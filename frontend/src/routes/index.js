@@ -5,22 +5,21 @@ import Hello from '../components/Hello'
 import NoMatch from '../components/NoMatch'
 import FormPage from '../components/signUp'
 import ForgotPasswordPage from '../components/forgotPassword'
-import ResetPasswordPage from '../components/resetPassword'
+import resetPasswordPage from '../components/resetPassword'
 
-import FormLogin from '../components/login'
-import ShipmentsPage from '../components/shipmentsPage'
-import InventoryPage from '../components/inventoryPage'
+import FormLoginPage from '../components/login'
+//import ShipmentsPage from '../components/shipmentsPage'
+//import InventoryPage from '../components/inventoryPage'
 const routes = (
   <div>
     <Switch>
       <Route exact path="/" component={Home} />
       <Route path="/page1" component={Hello} />
-      <Route path="/login" component={FormLogin} />
+      <Route path="/login" component={FormLoginPage} />
       <Route path="/signup" component={FormPage} />
       <Route path="/forgotPassword" component={ForgotPasswordPage} />
-      <Route path="/resetPassword" component={ResetPasswordPage} />
-      <Route path="/inventory" component={InventoryPage} />
-      <Route path="/shipments" component={ShipmentsPage} />
+      <Route path="/resetPassword" component={resetPasswordPage} />
+      
  
 
 
@@ -30,3 +29,5 @@ const routes = (
 )
 
 export default routes
+/* <Route path="/inventory" component={InventoryPage} />
+      <Route path="/shipments" component={ShipmentsPage} />*/
