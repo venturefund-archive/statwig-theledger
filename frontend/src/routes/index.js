@@ -13,6 +13,7 @@ import InventoryAnalytic from '../components/inventoryAnalytic'
 import OverViewAnalytic from '../components/overViewAnalytic'
 import ShipmentsPage from '../components/shipmentsPage'
 import InventoryPage from '../components/inventoryPage'
+import InventorySummary from '../components/inventorySummary'
 const routes = (
   <div>
     <Switch>
@@ -25,8 +26,9 @@ const routes = (
       <Route path="/shipments" component={ShipmentAnalytic} />
       <Route path="/inventoryAnalytic" component={InventoryAnalytic} />
       <Route path="/overViewAnalytic" component={OverViewAnalytic} />
-      <Route path="/shipmentsPage" component={ShipmentsPage} />*/
+      <Route path="/shipmentsPage" component={ShipmentsPage} />
       <Route path="/inventory" component={InventoryPage} />
+      <Route path="/inventorySummary" component={InventorySummary} />
  
 
 
