@@ -1,7 +1,306 @@
-@import '../../assets/styles/global.scss';
-
-.home {
-  header {
-    background-color: $white;
-  }
+.Homecontainer{
+  margin:0;
+  padding:0;
+  box-sizing: border-box;;
 }
+  .back1{
+     background: url(../../assets/brands/background.png) blue;
+     max-width: 100%;
+     height:740px;
+      }
+      .navbar{
+        position:fixed;
+        display:flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: row;
+        flex-wrap: wrap;
+        background-color: #ffffff;
+        width:100%;
+        z-index: 3;
+    }
+ 
+    .nav{
+        display: flex;
+        justify-content: right;
+        list-style: none;
+        margin-right: 10%;
+        
+    }
+    .logo{
+    flex:1 1 auto;
+        margin-left:5%;
+    }
+    .logo img{
+        position: relative;
+        width:230px;
+        height:30px;
+        top:-10px;
+        left:60px;
+    }
+    a1{
+        font-size: 14px;
+        margin-top: 20px;
+        margin-left: 70px;
+        color: #0093e9;
+        text-decoration: none;
+        text-transform: uppercase;
+        font-family: 'Roboto', sans-serif;
+    }
+    a1:hover{
+        color:#000000;
+        
+    }
+   #img0{
+     position:relative;
+     top:250px;
+     left:1px;
+     width:400px;
+    }
+  .h0 #Sign0{
+    font:  20px/30px Roboto;
+    font-weight:400;
+    letter-spacing: 0;
+    color: #000000;
+    opacity: 1;
+    position:relative;top:260px;left:5px;
+    }
+     .button{
+    position: relative;
+    top:300px;
+    left:0px;
+    width: 180px;
+    height: 50px;
+    border:hidden;
+    background: transparent linear-gradient(105deg, #0093E9 0%, #36C2CF 100%) 0% 0% no-repeat padding-box;
+    border-radius: 8px;
+    opacity: 1;
+    font-family: 'Roboto';
+    color:white;
+    font-weight:bold;
+     font-size:20px;
+     text-transform: uppercase;
+  }
+  #im1{
+    position: relative;
+    width: 750px;
+    height: 550px;
+    top:50px;
+    }
+    .back2{
+    background: url(../../assets/brands/BG2.png);
+    max-width: 100%;
+    height: 800px;
+    opacity: 1;
+  }
+  #heading{
+    position: relative;
+    top:250px;
+    left:200px;
+    text-align: left;
+    font: Bold 45px/40px roboto;
+    color: #0093E9;
+     opacity: 1;
+  }
+  .flex-container {
+    position: relative;
+    display: flex;
+    flex-wrap: nowrap;
+    top: 335px;
+  }
+  .flex-container > div {
+    background-color: white;
+    width: 150px;
+    height:150px;
+    margin-top: 10px;
+    margin-left: 200px;
+    text-align: center;
+    border-radius: 50%;
+    box-shadow: 0px 3px 6px #00000029;
+  }
+  #block{
+    width:80px;
+    height:80px;
+    margin-top: 30px;
+  }
+  #block1{
+    width:40px;
+    height:65px;
+    margin-top:30px;
+  }
+
+  #block2{
+    width:48px;
+    height:58px;
+    margin-top: 30px;
+  }
+  #block3{
+    width: 58px;
+    height:58px;
+    margin-top:30px;
+  }
+  .flex-container1 {
+    position: relative;
+    display: flex;
+    flex-wrap: nowrap;
+    top: 340px;
+  }
+  .flex-container1 > div {
+        width: 150px;
+    height:150px;
+    margin-top: 10px;
+    margin-left: 200px;
+    text-align: center;
+  }
+  .text{
+    justify-content: left;
+    font-size: 16px;
+    font-weight:500 ;
+    font-family: roboto;
+
+  }
+ .back3{
+  background: url(../../assets/brands/BG3.png);
+  max-width: 100%;
+  height:740px;
+ }
+ #im2{
+  position:relative;
+  top:250px;
+  left:1px;
+  width:400px;
+}
+  .h2 #Sign1{
+    width: 812px;
+    text-align: left;
+    font-size: 20px;
+    line-height: 30px;
+    font-weight: 400;;
+    font-family: 'Roboto';
+    letter-spacing: 0;
+    color: #000000;
+    opacity: 1;
+  position:relative;top:100px;left:0px;
+    }
+     .heading2{
+      position: relative;
+      top:100px;
+      text-align: left;
+    font: Bold 45px/40px roboto;
+    color: #0093E9;
+     opacity: 1;
+    }
+    #im2{
+      position: relative;
+      top:100px;
+      width: 800px;
+      height: 500px;
+    }
+    .back4{
+      height:750px;
+    }
+    .heading3{
+      position: relative;
+      top:0px;
+      left:200px;
+      text-align: left;
+    font: Bold 45px/40px roboto;
+    color: #0093E9;
+     opacity: 1;
+    }
+   #im3{
+     position: relative;;
+    width: 959px;
+    height: 500px;
+    left:250px;
+    top:50px;
+   }
+   .back5{
+    background: url(../../assets/brands/BG3.png);
+    max-width: 100%;
+    height:740px;
+   }
+   .heading4{
+     position: relative;
+     top: 350px;
+     left:200px;
+    text-align: left;
+    font: Bold 45px/40px roboto;
+    color: #0093E9;
+    opacity: 1;
+   }
+   #sign2{
+    width: 812px;
+    text-align: left;
+    font-size: 20px;
+    line-height: 30px;
+    font-weight: 400;;
+    font-family: 'Roboto';
+    letter-spacing: 0;
+    color: #000000;
+    opacity: 1;
+  position:relative;top:360px;left:200px;
+   }
+   .email-container{
+     position: relative;
+     top:380px;
+     left:200px;
+     width: 340px;
+     height:50px;
+     background: #FFFFFF 0% 0% no-repeat padding-box;
+     box-shadow: 0px 1px 3px #00000065;
+     border-radius: 8px;
+     opacity: 1;
+   }
+   input[type=text] {position: relative;
+    top:10px;
+    left:10px;
+    width:310px;
+    border-radius: 8px;
+    height:30px;
+    border: hidden;
+    color:#a8a8a8;
+}
+  #button1{
+    position: relative;
+    top:330px;
+    left:550px;
+    width: 140px;
+    height: 50px;
+    border:hidden;
+    background: transparent linear-gradient(109deg, #0093E9 0%, #36C2CF 100%) 0% 0% no-repeat padding-box;
+    border-radius: 8px;
+    font-size:20px;
+    font-weight:bold;
+    opacity: 1;
+    color:white;
+    text-transform:uppercase;
+  }
+  .Line_1 {
+		overflow: visible;
+    z-index: 2;
+		position:relative;
+		width: 1300px;
+		height: 5px;
+		left: 0px;
+		top: 420px;
+		transform: matrix(1,0,0,1,0,0);
+	}
+  #footer{
+   display:flex;
+   justify-content: space-between;
+  }
+ .flex-container2{
+   position: relative;
+   top:430px;
+   display:flex;
+   justify-content: space-around;
+   font: Bold 16px/17px Roboto;
+   letter-spacing: 1.6px;
+   color: #000000;
+   opacity: 1;  
+ }
+  #logo{
+  width:250px;
+  height:30px;
+ }
