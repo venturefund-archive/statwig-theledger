@@ -8,7 +8,9 @@ const { constants } = require("../helpers/constants");
 const auth = require("../middlewares/jwt");
 const checkToken = require('../middlewares/middleware').checkToken;
 const axios = require('axios');
-const blockchain_service_url = 'http://3.91.225.127:3008';
+const dotenv = require('dotenv').config();
+
+const blockchain_service_url = process.env.URL;
 
 exports.getTotalCount = [
         auth,
