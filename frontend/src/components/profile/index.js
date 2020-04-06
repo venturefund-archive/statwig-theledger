@@ -2,14 +2,11 @@ import React, { Component } from 'react';
 import ProfilePic from "../../assets/brands/user-image/Image73@2x.png";
 import Pen from "../../assets/icons/pen.svg";
 import './style.scss';
-import { SERVER_URL } from '../../config';
+import { config } from '../../config';
 const axios = require("axios");
 
 class Profile extends React.Component{
-// const Profile = props => {
-  // const [file, setFile] = useState('')
-  // const [profile, setProfile] = useState('')
-  // const upload = useRef(null);
+
   constructor(props) {
     super(props);
     this.state ={
@@ -19,42 +16,32 @@ class Profile extends React.Component{
     this.onChange = this.onChange.bind(this);
 }
 componentDidMount() {
-  axios.get(`${SERVER_URL}/usermanagement/api/auth/userInfo`)
+  axios.get(config().userInfoUrl)
     .then(res => {
       const prof = res.data;
       this.setState({profile : prof})
-      console.log(prof)
       console.log(this.state.profile)
     })
     
 }
-
-// useEffect(() => {
-//   axios.get(`${SERVER_URL}/auth/userInfo`)
-//     .then(res => {
-//       const profile = res.data;
-//       setProfile({ profile });
-//     })
-//  }, [])
-
 onChange(e)  {
-  this.setState({ selectedFile: event.target.files[0] }) 
-    e.preventDefault();
+    this.setState({ selectedFile: event.target.files[0] }) 
     console.log(this.state.selectedFile)
+    e.preventDefault();
     const formData = new FormData();
     formData.append('profile',this.state.selectedFile);
-    const config = {
+    const configs = {
         headers: {
             'content-type': 'multipart/form-data'
         }
     };
-    axios.post(`${SERVER_URL}/usermanagement/api/auth/upload`,formData,config)
+    axios.post(config().uploadUrl,formData,configs)
         .then((response) => {
-            alert("The file is successfully uploaded" + response);
+            alert("The image has been updated succesfully");
         }).catch((error) => {
           alert(error);
     });
-    state = { selectedFile: null }
+    
 }
 
 
