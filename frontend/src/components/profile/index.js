@@ -6,10 +6,7 @@ import { config } from '../../config';
 const axios = require("axios");
 
 class Profile extends React.Component{
-// const Profile = props => {
-  // const [file, setFile] = useState('')
-  // const [profile, setProfile] = useState('')
-  // const upload = useRef(null);
+
   constructor(props) {
     super(props);
     this.state ={
@@ -23,24 +20,14 @@ componentDidMount() {
     .then(res => {
       const prof = res.data;
       this.setState({profile : prof})
-      console.log(prof)
       console.log(this.state.profile)
     })
     
 }
-
-// useEffect(() => {
-//   axios.get(`${SERVER_URL}/auth/userInfo`)
-//     .then(res => {
-//       const profile = res.data;
-//       setProfile({ profile });
-//     })
-//  }, [])
-
 onChange(e)  {
   this.setState({ selectedFile: event.target.files[0] }) 
-    e.preventDefault();
     console.log(this.state.selectedFile)
+    e.preventDefault();
     const formData = new FormData();
     formData.append('profile',this.state.selectedFile);
     const configs = {
@@ -48,13 +35,13 @@ onChange(e)  {
             'content-type': 'multipart/form-data'
         }
     };
-    axios.post(config().upload,formData,configs)
+    axios.post(config().uploadUrl,formData,configs)
         .then((response) => {
-            alert("The file is successfully uploaded" + response);
+            alert("The image has been updated succesfully");
         }).catch((error) => {
           alert(error);
     });
-    state = { selectedFile: null }
+    
 }
 
 
