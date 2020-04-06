@@ -25,7 +25,7 @@ componentDidMount() {
     
 }
 onChange(e)  {
-  this.setState({ selectedFile: event.target.files[0] }) 
+    this.setState({ selectedFile: event.target.files[0] }) 
     console.log(this.state.selectedFile)
     e.preventDefault();
     const formData = new FormData();
