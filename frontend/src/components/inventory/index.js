@@ -11,19 +11,45 @@ import currentinventory from "../../assets/icons/CurrentInventory.svg";
 import Expiration from "../../assets/icons/TotalVaccinenearExpiration.svg";
 import TotalVaccineExpired from "../../assets/icons/TotalVaccineExpired.svg";
 import Add from '../../assets/icons/add.svg';
+import user from '../../assets/icons/brand.svg';
+import Package from '../../assets/icons/package.svg';
+import calender from '../../assets/icons/calendar.svg';
+import Status from '../../assets/icons/Status.svg';
 
 const Inventory = (props) => {
+      const headers = {
+            coloumn1 : "Product Type",
+            coloumn2:  "Manufacturer",
+            coloumn3: "Expiry Date",
+            coloumn4:  "Date Added",
+
+            img1: <img src={Package} width="16" height="16" />,
+            img2: <img src={user} width="16" height="16" />,
+            img3: <img src={calender} width="16" height="16" />,
+            img4:  <img src={Status} width="16" height="16" />
+      }
+
+      const tableHeaders = {
+            coloumn1 : "Product Name",
+            coloumn2:  "Manufacturer",
+            coloumn3:  "Batch Number",
+            coloumn4:  "Quantity",
+            coloumn5:  "Date Added",
+            coloumn6:  "Mfg Date",
+            coloumn7:  "Exp Date",
+           
+}
       return (
             <div className="inventory">
                   <div className="d-flex justify-content-between">
                         <h1 className="breadcrumb">INVENTORY</h1>
                         <div className="d-flex">
+                                <Link to="/newinventory">
                               <button className="btn btn-yellow font-weight-bold">
-                                    <Link to="/newinventory">
-                                          <img src={Add} width='13' height='13' className="mr-2" />
+                                    <img src={Add} width='13' height='13' className="mr-2" />
                                           <span>Add Inventory</span>
-                                    </Link>
-                              </button>
+                                  </button>
+                                  </Link>
                         </div>
                   </div>
                   <div className="row mb-4">
@@ -33,7 +59,7 @@ const Inventory = (props) => {
                                           <img src={TotalInventoryAdded} alt="truck" />
                                     </div>
                                     <div className="d-flex flex-column">
-                                          <div className="title">Inventory Added</div>
+                                          <div className="title truck-text">Inventory Added</div>
                                           <div className="tab-container">
                                                 <div className="tab-item active">This Year</div>
                                                 <div className="tab-item">This Month</div>
@@ -50,7 +76,7 @@ const Inventory = (props) => {
                                           <img src={currentinventory} alt="truck" />
                                     </div>
                                     <div className="d-flex flex-column">
-                                          <div className="title">Current Inventory</div>
+                                          <div className="title sent-text">Current Inventory</div>
                                           <div className="tab-container">
                                                 <div className="tab-item active">This Year</div>
                                                 <div className="tab-item">This Month</div>
@@ -67,7 +93,7 @@ const Inventory = (props) => {
                                           <img src={Expiration} alt="truck" />
                                     </div>
                                     <div className="d-flex flex-column">
-                                          <div className="title">Total Vaccine near Expiration</div>
+                                          <div className="title recived-text">Total Vaccine near Expiration</div>
                                           <div className="tab-container">
                                                 <div className="tab-item active">This Year</div>
                                                 <div className="tab-item">This Month</div>
@@ -84,7 +110,7 @@ const Inventory = (props) => {
                                           <img src={TotalVaccineExpired} alt="truck" />
                                     </div>
                                     <div className="d-flex flex-column">
-                                          <div className="title">Vaccine Expired</div>
+                                          <div className="title transit-text">Vaccine Expired</div>
                                           <div className="tab-container">
                                                 <div className="tab-item active">This Year</div>
                                                 <div className="tab-item">This Month</div>
@@ -97,12 +123,12 @@ const Inventory = (props) => {
                         </div>
                   </div>
                   <div className="full-width-ribben">
-                        <TableFilter />
+                        <TableFilter data={headers}/>
                   </div>
                   <div className="ribben-space">
                         <div className="row no-gutter">
                               <div className="col-sm-12 col-xl-9">
-                                    <Table {...props} />
+                                    <Table data={tableHeaders} {...props} />
                               </div>
                               <div className="col-sm-12 col-xl-3">
                                     <div className="list-container">
@@ -113,49 +139,49 @@ const Inventory = (props) => {
                                           <div className="row overflow">
                                                 <div className="col-sm-6">
                                                       <div className="d-flex card flex-column align-items-center">
-                                                            <div className="round-sign ellipseFour">OPV</div>
-                                                            <p>Hepatitis B Vaccine</p>
+                                                            <div className="round-sign ellipseOne">OPV</div>
+                                                            <p>Oral Polio Vaccine</p>
                                                             <h3>Qty: 74,000</h3>
                                                       </div>
                                                 </div>
                                                 <div className="col-sm-6">
                                                       <div className="d-flex card flex-column align-items-center">
-                                                            <div className="round-sign ellipseThree">OPV</div>
+                                                            <div className="round-sign ellipseFour">HepB</div>
                                                             <p>Hepatitis B Vaccine</p>
-                                                            <h3>Qty: 74,000</h3>
+                                                            <h3>Qty: 82,000</h3>
                                                       </div>
                                                 </div>
                                                 <div className="col-sm-6">
                                                       <div className="d-flex card flex-column align-items-center">
-                                                            <div className="round-sign ellipseTwo">MMP</div>
-                                                            <p>Hepatitis B Vaccine</p>
-                                                            <h3>Qty: 74,000</h3>
-                                                      </div>
-                                                </div>
-                                                <div className="col-sm-6">
-                                                      <div className="d-flex card flex-column align-items-center">
-                                                            <div className="round-sign ellipseOne">RV</div>
+                                                            <div className="round-sign ellipseTwo">MMR</div>
                                                             <p>Mumps, Measles & Rubella Vaccine</p>
                                                             <h3>Qty: 74,000</h3>
                                                       </div>
                                                 </div>
                                                 <div className="col-sm-6">
                                                       <div className="d-flex card flex-column align-items-center">
-                                                            <div className="round-sign ellipseFour">PVC</div>
+                                                            <div className="round-sign ellipseThree">PVC</div>
                                                             <p>Pneumococcal conjugate Vaccine</p>
                                                             <h3>Qty: 74,000</h3>
                                                       </div>
                                                 </div>
                                                 <div className="col-sm-6">
                                                       <div className="d-flex card flex-column align-items-center">
-                                                            <div className="round-sign ellipseThree">BVG</div>
-                                                            <p>Hepatitis B Vaccine</p>
+                                                            <div className="round-sign ellipseFive">RV</div>
+                                                            <p>Rotavirus Vaccine</p>
                                                             <h3>Qty: 74,000</h3>
                                                       </div>
                                                 </div>
                                                 <div className="col-sm-6">
                                                       <div className="d-flex card flex-column align-items-center">
-                                                            <div className="round-sign ellipseTwo">TTR</div>
+                                                            <div className="round-sign ellipseSix">IPV</div>
+                                                            <p>Inactivated Polio Vaccine</p>
+                                                            <h3>Qty: 74,000</h3>
+                                                      </div>
+                                                </div>
+                                                <div className="col-sm-6">
+                                                      <div className="d-flex card flex-column align-items-center">
+                                                            <div className="round-sign ellipseFour">HepB</div>
                                                             <p>Hepatitis B Vaccine</p>
                                                             <h3>Qty: 74,000</h3>
                                                       </div>
@@ -163,7 +189,7 @@ const Inventory = (props) => {
                                                 <div className="col-sm-6">
                                                       <div className="d-flex card flex-column align-items-center">
                                                             <div className="round-sign ellipseOne">OPV</div>
-                                                            <p>Hepatitis B Vaccine</p>
+                                                            <p>Oral Polio Vaccine</p>
                                                             <h3>Qty: 74,000</h3>
                                                       </div>
                                                 </div>
