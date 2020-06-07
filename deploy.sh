@@ -4,7 +4,7 @@
 if [ $# -eq 0 ];
   then
     echo "Please choose the mode: PROD TEST LOCAL"
-    echo "Followed by the sercices: FRONTEND GATEWAY SERVICESI SERVICESII"
+    echo "Followed by the sercices: FRONTEND GATEWAY SERVICESI SERVICESII ALL"
     echo "SERVICESI - shipping_service	transaction_service inventory_service	track_trace		user_service"
     echo "SERVICESII - blockchain_service	log_service alert_service notification_service"
     exit
@@ -13,10 +13,6 @@ else
    echo "Executing script in $1 mode for $2 service..."
 fi
 
-#Killing all the previous pm2 process
-echo "Killing all pm2 process......"
-pm2 stop all
-pm2 delete all
 
 #Creating env variables
 echo "Creating Env variables .... "
@@ -75,14 +71,23 @@ echo $(pwd)
 #start frontend
 echo "Building frontend"
 cd frontend
-
-if ([ "$1" == "PROD" ] || [ "$1" == "TEST" ]) && [ "$2" == "FRONTEND" ];
+: <<'END'
+if ([ "$1" == "PROD" ] || [ "$1" == "TEST" ]) && ([ "$2" == "FRONTEND" ] || [ "$2" == "ALL" ]);
    then
       echo "Building frontend in $1 mode....."
       sudo systemctl stop nginx
       sudo rm -rf /var/www/html/dist /var/wwww/html/index.html
       npm install
-      npm run build
+
+      if [ "$1" == "PROD" ];
+         then
+            echo "Building frotend for PROD enviornment......"
+            ENVIRONMENT=prod npm run build
+      else
+         echo "Building frotend for TESt enviornment......"
+         ENVIRONMENT=test npm run build
+      fi
+      
       sudo cp -r dist /var/www/html/
       sudo cp index.html /var/www/html/
       sudo systemctl start nginx
@@ -96,11 +101,11 @@ elif [ "$1" == "LOCAL" ] && [ "$2" == "FROTNEND" ]
       #npm start &
 
 fi
-
+END
 cd ..
 
 #start api gateway - traefik
-if [ "$2" == "GATEWAY" ]
+if ([ "$2" == "GATEWAY" ] || [ "$2" == "ALL" ]);
    then
       killall traefik
       cd apigateway
