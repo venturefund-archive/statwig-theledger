@@ -24,11 +24,29 @@
       border-radius: 0;
       // color: #A8A8A8;
       color: $black;
-      flex-basis: 65%;
+      flex-basis: 67%;
       flex-grow: inherit;
+     
+    }
+
+    .custom-dropdown .btn-custom-dropdown{
+      font-size:15px;
+    }
+
+    .user {
+      border: none;
+      background: transparent;
+      border-radius: 0;
+      color: $deepBlue;
+      flex-basis: 80%;
+      flex-grow: inherit;
+      font: 25px Helvetica Neue;
+      font-weight: bold;
     }
   }
-
+      .review{
+        float:right;
+      }
   .input-group {
     position: relative;
     margin-bottom: 1rem;
@@ -54,9 +72,9 @@
     }
   
   .square-box {
-    width: 40px;
-    height: 40px;
-    background-color: $deepBlue;
+    width: 20px;
+    height: 20px;
+    background-color: $skyBlue;
     border-radius: 10px;
     margin-right: 1rem;
   }
@@ -81,12 +99,17 @@
         align-items: center;
         justify-content: space-between;
 
+        .custom-dropdown .btn-custom-dropdown{
+          font-size:15px;
+        }
+
         &:last-child {
           border-right: none;
         }
 
         .form-group {
           flex-basis: 100%;
+          
 
           .form-field {
             width: 100%;

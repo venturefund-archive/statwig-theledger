@@ -14,7 +14,6 @@ class Profile extends React.Component {
       profile: null,
       editMode: false,
       role: '',
-      password: '',
       organisation: '',
       affiliateOrganisation: '',
       walletAddress: '',
@@ -82,7 +81,6 @@ class Profile extends React.Component {
       organisation,
       affiliateOrganisation,
       status,
-      password
     });
   }
 
@@ -115,14 +113,15 @@ class Profile extends React.Component {
   }
 
   async onSubmit() {
-    const { name, organisation, affiliateOrganisation, phone, password } = this.state;
-    const data = { name, organisation, affiliateOrganisation, phone, password }  ;
+    const { name, organisation, affiliateOrganisation, phone } = this.state;
+    const data = { name, organisation, affiliateOrganisation, phone }  ;
     const result = await updateProfile(data);
-    debugger;
+    
     if (result.status === 200) {
       this.setState({ message: result.data.message, editMode: false });
       const dispatch = useDispatch();    
-    dispatch(getUserInfo());
+      dispatch(getUserInfo());
+      history.push('/profile');
     } else {
       this.setState({ message: 'Error while updating please try again.' });
     }
@@ -139,8 +138,7 @@ class Profile extends React.Component {
       email,
       name,
       message,
-      profile_picture,
-      password
+      profile_picture
     } = this.state;
     return (
       <div className="profile">
@@ -175,33 +173,45 @@ class Profile extends React.Component {
               <div className="col-8 mt-5">
                 {editMode ? (
                   <div className="col-sm-12">
-                    <div>
-                      <label>Name </label>
+                  <div className="row">
+
+                  <ul>
+                  <li> <label>Name </label></li>
+                  <li><label>Role </label></li>
+                  <li> <label>Organisation</label></li>
+                  <li><label>Affiliated Organisation</label></li>
+                  <li><label>Wallet Address</label></li>
+                  <li><label>Email</label></li>
+                  <li><label>Phone</label></li>
+                  <li>Account Status</li>
+                  
+                  </ul>
+
+                  <ul>
+                  <li> 
                       <input
+                        className="form-control"
                         value={name}
                         onChange={e => this.setState({ name: e.target.value })}
                       />
-                    </div>
-                    <div>
-                      <label>Role </label>
-                      <input
+                      </li>
+                  <li><input
+                        className="form-control"
                         disabled
                         value={role}
                         onChange={e => this.setState({ role: e.target.value })}
                       />
-                    </div>
-                    <div>
-                      <label>Organisation</label>
+                      </li>
+                  <li>
                       <input
+                        className="form-control"
                         value={organisation}
                         onChange={e =>
                           this.setState({ organisation: e.target.value })
                         }
-                      />
-                    </div>
-                    <div>
-                      <label>Affiliated Organisation</label>
-                      <input
+                      /></li>
+                  <li>  <input
+                         className="form-control"
                         value={affiliateOrganisation}
                         onChange={e =>
                           this.setState({
@@ -209,27 +219,41 @@ class Profile extends React.Component {
                           })
                         }
                       />
-                    </div>
-                    <div>
-                      <label>Wallet Address</label>
-                      <input
+                    </li>
+                  <li> <input
+                        className="form-control wallet"
                         disabled
                         value={walletAddress}
                         onChange={e =>
                           this.setState({ walletAddress: e.target.value })
                         }
                       />
-                    </div>
-                    <div>
-                      <label>Phone</label>
-                      <input
+                    </li>
+                    <li> <input
+                        className="form-control"
+                        disabled
+                        value={email}
+                        onChange={e =>
+                          this.setState({ email: e.target.value })
+                        }
+                      />
+                    </li>
+                  <li> <input
+                        className="form-control"
                         value={phone}
                         onChange={e => this.setState({ phone: e.target.value })}
                       /></li>
+
+                         <li > 
+                       
+                        {status && <li className="form-control wallet">Active</li>}
                       
+                       </li>
+                       
                   </ul>
                   </div>
                   </div>
+
                 ) : (
                   <div className="row">
                     <ul>
@@ -266,13 +290,14 @@ class Profile extends React.Component {
                   </button>
                 </div>
               ) : (
-                <div className="col">
-                  <button className="btn-primary btn" onClick={this.onCancel}>
-                    <span>Cancel</span>
+                <div className="d-flex flex-row justify-content-between">
+                   <button className="btn btn-outline-info mr-2" onClick={this.onCancel}>
+                    <span>CANCEL</span>
                   </button>
-                  <button className="btn-primary btn" onClick={this.onSubmit}>
-                    <span>Submit</span>
+                   <button className="btn-primary btn" onClick={this.onSubmit}>
+                    <span>SAVE</span>
                   </button>
+                  
                 </div>
               )}
             </div>
@@ -287,3 +312,10 @@ class Profile extends React.Component {
 }
 
 export default Profile;
+
+
+
+
+
+
+

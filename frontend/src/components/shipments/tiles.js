@@ -13,21 +13,21 @@ const Tiles = (props) => {
       const [shipmentsSent, setShipmentsSent] = useState('0');
       const [shipmentsReceived, setShipmentsReceived] = useState('0');
       const [shipmentsTransit, setShipmentsTransit] = useState('0');
-      useEffect(() => {
+
+  useEffect(() => {
       
         const shipmentDates = props.shipments.map((data, index) => {
           return data;      
         })
       
         const total =  shipmentDates.filter(d => d.status != '');   
-        const sent = shipmentDates.filter(d => d.status == 'sent')
-        const received = shipmentDates.filter(d => d.status == 'received')
-        const transit = shipmentDates.filter(d => d.status == 'transit');
+        const sent = shipmentDates.filter(d => d.status == 'Shipped')
+        const received = shipmentDates.filter(d => d.status == 'Received')
+        const transit = shipmentDates.filter(d => d.status == 'In Transit');
         setTotalShipments(total.length);
         setShipmentsSent(sent.length);
         setShipmentsTransit(transit.length);
         setShipmentsReceived(received.length);
-        
         })
         
     return (
@@ -57,10 +57,10 @@ const Tiles = (props) => {
                     <div className="d-flex flex-column">
                         <div className="title sent-text ">Total Shipments Sent</div>
                         <div className="tab-container">
-                            <div className="tab-item active">This Year</div>
-                            <div className="tab-item">This Month</div>
-                            <div className="tab-item">This Week</div>
-                            <div className="tab-item">Today</div>
+                            <div className="tab-item ">This Year</div>
+                            <div className="tab-item ">This Month</div>
+                            <div className="tab-item ">This Week</div>
+                            <div className="tab-item ">Today</div>
                         </div>
                         <div className="sent-text count">{shipmentsSent}</div>
                     </div>

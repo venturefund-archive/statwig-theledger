@@ -1,84 +1,78 @@
 import React from 'react';
-import dp from '../../assets/icons/harsha.jpg';
+import { useSelector } from 'react-redux';
 import './table-style.scss';
 
 const SummaryTable = props => {
+
+  const profile = useSelector(state => {
+    return state.user;
+  });
   const { shipments } = props;
   return (
     <React.Fragment>
-      {/* {props.shipments.map(shipment => (
-                    <tr key={shipment.Shipment_ID}>
-                      <th scope="row">
-                        <img className="image" src={dp} width="25px" />
-                      </th>
-                      <td>{shipment['Deliver_To']}</td>
-                      <td>{shipment['Shipment_ID']}</td>
-                      <td>{shipment['Shipment_Date']}</td>
-                      <td>{shipment['Delivery Location']}</td>
-                      <td>8°C</td>
-                      <td>
-                        <span className="badge badge-pill badge-success p-2">
-                          Received
-                        </span>
-                      </td>
-                    </tr>
-                  ))} */}
       <div className="summaryTable">
         <div className="rowData">
-          <div className="headline">Client</div>
-          {shipments.map(shipment => (
-            <div className="combine-data">
-              <img className="round-sign" src={dp} width="15" />
+          <div className="headline ml-4">Client</div>
+          {shipments.map((shipment, index) => (
+            index < 5 ?
+            <div className="combine-data" key={index}>
+              <img className="round-sign" src={profile.profile_picture} width="15" />
               <a>{shipment.client}</a>
-            </div>
+            </div> : null
           ))}
         </div>
         <div className="rowData">
           <div className="headline">Shipment ID</div>
-          {shipments.map(shipment => (
-            <div className="combine-data">
+          {shipments.map((shipment, index) => (
+            index < 5 ?
+            <div className="combine-data" key={index}>
               <div>{shipment.shipmentId}</div>
-            </div>
+            </div> : null
           ))}
         </div>
         <div className="rowData">
           <div className="headline">Shipping Date</div>
-          {shipments.map(shipment => (
-            <div className="combine-data">
+          {shipments.map((shipment, index) => (
+            index < 5 ?
+            <div className="combine-data" key={index}>
               <div>{shipment.shipmentDate}</div>
-            </div>
+            </div> : null
           ))}
         </div>
         <div className="rowData">
           <div className="headline">Current Location</div>
-          {shipments.map(shipment => (
-            <div className="combine-data">
+          {shipments.map((shipment, index) => (
+            index < 5 ?
+            <div className="combine-data" key={index}>
               <div>{shipment.supplierLocation}</div>
-            </div>
+            </div> : null
           ))}
         </div>
         <div className="rowData">
           <div className="headline">Temperature</div>
-          {shipments.map(shipment => (
-            <div className="combine-data">
+          {shipments.map((shipment, index) => (
+            index < 5 ?
+            <div className="combine-data" key={index}>
               <div>8°C</div>
-            </div>
+            </div> :null
           ))}
         </div>
         <div className="rowData">
           <div className="headline">Status</div>
-          {shipments.map(shipment => (
-            <div className="combine-data">
-              <div>Received</div>
-            </div>
+          {shipments.map((shipment, index) => (
+            index < 5 ?
+            <div className="combine-data" key={index}>
+              <div><span className="badge badge-pill badge-success p-2">{shipment.status}</span></div>
+            </div> :null
           ))}
         </div>
       </div>
       <div className="summaryTable sm-only">
         <div className="row">
-          {shipments.map(shipment =>  <div className="col-sm-12 col-md-6 mb-3">
+          {shipments.map((shipment, index) => 
+          index < 5 ? <div key={index} className="col-sm-12 col-md-6 mb-3">
             <div className="combine-data mb-3">
-              <img className="rounded mr-2" src={dp} width="15" />
+              <img className="rounded mr-2" src={profile.profile_picture} width="15" />
               <a>{shipment.client}</a>
             </div>
             <div className="d-flex">
@@ -101,11 +95,12 @@ const SummaryTable = props => {
               <div className="mr-3">Status</div>
               <div className="font-weight-bold">
                 <span className="badge badge-pill badge-success p-2">
-                  Received
+                  {shipment.status}
                 </span>
               </div>
             </div>
-          </div>)}
+          </div>
+          :null)}
         </div>
       </div>
     </React.Fragment>

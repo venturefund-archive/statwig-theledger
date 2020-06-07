@@ -17,10 +17,13 @@
 
     label {
       color: #707070;
-      text-align: left;
+      text-align: center;
       font-size: 13px;
     }
-
+     .date{
+       border:none;
+       background: none;
+     }
     .form-control {
       border: none;
       background: transparent;
@@ -29,13 +32,15 @@
       color: $black;
       flex-basis: 55%;
       flex-grow: inherit;
-      font-size: 10px;
+      font-size: 12px;
     }
+     
 
     @media (min-width: $xl) {
       label {
         font-size: 16px;
-      }
+      } 
+
   
       .form-control {
         border: none;
@@ -46,13 +51,18 @@
         flex-basis: 65%;
         flex-grow: inherit;
         font-size: 14px;
+       
+        
       }
+
     }
   }
-
+ 
   .input-group {
     position: relative;
     margin-bottom: 1rem;
+
+    
 
     .input-group-append {
       position: absolute;
@@ -84,4 +94,24 @@
       max-height: 400px;
     }
   }
+}
+
+
+.inventorypopup{
+
+  .data{
+    font: Regular 20px/33px Roboto;
+     color: #707070;
+
+
+  }
+
+
+  .alert{
+    font: Bold 25px/33px Roboto;
+    color: #000000;
+}
+
+
+
 }

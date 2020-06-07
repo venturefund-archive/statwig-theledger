@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import EditTable from '../../shared/table/editTable';
+import { useDispatch} from "react-redux";
 import './style.scss';
 import Modal from '../../shared/modal';
 import InventoryPopUp from './inventorypopup';
-import {addInventory} from "../../actions/inventoryActions";
+import {addInventory,setReviewinventories} from "../../actions/inventoryActions";
+//import FailurePopUp from './failurepopup';
 
-const NewInventory = () => {
+const NewInventory = (props) => {
   const [openCreatedInventory, setOpenCreatedInventory] = useState(false);
   const [productName, setProductName] = useState('Select Product');
   const [manufacturerName, setManufacturerName] = useState(
@@ -15,7 +17,8 @@ const NewInventory = () => {
   const [quantity, setQuantity] = useState('');
   const [manufacturingDate, setManufacturingDate] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
-  const [storageCondition, setStorageCondition] = useState('');
+  const [storageConditionmin, setStorageConditionmin] = useState('');
+  const [storageConditionmax, setStorageConditionmax] = useState('');
   const [batchNumber, setBatchNumber] = useState('');
   const [serialNumber, setSerialNumber] = useState('');
   const editTableProps = {
@@ -29,8 +32,10 @@ const NewInventory = () => {
     setManufacturingDate,
     expiryDate,
     setExpiryDate,
-    storageCondition,
-    setStorageCondition,
+    storageConditionmin,
+    setStorageConditionmin,
+    storageConditionmax,
+    setStorageConditionmax,
     batchNumber,
     setBatchNumber,
     serialNumber,
@@ -39,15 +44,46 @@ const NewInventory = () => {
   const closeModal = () => {
     setOpenCreatedInventory(false);
   };
+  
+  var numeric = { year: 'numeric', month: 'numeric' };
+  
+  const dispatch = useDispatch();
+  const onProceedToReview = () => {
+    
+    const data = {
+      productName,
+      manufacturerName,
+      quantity,
+      manufacturingDate:manufacturingDate.date.toLocaleDateString('en-GB', numeric),
+      expiryDate : expiryDate.date1.toLocaleDateString('en-GB', numeric),
+      storageConditionmin,
+      storageConditionmax,
+      batchNumber,
+      serialNumber,
+    };
 
+    //Store in reducer
+    dispatch(setReviewinventories(data));
+    console.log('new inventory data', data);
+
+  console.log('clicked');
+    //Redirect to review page.
+    props.history.push('/reviewinventory');
+  
+
+    console.log('new inventory data', data);
+    console.log('clicked');
+
+  }
   const onAddInventory = async() => {
     const data = {
       productName,
       manufacturerName,
       quantity,
-      manufacturingDate,
-      expiryDate,
-      storageCondition,
+      manufacturingDate:manufacturingDate.date.toLocaleDateString('en-GB', numeric),
+      expiryDate : expiryDate.date1.toLocaleDateString('en-GB', numeric),
+      storageConditionmin,
+      storageConditionmax,
       batchNumber,
       serialNumber,
     };
@@ -65,28 +101,30 @@ const NewInventory = () => {
   return (
     <div className="Newinventory">
       <h1 className="breadcrumb">ADD INVENTORY</h1>
-      <EditTable {...editTableProps} />
+      <EditTable {...editTableProps} />   
+      
       <button className="btn btn-white shadow-radius font-bold">
         +<span> Add Another Product</span>
       </button>
+
+     
       <hr />
       <div className="d-flex justify-content-between">
-        <div className="d-flex w-25 justify-content-between">
-          <div className="total">Grand Total</div>
-          <span className="value">0</span>
-        </div>
-
-        <button className="btn-primary btn" onClick={onAddInventory}>
-          {' '}
-          Add Inventory
-        </button>
+        
+          <div className="total" >Grand Total</div>
+  <span className="value" >{quantity}</span>
+        
+        <button className="btn-primary btn"  onClick={onProceedToReview}>Proceed To Review</button>
+        
       </div>
       {openCreatedInventory && (
         <Modal
           close={() => closeModal()}
           size="modal-sm" //for other size's use `modal-lg, modal-md, modal-sm`
         >
-          <InventoryPopUp onHide={closeModal} />
+          <InventoryPopUp onHide={closeModal} //FailurePopUp
+          
+          />
         </Modal>
       )}
       {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
@@ -95,3 +133,10 @@ const NewInventory = () => {
 };
 
 export default NewInventory;
+
+
+/*<button className="btn-primary btn" onClick={onAddInventory}>
+          {' '}
+          Add Inventory
+        </button>*/
+      

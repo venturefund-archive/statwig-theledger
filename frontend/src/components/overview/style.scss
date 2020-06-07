@@ -65,7 +65,7 @@
     }
 
     @media (min-width: $xl) {
-      height: 450px;
+      height: 420px;
     }
 
     .card-body {
@@ -74,10 +74,11 @@
       justify-content: space-between;
 
       .card-link {
-        align-self: center;
         box-shadow: none;
         border-radius: 15px;
         border-width: 1px !important;
+        
+        
       }
 
       .total {
@@ -127,9 +128,25 @@
         height: 60px;
       }
 
+      @media screen and (max-width: 768px) {
+        display: flex;
+      }
+
+      @media (min-width:1024px) {
+        display: flex;
+       
+      }
+
+
       img {
         width: 52px;
         height: 26px;
+      }
+
+      .currentintransit{
+
+      width: 52px;
+      height: 32px;
       }
 
       &.truck-bg {
@@ -147,9 +164,34 @@
       }
     }
 
-    .count {
+    .count1{
       font-size: 26px;
-      color: $primaryBlue;
+      color: #0B65C1;
+      font-weight: bold;
+    }
+
+    .count2 {
+      font-size: 26px;
+      color:#2A9FAA;
+      font-weight: bold;
+    }
+
+    .count3 {
+      font-size: 26px;
+      color: #0093E9;
+      font-weight: bold;
+    }
+
+    .count4 {
+      font-size: 26px;
+      color: #36C2CF;
+      font-weight: bold;
+    }
+
+    
+    .count5 {
+      font-size: 26px;
+      color: #FFAB1D;
       font-weight: bold;
     }
 
