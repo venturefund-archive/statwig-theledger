@@ -8,9 +8,7 @@ const ChartsPage = (props) => {
   useEffect(() => {
     async function fetchData() {
       getInventories();
-      
-    
-    }
+      }
     fetchData();
     
   },[]);
