@@ -1,6 +1,6 @@
 # theledger
 
-Vaccine Ledger 1.0
+Vaccine Ledger 2.0
 
 # Online Links:
 
