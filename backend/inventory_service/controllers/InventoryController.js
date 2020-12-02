@@ -258,7 +258,6 @@ exports.getAllInventoryDetails = [
             if (permissionResult.success) {
               const { address } = req.user;
               const { skip, limit } = req.query;
-              let chunkUrls = [];
 
               /* InventoryModel.collection.dropIndexes(function(){
                 InventoryModel.collection.reIndex(function(finished){
@@ -272,6 +271,8 @@ exports.getAllInventoryDetails = [
                 .sort({ createdAt: -1 })
                 .skip(parseInt(skip))
                 .limit(parseInt(limit));
+             /*
+               let chunkUrls = [];
               inventoryResult.forEach(inventory => {
                 const chunkUrl = axios.get(
                   `${blockchain_service_url}/queryDataByKey?stream=${stream_name}&key=${
@@ -279,9 +280,9 @@ exports.getAllInventoryDetails = [
                   }`,
                 );
                 chunkUrls.push(chunkUrl);
-              });
-              const responses = await axios.all(chunkUrls);
-              const items = responses.map(response => response.data.items[0]);
+              });*/
+             // const responses = await axios.all(chunkUrls);
+              //const items = responses.map(response => response.data.items[0]);
               const productNamesResponse = await axios.get(
                 `${product_service_url}/getProductNames`,
                 {
@@ -449,7 +450,7 @@ exports.getAllInventoryDetails = [
               }
 
               res.json({
-                data: items,
+                data: inventoryResult,
                 dict,
                 counts: {
                   inventoryAdded: {
@@ -601,6 +602,8 @@ exports.addNewInventory = [
                 serialNumber: response.data.serialNumber,
                 owner: response.data.owner,
                 transactionIds: [response.data.transactionIds],
+                shipmentId: data.shipmentId,
+                poNumber: data.poNumber
               });
               await newInventory.save();
 
@@ -685,7 +688,7 @@ exports.insertInventories = [
     try {
       const { address } = req.user;
       const { data } = req.body;
-      const { serialNumberRange, manufacturingDate, expiryDate, productName } = data;
+      const { serialNumberRange, manufacturingDate, expiryDate, productName, poNumber, shipmentId } = data;
       const serialNumbers = serialNumberRange.split('-');
       const serialNumbersFrom = parseInt(serialNumbers[0].split(/(\d+)/)[1]);
       const serialNumbersTo = parseInt(serialNumbers[1].split(/(\d+)/)[1]);
@@ -700,14 +703,57 @@ exports.insertInventories = [
            expiryDate,
            productName,
            quantity: 1,
+           poNumber,
+           shipmentId,
            owner: address
          }
          inventories.push(inventory);
       }
-      await InventoryModel.insertMany(
-        inventories,
-      );
+      const chunkSize = 50;
+      let limit = chunkSize;
+      let skip = 0;
+      let count = 0;
+      const start = new Date();
+      logger.log('info', 'Inserting inventories data in chunks');
+      async function recursiveFun() {
+        skip = chunkSize * count;
+        count++;
+        limit = chunkSize * count;
+        logger.log('info', `skip ${skip}`);
 
+        logger.log('info', `limit ${limit}`);
+        const chunkedData = inventories.slice(skip, limit);
+        try {
+          await InventoryModel.insertMany(
+            chunkedData,
+          );
+          if (limit < inventories.length) {
+            recursiveFun();
+          } else {
+            logger.log(
+              'info',
+              `Insertion of inventories from mobile is completed. Time Taken to insert ${
+                inventories.length
+                } in seconds - `,
+              (new Date() - start) / 1000,
+            );
+            const newNotification = new NotificationModel({
+              owner: address,
+              message: `Your inventories are added successfully on ${new Date().toLocaleString()}`,
+            });
+            await newNotification.save();
+          }
+        }catch(e){
+          const newNotification = new NotificationModel({
+            owner: address,
+            message: `${e.errmsg} on ${new Date().toLocaleString()}`,
+          });
+          await newNotification.save();
+        }
+
+
+      }
+      recursiveFun();
       apiResponse.successResponseWithData(res, 'Inserted Success');
     }catch(e) {
       apiResponse.ErrorResponse(res, e);

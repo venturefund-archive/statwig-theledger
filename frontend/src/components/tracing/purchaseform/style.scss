@@ -1,5 +1,4 @@
-@import '../../assets/styles/global.scss';
-
+@import '../../../assets/styles/global.scss';
 
 .purchaseform{
   padding-left: 3rem;
@@ -58,7 +57,7 @@
       border-bottom: 2px solid #d6d6d6;
       border-radius: 0;
       // color: #A8A8A8;
-      color: #707070;
+      color: $black;
       flex-basis: 67%;
       flex-grow: inherit;
       font-size:14px;
@@ -73,7 +72,7 @@
     .custom-dropdown .btn-custom-dropdown{
       font-size:14px;
       @media (max-width: 1250px) {
-        font-size:18px;
+        font-size:13px;
       }
     }
 
@@ -127,12 +126,6 @@
     .input-group,
     .form-group {
       margin-bottom: 0;
-    .form-control{
-      font-size:15px;
-      @media (max-width: 1250px) {
-        font-size:14px;
-      }
-    }
 
       .form-field {
         border: none;

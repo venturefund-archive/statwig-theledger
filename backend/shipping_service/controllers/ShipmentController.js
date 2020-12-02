@@ -389,7 +389,7 @@ exports.createShipment = [
           checkPermissions(permission_request, async permissionResult => {
             if (permissionResult.success) {
               const { data } = req.body;
-              const { shipmentId } = data;
+              const { shipmentId, batchNumber, poNumber } = data;
               const userData = {
                 stream: stream_name,
                 key: shipmentId,
@@ -495,6 +495,8 @@ exports.createShipment = [
                 );
                 const newShipment = new ShipmentModel({
                   shipmentId,
+                  poNumber,
+                  batchNumber,
                   txnIds: [txnId],
                   receiver: receiver_address,
                   sender: address,
@@ -865,7 +867,7 @@ exports.createPurchaseOrder = [
               try {
                 const { address } = req.user;
                 const { data } = req.body;
-                const orderID = 'PO' + Math.floor(1000 + Math.random() * 9000);
+                const orderID = data.poNum || 'PO' + Math.floor(1000 + Math.random() * 9000);
 
                 const userData = {
                   stream: po_stream_name,
@@ -891,6 +893,7 @@ exports.createPurchaseOrder = [
                   txnIds: [txnIdPO],
                   sender: data.sendpoto.address,
                   receiver: data.receiver.address,
+                  txnId: txnIdPO,
                 });
                 await newPO.save();
               } else {
@@ -1665,6 +1668,65 @@ exports.addPOsFromExcel = [
         }
       });
     } catch (e) {
+      return apiResponse.ErrorResponse(res, err);
+    }
+  },
+];
+
+exports.getPOdetailsByShipmentID = [
+  auth,
+  async (req, res) => {
+    try {
+      const { shipmentId } = req.query;
+      logger.log(
+        'info',
+        '<<<<< ShipmentService < ShipmentController < trackShipment : tracking shipment, querying data by transaction hash',
+      );
+      ShipmentModel.findOne({ shipmentId: shipmentId }).then(async user => {
+          let txnIds = user.txnIds
+          let txnId = txnIds[txnIds.length-1]
+          let poNumber = user.poNumber;
+          POModel.findOne({ orderID: poNumber }).then(async user => {
+          let poDetails = user;
+          res.json({poDetails: poDetails,txnIds: txnIds,txnId: txnId});
+        })
+      });
+    } catch (err) {
+      logger.log(
+        'error',
+        '<<<<< ShipmentService < ShipmentController < trackShipment : error (catch block)',
+      );
+      return apiResponse.ErrorResponse(res, err);
+    }
+  },
+];
+
+exports.getProductdetailsByshipmentID = [
+  auth,
+  async (req, res) => {
+    try {
+      const { shipmentId } = req.query;
+      logger.log(
+        'info',
+        '<<<<< ShipmentService < ShipmentController < trackShipment : tracking shipment, querying data by transaction hash',
+      );
+    const products = await InventoryModel.aggregate([
+                  { $match: { shipmentId: shipmentId } },
+                {
+                  $group: {
+                    _id : {productName:"$productName",batchNumber:"$batchNumber"},
+                    serialNumberFirst:{$first:"$serialNumber"},serialNumberLast:{$last:"$serialNumber"},serialNumbers:{$addToSet:"$serialNumber"},manufacturingDate:{$max:"$manufacturingDate"},expiryDate:{$max:"$expiryDate"},
+                    productName: { $first: '$productName' },
+                    quantity: { $sum: '$quantity' },
+                  },
+                },
+              ]);
+            res.json({productDetails: products});
+    } catch (err) {
+      logger.log(
+        'error',
+        '<<<<< ShipmentService < ShipmentController < trackShipment : error (catch block)',
+      );
       return apiResponse.ErrorResponse(res, err);
     }
   },
