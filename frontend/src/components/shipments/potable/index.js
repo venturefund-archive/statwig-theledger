@@ -35,7 +35,7 @@ const PoTable = props => {
 
   const onCreateShipment = () => props.history.push('/newshipment')
   const onPOStatusChange = async status => {
-    const data = { status, orderID: purchaseOrder.key };
+    const data = { status, orderID: purchaseOrder.orderID };
     const result = await changePOStatus(data);
     if (result.status === 200) {
       setAlertMessage('Success');
@@ -106,16 +106,19 @@ const PoTable = props => {
             <span>To Location</span>
           </div>
           <div className="rTableHead">
+            <span>Status</span>
+          </div>
+          <div className="rTableHead">
             <span />
           </div>
         </div>
         <div className="overflow">
           {purchases.map((purchase, index) => {
-            const p = JSON.parse(purchase.data);
+            const p = purchase;
             let statusStyle = 'warning-bg';
             if (purchase.status === 'Accepted') {
               statusStyle = 'success-bg';
-            } else if (purchase.status === 'Received') {
+            } else if (purchase.status === 'Created') {
               statusStyle = 'info-bg';
             } else if (purchase.status === 'Rejected') {
               statusStyle = 'secondary-bg';
@@ -128,7 +131,7 @@ const PoTable = props => {
                       {Object.keys(p.products[0])[0].split('-')[1]}
                     </div>
                   </div>
-                  <div className="rTableCell">{purchase.key}</div>
+                  <div className="rTableCell">{purchase.orderID}</div>
                   <div className="rTableCell">
                     {Object.keys(p.products[0])[0].split('-')[0]}
                   </div>
@@ -144,6 +147,9 @@ const PoTable = props => {
                   <div className="rTableCell">{p.date}</div>
                   <div className="rTableCell">{p.incoterms2}</div>
                   <div className="rTableCell">{p.destination}</div>
+                  <div className="rTableCell">
+                  <div className= {`status ${statusStyle}`}>{p.status}</div>
+                  </div>
                   <div className="rTableCell">
                     <button
                       className="btn btn-outline-primary"
