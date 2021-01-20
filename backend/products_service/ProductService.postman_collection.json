@@ -12,16 +12,7 @@
 			},
 			"request": {
 				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"firstName\":\"Test\",\n\t\"lastName\":\"ravi\",\n\t\"emailId\":\"ravilochan2000@gmail.com\",\n\t\"password\":\"123456\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
+				"header": [],	
 				"url": {
 					"raw": "http://localhost:3010/productmanagement/api/products/getProducts",
 					"protocol": "http",
