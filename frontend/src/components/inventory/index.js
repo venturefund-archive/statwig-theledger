@@ -33,7 +33,7 @@ const Inventory = props => {
     coloumn3: 'Batch Number',
     coloumn4: 'Quantity',
     coloumn5: 'Serial Number',
-    coloumn6: 'Date',
+    coloumn6: 'Mfg Date',
     coloumn7: 'Exp Date',
   };
   const [inventoryNearExpiration, setInventoryNearExpiration] = useState('');
