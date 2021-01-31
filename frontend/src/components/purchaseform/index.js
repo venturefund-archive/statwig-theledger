@@ -42,7 +42,7 @@ const PurchaseForm = props => {
   const[menu,setMenu] = useState(false);
   const [poError,setPoError]=useState();
   const[openExcel,setOpenExcel]= useState(false);
-
+  const [orderAmount, setOrderAmount] = useState(editPo.orderAmount);
   const closeExcelModal = () => {
     setOpenExcel(false);
   };
@@ -107,6 +107,7 @@ const PurchaseForm = props => {
         material: materialId,
         products: [productManufacturer],
         date:todayDate,
+        orderAmount
       },
     };
 
@@ -140,11 +141,13 @@ const PurchaseForm = props => {
     console.log(data);
     const result = await createPO(data);
     if (result.status === 200) {
+      await onCashfreeClick();
       setMessage('Success !');
     }else {
       setMessage('Unable to process , Please Check the Data entered');
     }
   };
+
 
   return (
     <div className="purchaseform">
@@ -255,6 +258,17 @@ const PurchaseForm = props => {
               value={toLocation}
             />
         </div>
+        <div className="input-group">
+          <label className="reference">Order Amount</label>
+           <input
+              type="text"
+              className="form-control"
+              name="orderAmount"
+              placeholder="Enter Amount"
+              onChange={e => setOrderAmount(e.target.value)}
+              value={orderAmount}
+            />
+        </div>
       </div>
       <ProductsTable
         tableHeader={tableHeader}
@@ -299,6 +313,7 @@ const PurchaseForm = props => {
           />
         </Modal>
       )}
+
         <button className="btn btn-orange review" onClick={onProceed}>REVIEW</button>
       </div>
      
