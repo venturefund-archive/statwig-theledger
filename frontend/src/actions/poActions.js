@@ -19,6 +19,17 @@ export const createPO = async data => {
   }
 };
 
+export const makePayment = async data => {
+  try {
+    debugger;
+    const result = await axios.post("https://payment.vaccineledger.com/request", data);
+    return result;
+  } catch (e) {
+    return e.response;
+  }
+};
+
+
 export const getPOs = async () => {
   try {
     const result = await axios.get(config().fetchAllPurchaseOrdersUrl);
@@ -27,6 +38,7 @@ export const getPOs = async () => {
     return e.response;
   }
 };
+
 
 export const getPO = async po => {
   try {
