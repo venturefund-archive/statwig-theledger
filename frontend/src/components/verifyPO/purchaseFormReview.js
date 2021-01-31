@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ProductsTableReview from './productsReview';
 import { useSelector, useDispatch } from 'react-redux';
-import { createPO, setEditPos, resetEditPos } from '../../actions/poActions';
+import { createPO,makePayment, setEditPos, resetEditPos } from '../../actions/poActions';
 import Pen from '../../assets/icons/po.svg';
 import Modal from '../../shared/modal';
 import PoPopUp from './poPopUp';
@@ -15,6 +15,7 @@ const PurchaseFormReview = props => {
   const todayDate =
     new Date().getDate() + '/' + month + '/' + new Date().getFullYear();
   const [openCreatedPo, setOpenCreatedPo] = useState(false);
+  const [makepayment,setMakePayment]= useState(false);
   const [ modalProps, setModalProps ] = useState({});
   const reviewPo = useSelector(state => {
     return state.reviewPo;
@@ -47,6 +48,22 @@ const PurchaseFormReview = props => {
         type: 'Failure'
       })
     }
+   const result1 =  makePayment(data);
+    setMakePayment(true);
+    if (result1.status == 200) {
+      dispatch(resetEditPos());
+      setModalProps({
+        message: 'Payment Success!',
+        TxID: result1.data.TxID,
+        type: 'Success'
+      })
+    }else if(result1.status === 500) {
+      setModalProps({
+        message: result.data.message,
+        TxID: result.data.TxID,
+        type: 'Failure'
+      })
+    } 
   };
   return (
     <div className="purchaseform">
