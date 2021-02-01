@@ -16,6 +16,8 @@ const ProductsTable = props => {
     manufacturers,
     quantity,
     onQuantityChange,
+    unitPrice,
+    onUnitPriceChange,
   } = props;
   return (
     <div className="table productTable mt-2">
@@ -66,10 +68,24 @@ const ProductsTable = props => {
                   min="0"
                   onKeyDown={ e => ( e.keyCode === 69 || e.keyCode === 190||e.keyCode === 189
                   ||e.keyCode === 187||e.keyCode === 40||e.keyCode === 38) && e.preventDefault() }
-                  className="form-control"
+                  className="form-field"
                   placeholder="Enter Quantity"
                   value={quantity}
                   onChange={onQuantityChange}
+                />
+              </div>
+            </div>
+            <div className="rTableCell">
+              <div className="form-group">
+                <input
+                  type="number"
+                  min="0"
+                  onKeyDown={ e => ( e.keyCode === 69 || e.keyCode === 190||e.keyCode === 189
+                  ||e.keyCode === 187||e.keyCode === 40||e.keyCode === 38) && e.preventDefault() }
+                  className="form-field"
+                  placeholder="Enter UnitPrice"
+                  value={unitPrice}
+                  onChange={onUnitPriceChange}
                 />
               </div>
             </div>

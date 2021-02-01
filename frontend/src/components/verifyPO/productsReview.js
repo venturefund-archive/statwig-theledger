@@ -6,11 +6,12 @@ const ProductsTableReview = props => {
   const {
     tableHeader,
     products,
-    materialId
+    materialId  
   } = props;
   const product = Object.keys(products[0])[0].split('-')[0];
   const manufacturer = Object.keys(products[0])[0].split('-')[1];
   const quantity = products[0][`${product}-${manufacturer}`];
+  cosnt unitPrice = '1000';
   return (
     <div className="table productTable">
       <div className="rTable">
@@ -57,6 +58,16 @@ const ProductsTableReview = props => {
                   type="number"
                   className="form-control"
                   value={quantity}
+                />
+              </div>
+            </div>
+            <div className="rTableCell">
+              <div className="form-group">
+                <input
+                disabled
+                  type="number"
+                  className="form-control"
+                  value={unitPrice}
                 />
               </div>
             </div>

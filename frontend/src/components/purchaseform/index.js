@@ -10,7 +10,7 @@ import DropdownButton from '../../shared/dropdownButtonGroup';
 import { createPO ,setReviewPos,getProducts,getManufacturers} from '../../actions/poActions';
 import { useDispatch,useSelector} from "react-redux";
 
-const tableHeader = ['Material ID', 'Product Name', 'Manufacturer', 'Quantity'];
+const tableHeader = ['Material ID', 'Product Name', 'Manufacturer', 'Quantity','UnitPrice'];
 
 const PurchaseForm = props => {
   const editPo = useSelector(state => {
@@ -34,6 +34,7 @@ const PurchaseForm = props => {
   const [manufacturer, setManufacturer] = useState(Object.keys(editPo.products[0])[0].split('-')[1]);
   const [quantity, setQuantity] = useState(editPo.products[0][`${product}-${manufacturer}`]);
   const  [materialId, setMaterialId] = useState(editPo.material);
+  const  [unitPrice, setUnitPrice] = useState(editPo.unitPrice);
   const [destination, setDestination] = useState(editPo.destination);
   const [client, setClient] = useState(editPo.client);
   const [message, setMessage] = useState('');
@@ -61,7 +62,7 @@ const PurchaseForm = props => {
   },[]);
 
   const poFields= ['sendPOTo','vendorId','unicefPo','vendorName','Receiver','locationId','shippedFrom','toLocation',
-                      'materialId','product','manufacturer','quantity'];
+                      'materialId','product','manufacturer','quantity','unitPrice'];
 
     const checkValidationErrors = (validations) => {
       let error = false;
@@ -105,6 +106,7 @@ const PurchaseForm = props => {
         incoterms2: shippedFrom,
         destination: toLocation,
         material: materialId,
+        unitPrice: unitPrice,
         products: [productManufacturer],
         date:todayDate,
         orderAmount
@@ -282,6 +284,8 @@ const PurchaseForm = props => {
         products={products}
         quantity={quantity}
         onQuantityChange={e => setQuantity(e.target.value)}
+        unitPrice={unitPrice}
+        onUnitPriceChange={e => setUnitPrice(e.target.value)}
       />
       {/* <button className="btn btn-white shadow-radius font-bold">
         +<span> Add Another Product</span>

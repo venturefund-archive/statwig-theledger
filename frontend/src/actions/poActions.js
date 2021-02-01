@@ -18,7 +18,6 @@ export const createPO = async data => {
     return e.response;
   }
 };
-
 export const getPOs = async () => {
   try {
     const result = await axios.get(config().fetchAllPurchaseOrdersUrl);
@@ -27,6 +26,7 @@ export const getPOs = async () => {
     return e.response;
   }
 };
+
 
 export const getPO = async po => {
   try {

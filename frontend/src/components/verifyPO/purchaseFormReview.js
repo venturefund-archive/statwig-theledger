@@ -8,7 +8,7 @@ import Modal from '../../shared/modal';
 import PoPopUp from './poPopUp';
 import './style.scss';
 
-const tableHeader = ['Material Id','Product Name', 'Manufacturer', 'Quantity'];
+const tableHeader = ['Material Id','Product Name', 'Manufacturer', 'Quantity','UnitPrice'];
 
 const PurchaseFormReview = props => {
   const dispatch = useDispatch();
@@ -227,7 +227,7 @@ const PurchaseFormReview = props => {
         />
       </form>
       <button className="btn btn-orange review " onClick={onAssign}>
-        CREATE
+        MAKEPAYMENT
       </button>
 
       <button className="btn edit mr-4" onClick={onEdit}>
