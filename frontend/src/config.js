@@ -9,13 +9,13 @@ export const LOCAL_SERVER_URL_PO = 'http://localhost:3012';
 export const LOCAL_SERVER_URL_TRACKANDTRACE = 'http://localhost:3005';
 export const LOCAL_SERVER_URL_NOTIFICATION = 'http://localhost:3006';
 export const LOCAL_SERVER_URL_PRODUCTS = 'http://localhost:3010';
-export const STABLE_SERVER_URL_USER = 'http://65.0.135.24:3001';
-export const STABLE_SERVER_URL_SHIPMENT = 'http://65.0.135.24:3002';
-export const STABLE_SERVER_URL_PO = 'http://65.0.135.24:3012';
-export const STABLE_SERVER_URL_INVENTORY = 'http://65.0.135.24:3007';
-export const STABLE_SERVER_URL_TRACKANDTRACE = 'http://65.0.135.24:3005';
-export const STABLE_SERVER_URL_NOTIFICATION = 'http://65.0.135.24:3006';
-export const STABLE_SERVER_URL_PRODUCTS = 'http://65.0.135.24:3010';
+export const STABLE_SERVER_URL_USER = 'http://54.164.66.73:3001';
+export const STABLE_SERVER_URL_SHIPMENT = 'http://54.164.66.73:3002';
+export const STABLE_SERVER_URL_PO = 'http://54.164.66.73:3012';
+export const STABLE_SERVER_URL_INVENTORY = 'http://54.164.66.73:3007';
+export const STABLE_SERVER_URL_TRACKANDTRACE = 'http://54.164.66.73:3005';
+export const STABLE_SERVER_URL_NOTIFICATION = 'http://54.164.66.73:3006';
+export const STABLE_SERVER_URL_PRODUCTS = 'http://54.164.66.73:3010';
 export const DEV_SERVER_URL = 'http://127.0.0.1:9001';
 
 
@@ -45,11 +45,14 @@ export function config() {
       getInventoryByBatchNumber:`${LOCAL_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getBatchDetailsByBatchNumber?skip=0&limit=100&batchNumber=`,
       addProductsToInventory: `${LOCAL_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/addProductsToInventory`,
       addInventoriesFromExcel: `${LOCAL_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/addInventoriesFromExcel`,
+      getRegionsUrl: `${LOCAL_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getRegions`,
+      getCountryByRegionUrl: `${LOCAL_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getCountryDetailsByRegion?region=`,
+      getWareHousesByCountryUrl: `${LOCAL_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getWarehouseDetailsByCountry?country=`,
       createShipmentUrl: `${LOCAL_SERVER_URL_SHIPMENT}/shipmentmanagement/api/shipment/createShipment`,
       addInventoryUrl: `${LOCAL_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/addNewInventory`,
       shipmentsSearch: `${LOCAL_SERVER_URL_SHIPMENT}/shipmentmanagement/api/shipping/fetchShipments?key=`,
       inventorySearch: `${LOCAL_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getInventoryDetailsForProduct?key=`,
-      getProductDetailsByWarehouseIdUrl: `${LOCAL_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getProductDetailsByWarehouseId?warhouseId=`,
+      getProductDetailsByWarehouseIdUrl: `${LOCAL_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getProductDetailsByWarehouseId?warehouseId=`,
       createPurchaseOrderUrl: `${LOCAL_SERVER_URL_PO}/pomanagement/api/po/createPurchaseOrder`,
       productListUrl: `${LOCAL_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getProductListCounts`,
       addPOsFromExcelUrl: `${LOCAL_SERVER_URL_SHIPMENT}/shipmentmanagement/api/shipping/addPOsFromExcel`,
@@ -95,7 +98,10 @@ export function config() {
       addInventoryUrl: `${DEV_SERVER_URL}/inventorymanagement/api/inventory/addNewInventory`,
       shipmentsSearch: `${DEV_SERVER_URL}/shipmentmanagement/api/shipping/fetchShipments?key=`,
       inventorySearch: `${DEV_SERVER_URL}/inventorymanagement/api/inventory/getInventoryDetailsForProduct?key=`,
-      getProductDetailsByWarehouseIdUrl: `${DEV_SERVER_URL}/inventorymanagement/api/inventory/getProductDetailsByWarehouseId?warhouseId=`,
+      getProductDetailsByWarehouseIdUrl: `${DEV_SERVER_URL}/inventorymanagement/api/inventory/getProductDetailsByWarehouseId?warehouseId=`,
+      getRegionsUrl: `${DEV_SERVER_URL}/inventorymanagement/api/inventory/getRegions`,
+      getCountryByRegionUrl: `${DEV_SERVER_URL}/inventorymanagement/api/inventory/getCountryDetailsByRegion?region=`,
+      getWareHousesByCountryUrl: `${DEV_SERVER_URL}/inventorymanagement/api/inventory/getWarehouseDetailsByCountry?country=`,
       createPurchaseOrderUrl: `${DEV_SERVER_URL}/shipmentmanagement/api/shipping/createPurchaseOrder`,
       addPOsFromExcelUrl: `${DEV_SERVER_URL}/shipmentmanagement/api/shipping/addPOsFromExcel`,
       changePOStatus: `${DEV_SERVER_URL}/shipmentmanagement/api/shipping/changePOStatus`,
@@ -145,7 +151,10 @@ export function config() {
       getSerialNumbersByBatchNumber: `${STABLE_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getInventoryDetailsByBatchNumber?skip=0&limit=100&batchNumber=`,
       getInventoryDetailsUrl: `${STABLE_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getInventoryDetails`,
       getInventoryByBatchNumber:`${STABLE_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getBatchDetailsByBatchNumber?skip=0&limit=100&batchNumber=`,
-      getProductDetailsByWarehouseIdUrl: `${STABLE_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getProductDetailsByWarehouseId?warhouseId=`,
+      getProductDetailsByWarehouseIdUrl: `${STABLE_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getProductDetailsByWarehouseId?warehouseId=`,
+      getRegionsUrl: `${STABLE_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getRegions`,
+      getCountryByRegionUrl: `${STABLE_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getCountryDetailsByRegion?region=`,
+      getWareHousesByCountryUrl: `${STABLE_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getWarehouseDetailsByCountry?country=`,
       trackShipment: `${STABLE_SERVER_URL_SHIPMENT}/shipmentmanagement/api/shipping/trackShipment?shipmentId=`,
       poDetailsByShipmentId:`${STABLE_SERVER_URL_SHIPMENT}/shipmentmanagement/api/shipping/fetchPOdetailsByShipmentID?shipmentId=`,
       productDetailsByShipmentId:`${STABLE_SERVER_URL_SHIPMENT}/shipmentmanagement/api/shipping/fetchProductdetailsByShipmentID?shipmentId=`,
@@ -188,7 +197,10 @@ export function config() {
       addInventoriesFromExcel: `${TEST_SERVER_URL}/inventorymanagement/api/inventory/addInventoriesFromExcel`,
       addInventoryUrl: `${TEST_SERVER_URL}/inventorymanagement/api/inventory/addNewInventory`,
       productListUrl: `${TEST_SERVER_URL}/inventorymanagement/api/inventory/getProductListCounts`,
-      getProductDetailsByWarehouseIdUrl: `${TEST_SERVER_URL}/inventorymanagement/api/inventory/getProductDetailsByWarehouseId?warhouseId=`,
+      getProductDetailsByWarehouseIdUrl: `${TEST_SERVER_URL}/inventorymanagement/api/inventory/getProductDetailsByWarehouseId?warehouseId=`,
+      getRegionsUrl: `${TEST_SERVER_URL}/inventorymanagement/api/inventory/getRegions`,
+      getCountryByRegionUrl: `${TEST_SERVER_URL}/inventorymanagement/api/inventory/getCountryDetailsByRegion?region=`,
+      getWareHousesByCountryUrl: `${TEST_SERVER_URL}/inventorymanagement/api/inventory/getWarehouseDetailsByCountry?country=`,
       trackShipment: `${TEST_SERVER_URL}/shipmentmanagement/api/shipping/trackShipment?shipmentId=`,
       poDetailsByShipmentId:`${TEST_SERVER_URL}/shipmentmanagement/api/shipping/fetchPOdetailsByShipmentID?shipmentId=`,
       productDetailsByShipmentId:`${TEST_SERVER_URL}/shipmentmanagement/api/shipping/fetchProductdetailsByShipmentID?shipmentId=`,
@@ -232,8 +244,11 @@ export function config() {
       addProductsToInventory: `${DEMO_SERVER_URL}/inventorymanagement/api/inventory/addProductsToInventory`,
       addInventoriesFromExcel: `${DEMO_SERVER_URL}/inventorymanagement/api/inventory/addInventoriesFromExcel`,
       addInventoryUrl: `${DEMO_SERVER_URL}/inventorymanagement/api/inventory/addNewInventory`,
-      getProductDetailsByWarehouseIdUrl: `${DEMO_SERVER_URL}/inventorymanagement/api/inventory/getProductDetailsByWarehouseId?warhouseId=`,
+      getProductDetailsByWarehouseIdUrl: `${DEMO_SERVER_URL}/inventorymanagement/api/inventory/getProductDetailsByWarehouseId?warehouseId=`,
       productListUrl: `${DEMO_SERVER_URL}/inventorymanagement/api/inventory/getProductListCounts`,
+      getRegionsUrl: `${DEMO_SERVER_URL}/inventorymanagement/api/inventory/getRegions`,
+      getCountryByRegionUrl: `${DEMO_SERVER_URL}/inventorymanagement/api/inventory/getCountryDetailsByRegion?region=`,
+      getWareHousesByCountryUrl: `${DEMO_SERVER_URL}/inventorymanagement/api/inventory/getWarehouseDetailsByCountry?country=`,
       trackShipment: `${DEMO_SERVER_URL}/shipmentmanagement/api/shipping/trackShipment?shipmentId=`,
       poDetailsByShipmentId:`${DEMO_SERVER_URL}/shipmentmanagement/api/shipping/fetchPOdetailsByShipmentID?shipmentId=`,
       productDetailsByShipmentId:`${DEMO_SERVER_URL}/shipmentmanagement/api/shipping/fetchProductdetailsByShipmentID?shipmentId=`,
@@ -280,7 +295,10 @@ export function config() {
       addProductsToInventory: `${PROD_SERVER_URL}/inventorymanagement/api/inventory/addProductsToInventory`,
       productListUrl: `${PROD_SERVER_URL}/inventorymanagement/api/inventory/getProductListCounts`,
       addInventoriesFromExcel: `${PROD_SERVER_URL}/inventorymanagement/api/inventory/addInventoriesFromExcel`,
-      getProductDetailsByWarehouseIdUrl: `${PROD_SERVER_URL}/inventorymanagement/api/inventory/getProductDetailsByWarehouseId?warhouseId=`,
+      getProductDetailsByWarehouseIdUrl: `${PROD_SERVER_URL}/inventorymanagement/api/inventory/getProductDetailsByWarehouseId?warehouseId=`,
+      getRegionsUrl: `${PROD_SERVER_URL}/inventorymanagement/api/inventory/getRegions`,
+      getCountryByRegionUrl: `${PROD_SERVER_URL}/inventorymanagement/api/inventory/getCountryDetailsByRegion?region=`,
+      getWareHousesByCountryUrl: `${PROD_SERVER_URL}/inventorymanagement/api/inventory/getWarehouseDetailsByCountry?country=`,
       trackShipment: `${PROD_SERVER_URL}/shipmentmanagement/api/shipping/trackShipment?shipmentId=`,
       poDetailsByShipmentId:`${PROD_SERVER_URL}/shipmentmanagement/api/shipping/fetchPOdetailsByShipmentID?shipmentId=`,
       productDetailsByShipmentId:`${PROD_SERVER_URL}/shipmentmanagement/api/shipping/fetchProductdetailsByShipmentID?shipmentId=`,
@@ -295,7 +313,7 @@ export function config() {
     },
   };
 
-  const environment = process.env.ENVIRONMENT || 'test'; // change prod to test, local,stable, dev for respective environments
+  const environment = process.env.ENVIRONMENT || 'stable'; // change prod to test, local,stable, dev for respective environments
   const conf = confs[environment];
   return conf;
 }
