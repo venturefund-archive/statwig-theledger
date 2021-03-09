@@ -149,7 +149,7 @@ const NewShipment = props => {
     <div className="NewShipment">
       <h1 className="breadcrumb">CREATE SHIPMENTS</h1>
       <div className="row mb-3">
-        <div className="col mr-3">
+      <div className="col bg-white low mr-3">
           <div className="form-group">
             <label htmlFor="shipmentId">Shipping Order ID</label>
             <div className="form-control">
@@ -172,7 +172,6 @@ const NewShipment = props => {
               disabled={true}
             />
           </div>
-          <div className="col bg-white low">
             <label htmlFor="client" className="headsup">
               Supplier Details:
             </label>
@@ -182,7 +181,7 @@ const NewShipment = props => {
                 type="text"
                 className="form-control"
                 name="organisation ID"
-                placeholder="organisation ID"
+                placeholder="Organisation ID"
                 value={
                   shippingOrderDetails?.supplierDetails?.supplierOrganisation
                 }
@@ -190,18 +189,17 @@ const NewShipment = props => {
               />
             </div>
             <div className="form-group">
-              <label htmlFor="client">organisation Name</label>
+              <label htmlFor="client">Organisation Name</label>
               <input
                 type="text"
                 className="form-control"
                 name="organisation Name"
-                placeholder="organisation Name"
+                placeholder="Organisation Name"
                 disabled={true}
                 value={shippingOrderDetails?.supplierDetails?.supplierOrgName}
               />
             </div>
           </div>
-        </div>
         <div className="col mr-3 bg-white">
           <label htmlFor="client" className="headsup">
             Customer Details:
@@ -289,6 +287,10 @@ const NewShipment = props => {
                     ? new Date(Date.parse(shipmentDate))
                     : shipmentDate
                 }
+                onKeyDown={e =>
+                  (e.keyCode != 8) &&
+                   e.preventDefault()
+                 }
                 placeholderText="Enter Shipment Date"
                 onChange={onChange}
                 showYearDropdown
@@ -310,6 +312,10 @@ const NewShipment = props => {
                   estimateDeliveryDate
                     ? new Date(Date.parse(estimateDeliveryDate))
                     : estimateDeliveryDate
+                }
+                onKeyDown={e =>
+                 (e.keyCode != 8) &&
+                  e.preventDefault()
                 }
                 showYearDropdown
                 dateFormatCalendar="MMMM"

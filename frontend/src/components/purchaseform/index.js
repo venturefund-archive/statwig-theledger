@@ -269,7 +269,7 @@ else {
               value={externalPoId}
             />
           </div>
-          <div className="font-weight-bold text-primary">Supplier Details:</div>
+          <div className="font-weight-bold text-primary mb-2">Supplier Details:</div>
           <div className="input-group">
             <label className="reference">Organisation ID</label>
             <div className="form-control">
