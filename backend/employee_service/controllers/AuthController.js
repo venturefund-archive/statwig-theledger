@@ -225,14 +225,14 @@ exports.register = [
                   
               //   }
               // }
-              const address = req.body?.address ? req.body.address : 'JNIBF, Gachibowli, Hyderabad, Telanagana, India';
-              const country = req.body?.country ? req.body.country : 'India';
+              const address = req.body.address ? req.body.address : 'JNIBF, Gachibowli, Hyderabad, Telanagana, India';
+              const country = req.body.country ? req.body.country : 'India';
               organisationId = uniqid('org-');
               const org = new OrganisationModel({
                 primaryContactId: employeeId,
                 name: organisationName,
                 id: organisationId,
-                type: req.body?.type ? req.body.type : 'SUPPLIER',
+                type: req.body.type ? req.body.type : 'SUPPLIER',
                 status: 'NOTVERIFIED',
                 postalAddress: address,
                 country: {
@@ -544,6 +544,7 @@ exports.userInfo = [
             postalAddress
           } = user;
           const org = await OrganisationModel.findOne({ id: organisationId }, 'name' );
+          const warehouse = await WarehouseModel.findOne({ id: warehouseId }, 'name' );
           let user_data = {
             firstName,
             lastName,
@@ -556,7 +557,9 @@ exports.userInfo = [
             accountStatus,
             role,
             photoId,
-            location: postalAddress
+            location: postalAddress,
+            warehouseLocation: `${warehouse.postalAddress}`,
+            warehouseCountry: `${warehouse.country}`,            
           };
           logger.log(
             'info',
