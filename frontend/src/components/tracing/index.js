@@ -59,7 +59,7 @@ const Tracing = props => {
     <div className="tracing">
       <div className="row justify-content-between">
         <h1 className="breadcrumb">Track & Trace</h1>
-        {!props.trackData.length&& noResult &&(
+        {Object.keys(props.trackData).length === 0 && noResult &&(
             <Link to="/overview">
               <Modal
               title="No Result Found"
