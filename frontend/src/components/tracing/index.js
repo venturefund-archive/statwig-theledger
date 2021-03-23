@@ -30,6 +30,7 @@ const Tracing = props => {
   const [openPurchase, setOpenPurchase] = useState(false);
   const [openShipping, setOpenShipping] = useState(false);
   const tracking = props.trackData;
+  const [noResult, setNoResult] = useState(!props.trackData.length);
   //const productCard = props.productDetails;
   //const poCard = props.poDetails;
 
@@ -37,13 +38,32 @@ const Tracing = props => {
     setOpenPurchase(false);
   }
 
+  const closeNoResult = () =>{
+    setNoResult(false);
+  }
+
   const closeModalShipping = () => {
     setOpenShipping(false);
   }
+
+
+  console.log('tracking')
+  console.log(props.trackData.length);
+
+
+
   return (
     <div className="tracing">
       <div className="row justify-content-between">
         <h1 className="breadcrumb">Track & Trace</h1>
+        {!props.trackData.length&& noResult &&(
+            <Modal
+            title="No Result Found"
+            close={() => closeNoResult()}
+            size="modal-md"
+          >
+          </Modal>  
+          )}
         <div className="row">
           <button className="btn btn-orange fontSize20 font-bold mr-5" >
             <img src={returnPo} width="14" height="14" className="mr-2" />
