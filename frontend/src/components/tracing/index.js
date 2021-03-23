@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import {
+  Link
+} from "react-router-dom";
 import ShipmentSummary from './shipmentsummary';
 import PoDetails from './podetails';
 import ShipmentDetails from './shipmentdetails';
@@ -57,12 +60,14 @@ const Tracing = props => {
       <div className="row justify-content-between">
         <h1 className="breadcrumb">Track & Trace</h1>
         {!props.trackData.length&& noResult &&(
-            <Modal
-            title="No Result Found"
-            close={() => closeNoResult()}
-            size="modal-md"
-          >
-          </Modal>  
+            <Link to="/overview">
+              <Modal
+              title="No Result Found"
+              close={() => closeNoResult()}
+              size="modal-md"
+            >
+            </Modal>
+          </Link>  
           )}
         <div className="row">
           <button className="btn btn-orange fontSize20 font-bold mr-5" >
