@@ -48,7 +48,7 @@ const ViewShippingModal = (props) => {
           <h3 className="text-info">{totalQuantity}</h3>
         </div>
       </div>
-            </div>
+      </div>
 
     );
 }

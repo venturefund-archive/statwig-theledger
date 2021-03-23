@@ -14,8 +14,8 @@ const TracingContainer = props => {
       const result = await trackProduct(props.match.params.id);
        if (result.status==200)
        {
-       setTrackData(result.data);
-       }else{
+          setTrackData(result.data);
+       }else{    
          setTrackData({});
        }
 }
