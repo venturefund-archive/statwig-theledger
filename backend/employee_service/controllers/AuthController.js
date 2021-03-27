@@ -397,13 +397,13 @@ exports.sendOtp = [
             let otp = utility.randomNumber(4);
             await EmployeeModel.update({emailId }, { otp });
 
-          axios.post('http://integrations.vaccineledger.com:9003/integrationmanagement/api/v1/otp/sendotp', {
+          axios.post(process.env.OTP_ENDPOINT, {
             subject : "OTP request for VL",
             email : emailId,
-            phone : "",
+            phone : user.phoneNumber,
             otp : otp.toString(),
             message : "Please Send the OTP",
-            source : "http://test.vaccineledger.com"
+            source : process.env.SOURCE
           })
           .then((response) => {
             console.log(response);
