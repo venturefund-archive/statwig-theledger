@@ -396,27 +396,56 @@ exports.sendOtp = [
             );
             let otp = utility.randomNumber(4);
             await EmployeeModel.update({emailId }, { otp });
-             let html = EmailContent({
-            name: user.firstName,
-            origin: req.headers.origin,
-            otp,
-          });
-          // Send confirmation email
-            try {
-              await mailer
-                  .send(
-                      constants.confirmEmails.from,
-                      user.emailId,
-                      constants.confirmEmails.subject,
-                      html,
-                  );
-              return apiResponse.successResponseWithData(
-                  res,
+            let otp = randomNumber(4);
+
+            fetch("http://integrations.vaccineledger.com:9003/integrationmanagement/api/v1/otp/sendotp", {
+                method: "POST",
+                body: JSON.stringify({
+                  subject : "OTP request for VL",
+                  email : emailId,
+                  phone : "",
+                  otp : otp,
+                  message : "Please Send the OTP",
+                  source : "http://test.vaccineledger.com"
+                }),
+            })
+            .then((response) => {
+              console.log("from fetch")
+              console.log(response); 
+              // if(response.status === 200){
+              //   props.history.push(`/verify?emailId=${email}`);        
+              // }
+              if (response.status === 200) {
+                return apiResponse.successResponseWithData(
+                  response,
                   'OTP Sent Success.'
               );
-            }catch(err) {
-              return apiResponse.ErrorResponse(res, err);
-            }
+              }
+              else{
+                return apiResponse.ErrorResponse(response, response.statusText);     
+              }
+          });            
+          //    let html = EmailContent({
+          //   name: user.firstName,
+          //   origin: req.headers.origin,
+          //   otp,
+          // });
+          // Send confirmation email
+            // try {
+            //   await mailer
+            //       .send(
+            //           constants.confirmEmails.from,
+            //           user.emailId,
+            //           constants.confirmEmails.subject,
+            //           html,
+            //       );
+              // return apiResponse.successResponseWithData(
+              //     res,
+              //     'OTP Sent Success.'
+              // );
+            // }catch(err) {
+              // return apiResponse.ErrorResponse(res, err);
+            // }
 
            /* let userData = {
               id: user.id,
