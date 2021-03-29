@@ -403,7 +403,7 @@ exports.sendOtp = [
             phone : user.phoneNumber,
             otp : otp.toString(),
             message : "Please Send the OTP",
-            source : process.env.SOURCE
+            source : req.body.source.toLowerCase()
           })
           .then((response) => {
             console.log(response);
