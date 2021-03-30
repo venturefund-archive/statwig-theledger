@@ -25,6 +25,8 @@ const checkToken = require('../middlewares/middleware').checkToken;
 const init = require('../logging/init');
 const logger = init.getLog();
 const EmailContent = require('../components/EmailContent');
+var Isemail = require('isemail');
+var isPhoneNumber = require('is-phone-number');
 
 /**
  * Uniques email check
@@ -226,8 +228,8 @@ exports.register = [
                   
               //   }
               // }
-              const country = req.body?.address?.country ? req.body.address?.country : 'India';
-              const address = req.body?.address ? req.body.address : {};
+              const country = req.body.address.country ? req.body.address.country : 'India';
+              const address = req.body.address ? req.body.address : {};
               addr = address.line1 + ', ' + address.city + ', ' + address.state + ', ' + address.pincode;
               organisationId = uniqid('org-');
               warehouseId = uniqid('war-');
@@ -235,7 +237,7 @@ exports.register = [
                 primaryContactId: employeeId,
                 name: organisationName,
                 id: organisationId,
-                type: req.body?.type  ? req.body.type : 'CUSTOMER_SUPPLIER',
+                type: req.body.type  ? req.body.type : 'CUSTOMER_SUPPLIER',
                 status: 'NOTVERIFIED',
                 postalAddress: addr,
                 warehouses: [warehouseId],
@@ -359,13 +361,13 @@ exports.register = [
  * @returns {Object}
  */
 exports.sendOtp = [
-  body('emailId')
+  body('input')
     .isLength({ min: 1 })
     .trim()
-    .withMessage('Email must be specified.')
-    .isEmail()
-    .withMessage('Email must be a valid email address.'),
-  sanitizeBody('emailId').escape(),
+    .withMessage('Input must be specified.'),
+    // .isEmail()
+    // .withMessage('Email must be a valid email address.'),
+  sanitizeBody('input').escape(),
   async (req, res) => {
     try {
       const errors = validationResult(req);
@@ -386,8 +388,22 @@ exports.sendOtp = [
           errors.array(),
         );
       } else {
-        const emailId = req.body.emailId.toLowerCase();
-        const user = await EmployeeModel.findOne({ emailId });
+        const input = req.body.input.toLowerCase();
+        let emailId;
+        let phoneNumber;
+        let user;
+        var phoneno = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;        
+        if(Isemail.validate(input)){
+          emailId = input;
+          user = await EmployeeModel.findOne({emailId });          
+        }
+        else if(input.match(phoneno))
+        {
+          phoneNumber =  input;
+          user = await EmployeeModel.findOne({phoneNumber });          
+        }    
+        // console.log('User');
+        // console.log(user);
         if(user) {
           if (user.accountStatus === 'ACTIVE') {
             logger.log(
@@ -397,20 +413,25 @@ exports.sendOtp = [
             let otp = utility.randomNumber(4);
             await EmployeeModel.update({emailId }, { otp });
 
+            const responseData = {
+              email: user.emailId
+            }
+
           axios.post(process.env.OTP_ENDPOINT, {
             subject : "OTP request for VL",
-            email : emailId,
+            email : user.email,
             phone : user.phoneNumber,
             otp : otp.toString(),
             message : "Please Send the OTP",
             source : req.body.source.toLowerCase()
           })
           .then((response) => {
-            console.log(response);
+            // console.log(response);
             if(response.status===200){
               return apiResponse.successResponseWithData(
                 res,
-                'OTP Sent Success.'   
+                'OTP Sent Success.',
+                responseData   
               );   
             }
             else{

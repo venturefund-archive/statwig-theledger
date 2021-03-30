@@ -17,7 +17,7 @@ const LoginContainer = props => {
 
   const onSendOtp = useCallback(async () => {
       dispatch(turnOn());
-    const data = { emailId:email, source:'http://test.vaccineledger.com/'};
+    const data = { input:email, source:'http://test.vaccineledger.com/'};
     const result = await sendOtp(data);
 
   if (result.status === 200) {
@@ -29,6 +29,7 @@ const LoginContainer = props => {
     // Set user and isAuthenticated
     localStorage.setItem('theLedgerToken', token);
     dispatch(setCurrentUser(decoded));*/
+    setEmail(result.data.data.email);
     props.history.push(`/verify?emailId=${email}`);
   }else if(result.status === 500) {
       const err = result.data.message;
