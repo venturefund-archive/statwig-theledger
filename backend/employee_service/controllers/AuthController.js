@@ -390,8 +390,8 @@ exports.sendOtp = [
       } else {
         console.log(req);
         const input = req.body.input.toLowerCase();
-        let emailId;
-        let phoneNumber;
+        let emailId = '';
+        let phoneNumber = '';
         let user;
         var phoneno = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;        
         if(Isemail.validate(input)){
@@ -419,16 +419,19 @@ exports.sendOtp = [
             }
           console.log('Origin');
           console.log(req.headers.origin);
+          console.log(phoneNumber);
+          console.log(emailId)
           axios.post(process.env.OTP_ENDPOINT, {
             subject : "OTP request for VL",
-            email : user.email,
-            phone : user.phoneNumber,
+            email : emailId,
+            phone : phoneNumber,
             otp : otp.toString(),
             message : "Please Send the OTP",
             source : req.headers.origin
           })
           .then((response) => {
-            // console.log(response);
+            console.log('Response');
+            console.log(response);
             if(response.status===200){
               return apiResponse.successResponseWithData(
                 res,
