@@ -388,6 +388,7 @@ exports.sendOtp = [
           errors.array(),
         );
       } else {
+        console.log(req);
         const input = req.body.input.toLowerCase();
         let emailId;
         let phoneNumber;
@@ -416,14 +417,15 @@ exports.sendOtp = [
             const responseData = {
               email: user.emailId
             }
-
+          console.log('Origin');
+          console.log(req.headers.origin);
           axios.post(process.env.OTP_ENDPOINT, {
             subject : "OTP request for VL",
             email : user.email,
             phone : user.phoneNumber,
             otp : otp.toString(),
             message : "Please Send the OTP",
-            source : req.body.source.toLowerCase()
+            source : req.headers.origin
           })
           .then((response) => {
             // console.log(response);

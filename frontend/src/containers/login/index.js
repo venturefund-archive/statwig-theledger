@@ -17,7 +17,7 @@ const LoginContainer = props => {
 
   const onSendOtp = useCallback(async () => {
       dispatch(turnOn());
-    const data = { input:email, source:'http://test.vaccineledger.com/'};
+    const data = { input:email };
     const result = await sendOtp(data);
 
   if (result.status === 200) {
