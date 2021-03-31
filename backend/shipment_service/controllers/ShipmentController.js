@@ -310,25 +310,37 @@ exports.receiveShipment = [
             const poID = data.poId;
 
             const shipmentID = data.id;
+            
             const shipmentInfo = await ShipmentModel.find({id: shipmentID});
+            
 
+            var actuallyShippedQuantity = 0;
+            var productNumber=-1;
             if(shipmentInfo !== null){
                 const receivedProducts = data.products;
-                var products = shipmentInfo.products;
+                var shipmentProducts = shipmentInfo[0].products;
                 
-                products.forEach(product => {
+                shipmentProducts.forEach(product => {
+                    productNumber  = productNumber + 1;
                     receivedProducts.forEach(reqProduct => {
-                        if(product.productId === reqProduct.productID){
-                            var actuallyShippedQuantity = product.productQuantity;
+                        
+                        if(product.productName === reqProduct.productName){
+                            actuallyShippedQuantity = product.productQuantity;
+                            
                             var receivedQuantity = reqProduct.productQuantity;
                             var quantityDifference = actuallyShippedQuantity - receivedQuantity;
                             var rejectionRate = (quantityDifference/actuallyShippedQuantity)*100;
-                            (shipmentInfo.products[product]).quantityDelivered = receivedQuantity;
-                            (shipmentInfo.products[product]).rejectionRate = rejectionRate;
+                            
+                            (shipmentProducts[productNumber]).quantityDelivered = receivedQuantity;
+                            (shipmentProducts[productNumber]).rejectionRate = rejectionRate;
                         }    
                     })
                 });
-                await shipmentInfo.save();    
+                
+                if(actuallyShippedQuantity !== 0){
+                    const updatedDocument =  await ShipmentModel.updateOne({id: shipmentID}, shipmentInfo);    
+                }
+                
             }
 
             
