@@ -312,21 +312,24 @@ exports.receiveShipment = [
             const shipmentID = data.id;
             const shipmentInfo = await ShipmentModel.find({id: shipmentID});
 
-            const receivedProducts = data.products;
-            var products = shipmentInfo.products;
-            products.forEach(product => {
-                receivedProducts.forEach(reqProduct => {
-                    if(product.productId === reqProduct.productID){
-                        var actuallyShippedQuantity = product.productQuantity;
-                        var receivedQuantity = reqProduct.productQuantity;
-                        var quantityDifference = actuallyShippedQuantity - receivedQuantity;
-                        var rejectionRate = (quantityDifference/actuallyShippedQuantity)*100;
-                        (shipmentInfo.products[product]).quantityDelivered = receivedQuantity;
-                        (shipmentInfo.products[product]).rejectionRate = rejectionRate;
-                    }    
-                })
-            });
-            await shipmentInfo.save();
+            if(shipmentInfo !== null){
+                const receivedProducts = data.products;
+                var products = shipmentInfo.products;
+                
+                products.forEach(product => {
+                    receivedProducts.forEach(reqProduct => {
+                        if(product.productId === reqProduct.productID){
+                            var actuallyShippedQuantity = product.productQuantity;
+                            var receivedQuantity = reqProduct.productQuantity;
+                            var quantityDifference = actuallyShippedQuantity - receivedQuantity;
+                            var rejectionRate = (quantityDifference/actuallyShippedQuantity)*100;
+                            (shipmentInfo.products[product]).quantityDelivered = receivedQuantity;
+                            (shipmentInfo.products[product]).rejectionRate = rejectionRate;
+                        }    
+                    })
+                });
+                await shipmentInfo.save();    
+            }
 
             
             var flag = "Y";
