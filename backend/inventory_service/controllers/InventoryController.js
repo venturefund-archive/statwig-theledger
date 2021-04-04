@@ -13,6 +13,7 @@ const EmployeeModel = require('../models/EmployeeModel');
 const AtomModel = require('../models/AtomModel');
 const ProductModel = require('../models/ProductModel');
 const NotificationModel = require('../models/NotificationModel');
+const requiredPermissions = require('./requiredPermissions.json');
 
 const checkToken = require('../middlewares/middleware').checkToken;
 const checkPermissions = require('../middlewares/rbac_middleware')
@@ -43,7 +44,7 @@ exports.getTotalCount = [
 
           permission_request = {
             emailId: result,
-            permissionRequired: 'viewInventory',
+            permissionRequired: requiredPermissions.getTotalCount
           };
           checkPermissions(permission_request, permissionResult => {
             if (permissionResult.success) {
@@ -84,7 +85,7 @@ exports.getTotalCountOnHold = [
 
           permission_request = {
             result: result,
-            permissionRequired: 'viewInventory',
+            permissionRequired: requiredPermissions.getTotalCountOnHold,
           };
           checkPermissions(permission_request, permissionResult => {
             if (permissionResult.success) {
@@ -125,7 +126,7 @@ exports.getExpiringInventory = [
 
           permission_request = {
             result: result,
-            permissionRequired: 'viewInventory',
+            permissionRequired: requiredPermissions.getExpiringInventory,
           };
           checkPermissions(permission_request, permissionResult => {
             if (permissionResult.success) {
@@ -166,7 +167,7 @@ exports.getInventoryforProduct = [
 
           permission_request = {
             result: result,
-            permissionRequired: 'viewInventory',
+            permissionRequired: requiredPermissions.getInventoryforProduct,
           };
           checkPermissions(permission_request, permissionResult => {
             if (permissionResult.success) {
@@ -208,7 +209,7 @@ exports.getInventoryDetailsForProduct = [
 
           permission_request = {
             result: result,
-            permissionRequired: 'viewInventory',
+            permissionRequired: requiredPermissions.getInventoryDetailsForProduct,
           };
           checkPermissions(permission_request, async permissionResult => {
             if (permissionResult.success) {
@@ -258,7 +259,7 @@ exports.getAllInventoryDetails = [
 
           permission_request = {
             result: result,
-            permissionRequired: 'viewInventory',
+            permissionRequired: requiredPermissions.getAllInventoryDetails,
           };
           checkPermissions(permission_request, async permissionResult => {
             if (permissionResult.success) {
@@ -515,6 +516,7 @@ exports.updateInventories = [
   auth,
   async (req, res) => {
     try {
+      
       const { address } = req.user;
       const { data } = req.body;
       const {
