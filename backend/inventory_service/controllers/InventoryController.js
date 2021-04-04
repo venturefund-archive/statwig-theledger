@@ -516,48 +516,72 @@ exports.updateInventories = [
   auth,
   async (req, res) => {
     try {
-      
-      const { address } = req.user;
-      const { data } = req.body;
-      const {
-        serialNumberRange,
-        manufacturingDate,
-        expiryDate,
-        productName,
-      } = data;
-      const serialNumbers = serialNumberRange.split('-');
-      const serialNumbersFrom = parseInt(serialNumbers[0].split(/(\d+)/)[1]);
-      const serialNumbersTo = parseInt(serialNumbers[1].split(/(\d+)/)[1]);
-
-      const serialNumberText = serialNumbers[1].split(/(\d+)/)[0];
-      let inventories = [];
-      for (let i = serialNumbersFrom; i <= serialNumbersTo; i++) {
-        const inventory = {
-          transactionIds: [],
-          serialNumber: `${serialNumberText}${i}`,
-          manufacturingDate,
-          expiryDate,
-          productName,
-          quantity: 1,
-          owner: address,
-        };
-        inventories.push(inventory);
-      }
-      let bulkArr = [];
-      /* const inventoryMongoResult = await InventoryModel.insertMany(
-        inventories,
-      );*/
-      for (const i of inventories) {
-        bulkArr.push({
-          updateOne: {
-            filter: { serialNumber: i.serialNumber },
-            update: { owner: address },
-          },
-        });
-      }
-
-      await InventoryModel.bulkWrite(bulkArr);
-      apiResponse.successResponseWithData(res, 'Updated Success');
+      checkToken(req, res, async result => {
+        if (result.success) {
+          logger.log(
+            'info',
+            '<<<<< InventoryService < InventoryController < updateInventories : token verified successfullly, querying data by key',
+          );
+    
+          permission_request = {
+            result: result,
+            permissionRequired: requiredPermissions.updateInventories,
+          };
+          checkPermissions(permission_request, async permissionResult => {
+            if (permissionResult.success) {
+              const { address } = req.user;
+              const { data } = req.body;
+              const {
+                serialNumberRange,
+                manufacturingDate,
+                expiryDate,
+                productName,
+              } = data;
+              const serialNumbers = serialNumberRange.split('-');
+              const serialNumbersFrom = parseInt(serialNumbers[0].split(/(\d+)/)[1]);
+              const serialNumbersTo = parseInt(serialNumbers[1].split(/(\d+)/)[1]);
+        
+              const serialNumberText = serialNumbers[1].split(/(\d+)/)[0];
+              let inventories = [];
+              for (let i = serialNumbersFrom; i <= serialNumbersTo; i++) {
+                const inventory = {
+                  transactionIds: [],
+                  serialNumber: `${serialNumberText}${i}`,
+                  manufacturingDate,
+                  expiryDate,
+                  productName,
+                  quantity: 1,
+                  owner: address,
+                };
+                inventories.push(inventory);
+              }
+              let bulkArr = [];
+              /* const inventoryMongoResult = await InventoryModel.insertMany(
+                inventories,
+              );*/
+              for (const i of inventories) {
+                bulkArr.push({
+                  updateOne: {
+                    filter: { serialNumber: i.serialNumber },
+                    update: { owner: address },
+                  },
+                });
+              }
+        
+              await InventoryModel.bulkWrite(bulkArr);
+              apiResponse.successResponseWithData(res, 'Updated Successfully');
+            } else {
+              res.json('Sorry! User does not have enough Permissions');
+            }
+          });
+        } else {
+          logger.log(
+            'warn',
+            '<<<<< InventoryService < InventoryController < updateInventories : refuted token',
+          );
+          res.status(403).json(result);
+        }
+      });
     } catch (e) {
       apiResponse.ErrorResponse(res, e);
     }
@@ -567,94 +591,122 @@ exports.insertInventories = [
   auth,
   async (req, res) => {
     try {
-      const { address } = req.user;
-      const { data } = req.body;
-      const {
-        serialNumberRange,
-        manufacturingDate,
-        expiryDate,
-        productName,
-        poNumber,
-        shipmentId,
-        manufacturerName,
-        batchNumber,
-      } = data;
-      const serialNumbers = serialNumberRange.split('-');
-      const serialNumbersFrom = parseInt(serialNumbers[0].split(/(\d+)/)[1]);
-      const serialNumbersTo = parseInt(serialNumbers[1].split(/(\d+)/)[1]);
-
-      const serialNumberText = serialNumbers[1].split(/(\d+)/)[0];
-      let inventories = [];
-      for (let i = serialNumbersFrom; i <= serialNumbersTo; i++) {
-        const inventory = {
-          transactionIds: [],
-          serialNumber: `${serialNumberText}${i}`,
-          manufacturingDate,
-          expiryDate,
-          productName,
-          quantity: 1,
-          poNumber,
-          shipmentId,
-          manufacturerName,
-          batchNumber,
-          owner: address,
-        };
-        inventories.push(inventory);
-      }
-      const chunkSize = 50;
-      let limit = chunkSize;
-      let skip = 0;
-      let count = 0;
-      const start = new Date();
-      logger.log('info', 'Inserting inventories data in chunks');
-      async function recursiveFun() {
-        skip = chunkSize * count;
-        count++;
-        limit = chunkSize * count;
-        logger.log('info', `skip ${skip}`);
-
-        logger.log('info', `limit ${limit}`);
-        const chunkedData = inventories.slice(skip, limit);
-        try {
-          await InventoryModel.insertMany(chunkedData);
-          if (limit < inventories.length) {
-            recursiveFun();
-          } else {
-            logger.log(
-              'info',
-              `Insertion of inventories from mobile is completed. Time Taken to insert ${
-                inventories.length
-              } in seconds - `,
-              (new Date() - start) / 1000,
-            );
-            const newNotification = new NotificationModel({
-              owner: address,
-              message: `Your inventories are added successfully on ${new Date().toLocaleString()}`,
-            });
-            await newNotification.save();
-          }
-        } catch (e) {
-          /* const newNotification = new NotificationModel({
-            owner: address,
-            message: `${e.errmsg} on ${new Date().toLocaleString()}`,
+     
+      checkToken(req, res, async result => {
+        if (result.success) {
+          logger.log(
+            'info',
+            '<<<<< InventoryService < InventoryController < insertInventories : token verified successfullly, querying data by key',
+          );
+    
+          permission_request = {
+            result: result,
+            permissionRequired: requiredPermissions.insertInventories,
+          };
+          checkPermissions(permission_request, async permissionResult => {
+            if (permissionResult.success) {
+              const { address } = req.user;
+              const { data } = req.body;
+              const {
+                serialNumberRange,
+                manufacturingDate,
+                expiryDate,
+                productName,
+                poNumber,
+                shipmentId,
+                manufacturerName,
+                batchNumber,
+              } = data;
+              const serialNumbers = serialNumberRange.split('-');
+              const serialNumbersFrom = parseInt(serialNumbers[0].split(/(\d+)/)[1]);
+              const serialNumbersTo = parseInt(serialNumbers[1].split(/(\d+)/)[1]);
+        
+              const serialNumberText = serialNumbers[1].split(/(\d+)/)[0];
+              let inventories = [];
+              for (let i = serialNumbersFrom; i <= serialNumbersTo; i++) {
+                const inventory = {
+                  transactionIds: [],
+                  serialNumber: `${serialNumberText}${i}`,
+                  manufacturingDate,
+                  expiryDate,
+                  productName,
+                  quantity: 1,
+                  poNumber,
+                  shipmentId,
+                  manufacturerName,
+                  batchNumber,
+                  owner: address,
+                };
+                inventories.push(inventory);
+              }
+              const chunkSize = 50;
+              let limit = chunkSize;
+              let skip = 0;
+              let count = 0;
+              const start = new Date();
+              logger.log('info', 'Inserting inventories data in chunks');
+              async function recursiveFun() {
+                skip = chunkSize * count;
+                count++;
+                limit = chunkSize * count;
+                logger.log('info', `skip ${skip}`);
+        
+                logger.log('info', `limit ${limit}`);
+                const chunkedData = inventories.slice(skip, limit);
+                try {
+                  await InventoryModel.insertMany(chunkedData);
+                  if (limit < inventories.length) {
+                    recursiveFun();
+                  } else {
+                    logger.log(
+                      'info',
+                      `Insertion of inventories from mobile is completed. Time Taken to insert ${
+                        inventories.length
+                      } in seconds - `,
+                      (new Date() - start) / 1000,
+                    );
+                    const newNotification = new NotificationModel({
+                      owner: address,
+                      message: `Your inventories are added successfully on ${new Date().toLocaleString()}`,
+                    });
+                    await newNotification.save();
+                  }
+                } catch (e) {
+                  /* const newNotification = new NotificationModel({
+                    owner: address,
+                    message: `${e.errmsg} on ${new Date().toLocaleString()}`,
+                  });
+                  await newNotification.save();*/
+                  //If inventories are duplicate then update inventories with new owner
+                  let bulkArr = [];
+                  for (const i of inventories) {
+                    bulkArr.push({
+                      updateOne: {
+                        filter: { serialNumber: i.serialNumber },
+                        update: { owner: address },
+                      },
+                    });
+                  }
+        
+                  await InventoryModel.bulkWrite(bulkArr);
+                }
+              }
+              recursiveFun();
+              apiResponse.successResponseWithData(res, 'Inserted Success');
+            } else {
+              res.json('Sorry! User does not have enough Permissions');
+            }
           });
-          await newNotification.save();*/
-          //If inventories are duplicate then update inventories with new owner
-          let bulkArr = [];
-          for (const i of inventories) {
-            bulkArr.push({
-              updateOne: {
-                filter: { serialNumber: i.serialNumber },
-                update: { owner: address },
-              },
-            });
-          }
-
-          await InventoryModel.bulkWrite(bulkArr);
+        } else {
+          logger.log(
+            'warn',
+            '<<<<< InventoryService < InventoryController < insertInventories : refuted token',
+          );
+          res.status(403).json(result);
         }
-      }
-      recursiveFun();
-      apiResponse.successResponseWithData(res, 'Inserted Success');
+      });
+     
+    
     } catch (e) {
       apiResponse.ErrorResponse(res, e);
     }
