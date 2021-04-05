@@ -199,7 +199,6 @@ exports.getInventoryDetailsForProduct = [
   auth,
   (req, res) => {
     try {
-
       const { authorization } = req.headers;
       checkToken(req, res, async (result) => {
         if (result.success) {
@@ -1464,7 +1463,8 @@ exports.getInventoryDetailsByBatchNumber = [
 
           permission_request = {
             result: result,
-            permissionRequired: requiredPermissions.getInventoryDetailsByBatchNumber,
+            permissionRequired:
+              requiredPermissions.getInventoryDetailsByBatchNumber,
           };
           checkPermissions(permission_request, async (permissionResult) => {
             if (permissionResult.success) {
@@ -1517,7 +1517,8 @@ exports.getBatchDetailsByBatchNumber = [
 
           permission_request = {
             result: result,
-            permissionRequired: requiredPermissions.getBatchDetailsByBatchNumber,
+            permissionRequired:
+              requiredPermissions.getBatchDetailsByBatchNumber,
           };
           checkPermissions(permission_request, async (permissionResult) => {
             if (permissionResult.success) {
@@ -1573,24 +1574,27 @@ exports.getProductListCounts = [
   auth,
   async (req, res) => {
     try {
-
-      checkToken(req, res, async result => {
+      checkToken(req, res, async (result) => {
         if (result.success) {
           logger.log(
-            'info',
-            '<<<<< InventoryService < InventoryController < getProductListCounts : token verified successfullly, querying data by key',
+            "info",
+            "<<<<< InventoryService < InventoryController < getProductListCounts : token verified successfullly, querying data by key"
           );
           permission_request = {
             result: result,
             permissionRequired: requiredPermissions.getProductListCounts,
           };
-          checkPermissions(permission_request, async permissionResult => {
+          checkPermissions(permission_request, async (permissionResult) => {
             if (permissionResult.success) {
               const { warehouseId } = req.user;
-              const InventoryId = await WarehouseModel.find({ id: warehouseId });
+              const InventoryId = await WarehouseModel.find({
+                id: warehouseId,
+              });
               const val = InventoryId[0].warehouseInventory;
               const productList = await InventoryModel.find({ id: val });
-              const list = JSON.parse(JSON.stringify(productList[0].inventoryDetails));
+              const list = JSON.parse(
+                JSON.stringify(productList[0].inventoryDetails)
+              );
               var productArray = [];
               for (j = 0; j < list.length; j++) {
                 var productId = list[j].productId;
@@ -1604,19 +1608,17 @@ exports.getProductListCounts = [
               }
               return apiResponse.successResponseWithData(res, productArray);
             } else {
-              res.json('Sorry! User does not have enough Permissions');
+              res.json("Sorry! User does not have enough Permissions");
             }
           });
         } else {
           logger.log(
-            'warn',
-            '<<<<< InventoryService < InventoryController < getProductListCounts : refuted token',
+            "warn",
+            "<<<<< InventoryService < InventoryController < getProductListCounts : refuted token"
           );
           res.status(403).json(result);
         }
       });
-
-
     } catch (err) {
       logger.log(
         "error",
@@ -1631,19 +1633,19 @@ exports.getProductDetailsByWarehouseId = [
   auth,
   async (req, res) => {
     try {
-
-      checkToken(req, res, async result => {
+      checkToken(req, res, async (result) => {
         if (result.success) {
           logger.log(
-            'info',
-            '<<<<< InventoryService < InventoryController < getProductDetailsByWarehouseId : token verified successfullly, querying data by key',
+            "info",
+            "<<<<< InventoryService < InventoryController < getProductDetailsByWarehouseId : token verified successfullly, querying data by key"
           );
-    
+
           permission_request = {
             result: result,
-            permissionRequired: requiredPermissions.getProductDetailsByWarehouseId,
+            permissionRequired:
+              requiredPermissions.getProductDetailsByWarehouseId,
           };
-          checkPermissions(permission_request, async permissionResult => {
+          checkPermissions(permission_request, async (permissionResult) => {
             if (permissionResult.success) {
               const { warehouseId } = req.query;
               const warehouseDetails = await WarehouseModel.findOne({
@@ -1651,7 +1653,9 @@ exports.getProductDetailsByWarehouseId = [
               });
               const val = warehouseDetails.warehouseInventory;
               const productList = await InventoryModel.find({ id: val });
-              const list = JSON.parse(JSON.stringify(productList[0].inventoryDetails));
+              const list = JSON.parse(
+                JSON.stringify(productList[0].inventoryDetails)
+              );
               var productArray = [];
               for (j = 0; j < list.length; j++) {
                 var productId = list[j].productId;
@@ -1672,24 +1676,23 @@ exports.getProductDetailsByWarehouseId = [
                 warehouseAddress: warehouseDetails.postalAddress,
                 warehouseLocation: warehouseDetails.location,
               };
-        
+
               return apiResponse.successResponseWithData(res, "Fetch success", {
                 warehouse,
                 productArray,
               });
             } else {
-              res.json('Sorry! User does not have enough Permissions');
+              res.json("Sorry! User does not have enough Permissions");
             }
           });
         } else {
           logger.log(
-            'warn',
-            '<<<<< InventoryService < InventoryController < getProductDetailsByWarehouseId : refuted token',
+            "warn",
+            "<<<<< InventoryService < InventoryController < getProductDetailsByWarehouseId : refuted token"
           );
           res.status(403).json(result);
         }
       });
-     
     } catch (err) {
       logger.log(
         "error",
@@ -1704,22 +1707,24 @@ exports.getEmployeeDetailsByWarehouseId = [
   auth,
   async (req, res) => {
     try {
-
-      checkToken(req, res, async result => {
+      checkToken(req, res, async (result) => {
         if (result.success) {
           logger.log(
-            'info',
-            '<<<<< InventoryService < InventoryController < getEmployeeDetailsByWarehouseId : token verified successfullly, querying data by key',
+            "info",
+            "<<<<< InventoryService < InventoryController < getEmployeeDetailsByWarehouseId : token verified successfullly, querying data by key"
           );
-    
+
           permission_request = {
             result: result,
-            permissionRequired: requiredPermissions.getEmployeeDetailsByWarehouseId,
+            permissionRequired:
+              requiredPermissions.getEmployeeDetailsByWarehouseId,
           };
-          checkPermissions(permission_request, async permissionResult => {
+          checkPermissions(permission_request, async (permissionResult) => {
             if (permissionResult.success) {
               const { warehouseId } = req.query;
-              const warehouseDetails = await WarehouseModel.find({ id: warehouseId });
+              const warehouseDetails = await WarehouseModel.find({
+                id: warehouseId,
+              });
               const employees = warehouseDetails[0].supervisors;
               return apiResponse.successResponseWithData(
                 res,
@@ -1727,13 +1732,13 @@ exports.getEmployeeDetailsByWarehouseId = [
                 employees
               );
             } else {
-              res.json('Sorry! User does not have enough Permissions');
+              res.json("Sorry! User does not have enough Permissions");
             }
           });
         } else {
           logger.log(
-            'warn',
-            '<<<<< InventoryService < InventoryController < getEmployeeDetailsByWarehouseId : refuted token',
+            "warn",
+            "<<<<< InventoryService < InventoryController < getEmployeeDetailsByWarehouseId : refuted token"
           );
           res.status(403).json(result);
         }
@@ -1752,19 +1757,18 @@ exports.getCountryDetailsByRegion = [
   auth,
   async (req, res) => {
     try {
-
-      checkToken(req, res, async result => {
+      checkToken(req, res, async (result) => {
         if (result.success) {
           logger.log(
-            'info',
-            '<<<<< InventoryService < InventoryController < getCountryDetailsByRegion : token verified successfullly, querying data by key',
+            "info",
+            "<<<<< InventoryService < InventoryController < getCountryDetailsByRegion : token verified successfullly, querying data by key"
           );
-    
+
           permission_request = {
             result: result,
             permissionRequired: requiredPermissions.getCountryDetailsByRegion,
           };
-          checkPermissions(permission_request, async permissionResult => {
+          checkPermissions(permission_request, async (permissionResult) => {
             if (permissionResult.success) {
               const { region } = req.query;
               const regionDetails = await RegionModel.find({ name: region });
@@ -1775,24 +1779,22 @@ exports.getCountryDetailsByRegion = [
                                 var countryName = countryDetails[j].country;
                                 countryArray.push(countryName)
                            } */
-        
+
               return apiResponse.successResponseWithData(res, "Fetch success", {
                 countries: regionDetails[0].country,
               });
             } else {
-              res.json('Sorry! User does not have enough Permissions');
+              res.json("Sorry! User does not have enough Permissions");
             }
           });
         } else {
           logger.log(
-            'warn',
-            '<<<<< InventoryService < InventoryController < getCountryDetailsByRegion : refuted token',
+            "warn",
+            "<<<<< InventoryService < InventoryController < getCountryDetailsByRegion : refuted token"
           );
           res.status(403).json(result);
         }
       });
-
-
     } catch (err) {
       logger.log(
         "error",
@@ -1807,34 +1809,37 @@ exports.getRegions = [
   auth,
   async (req, res) => {
     try {
-      checkToken(req, res, async result => {
+      checkToken(req, res, async (result) => {
         if (result.success) {
           logger.log(
-            'info',
-            '<<<<< InventoryService < InventoryController < getRegions : token verified successfullly, querying data by key',
+            "info",
+            "<<<<< InventoryService < InventoryController < getRegions : token verified successfullly, querying data by key"
           );
-    
+
           permission_request = {
             result: result,
             permissionRequired: requiredPermissions.getRegions,
           };
-          checkPermissions(permission_request, async permissionResult => {
+          checkPermissions(permission_request, async (permissionResult) => {
             if (permissionResult.success) {
               const regions = await RegionModel.find({});
-              return apiResponse.successResponseWithData(res, "Regions", regions);
+              return apiResponse.successResponseWithData(
+                res,
+                "Regions",
+                regions
+              );
             } else {
-              res.json('Sorry! User does not have enough Permissions');
+              res.json("Sorry! User does not have enough Permissions");
             }
           });
         } else {
           logger.log(
-            'warn',
-            '<<<<< InventoryService < InventoryController < getRegions : refuted token',
+            "warn",
+            "<<<<< InventoryService < InventoryController < getRegions : refuted token"
           );
           res.status(403).json(result);
         }
       });
-
     } catch (err) {
       return apiResponse.ErrorResponse(res, err);
     }
@@ -1845,50 +1850,47 @@ exports.getWarehouseDetailsByRegion = [
   auth,
   async (req, res) => {
     try {
-
-      checkToken(req, res, async result => {
+      checkToken(req, res, async (result) => {
         if (result.success) {
           logger.log(
-            'info',
-            '<<<<< InventoryService < InventoryController < getWarehouseDetailsByRegion : token verified successfullly, querying data by key',
+            "info",
+            "<<<<< InventoryService < InventoryController < getWarehouseDetailsByRegion : token verified successfullly, querying data by key"
           );
-    
+
           permission_request = {
             result: result,
             permissionRequired: requiredPermissions.getWarehouseDetailsByRegion,
           };
-          checkPermissions(permission_request, async permissionResult => {
+          checkPermissions(permission_request, async (permissionResult) => {
             if (permissionResult.success) {
-                
-      const { region } = req.query;
-      const warehouseDetails = await WarehouseModel.find({
-        "region.name": region,
-      });
+              const { region } = req.query;
+              const warehouseDetails = await WarehouseModel.find({
+                "region.name": region,
+              });
 
-      var warehouseArray = [];
-      for (j = 0; j < warehouseDetails.length; j++) {
-        var warehouseId = warehouseDetails[j];
-        warehouseArray.push(warehouseId);
-      }
+              var warehouseArray = [];
+              for (j = 0; j < warehouseDetails.length; j++) {
+                var warehouseId = warehouseDetails[j];
+                warehouseArray.push(warehouseId);
+              }
 
-      return apiResponse.successResponseWithData(
-        res,
-        "Fetch success",
-        warehouseArray
-      );
+              return apiResponse.successResponseWithData(
+                res,
+                "Fetch success",
+                warehouseArray
+              );
             } else {
-              res.json('Sorry! User does not have enough Permissions');
+              res.json("Sorry! User does not have enough Permissions");
             }
           });
         } else {
           logger.log(
-            'warn',
-            '<<<<< InventoryService < InventoryController < getWarehouseDetailsByRegion : refuted token',
+            "warn",
+            "<<<<< InventoryService < InventoryController < getWarehouseDetailsByRegion : refuted token"
           );
           res.status(403).json(result);
         }
       });
-
     } catch (err) {
       logger.log(
         "error",
@@ -1903,49 +1905,48 @@ exports.getWarehouseDetailsByCountry = [
   auth,
   async (req, res) => {
     try {
-
-      checkToken(req, res, async result => {
+      checkToken(req, res, async (result) => {
         if (result.success) {
           logger.log(
-            'info',
-            '<<<<< InventoryService < InventoryController < getWarehouseDetailsByCountry : token verified successfullly, querying data by key',
+            "info",
+            "<<<<< InventoryService < InventoryController < getWarehouseDetailsByCountry : token verified successfullly, querying data by key"
           );
-    
+
           permission_request = {
             result: result,
-            permissionRequired: requiredPermissions.getWarehouseDetailsByCountry,
+            permissionRequired:
+              requiredPermissions.getWarehouseDetailsByCountry,
           };
-          checkPermissions(permission_request, async permissionResult => {
+          checkPermissions(permission_request, async (permissionResult) => {
             if (permissionResult.success) {
               const { country } = req.query;
               const warehouseDetails = await WarehouseModel.find({
                 "country.name": country,
               });
-        
+
               var warehouseArray = [];
               for (j = 0; j < warehouseDetails.length; j++) {
                 var warehouseId = warehouseDetails[j];
                 warehouseArray.push(warehouseId);
               }
-        
+
               return apiResponse.successResponseWithData(
                 res,
                 "Fetch success",
                 warehouseArray
               );
             } else {
-              res.json('Sorry! User does not have enough Permissions');
+              res.json("Sorry! User does not have enough Permissions");
             }
           });
         } else {
           logger.log(
-            'warn',
-            '<<<<< InventoryService < InventoryController < getWarehouseDetailsByCountry : refuted token',
+            "warn",
+            "<<<<< InventoryService < InventoryController < getWarehouseDetailsByCountry : refuted token"
           );
           res.status(403).json(result);
         }
       });
-     
     } catch (err) {
       logger.log(
         "error",
@@ -1960,22 +1961,24 @@ exports.getInventory = [
   auth,
   async (req, res) => {
     try {
-      checkToken(req, res, async result => {
+      checkToken(req, res, async (result) => {
         if (result.success) {
           logger.log(
-            'info',
-            '<<<<< InventoryService < InventoryController < getInventory : token verified successfullly, querying data by key',
+            "info",
+            "<<<<< InventoryService < InventoryController < getInventory : token verified successfullly, querying data by key"
           );
-    
+
           permission_request = {
             result: result,
             permissionRequired: requiredPermissions.getInventory,
           };
-          checkPermissions(permission_request, async permissionResult => {
+          checkPermissions(permission_request, async (permissionResult) => {
             if (permissionResult.success) {
               const { skip, limit } = req.query;
               const { warehouseId } = req.user;
-              const warehouse = await WarehouseModel.findOne({ id: warehouseId });
+              const warehouse = await WarehouseModel.findOne({
+                id: warehouseId,
+              });
               if (warehouse) {
                 const inventory = await InventoryModel.aggregate([
                   { $match: { id: warehouse.warehouseInventory } },
@@ -2005,18 +2008,17 @@ exports.getInventory = [
                 );
               }
             } else {
-              res.json('Sorry! User does not have enough Permissions');
+              res.json("Sorry! User does not have enough Permissions");
             }
           });
         } else {
           logger.log(
-            'warn',
-            '<<<<< InventoryService < InventoryController < getInventory : refuted token',
+            "warn",
+            "<<<<< InventoryService < InventoryController < getInventory : refuted token"
           );
           res.status(403).json(result);
         }
       });
-     
     } catch (err) {
       return apiResponse.ErrorResponse(res, err);
     }
