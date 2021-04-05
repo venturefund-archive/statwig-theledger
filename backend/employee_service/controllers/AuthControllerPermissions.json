@@ -1,0 +1,15 @@
+{
+    "checkEmail": "checkEmail",
+    "register": "register",
+    "sendOtp": "sendOtp",
+    "verifyOtp": "verifyOtp",
+    "userInfo": "userInfo",
+    "updateProfile": "updateProfile",
+    "updatePassword": "updatePassword",
+    "uploadImage": "uploadImage",
+    "createUserAddress": "createUserAddress",
+    "getAllUsers": "getAllUsers",
+    "assignProductConsumer": "assignProductConsumer",
+    "addWarehouse": "addWarehouse",
+    "fetchImage": "fetchImage"
+}

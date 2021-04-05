@@ -1,36 +1,37 @@
-const EmployeeModel = require('../models/EmployeeModel');
-const WarehouseModel = require('../models/WarehouseModel');
-const ConsumerModel = require('../models/ConsumerModel');
-const InventoryModel = require('../models/InventoryModel');
-const OrganisationModel = require('../models/OrganisationModel');
-const CounterModel = require('../models/CounterModel');
-const { body, validationResult, oneOf, check } = require('express-validator');
-const { sanitizeBody } = require('express-validator');
-const uniqid = require('uniqid');
+const EmployeeModel = require("../models/EmployeeModel");
+const WarehouseModel = require("../models/WarehouseModel");
+const ConsumerModel = require("../models/ConsumerModel");
+const InventoryModel = require("../models/InventoryModel");
+const OrganisationModel = require("../models/OrganisationModel");
+const CounterModel = require("../models/CounterModel");
+const { body, validationResult, oneOf, check } = require("express-validator");
+const { sanitizeBody } = require("express-validator");
+const uniqid = require("uniqid");
 
 //helper file to prepare responses.
-const apiResponse = require('../helpers/apiResponse');
-const utility = require('../helpers/utility');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const mailer = require('../helpers/mailer');
-const { constants } = require('../helpers/constants');
-var base64Img = require('base64-img');
-const auth = require('../middlewares/jwt');
-const axios = require('axios');
-const dotenv = require('dotenv').config();
+const apiResponse = require("../helpers/apiResponse");
+const utility = require("../helpers/utility");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const mailer = require("../helpers/mailer");
+const { constants } = require("../helpers/constants");
+var base64Img = require("base64-img");
+const auth = require("../middlewares/jwt");
+const axios = require("axios");
+const dotenv = require("dotenv").config();
 const fs = require("fs");
 const moveFile = require("move-file");
 const blockchain_service_url = process.env.URL;
 const stream_name = process.env.INV_STREAM;
 
-const checkToken = require('../middlewares/middleware').checkToken;
-const init = require('../logging/init');
+const checkToken = require("../middlewares/middleware").checkToken;
+const checkPermissions = require("../../rbac/rbac_middleware").checkPermissions;
+const init = require("../logging/init");
 const logger = init.getLog();
-const EmailContent = require('../components/EmailContent');
+const EmailContent = require("../components/EmailContent");
 const emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const phoneRgex = /^\d{10}$/;
-
+const requiredPermissions = require("./AuthControllerPermissions.json");
 /**
  * Uniques email check
  *
@@ -40,93 +41,117 @@ const phoneRgex = /^\d{10}$/;
  */
 exports.checkEmail = [
   // Validate fields.
-  body('firstName')
+  body("firstName")
     .isLength({ min: 1 })
     .trim()
-    .withMessage('name must be specified.'),
-  body('lastName')
+    .withMessage("name must be specified."),
+  body("lastName")
     .isLength({ min: 1 })
     .trim()
-    .withMessage('name must be specified.'),
-  body('organisationId')
+    .withMessage("name must be specified."),
+  body("organisationId")
     .isLength({ min: 1 })
     .trim()
-    .withMessage('Organisation must be specified.'),
-  body('emailId')
+    .withMessage("Organisation must be specified."),
+  body("emailId")
     .isLength({ min: 1 })
     .trim()
-    .withMessage('Email must be specified.')
+    .withMessage("Email must be specified.")
     // .isEmail()
     // .withMessage('Email must be a valid email address.')
-    .custom(async value => {
-      const emailId = value.toLowerCase().replace(' ', '');
+    .custom(async (value) => {
+      const emailId = value.toLowerCase().replace(" ", "");
       let user;
-      let phone = '';
-      if (!emailId.replace('+91', '').match(phoneRgex) && !emailId.match(emailRegex))
-        return Promise.reject('E-mail/Mobile not in valid');
-      
-      if (emailId.indexOf('@') > -1)          
+      let phone = "";
+      if (
+        !emailId.replace("+91", "").match(phoneRgex) &&
+        !emailId.match(emailRegex)
+      )
+        return Promise.reject("E-mail/Mobile not in valid");
+
+      if (emailId.indexOf("@") > -1)
         user = await EmployeeModel.findOne({ emailId });
       else {
-        phone = emailId.indexOf('+91') === 0 ? emailId : '+91' + emailId;
+        phone = emailId.indexOf("+91") === 0 ? emailId : "+91" + emailId;
         user = await EmployeeModel.findOne({ phoneNumber: phone });
       }
       // return EmployeeModel.findOne({ emailId: value.toLowerCase() }).then(user => {
-        if (user) {
-          logger.log(
-            'info',
-            '<<<<< UserService < AuthController < register : Entered email is already present in EmployeeModel',
-          );
-          return Promise.reject('Account already in use');
-        }
+      if (user) {
+        logger.log(
+          "info",
+          "<<<<< UserService < AuthController < register : Entered email is already present in EmployeeModel"
+        );
+        return Promise.reject("Account already in use");
+      }
       // });
     }),
   // Process request after validation and sanitization.
   async (req, res) => {
     try {
-      if (
-        !req.body.firstName.match('[A-Za-z]') ||
-        !req.body.lastName.match('[A-Za-z]')
-      ) {
-        logger.log(
-          'warn',
-          '<<<<< UserService < AuthController < register : Name should only consist of letters',
-        );
-        return apiResponse.ErrorResponse(
-          res,
-          'Name should only consists of letters',
-        );
-      }
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        // Display sanitized values/errors messages.
-        logger.log(
-          'error',
-          '<<<<< UserService < AuthController < register : Validation error',
-        );
-        return apiResponse.validationErrorWithData(
-          res,
-          'Validation Error.',
-          errors.array(),
-        );
-      }
-      if (!mailer.validateEmail(req.body.emailId)) {
-        return apiResponse.ErrorResponse(
-          res,
-          'Your email id is not eligible to register.',
-        );
-      } else {
-        return apiResponse.successResponseWithData(
-          res,
-          'Continue',
-          [],
-        );
-      }
+      checkToken(req, res, async (result) => {
+        if (result.success) {
+          logger.log(
+            "info",
+            "<<<<< UserService < AuthController < register : token verified successfullly, querying data by key"
+          );
+
+          permission_request = {
+            result: result,
+            permissionRequired: requiredPermissions.checkEmail,
+          };
+          checkPermissions(permission_request, async (permissionResult) => {
+            if (permissionResult.success) {
+              if (
+                !req.body.firstName.match("[A-Za-z]") ||
+                !req.body.lastName.match("[A-Za-z]")
+              ) {
+                logger.log(
+                  "warn",
+                  "<<<<< UserService < AuthController < register : Name should only consist of letters"
+                );
+                return apiResponse.ErrorResponse(
+                  res,
+                  "Name should only consists of letters"
+                );
+              }
+              const errors = validationResult(req);
+              if (!errors.isEmpty()) {
+                // Display sanitized values/errors messages.
+                logger.log(
+                  "error",
+                  "<<<<< UserService < AuthController < register : Validation error"
+                );
+                return apiResponse.validationErrorWithData(
+                  res,
+                  "Validation Error.",
+                  errors.array()
+                );
+              }
+              if (!mailer.validateEmail(req.body.emailId)) {
+                return apiResponse.ErrorResponse(
+                  res,
+                  "Your email id is not eligible to register."
+                );
+              } else {
+                return apiResponse.successResponseWithData(res, "Continue", []);
+              }
+            } else {
+              res.json("Sorry! User does not have enough Permissions");
+            }
+          });
+        } else {
+          logger.log(
+            "warn",
+            "<<<<< UserService < AuthController < register : refuted token"
+          );
+          res.status(403).json(result);
+        }
+      });
     } catch (err) {
       //throw error in json response with status 500.
       logger.log(
-        'error',
-        '<<<<< UserService < AuthController < register : Error in catch block 2',
+        "error",
+        "<<<<< UserService < AuthController < register : Error in catch block 2"
       );
       return apiResponse.ErrorResponse(res, err);
     }
@@ -144,245 +169,291 @@ exports.checkEmail = [
  */
 exports.register = [
   // Validate fields.
-  body('firstName')
+  body("firstName")
     .isLength({ min: 1 })
     .trim()
-    .withMessage('name must be specified.'),
-  body('lastName')
+    .withMessage("name must be specified."),
+  body("lastName")
     .isLength({ min: 1 })
     .trim()
-    .withMessage('name must be specified.'),
-  body('organisationId')
+    .withMessage("name must be specified."),
+  body("organisationId")
     .isLength({ min: 1 })
     .trim()
-    .withMessage('Organisation must be specified.'),
-  body('emailId')
+    .withMessage("Organisation must be specified."),
+  body("emailId")
     .isLength({ min: 1 })
     .trim()
-    .withMessage('Email must be specified.')
+    .withMessage("Email must be specified.")
     // .isEmail()
     // .withMessage('Email must be a valid email address.')
-    .custom(async(value) => {
-      const emailId = value.toLowerCase().replace(' ', '');
+    .custom(async (value) => {
+      const emailId = value.toLowerCase().replace(" ", "");
       let user;
-      let phone = '';
-      if (!emailId.replace('+91', '').match(phoneRgex) && !emailId.match(emailRegex))
-        return Promise.reject('E-mail/Mobile not in valid');
-      
-      if (emailId.indexOf('@') > -1)          
+      let phone = "";
+      if (
+        !emailId.replace("+91", "").match(phoneRgex) &&
+        !emailId.match(emailRegex)
+      )
+        return Promise.reject("E-mail/Mobile not in valid");
+
+      if (emailId.indexOf("@") > -1)
         user = await EmployeeModel.findOne({ emailId });
       else {
-        phone = emailId.indexOf('+91') === 0 ? emailId : '+91' + emailId;
+        phone = emailId.indexOf("+91") === 0 ? emailId : "+91" + emailId;
         user = await EmployeeModel.findOne({ phoneNumber: phone });
       }
-      
+
       // return EmployeeModel.findOne({ emailId: value.toLowerCase() }).then(user => {
-        if (user) {
-          logger.log(
-            'info',
-            '<<<<< UserService < AuthController < register : Entered email is already present in EmployeeModel',
-          );
-          return Promise.reject('E-mail/Mobile already in use');
-        }
+      if (user) {
+        logger.log(
+          "info",
+          "<<<<< UserService < AuthController < register : Entered email is already present in EmployeeModel"
+        );
+        return Promise.reject("E-mail/Mobile already in use");
+      }
       // });
     }),
   // Process request after validation and sanitization.
   async (req, res) => {
-    try {
-      if (
-        !req.body.firstName.match('[A-Za-z]') ||
-        !req.body.lastName.match('[A-Za-z]')
-      ) {
+    checkToken(req, res, async (result) => {
+      if (result.success) {
         logger.log(
-          'warn',
-          '<<<<< UserService < AuthController < register : Name should only consist of letters',
+          "info",
+          "<<<<< UserService < AuthController < register : token verified successfullly, querying data by key"
         );
-        return apiResponse.ErrorResponse(
-          res,
-          'Name should only consists of letters',
-        );
-      }
-      /*EmployeeModel.collection.dropIndexes(function(){
-        EmployeeModel.collection.reIndex(function(finished){
-                 console.log("finished re indexing")
-               })
-             })*/
-       //EmployeeModel.createIndexes();
-      // Extract the validation errors from a request.
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        // Display sanitized values/errors messages.
-        logger.log(
-          'error',
-          '<<<<< UserService < AuthController < register : Validation error',
-        );
-        return apiResponse.validationErrorWithData(
-          res,
-          'Validation Error.',
-          errors.array(),
-        );
-      }
-      if (!mailer.validateEmail(req.body.emailId)) {
-        return apiResponse.ErrorResponse(
-          res,
-          'Your email id is not eligible to register.',
-        );
-      } else {
-        //hash input password
-          // generate OTP for confirmation
-          logger.log(
-            'info',
-            '<<<<< UserService < AuthController < register : Generating Hash for Input Password',
-          );
-        
-          var organisationId = req.body.organisationId;
-          var warehouseId = 'NA';
-          var employeeId = uniqid('emp-');
-          var employeeStatus = 'NOTAPPROVED';
-          let addr = '';
-            
-          //create organisation if doesn't exists 
-          if (req.body.organisationName) {
-            const organisationName = req.body.organisationName;
-            const organisation = await OrganisationModel.findOne({ name : { $regex : organisationName , $options : 'i'}});
-            if (organisation) {
-              organisationId = organisation.id;
-            }
-            else {
-              // employeeStatus = 'ACTIVE';
-              // const centralOrg = await OrganisationModel.findOne({ type: 'CENTRAL_AUTHORITY' });
-              // if (centralOrg) {
-              //   if (centralOrg.configuration_id) {
-                  
-              //   }
-              // }
-              const country = req.body?.address?.country ? req.body.address?.country : 'India';
-              const address = req.body?.address ? req.body.address : {};
-              addr = address.line1 + ', ' + address.city + ', ' + address.state + ', ' + address.pincode;
-              organisationId = uniqid('org-');
-              warehouseId = uniqid('war-');
-              const org = new OrganisationModel({
-                primaryContactId: employeeId,
-                name: organisationName,
-                id: organisationId,
-                type: req.body?.type ? req.body.type : 'CUSTOMER_SUPPLIER',
-                status: 'NOTVERIFIED',
-                postalAddress: addr,
-                warehouses: [warehouseId],
-                warehouseEmployees: [employeeId],
-                country: {
-                  countryId: '001',
-                  countryName: country
-                },
-                configuration_id: 'CONF001'
-              });
-              await org.save();
 
-              const inventoryId = uniqid('inv-');
-              const inventoryResult = new InventoryModel({ id: inventoryId });
-              await inventoryResult.save();
-
-              const warehouse = new WarehouseModel({
-                title: 'Office',
-                id: warehouseId,
-                warehouseInventory: inventoryId,
-                organisationId: organisationId,
-                // postalAddress: address,
-                warehouseAddress: {
-                  firstLine: address.line1,
-                  secondLine: "",
-                  city: address.city,
-                  state: address.state,
-                  country: address.country,
-                  landmark: "",
-                  zipCode: address.pincode
-                },
-                country: {
-                  countryId: '001',
-                  countryName: country
-                }
-              });
-              await warehouse.save();
-            }
-          }
-
-        const emailId = req.body.emailId.toLowerCase().replace(' ','');
-        let phone = '';
-        if (emailId.indexOf('@') === -1)
-          phone = emailId.indexOf('+91') === 0 ? emailId : '+91'+emailId;
-        
-          // Create User object with escaped and trimmed data
-          const user = new EmployeeModel({
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
-            emailId: phone ? '' : req.body.emailId,
-            phoneNumber: phone,
-            organisationId: organisationId,
-            id: employeeId,
-            postalAddress: addr,
-            accountStatus: employeeStatus,
-            warehouseId: warehouseId
-          });
-          await user.save()
-        return apiResponse.successResponse(res, 'User registered Success');
-          // Html email body
-         /* let html = EmailContent({
-            name: req.body.name,
-            origin: req.headers.origin,
-            otp,
-          });
-          // Send confirmation email
-          mailer
-            .send(
-              constants.confirmEmails.from,
-              req.body.emailId,
-              constants.confirmEmails.subject,
-              html,
-            )
-            .then(function() {
-              // Save user.
-              user.save(function(err) {
-                if (err) {
-                  logger.log(
-                    'info',
-                    '<<<<< UserService < AuthController < register : Error while saving User',
-                  );
-                  return apiResponse.ErrorResponse(res, err);
-                }
-                let userData = {
-                  id: user.id,
-                  firstName: user.firstName,
-                  lastName: user.lastName,
-                  emailId: user.emailId,
-                  warehouseId:user.warehouseId,
-                };
+        permission_request = {
+          result: result,
+          permissionRequired: requiredPermissions.register,
+        };
+        checkPermissions(permission_request, async (permissionResult) => {
+          if (permissionResult.success) {
+            try {
+              if (
+                !req.body.firstName.match("[A-Za-z]") ||
+                !req.body.lastName.match("[A-Za-z]")
+              ) {
                 logger.log(
-                  'info',
-                  '<<<<< UserService < AuthController < register : Successfully saving User',
+                  "warn",
+                  "<<<<< UserService < AuthController < register : Name should only consist of letters"
                 );
-                return apiResponse.successResponseWithData(
+                return apiResponse.ErrorResponse(
                   res,
-                  'Registration Success.',
-                  userData,
+                  "Name should only consists of letters"
                 );
-              });
-            })
-            .catch(err => {
+              }
+              /*EmployeeModel.collection.dropIndexes(function(){
+                EmployeeModel.collection.reIndex(function(finished){
+                         console.log("finished re indexing")
+                       })
+                     })*/
+              //EmployeeModel.createIndexes();
+              // Extract the validation errors from a request.
+              const errors = validationResult(req);
+              if (!errors.isEmpty()) {
+                // Display sanitized values/errors messages.
+                logger.log(
+                  "error",
+                  "<<<<< UserService < AuthController < register : Validation error"
+                );
+                return apiResponse.validationErrorWithData(
+                  res,
+                  "Validation Error.",
+                  errors.array()
+                );
+              }
+              if (!mailer.validateEmail(req.body.emailId)) {
+                return apiResponse.ErrorResponse(
+                  res,
+                  "Your email id is not eligible to register."
+                );
+              } else {
+                //hash input password
+                // generate OTP for confirmation
+                logger.log(
+                  "info",
+                  "<<<<< UserService < AuthController < register : Generating Hash for Input Password"
+                );
+
+                var organisationId = req.body.organisationId;
+                var warehouseId = "NA";
+                var employeeId = uniqid("emp-");
+                var employeeStatus = "NOTAPPROVED";
+                let addr = "";
+
+                //create organisation if doesn't exists
+                if (req.body.organisationName) {
+                  const organisationName = req.body.organisationName;
+                  const organisation = await OrganisationModel.findOne({
+                    name: { $regex: organisationName, $options: "i" },
+                  });
+                  if (organisation) {
+                    organisationId = organisation.id;
+                  } else {
+                    // employeeStatus = 'ACTIVE';
+                    // const centralOrg = await OrganisationModel.findOne({ type: 'CENTRAL_AUTHORITY' });
+                    // if (centralOrg) {
+                    //   if (centralOrg.configuration_id) {
+
+                    //   }
+                    // }
+                    const country = req.body?.address?.country
+                      ? req.body.address?.country
+                      : "India";
+                    const address = req.body?.address ? req.body.address : {};
+                    addr =
+                      address.line1 +
+                      ", " +
+                      address.city +
+                      ", " +
+                      address.state +
+                      ", " +
+                      address.pincode;
+                    organisationId = uniqid("org-");
+                    warehouseId = uniqid("war-");
+                    const org = new OrganisationModel({
+                      primaryContactId: employeeId,
+                      name: organisationName,
+                      id: organisationId,
+                      type: req.body?.type
+                        ? req.body.type
+                        : "CUSTOMER_SUPPLIER",
+                      status: "NOTVERIFIED",
+                      postalAddress: addr,
+                      warehouses: [warehouseId],
+                      warehouseEmployees: [employeeId],
+                      country: {
+                        countryId: "001",
+                        countryName: country,
+                      },
+                      configuration_id: "CONF001",
+                    });
+                    await org.save();
+
+                    const inventoryId = uniqid("inv-");
+                    const inventoryResult = new InventoryModel({
+                      id: inventoryId,
+                    });
+                    await inventoryResult.save();
+
+                    const warehouse = new WarehouseModel({
+                      title: "Office",
+                      id: warehouseId,
+                      warehouseInventory: inventoryId,
+                      organisationId: organisationId,
+                      // postalAddress: address,
+                      warehouseAddress: {
+                        firstLine: address.line1,
+                        secondLine: "",
+                        city: address.city,
+                        state: address.state,
+                        country: address.country,
+                        landmark: "",
+                        zipCode: address.pincode,
+                      },
+                      country: {
+                        countryId: "001",
+                        countryName: country,
+                      },
+                    });
+                    await warehouse.save();
+                  }
+                }
+
+                const emailId = req.body.emailId.toLowerCase().replace(" ", "");
+                let phone = "";
+                if (emailId.indexOf("@") === -1)
+                  phone =
+                    emailId.indexOf("+91") === 0 ? emailId : "+91" + emailId;
+
+                // Create User object with escaped and trimmed data
+                const user = new EmployeeModel({
+                  firstName: req.body.firstName,
+                  lastName: req.body.lastName,
+                  emailId: phone ? "" : req.body.emailId,
+                  phoneNumber: phone,
+                  organisationId: organisationId,
+                  id: employeeId,
+                  postalAddress: addr,
+                  accountStatus: employeeStatus,
+                  warehouseId: warehouseId,
+                });
+                await user.save();
+                return apiResponse.successResponse(
+                  res,
+                  "User registered Success"
+                );
+                // Html email body
+                /* let html = EmailContent({
+                    name: req.body.name,
+                    origin: req.headers.origin,
+                    otp,
+                  });
+                  // Send confirmation email
+                  mailer
+                    .send(
+                      constants.confirmEmails.from,
+                      req.body.emailId,
+                      constants.confirmEmails.subject,
+                      html,
+                    )
+                    .then(function() {
+                      // Save user.
+                      user.save(function(err) {
+                        if (err) {
+                          logger.log(
+                            'info',
+                            '<<<<< UserService < AuthController < register : Error while saving User',
+                          );
+                          return apiResponse.ErrorResponse(res, err);
+                        }
+                        let userData = {
+                          id: user.id,
+                          firstName: user.firstName,
+                          lastName: user.lastName,
+                          emailId: user.emailId,
+                          warehouseId:user.warehouseId,
+                        };
+                        logger.log(
+                          'info',
+                          '<<<<< UserService < AuthController < register : Successfully saving User',
+                        );
+                        return apiResponse.successResponseWithData(
+                          res,
+                          'Registration Success.',
+                          userData,
+                        );
+                      });
+                    })
+                    .catch(err => {
+                      logger.log(
+                        'error',
+                        '<<<<< UserService < AuthController < register : Error in catch block 1',
+                      );
+                      return apiResponse.ErrorResponse(res, err);
+                    });*/
+              }
+            } catch (err) {
+              //throw error in json response with status 500.
               logger.log(
-                'error',
-                '<<<<< UserService < AuthController < register : Error in catch block 1',
+                "error",
+                "<<<<< UserService < AuthController < register : Error in catch block 2"
               );
               return apiResponse.ErrorResponse(res, err);
-            });*/
+            }
+          } else {
+            res.json("Sorry! User does not have enough Permissions");
+          }
+        });
+      } else {
+        logger.log(
+          "warn",
+          "<<<<< UserService < AuthController < register : refuted token"
+        );
+        res.status(403).json(result);
       }
-    } catch (err) {
-      //throw error in json response with status 500.
-      logger.log(
-        'error',
-        '<<<<< UserService < AuthController < register : Error in catch block 2',
-      );
-      return apiResponse.ErrorResponse(res, err);
-    }
+    });
   },
 ];
 
@@ -395,18 +466,17 @@ exports.register = [
  * @returns {Object}
  */
 exports.sendOtp = [
-  body('emailId')
+  body("emailId")
     .isLength({ min: 10 })
     .trim()
-    .withMessage('Email/Mobile must be specified.')
+    .withMessage("Email/Mobile must be specified."),
   //   .isEmail()
   // .withMessage('Email must be a valid email address.')
-  ,
-  sanitizeBody('emailId').escape(),
+  sanitizeBody("emailId").escape(),
   async (req, res) => {
     try {
       const errors = validationResult(req);
-     /* EmployeeModel.collection.dropIndexes(function(){
+      /* EmployeeModel.collection.dropIndexes(function(){
         EmployeeModel.collection.reIndex(function(finished){
                  console.log("finished re indexing")
                })
@@ -414,82 +484,85 @@ exports.sendOtp = [
       //EmployeeModel.createIndexes();
       if (!errors.isEmpty()) {
         logger.log(
-          'info',
-          '<<<<< UserService < AuthController < login : Validation Error while login',
+          "info",
+          "<<<<< UserService < AuthController < login : Validation Error while login"
         );
         return apiResponse.validationErrorWithData(
           res,
-          'Validation Error.',
-          errors.array(),
+          "Validation Error.",
+          errors.array()
         );
       } else {
         const emailId = req.body.emailId.toLowerCase();
         let user;
-        let phone = '';
-        if (emailId.indexOf('@') > -1)
+        let phone = "";
+        if (emailId.indexOf("@") > -1)
           user = await EmployeeModel.findOne({ emailId });
         else {
-          phone = emailId.indexOf('+91') === 0 ? emailId : '+91'+emailId;
+          phone = emailId.indexOf("+91") === 0 ? emailId : "+91" + emailId;
           user = await EmployeeModel.findOne({ phoneNumber: phone });
         }
-        if(user) {
-          if (user.accountStatus === 'ACTIVE') {
+        if (user) {
+          if (user.accountStatus === "ACTIVE") {
             logger.log(
-                'info',
-                '<<<<< UserService < AuthController < login : user is active',
+              "info",
+              "<<<<< UserService < AuthController < login : user is active"
             );
             let otp = utility.randomNumber(4);
             if (user.emailId === process.env.EMAIL_APPSTORE)
               otp = process.env.OTP_APPSTORE;
-            
-            await EmployeeModel.updateOne({id: user.id }, { otp });
-            
-            axios.post(process.env.OTP_ENDPOINT, {
-              subject : "OTP request for Vaccine Ledger",
-              email : user.emailId,
-              phone : user.phoneNumber ? user.phoneNumber : '',
-              otp : otp.toString(),
-              message : "Please Send the OTP",
-              source : process.env.SOURCE
-            })
-              .then((response) => {
-              if (response.status === 200) {
-                return apiResponse.successResponseWithData(
-                  res,
-                  'OTP Sent Success.',
-                  { email: user.emailId }
-                );
-              }
-              else {
-                return apiResponse.ErrorResponse(res, response.statusText);
-              }
-            }, (error) => {
-                console.log(error);
-            });
-            
-          //   let html = EmailContent({
-          //     name: user.firstName,
-          //     origin: req.headers.origin,
-          //     otp,
-          //   });
-          // // Send confirmation email
-          //   try {
-          //     await mailer
-          //         .send(
-          //             constants.confirmEmails.from,
-          //             user.emailId,
-          //             constants.confirmEmails.subject,
-          //             html,
-          //         );
-          //     return apiResponse.successResponseWithData(
-          //         res,
-          //         'OTP Sent Success.'
-          //     );
-          //   }catch(err) {
-          //     return apiResponse.ErrorResponse(res, err);
-          //   }
 
-           /* let userData = {
+            await EmployeeModel.updateOne({ id: user.id }, { otp });
+
+            axios
+              .post(process.env.OTP_ENDPOINT, {
+                subject: "OTP request for Vaccine Ledger",
+                email: user.emailId,
+                phone: user.phoneNumber ? user.phoneNumber : "",
+                otp: otp.toString(),
+                message: "Please Send the OTP",
+                source: process.env.SOURCE,
+              })
+              .then(
+                (response) => {
+                  if (response.status === 200) {
+                    return apiResponse.successResponseWithData(
+                      res,
+                      "OTP Sent Success.",
+                      { email: user.emailId }
+                    );
+                  } else {
+                    return apiResponse.ErrorResponse(res, response.statusText);
+                  }
+                },
+                (error) => {
+                  console.log(error);
+                }
+              );
+
+            //   let html = EmailContent({
+            //     name: user.firstName,
+            //     origin: req.headers.origin,
+            //     otp,
+            //   });
+            // // Send confirmation email
+            //   try {
+            //     await mailer
+            //         .send(
+            //             constants.confirmEmails.from,
+            //             user.emailId,
+            //             constants.confirmEmails.subject,
+            //             html,
+            //         );
+            //     return apiResponse.successResponseWithData(
+            //         res,
+            //         'OTP Sent Success.'
+            //     );
+            //   }catch(err) {
+            //     return apiResponse.ErrorResponse(res, err);
+            //   }
+
+            /* let userData = {
               id: user.id,
               firstName: user.firstName,
               emailId: user.emailId,
@@ -508,27 +581,29 @@ exports.sendOtp = [
                 'info',
                 '<<<<< UserService < AuthController < login : user login success',
             );*/
-
           } else {
             logger.log(
-                'warn',
-                '<<<<< UserService < AuthController < login : account is not approved.',
+              "warn",
+              "<<<<< UserService < AuthController < login : account is not approved."
             );
             return apiResponse.unauthorizedResponse(
-                res,
-                'Account is not Approved. Please contact admin.',
+              res,
+              "Account is not Approved. Please contact admin."
             );
           }
         } else {
-          return apiResponse.ErrorResponse(res, 'User not registered');
+          return apiResponse.ErrorResponse(res, "User not registered");
         }
       }
     } catch (err) {
       logger.log(
-        'error',
-        '<<<<< UserService < AuthController < login : error in login (catch block)',
+        "error",
+        "<<<<< UserService < AuthController < login : error in login (catch block)"
       );
-      return apiResponse.ErrorResponse(res, 'Email already registered. Check Email for verifying the account');
+      return apiResponse.ErrorResponse(
+        res,
+        "Email already registered. Check Email for verifying the account"
+      );
     }
   },
 ];
@@ -542,37 +617,34 @@ exports.sendOtp = [
  * @returns {Object}
  */
 exports.verifyOtp = [
-  body('emailId')
+  body("emailId")
     .isLength({ min: 1 })
     .trim()
-    .withMessage('Email/Mobile must be specified.')
-    // .isEmail()
-    // .withMessage('Email must be a valid email address.'),
-  ,body('otp')
-    .isLength({ min: 1 })
-    .trim()
-    .withMessage('OTP must be specified.'),
+    .withMessage("Email/Mobile must be specified."),
+  // .isEmail()
+  // .withMessage('Email must be a valid email address.'),
+  body("otp").isLength({ min: 1 }).trim().withMessage("OTP must be specified."),
   async (req, res) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         logger.log(
-          'error',
-          '<<<<< UserService < AuthController < verifyConfirm : validation error',
+          "error",
+          "<<<<< UserService < AuthController < verifyConfirm : validation error"
         );
         return apiResponse.validationErrorWithData(
           res,
-          'Validation Error.',
-          errors.array(),
+          "Validation Error.",
+          errors.array()
         );
       } else {
         const emailId = req.body.emailId.toLowerCase();
         var query = { emailId };
-        if (emailId.indexOf('@') === -1) {
-          let phone = emailId.indexOf('+91') === 0 ? emailId : '+91' + emailId;
+        if (emailId.indexOf("@") === -1) {
+          let phone = emailId.indexOf("+91") === 0 ? emailId : "+91" + emailId;
           query = { phoneNumber: phone };
         }
-        
+
         const user = await EmployeeModel.findOne(query);
         if (user && user.otp == req.body.otp) {
           await EmployeeModel.update(query, { otp: null });
@@ -581,8 +653,8 @@ exports.verifyOtp = [
             firstName: user.firstName,
             emailId: user.emailId,
             role: user.role,
-            warehouseId:user.warehouseId,
-	          organisationId:user.organisationId,
+            warehouseId: user.warehouseId,
+            organisationId: user.organisationId,
           };
           //Prepare JWT token for authentication
           const jwtPayload = userData;
@@ -593,18 +665,22 @@ exports.verifyOtp = [
           //Generated JWT token with Payload and secret.
           userData.token = jwt.sign(jwtPayload, secret, jwtData);
           logger.log(
-              'info',
-              '<<<<< UserService < AuthController < login : user login success',
+            "info",
+            "<<<<< UserService < AuthController < login : user login success"
           );
-          return apiResponse.successResponseWithData(res, 'Login Success', userData);
+          return apiResponse.successResponseWithData(
+            res,
+            "Login Success",
+            userData
+          );
         } else {
           return apiResponse.ErrorResponse(res, `Otp doesn't match`);
         }
       }
     } catch (err) {
       logger.log(
-        'error',
-        '<<<<< UserService < AuthController < verifyConfirm : Error (catch block)',
+        "error",
+        "<<<<< UserService < AuthController < verifyConfirm : Error (catch block)"
       );
       return apiResponse.ErrorResponse(res, err);
     }
@@ -614,367 +690,550 @@ exports.verifyOtp = [
 exports.userInfo = [
   auth,
   (req, res) => {
-    try {
-      EmployeeModel.findOne({ emailId: req.user.emailId }).then(async user => {
-        if (user) {
-          logger.log(
-            'info',
-            '<<<<< UserService < AuthController < userInfo : user exist',
-          );
-          const {
-            firstName,
-            lastName,
-            emailId,
-            phoneNumber,
-            walletAddress,
-            affiliatedOrganisations,
-            organisationId,
-            warehouseId,
-            accountStatus,
-            role,
-            photoId,
-            postalAddress
-          } = user;
-          const org = await OrganisationModel.findOne({ id: organisationId }, 'name' );
-          const warehouse = await WarehouseModel.findOne({ id: warehouseId });  
-          console.log(warehouse);        
-          let user_data = {
-            firstName,
-            lastName,
-            emailId,
-            phoneNumber,
-            walletAddress,
-            affiliatedOrganisations,
-            organisation: `${org.name}/${organisationId}`,
-            warehouseId,
-            accountStatus,
-            role,
-            photoId,
-            location: postalAddress,
-            warehouseAddress_country: warehouse.warehouseAddress.country,
-            warehouseAddress_zipcode: warehouse.warehouseAddress.zipCode,
-            warehouseAddress_city: warehouse.warehouseAddress.city,
-            warehouseAddress_firstline: warehouse.warehouseAddress.firstLine
-          };
-          logger.log(
-            'info',
-            '<<<<< UserService < AuthController < userInfo : sending profile',
-          );
-          return apiResponse.successResponseWithData(
-            res,
-            'Sent Profile',
-            user_data,
-          );
-        } else {
-          logger.log(
-            'error',
-            '<<<<< UserService < AuthController < userInfo : error while sending user info',
-          );
-          return apiResponse.ErrorResponse(res);
-        }
-      });
-    } catch (err) {
-      logger.log(
-        'error',
-        '<<<<< UserService < AuthController < userInfo : error (catch block)',
-      );
-      return apiResponse.ErrorResponse(res, err);
-    }
+    checkToken(req, res, async (result) => {
+      if (result.success) {
+        logger.log(
+          "info",
+          "<<<<< UserService < AuthController < userInfo : token verified successfullly, querying data by key"
+        );
+
+        permission_request = {
+          result: result,
+          permissionRequired: requiredPermissions.userInfo,
+        };
+        checkPermissions(permission_request, async (permissionResult) => {
+          if (permissionResult.success) {
+            try {
+              EmployeeModel.findOne({ emailId: req.user.emailId }).then(
+                async (user) => {
+                  if (user) {
+                    logger.log(
+                      "info",
+                      "<<<<< UserService < AuthController < userInfo : user exist"
+                    );
+                    const {
+                      firstName,
+                      lastName,
+                      emailId,
+                      phoneNumber,
+                      walletAddress,
+                      affiliatedOrganisations,
+                      organisationId,
+                      warehouseId,
+                      accountStatus,
+                      role,
+                      photoId,
+                      postalAddress,
+                    } = user;
+                    const org = await OrganisationModel.findOne(
+                      { id: organisationId },
+                      "name"
+                    );
+                    const warehouse = await WarehouseModel.findOne({
+                      id: warehouseId,
+                    });
+                    console.log(warehouse);
+                    let user_data = {
+                      firstName,
+                      lastName,
+                      emailId,
+                      phoneNumber,
+                      walletAddress,
+                      affiliatedOrganisations,
+                      organisation: `${org.name}/${organisationId}`,
+                      warehouseId,
+                      accountStatus,
+                      role,
+                      photoId,
+                      location: postalAddress,
+                      warehouseAddress_country:
+                        warehouse.warehouseAddress.country,
+                      warehouseAddress_zipcode:
+                        warehouse.warehouseAddress.zipCode,
+                      warehouseAddress_city: warehouse.warehouseAddress.city,
+                      warehouseAddress_firstline:
+                        warehouse.warehouseAddress.firstLine,
+                    };
+                    logger.log(
+                      "info",
+                      "<<<<< UserService < AuthController < userInfo : sending profile"
+                    );
+                    return apiResponse.successResponseWithData(
+                      res,
+                      "Sent Profile",
+                      user_data
+                    );
+                  } else {
+                    logger.log(
+                      "error",
+                      "<<<<< UserService < AuthController < userInfo : error while sending user info"
+                    );
+                    return apiResponse.ErrorResponse(res);
+                  }
+                }
+              );
+            } catch (err) {
+              logger.log(
+                "error",
+                "<<<<< UserService < AuthController < userInfo : error (catch block)"
+              );
+              return apiResponse.ErrorResponse(res, err);
+            }
+          } else {
+            res.json("Sorry! User does not have enough Permissions");
+          }
+        });
+      } else {
+        logger.log(
+          "warn",
+          "<<<<< UserService < AuthController < userInfo : refuted token"
+        );
+        res.status(403).json(result);
+      }
+    });
   },
 ];
 
 exports.updateProfile = [
   auth,
   async (req, res) => {
-    try {
-      const employee = await EmployeeModel.findOne({
-        emailId: req.user.emailId,
-      });
-      const {
-        firstName,
-        lastName,
-        phoneNumber,
-        warehouseId,
-        organisation
-      } = req.body;
-      const organisationId = organisation.split('/')[1];
-      const organisationName = organisation.split('/')[0];
-      employee.firstName = firstName;
-      employee.lastName = lastName;
-      employee.phoneNumber = phoneNumber;
-      employee.organisationId = organisationId;
-      employee.warehouseId = warehouseId;
-      await employee.save();
+    checkToken(req, res, async (result) => {
+      if (result.success) {
+        logger.log(
+          "info",
+          "<<<<< UserService < AuthController < updateProfile : token verified successfullly, querying data by key"
+        );
 
-      const returnData = {isRefresh: false};
-      if (warehouseId !== req.user.warehouseId) {
-        let userData = {
-          id: employee.id,
-          firstName: firstName,
-          emailId: employee.emailId,
-          role: employee.role,
-          warehouseId: warehouseId,
+        permission_request = {
+          result: result,
+          permissionRequired: requiredPermissions.updateProfile,
         };
-        //Prepare JWT token for authentication
-        const jwtPayload = userData;
-        const jwtData = {
-          expiresIn: process.env.JWT_TIMEOUT_DURATION,
-        };
-        const secret = process.env.JWT_SECRET;
-        //Generated JWT token with Payload and secret.
-        returnData.isRefresh = true;
-        returnData.token = jwt.sign(jwtPayload, secret, jwtData);
+        checkPermissions(permission_request, async (permissionResult) => {
+          if (permissionResult.success) {
+            try {
+              const employee = await EmployeeModel.findOne({
+                emailId: req.user.emailId,
+              });
+              const {
+                firstName,
+                lastName,
+                phoneNumber,
+                warehouseId,
+                organisation,
+              } = req.body;
+              const organisationId = organisation.split("/")[1];
+              const organisationName = organisation.split("/")[0];
+              employee.firstName = firstName;
+              employee.lastName = lastName;
+              employee.phoneNumber = phoneNumber;
+              employee.organisationId = organisationId;
+              employee.warehouseId = warehouseId;
+              await employee.save();
+
+              const returnData = { isRefresh: false };
+              if (warehouseId !== req.user.warehouseId) {
+                let userData = {
+                  id: employee.id,
+                  firstName: firstName,
+                  emailId: employee.emailId,
+                  role: employee.role,
+                  warehouseId: warehouseId,
+                };
+                //Prepare JWT token for authentication
+                const jwtPayload = userData;
+                const jwtData = {
+                  expiresIn: process.env.JWT_TIMEOUT_DURATION,
+                };
+                const secret = process.env.JWT_SECRET;
+                //Generated JWT token with Payload and secret.
+                returnData.isRefresh = true;
+                returnData.token = jwt.sign(jwtPayload, secret, jwtData);
+              }
+              return apiResponse.successResponseWithData(
+                res,
+                "Employee Profile update Success",
+                returnData
+              );
+            } catch (err) {
+              logger.log(
+                "error",
+                "<<<<< UserService < AuthController < updateProfile : error (catch block)"
+              );
+              return apiResponse.ErrorResponse(res, err);
+            }
+          } else {
+            res.json("Sorry! User does not have enough Permissions");
+          }
+        });
+      } else {
+        logger.log(
+          "warn",
+          "<<<<< UserService < AuthController < updateProfile : refuted token"
+        );
+        res.status(403).json(result);
       }
-      return apiResponse.successResponseWithData(res, 'Employee Profile update Success', returnData);
-    } catch (err) {
-      logger.log(
-        'error',
-        '<<<<< UserService < AuthController < updateProfile : error (catch block)',
-      );
-      return apiResponse.ErrorResponse(res, err);
-    }
+    });
   },
 ];
 
 exports.updatePassword = [
   auth,
   (req, res) => {
-    try {
-      EmployeeModel.findOne({ email: req.user.email }).then(user => {
-        if (user) {
-          logger.log(
-            'info',
-            '<<<<< UserService < AuthController < updatePassword : user exist',
-          );
-          bcrypt.hash(req.body.password, 10, function(err, hash) {
-            var passwordNew = hash;
-            if (req.body.password) {
+    checkToken(req, res, async (result) => {
+      if (result.success) {
+        logger.log(
+          "info",
+          "<<<<< UserService < AuthController < updatePassword : token verified successfullly, querying data by key"
+        );
+
+        permission_request = {
+          result: result,
+          permissionRequired: requiredPermissions.updatePassword,
+        };
+        checkPermissions(permission_request, async (permissionResult) => {
+          if (permissionResult.success) {
+            try {
+              EmployeeModel.findOne({ email: req.user.email }).then((user) => {
+                if (user) {
+                  logger.log(
+                    "info",
+                    "<<<<< UserService < AuthController < updatePassword : user exist"
+                  );
+                  bcrypt.hash(req.body.password, 10, function (err, hash) {
+                    var passwordNew = hash;
+                    if (req.body.password) {
+                      logger.log(
+                        "info",
+                        "<<<<< UserService < AuthController < updatePassword : new password is not null"
+                      );
+                      if (req.body.password.length > 2) {
+                        logger.log(
+                          "info",
+                          "<<<<< UserService < AuthController < updatePassword : new password has length grater than 2"
+                        );
+                        user.password = passwordNew;
+                      }
+                    }
+                    user.save(function (err) {
+                      if (err) {
+                        logger.log(
+                          "error",
+                          "<<<<< UserService < AuthController < updatePassword : error while updating user password"
+                        );
+                        return apiResponse.ErrorResponse(res, err);
+                      } else {
+                        logger.log(
+                          "info",
+                          "<<<<< UserService < AuthController < updatePassword : updating password successfully"
+                        );
+                        return apiResponse.successResponse(
+                          res,
+                          user.firstName + " password Updated"
+                        );
+                      }
+                    });
+                  });
+                }
+              });
+            } catch (err) {
               logger.log(
-                'info',
-                '<<<<< UserService < AuthController < updatePassword : new password is not null',
+                "info",
+                "<<<<< UserService < AuthController < updatePassword : error (catch block)"
               );
-              if (req.body.password.length > 2) {
-                logger.log(
-                  'info',
-                  '<<<<< UserService < AuthController < updatePassword : new password has length grater than 2',
-                );
-                user.password = passwordNew;
-              }
+              return apiResponse.ErrorResponse(res, err);
             }
-            user.save(function(err) {
-              if (err) {
-                logger.log(
-                  'error',
-                  '<<<<< UserService < AuthController < updatePassword : error while updating user password',
-                );
-                return apiResponse.ErrorResponse(res, err);
-              } else {
-                logger.log(
-                  'info',
-                  '<<<<< UserService < AuthController < updatePassword : updating password successfully',
-                );
-                return apiResponse.successResponse(
-                  res,
-                  user.firstName + ' password Updated',
-                );
-              }
-            });
-          });
-        }
-      });
-    } catch (err) {
-      logger.log(
-        'info',
-        '<<<<< UserService < AuthController < updatePassword : error (catch block)',
-      );
-      return apiResponse.ErrorResponse(res, err);
-    }
+          } else {
+            res.json("Sorry! User does not have enough Permissions");
+          }
+        });
+      } else {
+        logger.log(
+          "warn",
+          "<<<<< UserService < AuthController < updatePassword : refuted token"
+        );
+        res.status(403).json(result);
+      }
+    });
   },
 ];
 
 exports.uploadImage = [
   auth,
   (req, res) => {
-    try {
-      EmployeeModel.findOne({ emailId: req.user.emailId }).then(user => {
-        if (user) {
-          logger.log(
-            'info',
-            '<<<<< UserService < AuthController < uploadImage : user exist',
-          );
-          base64Img.base64('uploads/' + req.file.filename, function(err, data) {
-            var base64ImgData = data;
-            user.profile_picture = data;
-            user.image_location = req.file.filename;
-            // Save user.
-            user.save(function(err) {
-              if (err) {
-                logger.log(
-                  'error',
-                  '<<<<< UserService < AuthController < uploadImage : error while uploading image',
-                );
-                return apiResponse.ErrorResponse(res, err);
-              }
+    checkToken(req, res, async (result) => {
+      if (result.success) {
+        logger.log(
+          "info",
+          "<<<<< UserService < AuthController < uploadImage : token verified successfullly, querying data by key"
+        );
+
+        permission_request = {
+          result: result,
+          permissionRequired: requiredPermissions.uploadImage,
+        };
+        checkPermissions(permission_request, async (permissionResult) => {
+          if (permissionResult.success) {
+            try {
+              EmployeeModel.findOne({ emailId: req.user.emailId }).then(
+                (user) => {
+                  if (user) {
+                    logger.log(
+                      "info",
+                      "<<<<< UserService < AuthController < uploadImage : user exist"
+                    );
+                    base64Img.base64(
+                      "uploads/" + req.file.filename,
+                      function (err, data) {
+                        var base64ImgData = data;
+                        user.profile_picture = data;
+                        user.image_location = req.file.filename;
+                        // Save user.
+                        user.save(function (err) {
+                          if (err) {
+                            logger.log(
+                              "error",
+                              "<<<<< UserService < AuthController < uploadImage : error while uploading image"
+                            );
+                            return apiResponse.ErrorResponse(res, err);
+                          }
+                          logger.log(
+                            "info",
+                            "<<<<< UserService < AuthController < uploadImage : uploading user image successfully"
+                          );
+                          return apiResponse.successResponseWithData(
+                            res,
+                            "Updated",
+                            base64ImgData
+                          );
+                        });
+                      }
+                    );
+                  }
+                }
+              );
+            } catch (err) {
               logger.log(
-                'info',
-                '<<<<< UserService < AuthController < uploadImage : uploading user image successfully',
+                "error",
+                "<<<<< UserService < AuthController < uploadImage : error (catch block)"
               );
-              return apiResponse.successResponseWithData(
-                res,
-                'Updated',
-                base64ImgData,
-              );
-            });
-          });
-        }
-      });
-    } catch (err) {
-      logger.log(
-        'error',
-        '<<<<< UserService < AuthController < uploadImage : error (catch block)',
-      );
-      return apiResponse.ErrorResponse(res, err);
-    }
+              return apiResponse.ErrorResponse(res, err);
+            }
+          } else {
+            res.json("Sorry! User does not have enough Permissions");
+          }
+        });
+      } else {
+        logger.log(
+          "warn",
+          "<<<<< UserService < AuthController < uploadImage : refuted token"
+        );
+        res.status(403).json(result);
+      }
+    });
   },
 ];
 
 exports.createUserAddress = [
   async (req, res) => {
-    try {
-      logger.log(
-        'info',
-        '<<<<< UserService < AuthController < createUserAddress : creating user address',
-      );
-      const response = await axios.get(
-        `${blockchain_service_url}/createUserAddress`,
-      );
-      const address = response.data.items;
-      const userData = {
-        address,
-      };
-      const response_grant = await axios.post(
-        `${blockchain_service_url}/grantPermission`,
-        userData,
-      );
-      logger.log(
-        'info',
-        '<<<<< UserService < AuthController < createUserAddress : created user address',
-      );
-      res.json({ address: address });
-    } catch (err) {
-      logger.log(
-        'error',
-        '<<<<< UserService < AuthController < createUserAddress : error(catch block)',
-      );
-      return apiResponse.ErrorResponse(res, err);
-    }
+    checkToken(req, res, async (result) => {
+      if (result.success) {
+        logger.log(
+          "info",
+          "<<<<< UserService < AuthController < createUserAddress : token verified successfullly, querying data by key"
+        );
+
+        permission_request = {
+          result: result,
+          permissionRequired: requiredPermissions.createUserAddress,
+        };
+        checkPermissions(permission_request, async (permissionResult) => {
+          if (permissionResult.success) {
+            try {
+              logger.log(
+                "info",
+                "<<<<< UserService < AuthController < createUserAddress : creating user address"
+              );
+              const response = await axios.get(
+                `${blockchain_service_url}/createUserAddress`
+              );
+              const address = response.data.items;
+              const userData = {
+                address,
+              };
+              const response_grant = await axios.post(
+                `${blockchain_service_url}/grantPermission`,
+                userData
+              );
+              logger.log(
+                "info",
+                "<<<<< UserService < AuthController < createUserAddress : created user address"
+              );
+              res.json({ address: address });
+            } catch (err) {
+              logger.log(
+                "error",
+                "<<<<< UserService < AuthController < createUserAddress : error(catch block)"
+              );
+              return apiResponse.ErrorResponse(res, err);
+            }
+          } else {
+            res.json("Sorry! User does not have enough Permissions");
+          }
+        });
+      } else {
+        logger.log(
+          "warn",
+          "<<<<< UserService < AuthController < createUserAddress : refuted token"
+        );
+        res.status(403).json(result);
+      }
+    });
   },
 ];
 
 exports.getAllUsers = [
   auth,
   async (req, res) => {
-    try {
-      const users = await EmployeeModel.find(
-        {},
-        'firstName walletAddress emailId',
-      );
-      const confirmedUsers = users.filter(user => user.walletAddress !== '');
-      logger.log(
-        'info',
-        '<<<<< UserService < AuthController < getAllUsers : retrieved users successfully',
-      );
-      return apiResponse.successResponseWithData(
-        res,
-        'Users Retrieved Success',
-        confirmedUsers,
-      );
-    } catch (err) {
-      logger.log(
-        'error',
-        '<<<<< UserService < AuthController < getAllUsers : error(catch block)',
-      );
-      return apiResponse.ErrorResponse(res, err);
-    }
+    checkToken(req, res, async (result) => {
+      if (result.success) {
+        logger.log(
+          "info",
+          "<<<<< UserService < AuthController < getAllUsers : token verified successfullly, querying data by key"
+        );
+
+        permission_request = {
+          result: result,
+          permissionRequired: requiredPermissions.getAllUsers,
+        };
+        checkPermissions(permission_request, async (permissionResult) => {
+          if (permissionResult.success) {
+            try {
+              const users = await EmployeeModel.find(
+                {},
+                "firstName walletAddress emailId"
+              );
+              const confirmedUsers = users.filter(
+                (user) => user.walletAddress !== ""
+              );
+              logger.log(
+                "info",
+                "<<<<< UserService < AuthController < getAllUsers : retrieved users successfully"
+              );
+              return apiResponse.successResponseWithData(
+                res,
+                "Users Retrieved Success",
+                confirmedUsers
+              );
+            } catch (err) {
+              logger.log(
+                "error",
+                "<<<<< UserService < AuthController < getAllUsers : error(catch block)"
+              );
+              return apiResponse.ErrorResponse(res, err);
+            }
+          } else {
+            res.json("Sorry! User does not have enough Permissions");
+          }
+        });
+      } else {
+        logger.log(
+          "warn",
+          "<<<<< UserService < AuthController < getAllUsers : refuted token"
+        );
+        res.status(403).json(result);
+      }
+    });
   },
 ];
 
 exports.assignProductConsumer = [
   async (req, res) => {
     try {
-      checkToken(req, res, async result => {
+      checkToken(req, res, async (result) => {
         if (result.success) {
           logger.log(
-            'info',
-            '<<<<< InventoryService < InventoryController < getAllInventoryDetails : token verified successfullly, querying data by publisher',
+            "info",
+            "<<<<< InventoryService < InventoryController < assignProductConsumer : token verified successfullly, querying data by publisher"
           );
-          console.log('res', result.data.address);
-          var user = new ConsumerModel({
-            shipmentId: req.body.consumer.shipmentId,
-            name: req.body.consumer.name,
-            gender: req.body.consumer.gender,
-            age: req.body.consumer.age,
-            aadhar: req.body.consumer.aadhar,
-            vaccineId: req.body.vaccine.serialNumber,
+          permission_request = {
+            result: result,
+            permissionRequired: requiredPermissions.assignProductConsumer,
+          };
+          checkPermissions(permission_request, async (permissionResult) => {
+            if (permissionResult.success) {
+              console.log("res", result.data.address);
+              var user = new ConsumerModel({
+                shipmentId: req.body.consumer.shipmentId,
+                name: req.body.consumer.name,
+                gender: req.body.consumer.gender,
+                age: req.body.consumer.age,
+                aadhar: req.body.consumer.aadhar,
+                vaccineId: req.body.vaccine.serialNumber,
+              });
+
+              await user.save();
+              let userData = {
+                _id: user._id,
+                Name: user.name,
+                Aadhar: user.aadhar,
+                ShipmentId: user.ShipmentId,
+              };
+              logger.log(
+                "info",
+                "<<<<< UserService < AuthController < registerConsumer : Successfully saving Consumer"
+              );
+
+              let date_ob = new Date();
+              let date = ("0" + date_ob.getDate()).slice(-2);
+              let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
+              let year = date_ob.getFullYear();
+              var today = date + "-" + month + "-" + year;
+
+              const userData1 = {
+                stream: stream_name,
+                key: req.body.vaccine.serialNumber,
+                address: "1bCBUXox5GXGAiTxGgNbmhETUaHMJZVLwctveT",
+                data: {
+                  ...req.body,
+                  ...{ consumedStatus: "Y", consumedDate: today },
+                },
+              };
+              console.log("userData", userData1);
+              const response = await axios.post(
+                `${blockchain_service_url}/publish`,
+                userData1
+              );
+              const txnId = response.data.transactionId;
+
+              const productQuery = {
+                serialNumber: req.body.vaccine.serialNumber,
+              };
+              const productFound = await InventoryModel.findOne(productQuery);
+              if (productFound) {
+                logger.log(
+                  "info",
+                  "<<<<< ShipmentService < ShipmentController < createShipment : product found status receive"
+                );
+                await InventoryModel.updateOne(productQuery, {
+                  transactionIds: [...productFound.transactionIds, txnId],
+                });
+              }
+              return apiResponse.successResponseWithData(
+                res,
+                "Registration Success.",
+                userData
+              );
+            } else {
+              res.json("Sorry! User does not have enough Permissions");
+            }
           });
-
-          await user.save();
-          let userData = {
-            _id: user._id,
-            Name: user.name,
-            Aadhar: user.aadhar,
-            ShipmentId: user.ShipmentId,
-          };
-          logger.log(
-            'info',
-            '<<<<< UserService < AuthController < registerConsumer : Successfully saving Consumer',
-          );
-
-          let date_ob = new Date();
-          let date = ('0' + date_ob.getDate()).slice(-2);
-          let month = ('0' + (date_ob.getMonth() + 1)).slice(-2);
-          let year = date_ob.getFullYear();
-          var today = date + '-' + month + '-' + year;
-
-          const userData1 = {
-            stream: stream_name,
-            key: req.body.vaccine.serialNumber,
-            address: '1bCBUXox5GXGAiTxGgNbmhETUaHMJZVLwctveT',
-            data: {
-              ...req.body,
-              ...{ consumedStatus: 'Y', consumedDate: today },
-            },
-          };
-          console.log('userData', userData1);
-          const response = await axios.post(
-            `${blockchain_service_url}/publish`,
-            userData1,
-          );
-          const txnId = response.data.transactionId;
-
-          const productQuery = { serialNumber: req.body.vaccine.serialNumber };
-          const productFound = await InventoryModel.findOne(productQuery);
-          if (productFound) {
-            logger.log(
-              'info',
-              '<<<<< ShipmentService < ShipmentController < createShipment : product found status receive',
-            );
-            await InventoryModel.updateOne(productQuery, {
-              transactionIds: [...productFound.transactionIds, txnId],
-            });
-          }
-          return apiResponse.successResponseWithData(
-            res,
-            'Registration Success.',
-            userData,
-          );
         }
       });
     } catch (err) {
-      console.log('err');
+      console.log("err");
       logger.log(
-        'error',
-        '<<<<< UserService < AuthController < registerConsumer : Error in catch block',
+        "error",
+        "<<<<< UserService < AuthController < assignProductConsumer : Error in catch block"
       );
       return apiResponse.ErrorResponse(res, err);
     }
@@ -984,211 +1243,256 @@ exports.assignProductConsumer = [
 exports.addWarehouse = [
   auth,
   async (req, res) => {
-  try {
-    const inventoryId = uniqid('inv-');
-    const inventoryResult = new InventoryModel({ id: inventoryId });
-    await inventoryResult.save();
-    const {
-      organisationId,
-      postalAddress,
-      region,
-      country,
-      location,
-      supervisors,
-      employees,
-    } = req.body;
-    const warehouseId = uniqid('war-');
-    const warehouse = new WarehouseModel({
-      id: warehouseId,
-      organisationId,
-      postalAddress,
-      region,
-      country,
-      location,
-      supervisors,
-      employees,
-      warehouseInventory: inventoryResult.id,
+    checkToken(req, res, async (result) => {
+      if (result.success) {
+        logger.log(
+          "info",
+          "<<<<< UserService < AuthController < addWarehouse : token verified successfullly, querying data by key"
+        );
+
+        permission_request = {
+          result: result,
+          permissionRequired: requiredPermissions.addWarehouse,
+        };
+        checkPermissions(permission_request, async (permissionResult) => {
+          if (permissionResult.success) {
+            try {
+              const inventoryId = uniqid("inv-");
+              const inventoryResult = new InventoryModel({ id: inventoryId });
+              await inventoryResult.save();
+              const {
+                organisationId,
+                postalAddress,
+                region,
+                country,
+                location,
+                supervisors,
+                employees,
+              } = req.body;
+              const warehouseId = uniqid("war-");
+              const warehouse = new WarehouseModel({
+                id: warehouseId,
+                organisationId,
+                postalAddress,
+                region,
+                country,
+                location,
+                supervisors,
+                employees,
+                warehouseInventory: inventoryResult.id,
+              });
+              await warehouse.save();
+              return apiResponse.successResponseWithData(
+                res,
+                "Warehouse added success",
+                warehouse
+              );
+            } catch (err) {
+              return apiResponse.ErrorResponse(res, err);
+            }
+          } else {
+            res.json("Sorry! User does not have enough Permissions");
+          }
+        });
+      } else {
+        logger.log(
+          "warn",
+          "<<<<< UserService < AuthController < addWarehouse : refuted token"
+        );
+        res.status(403).json(result);
+      }
     });
-    await warehouse.save();
-    return apiResponse.successResponseWithData(
-      res,
-      'Warehouse added success',
-      warehouse,
-    );
-  }catch(err) {
-    return apiResponse.ErrorResponse(res, err);
-  }
-
-
   },
 ];
 
-exports.uploadImage = async function(req, res) {
-    checkToken(req, res, async (result) => {
-        if (result.success) {
-            const {
-                data
-            } = result;
-            var filename;
-            const {
-                id,
-                type,
-                imageSide,
-                action
-            } = req.query;
+exports.uploadImage = async function (req, res) {
+  checkToken(req, res, async (result) => {
+    if (result.success) {
+      const { data } = result;
+      var filename;
+      const { id, type, imageSide, action } = req.query;
 
-            const incrementCounter = await CounterModel.update({
-                'counters.name': "employeeImage"
-            }, {
-                $inc: {
-                    "counters.$.value": 1
-                }
-            })
-
-            const poCounter = await CounterModel.find({
-                "counters.name": "employeeImage"
-            }, {
-                "counters.name.$": 1
-            })
-            const t = JSON.parse(JSON.stringify(poCounter[0].counters[0]))
-            try {
-                if (action != "STOREID")
-                    filename = id + "-" + type + imageSide + "-" + t.format + t.value + ".png";
-                else
-                    filename = t.value + "-" + req.file.filename;
-
-                let dir = `uploads`;
-                await moveFile(req.file.path, `${dir}/${filename}`);
-            } catch (e) {
-                console.log("Error in image upload", e);
-                res.status(403).json(e);
-            }
-
-            if (action == "KYCUPLOAD") {
-                const update = await EmployeeModel.updateOne({
-                    $and: [{
-                        "userDocuments.idNumber": parseInt(id)
-                    }, {
-                        "userDocuments.idType": type
-                    }]
-                }, {
-                    "$push": {
-                        "userDocuments.$.imageDetails": filename
-                    }
-                })
-                return res.send({
-                    success: true,
-                    data: "Image uploaded successfullly.!",
-                    filename
-                })
-
-            } else if (action == "STOREID") {
-                const data = {
-                    "userDocuments": {
-                        "imageDetails": [
-                            filename
-                        ],
-                        "idType": "STOREID",
-                    }
-                }
-
-                const employee = await EmployeeModel.updateOne({
-                    emailId: "satheesh@statwig.com"
-                }, {
-                    $push: data
-                });
-                return res.send({
-                    success: true,
-                    data: "Uploaded successfully",
-                    filename
-                })
-            } else if (action == "KYCNEW") {
-                const data = {
-                    "userDocuments": {
-                        "imageDetails": [
-                            filename
-                        ],
-                        "idType": type,
-                        "idNumber": parseInt(id),
-                        "approvalStatus": "NOTAPPROVED"
-                    }
-                }
-                const employee = await EmployeeModel.updateOne({
-                    emailId: "satheesh@statwig.com"
-                }, {
-                    $push: data
-                });
-                return res.send({
-                    success: true,
-                    data: "Uploaded successfully",
-                    filename
-                })
-            } else {
-                return res.send({
-                    success: false,
-                    data: "Please check the type action you want to perfrom STOREID/KYCNEW/KYCUPLOAD.!"
-                })
-            }
-        } else {
-            res.json(result);
+      const incrementCounter = await CounterModel.update(
+        {
+          "counters.name": "employeeImage",
+        },
+        {
+          $inc: {
+            "counters.$.value": 1,
+          },
         }
-    });
+      );
+
+      const poCounter = await CounterModel.find(
+        {
+          "counters.name": "employeeImage",
+        },
+        {
+          "counters.name.$": 1,
+        }
+      );
+      const t = JSON.parse(JSON.stringify(poCounter[0].counters[0]));
+      try {
+        if (action != "STOREID")
+          filename =
+            id + "-" + type + imageSide + "-" + t.format + t.value + ".png";
+        else filename = t.value + "-" + req.file.filename;
+
+        let dir = `uploads`;
+        await moveFile(req.file.path, `${dir}/${filename}`);
+      } catch (e) {
+        console.log("Error in image upload", e);
+        res.status(403).json(e);
+      }
+
+      if (action == "KYCUPLOAD") {
+        const update = await EmployeeModel.updateOne(
+          {
+            $and: [
+              {
+                "userDocuments.idNumber": parseInt(id),
+              },
+              {
+                "userDocuments.idType": type,
+              },
+            ],
+          },
+          {
+            $push: {
+              "userDocuments.$.imageDetails": filename,
+            },
+          }
+        );
+        return res.send({
+          success: true,
+          data: "Image uploaded successfullly.!",
+          filename,
+        });
+      } else if (action == "STOREID") {
+        const data = {
+          userDocuments: {
+            imageDetails: [filename],
+            idType: "STOREID",
+          },
+        };
+
+        const employee = await EmployeeModel.updateOne(
+          {
+            emailId: "satheesh@statwig.com",
+          },
+          {
+            $push: data,
+          }
+        );
+        return res.send({
+          success: true,
+          data: "Uploaded successfully",
+          filename,
+        });
+      } else if (action == "KYCNEW") {
+        const data = {
+          userDocuments: {
+            imageDetails: [filename],
+            idType: type,
+            idNumber: parseInt(id),
+            approvalStatus: "NOTAPPROVED",
+          },
+        };
+        const employee = await EmployeeModel.updateOne(
+          {
+            emailId: "satheesh@statwig.com",
+          },
+          {
+            $push: data,
+          }
+        );
+        return res.send({
+          success: true,
+          data: "Uploaded successfully",
+          filename,
+        });
+      } else {
+        return res.send({
+          success: false,
+          data:
+            "Please check the type action you want to perfrom STOREID/KYCNEW/KYCUPLOAD.!",
+        });
+      }
+    } else {
+      res.json(result);
+    }
+  });
 };
 
-exports.fetchImage = async function(req, res) {
-    checkToken(req, res, async (result) => {
-        if (result.success) {
-            const {
-                data
-            } = result;
-            const {
-                type
-            } = req.query;
-            var imageArray = [];
-            const findRecord = await EmployeeModel.findOne({
-                $and: [{
-                    "emailId": data.emailId
-                }, {
-                    "userDocuments.idType": type
-                }]
-            });
+exports.fetchImage = async function (req, res) {
+  checkToken(req, res, async (result) => {
+    if (result.success) {
+      permission_request = {
+        result: result,
+        permissionRequired: requiredPermissions.fetchImage,
+      };
+      checkPermissions(permission_request, async (permissionResult) => {
+        if (permissionResult.success) {
+          const { data } = result;
+          const { type } = req.query;
+          var imageArray = [];
+          const findRecord = await EmployeeModel.findOne({
+            $and: [
+              {
+                emailId: data.emailId,
+              },
+              {
+                "userDocuments.idType": type,
+              },
+            ],
+          });
 
-            if (findRecord != null) {
+          if (findRecord != null) {
+            const update = await EmployeeModel.findOne(
+              {
+                $and: [
+                  {
+                    emailId: data.emailId,
+                  },
+                  {
+                    "userDocuments.idType": type,
+                  },
+                ],
+              },
+              {
+                "userDocuments.$.imageDetails": 1,
+              }
+            )
+              .then((result) => {
+                imageArray = result.userDocuments[0].imageDetails;
+              })
+              .catch((e) => {
+                console.log("Err", e);
+              });
 
-                const update = await EmployeeModel.findOne({
-                    $and: [{
-                        "emailId": data.emailId
-                    }, {
-                        "userDocuments.idType": type
-                    }]
-                }, {
-                    "userDocuments.$.imageDetails": 1
-                }).then((result) => {
-                    imageArray = result.userDocuments[0].imageDetails;
-                }).catch((e) => {
-                    console.log("Err", e)
-                })
+            var resArray = [];
 
-                var resArray = [];
-
-                for (i = 0; i < imageArray.length; i++) {
-                    const s = "/images/" + imageArray[i];
-                    resArray.push(s)
-                }
-            } else {
-                return res.send({
-                    success: false,
-                    data: "Matching ID number and type not found.! STOREID/Aadhar/Passport"
-                })
-
+            for (i = 0; i < imageArray.length; i++) {
+              const s = "/images/" + imageArray[i];
+              resArray.push(s);
             }
+          } else {
             return res.send({
-                success: true,
-                data: resArray
-            })
-
+              success: false,
+              data:
+                "Matching ID number and type not found.! STOREID/Aadhar/Passport",
+            });
+          }
+          return res.send({
+            success: true,
+            data: resArray,
+          });
         } else {
-            res.json(result);
+          res.json("Sorry! User does not have enough Permissions");
         }
-    });
+      });
+    } else {
+      res.json(result);
+    }
+  });
 };
