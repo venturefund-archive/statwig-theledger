@@ -1,0 +1,10 @@
+{
+    "fetchPurchaseOrders" : "fetchPurchaseOrders",
+    "fetchAllPurchaseOrdersBC" : "fetchAllPurchaseOrdersBC",
+    "fetchPublisherPurchaseOrders" : "fetchPublisherPurchaseOrders",
+    "fetchPurchaseOrderBC" : "fetchPurchaseOrderBC",
+    "changePOStatus" : "changePOStatus",
+    "createPurchaseOrder" : "createPurchaseOrder",
+    "addPOsFromExcel" : "addPOsFromExcel",
+    "createOrder" : "createOrder"
+}

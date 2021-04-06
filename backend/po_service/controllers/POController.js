@@ -21,7 +21,7 @@ const checkPermissions = require('../middlewares/rbac_middleware')
     .checkPermissions;
 const dotenv = require('dotenv').config();
 const wrapper = require('../models/DBWrapper')
-
+const requiredPermissions  = require('./requiredPermissions.json');
 const blockchain_service_url = process.env.URL;
 const stream_name = process.env.SHIP_STREAM;
 const po_stream_name = process.env.PO_STREAM;
@@ -114,7 +114,7 @@ exports.fetchPurchaseOrders = [
           );
           const permission_request = {
             role: req.user.role,
-            permissionRequired: 'viewPO',
+            permissionRequired: requiredPermissions.fetchPurchaseOrders,
           };
           checkPermissions(permission_request, async permissionResult => {
             if (permissionResult.success) {
@@ -195,7 +195,7 @@ exports.fetchAllPurchaseOrdersBC = [
           );
           const permission_request = {
             result: result,
-            permissionRequired: 'receivePO',
+            permissionRequired: requiredPermissions.fetchAllPurchaseOrdersBC,
           };
           checkPermissions(permission_request, async permissionResult => {
             if (permissionResult.success) {
@@ -243,7 +243,7 @@ exports.fetchPublisherPurchaseOrders = [
           );
           const permission_request = {
             result: result,
-            permissionRequired: 'viewPO',
+            permissionRequired: requiredPermissions.fetchPublisherPurchaseOrders,
           };
           checkPermissions(permission_request, async permissionResult => {
             if (permissionResult.success) {
@@ -301,7 +301,7 @@ exports.fetchPurchaseOrderBC = [
 
           const permission_request = {
             result: result,
-            permissionRequired: 'viewPO',
+            permissionRequired: requiredPermissions.fetchPurchaseOrderBC,
           };
           checkPermissions(permission_request, async permissionResult => {
             if (permissionResult.success) {
@@ -354,7 +354,7 @@ exports.changePOStatus = [
 
           const permission_request = {
             result: result,
-            permissionRequired: 'receivePO',
+            permissionRequired: requiredPermissions.changePOStatus,
           };
           checkPermissions(permission_request, async permissionResult => {
             if (permissionResult.success) {
@@ -410,7 +410,20 @@ exports.createPurchaseOrder = [
   auth,
   async (req, res) => {
     try {
-      //Use this code for reindex
+      checkToken(req, res, async result => {
+        if (result.success) {
+          logger.log(
+            'info',
+            '<<<<< POStatus < ShipmentController < createPurchaseOrder : token verified successfullly, querying data by key',
+          );
+    
+          permission_request = {
+            result: result,
+            permissionRequired: requiredPermissions.createPurchaseOrder,
+          };
+          checkPermissions(permission_request, async permissionResult => {
+            if (permissionResult.success) {
+                        //Use this code for reindex
      /*  RecordModel.collection.dropIndexes(function(){
          RecordModel.collection.reIndex(function(finished){
                  console.log("finished re indexing")
@@ -431,10 +444,22 @@ exports.createPurchaseOrder = [
       });
       const result  = await purchaseOrder.save();
       return apiResponse.successResponseWithData(res, 'Created PO Success', result.id);
+            } else {
+              res.json('Sorry! User does not have enough Permissions');
+            }
+          });
+        } else {
+          logger.log(
+            'warn',
+            '<<<<< POStatus < ShipmentController < createPurchaseOrder : refuted token',
+          );
+          res.status(403).json(result);
+        }
+      });
     } catch (err) {
       logger.log(
           'error',
-          '<<<<< ShipmentService < ShipmentController < createPurchaseOrder : error (catch block)',
+          '<<<<< POStatus < ShipmentController < createPurchaseOrder  : error (catch block)',
       );
       return apiResponse.ErrorResponse(res, err);
     }
@@ -447,7 +472,7 @@ exports.addPOsFromExcel = [
     try {
       const permission_request = {
         role: req.user.role,
-        permissionRequired: 'createPO',
+        permissionRequired: requiredPermissions.addPOsFromExcel,
       };
       checkPermissions(permission_request, async permissionResult => {
         if (permissionResult.success) {
@@ -538,39 +563,65 @@ exports.success = [
 exports.createOrder = [
   auth,
   async (req, res) => {
-    try {
-      const incrementCounter = await CounterModel.update({
-        'counters.name': "poId"
-      }, {
-        $inc: {
-          "counters.$.value": 1
-        }
-      });
+    checkToken(req, res, async result => {
+      if (result.success) {
+        logger.log(
+          'info',
+          '<<<<< POStatus < ShipmentController < createOrder  : token verified successfullly, querying data by key',
+        );
+  
+        permission_request = {
+          result: result,
+          permissionRequired: requiredPermissions.createOrder,
+        };
+        checkPermissions(permission_request, async permissionResult => {
+          if (permissionResult.success) {
+            try {
+              const incrementCounter = await CounterModel.update({
+                'counters.name': "poId"
+              }, {
+                $inc: {
+                  "counters.$.value": 1
+                }
+              });
+        
+              const poCounter = await CounterModel.findOne({'counters.name':"poId"})
+              const poId = poCounter.counters[5].format + poCounter.counters[5].value;
+              
+              const { externalId, supplier, customer, products, creationDate, lastUpdatedOn } = req.body;
+              const { createdBy, lastUpdatedBy } = req.user.id;
+              const purchaseOrder = new RecordModel({
+                id: poId,
+                externalId,
+                creationDate,
+                supplier,
+                customer,
+                products,
+                lastUpdatedOn,
+                createdBy,
+                lastUpdatedBy
+              });
+              const result = await purchaseOrder.save();
+              return apiResponse.successResponseWithData(res, 'Created order');
+            } catch (err) {
+              logger.log(
+                  'error',
+                  '<<<<< POService < POController < createOrder : error (catch block)',
+              );
+              return apiResponse.ErrorResponse(res, err);
+            }
+          } else {
+            res.json('Sorry! User does not have enough Permissions');
+          }
+        });
+      } else {
+        logger.log(
+          'warn',
+          '<<<<< NotificationService < NotificationController < fetchAllShippingOrders  : refuted token',
+        );
+        res.status(403).json(result);
+      }
+    });
 
-      const poCounter = await CounterModel.findOne({'counters.name':"poId"})
-      const poId = poCounter.counters[5].format + poCounter.counters[5].value;
-      
-      const { externalId, supplier, customer, products, creationDate, lastUpdatedOn } = req.body;
-      const { createdBy, lastUpdatedBy } = req.user.id;
-      const purchaseOrder = new RecordModel({
-        id: poId,
-        externalId,
-        creationDate,
-        supplier,
-        customer,
-        products,
-        lastUpdatedOn,
-        createdBy,
-        lastUpdatedBy
-      });
-      const result = await purchaseOrder.save();
-      return apiResponse.successResponseWithData(res, 'Created order');
-    } catch (err) {
-      logger.log(
-          'error',
-          '<<<<< POService < POController < createOrder : error (catch block)',
-      );
-      return apiResponse.ErrorResponse(res, err);
-    }
   },
 ];
