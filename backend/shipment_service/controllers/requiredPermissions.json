@@ -1,0 +1,13 @@
+{
+    "createShipment": "createShipment",
+    "receiveShipment": "receiveShipment",
+    "fetchShipmentsByQRCode": "fetchShipmentsByQRCode",
+    "fetchShipments": "fetchShipments",
+    "viewShipment": "viewShipment",
+    "fetchAllShipments": "fetchAllShipments",
+    "fetch_po_Shipments": "fetch_po_Shipments",
+    "updateStatus": "updateStatus",
+    "getProductsByInventory": "getProductsByInventory",
+    "uploadImage": "uploadImage",
+    "fetchImage": "fetchImage"
+}
