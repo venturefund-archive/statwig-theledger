@@ -1,0 +1,9 @@
+{
+"createShippingOrder": "createShippingOrder",
+"getShippingOrders": "getShippingOrders",
+"getShippingOrderIds": "getShippingOrderIds",
+"viewShippingOrder": "viewShippingOrder",
+"assignShippingOrder": "assignShippingOrder",
+"updateShippingOrder": "updateShippingOrder",
+"changeSOStatus": "changeSOStatus"
+}

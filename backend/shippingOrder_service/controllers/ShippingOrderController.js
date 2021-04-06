@@ -11,163 +11,267 @@ const checkPermissions = require('../middlewares/rbac_middleware')
   .checkPermissions;
 const wrapper = require('../models/DBWrapper');
 const uniqid = require('uniqid');
-
+const requiredPermissions = require('./ShippingOrderPermissions.json');
 const init = require('../logging/init');
 const logger = init.getLog();
 
 exports.createShippingOrder = [
   auth,
   async (req, res) => {
-    try {
-      const {
-        soPurchaseOrderId,
-        soAssignedTo,
-        soUpdatedOn,
-        products,
-      } = req.body;
-      const { id: soCreatedBy, id: soUpdatedBy } = req.user;
-      const id = uniqid('so-');
-
-      const POFound = await RecordModel.findOne({ id: soPurchaseOrderId });
-
-      console.log('POFound', POFound);
-
-      if (!POFound) {
+    checkToken(req, res, async result => {
+      if (result.success) {
         logger.log(
           'info',
-          '<<<<< ShippingOrderService < ShippingController < createShippingOrder : PO not found in collection',
+          '<<<<< ShippingOrderService < ShippingController <  createShippingOrder : token verified successfullly, querying data by key',
         );
-        return apiResponse.ErrorResponse(res, 'PO Not found');
-      } else {
-        await RecordModel.findOneAndUpdate(
-          { id: soPurchaseOrderId },
-          { $push: { shippingOrders: id } },
-        );
-        const so = new ShippingOrderModel({
-          id,
-          soPurchaseOrderId,
-          soCreatedBy,
-          soAssignedTo,
-          soUpdatedBy,
-          soUpdatedOn,
-          products,
+  
+        permission_request = {
+          result: result,
+          permissionRequired: requiredPermissions.createShippingOrder,
+        };
+        checkPermissions(permission_request, async permissionResult => {
+          if (permissionResult.success) {
+            try {
+              const {
+                soPurchaseOrderId,
+                soAssignedTo,
+                soUpdatedOn,
+                products,
+              } = req.body;
+              const { id: soCreatedBy, id: soUpdatedBy } = req.user;
+              const id = uniqid('so-');
+        
+              const POFound = await RecordModel.findOne({ id: soPurchaseOrderId });
+        
+              console.log('POFound', POFound);
+        
+              if (!POFound) {
+                logger.log(
+                  'info',
+                  '<<<<< ShippingOrderService < ShippingController < createShippingOrder : PO not found in collection',
+                );
+                return apiResponse.ErrorResponse(res, 'PO Not found');
+              } else {
+                await RecordModel.findOneAndUpdate(
+                  { id: soPurchaseOrderId },
+                  { $push: { shippingOrders: id } },
+                );
+                const so = new ShippingOrderModel({
+                  id,
+                  soPurchaseOrderId,
+                  soCreatedBy,
+                  soAssignedTo,
+                  soUpdatedBy,
+                  soUpdatedOn,
+                  products,
+                });
+                const result = await so.save();
+                return apiResponse.successResponseWithData(
+                  res,
+                  'Shipping Order Created Success',
+                  result,
+                );
+              }
+            } catch (err) {
+              logger.log(
+                'error',
+                '<<<<< ShippingOrderService < ShippingController < createShippingOrder : error (catch block)',
+              );
+              return apiResponse.ErrorResponse(res, err);
+            }
+          } else {
+            res.json('Sorry! User does not have enough Permissions');
+          }
         });
-        const result = await so.save();
-        return apiResponse.successResponseWithData(
-          res,
-          'Shipping Order Created Success',
-          result,
+      } else {
+        logger.log(
+          'warn',
+          '<<<<< UserService < AuthController < register : refuted token',
         );
+        res.status(403).json(result);
       }
-    } catch (err) {
-      logger.log(
-        'error',
-        '<<<<< ShippingOrderService < ShippingController < createShippingOrder : error (catch block)',
-      );
-      return apiResponse.ErrorResponse(res, err);
-    }
+    });
+
   },
 ];
 
 exports.getShippingOrders = [
   auth,
   async (req, res) => {
-    try {
-      const { warehouseId } = req.user;
-      const shippingOrders = await ShippingOrderModel.find({
-        'soAssignedTo.warehouseId': warehouseId,
-      }).sort({createdAt: -1});
-      return apiResponse.successResponseWithData(
-        res,
-        'Shipping Orders',
-        shippingOrders,
-      );
-    } catch (err) {
-      logger.log(
-        'error',
-        '<<<<< ShippingOrderService < ShippingController < fetchAllShippingOrders : error (catch block)',
-      );
-      return apiResponse.ErrorResponse(res, err);
-    }
+    checkToken(req, res, async result => {
+      if (result.success) {
+        logger.log(
+          'info',
+          '<<<<< ShippingOrderService < ShippingController < fetchAllShippingOrders : token verified successfullly, querying data by key',
+        );
+  
+        permission_request = {
+          result: result,
+          permissionRequired: requiredPermissions.getShippingOrders,
+        };
+        checkPermissions(permission_request, async permissionResult => {
+          if (permissionResult.success) {
+            try {
+              const { warehouseId } = req.user;
+              const shippingOrders = await ShippingOrderModel.find({
+                'soAssignedTo.warehouseId': warehouseId,
+              }).sort({createdAt: -1});
+              return apiResponse.successResponseWithData(
+                res,
+                'Shipping Orders',
+                shippingOrders,
+              );
+            } catch (err) {
+              logger.log(
+                'error',
+                '<<<<< ShippingOrderService < ShippingController < fetchAllShippingOrders : error (catch block)',
+              );
+              return apiResponse.ErrorResponse(res, err);
+            }
+          } else {
+            res.json('Sorry! User does not have enough Permissions');
+          }
+        });
+      } else {
+        logger.log(
+          'warn',
+          '<<<<< ShippingOrderService < ShippingController < fetchAllShippingOrders : refuted token',
+        );
+        res.status(403).json(result);
+      }
+    });
+
   },
 ];
 
 exports.getShippingOrderIds = [
   auth,
   async (req, res) => {
-    try {
-      const { warehouseId } = req.user;
-      const shippingOrderIds = await ShippingOrderModel.find(
-        { 'soAssignedTo.warehouseId': warehouseId },
-        'id',
-      );
-      return apiResponse.successResponseWithData(
-        res,
-        'Shipping Order Ids',
-        shippingOrderIds,
-      );
-    } catch (err) {
-      logger.log(
-        'error',
-        '<<<<< ShippingOrderService < ShippingController < fetchAllShippingOrders : error (catch block)',
-      );
-      return apiResponse.ErrorResponse(res, err);
-    }
+    checkToken(req, res, async result => {
+      if (result.success) {
+        logger.log(
+          'info',
+          '<<<<< ShippingOrderService < ShippingController < fetchAllShippingOrders : token verified successfullly, querying data by key',
+        );
+  
+        permission_request = {
+          result: result,
+          permissionRequired: requiredPermissions.getShippingOrderIds,
+        };
+        checkPermissions(permission_request, async permissionResult => {
+          if (permissionResult.success) {
+            try {
+              const { warehouseId } = req.user;
+              const shippingOrderIds = await ShippingOrderModel.find(
+                { 'soAssignedTo.warehouseId': warehouseId },
+                'id',
+              );
+              return apiResponse.successResponseWithData(
+                res,
+                'Shipping Order Ids',
+                shippingOrderIds,
+              );
+            } catch (err) {
+              logger.log(
+                'error',
+                '<<<<< ShippingOrderService < ShippingController < fetchAllShippingOrders : error (catch block)',
+              );
+              return apiResponse.ErrorResponse(res, err);
+            }
+          } else {
+            res.json('Sorry! User does not have enough Permissions');
+          }
+        });
+      } else {
+        logger.log(
+          'warn',
+          '<<<<< ShippingOrderService < ShippingController < fetchAllShippingOrders : refuted token',
+        );
+        res.status(403).json(result);
+      }
+    });
+
   },
 ];
 
 exports.viewShippingOrder = [
   auth,
   async (req, res) => {
-    try {
-      const { soId } = req.query;
-      const shippingOrder = await ShippingOrderModel.findOne(
-        {
-          id: soId,
-        },
-        'soPurchaseOrderId products soAssignedTo',
-      );
-      const poDetails = await RecordModel.findOne(
-        { id: shippingOrder.soPurchaseOrderId },
-        'supplier customer',
-      );
-      const supplierOrg = await OrganisationModel.findOne(
-        { id: poDetails.supplier.supplierOrganisation },
-        'name',
-      );
-      const customerOrg = await OrganisationModel.findOne(
-        { id: poDetails.customer.customerOrganisation },
-        'name',
-      );
-      const warehouse = await WarehouseModel.findOne(
-      { id: poDetails.customer.shippingAddress.shippingAddressId }
-      );
-      const data = {
-        purchaseOrderId: shippingOrder.soPurchaseOrderId,
-        supplierDetails: {
-          ...poDetails.supplier,
-          supplierOrgName: supplierOrg.name,
-          locationId: shippingOrder.soAssignedTo.warehouseId
-        },
-        customerDetails: {
-          ...poDetails.customer,
-          customerOrgName: customerOrg.name,
-          deliveryLocation: warehouse.postalAddress
-        },
-        products: shippingOrder.products,
-      };
-      return apiResponse.successResponseWithData(
-        res,
-        'Shipping Order Details',
-        data,
-      );
-    } catch (err) {
-      logger.log(
-        'error',
-        '<<<<< ShippingOrderService < ShippingController < viewShippingOrder : error (catch block)',
-      );
-      return apiResponse.ErrorResponse(res, err);
-    }
+    checkToken(req, res, async result => {
+      if (result.success) {
+        logger.log(
+          'info',
+          '<<<<< ShippingOrderService < ShippingController < fetchAllShippingOrders : token verified successfullly, querying data by key',
+        );
+  
+        permission_request = {
+          result: result,
+          permissionRequired: requiredPermissions.viewShippingOrder,
+        };
+        checkPermissions(permission_request, async permissionResult => {
+          if (permissionResult.success) {
+            try {
+              const { soId } = req.query;
+              const shippingOrder = await ShippingOrderModel.findOne(
+                {
+                  id: soId,
+                },
+                'soPurchaseOrderId products soAssignedTo',
+              );
+              const poDetails = await RecordModel.findOne(
+                { id: shippingOrder.soPurchaseOrderId },
+                'supplier customer',
+              );
+              const supplierOrg = await OrganisationModel.findOne(
+                { id: poDetails.supplier.supplierOrganisation },
+                'name',
+              );
+              const customerOrg = await OrganisationModel.findOne(
+                { id: poDetails.customer.customerOrganisation },
+                'name',
+              );
+              const warehouse = await WarehouseModel.findOne(
+              { id: poDetails.customer.shippingAddress.shippingAddressId }
+              );
+              const data = {
+                purchaseOrderId: shippingOrder.soPurchaseOrderId,
+                supplierDetails: {
+                  ...poDetails.supplier,
+                  supplierOrgName: supplierOrg.name,
+                  locationId: shippingOrder.soAssignedTo.warehouseId
+                },
+                customerDetails: {
+                  ...poDetails.customer,
+                  customerOrgName: customerOrg.name,
+                  deliveryLocation: warehouse.postalAddress
+                },
+                products: shippingOrder.products,
+              };
+              return apiResponse.successResponseWithData(
+                res,
+                'Shipping Order Details',
+                data,
+              );
+            } catch (err) {
+              logger.log(
+                'error',
+                '<<<<< ShippingOrderService < ShippingController < viewShippingOrder : error (catch block)',
+              );
+              return apiResponse.ErrorResponse(res, err);
+            }
+          } else {
+            res.json('Sorry! User does not have enough Permissions');
+          }
+        });
+      } else {
+        logger.log(
+          'warn',
+          '<<<<< ShippingOrderService < ShippingController < fetchAllShippingOrders : refuted token',
+        );
+        res.status(403).json(result);
+      }
+    });
+
   },
 ];
 
@@ -184,7 +288,7 @@ exports.assignShippingOrder = [
 
           const permission_request = {
             result: result,
-            permissionRequired: 'receiveSO',
+            permissionRequired: requiredPermissions.assignShippingOrder,
           };
           checkPermissions(permission_request, async permissionResult => {
             if (permissionResult.success) {
