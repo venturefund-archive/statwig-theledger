@@ -1,0 +1,4 @@
+{
+    "getNotifications": "getNotifications",
+    "deleteNotification": "deleteNotification"
+}
