@@ -25,7 +25,8 @@ const blockchain_service_url = process.env.URL;
 const stream_name = process.env.INV_STREAM;
 
 const checkToken = require("../middlewares/middleware").checkToken;
-const checkPermissions = require("../middlewares/rbac_middleware").checkPermissions;
+const checkPermissions = require("../middlewares/rbac_middleware")
+  .checkPermissions;
 const init = require("../logging/init");
 const logger = init.getLog();
 const EmailContent = require("../components/EmailContent");

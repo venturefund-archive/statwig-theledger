@@ -1,0 +1,6 @@
+{
+    "getAnalytics": "getAnalytics",
+    "getOverviewAnalytics": "getOverviewAnalytics",
+    "getInventoryAnalytics": "getInventoryAnalytics",
+    "getShipmentAnalytics": "getShipmentAnalytics"
+}
