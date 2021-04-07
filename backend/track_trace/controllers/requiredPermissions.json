@@ -1,0 +1,6 @@
+{
+    "fetchGoodsByID": "fetchGoodsByID",
+    "fetchTracking": "fetchTracking",
+    "fetchTemp": "fetchTemp",
+    "track": "track"
+}
