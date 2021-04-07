@@ -1142,38 +1142,32 @@ exports.getInventoryDetails = [
           };
           checkPermissions(permission_request, async (permissionResult) => {
             if (permissionResult.success) {
+              var selectedWarehouseId = '';
+              if(req.body.warehouseId !== null){
+                selectedWarehouseId = req.body.warehouseId;
+              }
               const employee = await EmployeeModel.findOne({ id: req.user.id });
-              const warehouse = await WarehouseModel.findOne({
-                id: employee.warehouseId,
-              });
-              if (warehouse) {
-                const inventory = await InventoryModel.findOne({
-                  id: warehouse.warehouseInventory,
-                });
-                let inventoryDetails = [];
-                await utility.asyncForEach(
-                  inventory.inventoryDetails,
-                  async (inventoryDetail) => {
-                    const product = await ProductModel.findOne({
-                      id: inventoryDetail.productId,
-                    });
-                    const inventoryDetailClone = { ...inventoryDetail };
-                    inventoryDetailClone["productName"] = product.name;
-                    inventoryDetailClone["manufacturer"] = product.manufacturer;
-                    inventoryDetails.push(inventoryDetailClone);
-                  }
-                );
-
-                return apiResponse.successResponseWithData(
-                  res,
-                  "Inventory Details",
-                  inventoryDetails
-                );
-              } else {
-                return apiResponse.ErrorResponse(
-                  res,
-                  "Cannot find warehouse for this employee"
-                );
+          
+              var warehouse;
+              if(selectedWarehouseId == '' || selectedWarehouseId == null){
+                warehouse = await WarehouseModel.findOne({ id: employee.warehouseId })
+              }else{
+                warehouse = await WarehouseModel.findOne({ id: selectedWarehouseId })
+              }
+              if(warehouse) {
+                const inventory = await InventoryModel.findOne({ id: warehouse.warehouseInventory });
+                let inventoryDetails = []
+                await utility.asyncForEach(inventory.inventoryDetails, async inventoryDetail => {
+                  const product = await ProductModel.findOne({ id: inventoryDetail.productId });
+                  const inventoryDetailClone = {...inventoryDetail};
+                  inventoryDetailClone['productName'] = product.name;
+                  inventoryDetailClone['manufacturer'] = product.manufacturer;
+                  inventoryDetails.push(inventoryDetailClone);
+                })
+          
+                return apiResponse.successResponseWithData(res, 'Inventory Details', inventoryDetails);
+              }else {
+                return apiResponse.ErrorResponse(res, 'Cannot find warehouse for this employee')
               }
             } else {
               res.json("Sorry! User does not have enough Permissions");

@@ -232,16 +232,16 @@ exports.register = [
           if (permissionResult.success) {
             try {
               if (
-                !req.body.firstName.match("[A-Za-z]") ||
-                !req.body.lastName.match("[A-Za-z]")
+                !req.body.firstName.match('[A-Za-z]') ||
+                !req.body.lastName.match('[A-Za-z]')
               ) {
                 logger.log(
-                  "warn",
-                  "<<<<< UserService < AuthController < register : Name should only consist of letters"
+                  'warn',
+                  '<<<<< UserService < AuthController < register : Name should only consist of letters',
                 );
                 return apiResponse.ErrorResponse(
                   res,
-                  "Name should only consists of letters"
+                  'Name should only consists of letters',
                 );
               }
               /*EmployeeModel.collection.dropIndexes(function(){
@@ -249,144 +249,126 @@ exports.register = [
                          console.log("finished re indexing")
                        })
                      })*/
-              //EmployeeModel.createIndexes();
+               //EmployeeModel.createIndexes();
               // Extract the validation errors from a request.
               const errors = validationResult(req);
               if (!errors.isEmpty()) {
                 // Display sanitized values/errors messages.
                 logger.log(
-                  "error",
-                  "<<<<< UserService < AuthController < register : Validation error"
+                  'error',
+                  '<<<<< UserService < AuthController < register : Validation error',
                 );
                 return apiResponse.validationErrorWithData(
                   res,
-                  "Validation Error.",
-                  errors.array()
+                  'Validation Error.',
+                  errors.array(),
                 );
               }
               if (!mailer.validateEmail(req.body.emailId)) {
                 return apiResponse.ErrorResponse(
                   res,
-                  "Your email id is not eligible to register."
+                  'Your email id is not eligible to register.',
                 );
               } else {
                 //hash input password
-                // generate OTP for confirmation
-                logger.log(
-                  "info",
-                  "<<<<< UserService < AuthController < register : Generating Hash for Input Password"
-                );
-
-                var organisationId = req.body.organisationId;
-                var warehouseId = "NA";
-                var employeeId = uniqid("emp-");
-                var employeeStatus = "NOTAPPROVED";
-                let addr = "";
-
-                //create organisation if doesn't exists
-                if (req.body.organisationName) {
-                  const organisationName = req.body.organisationName;
-                  const organisation = await OrganisationModel.findOne({
-                    name: { $regex: organisationName, $options: "i" },
-                  });
-                  if (organisation) {
-                    organisationId = organisation.id;
-                  } else {
-                    // employeeStatus = 'ACTIVE';
-                    // const centralOrg = await OrganisationModel.findOne({ type: 'CENTRAL_AUTHORITY' });
-                    // if (centralOrg) {
-                    //   if (centralOrg.configuration_id) {
-
-                    //   }
-                    // }
-                    const country = req.body?.address?.country
-                      ? req.body.address?.country
-                      : "India";
-                    const address = req.body?.address ? req.body.address : {};
-                    addr =
-                      address.line1 +
-                      ", " +
-                      address.city +
-                      ", " +
-                      address.state +
-                      ", " +
-                      address.pincode;
-                    organisationId = uniqid("org-");
-                    warehouseId = uniqid("war-");
-                    const org = new OrganisationModel({
-                      primaryContactId: employeeId,
-                      name: organisationName,
-                      id: organisationId,
-                      type: req.body?.type
-                        ? req.body.type
-                        : "CUSTOMER_SUPPLIER",
-                      status: "NOTVERIFIED",
-                      postalAddress: addr,
-                      warehouses: [warehouseId],
-                      warehouseEmployees: [employeeId],
-                      country: {
-                        countryId: "001",
-                        countryName: country,
-                      },
-                      configuration_id: "CONF001",
-                    });
-                    await org.save();
-
-                    const inventoryId = uniqid("inv-");
-                    const inventoryResult = new InventoryModel({
-                      id: inventoryId,
-                    });
-                    await inventoryResult.save();
-
-                    const warehouse = new WarehouseModel({
-                      title: "Office",
-                      id: warehouseId,
-                      warehouseInventory: inventoryId,
-                      organisationId: organisationId,
-                      // postalAddress: address,
-                      warehouseAddress: {
-                        firstLine: address.line1,
-                        secondLine: "",
-                        city: address.city,
-                        state: address.state,
-                        country: address.country,
-                        landmark: "",
-                        zipCode: address.pincode,
-                      },
-                      country: {
-                        countryId: "001",
-                        countryName: country,
-                      },
-                    });
-                    await warehouse.save();
+                  // generate OTP for confirmation
+                  logger.log(
+                    'info',
+                    '<<<<< UserService < AuthController < register : Generating Hash for Input Password',
+                  );
+                
+                  var organisationId = req.body.organisationId;
+                  var warehouseId = 'NA';
+                  var employeeId = uniqid('emp-');
+                  var employeeStatus = 'NOTAPPROVED';
+                  let addr = '';
+                    
+                  //create organisation if doesn't exists 
+                  if (req.body.organisationName) {
+                    const organisationName = req.body.organisationName;
+                    const organisation = await OrganisationModel.findOne({ name : { $regex : organisationName , $options : 'i'}});
+                    if (organisation) {
+                      organisationId = organisation.id;
+                    }
+                    else {
+                      // employeeStatus = 'ACTIVE';
+                      // const centralOrg = await OrganisationModel.findOne({ type: 'CENTRAL_AUTHORITY' });
+                      // if (centralOrg) {
+                      //   if (centralOrg.configuration_id) {
+                          
+                      //   }
+                      // }
+                      const country = req.body?.address?.country ? req.body.address?.country : 'India';
+                      const address = req.body?.address ? req.body.address : {};
+                      addr = address.line1 + ', ' + address.city + ', ' + address.state + ', ' + address.pincode;
+                      organisationId = uniqid('org-');
+                      warehouseId = uniqid('war-');
+                      const org = new OrganisationModel({
+                        primaryContactId: employeeId,
+                        name: organisationName,
+                        id: organisationId,
+                        type: req.body?.type ? req.body.type : 'CUSTOMER_SUPPLIER',
+                        status: 'NOTVERIFIED',
+                        postalAddress: addr,
+                        warehouses: [warehouseId],
+                        warehouseEmployees: [employeeId],
+                        country: {
+                          countryId: '001',
+                          countryName: country
+                        },
+                        configuration_id: 'CONF001'
+                      });
+                      await org.save();
+        
+                      const inventoryId = uniqid('inv-');
+                      const inventoryResult = new InventoryModel({ id: inventoryId });
+                      await inventoryResult.save();
+        
+                      const warehouse = new WarehouseModel({
+                        title: 'Office',
+                        id: warehouseId,
+                        warehouseInventory: inventoryId,
+                        organisationId: organisationId,
+                        // postalAddress: address,
+                        warehouseAddress: {
+                          firstLine: address.line1,
+                          secondLine: "",
+                          city: address.city,
+                          state: address.state,
+                          country: address.country,
+                          landmark: "",
+                          zipCode: address.pincode
+                        },
+                        country: {
+                          countryId: '001',
+                          countryName: country
+                        }
+                      });
+                      await warehouse.save();
+                    }
                   }
-                }
-
-                const emailId = req.body.emailId.toLowerCase().replace(" ", "");
-                let phone = "";
-                if (emailId.indexOf("@") === -1)
-                  phone =
-                    emailId.indexOf("+91") === 0 ? emailId : "+91" + emailId;
-
-                // Create User object with escaped and trimmed data
-                const user = new EmployeeModel({
-                  firstName: req.body.firstName,
-                  lastName: req.body.lastName,
-                  emailId: phone ? "" : req.body.emailId,
-                  phoneNumber: phone,
-                  organisationId: organisationId,
-                  id: employeeId,
-                  postalAddress: addr,
-                  accountStatus: employeeStatus,
-                  warehouseId: warehouseId,
-                });
-                await user.save();
-                return apiResponse.successResponse(
-                  res,
-                  "User registered Success"
-                );
-                // Html email body
-                /* let html = EmailContent({
+        
+                const emailId = req.body.emailId.toLowerCase().replace(' ','');
+                let phone = '';
+                if (emailId.indexOf('@') === -1)
+                  phone = emailId.indexOf('+91') === 0 ? emailId : '+91'+emailId;
+                
+                  // Create User object with escaped and trimmed data
+                  const user = new EmployeeModel({
+                    firstName: req.body.firstName,
+                    lastName: req.body.lastName,
+                    emailId: phone ? '' : req.body.emailId.toLowerCase(),
+                    phoneNumber: phone,
+                    organisationId: organisationId,
+                    id: employeeId,
+                    postalAddress: addr,
+                    accountStatus: employeeStatus,
+                    warehouseId: warehouseId
+                  });
+                  await user.save()
+                return apiResponse.successResponse(res, 'User registered Success');
+                  // Html email body
+                 /* let html = EmailContent({
                     name: req.body.name,
                     origin: req.headers.origin,
                     otp,
@@ -438,11 +420,11 @@ exports.register = [
             } catch (err) {
               //throw error in json response with status 500.
               logger.log(
-                "error",
-                "<<<<< UserService < AuthController < register : Error in catch block 2"
+                'error',
+                '<<<<< UserService < AuthController < register : Error in catch block 2',
               );
               return apiResponse.ErrorResponse(res, err);
-            }
+            }        
           } else {
             res.json("Sorry! User does not have enough Permissions");
           }
