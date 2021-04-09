@@ -26,7 +26,6 @@ import requireAuth from '../components/hocs/requireAuth';
 import QrCode from '../containers/qrcode';
 import TransactionHistory from '../containers/transactionHistory'
 import ViewOrder from '../containers/vieworder';
-import ReviewOrder from '../containers/revieworder';
 
 import AddProduct from '../containers/addproduct';
 import Signup from '../containers/signUp';
@@ -35,9 +34,15 @@ import resetPasswordPage from '../containers/resetPassword';
 import Home from '../containers/home';
 import UpdateStatus from  '../containers/updateStatus';
 import ReceiveShipment from  '../containers/receiveShipment';
+import Addlocation from  '../containers/Addlocation';
+
+
 import NoMatch from '../components/NoMatch';
 
+
 import './style.scss';
+// import Addlocation from '../components/profile/Addlocation';
+
 const routes = (
   <Switch>
     <Route exact path="/" component={Home} />
@@ -69,9 +74,12 @@ const routes = (
     <Route path="/orders" component={requireAuth(Orders)} />
     <Route path="/neworder" component={requireAuth(NewOrder)} />
     <Route path="/vieworder/:id" component={requireAuth(ViewOrder)} />
-    <Route path="/revieworder" component={requireAuth(ReviewOrder)} />
     <Route path="/updateStatus/:id" component={requireAuth(UpdateStatus)} />
     <Route path="/receiveShipment/:id" component={requireAuth(ReceiveShipment)} />
+    <Route path="/Addlocation" component={requireAuth(Addlocation)} />
+   
+    
+    
     <Route component={NoMatch} />
 
   </Switch>

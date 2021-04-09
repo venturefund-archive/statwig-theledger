@@ -46,7 +46,7 @@ const Overview = props => {
           <div className="col">
             <div className="panel">
               <div className="picture truck-bg">
-                <img src={totalshipments} alt="truck" />
+                <img src={totalshipments}  alt="truck" />
               </div>
               <div className="d-flex flex-column">
                 <div className="title">Total Outbound Shipments</div>
@@ -70,7 +70,7 @@ const Overview = props => {
           <div className="col">
             <div className="panel">
               <div className="picture truck-bg">
-              <img src={TotalInventoryAdded} alt="truck" />
+              <img src={TotalInventoryAdded}  width="27px"alt="truck" />
               </div>
               <div className="d-flex flex-column">
                 <div className="title">Total Product Category</div>
@@ -82,7 +82,7 @@ const Overview = props => {
           <div className="col">
             <div className="panel">
               <div className="time truck-bg">
-                <img src={AverageOrderProcessingTime} width="25px" alt="truck" />
+                <img src={AverageOrderProcessingTime} width="31px"  alt="truck" />
               </div>
               <div className="d-flex flex-column">
                 <div className="title">Average Order Processing Time</div>
@@ -94,11 +94,11 @@ const Overview = props => {
           <div className="col">
             <div className="panel border-0">
               <div className="picture truck-bg">
-                <img src={shipmentsdelayed} alt="truck" />
+                <img src={shipmentsdelayed}  width="45px"  alt="truck" />
               </div>
               <div className="d-flex flex-column">
-                <div className="title">Pending Orders</div>
-                <div className="count5">{overviewAnalytics.pendingOrders} <small className="dayStatus"></small></div>
+                <div className="title1">Pending Orders</div>
+                <div className="count5">{overviewAnalytics.pendingOrders}  <small className="dayStatus ml-1"></small></div>
               </div>
             </div>
           </div>

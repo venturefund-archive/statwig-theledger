@@ -1,21 +1,33 @@
-import React, { Component } from 'react';
+import React from 'react';
+
+import {
+  Link
+} from "react-router-dom";
 import ProfilePic from '../../assets/brands/user-image/Image73@2x.png';
 import { useDispatch } from 'react-redux';
 import DropdownButton from '../../shared/dropdownButtonGroup';
 import Pen from '../../assets/icons/pen.svg';
 import Mail from '../../assets/icons/mail.svg';
 import Briefcase from '../../assets/icons/briefcase.svg';
+import  TestPopV  from './testpopv';
 import Telephone from '../../assets/icons/telephone.svg';
 import './style.scss';
 import { config } from '../../config';
 const axios = require('axios');
 import { getUserInfoUpdated, updateProfile, getUserInfo } from '../../actions/userActions';
 import { getWarehouseByOrgId } from '../../actions/productActions';
+import Addlocation from './Addlocation';
+import PopUpLocation from './popuplocation';
+import Modal from '../../shared/modal' 
+
+// import Modal from "../../shared/modal";
+
 
 class Profile extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      openModal:false,
       selectedFile: null,
       profile: null,
       editMode: false,
@@ -41,6 +53,8 @@ class Profile extends React.Component {
     this.onChange = this.onChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
     this.onCancel = this.onCancel.bind(this);
+    this.closeModal = this.closeModal.bind(this);
+    
   }
 
   async componentDidMount() {
@@ -96,7 +110,12 @@ class Profile extends React.Component {
     }
 
   }
-  
+   closeModal() {
+     console.log("Closed Model called");
+    this.setState({openModal:false});
+    // props.history.push("/Addlocation");
+  };
+
   onCancel() {
     const {
       prof,
@@ -291,11 +310,32 @@ class Profile extends React.Component {
 
 
                     </div>
+                   
+                      <div >
+                        {
+                          editMode && (
+                      <button className="btn btn-outline-info mr-2" onClick={()=>{ 
+                        this.setState({openModal:true})
+                      } }>
+                      <span>Add + </span>
+                      </button>
+                )}
+                     <div className="inventorypopup">
+              {this.state.openModal && (
+              <Modal class="modal-lg" style="min-width: 100%"
+               close={() => this.closeModal()}
+                 size="" //for other size's use `modal-lg, modal-md, modal-sm`
+                           >
+                              <PopUpLocation />
+             </Modal>
+      )}</div>
+ </div>
+    
                     <div className="col">
                         <div className="row location">
                           MY LOCATIONS
                         </div>
-                    </div>
+                    </div>; 
                     <div className="col">
                       <div className="row">
                         <div className="col-sm-12 col-lg-7 col-xl-7 location-cards">  
@@ -320,11 +360,7 @@ class Profile extends React.Component {
                       </div> 
                       </div>
                     </div>                   
-
-
                   </div>
-
-
                 ) : (
                   <div>
                       <div className="col">
@@ -345,7 +381,9 @@ class Profile extends React.Component {
                         <div className="row row-list">
                           <img src={Telephone} width="20" height="20" className="mr-3" />
                           {this.state.phoneNumber ? <span>{this.state.phoneNumber}</span> : <span>N/A</span>}
-                        </div>                                                                                                               
+                        </div>
+                        
+
                       </div>
                       <div className="col">
                         <div className="row location">
@@ -377,7 +415,8 @@ class Profile extends React.Component {
                               </div>  
                               <div className="pin-code">
                               Zipcode : {this.state.warehouseAddress_zipcode ? <span>{this.state.warehouseAddress_zipcode}</span> : <span>N/A</span>}
-                              </div>                                                  
+                              </div> 
+                                                                               
                             </div>                        
                           </div>    
                         </div>                             
@@ -408,6 +447,7 @@ class Profile extends React.Component {
                     <button className="btn-primary btn" onClick={this.onSubmit}>
                       <span>SAVE</span>
                     </button>
+                   
 
                   </div>
                 )}

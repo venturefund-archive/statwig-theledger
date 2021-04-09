@@ -1,5 +1,6 @@
 @import "../../assets/styles/global.scss";
 
+
 .overview {
   padding-right: 3rem;
     padding-left: 3rem;
@@ -102,7 +103,7 @@
     background: $eeGrey;
     padding: 1rem;
     display: flex;
-    justify-content: center;
+    justify-content: left;
     align-items: center;
     border-right: 1px solid $d6Grey;
     @media screen and (max-width: 768px) {
@@ -171,16 +172,33 @@ width: 60px;
         height: 60px;
       }
     }
-
+   
 
     .title {
       font-size: 9px;
-      line-height: 12px;
+      line-height: 10px;
       font-weight: bold;
+      margin-left: 0;
       color: #707070;
       @media (min-width: $xl) {
         font-size: 12px;
       }
+      
+
+    }
+    .title1 {
+      font-size: 9px;
+      line-height: 10px;
+      font-weight: bold;
+      color: #707070;
+      margin-left:0;
+      margin-left: 0;
+     
+      @media (min-width: $xl) {
+        font-size: 12px;
+      }
+      
+
     }
 
     .count1{
@@ -212,10 +230,13 @@ width: 60px;
       font-size: 26px;
       color: #FFAB1D;
       font-weight: bold;
+    
     }
 
     .dayStatus {
       font-size: 9px;
+
+
       
       color: $black;
     }
