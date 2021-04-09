@@ -48,7 +48,7 @@ const Table = props => {
                   <span className="text-muted">{customer.shippingAddress.shippingAddressId}</span>
                 </div>
                 <div className="rTableCell">
-                <div className={`status secondary-bg ${statusStyle}`}>
+                <div className={`status secondary-bg ${statusStyle} {cell padding= "2"}`}>
                     {status}
                 </div>
                 </div>

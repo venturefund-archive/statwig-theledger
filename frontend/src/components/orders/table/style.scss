@@ -9,17 +9,25 @@
   .rTable {
     display: flex;
     flex-direction: column;
-    width: 100%;
+    width: 107%;
+    padding-right: 110px;
+    padding-left: 0px;
+    
+    
+    
 
     .rTableHeading {
       display: flex;
       justify-content: space-between;
       margin-bottom: 1rem;
+      
+      
     }
 
     .rTableBody {
       display: flex;
       justify-content: space-between;
+      
     }
 
     .rTableRow {
@@ -27,10 +35,10 @@
       background: #fff;
       justify-content: space-between;
       margin-bottom: 20px;
-      padding: 5px 10px;
+      padding: 5px 0px;
       border-radius: 10px;
       box-shadow: 0px 3px 10px #00000029;
-    }
+      }
 
     .rTableFoot {
       display: table-footer-group;
@@ -42,8 +50,8 @@
     .rTableCell,
     .rTableHead {
       flex: 1;
-      padding: 3px 10px;
-      align-self: center;
+      padding: 5px 10px;
+    
       font-size: 12px;
       color: #707070;
       font-weight: bold;
@@ -51,11 +59,12 @@
 
     .rTableHead {
       text-align: center;
+      
     }
     
     .rTableCell {
       color: $black;
-      text-align: left;
+      text-align: center;
       font-weight: 400;
       a {
         color: $black;
