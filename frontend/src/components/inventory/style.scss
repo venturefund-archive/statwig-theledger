@@ -1,10 +1,10 @@
 @import "../../assets/styles/global.scss";
 
 .inventory {
-  padding-right: 3rem;
-  padding-left: 3rem;
+  padding-right: 2rem;
+  padding-left: 8rem;
   @media (max-width: $md) {
-    padding-right: 10px;
+    padding-right: 20px;
     padding-left: 10px;
   }
 
@@ -14,13 +14,14 @@
     right: 0;
     background-color: #eaeaea;
     .filter {
-      margin-left: 9rem;
-      margin-right: 3rem;
+      margin-left: 16rem;
+      margin-right: 2rem;
+      text-align: center;
     }
   }
 
   .ribben-space {
-    margin-top: 8rem;
+    margin-top: 7rem;
   }
 
   .fix-wrap {
@@ -38,18 +39,21 @@
   }
   .table .rTable .rTableCell {
       color: $black;
-      text-align: left;
-      font-weight: 400;
+      text-align: right;
+      font-weight: 600;
+      padding-right:159px;
+  
  }
   .list-container {
     h4 {
       color: $OBBlue;
-      font-weight: 400;
-      font-size: 16px;
+      font-weight: 600;
+      font-size: 20px;
+      
     }
 
     .btn {
-      font-size: 11px;
+      font-size: 12px;
       padding: 0;
     }
 
@@ -167,9 +171,9 @@
       display: flex;
       justify-content: space-between;
       .tab-item {
-        font-size: 8px;
+        font-size: 6px;
         color: #707070;
-        margin-right: 3px;
+        margin-right: 8px;
         cursor: pointer;
       }
         .tab-item:hover {
