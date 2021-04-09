@@ -71,27 +71,35 @@ const ChartsPage = (props) => {
 const option = {
   maintainAspectRatio: false,
   responsive: false,
+ 
 layout: {
+  
             padding: {
                 left: 0,
-                right: 0,
+                right:0,
                 top:0,
-                bottom:30
+                bottom:47,
+                
             }
+            
         },
   legend: {
+
   position: 'right',
-padding:10,
-  labels: {
+  labels: {  
+    padding:12,
    usePointStyle: true,
+   fontSize: 14,
+ 
+   
+  
 
   }
  }
 }
-
   return (
     <MDBContainer>
-      <Doughnut id="doughnut-chart" height="300px" data={doughnut}  options={option} />
+      <Doughnut id="doughnut-chart" height="288px" width="423" data={doughnut}  options={option} />
     </MDBContainer>
   );
 };
