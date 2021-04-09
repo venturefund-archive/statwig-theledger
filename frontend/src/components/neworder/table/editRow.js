@@ -33,13 +33,13 @@ const EditRow = props => {
 
   return (
     <div className="row ml-3">
-      <div class="trow row text-dark col">
-        <div class="col pl-4 tcell p-2">
+      <div class="trow row text- col">
+        <div class="col pl-4 tcell p-1">
           <div class=" p-0">
             <div class="d-flex flex-column">
               <div class="title recived-text">
                 <DropdownButton
-                  name={prod.type ? prod.type : "Category"}
+                  name={prod.type ? prod.type : "Select Product Category"}
                   onSelect={item => { handleCategoryChange(index, item) }}
                   groups={category}
                 />
@@ -47,21 +47,30 @@ const EditRow = props => {
             </div>
           </div>
         </div>
+        
+        <div class="mr-3"></div>
         <div class="col tcell text-center justify-content-center p-2">
           <div class=" p-0">
             <div class="d-flex pt-1 flex-row justify-content-between">
-              <div class="title col-6 recived-text">
+           
+              <div class="title col-6 recived-text"> 
+              
                 <DropdownButton
-                  name={prod.name ? prod.name : "Product"}
+                
+                  name={prod.name ? prod.name : "Product Name"}
                   onSelect={item => { handleProductChange(index, item) }}
                   groups={products}
                 />
               </div>
+              
               <div class="title recived-text">{prod.id}</div>
+              
             </div>
           </div>
         </div>
-        <div class="col tcell text-center justify-content-center p-2">{prod.manufacturer}&nbsp;</div>
+        
+        <div class="col tcell text-center justify-content-center p-2" >{prod.manufacturer}&nbsp;
+         </div>
         <div class="col tcell text-center justify-content-center p-2">
           <div className="">
             <input
@@ -74,9 +83,10 @@ const EditRow = props => {
           </div>
         </div>
       </div>
-      {props.product.length > 1 &&
+      {props.product.length > 0 &&
         < div className=" m-3 bg-light">
-            <span onClick={() => onRemoveRow(index)}><img className="border-none cursorP shadow p-1 ml-2 rounded-circle" height="25" src={Delete} /></span>
+            <span onClick={() => onRemoveRow(index)}><img className="border-none cursorP shadow p-2 ml-2 rounded-circle" height="50" border-radius="none" src={Delete} /></span>
+            
           </div>
       }
     </div>

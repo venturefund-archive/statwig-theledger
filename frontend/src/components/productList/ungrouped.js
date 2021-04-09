@@ -21,7 +21,7 @@ const Ungrouped = (batch) => {
           <div className="rTableHead">Manufacturer</div>
           <div className="rTableHead">Batch Number</div>
           <div className="rTableHead">Serial Number</div>
-          <div className="rTableHead">Date Added</div>
+          <div className="rTableHead">Date Added</div> <br></br>
           <div className="rTableHead">Mfg Date</div>
           <div className="rTableHead">Exp Date</div>
           <div className="rTableHead"></div>

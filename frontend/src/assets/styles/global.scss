@@ -10,7 +10,7 @@ body {
 .breadcrumb {
   background: transparent;
   border-bottom: 3px solid $lightBlue;
-  padding: 0;
+  padding-left: 8px;
   border-radius: 0;
   display: inline-block;
   text-transform: uppercase;
@@ -31,7 +31,7 @@ body {
 
 .btn {
   padding: 5px 20px;
-  height: 45px;
+  height: 50px;
 }
 
 .btn-white {

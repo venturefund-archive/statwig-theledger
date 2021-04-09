@@ -13,7 +13,7 @@ const EditTable = props => {
           <div className={visible ? `w-15` : `w-20`}>
             Manufacturer
           </div>
-         <div className={visible ? `w-10` : `w-20`}>Quantity</div>
+         <div className={visible ? `w-10` : `w-20`}>Quantity</div><br></br>
          {visible &&
           <>
             <div className="w-10">

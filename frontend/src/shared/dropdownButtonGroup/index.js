@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import parse from 'html-react-parser';
 import useOnclickOutside from 'react-cool-onclickoutside';
 
-import upDownArrow from '../../assets/icons/up-and-down-blue.svg';
+import upDownArrow from '../../assets/icons/dropdown selected.png';
 import './style.scss';
 
 const dropdownButtonGroup = props => {
@@ -25,8 +25,8 @@ const dropdownButtonGroup = props => {
           // disabled={disabled}
           onClick={() => setMenu(!menu)}
         >
-          <span className={`${name?.length > 30 && 'textNeg'}`}>{useParse ? parse(name) : name}</span>
-          <img src={upDownArrow} alt="downarrow" width="9" height="9" />
+          <span className={`${name?.length > 40 && 'textNeg'}`}>{useParse ? parse(name) : name}</span>
+          <img src={upDownArrow} alt="downarrow" width="20.34" height="11.62" />
         </button>
       }
       {menu && !disabled && groups.length > 0 && (

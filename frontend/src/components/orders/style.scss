@@ -1,26 +1,27 @@
 @import '../../assets/styles/global.scss';
 
 .orders {
-    padding-right: 3rem;
-    padding-left: 3rem;
+    padding-right: 2rem;
+    padding-left: 8rem;
     @media (max-width: $md) {
       padding-right: 10px;
       padding-left: 10px;
     }
+    
 
     .full-width-ribben {
         position: absolute;
         left: 0;
         right: 0;
-        background-color: #eaeaea;
+        background-color: #EAEAEA;
         .filter {
-          margin-left: 9rem;
-          margin-right: 3rem;
+          margin-left: 12rem;
+          margin-right: 7rem;
         }
       }
 
       .ribben-space {
-        margin-top: 6.5rem;
+        margin-top: 6rem;
         .address{
           word-wrap: break-word;
           word-break: break-word
@@ -31,13 +32,13 @@
         box-shadow: 0px 3px 6px $grey;
         border-radius: 15px;
         background-color: $white;
-        padding: 20px 20px 5px 20px;
-        margin-top: 20px;
+        padding: 20px 20px 20px 20px;
+        margin-top: -10px;
         display: flex;
         align-items: flex-start;
 
         & > .d-flex {
-          margin-top: 15px;
+          margin-top: 5px;
         }
 
         @media screen and (max-width: 768px) {
@@ -62,18 +63,19 @@
           border-radius: 50%;
           justify-content: center;
           align-items: center;
+          margin-top: 6px;
           margin-right: 13px;
           display: flex;
 
 
           @media (min-width: $xl) {
-            width: 60px;
-            height: 60px;
+            width: 55px;
+            height: 55px;
           }
 
           img {
-            width: 28px;
-            height: 20px;
+            width: 25px;
+            height: 25px;
           }
 
           &.truck-bg {
@@ -94,7 +96,7 @@
           }
 
           &.outbound-alert-bg{
-            background-color: #35BFCC96;
+            background-color: #92eef796;
           }
 
           &.transit-bg {
@@ -124,18 +126,18 @@
 
         .title {
           font-size: 14px;
-          line-height: 9px;
+          line-height: 8px;
           font-weight: bold;
           color: #707070;
           margin-bottom: 8px;
           @media (min-width: $xl) {
-            font-size: 14px;
+            font-size: 13px;
           }
         }
 
         .count {
           font-size: 26px;
-          margin-top: 12px;
+          margin-top: 13px;
           font-weight: bold;
         }
 

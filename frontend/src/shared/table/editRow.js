@@ -148,7 +148,7 @@ const EditRow = props => {
         </>
       )}
       <div className="ml-2 bg-light align-self-center">
-        <span onClick={() => props.onRemoveRow(idx)}><img className="border-none cursorP shadow p-1 rounded-circle" height="25" src={Delete} /></span>
+        <span onClick={() => props.onRemoveRow(idx)}><img className="border-none cursorP shadow p-1 rounded-circle" height="35" src={Delete} /></span>
       </div>
       {!addMore && 
         <div className="ml-2 mt-1 mb-1 ">

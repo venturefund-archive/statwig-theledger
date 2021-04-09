@@ -2,8 +2,8 @@
 
 
 .NewOrder {
-  padding-right: 3rem;
-    padding-left: 3rem;
+    padding-right: 2rem;
+    padding-left: 8rem;
     @media (max-width: $md) {
       padding-right: 10px;
       padding-left: 10px;
@@ -111,11 +111,20 @@
     padding-bottom:5px;
     border-radius: 10px;
   }
+  .headsup1{
+    font-size: 16px;
+    font-weight: 1000;
+    padding-top:-1rem;
+    padding-bottom: 0rem;
+    padding-left:1rem 
+  }
   .headsup{
-    font-size: 15px;
-    font-weight: 700;
-    padding-top:1.25rem;
-    padding-bottom: 0.625rem; 
+    font-size: 16px;
+    font-weight: 1000;
+    padding-top:0rem;
+    padding-bottom: 0rem;
+    padding-left:0rem 
+    
   }
   .total{
     color: $OBBlue;

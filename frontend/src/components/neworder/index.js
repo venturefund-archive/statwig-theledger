@@ -200,8 +200,8 @@ const NewOrder = (props) => {
   };
 
   return (
-    <div className="NewOrder m-3">
-      <h1 className="breadcrumb">CREATE ORDER</h1>
+    <div className="NewOrder m-2">
+      <h1 className="breadcrumb">CREATE NEW ORDER</h1>
       <Formik
         // enableReinitialize={true}
         initialValues={{
@@ -245,8 +245,8 @@ const NewOrder = (props) => {
           <form onSubmit={handleSubmit} className="">
             
             <div className="row mb-3">
-              <label htmlFor="productDetails" className="headsup">
-                Product Details
+              <label htmlFor="productDetails" className="headsup1" >
+                          Product Details
               </label>
                 <EditTable
                   product={addProducts}
@@ -266,7 +266,7 @@ const NewOrder = (props) => {
                       setAddProducts(prod => [...prod, newArr]);
                     }}
                   >
-                    +<span> Add Another Product</span>
+                    +<span> <b>Add Another Product </b></span>
                   </button>
                 </div>
             </div>
@@ -277,17 +277,18 @@ const NewOrder = (props) => {
             <div className="row mb-3">
               <div className="col bg-white shadow formContainer low p-3">
                 <label htmlFor="client" className="headsup">
-                  From
+                  Order From
                 </label>
                 <div className="row">
                   <div className="col-md-6 com-sm-12">
                     <div className="form-group">
-                      <label htmlFor="organizationName">Organisation Name*</label>
+                      <label htmlFor="organizationName" >Organisation Name*</label>
                       <div className="form-control">
                         <DropdownButton
                           name={senderOrganisation[0]}
-                          disabled={true}
+                          disabled={false}
                           onSelect={() => { }}
+                                              
                           groups={[senderOrganisation[0]]}
                         />
                       </div>
@@ -309,7 +310,7 @@ const NewOrder = (props) => {
             <div className="row mb-3">
               <div className="col bg-white formContainer shadow low p-3">
                 <label htmlFor="client" className="headsup">
-                  To
+                  Deliver To
                 </label>
                 <div className="row">
                   <div className="col-md-6 com-sm-12">
@@ -379,7 +380,7 @@ const NewOrder = (props) => {
 
                 <button className="btn btn-yellow fontSize20 font-bold">
                   <img src={OrderIcon} width="20" height="17" className="mr-2 mb-1" />
-                  <span>Create Order</span>
+                  <span>Review Order</span>
                 </button>
               </div>
             </div>

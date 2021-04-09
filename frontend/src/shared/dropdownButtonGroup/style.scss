@@ -9,6 +9,7 @@
   small {
     color: $a8Grey;
   }
+  
   .btn-custom-dropdown {
     border: none;
     display: flex;
@@ -29,7 +30,7 @@
   }
 
   .dropdown-menu {
-    height:180px;
+    height:140px;
     overflow: auto;
 
     box-shadow: 0px 3px 10px $grey;
@@ -44,15 +45,15 @@
     }
     hr {
       border-width: 0.5px;
-      margin-top: 5px;
+      margin-top: 4px;
       margin-bottom: 5px;
     }
   }
   .transform-group {
     position: absolute;
-    transform: translate3d(0px, 38px, 0px);
+    transform: translate3d(-18px, 48px, 0px);
     top: 0;
-    left: -16px;
+    left: -14px;
     right: -15px;
     will-change: transform;
   }
