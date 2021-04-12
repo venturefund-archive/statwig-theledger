@@ -35,6 +35,7 @@ const VerifyInventory = props => {
         serialNumbersRange: inventory.serialNumber
       }
     });
+    debugger;
     const result = await addProductsToInventory({
       products: postData,
     });

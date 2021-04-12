@@ -8,6 +8,7 @@ import ExcelPopUp from './excelpopup';
 import FailurePopUp from './failurepopup';
 import uploadBlue from '../../assets/icons/UploadWhite.svg';
 import ExportIcon from '../../assets/icons/Export.svg';
+import EyeIcon from '../../assets/icons/eye.svg';
 import dropdownIcon from '../../assets/icons/drop-down.svg';
 
 import {
@@ -180,7 +181,7 @@ const NewInventory = props => {
   return (
     <div className="Newinventory">
       <div className="d-flex justify-content-between mb-5">
-        <h1 className="breadcrumb">ADD PRODUCTS TO INVENTORY</h1>
+        <h1 className="breadcrumb">ADD INVENTORY</h1>
         <div className="d-flex flex-column align-items-center">
           <button className="btn-primary btn" onClick={() => setMenu(!menu)}>
             <div className="d-flex  align-items-center">
@@ -235,7 +236,8 @@ const NewInventory = props => {
         <span className="value">{grandTotal}</span> */}
 
         <button className="btn-primary btn" onClick={onProceedToReview}>
-          Proceed To Review
+        <img src={EyeIcon} width="18" height="18" className="mr-3" />
+        Review
         </button>
      </div>
       {openCreatedInventory && (
