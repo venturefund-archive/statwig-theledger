@@ -1,59 +1,197 @@
-@import "../../assets/styles/global.scss";
+@import '../../assets/styles/global.scss';
 
-.custom-dropdown {
-  flex-basis: 100%;
-  display: flex;
-  outline: none;
-  position: relative;
 
-  small {
-    color: $a8Grey;
+.NewOrder {
+  padding-right: 3rem;
+    padding-left: 3rem;
+    @media (max-width: $md) {
+      padding-right: 10px;
+      padding-left: 10px;
+    }
+  .userpanel{
+    padding: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .profileIconRound{
+      background-color: #FABCC4;
+      font-size: 0.625rem;
+      width: 30px;
+      height: 30px;
+      box-shadow: 0px 3px 6px #00000029;
+      border-radius: 50%;
+      justify-content: center;
+      align-items: center;
+      margin-right: 11px;
+      display: flex;
+    }
+  }  
+
+  .formContainer{
+    border-radius: 0.313rem;
   }
-  .btn-custom-dropdown {
-    border: none;
+
+  .form-group,
+  .input-group {
     display: flex;
     justify-content: space-between;
-    // color:#707070;
-    flex-basis: 100%;
-    outline: none;
     align-items: center;
-    font-size: 12px;
-    background: transparent;
 
-    &.active {
-      color: $primaryBlue;
+    
+    .custom-dropdown .btn-custom-dropdown{
+      font-size:14px;
+      align-items: center;
+      padding-left: 0;
+      @media (min-width: $xl) {
+        font-size:14px;
+      }
+      @media (max-width: $lg) {
+        font-size:12px;
+      }
     }
-    .textNeg{
-      margin-top: -1.15rem;
+
+    label {
+      // color: #707070;
+      text-align: center;
+      font-size: 15px;
+      margin-bottom:0px;
+    }
+     .date{
+       border:none;
+       background: none;
+     }
+    .form-control {
+      border: none;
+      background: transparent;
+      border-bottom: 2px solid #d6d6d6;
+      border-radius: 0;
+      color: $black;
+      flex-basis: 55%;
+      flex-grow: inherit;
+      font-size: 15px;
+    }
+
+    @media (min-width: $xl) {
+      label {
+        font-size: 14px;
+        margin-bottom:0px;
+      } 
+
+  
+      .form-control {
+        border: none;
+        background: transparent;
+        border-bottom: 2px solid #d6d6d6;
+        border-radius: 0;
+        color: $black;
+        flex-basis: 65%;
+        flex-grow: inherit;
+        font-size: 13px;
+       
+        
+      }
+
     }
   }
+ 
+  .input-group {
+    position: relative;
+    margin-bottom: 1rem;
 
-  .dropdown-menu {
-    height:180px;
-    overflow: auto;
+    
 
-    box-shadow: 0px 3px 10px $grey;
-    border-radius: 8px;
-    border: none;
-    padding: 0.5rem;
-    .dropdown-item {
-      padding: 0;
-      clear: both;
-      font-size: 14px;
+    .input-group-append {
+      position: absolute;
+      right: 0;
       cursor: pointer;
     }
-    hr {
-      border-width: 0.5px;
-      margin-top: 5px;
-      margin-bottom: 5px;
+  }
+
+  .low{
+    padding-bottom:5px;
+    border-radius: 10px;
+  }
+  .headsup1{
+    font-size: 16px;
+    font-weight: 1000;
+    padding-top:-1rem;
+    padding-bottom: 0rem;
+    padding-left:1rem 
+  }
+  .headsup{
+    font-size: 15px;
+    font-weight: 700;
+    padding-top:1.25rem;
+    padding-bottom: 0.625rem; 
+  }
+  .total{
+    color: $OBBlue;
+    font:  25px/13px $roboto;
+   
+  }
+  .value{
+    color: $black;
+    font:  25px/13px $roboto;
+  }
+
+  hr {
+    border-width: 2px;
+    border-color: #D3D3D3;
+  }
+
+  .btn-outline-info{
+    border-radius: 10px;
+  }
+
+  .tooltip {
+    position: relative;
+ }
+ .tooltip::before {
+    background-color: white;
+    border: 1px solid #888;
+    border-radius: 2px;
+    color: #444;
+    content: attr(data-title);
+    display: none;
+    font-family: sans-serif;
+    font-size: 14px;
+    padding: 2px 5px;
+    position: absolute;
+    top: 20px;
+    left: 5px;
+    z-index: 1;
+ }
+ .tooltip:hover::before {
+    display: block;
+ }
+
+  
+
+  .table {
+    .overflow {
+      height: auto;
+      max-height: 400px;
     }
   }
-  .transform-group {
-    position: absolute;
-    transform: translate3d(0px, 38px, 0px);
-    top: 0;
-    left: -16px;
-    right: -15px;
-    will-change: transform;
-  }
+}
+
+
+.shipmentpopup{
+
+  .data{
+    font: 16px/27px $roboto ;
+     color: #707070;
+}
+
+.error{
+  font: 22px/36px $roboto ;
+  color: #707070;
+}
+
+  .alert{
+    font:  25px/0.1px $roboto;
+    color: #000000;
+}
+
+
 }
