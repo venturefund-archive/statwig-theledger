@@ -74,7 +74,7 @@ const EditRow = props => {
           </div>
         </div>
       </div>
-      {props.product.length > 1 &&
+      {props.product.length > 0 &&
         < div className=" m-3 bg-light">
             <span onClick={() => onRemoveRow(index)}><img className="border-none cursorP shadow p-1 ml-2 rounded-circle" height="38" src={Delete} /></span>
           </div>
