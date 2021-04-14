@@ -12,7 +12,7 @@ import calender from '../../assets/icons/calendar.svg';
 import Order from '../../assets/icons/orders.svg';
 import Totalshipments from "../../assets/icons/TotalShipment.svg";
 import { useDispatch, useSelector } from 'react-redux';
-import { getPOs, resetPOs } from '../../actions/poActions';
+import { getPOs, resetPOs, resetReviewPos } from '../../actions/poActions';
 
 const Orders = props => {
   const [visible, setvisible] = useState('one');
@@ -21,6 +21,10 @@ const Orders = props => {
   const [loadMore, setLoadMore] = useState(true);
   const [alerts, setAlerts] = useState(false);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(resetReviewPos({}));
+  },[])
   
   const onLoadMore = async (isInc, isReset = false) => {
     const newSkip = isInc ? skip + 5 : skip - 5;
@@ -41,7 +45,7 @@ const Orders = props => {
     img2: <img src={calender} width="16" height="16" />,
     img3: <img src={Order} width="16" height="16" />,
     img4: <img src={Package} width="16" height="16" />,
-    img5: <img src={Totalshipments} width="18" height="18" />,
+    img5: <img src={Totalshipments} width="16" height="16" />,
   };
 
   const setData = (v, a = false) => {
@@ -59,7 +63,7 @@ const Orders = props => {
   return (
     <div className="orders">
       <div className="d-flex justify-content-between">
-        <h1 className="breadcrumb">ORDERS</h1>
+        <h1 className="breadcrumb">YOUR ORDERS</h1>
         <div className="d-flex">
           <Link to="/neworder">
             <button className="btn btn-orange fontSize20 font-bold">
@@ -74,7 +78,7 @@ const Orders = props => {
         <Tabs {...props} setvisible={setvisible} visible={visible} />
       </div>
       <div className="full-width-ribben mt-4">
-        <TableFilter data={headers} fb="73%"/>
+        <TableFilter data={headers} fb="100%"/>
       </div>
       <div className="ribben-space">
         <Table {...props} skip={skip} loadMore={loadMore} ordrs={sendData} visible={visible} onLoadMore={onLoadMore}/>

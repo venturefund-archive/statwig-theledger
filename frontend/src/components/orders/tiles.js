@@ -11,7 +11,7 @@ const Tiles = props => {
       <div className="col">
         <div onClick={() => props.setData('one')} className="panel cursorP">
           <div className="picture recived-bg">
-            <img src={Received} alt="truck"/>
+            <img src={Received} alt="truck" />
           </div>
           <div className="d-flex flex-column">
             <div className="title recived-text">Total Oders Sent</div>
@@ -22,7 +22,7 @@ const Tiles = props => {
       <div className="col">
         <div onClick={() => props.setData('two')} className="panel cursorP">
           <div className="picture sent-bg">
-            <img src={Sent} alt="truck" />
+            <img src={Sent} alt="truck" width="500" height="600"/>
           </div>
           <div className="d-flex flex-column">
             <div className="title sent-text ">Total Oders Received</div>

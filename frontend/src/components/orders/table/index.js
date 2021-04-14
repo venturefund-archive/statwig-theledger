@@ -23,9 +23,16 @@ const Table = props => {
               let statusStyle = 'bg-primary';
               let status = order.poStatus;
               if (order.poStatus === 'RECEIVED') {
-                statusStyle = 'bg-success';
+                statusStyle = 'bg-info';
                 status = 'Delivered';
               }
+else if (order.poStatus === 'Accepted') {
+    statusStyle = 'bg-success';
+    status = 'Accepted';
+  }else if (order.poStatus === 'Rejected') {
+    statusStyle = 'bg-warning';
+  }
+
               const { customer, products, supplier } = order;
               return (
               <div key={index} className="rTableRow pt-2 pb-2 shadow-none">
@@ -48,12 +55,13 @@ const Table = props => {
                   <span className="text-muted">{customer.shippingAddress.shippingAddressId}</span>
                 </div>
                 <div className="rTableCell">
-                <div className={`status secondary-bg ${statusStyle}`}>
+                {/* <div className={`status secondary-bg ${statusStyle}`}> */}
+                <div className={`status secondary-bg ${statusStyle} {cell padding= "2"}`}>
                     {status}
                 </div>
                 </div>
                 <div className="rTableCell">
-                  <Link to={`/vieworder/${order.id}`} 
+                  <Link to={`/vieworder/${order.id}`}
                     className="button pl-3 pr-3 pt-1 pb-1"
                   >
                     View
