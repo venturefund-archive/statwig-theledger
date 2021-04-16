@@ -63,7 +63,7 @@ const Orders = props => {
   return (
     <div className="orders">
       <div className="d-flex justify-content-between">
-        <h1 className="breadcrumb">ORDERS</h1>
+        <h1 className="breadcrumb">YOUR ORDERS</h1>
         <div className="d-flex">
           <Link to="/neworder">
             <button className="btn btn-orange fontSize20 font-bold">
