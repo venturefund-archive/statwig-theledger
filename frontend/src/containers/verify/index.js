@@ -6,6 +6,9 @@ import Verify from '../../components/verify';
 import {sendOtp, setCurrentUser, verifyOtp} from '../../actions/userActions';
 import {turnOff, turnOn} from "../../actions/spinnerActions";
 import setAuthToken from "../../utils/setAuthToken";
+import MobileHeader from '../../shared/header/mobileHeader';
+import logo from '../../assets/brands/VACCINELEDGER.png';
+
 
 const VerifyContainer = props => {
   const [email, setEmail] = useState('');
@@ -76,7 +79,14 @@ const VerifyContainer = props => {
    }
 
   return (
+    
     <div className="container-fluid p-0" tabIndex="-1" onKeyDown={onkeydown}>
+        <MobileHeader {...props} />
+         <nav className="navbar sticky-top navbar-expand-lg">
+        <a className="navbar-brand" href="#">
+          <img src={logo} width="230" height="30" alt="logo" onClick={() =>props.history.push('/#')} />
+        </a>
+        </nav>
       <Verify
         email={email}
         otp1={otp1}
@@ -92,6 +102,8 @@ const VerifyContainer = props => {
         onVerifyOtp={verifyOTP}
         onResendOtp={resendOtp}
       />
+    
+
     </div>
   );
 };

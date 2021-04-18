@@ -5,6 +5,9 @@ import hide from '../../assets/icons/hide.png';
 import eye from '../../assets/icons/eye.png';
 import logo from '../../assets/brands/VaccineLedgerlogo.svg';
 import '../login/style.scss';
+import {
+  Link
+} from "react-router-dom";
 
 const FormVerifyPage = (props) => {
   const { otp1, onOtpChange1, otp2, onOtpChange2, otp3, onOtpChange3, otp4, onOtpChange4,
@@ -79,6 +82,9 @@ const FormVerifyPage = (props) => {
                     <button type="button" className="btn btn-primary" onClick={onVerifyOtp}>
                       LOGIN
                     </button>
+                  </div>
+                  <div className="signup-link text-center mt-2">
+                  Go to Login Page? <Link to="/login">Login</Link>
                   </div>
                 </div>
               </div>
