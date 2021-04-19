@@ -16,6 +16,16 @@ router.get("/getStatsByBrewery/:warehouseId/:productId", AnalyticsController.get
 router.get("/getSales/:state/:tenure", AnalyticsController.getAllStats);
 router.get("/getReturnedRate/:state/:tenure", AnalyticsController.getAllStats);
 router.get("/getTarget/:state/:tenure", AnalyticsController.getAllStats);
-router.delete("/getActualReturns/:state/:tenure", AnalyticsController.getAllStats);
+// TODO
+router.get("/getInventoryBySku/:sku/:state", AnalyticsController.getAllStats);
+router.get("/getInventoryByBrand/:brand/:state/",AnalyticsController.getAllStats);
+
+/*
+ Unknown ?
+/getProductsById --> Get Product details ?
+
+/getAllBrands [ { brandId } ] --> Product to brand mapping ?
+*/
+
 
 module.exports = router;
