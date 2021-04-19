@@ -21,7 +21,6 @@ router.get("/getInventoryBySku/:sku/:state", AnalyticsController.getAllStats);
 router.get("/getInventoryByBrand/:brand/:state/",AnalyticsController.getAllStats);
 
 /*
- Unknown ?
 /getProductsById --> Get Product details --> Product Service
 
 /getAllBrands [ { brandId } ] --> Product to brand mapping ?
