@@ -324,7 +324,7 @@ exports.createShipment = [
 ];
 
 exports.receiveShipment = [
-    // auth,
+    auth,
     async (req, res) => {
         try {
             const data = req.body;
