@@ -23,6 +23,7 @@ const OrganisationModel = require('../models/OrganisationModel')
 const CounterModel = require('../models/CounterModel')
 
 const init = require('../logging/init');
+const { count } = require('../models/ShipmentModel');
 const logger = init.getLog();
 const imageUrl = process.env.IMAGE_URL;
 
@@ -323,48 +324,47 @@ exports.createShipment = [
 ];
 
 exports.receiveShipment = [
-    auth,
+    // auth,
     async (req, res) => {
         try {
             const data = req.body;
-
-            const soID = data.shippingOrderId;
-            const poID = data.poId;
-
             const shipmentID = data.id;
-            
             const shipmentInfo = await ShipmentModel.find({id: shipmentID});
-            
-
             var actuallyShippedQuantity = 0;
             var productNumber=-1;
-            /* if(shipmentInfo !== null){
+             if(shipmentInfo != null){
                 const receivedProducts = data.products;
                 var shipmentProducts = shipmentInfo[0].products;
-                
+                console.log(shipmentProducts)
                 shipmentProducts.forEach(product => {
+                    console.log(product)
                     productNumber  = productNumber + 1;
                     receivedProducts.forEach(reqProduct => {
                         
                         if(product.productName === reqProduct.productName){
                             actuallyShippedQuantity = product.productQuantity;
-                            
                             var receivedQuantity = reqProduct.productQuantity;
                             var quantityDifference = actuallyShippedQuantity - receivedQuantity;
                             var rejectionRate = (quantityDifference/actuallyShippedQuantity)*100;
-                            
+            
                             (shipmentProducts[productNumber]).quantityDelivered = receivedQuantity;
                             (shipmentProducts[productNumber]).rejectionRate = rejectionRate;
+                            console.log("Rejaction Rate "+rejectionRate)
+                            ShipmentModel.updateOne({
+                                "id": shipmentID,
+                                "products.productID": product.productID
+                            }, {
+                                $set: {
+                                    "products.$.rejectionRate": rejectionRate
+                                }
+                            })
+                            .then(e=>{console.log(e)}).catch(err=>{
+                                console.log(err)
+                            })
                         }    
                     })
                 });
-                
-                if(actuallyShippedQuantity !== 0){
-                    const updatedDocument =  await ShipmentModel.updateOne({id: shipmentID}, shipmentInfo);    
-                }
-                
-            }*/
-            
+            }
             var flag = "Y";
             if ( data.poId === null ) {
                    flag = "YS"
@@ -392,7 +392,7 @@ exports.receiveShipment = [
             }
         }
             if (flag != "N") {
-
+                console.log("N")
             const suppWarehouseDetails = await WarehouseModel.findOne({
                 id: data.supplier.locationId
             })
@@ -409,8 +409,9 @@ exports.receiveShipment = [
                 id: recvInventoryId
             })
             var products = data.products;
+            var count = 0;
               for ( count=0; count < products.length; count++)
-                 {
+                 { console.log(count)
                     inventoryUpdate(products[count].productID, products[count].productQuantity, suppInventoryId, recvInventoryId, data.poId, "RECEIVED")
                     shipmentUpdate(products[count].productID, products[count].productQuantity, data.id, "RECEIVED")
                     if (flag == "Y")
@@ -429,18 +430,12 @@ exports.receiveShipment = [
 	     {
 		      $push: { shipmentUpdates: updates },
 		      $set: {status :"RECEIVED" }
-	     })
-
-            //await ShipmentModel.findOneAndUpdate({
-              //  id: data.id
-            //}, {
-              //  status: "RECEIVED"
-            //}, );
+	     },{ "new": true})
 
             return apiResponse.successResponseWithData(
                 res,
                 'Shipment Received',
-                products
+                updateData
             );
           } else {
                 return apiResponse.successResponse(
@@ -449,13 +444,9 @@ exports.receiveShipment = [
                 );
             }
         } catch (err) {
-            logger.log(
-                'error',
-                '<<<<< ShipmentService < ShipmentController < modifyShipment : error (catch block)',
-            );
             return apiResponse.ErrorResponse(res, err);
         }
-    },
+    }
 ];
 
 exports.fetchShipmentsByQRCode = [
