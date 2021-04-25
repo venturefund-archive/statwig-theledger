@@ -3,6 +3,6 @@ const AlertController = require("../controllers/AlertController");
 
 var router = express.Router();
 
-router.get("/getShipmentReceived", AlertController.getShipmentReceived);
+router.get("/getShipmentReceived", AlertController.getAllAlerts);
 
 module.exports = router;

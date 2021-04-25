@@ -6,11 +6,13 @@ const utility = require("../helpers/utility");
 const jwt = require("jsonwebtoken");
 const { constants } = require("../helpers/constants");
 
-exports.getShipmentReceived = [
+
+
+exports.getAllAlerts= [
 
         (req, res) => {
                 try {
-                        res.json("Shipment Received")
+                        res.json("Alert Received")
                 } catch (err) {
                         return apiResponse.ErrorResponse(res, err);
                 }
