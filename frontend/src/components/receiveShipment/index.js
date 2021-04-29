@@ -163,30 +163,31 @@ const ReceiveShipment = (props) => {
             )}
         </div> 
       </div> 
-
-        <div className="d-flex flex-row">
+        <div className="row ml-1">
+        <div className="d-flex flex-auto">
           <div className="panel commonpanle">
             <div className="form-group">
-              <label className="mb-1 text-secondary">Shipment ID</label>
+              <label className="mb-1 text-secondary pt-2">Shipment ID:</label>
               <input
                 name="id"
                 type="text"
-                className="form-control"
+                className="form-control ml-5"
                 onChange={(e) => setshipmentId(e.target.value)}
-                size="40"
+                size="30"
                 value={id}
-              />
+                />
+                </div>
             </div>
           </div>
-          <div className="panel commonpanle">
+          <div className="panel commonpanle ml-3">
              <div className="form-group">
-             <label className="mb-1 text-secondary">Bill No</label>
+             <label className="mb-1 text-secondary pt-2">Bill No:</label>
               <input
                 type="text"
-                className="form-control"
+                className="form-control ml-5"
                 name="billNo"
                 onChange={(e) => setBillNo(e.target.value)}
-                size="40"
+                size="32"
                 value={billNo}
               />
               </div>
@@ -197,7 +198,7 @@ const ReceiveShipment = (props) => {
           <div className="col-sm-4">
             {/* <h6 className="heading mb-3">SHIPMENT SUMMARY</h6> */}
             {/* <ShipmentSummary shipments={tracking} /> */}
-            <h6 className="heading mt-3 mb-3 ml-3">Shipment Details</h6>
+            <h6 className="heading mt-3 mb-4 ml-3">Shipment Details</h6>
             <ShipmentDetails
               shipments={tracking}
               setMenuShip={setMenuShip}
@@ -218,7 +219,7 @@ const ReceiveShipment = (props) => {
             />
           </div>
           <div className="col-sm-4">
-          <h6 className="heading mt-3 mb-3 ml-3">Comments</h6>            
+          <h6 className="heading mt-3 mb-4 ml-3">Comments</h6>            
             <div className="panel commonpanle" style={{height:'45%'}}>
               <div className="form-group" style={{width:"150%"}}>
                 <textarea
@@ -230,15 +231,18 @@ const ReceiveShipment = (props) => {
                   size="40"
                   cols="120" rows="7"
                   placeholder="Enter Comment Here"
-                />              
+                />
+                              
               </div>           
             </div>               
 
           </div>
           <div className="col-sm-4">
             <div className="row justify-content-between">
-              <h6 className="heading mt-3 mb-1 ml-4">Upload Image</h6>             
-                <button className="btn btn-primary font-weight-bold mb-0" onClick={uploadPhoto} style={{height:'4.4vh',width:'6vw'}}>
+              <h6 className="heading mt-3 ml-4">Upload Image</h6>  
+              <button className="btn btn-primary font-weight-bold mr-4"
+                   onClick={uploadPhoto} 
+                   style={{height:'5vh',width:'6vw'}}>
                   {/* <img
                     src={uploadWhite}
                     width="35"
