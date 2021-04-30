@@ -40,8 +40,8 @@ let options = {
 				"email" : "dev@statwig.com"
 			  },
         },
-        host: 'vaccineledger.com:9001/',
-        basePath: 'alertmanagement/alert/api',
+        host: 'localhost:3004/',
+        basePath: 'alertmanagement/api/alert/',
 		"consumes": [
 			"application/json"
 		  ],
@@ -90,7 +90,7 @@ app.use(cors());
 
 //Route Prefixes
 app.use("/", indexRouter);
-app.use("/api/", apiRouter);
+app.use("/alertmanagement/api/", apiRouter);
 
 // throw 404 if URL not found
 app.all("*", function(req, res) {

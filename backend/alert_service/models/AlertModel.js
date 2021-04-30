@@ -1,10 +1,10 @@
 var mongoose = require("mongoose");
 AlertSchema = new mongoose.Schema(
   {
-    id: { type: String, required: true, unique: true },
+    id: { type: String, unique: true },
     username: String,
     label: {
-      labelId: String, required : false
+      labelId: String, 
     },
     user: {
       user_id: String,
@@ -15,17 +15,17 @@ AlertSchema = new mongoose.Schema(
     transactionIds: [String],
     alerts: [
       {
-        productID: String, required : false,
-        productName: String, required : false,
-        manufacturer: String, required: false,
-        event_type_primary: String, required : false,
-        event_type_secondary: String, required : false, 
-        createdBy: String, required : true,
-        AlertMode: {
-                mobile : Boolean, required : true, default : false,
-                email : Boolean, required : true, default : true,
-                telegram : Boolean, required : true, default : false, 
-                web_push : Boolean, required : true, default : false,
+        productID: String,
+        productName: String,
+        manufacturer: String,
+        event_type_primary: String,
+        event_type_secondary: String, 
+        createdBy: String,
+        alertMode: {
+                mobile : Boolean, default : false,
+                email : Boolean, default : true,
+                telegram : Boolean, default : false, 
+                web_push : Boolean, default : false,
             }        
       },
     ],
