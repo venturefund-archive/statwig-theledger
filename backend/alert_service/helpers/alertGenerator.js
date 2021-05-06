@@ -1,0 +1,3 @@
+exports.generateAlert = function () {
+	
+};

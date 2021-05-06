@@ -7,7 +7,8 @@ var indexRouter = require("./routes/index");
 var apiRouter = require("./routes/api");
 var apiResponse = require("./helpers/apiResponse");
 var cors = require("cors");
-
+var alerts = require("./helpers/alertGenerator")
+var events = require("./models/EventModal");
 // DB connection
 var MONGODB_URL = process.env.MONGODB_URL;
 var mongoose = require("mongoose");
@@ -24,6 +25,7 @@ mongoose.connect(MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true 
 		process.exit(1);
 	});
 var db = mongoose.connection;
+const eventEmitter = events.watch();
 
 var app = express();
 //Swagger API
