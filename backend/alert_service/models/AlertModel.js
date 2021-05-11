@@ -16,8 +16,7 @@ AlertSchema = new mongoose.Schema(
     alerts: [
       {
         productID: String,
-        productName: String,
-        manufacturer: String,
+        actorOrgId : String,
         event_type_primary: String,
         event_type_secondary: String, 
         createdBy: String,

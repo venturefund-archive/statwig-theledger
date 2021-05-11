@@ -11,8 +11,7 @@ var lastYear = new Date()
 lastYear.setDate(today.getDate() - 365)
 
 async function connectDB() {
-  var MONGODB_URL =
-    'mongodb://StaTwig:StaTwig2020@db.vaccineledger.com:27017/abinbev'
+  var MONGODB_URL = process.env.MONGODB_URL
   console.log(MONGODB_URL)
   var mongoose = require('mongoose')
   mongoose
