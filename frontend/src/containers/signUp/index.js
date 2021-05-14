@@ -1,116 +1,218 @@
-import React, { useState, useCallback } from 'react';
-import Signup from '../../components/signUp';
-import {registerUser, checkUser} from '../../actions/userActions';
-import MobileHeader from '../../shared/header/mobileHeader';
-import logo from '../../assets/brands/VACCINELEDGER.png';
-import Modal from '../../shared/modal';
-import OrganisationPopUp from '../../components/signUp/organisationPopUp';
+import React, { useState,useEffect } from "react";
+import { Link } from 'react-router-dom';
+import DropdownButton from '../../shared/dropdownButtonGroup';
+import {getOrganisations} from '../../actions/productActions';
+import { Formik } from "formik";
 
-const SignupContainer = (props) => {
-  const [email, setEmail] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [ organisation, setOrganisation ] = useState({id: '', name: ''});
-  const [showModal, setShowModal] = useState(false);
-  const [ adminAwaiting, setAdminAwaiting ] = useState(false);
-  const [isNewOrg, setIsNewOrg] = useState(false);
+import '../login/style.scss';
+import Key from "../../assets/icons/key.png";
+import User from "../../assets/icons/user.png";
+import Mail from "../../assets/icons/mail.png";
+import hide from "../../assets/icons/hide.png";
+import eye from "../../assets/icons/eye.png";
+import org from "../../assets/icons/organization.png";
+import Waiting from "../../assets/icons/waiting.png";
+import logo from "../../assets/brands/VaccineLedgerlogo.svg";
 
-  const onSignup = useCallback(async (values) => {
-    let data = { firstName, lastName, emailId: email, organisationId: organisation.id };
-    if (isNewOrg) {
-      // data.organisationName = organisation.name;
-      data.organisationName = values.name;
-      data.address = {
-        line1: values.line1,
-        city:  values.city,
-        state: values.state,
-        pincode: values.pincode,
-        country: values.country
+const FormPage = (props) => {
+const [organisations, setOrganisations] = useState([]);
+const [organisationsArr, setOrganisationsArr] = useState([]);
+  const [value, setValue] = useState('');
+  
+  useEffect(() => {
+    async function fetchData() {
+      const orgs = await getOrganisations();
+      // const orgIds = orgs.map(org => org.id);
+      // setOrganisations(orgIds);
+      orgs.push({ id: 'Other', name: 'Other' });
+      setOrganisations(orgs);
+      setOrganisationsArr(orgs);
+    }
+    fetchData();
+  }, []);
+
+  const changeFn = (value, e) => {
+    setValue(value);
+    let orgs = organisationsArr.filter(org => org.name.toLowerCase().includes(value.toLowerCase()));
+    // orgs.push({ id: 0, name: 'Other' });
+    setOrganisations(orgs);
+    if (organisationsArr.filter(org => org.name.toLowerCase() == value.toLowerCase()).length && value != 'Other')
+      props.onOrgChange(false);
+    else {
+      props.onOrgChange(true);
+      if (e) {
+        setValue('Other');
       }
-      // data.type = 'CUSTOMER_SUPPLIER';
-      data.organisationId = 0;
     }
     
-    const result = await registerUser(data);
-    if (result.status === 200) {
-      setShowModal(false);
-      setAdminAwaiting(true);
-    }else if(result.status === 500) {
-      setErrorMessage(result.data.message);
-    }
-    else{
-      const err = result.data.data[0];
-      setErrorMessage(err.msg);
-    }
-  });
-
-  const checkNcontinue = async () => {
-    if (isNewOrg) {
-      let data = { firstName, lastName, emailId: email, organisationId: organisation.id };
-      const result = await checkUser(data);
-      if(result.status === 200) {
-        setShowModal(true);
-      }else if(result.status === 500) {
-        setErrorMessage(result.data.message);
-      }
-      else{
-        const err = result.data.data[0];
-        setErrorMessage(err.msg);
-      }
-    }
-    else
-      onSignup({});
+    props.onOrganisationChange({id: 0, name: value});
   }
-
-  const onkeydown = (event) => {
-    if (event.keyCode  === 13) {
-      checkNcontinue();
-    }
-  }
-  
-  const closeModal = () => {
-    setShowModal(false);
-  };
-
   return (
-    <div className="container-fluid p-0" tabIndex="-1" onKeyDown={onkeydown}>
-      {showModal && (
-        <Modal
-          isMandatory={true}
-          close={() => closeModal()}
-          size="modal-md" //for other size's use `modal-lg, modal-md, modal-sm`
-        >
-          <OrganisationPopUp
-            onHide={closeModal}
-            onSignup={onSignup}
-          />
-        </Modal>
-      )}
- <MobileHeader {...props} />
-   <nav className="navbar sticky-top navbar-expand-lg">
-        <a className="navbar-brand" href="#">
-          <img src={logo} width="230" height="30" alt="logo" onClick={() =>props.history.push('/#')} />
-        </a>
-</nav>
+    <div className="login-wrapper">
+      <div className="container">
+        <div className="mobile-header">
+          <div className="branding">
+            <img src={logo} alt="vaccineledger" />
+          </div>
+        </div>
+      
+  <div className="row">
+          <div className="col-sm-6 col-lg-6">
+            <div className="form-content">
+              <img className="logo" src={logo} />
+              <h1>Welcome,</h1>
+              <p>Signup to continue</p>
+            </div>
+          </div>
+          <div className="col-sm-6 col-lg-5">
+            <div className="card">
+              { props.adminAwaiting ?
+                <><img alt="" src={Waiting} height="150" width="150" className="align-self-center mt-5 mb-4" />
+              <div className="font-weight-bold align-self-center text-center ml-2 mr-2 mb-5 approve">Request is pending and you will receive an email/sms after approval</div></>
+              
+              :
+                <div className="card-body">
+                  <Formik
+                enableReinitialize={true}
+                initialValues={{
+                  firstName: "",
+                  lastName: "",
+                  email: '',
+                  org: "",
+                }}
+                validate={(values) => {
+                  const errors = {};
+                  if (!values.firstName) {
+                    errors.firstName = "Required";
+                  }
+                  if (!values.lastName) {
+                    errors.lastName = "Required";
+                  }
+                  if (!values.email) {
+                    errors.email = "Required";
+                  }
+                  if (!values.org) {
+                    errors.org = "Required";
+                  }
+                  return errors;
+                }}
+                onSubmit={(values, { setSubmitting }) => {
+                  setSubmitting(false);
+                  props.onSignup(values);
+                }}
+              >
+                {({
+                  values,
+                  errors,
+                  touched,
+                  handleChange,
+                  handleBlur,
+                  handleSubmit,
+                  isSubmitting,
+                  setFieldValue,
+                  dirty,
+                }) => (
+                  <form onSubmit={handleSubmit} className="mb-3">
+                  <div className="login-form mt-3 pl-5 pr-5">
+                  
+                  <div className="card-title p-3">Signup</div>
+                  <div className="form-group flex-column">
+                    <div className="pb-1">
+                  <img alt="" src={User} className="icon imgs"/></div>
+                  <input type="text"
+                  className="form-control-login"
+                  name="firstName"
+                  value={props.firstName}
+                  onChange={(e) => { props.onfirstNameChange(e); handleChange(e);}}
+                  placeholder="    First Name" />
+                  {errors.firstName && touched.firstName && (
+                    <span className="error-msg text-danger">{errors.firstName}</span>
+                  )}
+                  </div>
+                  <div className="form-group flex-column">
+                  <div className="pb-1">
+                  <img alt="" src={User} className="icon imgs" /></div>
+                  <input type="text"
+                  className="form-control-login"
+                  name="lastName"
+                  value={props.lastName}
+                  onChange={(e) => { props.onlastNameChange(e); handleChange(e);}}
+                  placeholder="    Last Name" />
+                  {errors.lastName && touched.lastName && (
+                    <span className="error-msg text-danger">{errors.lastName}</span>
+                  )}
+                  </div>
+                  <div className="form-group flex-column">
+                  <div className="pb-1">
+                  <img alt="" src={Mail} className="icon imgs" /></div>
+                  <input type="text"
+                  className="form-control-login"
+                  name="email"
+                  value={props.email}
+                  onChange={(e) => { props.onEmailChange(e); handleChange(e);}}
+                  placeholder="    Email ID/Mobile Number" />
+                  {errors.email && touched.email && (
+                    <span className="error-msg text-danger">{errors.email}</span>
+                  )}
+                  </div>
+                  <div className="form-group flex-column">               
+                  <img alt="" src={org} className="icon imgs" />
+                  <div className="pl-3" style={{color:"black"}}>
+                  <DropdownButton
+                  name={props.organisation.organisationId}
+                  value={value}
+                  isText={true}
+                  // placeholder='Select organisation/type new'
+                  placeholder='    Organisation'
+                  onSelect={item => {
+                    setFieldValue('org', item.name);
+                    props.onOrganisationChange(item);
+                    let orgs = organisationsArr.filter(org => org.name.toLowerCase() == item.name.toLowerCase());
+                    if (orgs.length && item.name != 'Other')
+                      props.onOrgChange(false);
+                    else
+                      props.onOrgChange(true);
+                    setValue(item.name);
+                  }}
+                  groups={organisations}
+                  changeFn={(v, e = '') => { console.log(v);
+                   setFieldValue('org', v); changeFn(v, e); }}
+                  dClass="ml-4"
+                  className="text"
+                  />
+                  {errors.org && touched.org && (
+                    <span className="error-msg text-danger">{errors.org}</span>
+                  )}
+                  </div>
+                  </div>
+              {
+                  props.errorMessage && <div className="alert alert-danger">{props.errorMessage}</div>
+              }
+                  <div className="text-center mt-2">
+                    <br></br>
+                  <button type="submit" className="btn btn-primary" >
+                  SIGNUP
+                  </button>
+                  </div>
+                  <div className="signup-link text-center mt-2">
+                  Already have an Account? <Link to="/login">Login</Link>
+                  </div>
+                  </div></form>
+                )}
+              </Formik>
+                  </div>
+              }
 
-      <Signup
-        email={email}
-        firstName={firstName}
-        lastName={lastName}
-        onSignup={checkNcontinue}
-        adminAwaiting={adminAwaiting}
-        onfirstNameChange={e => setFirstName(e.target.value)}
-        errorMessage={errorMessage}
-        onEmailChange={e => setEmail(e.target.value)}
-        onOrgChange={value => setIsNewOrg(value)}
-        onPasswordChange={e => setPassword(e.target.value)}
-        onlastNameChange={e => setLastName(e.target.value)}
-        onOrganisationChange={org => setOrganisation({id: org.id, name: org.name})}
-        organisation={organisation}
-      />
+             
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default SignupContainer;
+export default FormPage;
+
+
+
