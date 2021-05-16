@@ -19,15 +19,15 @@ AlertSchema = new mongoose.Schema(
         actorOrgId : String,
         event_type_primary: String,
         event_type_secondary: String, 
-        createdBy: String,
-        alertMode: {
-                mobile : Boolean, default : false,
-                email : Boolean, default : true,
-                telegram : Boolean, default : false, 
-                web_push : Boolean, default : false,
-            }        
+        createdBy: String,     
       },
     ],
+    alertMode: {
+      mobile : Boolean, default : false,
+      email : Boolean, default : true,
+      telegram : Boolean, default : false, 
+      web_push : Boolean, default : false,
+  }   
   },
   { timestamps: true }
 );

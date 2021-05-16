@@ -32,46 +32,38 @@ exports.createNewAlert = [
       console.log(Alert)
       if (Alert) {
         const newAlert = {
-                productId : req.body.productId,
-                productName : req.body.productName,
-                manufacturer : req.body.manufacturer,
-                event_type_primary : req.body.eventPrimary,
-                event_type_secondary : req.body.eventSecondary,
-                createdBy : req.body.createdBy,
-                AlertMode : req.body.alert
+          productId: req.body.productId,
+          productName: req.body.productName,
+          manufacturer: req.body.manufacturer,
+          event_type_primary: req.body.eventPrimary,
+          event_type_secondary: req.body.eventSecondary,          
+          actorOrgId: req.body.actorOrgId,
+          createdBy: req.body.createdBy
         }
-        console.log(newAlert);
-        Alert.alerts.push(newAlert);
+        console.log(newAlert)
+        Alert.alerts.push(newAlert)
         Alert.save(function (err, result) {
-                if (err) {
-                  console.log(err)
-                  apiResponse.ErrorResponse(res, err)
-                } else {
-                  return apiResponse.successResponse(
-                    res,
-                    'Alert Added successfully',
-                  )
-                }
-              })
+          if (err) {
+            console.log(err)
+            apiResponse.ErrorResponse(res, err)
+          } else {
+            return apiResponse.successResponse(res, 'Alert Added successfully')
+          }
+        })
       } else {
         EmployeeModel.findOne({ emailId: req.body.user }).then(async (user) => {
           if (user) {
             const { id, firstName, lastName, emailId, phoneNumber } = user
-
             const alertData = {
               productId: req.body.productId,
               productName: req.body.productName,
               manufacturer: req.body.manufacturer,
               event_type_primary: req.body.eventPrimary,
               event_type_secondary: req.body.eventSecondary,
+              actorOrgId: req.body.actorOrgId,
               createdBy: req.body.createdBy,
-              AlertMode: {
-                mobile: req.body.alertMobile,
-                email: req.body.alertEmail,
-                telegram: req.body.alertTelegram,
-                web_push: req.body.alertWebPush,
-              },
             }
+            console.log(alertData)
             const alert = new Alerts({
               id: utility.randomNumber(10),
               username: req.body.user,
@@ -84,6 +76,12 @@ exports.createNewAlert = [
               },
               //transactionIds:[...req.body.transactioId],
               alerts: [alertData],
+              alertMode: {
+                mobile: req.body.alertMobile || false,
+                email: req.body.alertEmail || false,
+                telegram: req.body.alertTelegram || false,
+                web_push: req.body.alertWebPush || false,
+              },
             })
             alert.save(function (err, result) {
               if (err) {
@@ -91,7 +89,7 @@ exports.createNewAlert = [
                 apiResponse.ErrorResponse(res, err)
               } else {
                 return apiResponse.successResponse(
-                  res,
+                  result,
                   'Alert Added successfully',
                 )
               }

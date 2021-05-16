@@ -26,24 +26,39 @@ async function connectDB() {
     })
 }
 
-function generateAlert(event) {
+async function generateAlert(event) {
+    try{
+        //console.log("*****************EVENT*************",event)
     let params = { 
-        event_type_primary: event.eventTypePrimary,
-        event_type_secondary: event.eventTypeDesc,
-        actorOrgId: event.actorOrgId
+        "alerts.event_type_primary": event.eventTypePrimary,
+        "alerts.event_type_secondary": event.eventTypeDesc,
+        "alerts.actorOrgId": event.actorOrgId
     }
-	for await (const row of Alert.find({...params})){
+    console.log("*************PARAMS FOR QUERY*************",params)
+	for await(const row of Alert.find({
+        ...params
+    })){
+        console.log("*****************ROW STARTS HERE**********************",row)
+        console.log("**************** ALERTS MODE *****************", row.alertMode)
         if(row.alertMode.mobile){
+            console.log("********************MOBILE NUMBER*********************",row.user.mobile_number)
             alertMobile(event,row.user.mobile_number);
         }
         if(row.alertMode.email){
-            alertEmail(event,row.user.email)
+            console.log("********************EMAIL ID****************",row.user.emailId)
+           alertEmail(event,row.user.emailId)
         }
         if(row.alertMode.web_push){
             let user = await User.find({id:row.user.user_id})
+            console.log("****************WEB PUSH ID****************",user.web_push)
             alertWebPush(event,user.web_push)
-        }
+        }        
+        console.log("****************ROW ENDS HERE *****************************")
     }
-};
+}
+catch(err){
+    console.log(err)
+}
+}
 
 exports.generateAlert = generateAlert;

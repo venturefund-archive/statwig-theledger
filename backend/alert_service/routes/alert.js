@@ -23,8 +23,9 @@ router.get("/getAllAlerts", AlertController.getAllAlerts);
 *"manufacturer":"BHARATBIOTECH",
 *"eventPrimary" : "CREATE",
 *"eventSecondary" : "ORGANIZATION",
+*"actorOrgId" : "org002",
 *"createdBy" :"sanath@statwig.com",
-*"alertMobile" : true
+*"alertMobile" : true,
 *"alertEmail" : true
 *}
 * @returns {object} 200 - An array of Alerts 
