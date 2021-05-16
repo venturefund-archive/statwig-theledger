@@ -22,29 +22,46 @@ function eventToHtml(event){
 }
 
 function alertMobile(event,mobile){    
+    try{
     const content = eventToData(event,"mobile")
-    axios.post(process.env.OTP_ENDPOINT, {
-        //Need to discuss this implementation. 
-      })
+    axios.post(process.env.MESSAGING_SERVICE_URL, {
+        "subject": "Testing otp",
+        "phone": mobile,
+        "otp": "0007",
+        "message": content,
+        "source": "https://theledger.com"
+    })
         .then((response) => {
-          if (response.status === 200) {
+          if (response.status === 200) {              
+            console.log("******************************** SMS SUCCESSFUL ****************")
               return true;
           }
         })
+    }
+    catch(err){
+        console.log(err)
+    }
 }
 
 function alertEmail(event,email){
-    const content = eventToData(event,"mail")
-    mailer
-           .send(
-             constants.confirmEmails.from,
-             email,
-             "New Email Alert from StaTwig",
-             content,
-           )
-           .then(function(){
-               return true;
-           })
+    try{
+    const content = eventToData(event,"email")
+    axios.post(process.env.MESSAGING_SERVICE_URL, {
+        "subject": `New Alert`,
+        "email" : email,
+        "otp": "0007",
+        "message": content,
+        "source": "https://theledger.com"
+    })
+        .then((response) => {
+          if (response.status === 200) {
+              console.log("**********Mailed Succesfully**********")
+              return true;
+          }
+        })
+}catch(err){
+    console.log(err)
+}
 }
 
 function alertWebPush(){
