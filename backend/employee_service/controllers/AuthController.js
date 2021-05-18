@@ -3,12 +3,11 @@ const WarehouseModel = require('../models/WarehouseModel');
 const ConsumerModel = require('../models/ConsumerModel');
 const InventoryModel = require('../models/InventoryModel');
 const OrganisationModel = require('../models/OrganisationModel');
+const ConfigurationModel = require('../models/ConfigurationModel');
 const CounterModel = require('../models/CounterModel');
 const { body, validationResult, oneOf, check } = require('express-validator');
 const { sanitizeBody } = require('express-validator');
 const uniqid = require('uniqid');
-
-//helper file to prepare responses.
 const apiResponse = require('../helpers/apiResponse');
 const utility = require('../helpers/utility');
 const bcrypt = require('bcrypt');
@@ -269,7 +268,7 @@ exports.register = [
             //   }
             // }
             const country =  req.body?.address?.country ? req.body.address?.country : 'India';
-            const address =  req.body?.address ? req.body.address : {};
+            const address =  req.body?.address ? req.body.address :  {};
             addr = address.line1 + ', ' + address.city + ', ' + address.state + ', ' + address.pincode;
             
             const incrementCounterOrg = await CounterModel.update({
@@ -484,7 +483,7 @@ exports.sendOtp = [
               '<<<<< UserService < AuthController < login : user is active',
             );
             let otp = utility.randomNumber(4);
-            if (process.env.EMAIL_APPSTORE.includes(user.emailId))
+            if (user.emailId === process.env.EMAIL_APPSTORE)
               otp = process.env.OTP_APPSTORE;
 
             await EmployeeModel.updateOne({ id: user.id }, { otp });
@@ -618,50 +617,21 @@ exports.verifyOtp = [
           query = { phoneNumber: phone };
         }
 
-	   const user = await EmployeeModel.findOne(query);
-
+        const user = await EmployeeModel.findOne(query);
         if (user && user.otp == req.body.otp) {
-
-	    var address;
-		
-		if (user.walletAddress == null || user.walletAddress == "wallet12345address")
-                   {
-                     const response = await axios.get(
-                     `${blockchain_service_url}/createUserAddress`,
-                );
-                address = response.data.items;
-                const userData = {
-                  address,
-                };
-                logger.log(
-                  'info',
-                  '<<<<< UserService < AuthController < verifyConfirm : granting permission to user',
-                );
-                await axios.post(
-                  `${blockchain_service_url}/grantPermission`,
-                  userData,
-                );
-		       await EmployeeModel.update(query, { otp: null ,walletAddress: address});
-                  }
-              else
-                 {
-                      address = user.walletAddress
-                 }
-
-            let userData = {
+          await EmployeeModel.update(query, { otp: null });
+          let userData = {
             id: user.id,
             firstName: user.firstName,
             emailId: user.emailId,
             role: user.role,
             warehouseId: user.warehouseId[0],
             organisationId: user.organisationId,
-	    walletAddress: address
           };
           //Prepare JWT token for authentication
           const jwtPayload = userData;
           const jwtData = {
-            //expiresIn: process.env.JWT_TIMEOUT_DURATION,
-            expiresIn : "12 hours"
+            expiresIn: process.env.JWT_TIMEOUT_DURATION,
           };
           const secret = process.env.JWT_SECRET;
           //Generated JWT token with Payload and secret.
@@ -1062,8 +1032,8 @@ exports.getUserWarehouses = [
   auth,
   async (req, res) => {
     try {
-      const users = await WarehouseModel.find({
-	organisationId: req.user.organisationId
+      const users = await EmployeeModel.findOne({
+        emailId: req.user.emailId
       });
       logger.log(
         'info',
@@ -1072,7 +1042,7 @@ exports.getUserWarehouses = [
       return apiResponse.successResponseWithData(
         res,
 	"User warehouses",
-        users,
+        users.warehouseId,
       );
     } catch (err) {
       logger.log(
@@ -1134,16 +1104,15 @@ exports.addWarehouse = [
         employees,
         warehouseAddress,
         warehouseInventory: inventoryResult.id,
-	status: 'NOTVERIFIED'
       });
         const s = await warehouse.save();
       /*await OrganisationModel.findOneAndUpdate({
-       	            id: organisationId
+                    id: organisationId
                 }, {
                     $push: {
                         warehouses: warehouseId
                     }
-                });*/
+                }); */
       await EmployeeModel.findOneAndUpdate({
                     id: req.user.id
                 }, {
@@ -1162,31 +1131,6 @@ exports.addWarehouse = [
     }
 
 
-  },
-];
-
-exports.updateWarehouseAddress = [
-  auth,
-  async (req, res) => {
-    try {
-      await WarehouseModel.findOneAndUpdate(
-        { id: req.query.warehouseId },
-        req.body,
-        { new: true }
-      )
-        .then((warehouse) => {
-          return apiResponse.successResponseWithData(
-            res,
-            "Warehouse Address Updated",
-            warehouse
-          );
-        })
-        .catch((err) => {
-          return apiResponse.ErrorResponse(res, err);
-        });
-    } catch (err) {
-      return apiResponse.ErrorResponse(res, err);
-    }
   },
 ];
 
@@ -1252,7 +1196,7 @@ exports.uploadImage = async function (req, res) {
         })
 
       } else if (action == "STOREID") {
-        const userData = {
+        const data = {
           "userDocuments": {
             "imageDetails": [
               filename
@@ -1262,9 +1206,9 @@ exports.uploadImage = async function (req, res) {
         }
 
         const employee = await EmployeeModel.updateOne({
-          emailId: data.emailId
+          emailId: "satheesh@statwig.com"
         }, {
-          $push: userData
+          $push: data
         });
         return res.send({
           success: true,
@@ -1272,7 +1216,7 @@ exports.uploadImage = async function (req, res) {
           filename
         })
       } else if (action == "KYCNEW") {
-        const userData = {
+        const data = {
           "userDocuments": {
             "imageDetails": [
               filename
@@ -1283,9 +1227,9 @@ exports.uploadImage = async function (req, res) {
           }
         }
         const employee = await EmployeeModel.updateOne({
-          emailId: data.emailId
+          emailId: "satheesh@statwig.com"
         }, {
-          $push: userData
+          $push: data
         });
         return res.send({
           success: true,
@@ -1657,3 +1601,39 @@ exports.getAllUsersByOrganisation = [
   },
 ];
 
+
+exports.getOrganizationsByType = [
+  auth,
+    async (req, res)=>{
+      try {
+        const organisationId=req.query.id;
+        const organisations=await ConfigurationModel.find({id:organisationId},'organisationTypes.id organisationTypes.name')
+        return apiResponse.successResponseWithData(
+          res,
+          "Operation success",
+          organisations
+        );
+      } catch (err) {
+        return apiResponse.ErrorResponse(res, err);
+      }
+    },
+  ];
+
+  exports.getwarehouseByType = [
+    auth,
+      async (req, res) => {
+        try {
+          const organisationId=req.query.id;
+          console.log(organisationId);
+          const organisations=await ConfigurationModel.find({id:organisationId},'warehouseTypes.id warehouseTypes.name')
+          console.log(organisations)
+          return apiResponse.successResponseWithData(
+            res,
+            "Operation success",
+            organisations
+          );
+        } catch (err) {
+          return apiResponse.ErrorResponse(res, err);
+        }
+      },
+    ];
