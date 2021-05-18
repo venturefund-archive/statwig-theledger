@@ -8,8 +8,6 @@ const CounterModel = require('../models/CounterModel');
 const { body, validationResult, oneOf, check } = require('express-validator');
 const { sanitizeBody } = require('express-validator');
 const uniqid = require('uniqid');
-
-//helper file to prepare responses.
 const apiResponse = require('../helpers/apiResponse');
 const utility = require('../helpers/utility');
 const bcrypt = require('bcrypt');
@@ -1606,7 +1604,7 @@ exports.getAllUsersByOrganisation = [
 
 exports.getOrganizationsByType = [
   auth,
-    async (req, res) => {
+    async (req, res)=>{
       try {
         const organisationId=req.query.id;
         const organisations=await ConfigurationModel.find({id:organisationId},'organisationTypes.id organisationTypes.name')
