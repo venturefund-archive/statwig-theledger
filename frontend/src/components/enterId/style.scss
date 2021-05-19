@@ -2,19 +2,14 @@
 
 .or{
   color: #0093E9; 
-  padding-left: 2rem;
+  padding-left: 7rem;
   padding-top: 2rem;
-  @media (max-width: $md) {
-    padding-right: 0px;
-    padding-left: 0px;
-    font-size: 15px;
-    padding-top: 3rem;
-  }
+  margin-right: 5rem;
 }
 .bottom {
   position: absolute;
   padding-top: 22rem;
-  padding-left: 13rem;
+  padding-left: 28rem;
 }
 .updateStatus {
   padding-right: 3rem;
@@ -135,6 +130,6 @@ display: inline;
         cursor: pointer;
       }
     }
-
+    
 
       }
