@@ -88,11 +88,10 @@ body {
 }
 
 .btn-outline-primary {
-  //color: !important;
-  //border-color: #229aca !important;
-  border-width: 2px !important;
+  color: $primaryBlue !important;
+  border-color: $primaryBlue !important;
+  border-width: 1px !important;
   border-radius: 10px !important;
-   
 }
 
 .custom-card {

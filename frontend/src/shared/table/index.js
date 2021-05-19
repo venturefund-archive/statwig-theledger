@@ -4,7 +4,7 @@ import next from '../../assets/icons/next.png';
 import './style.scss';
 
 const Table = props => {
-  const { loadMore, onLoadMore, inventoryDetails, colors, skip, date } = props;
+  const { loadMore, onLoadMore, inventoryDetails, colors, skip } = props;
   return (
     <div className="table">
       <div className="rTable">
@@ -30,12 +30,9 @@ const Table = props => {
                     </div> */}
                 </div>
               </div>
-              <div className="rTableCell" style={{position:"relative",left:'0'}}>{inventory.products.manufacturer}</div>
-              <div className="rTableCell" style={{position:"relative",left:'0%'}}>{inventory.products.manufacturer}</div>
-              
-              <div className="rTableCell" style={{position:"relative",left:'5%'}}>{inventory.products.name}</div>
-              <div className="rTableCell" style={{position:"relative",left:'4%',fontWeight:700}}>{inventory.inventoryDetails.quantity}</div>
-              <div className="rTableCell" style={{position:"relative",left:'5%'}}>
+              <div className="rTableCell" style={{position:"relative",left:'7%'}}>{inventory.products.manufacturer}</div>
+              <div className="rTableCell" style={{position:"relative",left:'12%',fontWeight:700}}>{inventory.inventoryDetails.quantity}</div>
+              <div className="rTableCell" style={{position:"relative",left:'12%'}}>
                 <button
                   className="btn btn-outline-info fontSize200 expand"
                   onClick={() => {

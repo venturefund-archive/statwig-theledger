@@ -17,24 +17,17 @@ import user from '../../assets/icons/brand.svg';
 import Package from '../../assets/icons/package.svg';
 import calender from '../../assets/icons/calendar.svg';
 import Status from '../../assets/icons/Status.svg';
-import inventory from '../../assets/icons/Quantity.png';
-import date from '../../assets/icons/ship_date.png';
 
 const Inventory = props => {
   const headers = {
     coloumn1: 'Product Name',
-    coloumn2: 'Product Category',
-    coloumn3: 'Manufacturer',
-    coloumn4: 'Date',
-    coloumn5: 'Quantity',
-    coloumn6: 'Status',
-    
+    coloumn2: 'Manufacturer',
+    coloumn3: 'Quantity',
+
+
     img1: <img src={Package} width="16" height="16" />,
-    img2: <img src={inventory} width="25" height="18" />,
-    img3: <img src={user} width="16" height="16" />,
-    img4: <img src={date} width="16" height="16" />,
-    img5: <img src={inventory} width="25" height="18" />,
-    img6: <img src={Status} width="16" height="16" />,
+    img2: <img src={user} width="16" height="16" />,
+    img3: <img src={Status} width="16" height="16" />,
   };
 
   const tableHeaders = {
@@ -102,7 +95,7 @@ const Inventory = props => {
         <h1 className="breadcrumb">INVENTORY </h1>
         <div className="d-flex">
           <Link to="/newinventory">
-            <button className="btn btn-yellow">
+            <button className="btn btn-yellow font-weight-bold">
               <img src={Add} width="13" height="13" className="mr-2" />
               <span>Add Inventory</span>
             </button>
@@ -282,8 +275,8 @@ const Inventory = props => {
           </div>
         </div>
       </div>
-      <div className="full-width-ribben ">
-        <TableFilter data={headers} fb="100%" />
+      <div className="full-width-ribben">
+        <TableFilter data={headers} fb="60%" />
       </div>
       <div className="ribben-space">
         <div className="row no-gutter">
