@@ -76,7 +76,7 @@ const LoginContainer = props => {
         onSendOtp={onSendOtp}
          
        
-       onEmailChange={e => setEmail(e.target.value)}
+      onEmailChange={e => setEmail((e.target.value).toLowerCase())}
        onPhoneChange={value=> setPhone(value)}
       
       
