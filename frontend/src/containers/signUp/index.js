@@ -119,7 +119,7 @@ const SignupContainer = (props) => {
         adminAwaiting={adminAwaiting}
         onfirstNameChange={e => setFirstName(e.target.value)}
         errorMessage={errorMessage}
-        onEmailChange={e => setEmail(e.target.value)}
+        onEmailChange={e => setEmail((e.target.value).toLowerCase())}
         onphoneChange={value => setPhone(value)}
         onOrgChange={value => setIsNewOrg(value)}
         onPasswordChange={e => setPassword(e.target.value)}
