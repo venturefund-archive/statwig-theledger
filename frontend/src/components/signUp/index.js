@@ -5,7 +5,6 @@ import {getOrganisations} from '../../actions/productActions';
 import { Formik } from "formik";
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
-
 import '../login/style.scss';
 import Key from "../../assets/icons/key.png";
 import User from "../../assets/icons/user.png";
@@ -16,12 +15,12 @@ import eye from "../../assets/icons/eye.png";
 import org from "../../assets/icons/organization.png";
 import Waiting from "../../assets/icons/waiting.png";
 import logo from "../../assets/brands/VaccineLedgerlogo.svg";
-
+import {getOrganizationsByType} from '../../actions/userActions';
 const FormPage = (props) => {
 const [organisations, setOrganisations] = useState([]);
 const [organisationsArr, setOrganisationsArr] = useState([]);
 const [value, setValue] = useState('');
-  
+const [organisationsType, setOrganisationsType] = useState([]);  
   useEffect(() => {
     async function fetchData() {
       const orgs = await getOrganisations();
@@ -31,16 +30,20 @@ const [value, setValue] = useState('');
       setOrganisations(orgs);
       setOrganisationsArr(orgs);
     }
+	async function fetchOrganisationType() {	
+      const orgsType = await getOrganizationsByType({id:"CONF001"});	
+      setOrganisationsType(orgsType);	
+    }	
+    fetchOrganisationType();
     fetchData();
-
   }, []);
+  console.log(organisationsType);
   const changeFn = (value_new, e) => {
     setValue(value_new);
     let orgs = organisationsArr.filter(org => org.name.toLowerCase().includes(value_new.toLowerCase()));
     // orgs.push({ id: 0, name: 'Other' });
     setOrganisations(orgs);
     // console.log(organisations);
-
     if (organisationsArr.filter(org => org.name.toLowerCase() == value_new.toLowerCase()).length && value_new != 'Other')
       props.onOrgChange(false);
     else {
@@ -158,14 +161,14 @@ const [value, setValue] = useState('');
                   <input type="text"
                   className="form-control-login"
                   name="email"
-                  value={props.email}
+                  autoCapitalize = 'none'	
+                  value={(props.email).toLowerCase()}
                   onChange={(e) => { props.onEmailChange(e); handleChange(e);}}
                   placeholder="    Email ID" />
                   {errors.email && touched.email && (
                     <span className="error-msg text-danger">{errors.email}</span>
                   )}
                   </div>
-
                   <div className="form-group flex-column">
                   <div className="pb-1">
                   <img alt="" src={Phone} className="icon imgsPhone" /></div>
@@ -190,6 +193,7 @@ const [value, setValue] = useState('');
                   <div className="form-group flex-column">               
                   <img alt="" src={org} className="icon imgs" />
                   <div className="pl-3" style={{color:"black"}}>
+				  <img alt="" src={org} className="icon imgs" />
                     <DropdownButton
                       name={props.organisation.organisationId}
                       value={value}
@@ -239,7 +243,6 @@ const [value, setValue] = useState('');
               </Formik>
                   </div>
               }
-
              
             </div>
           </div>
@@ -248,8 +251,4 @@ const [value, setValue] = useState('');
     </div>
   );
 };
-
 export default FormPage;
-
-
-
