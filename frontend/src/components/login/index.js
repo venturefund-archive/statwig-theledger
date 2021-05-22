@@ -18,8 +18,6 @@ const FormLoginPage = (props) => {
         onSendOtp();
     }
    }
-   
-   
   return (
     <div className="login-wrapper">
       <div className="container">
@@ -60,14 +58,14 @@ const FormLoginPage = (props) => {
                           // autoFocus: true,
                           enableSearch: true,
                         }}
-                        value={phone}
+						            value={phone}
                         onChange={onPhoneChange}
                       />
-                     
                       <div className="pb-3"></div>
               
                     </div>
-                  
+                    
+
                   {
                     errorMessage && <div className="alert alert-danger">{errorMessage}</div>
                   }
