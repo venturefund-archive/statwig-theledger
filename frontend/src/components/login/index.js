@@ -12,12 +12,14 @@ import eye from '../../assets/icons/eye.png';
 import Phone from "../../assets/icons/phone.png";
 
 const FormLoginPage = (props) => {
-  const { email, onEmailChange, errorMessage, onSendOtp } = props;
+  const { email, onEmailChange, errorMessage, onSendOtp, phone, onPhoneChange } = props;
   const onkeydown = (event) => {
     if (event.keyCode  === 13) {
         onSendOtp();
     }
    }
+   
+   
   return (
     <div className="login-wrapper">
       <div className="container">
@@ -58,12 +60,14 @@ const FormLoginPage = (props) => {
                           // autoFocus: true,
                           enableSearch: true,
                         }}
+                        value={phone}
+                        onChange={onPhoneChange}
                       />
+                     
                       <div className="pb-3"></div>
               
                     </div>
-                    
-
+                  
                   {
                     errorMessage && <div className="alert alert-danger">{errorMessage}</div>
                   }
