@@ -67,7 +67,7 @@ exports.checkEmail = [
       if (emailId.indexOf('@') > -1)
         user = await EmployeeModel.findOne({ emailId });
       else {
-        phone = emailId.indexOf('+91') === 0 ? emailId : '+91' + emailId;
+        phone = emailId.indexOf('+91') === 0 ? emailId : '+' + emailId;
         user = await EmployeeModel.findOne({ phoneNumber: phone });
       }
       // return EmployeeModel.findOne({ emailId: value.toLowerCase() }).then(user => {
@@ -175,7 +175,7 @@ exports.register = [
       if (emailId.indexOf('@') > -1)
         user = await EmployeeModel.findOne({ emailId });
       else {
-        phone = emailId.indexOf('+91') === 0 ? emailId : '+91' + emailId;
+        phone = emailId.indexOf('+91') === 0 ? emailId : '+' + emailId;
         user = await EmployeeModel.findOne({ phoneNumber: phone });
       }
 
@@ -357,7 +357,7 @@ exports.register = [
         const emailId = req.body.emailId.toLowerCase().replace(' ', '');
         let phone = '';
         if (emailId.indexOf('@') === -1)
-          phone = emailId.indexOf('+91') === 0 ? emailId : '+91' + emailId;
+          phone = emailId.indexOf('+91') === 0 ? emailId : '+' + emailId;
 
         // Create User object with escaped and trimmed data
         const user = new EmployeeModel({
@@ -477,7 +477,7 @@ exports.sendOtp = [
         if (emailId.indexOf('@') > -1)
           user = await EmployeeModel.findOne({ emailId });
         else {
-          phone = emailId.indexOf('+91') === 0 ? emailId : '+91' + emailId;
+          phone = emailId.indexOf('+91') === 0 ? emailId : '+' + emailId;
           user = await EmployeeModel.findOne({ phoneNumber: phone });
         }
         if (user) {
@@ -617,7 +617,7 @@ exports.verifyOtp = [
         const emailId = req.body.emailId.toLowerCase();
         var query = { emailId };
         if (emailId.indexOf('@') === -1) {
-          let phone = emailId.indexOf('+91') === 0 ? emailId : '+91' + emailId;
+          let phone = emailId.indexOf('+91') === 0 ? emailId : '+' + emailId;
           query = { phoneNumber: phone };
         }
 
