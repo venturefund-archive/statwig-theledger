@@ -2,9 +2,11 @@ import React, { useState,useEffect } from "react";
 import { Link } from 'react-router-dom';
 import DropdownButton from '../../shared/dropdownButtonGroup';
 import {getOrganisations} from '../../actions/productActions';
+import {getOrganizationsByType} from '../../actions/userActions';
 import { Formik } from "formik";
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
+
 import '../login/style.scss';
 import Key from "../../assets/icons/key.png";
 import User from "../../assets/icons/user.png";
@@ -14,36 +16,50 @@ import hide from "../../assets/icons/hide.png";
 import eye from "../../assets/icons/eye.png";
 import org from "../../assets/icons/organization.png";
 import Waiting from "../../assets/icons/waiting.png";
+import organisationType from "../../assets/icons/organisationType.png";
 import logo from "../../assets/brands/VaccineLedgerlogo.svg";
-import {getOrganizationsByType} from '../../actions/userActions';
+
 const FormPage = (props) => {
 const [organisations, setOrganisations] = useState([]);
+const [organisationsType, setOrganisationsType] = useState([]);
 const [organisationsArr, setOrganisationsArr] = useState([]);
 const [value, setValue] = useState('');
-const [organisationsType, setOrganisationsType] = useState([]);  
+const [orgType, setorgType] = useState('');
+const [selectedType,setselectedType] = useState();
   useEffect(() => {
     async function fetchData() {
       const orgs = await getOrganisations();
-      // const orgIds = orgs.map(org => org.id);
-      // setOrganisations(orgIds);
+
       orgs.push({ id: 'Other', name: 'Other' });
       setOrganisations(orgs);
       setOrganisationsArr(orgs);
     }
-	async function fetchOrganisationType() {	
-      const orgsType = await getOrganizationsByType({id:"CONF001"});	
-      setOrganisationsType(orgsType);	
-    }	
+    async function fetchOrganisationType() {
+      const orgsType = await getOrganizationsByType("CONF000");
+      var arr =[];
+      arr.push(orgsType.data[0].organisationTypes);
+      setOrganisationsType(arr);
+    }
     fetchOrganisationType();
     fetchData();
   }, []);
-  console.log(organisationsType);
-  const changeFn = (value_new, e) => {
+var orgTypeArray = [];
+organisationsType.map((data)=>{
+  for(var i=0;i<data.length;i++){
+    orgTypeArray.push(data[i].name);
+  }
+})
+const showOrgByType = (value) =>{
+  let arr = organisations.filter(data => data.type == value);
+  return arr;
+}
+  const changeFn = (value_new,e) => {
     setValue(value_new);
     let orgs = organisationsArr.filter(org => org.name.toLowerCase().includes(value_new.toLowerCase()));
     // orgs.push({ id: 0, name: 'Other' });
     setOrganisations(orgs);
     // console.log(organisations);
+
     if (organisationsArr.filter(org => org.name.toLowerCase() == value_new.toLowerCase()).length && value_new != 'Other')
       props.onOrgChange(false);
     else {
@@ -52,8 +68,8 @@ const [organisationsType, setOrganisationsType] = useState([]);
         setValue('Other');
       }
     }
-    
-    props.onOrganisationChange({id: 0, name: value_new});
+
+  props.onOrganisationChange({id: 0, name: value_new});
   }
   return (
     <div className="login-wrapper">
@@ -97,7 +113,7 @@ const [organisationsType, setOrganisationsType] = useState([]);
                   if (!values.lastName) {
                     errors.lastName = "Required";
                   }
-                 // if (!values.email) {
+                  //if (!values.email) {
                    // errors.email = "Required";
                   //}
                   // if (!values.phone) {
@@ -117,7 +133,6 @@ const [organisationsType, setOrganisationsType] = useState([]);
                   values,
                   errors,
                   touched,
-                  
                   handleChange,
                   handleBlur,
                   handleSubmit,
@@ -161,7 +176,7 @@ const [organisationsType, setOrganisationsType] = useState([]);
                   <input type="text"
                   className="form-control-login"
                   name="email"
-                  autoCapitalize = 'none'	
+                  autoCapitalize = 'none'
                   value={(props.email).toLowerCase()}
                   onChange={(e) => { props.onEmailChange(e); handleChange(e);}}
                   placeholder="    Email ID" />
@@ -169,6 +184,7 @@ const [organisationsType, setOrganisationsType] = useState([]);
                     <span className="error-msg text-danger">{errors.email}</span>
                   )}
                   </div>
+
                   <div className="form-group flex-column">
                   <div className="pb-1">
                   <img alt="" src={Phone} className="icon imgsPhone" /></div>
@@ -182,6 +198,7 @@ const [organisationsType, setOrganisationsType] = useState([]);
                         enableSearch: true,
                       }}
                       value={props.phone}
+
                       onChange = {props.onphoneChange}
                     />
                    {errors.phone && touched.phone && (
@@ -191,36 +208,53 @@ const [organisationsType, setOrganisationsType] = useState([]);
                   </div>
           
                   <div className="form-group flex-column">               
-                  <img alt="" src={org} className="icon imgs" />
-                  <div className="pl-3" style={{color:"black"}}>
-				  <img alt="" src={org} className="icon imgs" />
+                  <div className="pl-4" style={{color:"black"}}>
+                    <img alt="" src={organisationType} className="icon imgs" />
                     <DropdownButton
-                      name={props.organisation.organisationId}
-                      value={value}
-              
-                      // {...console.log(name)}
                       isText={true}
-                      placeholder='     Organisation'
+                      value={orgType}
+                      placeholder='  Organisation Type'
                       onSelect={item => {
-                        setFieldValue('org', item.name);
-                        props.onOrganisationChange(item);
-                        let orgs = organisationsArr.filter(org => org.name.toLowerCase() == item.name.toLowerCase());
-                        // console.log(orgs);
-                        if (orgs.length && item.name != 'Other')
-                          props.onOrgChange(false);
-                        else
-                          props.onOrgChange(true);
-                        setValue(item.name);
+                        setselectedType(item);
+                        setorgType(item);
+                        setValue("");
                       }}
-                      groups={organisations}
-                    //   changeFn={(v, e = '') => {
-                    //     console.log(v);
-                    //     setFieldValue('org', v); 
-                    //     changeFn(v, e);
-                    //  }}
+                      groups={orgTypeArray}
                       dClass="ml-4"
                       className="text"
-                    />
+                    />   
+                                      {errors.org && touched.org && (
+                    <span className="error-msg text-danger">{errors.org}</span>
+                  )}
+                     </div></div>
+                    <div className="pb-4"></div>
+                  <div className="form-group flex-column">               
+                  <div className="pl-4" style={{color:"black"}}>
+                    <img alt="" src={org} className="icon imgs" />
+                  <DropdownButton
+                    name={props.organisation.organisationId}
+                    value={value}
+                    isText={true}
+                    placeholder='  Organisation Name'
+                    onSelect={item => {
+                      setFieldValue('org', item);
+                      props.onOrganisationChange(item);
+                      let orgs = organisationsArr.filter(org => org.name == item.name);
+                      if (orgs.length && item.name != 'Other')
+                        props.onOrgChange(false);
+                      else
+                        props.onOrgChange(true);
+                        setValue(item.name);
+                    }}
+                    groups={showOrgByType(selectedType)}
+                  //   changeFn={(v, e = '') => {
+                  //     console.log(v);
+                  //     setFieldValue('org', v); 
+                  //     changeFn(v, e);
+                  //  }}
+                    dClass="ml-4"
+                    className="text"
+                  /> 
                   {errors.org && touched.org && (
                     <span className="error-msg text-danger">{errors.org}</span>
                   )}
@@ -242,8 +276,7 @@ const [organisationsType, setOrganisationsType] = useState([]);
                 )}
               </Formik>
                   </div>
-              }
-             
+              }   
             </div>
           </div>
         </div>
@@ -251,4 +284,8 @@ const [organisationsType, setOrganisationsType] = useState([]);
     </div>
   );
 };
+
 export default FormPage;
+
+
+
