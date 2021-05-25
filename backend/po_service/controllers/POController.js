@@ -455,15 +455,16 @@ exports.createPurchaseOrder = [
 ];
 
 exports.addPOsFromExcel = [
-  //auth,
+  auth,
   async (req, res) => {
+    console.log(req.user)
     try {
       // const permission_request = {
       //   role: req.user.role,
       //   permissionRequired: 'createPO',
       // };
-      //checkPermissions(permission_request, async permissionResult => {
-        //if (permissionResult.success) {
+      // checkPermissions(permission_request, async permissionResult => {
+      //   if (permissionResult.success) {
           try {
             const dir = `uploads`;
             if (!fs.existsSync(dir)) {
@@ -483,7 +484,7 @@ exports.addPOsFromExcel = [
                 { dateNF: 'dd/mm/yyyy;@', cellDates: true, raw: false },
             );            
             console.log(data)
-            //const { createdBy, lastUpdatedBy } = req.user.id || 'StaTwig';
+            const  createdBy = lastUpdatedBy = req.user.id;
             let poDataArray = [];
             console.log(data)
             poDataArray = data.map(po => {
@@ -492,6 +493,7 @@ exports.addPOsFromExcel = [
                "externalId": po['UNICEf PO Number'],
                 "creationDate": po['Document Date'],
                 "lastUpdatedOn": new Date().toISOString(),
+                "poStatus": ( req.user.id == po['Vendor'] ? 'APPROVED' : 'CREATED') ,
                 "supplier": {
                   "supplierOrganisation": po['Vendor'],
                   // "supplierIncharge": po['Supplier Incharge']
@@ -511,10 +513,11 @@ exports.addPOsFromExcel = [
                     "productQuantity": po['Order Quantity']
                   }
                 ],
-                // createdBy,
-                // lastUpdatedBy
+                "createdBy" : createdBy,
+                "lastUpdatedBy" : lastUpdatedBy
               }
             });
+            console.log(poDataArray)
             await RecordModel.insertMany(poDataArray);
             return apiResponse.successResponseWithData(
                 res,
@@ -522,14 +525,13 @@ exports.addPOsFromExcel = [
                 poDataArray
             );
           } catch (e) {
-            console.log(JSON.stringify(e))
             return apiResponse.ErrorResponse(res, 'Error from Blockchain');
 
           }
-        // } else {
-        //   res.json('Sorry! User does not have enough Permissions');
-        // }
-     // });
+    //     } else {
+    //       res.json('Sorry! User does not have enough Permissions');
+    //     }
+    //  });
     } catch (err) {
       return apiResponse.ErrorResponse(res, err);
     }
