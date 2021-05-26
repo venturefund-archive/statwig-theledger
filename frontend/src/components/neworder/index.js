@@ -100,7 +100,8 @@ const NewOrder = (props) => {
                                     }));
 
       const orgType = await getOrganizationsByTypes(profile.configuration_id);
-      setOrgTypes(orgType.data.length > 0 ? orgType.data[0].organisationTypes.map(item => {
+      console.log("org",orgType.data[0])
+      setOrgTypes(orgType.data[0].organisationTypes.length > 0 ? orgType.data[0].organisationTypes.map(item => {
                                       return {
                                         value: item.id,
                                         label: item.name
