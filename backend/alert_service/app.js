@@ -25,15 +25,15 @@ mongoose.connect(MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true 
 		process.exit(1);
 	});
 var db = mongoose.connection;
-const eventEmitter = events.watch();
-eventEmitter.on('change', (change) => {
-	if(change.operationType === 'insert') {
-		const event = change.fullDocument;
-		alerts.generateAlert(event)
-	  } else if(change.operationType === 'delete') {
-		console.log("********************************EVENT DELETED********************************",change.documentKey._id);
-	  }
-});
+// const eventEmitter = events.watch();
+// eventEmitter.on('change', (change) => {
+// 	if(change.operationType === 'insert') {
+// 		const event = change.fullDocument;
+// 		alerts.generateAlert(event)
+// 	  } else if(change.operationType === 'delete') {
+// 		console.log("********************************EVENT DELETED********************************",change.documentKey._id);
+// 	  }
+// });
 var app = express();
 //Swagger API
 const expressSwagger = require('express-swagger-generator')(app);
