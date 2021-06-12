@@ -1240,12 +1240,12 @@ exports.getStatsBySKU = [
 ];
 
 /**
- * getAllSalesStatOfBrands by district and month
+ * getSalesTotalOfAllBrands by district and month
  * 
  * @returns {Object}
  */
 
-exports.getAllSalesStatOfBrands = [
+exports.getSalesTotalOfAllBrands = [
 	auth,
 	async function (req, res) {
 		try {
