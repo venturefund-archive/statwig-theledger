@@ -41,7 +41,6 @@ inventoryDetails.sort(function(a,b){
            
               <AccordionSummary
                  // expand={display}
-                 expandIcon={<dropdownIcon />}
                   aria-controls="panel1a-content"
                   id="panel1a-header"
                   //className="rTableRow"
@@ -56,10 +55,10 @@ inventoryDetails.sort(function(a,b){
                   </div>
                   <div className="rTableCell" style={{position:"relative",left:'6%'}}>{inventory.productDetails.type}</div>
                   {/* <div className="rTableCell" style={{position:"relative",left:'0%'}}>{inventory.ProductList[0].productDetails.manufacturer}</div> */}
-                  <div className="rTableCell " style={{position:"relative",left:'12%'}}> {formatDate(inventory.createdAt)}</div>
-                  <div className="rTableCell"  style={{position:"relative",left:'19%'}}>{inventory.inventoryQuantity}</div>                                 
-                  <div className="rTableCell" style={{position:"relative", left:"22%"}}>
-                        {(inventory.eventTypePrimary !== 'ADD') ? (inventory.eventTypePrimary === 'RECEIVED' ? 'RECEIVED' :  'SENT') : 'ADDED'} 
+                  <div className="rTableCell " style={{position:"relative",left:"12%"}}> {formatDate(inventory.createdAt)}</div>
+                  <div className="rTableCell"  style={{position:"relative",left:"19%" }}>{inventory.inventoryQuantity}</div>                                 
+                  <div className="rTableCell" style={{position:"relative", left:"22%" }}>
+                      {(inventory.eventTypePrimary !== 'ADD') ? (inventory.eventTypePrimary === 'RECEIVED' ? 'RECEIVED' :  'SENT') : 'ADDED'} 
                    </div>
                     <div className=" rTableCell m-2" 
                          style={{position:"relative",left:'12%'}}>
@@ -90,37 +89,37 @@ inventoryDetails.sort(function(a,b){
                                      <TableRow>
                                           <TableCell>Shipment Id:</TableCell>
                                              <div className="">
-                                             <TableCell align="left">{inventory.shipmentDetails.id}</TableCell></div>
+                                             <TableCell align="left"> {inventory.shipmentDetails.id} </TableCell></div>
                                       </TableRow>
                                       <TableRow>
                                           <TableCell>From Organisation:</TableCell>
                                              <div className="">
-                                             <TableCell align="left">{inventory.shipmentDetails.supplier.id}</TableCell></div>
+                                             <TableCell align="left"> {inventory.shipmentDetails.supplier.id} </TableCell></div>
                                       </TableRow>
                                       <TableRow>
                                           <TableCell>From Location:</TableCell>
                                           <div className="">
-                                          <TableCell align="left">{(inventory.actorOrgId === inventory.shipmentDetails.supplier.id) ? inventory.actorOrgAddress : inventory.secondaryOrgAddress}</TableCell></div>
+                                          <TableCell align="left"> {(inventory.actorOrgId === inventory.shipmentDetails.supplier.id) ? inventory.actorOrgAddress : inventory.secondaryOrgAddress} </TableCell></div>
                                       </TableRow>
                                     </div>
                                          :
-                                         <div>
-                                    <TableRow>
-                                           <TableCell>Mfg Date</TableCell>
+                                    <div>
+                                     <TableRow>
+                                              <TableCell> Mfg Date </TableCell>
                                               <div className="ml-5">
-                                              <TableCell align="left">{formatDate(inventory.payloadData.data.products.mfgDate)}</TableCell></div>
-                                    </TableRow>
-                                    <TableRow>
+                                              <TableCell align="left"> {formatDate(inventory.payloadData.data.products.mfgDate)} </TableCell></div>
+                                     </TableRow>
+                                     <TableRow>
                                               <TableCell align="left">Exp Date</TableCell>
                                               <div className="ml-5">
-                                              <TableCell align="left">{formatDate(inventory.payloadData.data.products.expDate)}</TableCell></div>
-                                    </TableRow>
-                                    <TableRow>
+                                              <TableCell align="left"> {formatDate(inventory.payloadData.data.products.expDate)} </TableCell></div>
+                                     </TableRow>
+                                     <TableRow>
                                               <TableCell align="left">Batch</TableCell>
                                               <div className="ml-5">
-                                              <TableCell align="left">{inventory.payloadData.data.products.batchNumber}</TableCell></div>
-                                    </TableRow> 
-                                    </div>
+                                              <TableCell align="left"> {inventory.payloadData.data.products.batchNumber} </TableCell></div>
+                                     </TableRow> 
+                                     </div>
                                   }    
 
                                       <div className="mt-3" style={{position:"absolute ", left:"79% ", bottom:"38% ", width:"20% "}}>
