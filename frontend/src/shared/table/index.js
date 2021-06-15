@@ -73,9 +73,7 @@ inventoryDetails.sort(function(a,b){
                       >{display ? "SHOW LESS" : "SHOW MORE"}
                     </button> */}
        
-                 
-           
-
+              
              </AccordionSummary>
                 <AccordionDetails>
                   <Typography>
