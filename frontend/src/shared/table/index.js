@@ -89,30 +89,30 @@ inventoryDetails.sort(function(a,b){
                                      <TableRow>
                                           <TableCell>Shipment Id:</TableCell>
                                              <div className="">
-                                             <TableCell align="left"><b>{inventory.shipmentDetails.id}</b></TableCell></div>
+                                             <TableCell align="left">{inventory.shipmentDetails.id}</TableCell></div>
                                       </TableRow>
                                       <TableRow>
                                           <TableCell>From Organisation:</TableCell>
                                              <div className="">
-                                             <TableCell align="left"><b>{inventory.shipmentDetails.supplier.id}</b></TableCell></div>
+                                             <TableCell align="left">{inventory.shipmentDetails.supplier.id}</TableCell></div>
                                       </TableRow>
                                       <TableRow>
                                           <TableCell>From Location:</TableCell>
                                           <div className="">
-                                          <TableCell align="left"><b>{(inventory.actorOrgId === inventory.shipmentDetails.supplier.id) ? inventory.actorOrgAddress : inventory.secondaryOrgAddress}</b></TableCell></div>
+                                          <TableCell align="left">{(inventory.actorOrgId === inventory.shipmentDetails.supplier.id) ? inventory.actorOrgAddress : inventory.secondaryOrgAddress}</TableCell></div>
                                       </TableRow>
                                     </div>
                                          :
                                      <TableRow>
                                            <TableCell>Mfg Date</TableCell>
                                               <div className="ml-5">
-                                              <TableCell align="left"><b>{formatDate(inventory.payloadData.data.products.mfgDate)}</b></TableCell></div>
+                                              <TableCell align="left">{formatDate(inventory.payloadData.data.products.mfgDate)}</TableCell></div>
                                           <TableCell align="left">Exp Date</TableCell>
                                               <div className="ml-5">
-                                              <TableCell align="left"><b>{formatDate(inventory.payloadData.data.products.expDate)}</b></TableCell></div>
+                                              <TableCell align="left">{formatDate(inventory.payloadData.data.products.expDate)}</TableCell></div>
                                           <TableCell align="left">Batch</TableCell>
                                               <div className="ml-5">
-                                              <TableCell align="left"><b>{inventory.payloadData.data.products.batchNumber}</b></TableCell></div>
+                                              <TableCell align="left">{inventory.payloadData.data.products.batchNumber}</TableCell></div>
                                     </TableRow> }    
 
                                       <div className="mt-3" style={{position:"absolute ", left:"79% ", bottom:"38% ", width:"20% "}}>
