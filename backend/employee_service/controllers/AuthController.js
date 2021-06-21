@@ -18,6 +18,10 @@ var base64Img = require('base64-img');
 const auth = require('../middlewares/jwt');
 const axios = require('axios');
 const dotenv = require('dotenv').config();
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const serviceID = process.env.TWILIO_SERVICE_ID;
+const client = require('twilio')(accountSid, authToken);
 // const fs = require("fs");
 const moveFile = require("move-file");
 const blockchain_service_url = process.env.URL;
@@ -955,7 +959,7 @@ exports.createTwilioBinding = [
     try {
       console.log("REGISTERING")
       console.log(req.user)
-      client.notify.services('IS6bea64ed9ef63a6a81f863e8f54ec792')
+      client.notify.services(serviceID)
                       .bindings
                       .create({
                       identity: req.user.username,
