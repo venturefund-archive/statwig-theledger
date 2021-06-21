@@ -962,7 +962,7 @@ exports.createTwilioBinding = [
       client.notify.services(serviceID)
                       .bindings
                       .create({
-                      identity: req.user.username,
+                      identity: req.user.id,
                       bindingType: req.body.device_type == 'ios' ? 'apn' : 'fcm',
                       address: req.body.token_id
                       })
