@@ -948,6 +948,29 @@ exports.createUserAddress = [
   },
 ];
 
+
+exports.createTwilioBinding = [
+  auth,
+  async (req, res) => {
+    try {
+      console.log("REGISTERING")
+      console.log(req.user)
+      client.notify.services('IS6bea64ed9ef63a6a81f863e8f54ec792')
+                      .bindings
+                      .create({
+                      identity: req.user.username,
+                      bindingType: req.body.device_type == 'ios' ? 'apn' : 'fcm',
+                      address: req.body.token_id
+                      })
+                      .then(binding => console.log(binding));
+      res.send("Succesfully Registered") 
+    } catch (err) {
+      console.log(err)
+      return apiResponse.ErrorResponse(res, err);
+    }
+  },
+];
+
 exports.getAllUsers = [
   auth,
   async (req, res) => {
