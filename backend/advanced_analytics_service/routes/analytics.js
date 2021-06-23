@@ -29,11 +29,14 @@ router.get("/getInventoryBySku/:sku/:state", AnalyticsController.getAllStats);
 router.get("/getInventoryByBrand/:brand/:state/", AnalyticsController.getAllStats);
 router.get("/getMonthlySalesOfSkuByBrand", AnalyticsController.getMonthlySalesOfSkuByBrand)
 router.get("/getSalesTotalOfAllBrands", AnalyticsController.getSalesTotalOfAllBrands);
+router.get("/getlocation", AnalyticsController.getLocation);
+
 /*
 /getProductsById --> Get Product details --> Product Service
 
 /getAllBrands [ { brandId } ] --> Product to brand mapping : TODO
 */
 
+//api to fetch to fetch details based on region, country, state,city
 
 module.exports = router;
