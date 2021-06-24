@@ -8,7 +8,7 @@ import dropdownIcon from '../../assets/icons/dropdown_selected.png';
 import Location from '../../assets/icons/location_blue.png';
 import { Redirect } from 'react-router-dom';
 import DrawerMenu from './drawerMenu';
-import { getUserInfo, logoutUser } from '../../actions/userActions';
+import { getUserInfo, logoutUser, registerUser } from '../../actions/userActions';
 import logo from '../../assets/brands/VACCINELEDGER.png';
 //import searchingIcon from '../../assets/icons/searching@2x.png';
 //import bellIcon from '../../assets/icons/bellwhite.png';
@@ -20,7 +20,7 @@ import useOnclickOutside from 'react-cool-onclickoutside';
 import { config } from "../../config";
 import Modal from "../modal/index";
 import FailedPopUp from "../PopUp/failedPopUp";
-import {getShippingOrderIds} from "../../actions/shippingOrderAction";
+import {getShippingOrderIds,fetchAllairwayBillNumber} from "../../actions/shippingOrderAction";
 import { getOrderIds} from "../../actions/poActions";
 //import Badge from '@material-ui/core/Badge';
 //import MailIcon from '@material-ui/icons/Mail';
@@ -30,9 +30,10 @@ import { getOrderIds} from "../../actions/poActions";
 //import ListItemText from '@material-ui/core/ListItemText';
 import Select from '@material-ui/core/Select';
 import DropdownButton from "../../shared/dropdownButtonGroup";
-
+import { resetShipments } from '../../actions/shipmentActions';
 
 const Header = props => {
+  const dispatch = useDispatch();
   const [menu, setMenu] = useState(false);
   const [location, setLocation] = useState(false);
   const [sidebar, openSidebar] = useState(false);
@@ -40,8 +41,10 @@ const Header = props => {
   const [invalidSearch, setInvalidSearch] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [orderIds, setOrderIds] = useState([]);
-  const [shippingIds, setShippingIds] = useState([]);
+  // const [orderIds, setOrderIds] = useState([]);
+  // const [airWayBillNo,setairWayBillNo] = useState([]);
+  // const [airWayBillNowithshipmentID,setairWayBillNowithshipmentID] = useState([]);
+  // const [shippingIds, setShippingIds] = useState([]);
   const [wareHouse, setWareHouse]= useState({});
   const [selectLocation, setSelectLocation] = useState("");
   
@@ -56,36 +59,94 @@ const ref = useOnclickOutside(() => {
   const closeModalFail = () => {
     setInvalidSearch(false);
   };
+  // useEffect(() => {
 
-  useEffect(() => {
+    // async function getIds(){
+      // const resultShippingIds = await getShippingOrderIds();
+      // const resultOrderIds = await getOrderIds();
+      // const resultAirwayBillNo = await fetchAllairwayBillNumber();
+      // setairWayBillNowithshipmentID(resultAirwayBillNo.data);
 
-    async function getIds(){
-      const resultShippingIds = await getShippingOrderIds();
-      const resultOrderIds = await getOrderIds();
-      setOrderIds(resultOrderIds.map((so)=>so.id));
-      setShippingIds(resultShippingIds.map((so)=>so.id));
-    }
-
-    getIds();
-  }, []);
+      // setOrderIds(resultOrderIds.map((so)=>so.id));
+      // setShippingIds(resultShippingIds.map((so)=>so.id));
+      // setairWayBillNo(resultAirwayBillNo.data.map((so)=>so.airWayBillNo))
+  //   }
+  //   getIds();
+  // }, []);
+        // console.log(airWayBillNowithshipmentID.data);
+        
+  async function getAllShipmentIDs(){
+    dispatch(turnOn());
+    let result =await getShippingOrderIds();
+    dispatch(turnOff());
+    return result;
+  }
+  async function getAllOrderIDs(){
+    dispatch(turnOn());
+    let result = await getOrderIds();
+    dispatch(turnOff());
+    return result;
+  }
+  async function getAllAirwayBillNo(){
+    dispatch(turnOn());
+    const result = await fetchAllairwayBillNumber();
+    dispatch(turnOff());
+    return result;
+  }
 
   const onSeach = () => {
-    console.log('Check');
-    // console(context);
-    console.log(orderIds);
-    console.log(orderIds.indexOf(search));
-    if(orderIds.indexOf(search)!=-1)
-    props.history.push(`/vieworder/${search}`);
-    else if(shippingIds.indexOf(search)!=-1)
-    props.history.push(`/viewshipment/${search}`);
-    else
-    setInvalidSearch(true);
+    if(search.substring(0,2) == 'SH'){
+      getAllShipmentIDs().then((result)=>{
+        let shippingIds = result.map((so)=>so.id);
+        if(shippingIds.indexOf(search)!=-1){
+          props.history.push(`/viewshipment/${search}`);
+        }
+        else
+          setInvalidSearch(true);
+      });
+    }
+    else if(search.substring(0,2) == 'PO'){
+      getAllOrderIDs().then((result)=>{
+        let orderIds = result.map((so)=>so.id);
+        if(orderIds.indexOf(search)!=-1){
+          props.history.push(`/vieworder/${search}`);
+        }        
+        else
+          setInvalidSearch(true);
+      })
+    }
+    else{
+        getAllAirwayBillNo().then((result)=>{
+          dispatch(turnOn());
+          console.log(result,"data");
+          let airWayBillNowithshipmentID = result.data;
+          let airWayBillNo = result.data.map((so)=>so.airWayBillNo)
+          dispatch(turnOff());
+          if(airWayBillNo.indexOf(search)!=-1){
+            let index = airWayBillNo.indexOf(search);
+            props.history.push(`/viewshipment/${airWayBillNowithshipmentID[index].id}`)
+          }
+          else
+            setInvalidSearch(true); 
+
+        });
+    }
+    // if(orderIds.indexOf(search)!=-1)
+    // props.history.push(`/vieworder/${search}`);
+    // else if(shippingIds.indexOf(search)!=-1)
+    // props.history.push(`/viewshipment/${search}`);
+    // else if(airWayBillNo.indexOf(search)!=-1){
+    //   let index = airWayBillNo.indexOf(search);
+    //   props.history.push(`/viewshipment/${airWayBillNowithshipmentID[index].id}`)
+    // }
+    // else
+    // setInvalidSearch(true);
   };
 
   const profile = useSelector(state => {
     return state.user;
   });
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   useEffect(() => {
     dispatch(getUserInfo());
     async function fetchApi() {
@@ -126,9 +187,9 @@ const imgs = config().fetchProfileImage;
           <input
             type="text"
             // value={search}
-            placeholder="Search by PO ID/Shipment ID/ Product ID"
+            placeholder="Search PO ID/ Shipment ID/ Airway Bill No."
             onFocus={(e) => e.target.placeholder = ''}
-            onBlur={(e) => e.target.placeholder = 'Search PO ID/ Shipment ID/ Product ID'}
+            onBlur={(e) => e.target.placeholder = 'Search PO ID/ Shipment ID/ Airway Bill No.'}
             onChange={onSearchChange}
             className= "form-control search-field"
           />

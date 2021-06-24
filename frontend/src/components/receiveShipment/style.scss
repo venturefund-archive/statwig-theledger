@@ -4,6 +4,10 @@
   color:$darkBlue; 
   font-weight:700;
 }
+.breadcrumb{
+  margin-left:10px;
+
+}
 
 .select{
   display: none;
@@ -81,14 +85,19 @@ border-radius:8px;
       letter-spacing: 0px;
       padding: 0.5rem;
       list-style: none;
-      font-weight: 600;
+      font-weight: 400;
     }
   }
   }
 
+
+
 .receiveShipment {
-  padding-right: 3rem;
-    padding-left: 4rem;
+  position: relative;
+  top:-22px;
+    padding-right: 15px;
+    padding-left: 45px;
+    overflow: hidden;
     @media (max-width: $md) {
       padding-right: 10px;
       padding-left: 10px;
@@ -135,7 +144,7 @@ border-radius:8px;
           border-bottom: 2px solid #d6d6d6;
           border-radius: 0;
           color: $black;
-          font-weight:600;
+          font-weight:400;
         flex-basis: 65%;
         flex-grow: inherit;
         font-size: 13px;
@@ -199,5 +208,6 @@ color: #4A4A4A;
     }
 
 
-      }
+   }
+   
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Delete from '../../../assets/icons/Delete.png';
 import DropdownButton from '../../../shared/dropdownButtonGroup';
 import Select from 'react-select';
+import {getProductList} from '../../../actions/productActions';
 import './style.scss';
 
 const EditRow = props => {
@@ -17,7 +18,40 @@ const EditRow = props => {
     handleProductChange,
     products
   } = props;
+  const [productsList,setProductsList] = useState([]);
+  useEffect(() => {
 
+    async function fetchData() {
+  
+      const result111 = await getProductList();
+      console.log(result111);
+      setProductsList(result111.message);
+  
+    }
+  
+    fetchData();
+  }, []);
+
+
+  const new_products = [];
+
+  for(var i=0;i<products.length;i++)
+  {
+    console.log(productsList);
+    let check = false;
+    for(var j=0;j<productsList.length;j++)
+    {
+      if(products[i].label===productsList[j].productName)
+      {
+        check = true;
+        break;
+      }
+    }
+    if(check)
+    {
+      new_products.push(products[i]);
+    }
+  }
   const numbersOnly = (e) => {
     // Handle paste
     if (e.type === 'paste') {
@@ -33,8 +67,25 @@ const EditRow = props => {
       if(e.preventDefault) e.preventDefault();
     }
   }
-
-console.log("yyyy",prod);
+const handleChange = (value) =>
+{
+    console.log(value);
+}
+//console.log("yyyy",prod);
+console.log(products);
+// const handlee = () =>
+// {
+//   console.log("Hi");
+//     const value = document.getElementById("checker").value;
+//     console.log("value is " + value);
+//     if(value)
+//     {
+//       this.props.checkAndTrace(true);
+//     }
+//     else{
+//       this.props.checkAndTrace(false);
+//     }
+// };
 
   return (
     <div className="row ml-3 mr-1">
@@ -81,7 +132,7 @@ console.log("yyyy",prod);
                   placeholder="Select Product Name"
                   defaultInputValue={prod.name}
                   onChange={(v) => handleProductChange(index, v)}
-                  options={products}
+                  options={new_products}
                 /> : prod.name
                 }
               </div>
@@ -94,10 +145,18 @@ console.log("yyyy",prod);
           <div className="">
             <input
               className="form-control text-center"
+              id="checker"
               placeholder="Quantity"
               onKeyPress={numbersOnly}
               value={prod.productQuantity}
-              onChange={e => handleQuantityChange(e.target.value, index)}
+              onChange={(e) => {
+                handleQuantityChange(e.target.value, index);
+                 console.log(e.target.value);
+                  if(e.target.value==="0")
+                  {
+                    prod.productQuantity = "";
+                  }
+                }}
             />
           </div>
         </div>

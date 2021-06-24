@@ -16,6 +16,7 @@ router.get("/getStatsBySKU", AnalyticsController.getStatsBySKU);
 router.get("/getStatsByBrand", AnalyticsController.getStatsByBrand);
 router.get("/getSalesStatsByBrand", AnalyticsController.getSalesStatsByBrand);
 router.get("/getStatsByOrg", AnalyticsController.getStatsByOrg);
+router.get("/getStatsByOrgType", AnalyticsController.getStatsByOrgType);
 
 router.get("/getLeadTimes", AnalyticsController.getLeadTimes);
 router.get("/getSupplierPerfomance", AnalyticsController.getSupplierPerformance);
@@ -29,14 +30,14 @@ router.get("/getInventoryBySku/:sku/:state", AnalyticsController.getAllStats);
 router.get("/getInventoryByBrand/:brand/:state/", AnalyticsController.getAllStats);
 router.get("/getMonthlySalesOfSkuByBrand", AnalyticsController.getMonthlySalesOfSkuByBrand)
 router.get("/getSalesTotalOfAllBrands", AnalyticsController.getSalesTotalOfAllBrands);
-router.get("/getlocation", AnalyticsController.getLocation);
-
 /*
 /getProductsById --> Get Product details --> Product Service
 
 /getAllBrands [ { brandId } ] --> Product to brand mapping : TODO
 */
 
-//api to fetch to fetch details based on region, country, state,city
+router.get("/", function (req, res) {
+    res.json({ status: "OK", Message:"Advanced Analytics servie is up" });
+  });
 
 module.exports = router;

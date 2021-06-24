@@ -23,6 +23,8 @@ import { Formik } from "formik";
 import Select from 'react-select';
 import {getOrganizationsTypewithauth} from '../../actions/userActions';
 import { getProducts, getProductsByCategory } from "../../actions/poActions";
+import {getProductList} from '../../actions/productActions';
+
 
 const NewShipment = (props) => {
   const [OrderIds, setOrderIds] = useState([]);
@@ -44,6 +46,7 @@ const NewShipment = (props) => {
   const [receiverOrgId, setReceiverOrgId] = useState(
     "Select Organisation Name"
   );
+  const [toOrgLocLabel,settoOrgLocLabel] = useState("");
   const [receiverOrgLoc, setReceiverOrgLoc] = useState(
     "Select Delivery Location"
   );
@@ -61,7 +64,7 @@ const NewShipment = (props) => {
   const [formatedDate, setformatedDate] = "4-21-2021";
   const [modalProps, setModalProps] = useState({});
   const [orgTypes, setOrgTypes] = useState([]);
-
+  const [productsList,setProductsList] = useState([]);
   const profile = useSelector((state) => {
     return state.user;
   });
@@ -89,7 +92,13 @@ const NewShipment = (props) => {
     // let date = new Date();
 
     // setformatedDate(`${date.getMonth()+1}-${date.getDate()}-${date.getFullYear()}`);
+    
     async function fetchData() {
+
+      const result111 = await getProductList();
+      //console.log(result111);
+      setProductsList(result111.message);
+
       const { search } = props.location;
       // const result = await getShippingOrderIds();
       const result = await getOpenOrderIds();
@@ -112,8 +121,10 @@ const NewShipment = (props) => {
       const orgs = await getAllOrganisations();
       
       const orgSplit = user.organisation?.split("/");
+      // console.log(orgSplit,"sender");
       setSenderOrganisation([orgSplit[0]]);
-      const organisations = orgs.data.filter((org) => org.id != orgSplit[1]);
+      // const organisations = orgs.data.filter((org) => org.id != orgSplit[1]);
+      const organisations = orgs.data;
       setAllOrganisations(organisations.map(item => {
                                       return {
                                         ...item,
@@ -142,6 +153,10 @@ const NewShipment = (props) => {
                                         label: v?.warehouseAddress ? v?.title + '/' + v?.warehouseAddress?.firstLine + ", " + v?.warehouseAddress?.city : v?.title + '/' + v.postalAddress
                                       };
                                     }));
+    
+      
+     
+      
 
       const orgType = await getOrganizationsTypewithauth('CONF000');
       setOrgTypes(orgType.data.length > 0 ? orgType.data[0].organisationTypes.map(item => {
@@ -292,7 +307,65 @@ const NewShipment = (props) => {
       const result = await createShipment(data);
       dispatch(turnOff());
       console.log("data", data);
-      if (result?.id) {
+      var check = false; 
+
+      for(var i=0;i<data.products.length;i++)
+      {
+        if(typeof data.products[i].productQuantity==='undefined')
+        {
+          check = true;
+          break;
+        }
+      }
+      if(check===true)
+      {
+        setShipmentError("Check product quantity");
+        setOpenShipmentFail(true);
+      }
+      else{
+
+        console.log(productsList);
+        ////////////////////////////////
+        let i,j;
+        let check = true;
+        let nn = data.products.length;
+        for(i=0;i<data.products.length;i++)
+        {
+          let prdctName = data.products[i].productName;
+          let qty = parseInt(data.products[i].productQuantity);
+          console.log("typed quantity is " + qty);
+          let flag = false;
+          
+          for(j=0;j<productsList.length;j++)
+          {
+            console.log("product list name is " + productsList[j].productName);
+            console.log("dataProductName is " + prdctName);
+            if(productsList[j].productName===prdctName)
+            {
+              console.log("typed quantity is " + qty + " product quantity is " + productsList[j].quantity);
+              if(qty > productsList[j].quantity)
+              {
+                
+                flag = false;
+                break;
+              }
+              else{
+                flag = true;
+              }
+            }
+          }
+
+          if(!flag)
+          {
+            setShipmentError("Not enough quantity of the selected product available");
+            //setShipmentError("Check product quantity");
+            setOpenShipmentFail(true);
+            break;
+          }
+        }
+
+        if(i >=nn){
+         if (result?.id) {
         setMessage("Created Shipment Success");
         setOpenCreatedInventory(true);
         setModalProps({
@@ -300,14 +373,20 @@ const NewShipment = (props) => {
           id: result?.id,
           type: "Success",
         });
-      } else {
+      } 
+      else  {
         setOpenShipmentFail(true);
         setErrorMessage("Create Shipment Failed");
       }
-    } else {
+    }
+    } 
+  }
+    else {
       setShipmentError("Check product quantity");
       setOpenShipmentFail(true);
     }
+
+    
   };
 
   const handleSOChange = async (item) => {
@@ -317,12 +396,15 @@ const NewShipment = (props) => {
     setOrderDetails(result);
     dispatch(turnOff());
   };
-
+ 
   const handleQuantityChange = (value, i) => {
+    
     const soDetailsClone = { ...OrderDetails };
     soDetailsClone.products[i].productQuantity = value;
     setOrderDetails(soDetailsClone);
   };
+
+  
 
   const handleLabelIdChange = (value, i) => {
     const soDetailsClone = { ...OrderDetails };
@@ -367,7 +449,10 @@ const NewShipment = (props) => {
     newArray[prodIndex] = { ...newArray[prodIndex], isSelected: true };
     setProducts((prod) => [...newArray]);
   };
+//console.log(allOrganisations,"All org");
 
+  
+  
   return (
     <div className="NewShipment">
       <h1 className="breadcrumb">CREATE SHIPMENT</h1>
@@ -390,7 +475,7 @@ const NewShipment = (props) => {
           estimateDeliveryDate: "",
           products: [],
         }}
-        validate={(values) => {
+        validate={(values) => { 
           const errors = {};
           if (!values.fromOrg) {
             errors.fromOrg = "Required";
@@ -524,11 +609,13 @@ const NewShipment = (props) => {
                           setOrderId(v.value);
                           dispatch(turnOn());
                           const result = await dispatch(getOrder(v.value));
+                          console.log(result);
                           setReceiverOrgLoc(
                              result.poDetails[0].customer.warehouse.title + '/' + result.poDetails[0].customer.warehouse.postalAddress
                           );
                           setReceiverOrgId(
-                            result.poDetails[0].customer.organisation.id
+                            result.poDetails[0].customer.organisation.name
+                            // result.poDetails[0].customer.organisation.id
                           );
                           setOrderDetails(result.poDetails[0]);
 
@@ -551,11 +638,13 @@ const NewShipment = (props) => {
                             "toOrg",
                             result.poDetails[0].customer.organisation.id + "/"+result.poDetails[0].customer.organisation.name
                           );
+                          settoOrgLocLabel(result.poDetails[0].customer.organisation.id + "/"+result.poDetails[0].customer.organisation.name)
                           let wa = result.poDetails[0].customer.warehouse;
                           setFieldValue(
                             "toOrgLoc",
                             result.poDetails[0].customer.shippingAddress.shippingAddressId + "/" + (wa?.warehouseAddress ? wa?.title + '/' + wa?.warehouseAddress?.firstLine + ", " + wa?.warehouseAddress?.city : wa?.title + '/' + wa.postalAddress)
                           );
+                          settoOrgLocLabel(wa?.warehouseAddress ? wa?.title + '/' + wa?.warehouseAddress?.firstLine + ", " + wa?.warehouseAddress?.city : wa?.title + '/' + wa.postalAddress)
                           setFieldValue(
                             "rtype",
                             result.poDetails[0].customer.organisation
@@ -638,8 +727,8 @@ const NewShipment = (props) => {
                 <div className="row">
                   <div className="col-md-6 com-sm-12">
                     <div className="form-group">
-                      <label htmlFor="organizationName">
-                        Organisation Name*
+                      <label className="required-field" htmlFor="organizationName">
+                        Organisation Name
                       </label>
                       <div className="form-control">
                         {/* <DropdownButton
@@ -667,8 +756,8 @@ const NewShipment = (props) => {
 
                   <div className="col-md-6 com-sm-12">
                     <div className="form-group">
-                      <label htmlFor="orgLocation">
-                        Organisation Location*
+                      <label className="required-field" htmlFor="orgLocation">
+                        Organisation Location
                       </label>
                       <div className="form-control">
                         {/* <DropdownButton
@@ -714,7 +803,7 @@ const NewShipment = (props) => {
                             setAddProducts((prod) => [...prod, newArr]);
                           }}
                           defaultInputValue={values.fromOrgLoc}
-                          options={senderWarehouses}
+                          options={senderWarehouses.filter( (ele, ind) => ind === senderWarehouses.findIndex( elem => elem.label===ele.label))}
                         />
                         {errors.fromOrgLoc && touched.fromOrgLoc && (
                           <span className="error-msg text-danger">
@@ -736,7 +825,7 @@ const NewShipment = (props) => {
                 <div className="row">
                   <div className="col-md-6 com-sm-12">
                     <div className="form-group">
-                      <label htmlFor="organizationType">Organisation Type*</label>
+                      <label className="required-field" htmlFor="organizationType">Organisation Type</label>
                       <div className="form-control">
                         <Select
                           styles={customStyles}
@@ -746,6 +835,8 @@ const NewShipment = (props) => {
                           onChange={(v) => {
                             setFieldValue('rtype', v?.value);
                             setFieldValue('rtypeName', v?.label); 
+                            setFieldValue("toOrg","");  
+                            setFieldValue("toOrgLoc", ""); 
                           }}
                           defaultInputValue={values.rtypeName}
                           options={orgTypes}
@@ -760,8 +851,8 @@ const NewShipment = (props) => {
                 <div className="row">
                   <div className="col-md-6 com-sm-12">
                     <div className="form-group">
-                      <label htmlFor="organizationName">
-                        Organisation Name*
+                      <label className="required-field" htmlFor="organizationName">
+                        Organisation Name
                       </label>
                       <div className="form-control">
                         {/* <DropdownButton
@@ -780,7 +871,9 @@ const NewShipment = (props) => {
                         <Select
                           styles={customStyles}
                           isDisabled={disabled}
-                          placeholder={disabled ? (values.toOrg).split("/")[1] : "Select Organisation Name"}
+                          // placeholder={disabled ? (values.toOrg).split("/")[1] : "Select Organisation Name"}
+                          placeholder={"Select Organisation Name"}
+                          value={values.toOrg==""?"Select Organisation Name":{value: values.toOrg, label: receiverOrgId}}
                           onChange={(v) => {
                             setFieldValue("toOrgLoc", "");
                             setReceiverOrgId(v.label);
@@ -802,7 +895,7 @@ const NewShipment = (props) => {
 
                   <div className="col-md-6 com-sm-12">
                     <div className="form-group">
-                      <label htmlFor="delLocation">Delivery Location*</label>
+                      <label className="required-field" htmlFor="delLocation">Delivery Location</label>
                       <div className="form-control">
                         {/* <DropdownButton
                           name={receiverOrgLoc}
@@ -823,12 +916,16 @@ const NewShipment = (props) => {
                         <Select
                           styles={customStyles}
                           isDisabled={disabled}
-                          placeholder={disabled ? values.toOrgLoc.split("/")[1] : "Select Delivery Location"}
+                          // placeholder={disabled ? values.toOrgLoc.split("/")[1] : "Select Delivery Location"}
+                          placeholder={"Select Delivery Location"}
+                          value={values.toOrgLoc==""?"Select Delivery Loction":{value: values.toOrgLoc, label:toOrgLocLabel}}
                           onChange={(v) => {
                             setFieldValue("toOrgLoc", v.value);
+                            settoOrgLocLabel(v.label)
+                            console.log(v.label);
                           }}
                           defaultInputValue={values.toOrgLoc}
-                          options={receiverWarehouses}
+                          options={receiverWarehouses.filter( (ele, ind) => ind === receiverWarehouses.findIndex( elem => elem.label===ele.label))}
                         />
                         {errors.toOrgLoc && touched.toOrgLoc && (
                           <span className="error-msg text-danger">
@@ -850,7 +947,7 @@ const NewShipment = (props) => {
                 <div className="row">
                   <div className="col-md-6 com-sm-12">
                     <div className="form-group">
-                      <label htmlFor="organizationName">Airway Bill*</label>
+                      <label className="required-field" htmlFor="organizationName">Airway Bill</label>
                       <input
                         type="text"
                         className="form-control"
@@ -862,7 +959,7 @@ const NewShipment = (props) => {
                       />
 
                       {errors.airWayBillNo && touched.airWayBillNo && (
-                        <span className="error-msg text-danger">
+                        <span className="error-msg text-danger-AB">
                           {errors.airWayBillNo}
                         </span>
                       )}
@@ -871,7 +968,7 @@ const NewShipment = (props) => {
 
                   <div className="col-md-6 com-sm-12">
                     <div className="form-group">
-                      <label htmlFor="delLocation">Shipment Date*</label>
+                      <label className="required-field" htmlFor="delLocation">Shipment Date</label>
                       <div className="form-control">
                         <DatePicker
                           className="date"
@@ -896,7 +993,7 @@ const NewShipment = (props) => {
                           scrollableYearDropdown
                         />
                         {errors.shipmentDate && touched.shipmentDate && (
-                          <span className="error-msg text-danger">
+                          <span className="error-msg text-danger-SD">
                             {errors.shipmentDate}
                           </span>
                         )}
@@ -908,7 +1005,7 @@ const NewShipment = (props) => {
                 <div className="row">
                   <div className="col-md-6 com-sm-12">
                     <div className="form-group">
-                      <label htmlFor="Label code">Label Code*</label>
+                      <label className="required-field" htmlFor="Label code">Label Code</label>
                       <input
                         type="text"
                         className="form-control"
@@ -919,7 +1016,7 @@ const NewShipment = (props) => {
                         value={values.labelCode}
                       />
                       {errors.labelCode && touched.labelCode && (
-                        <span className="error-msg text-danger">
+                        <span className="error-msg text-danger-AB">
                           {errors.labelCode}
                         </span>
                       )}
@@ -958,7 +1055,7 @@ const NewShipment = (props) => {
                         />
                         {errors.estimateDeliveryDate &&
                           touched.estimateDeliveryDate && (
-                            <span className="error-msg text-danger">
+                            <span className="error-msg text-danger-DD">
                               {errors.estimateDeliveryDate}
                             </span>
                           )}
@@ -974,9 +1071,9 @@ const NewShipment = (props) => {
               <label htmlFor="productDetails" className="headsup">
                 Product Details
               </label>
-              {values.products?.length > 0 && (
+              {OrderDetails?.products?.length > 0 && (
                 <EditTable
-                  product={values.products}
+                  product={OrderDetails?.products}
                   handleQuantityChange={(v, i) => {
                     handleQuantityChange(v, i);
                   }}
@@ -1098,7 +1195,7 @@ const NewShipment = (props) => {
               </div> */}
             </div>
             {errors.products && touched.products && (
-              <span className="error-msg text-danger">{errors.products}</span>
+              <span className="error-msg text-danger-DD">{errors.products}</span>
             )}
             <div className="d-flex justify-content-between">
               <div className="value">{productQuantity}</div>
@@ -1111,7 +1208,7 @@ const NewShipment = (props) => {
                   Cancel
                 </button>
 
-                <button className="btn btn-yellow fontSize20 font-bold">
+                <button className="btn btn-orange fontSize20 font-bold">
                   <img src={Add} width="20" height="17" className="mr-2 mb-1" />
                   <span>Create Shipment</span>
                 </button>

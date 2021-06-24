@@ -60,7 +60,8 @@ const inventoryUpdate = async (
       },
       {
         $inc: {
-          "inventoryDetails.$.quantityInTransit": quantity,
+          "inventoryDetails.$.quantityInTransit": parseInt(quantity),
+
         },
       }
     );
@@ -420,6 +421,7 @@ exports.createShipment = [
               }
               var products = data.products;
               for (count = 0; count < products.length; count++) {
+                data.products[count]["productId"] = data.products[count].productID;
                 inventoryUpdate(
                   products[count].productID,
                   products[count].productQuantity,
@@ -510,7 +512,6 @@ exports.createShipment = [
                 return apiResponse.ErrorResponse(res,"Shipment Not saved")
               }
   
-  
   //Blockchain Integration
   const userData = {
     stream: shipment_stream,
@@ -528,7 +529,8 @@ exports.createShipment = [
     $push: {
       transactionIds: response.data.transactionId
     }
-  });          
+  });         
+
               if (data.taggedShipments) {
                 const prevTaggedShipments = await ShipmentModel.findOne({
                   id: data.taggedShipments
@@ -545,7 +547,6 @@ exports.createShipment = [
                   }
                 });   
               }
-
               async function compute(event_data) {
                 resultt = await logEvent(event_data);
                 return resultt;     
@@ -562,20 +563,23 @@ exports.createShipment = [
               );
             }
           } catch (err) {
+            console.log(err)
             return apiResponse.ErrorResponse(res,err);
           } 
       } 
      
     });
       }  catch (err) { 
-            return apiResponse.ErrorResponse(res, "Shipment not created");
+        console.log(err)
+        return apiResponse.ErrorResponse(res, "Shipment not created");
           }
     } catch (err) {
+      console.log(err)
       logger.log(
         "error",
         "<<<<< ShipmentService < ShipmentController < modifyShipment : error (catch block)"
       );
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.ErrorResponse(res, err.message);
     }
   },
 ];
@@ -587,7 +591,7 @@ exports.receiveShipment = [
       const data = req.body;
       const shipmentID = data.id;
       const shipmentInfo = await ShipmentModel.find({ id: shipmentID });
-      
+
 
       const email = req.user.emailId;
       const user_id = req.user.id;
@@ -622,10 +626,6 @@ exports.receiveShipment = [
       receiverAddress = receiverOrgData.postalAddress;
     }
 
-  
-
-
-
       var actuallyShippedQuantity = 0;
       var productNumber = -1;
       if (shipmentInfo != null) {
@@ -634,10 +634,14 @@ exports.receiveShipment = [
         shipmentProducts.forEach(product => {
           productNumber = productNumber + 1;
           receivedProducts.forEach(reqProduct => {
-            if (product.productName === reqProduct.productName) {
+            if (product.productID === reqProduct.productID) {
               actuallyShippedQuantity = product.productQuantity;
               var receivedQuantity = reqProduct.productQuantity;
-              var quantityDifference = actuallyShippedQuantity - receivedQuantity;
+        
+	        if ( receivedQuantity > actuallyShippedQuantity)
+	           throw new Error("Received quantity cannot be greater than Actual quantity");
+		
+	      var quantityDifference = actuallyShippedQuantity - receivedQuantity;
               var rejectionRate = (quantityDifference / actuallyShippedQuantity) * 100;
               (shipmentProducts[productNumber]).quantityDelivered = receivedQuantity;
               (shipmentProducts[productNumber]).rejectionRate = rejectionRate;
@@ -844,7 +848,7 @@ exports.receiveShipment = [
         "error",
         "<<<<< ShipmentService < ShipmentController < modifyShipment : error (catch block)"
       );
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.ErrorResponse(res, err.message);
     }
   },
 ];
@@ -1035,6 +1039,20 @@ exports.fetchShipmentsForAbInBev = [
               },
               {
                 $lookup: {
+                  from: "organisations",
+                  localField: "supplier.org.authority",
+                  foreignField: "id",
+                  as: "supplier.org.S1",
+                },
+              },
+              {
+                $unwind: {
+                  path: "$supplier.org.S1",
+                  preserveNullAndEmptyArrays: true
+                },
+              },
+              {
+                $lookup: {
                   from: "warehouses",
                   localField: "receiver.locationId",
                   foreignField: "id",
@@ -1065,14 +1083,14 @@ exports.fetchShipmentsForAbInBev = [
               })
               .skip(parseInt(skip))
               .limit(parseInt(limit));
-
+            
             return apiResponse.successResponseWithMultipleData(
               res,
               "Shipments Table",
               shipments
             );
           } catch (err) {
-            return apiResponse.ErrorResponse(res, err);
+            return apiResponse.ErrorResponse(res, err.message);
           }
         } else {
           logger.log(
@@ -1087,7 +1105,7 @@ exports.fetchShipmentsForAbInBev = [
         "error",
         "<<<<< ShipmentService < ShipmentController < fetchShipmentsForAbInBev : error (catch block)"
       );
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.ErrorResponse(res, err.message);
     }
   },
 ];
@@ -1201,7 +1219,7 @@ exports.fetchShipments = [
               outboundShipments
             );
           } catch (err) {
-            return apiResponse.ErrorResponse(res, err);
+            return apiResponse.ErrorResponse(res, err.message);
           }
         } else {
           logger.log(
@@ -1216,7 +1234,7 @@ exports.fetchShipments = [
         "error",
         "<<<<< ShipmentService < ShipmentController < modifyShipment : error (catch block)"
       );
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.ErrorResponse(res, err.message);
     }
   },
 ];
@@ -1301,7 +1319,7 @@ exports.viewShipment = [
               );
             })
             .catch((err) => {
-              return apiResponse.ErrorResponse(res, err);
+              return apiResponse.ErrorResponse(res, err.message);
             });
         } else {
           logger.log(
@@ -1316,7 +1334,7 @@ exports.viewShipment = [
         "error",
         "<<<<< ShipmentService < ShipmentController < modifyShipment : error (catch block)"
       );
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.ErrorResponse(res, err.message);
     }
   },
 ];
@@ -1337,7 +1355,7 @@ exports.fetchAllShipments = [
               );
             })
             .catch((err) => {
-              return apiResponse.ErrorResponse(res, err);
+              return apiResponse.ErrorResponse(res, err.message);
             });
         } else {
           logger.log(
@@ -1352,7 +1370,7 @@ exports.fetchAllShipments = [
         "error",
         "<<<<< ShipmentService < ShipmentController < modifyShipment : error (catch block)"
       );
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.ErrorResponse(res, err.message);
     }
   },
 ];
@@ -1376,7 +1394,7 @@ exports.fetch_po_Shipments = [
               );
             })
             .catch((err) => {
-              return apiResponse.ErrorResponse(res, err);
+              return apiResponse.ErrorResponse(res, err.message);
             });
         } else {
           logger.log(
@@ -1391,7 +1409,7 @@ exports.fetch_po_Shipments = [
         "error",
         "<<<<< ShipmentService < ShipmentController < modifyShipment : error (catch block)"
       );
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.ErrorResponse(res, err.message);
     }
   },
 ];
@@ -1459,7 +1477,7 @@ exports.updateStatus = [
               );
             })
             .catch((err) => {
-              return apiResponse.ErrorResponse(res, err);
+              return apiResponse.ErrorResponse(res, err.message);
             });
         } else {
           logger.log(
@@ -1474,7 +1492,7 @@ exports.updateStatus = [
         "error",
         "<<<<< ShipmentService < ShipmentController < modifyShipment : error (catch block)"
       );
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.ErrorResponse(res, err.message);
     }
   },
 ];
@@ -1517,7 +1535,7 @@ exports.getProductsByInventory = [
         inventories
       );
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.ErrorResponse(res, err.message);
     }
   },
 ];
@@ -1558,7 +1576,7 @@ exports.uploadImage = async function (req, res) {
         );
         return apiResponse.successResponseWithData(res, "Image uploaded successfullly", update);
       } catch (e) {
-        return apiResponse.ErrorResponse(res, e);
+        return apiResponse.ErrorResponse(res, e.message);
       }
     } else {
       return apiResponse.unauthorizedResponse(res, result);
@@ -1577,7 +1595,7 @@ exports.fetchImage = async function (req, res) {
         })
         .catch((e) => {
           console.log("Err", e);
-          return apiResponse.ErrorResponse(res, e);
+          return apiResponse.ErrorResponse(res, e.message);
         });
 
       var resArray = [];
@@ -1625,7 +1643,7 @@ exports.updateTrackingStatus = [
         "error",
         "<<<<< ShipmentService < ShipmentController < modifyShipment : error (catch block)"
       );
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.ErrorResponse(res, err.message);
     }
   },
 ];
@@ -1857,7 +1875,7 @@ exports.chainOfCustody = [
                 "error",
                 "<<<<< ShipmentService < ShipmentController < modifyShipment : error (catch block)"
             );
-            return apiResponse.ErrorResponse(res, err);
+            return apiResponse.ErrorResponse(res, err.message);
         }
     },
 ];
@@ -1890,7 +1908,7 @@ exports.fetchShipmentIds = [
               );
             })
             .catch((err) => {
-              return apiResponse.ErrorResponse(res, err);
+              return apiResponse.ErrorResponse(res, err.message);
             });
         } else {
           logger.log(
@@ -1905,7 +1923,7 @@ exports.fetchShipmentIds = [
         "error",
         "<<<<< ShipmentService < ShipmentController < fetchShipmentIds : error (catch block)"
       );
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.ErrorResponse(res, err.message);
     }
   },
 ];
@@ -2016,7 +2034,7 @@ exports.fetchInboundShipments = [//inbound shipments with filter(shipmentId, fro
               });
             });
           } catch (err) {
-            return apiResponse.ErrorResponse(res, err);
+            return apiResponse.ErrorResponse(res, err.message);
           }
         } else {
           logger.log(
@@ -2031,7 +2049,7 @@ exports.fetchInboundShipments = [//inbound shipments with filter(shipmentId, fro
         "error",
         "<<<<< ShipmentService < ShipmentController < fetchInboundShipments : error (catch block)"
       );
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.ErrorResponse(res, err.message);
     }
   },
 ];
@@ -2138,7 +2156,7 @@ exports.fetchOutboundShipments = [ //outbound shipments with filter(shipmentId, 
               });
             });
           } catch (err) {
-            return apiResponse.ErrorResponse(res, err);
+            return apiResponse.ErrorResponse(res, err.message);
           }
         } else {
           logger.log(
@@ -2153,7 +2171,7 @@ exports.fetchOutboundShipments = [ //outbound shipments with filter(shipmentId, 
         "error",
         "<<<<< ShipmentService < ShipmentController < fetchOutboundShipments : error (catch block)"
       );
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.ErrorResponse(res, err.message);
     }
   },
 ];
@@ -2178,7 +2196,7 @@ exports.fetchSupplierAndReceiverList = [
               );
             }
           } catch (err) {
-            return apiResponse.ErrorResponse(res, err);
+            return apiResponse.ErrorResponse(res, err.message);
           }
         } else {
           logger.log(
@@ -2193,7 +2211,7 @@ exports.fetchSupplierAndReceiverList = [
         "error",
         "<<<<< ShipmentService < ShipmentController < fetchSupplierAndReceiverList : error (catch block)"
       );
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.ErrorResponse(res, err.message);
     }
   },
 ];
@@ -2219,7 +2237,6 @@ exports.fetchAllWarehouseShipments = [
         else {
             empDetails = await EmployeeModel.findOne({ phoneNumber });
       }
-
             const warehouses = empDetails.warehouseId;
               const shipments = await ShipmentModel.aggregate([{
                 $match: {
@@ -2290,14 +2307,13 @@ exports.fetchAllWarehouseShipments = [
                 })
                 .skip(parseInt(skip))
                 .limit(parseInt(limit));
-
             return apiResponse.successResponseWithData(
               res,
               "Shipments Table",
               shipments
             );
           } catch (err) {
-            return apiResponse.ErrorResponse(res, err);
+            return apiResponse.ErrorResponse(res, err.message);
           }
         } else {
           logger.log(
@@ -2312,7 +2328,7 @@ exports.fetchAllWarehouseShipments = [
         "error",
         "<<<<< ShipmentService < ShipmentController < modifyShipment : error (catch block)"
       );
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.ErrorResponse(res, err.message);
     }
   },
 ];
@@ -2328,6 +2344,8 @@ exports.trackJourney = [
                     var outwardShipmentsArray = [];
                     var poDetails, trackedShipment;
                     const trackingId = req.query.trackingId;
+		    try
+		    {
                     if (!trackingId.includes("PO")) {
                         const inwardShipments = await ShipmentModel.findOne({
                             $or: [{
@@ -2340,20 +2358,23 @@ exports.trackJourney = [
                             "taggedShipments": 1,
                             poId: 1
                         })
+
+			if(inwardShipments == null)
+                        throw new Error("ID does not exists..Please try searching with existing IDs");
+
                         shipmentsArray = inwardShipments.taggedShipments;
                         shipmentsArray.push(trackingId)
-                        poDetails = await RecordModel.find({
+                        poDetails = await RecordModel.findOne({
                             shipments: {
                                 "$in": shipmentsArray
                             }
                         })
-console.log("1",inwardShipments.taggedShipments)
                         if (inwardShipments.taggedShipments) {
                             if (inwardShipments.taggedShipments.length > 0 && inwardShipments.taggedShipments[0] !== '')
                                 inwardShipmentsArray = await ShipmentModel.aggregate([{
                                         $match: {
                                             "$and": [{
-						    id: { "$in" : inwardShipments.taggedShipments }
+						    id: { "$in" : shipmentsArray.pull(trackingId) }
                                             }, {
                                                 status: "RECEIVED"
                                             }]
@@ -2547,6 +2568,10 @@ console.log("1",inwardShipments.taggedShipments)
                         poDetails = await RecordModel.findOne({
                             id: trackingId
                         })
+
+			if( poDetails == null)
+                        throw new Error("Order ID does not exists..Please try searching with existing IDs");
+
                         outwardShipmentsArray = await ShipmentModel.aggregate([{
                                 $match:
 
@@ -2622,6 +2647,10 @@ console.log("1",inwardShipments.taggedShipments)
                             "outwardShipmentsArray": outwardShipmentsArray
                         }
                     );
+	   	 } catch (err) {
+                     return apiResponse.ErrorResponse(res, err.message);
+	        }
+
                 } else {
                     logger.log(
                         "warn",
@@ -2635,7 +2664,81 @@ console.log("1",inwardShipments.taggedShipments)
                 "error",
                 "<<<<< ShipmentService < ShipmentController < fetchShipmentIds : error (catch block)"
             );
-            return apiResponse.ErrorResponse(res, err);
+            return apiResponse.ErrorResponse(res, err.message);
         }
     },
 ];
+
+exports.checkShipmentID = [
+  auth,
+  async (req, res) => {
+    try {
+      const { shipmentId } = req.query;
+      const checkShipment = await ShipmentModel.find(
+        { id: shipmentId },
+      );
+      if (checkShipment.length > 0)
+      return apiResponse.successResponse(
+        res,
+        "Shipment found"
+      );
+      else
+      return apiResponse.ErrorResponse(
+        res,
+        "Shipment not found"
+      );
+
+    } catch (err) {
+      return apiResponse.ErrorResponse(res, err.message);
+    }
+  },
+];
+
+exports.fetchairwayBillNumber = [
+  auth,
+  async (req, res) => {
+    try {
+      checkToken(req, res, async (result) => {
+        if (result.success) {
+          const { warehouseId } = req.user;
+          await ShipmentModel.find(
+            {
+              $or: [
+                {
+                  "supplier.locationId": warehouseId,
+                },
+                {
+                  "receiver.locationId": warehouseId,
+                },
+              ],
+            },
+            'airWayBillNo id'
+          )
+            .then((shipments) => {
+              return apiResponse.successResponseWithData(
+                res,
+                "All Shipments",
+                shipments
+              );
+            })
+            .catch((err) => {
+              return apiResponse.ErrorResponse(res, err.message);
+            });
+        } else {
+          logger.log(
+            "warn",
+            "<<<<< ShipmentService < ShipmentController < fetchairwayBillNumber : refuted token"
+          );
+          res.status(403).json("Auth failed");
+        }
+      });
+    } catch (err) {
+      logger.log(
+        "error",
+        "<<<<< ShipmentService < ShipmentController < fetchairwayBillNumber : error (catch block)"
+      );
+      return apiResponse.ErrorResponse(res, err.message);
+    }
+  },
+];
+

@@ -13,6 +13,7 @@ import CurrentTemperature from "../../assets/icons/thermometer.svg";
 import traceDrop from "../../assets/icons/traceDrop.png";
 import Serial from "./serial";
 import back from '../../assets/icons/back.png';
+import UpdateStatus from '../../assets/icons/Update_Status.png';
 
 import "./style.scss";
 import ChainOfCustody from "./chainofcustody";
@@ -20,9 +21,12 @@ import Modal from "../../shared/modal";
 import { Link } from 'react-router-dom';
 import { chainOfCustody, updateStatus } from "../../actions/shipmentActions";
 import { receiveShipment } from "../../actions/shipmentActions";
+import { getAddress } from '../../utils/commonHelper';
+
 const Tracing = (props) => {
-  console.log('Props');
-  console.log(props);  const [menu, setMenu] = useState(false);
+  // console.log('Props');
+  // console.log(props);  
+  const [menu, setMenu] = useState(false);
   const [menuShip, setMenuShip] = useState(false);
   const [menuProduct, setMenuProduct] = useState(false);
   const [chain, setChain] = useState(false);
@@ -33,12 +37,12 @@ const Tracing = (props) => {
   const tracking = props.trackData;
   const status = tracking.status;
   const shippmentChainOfCustodyData = props.shippmentChainOfCustodyData;
-  console.log(shippmentChainOfCustodyData)
+  // console.log(shippmentChainOfCustodyData)
   // console.log(tracking);
   const productCard = props.productDetails;
   const poCard = props.poDetails;
   const {id} = props.match.params;
-  console.log(id);
+  // console.log(id);
 
   const closeModal = () => {
     setOpenPurchase(false);
@@ -47,33 +51,38 @@ const Tracing = (props) => {
   const closeModalShipping = () => {
     setOpenShipping(false);
   };
+
   return (
     <div className="tracing">
       <div className="row justify-content-between">
         <h1 className="breadcrumb">VIEW SHIPMENT</h1>
         <div className="row">
         <Link to={`/shipments`}>
-           <button className="btn btn-outline-primary mr-2" ><img src={back} height="17" className="mr-2 mb-1" />Back to shipments</button>
+           <button className="btn btn-outline-primary mr-4 mt-3" >
+           <img src={back} height="17" className="mr-2 mb-1" />
+           Back to shipments
+           </button>
           </Link>
 
           <Link to={(status=="RECEIVED")?`/viewshipment/${id}`:`/updatestatus/${id}`}>
-            <button className="btn btn-orange fontSize20 font-bold mr-5 chain" disabled={status=="RECEIVED"}>
-              Update Status
+            <button className="btn btn-orange mr-4 mt-3 chain" disabled={status=="RECEIVED"}>
+            <img src={UpdateStatus} height="17" className="mr-2 mb-1" />
+             <b>Update Status</b> 
             </button>
           </Link>
           <Link to={(status=="RECEIVED")?`/viewshipment/${id}`:`/receiveShipment/${id}`}>
-          <button className="btn btn-main-blue fontSize20 font-bold chain" disabled={status=="RECEIVED"}>
+          <button className="btn btn-main-blue chain mr-3 mt-3" disabled={status=="RECEIVED"}>
             <img src={returnShipment} width="14" height="14" className="mr-2" disabled={status=="RECEIVED"}/>
-            Receive Shipment
+            <b>Receive Shipment</b>
           </button>
           </Link>
         </div>
       </div>
       <div className="row">
-        <div className="col-sm-4">
+        <div className="col-sm-5">
           <h6 className="heading mb-3">SHIPMENT SUMMARY</h6>
           <ShipmentSummary shipments={tracking} />
-          <h6 className="heading mt-3 mb-3">SHIPMENT DETAILS</h6>
+          <h6 className="heading mt-4 mb-3">SHIPMENT DETAILS</h6>
           <ShipmentDetails
             shipments={tracking}
             setMenuShip={setMenuShip}
@@ -82,7 +91,7 @@ const Tracing = (props) => {
             setHighLight={setHighLight}
           />
 
-          <h6 className="heading mt-3 mb-3">PRODUCT LIST</h6>
+          <h6 className="heading mt-4 mb-3">PRODUCT LIST</h6>
           <ProductList
             shipments={tracking}
             productHighLight={productHighLight}
@@ -91,27 +100,27 @@ const Tracing = (props) => {
             setMenuProduct={setMenuProduct}
           />
         </div>
-        <div className="col-sm-8">
-          <div className="row mb-4">
-            <div className="panel col mr-1 geo commonpanle">
+        <div className="col-sm-7">
+          <div className="row mb-4 mt-4">
+            <div className="panel col mr-2 geo commonpanle">
               <p className="heading">Geographical Tracking</p> <Map />{" "}
             </div>
             <div className="panel commonpanle col">
               <div className="d-flex justify-content-between">
-                <div className="row ml-3">
+                <div className="row ml-2 mb-2">
                   <div className="arrow mr-2">
                     <img src={CurrentTemperature} width="20" height="20" />
                   </div>
 
                   <div className="d-flex flex-column">
                     <div className="info">Current temperature</div>
-                    <div className="info">3°C</div>
+                    <div className="temp">3°C</div>
                   </div>
                 </div>
 
                 <div className="d-flex flex-column">
                   <div className="info">Last Upadated on</div>
-                  <div className="info">07:00 am</div>
+                  <div className="info">06:00 am</div>
                 </div>
               </div>
               <Chart />{" "}
@@ -137,12 +146,12 @@ const Tracing = (props) => {
               <ViewShippingModal shipments={tracking} />
             </Modal>
           )}
-          <h6 className="heading mb-5">CHAIN OF CUSTODY</h6>
+          <h6 className="heading mb-3">CHAIN OF CUSTODY</h6>
           {shippmentChainOfCustodyData.length === 0 ? (
             <div>N/A</div>
           ) : (
-            <div className="row mb-3 mt-2">
-              <div className="picture ml-3">
+            <div className="row">
+              <div className="picture">
                 <img
                   src={currentinventory}
                   alt="truck"
@@ -150,7 +159,7 @@ const Tracing = (props) => {
                   width="15"
                 />
               </div>
-              <div className="d-flex flex-column mr-2">
+              <div className="d-flex flex-column">
                 <div className="chain text-secondary">Shipment Number</div>
                 <div className="chain">
                   <strong>{shippmentChainOfCustodyData[0].id}</strong>
@@ -162,11 +171,11 @@ const Tracing = (props) => {
               </div>
               <div className="col">
                 <div className="chain">
-                  <strong>{shippmentChainOfCustodyData[0].supplier.org.postalAddress}</strong>
+                  <strong>{getAddress(shippmentChainOfCustodyData[0].supplier.warehouse.warehouseAddress)}</strong>
                 </div>
                 <div className="chainhead mb-4">{shippmentChainOfCustodyData[0].supplier.org.name}</div>
                 <div className="chain">
-                  <strong>{shippmentChainOfCustodyData[0].receiver.org.postalAddress}</strong>
+                  <strong>{getAddress(shippmentChainOfCustodyData[0].receiver.warehouse.warehouseAddress)}</strong>
                 </div>
                 <div className="chainhead">{shippmentChainOfCustodyData[0].receiver.org.name}</div>
               </div>

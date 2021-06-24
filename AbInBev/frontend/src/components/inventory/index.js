@@ -160,7 +160,6 @@ const Inventory = (props) => {
     props.applyFilters(_filters);
     if (_filters.inventoryType === 'VENDOR') {
       _getOrganizationById(selectedOrganization).then((response) => {
-        console.log(response);
         setSelectedVendor(response);
       });
     } else {
@@ -359,6 +358,16 @@ const Inventory = (props) => {
                         }}
                       >
                         S2
+                      </a>
+                      <a
+                        className={`btn ${
+                          selectedVendorType === 'S3' ? 'active' : ''
+                        }`}
+                        onClick={() => {
+                          onVendorTypeChange('S3');
+                        }}
+                      >
+                        S3
                       </a>
                     </div>
                   </>

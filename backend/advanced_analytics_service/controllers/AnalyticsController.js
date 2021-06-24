@@ -5,23 +5,202 @@ const ShipmentModel = require("../models/ShipmentModel");
 const auth = require("../middlewares/jwt");
 const OrganisationModel = require("../models/OrganisationModel");
 const WarehouseModel = require("../models/WarehouseModel");
+const ProductModel = require("../models/ProductModel");
 //helper file to prepare responses.
 const apiResponse = require("../helpers/apiResponse");
 const moment = require("moment");
 const { count } = require("../models/ProductSKUModel");
 
-const RegionsModel = require("../models/RegionsModel");
-const CountriesModel = require("../models/CountryModel");
-const StatesModel = require("../models/StateModel");
-const CitiesModel = require("../models/CityModel");
-
 require("dotenv").config();
 
-const BREWERY_ORG = "BREWERY";
-const S1_ORG = "S1";
-const S2_ORG = "S2";
+const DATE_FORMAT = 'YYYY-MM-DD';
+var today = new Date()
+var lastWeek = new Date()
+lastWeek.setDate(today.getDate() - 7)
+var lastMonth = new Date()
+lastMonth.setDate(today.getDate() - 30)
+var lastYear = new Date()
+lastYear.setDate(today.getDate() - 365)
 
-const DATE_FORMAT = "YYYY-MM-DD";
+var timeFrame = moment().subtract(1, 'months');
+
+async function getReturns(analytics, from, to, warehouseIds) {
+	if (!analytics.length) {
+		return {
+			sales: 0,
+			targetSales: 0,
+			returns: 0,
+			actualReturns: 0
+		}
+	}
+	let b_arr = [];
+	const breweries = await OrganisationModel.find({ "type": 'BREWERY', "status": "ACTIVE" }, 'id');
+	for (let b of breweries)
+		b_arr.push(b.id);
+
+	let quantity = 0;
+	const row = analytics[0];
+	const Products = await ProductModel.find({ externalId: row.productId, manufacturer: row.brand });
+	for (const prod of Products) {
+		let params = {
+			'receiver.id': { $in: b_arr },
+			'products.productID': prod.id,
+			'supplier.locationId': { $in: warehouseIds },
+			'status': 'RECEIVED',
+			createdAt: {
+				$lte: new Date(to),
+				$gte: new Date(from),
+			},
+		}
+
+		const shipments = await ShipmentModel.find(params);
+		for (const Shipment of shipments) {
+			for (let product in Shipment.products)
+				if (Shipment['products'][product].productID == params['products.productID'])
+					quantity += Shipment['products'][product].productQuantityDelivered;
+		}
+	}
+	let sales = analytics.map(item => parseInt(item.sales) || 0).reduce((prev, next) => prev + next);
+	let targetSales = analytics.map(item => parseInt(item.targetSales) || 0).reduce((prev, next) => prev + next);
+	let returns = quantity;
+	let actualReturns = 0;
+	if (returns && sales) {
+		actualReturns = parseFloat(((returns / sales) * 100)).toFixed(2);
+	}
+	return {
+		sales: sales,
+		targetSales: targetSales,
+		returns: returns,
+		actualReturns: actualReturns
+	};
+}
+
+async function getReturnsByExternalId(externalId, from, to, orgIds) {
+	let b_arr = [];
+	const breweries = await OrganisationModel.find({ "type": 'BREWERY', "status": "ACTIVE" }, 'id');
+	for (let b of breweries)
+		b_arr.push(b.id);
+
+	let quantity = 0;
+	const Products = await ProductModel.find({ externalId: externalId });
+	for (const prod of Products) {
+		let params = {
+			'receiver.id': { $in: b_arr },
+			'products.productID': prod.id,
+			'supplier.id': { $in: orgIds },
+			'status': 'RECEIVED',
+			createdAt: {
+				$lte: new Date(to),
+				$gte: new Date(from),
+			},
+		}
+
+		const shipments = await ShipmentModel.find(params);
+		for (const Shipment of shipments) {
+			for (let product in Shipment.products)
+				if (Shipment['products'][product].productID == params['products.productID'])
+					quantity += Shipment['products'][product].productQuantityDelivered;
+		}
+	}
+
+	return quantity;
+}
+
+async function getOnlyReturns(prod_id, from, to, warehouseIds) {
+	let b_arr = [];
+	const breweries = await OrganisationModel.find({ "type": 'BREWERY', "status": "ACTIVE" }, 'id');
+	for (let b of breweries)
+		b_arr.push(b.id);
+
+	let quantity = 0;
+	let params = {
+		'receiver.id': { $in: b_arr },
+		'products.productID': prod_id,
+		'supplier.locationId': { $in: warehouseIds },
+		'status': 'RECEIVED',
+		createdAt: {
+			$lte: new Date(to),
+			$gte: new Date(from),
+		},
+	}
+
+	const shipments = await ShipmentModel.find(params);
+	for (const Shipment of shipments) {
+		for (let product in Shipment.products)
+			if (Shipment['products'][product].productID == params['products.productID'])
+				quantity += Shipment['products'][product].productQuantityDelivered;
+	}
+	return quantity;
+}
+
+async function getReturnsOrg(org, analytics) {
+	if (!analytics.length) {
+		return {
+			sales: 0,
+			targetSales: 0,
+			returns: 0,
+			actualReturns: 0
+		}
+	}
+	let b_arr = [];
+	const breweries = await OrganisationModel.find({ "type": 'BREWERY', "status": "ACTIVE" }, 'id');
+	for (let b of breweries)
+		b_arr.push(b.id);
+
+	let quantity = 0;
+	if (org.type != 'BREWERY') {
+		const row = analytics[0];
+		const Products = await ProductModel.find({ externalId: row.productId, manufacturer: row.brand });
+		for (const prod of Products) {
+			let params = {
+				'receiver.id': { $in: b_arr },
+				'supplier.id': org.id,
+				'products.productID': prod.id,
+				'status': 'RECEIVED',
+				createdAt: {
+					$lte: today,
+					$gte: new Date(timeFrame),
+				},
+			}
+
+			const shipments = await ShipmentModel.find(params);
+			for (const Shipment of shipments) {
+				for (let product in Shipment.products)
+					if (Shipment['products'][product].productID == params['products.productID'])
+						quantity += Shipment['products'][product].productQuantityDelivered;
+			}
+		}
+	}
+	else {
+		const shipments = await ShipmentModel.find({
+			'receiver.id': org.id,
+			'status': 'RECEIVED',
+			createdAt: {
+				$lte: today,
+				$gte: new Date(timeFrame),
+			}
+		});
+		for (const Shipment of shipments) {
+			for (let product in Shipment.products)
+				quantity += Shipment['products'][product].productQuantityDelivered;
+		}
+	}
+	let sales = analytics.map(item => parseInt(item.sales) || 0).reduce((prev, next) => prev + next);
+	let targetSales = analytics.map(item => parseInt(item.targetSales) || 0).reduce((prev, next) => prev + next);
+	// let returns = analytics.map(item => parseInt(item.returns) || 0).reduce((prev, next) => prev + next);
+	let returns = quantity;
+	let actualReturns = 0;
+	if (returns && sales) {
+		actualReturns = parseFloat(((returns / sales) * 100)).toFixed(2);
+	}
+	return {
+		sales: sales,
+		targetSales: targetSales,
+		returns: returns,
+		actualReturns: actualReturns
+	};
+
+}
 
 async function calculatePrevReturnRates(filters, analytic) {
   const lastMonthStart = moment()
@@ -49,132 +228,175 @@ async function calculatePrevReturnRates(filters, analytic) {
   }
 }
 
+
+async function calculatePrevReturnRatesNew(filters, analytic) {
+
+	const lastMonthStart = moment().subtract(1, 'months').startOf('month').format(DATE_FORMAT);
+	const lastMonthEnd = moment().subtract(1, 'months').endOf('month').format(DATE_FORMAT);
+	let prevAnalytic = await AnalyticsModel.findOne({
+		uploadDate: {
+			$lte: lastMonthEnd,
+			$gte: lastMonthStart,
+		},
+		brand: analytic._id.manufacturer,
+		productId: analytic._id.id
+	});
+	if (prevAnalytic && parseInt(prevAnalytic.sales)) {
+		return (parseInt(prevAnalytic.returns) / parseInt(prevAnalytic.sales)) * 100;
+	} else {
+		return 0;
+	}
+}
+
 function getFilterConditions(filters) {
-  let matchCondition = {};
-  if (filters.orgType && filters.orgType !== "") {
-    if (
-      filters.orgType === "BREWERY" ||
-      filters.orgType === "S1" ||
-      filters.orgType === "S2"
-    ) {
-      matchCondition.type = filters.orgType;
-    } else if (filters.orgType === "ALL_VENDORS") {
-      matchCondition.$or = [{ type: "S1" }, { type: "S2" }];
-    }
-  }
-  if (filters.state && filters.state.length) {
-    matchCondition.state = filters.state;
-  }
-  if (filters.district && filters.district.length) {
-    matchCondition.district = filters.district;
-  }
-  if (filters.organization && filters.organization.length) {
-    matchCondition.id = filters.organization;
-  }
-  return matchCondition;
+	let matchCondition = { status: 'ACTIVE' };
+	if (filters.orgType && filters.orgType !== '') {
+		if (filters.orgType === 'BREWERY' || filters.orgType === 'S1' || filters.orgType === 'S2') {
+			matchCondition.type = filters.orgType;
+		} else if (filters.orgType === 'ALL_VENDORS') {
+			matchCondition.$or = [{ type: 'S1' }, { type: 'S2' }];
+		}
+	}
+	if (filters.state && filters.state.length) {
+		matchCondition.state = filters.state;
+	}
+	if (filters.district && filters.district.length) {
+		matchCondition.district = filters.district;
+	}
+	if (filters.organization && filters.organization.length) {
+		matchCondition.id = filters.organization;
+	}
+
+	return matchCondition;
 }
 
 function getFilterConditionsWarehouse(filters) {
-  let matchCondition = {};
-  if (filters.orgType && filters.orgType !== "") {
-    if (
-      filters.orgType === "BREWERY" ||
-      filters.orgType === "S1" ||
-      filters.orgType === "S2"
-    ) {
-      matchCondition.type = filters.orgType;
-    } else if (filters.orgType === "ALL_VENDORS") {
-      matchCondition.$or = [{ type: "S1" }, { type: "S2" }];
-    }
-  }
-  if (filters.state && filters.state.length) {
-    matchCondition.state = filters.state;
-  }
-  if (filters.district && filters.district.length) {
-    matchCondition["warehouseAddress.firstLine"] = filters.district;
-  }
-  if (filters.organization && filters.organization.length) {
-    matchCondition.id = filters.organization;
-  }
-  return matchCondition;
+	let matchCondition = {};
+	if (filters.orgType && filters.orgType !== '') {
+		if (filters.orgType === 'BREWERY' || filters.orgType === 'S1' || filters.orgType === 'S2') {
+			matchCondition.type = filters.orgType;
+		} else if (filters.orgType === 'ALL_VENDORS') {
+			matchCondition.$or = [{ type: 'S1' }, { type: 'S2' }];
+		}
+	}
+	if (filters.state && filters.state.length) {
+		matchCondition.state = filters.state;
+	}
+	if (filters.district && filters.district.length) {
+		matchCondition["warehouseAddress.city"] = filters.district;
+	}
+	if (filters.organization && filters.organization.length) {
+		matchCondition.id = filters.organization;
+	}
+	return matchCondition;
 }
 
 const _getWarehouseIdsByOrg = async (org) => {
-  let matchCondition = {};
-  if (org && org.id && org.id !== "") {
-    matchCondition.id = org.id;
-  }
-  const warehouses = await OrganisationModel.aggregate([
-    {
-      $match: matchCondition,
-    },
-    {
-      $unwind: {
-        path: "$warehouses",
-      },
-    },
-    {
-      $group: {
-        _id: "$warehouseIds",
-        warehouseIds: {
-          $addToSet: "$warehouses",
-        },
-      },
-    },
-  ]);
-  let warehouseIds = [];
-  if (warehouses && warehouses[0] && warehouses[0].warehouseIds) {
-    warehouseIds = warehouses[0].warehouseIds;
-  }
-  return warehouseIds;
-};
+	let matchCondition = {};
+	if (org && org.id && org.id !== '') {
+		matchCondition.organisationId = org.id;
+	}
+	let warehouseIds = [];
+
+	const warehouse = await WarehouseModel.findOne({ organisationId: org.id });
+
+	if (warehouse) {
+		const warehouses = await WarehouseModel.aggregate([
+			{
+				$match: { "warehouseAddress.city": warehouse?.warehouseAddress.city }
+			},
+			{
+				$group: {
+					_id: '$id'
+				}
+			}
+		]);
+		for (const wh of warehouses)
+			warehouseIds.push(wh._id);
+	}
+
+	return warehouseIds;
+}
 
 const _getWarehouseIdsByOrgType = async (filters) => {
-  const warehouses = await OrganisationModel.aggregate([
-    {
-      $match: getFilterConditions(filters),
-    },
-    {
-      $unwind: {
-        path: "$warehouses",
-      },
-    },
-    {
-      $group: {
-        _id: "$warehouseIds",
-        warehouseIds: {
-          $addToSet: "$warehouses",
-        },
-      },
-    },
-  ]);
-  let warehouseIds = [];
-  if (warehouses && warehouses[0] && warehouses[0].warehouseIds) {
-    warehouseIds = warehouses[0].warehouseIds;
-  }
-  return warehouseIds;
-};
+	const warehouses = await OrganisationModel.aggregate([
+		{
+			$match: getFilterConditions(filters)
+		},
+		{
+			$unwind: {
+				path: "$warehouses"
+			}
+		},
+		{
+			$group: {
+				_id: '$warehouseIds',
+				'warehouseIds': {
+					$addToSet: "$warehouses"
+				}
+			}
+		}
+	]);
+	let warehouseIds = [];
+	if (warehouses && warehouses[0] && warehouses[0].warehouseIds) {
+		warehouseIds = warehouses[0].warehouseIds;
+	}
+	return warehouseIds;
+}
+
 
 const _getWarehouseIds = async (filters) => {
-  const warehouses = await WarehouseModel.aggregate([
-    {
-      $match: getFilterConditionsWarehouse(filters),
-    },
-    {
-      $group: {
-        _id: "$id",
-        warehouseIds: {
-          $addToSet: "$id",
-        },
-      },
-    },
-  ]);
-  let warehouseIds = [];
-  if (warehouses.length > 0) {
-    warehouseIds = warehouses.map((a) => a._id);
-  }
-  return warehouseIds;
-};
+	const warehouses = await WarehouseModel.aggregate([
+		{
+			$match: getFilterConditionsWarehouse(filters)
+		},
+		{
+			$group: {
+				_id: '$id',
+				'warehouseIds': {
+					$addToSet: "$id"
+				}
+			}
+		}
+	]);
+	let warehouseIds = [];
+	if (warehouses.length > 0) {
+		warehouseIds = warehouses.map(a => a._id);
+	}
+	return warehouseIds;
+}
+
+
+function getDistrictConditionsWarehouse(district) {
+	let matchCondition = {};
+	if (district && district.length) {
+		matchCondition["warehouseAddress.city"] = district;
+	}
+
+	return matchCondition;
+}
+
+
+const _getWarehouseIdsByDistrict = async (district) => {
+	const warehouses = await WarehouseModel.aggregate([
+		{
+			$match: getDistrictConditionsWarehouse(district)
+		},
+		{
+			$group: {
+				_id: '$id',
+				'warehouseIds': {
+					$addToSet: "$id"
+				}
+			}
+		}
+	]);
+	let warehouseIds = [];
+	if (warehouses.length > 0) {
+		warehouseIds = warehouses.map(a => a._id);
+	}
+	return warehouseIds;
+}
 
 const _getOverviewStats = async () => {
   let _filters = {
@@ -232,34 +454,28 @@ const _getOverviewStats = async () => {
 };
 
 const aggregateSalesStats = (inputArr) => {
-  if (!inputArr.length) {
-    return {
-      sales: 0,
-      targetSales: 0,
-      returns: 0,
-      actualReturns: 0,
-    };
-  }
-  let sales = inputArr
-    .map((item) => parseInt(item.sales) || 0)
-    .reduce((prev, next) => prev + next);
-  let targetSales = inputArr
-    .map((item) => parseInt(item.sales) || 0)
-    .reduce((prev, next) => prev + next);
-  let returns = inputArr
-    .map((item) => parseInt(item.sales) || 0)
-    .reduce((prev, next) => prev + next);
-  let actualReturns = 0;
-  if (returns) {
-    actualReturns = (returns / sales) * 100;
-  }
-  return {
-    sales: sales,
-    targetSales: targetSales,
-    returns: returns,
-    actualReturns: actualReturns,
-  };
-};
+	if (!inputArr.length) {
+		return {
+			sales: 0,
+			targetSales: 0,
+			returns: 0,
+			actualReturns: 0
+		}
+	}
+	let sales = inputArr.map(item => parseInt(item.sales) || 0).reduce((prev, next) => prev + next);
+	let targetSales = inputArr.map(item => parseInt(item.targetSales) || 0).reduce((prev, next) => prev + next);
+	let returns = inputArr.map(item => parseInt(item.returns) || 0).reduce((prev, next) => prev + next);
+	let actualReturns = 0;
+	if (returns && sales) {
+		actualReturns = parseFloat(((returns / sales) * 100)).toFixed(2);
+	}
+	return {
+		sales: sales,
+		targetSales: targetSales,
+		returns: returns,
+		actualReturns: actualReturns
+	};
+}
 
 // function dateConversion(filters) {
 // 	let conversion = {};
@@ -279,148 +495,147 @@ const aggregateSalesStats = (inputArr) => {
 // }
 
 function getSKUAnalyticsFilterConditions(filters) {
-  let matchCondition = {};
 
-  if (filters.sku && filters.sku !== "") {
-    matchCondition.productId = filters.sku;
-  }
+	let matchCondition = {};
 
-  if (filters.date_filter_type && filters.date_filter_type.length) {
-    const DATE_FORMAT = "YYYY-MM-DD";
-    if (filters.date_filter_type === "by_range") {
-      let startDate = filters.start_date ? filters.start_date : new Date();
-      let endDate = filters.end_date ? filters.end_date : new Date();
-      matchCondition.uploadDate = {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate),
-      };
-    } else if (filters.date_filter_type === "by_monthly") {
-      let startDateOfTheYear = moment([filters.year]).format(DATE_FORMAT);
-      let startDateOfTheMonth = moment(startDateOfTheYear)
-        .add(filters.month - 1, "months")
-        .format(DATE_FORMAT);
-      let endDateOfTheMonth = moment(startDateOfTheMonth)
-        .tz("Etc/GMT")
-        .add(1, "months")
-        .endOf("month");
+	if (filters.sku && filters.sku !== '') {
+		matchCondition.productId = filters.sku;
+	};
 
-      matchCondition.uploadDate = {
-        $gte: new Date(startDateOfTheMonth),
-        $lte: new Date(endDateOfTheMonth),
-      };
-    } else if (filters.date_filter_type === "by_quarterly") {
-      let startDateOfTheYear = moment([filters.year]).format(DATE_FORMAT);
-      let startDateOfTheQuarter = moment(startDateOfTheYear)
-        .quarter(filters.quarter)
-        .startOf("quarter")
-        .format(DATE_FORMAT);
-      // let endDateOfTheQuarter = moment(startDateOfTheYear).tz("Etc/GMT").quarter(filters.quarter).add(1, 'years').endOf('quarter');
-      let endDateOfTheQuarter = moment(startDateOfTheYear)
-        .quarter(filters.quarter)
-        .tz("Etc/GMT")
-        .add(3, "months")
-        .endOf("quarter");
+	// if (filters.district && filters.district !== '') {
+	// 	matchCondition.district = filters.district;
+	// }
 
-      matchCondition.uploadDate = {
-        $gte: new Date(startDateOfTheQuarter),
-        $lte: new Date(endDateOfTheQuarter),
-      };
-    } else if (filters.date_filter_type === "by_yearly") {
-      const currentDate = moment().format(DATE_FORMAT);
-      const currentYear = moment().year();
+	if (filters.date_filter_type && filters.date_filter_type.length) {
 
-      let startDateOfTheYear = moment([filters.year]).format(DATE_FORMAT);
-      let endDateOfTheYear = moment([filters.year])
-        .tz("Etc/GMT")
-        .add(1, "years")
-        .endOf("year");
+		const DATE_FORMAT = 'YYYY-MM-DD';
+		if (filters.date_filter_type === 'by_range') {
 
-      if (filters.year === currentYear) {
-        endDateOfTheYear = currentDate;
-      }
+			let startDate = filters.start_date ? filters.start_date : new Date();
+			let endDate = filters.end_date ? filters.end_date : new Date();
+			matchCondition.uploadDate = {
+				$gte: new Date(startDate),
+				$lte: new Date(endDate)
+			};
 
-      matchCondition.uploadDate = {
-        $gte: new Date(startDateOfTheYear),
-        $lte: new Date(endDateOfTheYear),
-      };
-    }
-  }
-  return matchCondition;
+		} else if (filters.date_filter_type === 'by_monthly') {
+
+			let startDateOfTheYear = moment([filters.year]).format(DATE_FORMAT);
+			let startDateOfTheMonth = moment(startDateOfTheYear).add(filters.month - 1, 'months').format(DATE_FORMAT);
+			let endDateOfTheMonth = moment(startDateOfTheMonth).tz("Etc/GMT").add(1, 'months').endOf('month');
+
+			matchCondition.uploadDate = {
+				$gte: new Date(startDateOfTheMonth),
+				$lte: new Date(endDateOfTheMonth)
+			};
+
+		} else if (filters.date_filter_type === 'by_quarterly') {
+
+			let startDateOfTheYear = moment([filters.year]).format(DATE_FORMAT);
+			let startDateOfTheQuarter = moment(startDateOfTheYear).quarter(filters.quarter).startOf('quarter').format(DATE_FORMAT);
+			// let endDateOfTheQuarter = moment(startDateOfTheYear).tz("Etc/GMT").quarter(filters.quarter).add(1, 'years').endOf('quarter');
+			let endDateOfTheQuarter = moment(startDateOfTheYear).quarter(filters.quarter).tz("Etc/GMT").add(3, 'months').endOf('quarter');
+
+			matchCondition.uploadDate = {
+				$gte: new Date(startDateOfTheQuarter),
+				$lte: new Date(endDateOfTheQuarter)
+			};
+
+		} else if (filters.date_filter_type === 'by_yearly') {
+
+			const currentDate = moment().format(DATE_FORMAT);
+			const currentYear = moment().year();
+
+			let startDateOfTheYear = moment([filters.year]).format(DATE_FORMAT);
+			let endDateOfTheYear = moment([filters.year]).tz("Etc/GMT").add(1, 'years').endOf('year');
+
+			if (filters.year === currentYear) {
+				endDateOfTheYear = currentDate;
+			}
+
+			matchCondition.uploadDate = {
+				$gte: new Date(startDateOfTheYear),
+				$lte: new Date(endDateOfTheYear)
+			};
+
+		}
+
+	}
+	return matchCondition;
 }
 
 function getAnalyticsFilterConditions(filters, warehouseIds) {
-  let matchCondition = {
-    warehouseId: {
-      $in: [...warehouseIds],
-    },
-  };
 
-  if (filters.sku && filters.sku !== "") {
-    matchCondition.productId = filters.sku;
-  }
+	let matchCondition = {
+		warehouseId: {
+			$in: [...warehouseIds]
+		}
+	};
 
-  if (filters.date_filter_type && filters.date_filter_type.length) {
-    const DATE_FORMAT = "YYYY-MM-DD";
-    if (filters.date_filter_type === "by_range") {
-      let startDate = filters.start_date ? filters.start_date : new Date();
-      let endDate = filters.end_date ? filters.end_date : new Date();
-      matchCondition.uploadDate = {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate),
-      };
-    } else if (filters.date_filter_type === "by_monthly") {
-      let startDateOfTheYear = moment([filters.year]).format(DATE_FORMAT);
-      let startDateOfTheMonth = moment(startDateOfTheYear)
-        .add(filters.month - 1, "months")
-        .format(DATE_FORMAT);
-      let endDateOfTheMonth = moment(startDateOfTheMonth)
-        .tz("Etc/GMT")
-        .add(1, "months")
-        .endOf("month");
+	if (filters.sku && filters.sku !== '') {
+		matchCondition.productId = filters.sku;
+	};
 
-      matchCondition.uploadDate = {
-        $gte: new Date(startDateOfTheMonth),
-        $lte: new Date(endDateOfTheMonth),
-      };
-    } else if (filters.date_filter_type === "by_quarterly") {
-      let startDateOfTheYear = moment([filters.year]).format(DATE_FORMAT);
-      let startDateOfTheQuarter = moment(startDateOfTheYear)
-        .quarter(filters.quarter)
-        .startOf("quarter")
-        .format(DATE_FORMAT);
-      // let endDateOfTheQuarter = moment(startDateOfTheYear).tz("Etc/GMT").quarter(filters.quarter).add(1, 'years').endOf('quarter');
-      let endDateOfTheQuarter = moment(startDateOfTheYear)
-        .quarter(filters.quarter)
-        .tz("Etc/GMT")
-        .add(3, "months")
-        .endOf("quarter");
+	if (filters.brand && filters.brand !== '') {
+		matchCondition.brand = filters.brand;
+	}
 
-      matchCondition.uploadDate = {
-        $gte: new Date(startDateOfTheQuarter),
-        $lte: new Date(endDateOfTheQuarter),
-      };
-    } else if (filters.date_filter_type === "by_yearly") {
-      const currentDate = moment().format(DATE_FORMAT);
-      const currentYear = moment().year();
+	if (filters.date_filter_type && filters.date_filter_type.length) {
 
-      let startDateOfTheYear = moment([filters.year]).format(DATE_FORMAT);
-      let endDateOfTheYear = moment([filters.year])
-        .tz("Etc/GMT")
-        .add(1, "years")
-        .endOf("year");
+		const DATE_FORMAT = 'YYYY-MM-DD';
+		if (filters.date_filter_type === 'by_range') {
 
-      if (filters.year === currentYear) {
-        endDateOfTheYear = currentDate;
-      }
+			let startDate = filters.start_date ? filters.start_date : new Date();
+			let endDate = filters.end_date ? filters.end_date : new Date();
+			matchCondition.uploadDate = {
+				$gte: new Date(startDate),
+				$lte: new Date(endDate)
+			};
 
-      matchCondition.uploadDate = {
-        $gte: new Date(startDateOfTheYear),
-        $lte: new Date(endDateOfTheYear),
-      };
-    }
-  }
+		} else if (filters.date_filter_type === 'by_monthly') {
 
-  return matchCondition;
+			let startDateOfTheYear = moment([filters.year]).format(DATE_FORMAT);
+			let startDateOfTheMonth = moment(startDateOfTheYear).add(filters.month - 1, 'months').format(DATE_FORMAT);
+			let endDateOfTheMonth = moment(startDateOfTheMonth).tz("Etc/GMT").add(1, 'months').endOf('month');
+
+			matchCondition.uploadDate = {
+				$gte: new Date(startDateOfTheMonth),
+				$lte: new Date(endDateOfTheMonth)
+			};
+
+		} else if (filters.date_filter_type === 'by_quarterly') {
+
+			let startDateOfTheYear = moment([filters.year]).format(DATE_FORMAT);
+			let startDateOfTheQuarter = moment(startDateOfTheYear).quarter(filters.quarter).startOf('quarter').format(DATE_FORMAT);
+			// let endDateOfTheQuarter = moment(startDateOfTheYear).tz("Etc/GMT").quarter(filters.quarter).add(1, 'years').endOf('quarter');
+			let endDateOfTheQuarter = moment(startDateOfTheYear).quarter(filters.quarter).tz("Etc/GMT").add(3, 'months').endOf('quarter');
+
+			matchCondition.uploadDate = {
+				$gte: new Date(startDateOfTheQuarter),
+				$lte: new Date(endDateOfTheQuarter)
+			};
+
+		} else if (filters.date_filter_type === 'by_yearly') {
+
+			const currentDate = moment().format(DATE_FORMAT);
+			const currentYear = moment().year();
+
+			let startDateOfTheYear = moment([filters.year]).format(DATE_FORMAT);
+			let endDateOfTheYear = moment([filters.year]).tz("Etc/GMT").add(1, 'years').endOf('year');
+
+			if (filters.year === currentYear) {
+				endDateOfTheYear = currentDate;
+			}
+
+			matchCondition.uploadDate = {
+				$gte: new Date(startDateOfTheYear),
+				$lte: new Date(endDateOfTheYear)
+			};
+		}
+
+	}
+
+	return matchCondition;
 }
 
 /**
@@ -510,114 +725,206 @@ exports.getAllBrands = [
  *
  * @returns {Object}
  */
+// exports.getStatsByBrand = [
+// 	auth,
+// 	async function (req, res) {
+// 		try {
+// 			const filters = req.query;
+// 			let warehouseIds = await _getWarehouseIds(filters);
+
+// 			let analyticsFilter = getAnalyticsFilterConditions(filters, warehouseIds);
+// 			let brandFilter = {};
+// 			if (filters.brand && filters.brand !== '') {
+// 				brandFilter.manufacturer = filters.brand;
+// 			}
+// 			let Analytics = await AnalyticsModel.aggregate([
+// 				{
+// 					$match: analyticsFilter
+// 				},
+// 				{
+// 					$lookup: {
+// 						from: 'products',
+// 						localField: 'productId',
+// 						foreignField: 'externalId',
+// 						as: 'prodDetails'
+// 					}
+// 				},
+// 				{
+// 					$unwind: {
+// 						path: '$prodDetails'
+// 					}
+// 				},
+// 				{
+// 					$replaceRoot: {
+// 						newRoot: {
+// 							$mergeObjects: ['$prodDetails', '$$ROOT']
+// 						}
+// 					}
+// 				},
+// 				{
+// 					$project: {
+// 						prodDetails: 0
+// 					}
+// 				},
+// 				{
+// 					$match: brandFilter
+// 				},
+// 				{
+// 					$group: {
+// 						_id: '$manufacturer',
+// 						sales: { $sum: 1 },
+// 						targetSales: { $sum: 1 },
+// 						products: { $addToSet: '$$ROOT' }
+// 					}
+// 				},
+// 				{ $sort: { "$products.productId": 1 } }
+
+// 			]);
+
+// 			for (let analytic of Analytics) {
+
+// 				let products = analytic.products.sort(function (a, b) {
+// 					return a.productId - b.productId;
+// 				});
+// 				let prods = [];
+// 				let arrIds = [];
+// 				let salesSum = 0;
+// 				let targetSum = 0;
+// 				let prevProd = '';
+// 				let sum = 0;
+
+// 				for (const [index, product] of products.entries()) {
+// 					if (prevProd !== product.productId || index === products.length - 1) {
+// 						if (index === products.length - 1) {
+// 							salesSum += parseInt(product.sales);
+// 							targetSum += parseInt(product.targetSales);
+// 						}
+// 						if (prevProd == '') {
+// 							if (product.productId != products[index + 1].productId) 
+// 								prevProd = product.productId;
+// 						}
+// 						else
+// 							prevProd = product.productId;
+
+
+// 						if (arrIds.indexOf(product.productId) === -1 && prevProd != '') {
+// 							product['returnRate'] = (parseInt(product.returns) / parseInt(product.sales)) * 100;
+// 							product['returnRatePrev'] = await calculatePrevReturnRates(filters, product);
+// 							arrIds.push(product.productId);
+
+// 							product['sales'] = salesSum;
+// 							product['targetSales'] = targetSum;
+// 							prods.push(product);
+// 							salesSum = 0;
+// 							targetSum = 0;
+// 						}
+// 						else if (prevProd == '') {
+// 							salesSum += parseInt(product.sales);
+// 							targetSum += parseInt(product.targetSales);
+// 						}
+// 					}
+// 					if (prevProd != '') {
+// 						salesSum += parseInt(product.sales);
+// 						targetSum += parseInt(product.targetSales);
+// 					}
+// 				}
+// 				analytic.products = prods;
+// 			}
+
+// 			return apiResponse.successResponseWithData(
+// 				res,
+// 				"Operation success",
+// 				Analytics
+// 			);
+// 		} catch (err) {
+// 			console.log(err);
+
+// 			return apiResponse.ErrorResponse(res, err);
+// 		}
+// 	}
+// ];
+
+/**
+ * getStatsByBrand.
+ *
+ * @returns {Object}
+ */
 exports.getStatsByBrand = [
-  auth,
-  async function (req, res) {
-    try {
-      const filters = req.query;
-      let warehouseIds = await _getWarehouseIds(filters);
+	auth,
+	async function (req, res) {
+		try {
+			const filters = req.query;
+			let warehouseIds = await _getWarehouseIds(filters);
 
-      let analyticsFilter = getAnalyticsFilterConditions(filters, warehouseIds);
-      let brandFilter = {};
-      if (filters.brand && filters.brand !== "") {
-        brandFilter.manufacturer = filters.brand;
-      }
-      let Analytics = await AnalyticsModel.aggregate([
-        {
-          $match: analyticsFilter,
-        },
-        {
-          $lookup: {
-            from: "products",
-            localField: "productId",
-            foreignField: "externalId",
-            as: "prodDetails",
-          },
-        },
-        {
-          $unwind: {
-            path: "$prodDetails",
-          },
-        },
-        {
-          $replaceRoot: {
-            newRoot: {
-              $mergeObjects: ["$prodDetails", "$$ROOT"],
-            },
-          },
-        },
-        {
-          $project: {
-            prodDetails: 0,
-          },
-        },
-        {
-          $match: brandFilter,
-        },
-        {
-          $group: {
-            _id: "$manufacturer",
-            sales: { $sum: 1 },
-            targetSales: { $sum: 1 },
-            products: { $addToSet: "$$ROOT" },
-          },
-        },
-        { $sort: { "products.productId": 1 } },
-      ]);
+			let analyticsFilter = getAnalyticsFilterConditions(filters, warehouseIds);
+			const Products = await AnalyticsModel.aggregate([
+				{
+					$match: analyticsFilter
+				},
+				{
+					$group: {
+						_id: {
+							id: '$productId',
+							manufacturer: '$brand',
+						},
+						sales: { $sum: "$sales" },
+						targetSales: { $sum: "$targetSales" },
+						returns: { $sum: "$returns" },
+						product: { "$first": { "productName": "$productName", "manufacturer": '$brand', "productSubName": "$productSubName", "productId": "$productId", "externalId": "$productId" } }
+					}
+				},
+				{ $sort: { "_id.manufacturer": 1 } }
+			]);
 
-      for (let analytic of Analytics) {
-        let products = analytic.products.sort(function (a, b) {
-          return a.productId - b.productId;
-        });
-        let prods = [];
-        let arrIds = [];
-        let salesSum = 0;
-        let targetSum = 0;
-        let prevProd = "";
+			const MasterProducts = await ProductModel.find({});
 
-        for (const [index, product] of products.entries()) {
-          if (prevProd == "") prevProd = product.productId;
+			let Analytics = [];
+			let arr = {};
+			let prevBrand = '';
+			const lastMonthStart = moment().subtract(1, 'months').startOf('month').format(DATE_FORMAT);
+			const lastMonthEnd = moment().subtract(1, 'months').endOf('month').format(DATE_FORMAT);
 
-          if (prevProd !== product.productId || index === products.length - 1) {
-            if (index === products.length - 1) {
-              salesSum += parseInt(product.sales);
-              targetSum += parseInt(product.targetSales);
-            }
-
-            prevProd = product.productId;
-            if (arrIds.indexOf(product.productId) === -1) {
-              product["returnRate"] =
-                (parseInt(product.returns) / parseInt(product.sales)) * 100;
-              product["returnRatePrev"] = await calculatePrevReturnRates(
-                filters,
-                product
-              );
-              arrIds.push(product.productId);
-
-              product["sales"] = salesSum;
-              product["targetSales"] = targetSum;
-              prods.push(product);
-              salesSum = 0;
-              targetSum = 0;
-            }
-          }
-          salesSum += parseInt(product.sales);
-          targetSum += parseInt(product.targetSales);
-        }
-        analytic.products = prods;
-      }
-
-      return apiResponse.successResponseWithData(
-        res,
-        "Operation success",
-        Analytics
-      );
-    } catch (err) {
-      console.log(err);
-
-      return apiResponse.ErrorResponse(res, err);
-    }
-  },
+			for (const [index, product] of Products.entries()) {
+				if (prevBrand != product._id.manufacturer) {
+					if (!!Object.keys(arr).length) {
+						Analytics.push(arr);
+					}
+					arr = {
+						_id: product._id.manufacturer,
+						sales: product.sales,
+						targetSales: parseInt(product.targetSales),
+						returns: product.returns,
+						products: []
+					};
+					prevBrand = product._id.manufacturer;
+				}
+				let prods = MasterProducts.filter(prod => (prod.externalId == product._id.id && prod.manufacturer == product._id.manufacturer));
+				if (prods.length) {
+					for (const [i, prod] of prods.entries()) {
+						let p = prod.toObject();
+						p['sales'] = product.sales;
+						p['targetSales'] = parseInt(product.targetSales);
+						p['productId'] = product._id.id;
+						p['returns'] = await getOnlyReturns(prod.id, moment().startOf('month'), today, warehouseIds);
+						p['returnRate'] = parseFloat(((parseInt(p['returns']) / parseInt(product.sales)) * 100)).toFixed(2);
+						// p['returnRatePrev'] = await calculatePrevReturnRatesNew(filters, product);
+						p['returnRatePrev'] = await getOnlyReturns(prod.id, lastMonthEnd, lastMonthStart, warehouseIds);
+						product.product = p;
+					}
+				}
+				arr.products.push(product.product);
+				if (index == Products.length - 1)
+					Analytics.push(arr);
+			}
+			return apiResponse.successResponseWithData(
+				res,
+				"Operation success",
+				Analytics
+			);
+		} catch (err) {
+			return apiResponse.ErrorResponse(res, err);
+		}
+	}
 ];
 
 /**
@@ -730,94 +1037,192 @@ exports.getSalesStatsByBrand = [
  * @returns {Object}
  */
 exports.getStatsByOrg = [
-  auth,
-  async function (req, res) {
-    try {
-      const filters = req.query;
+	// auth,
+	async function (req, res) {
+		try {
+			const filters = req.query;
+			let organizations = await OrganisationModel.aggregate([
+				{
+					$match: getFilterConditions(filters)
+				}
+			]);
+			for (let organization of organizations) {
+				let warehouseIds = await _getWarehouseIdsByOrg(organization);
+				let analyticsFilter = getAnalyticsFilterConditions(filters, warehouseIds);
+				let Analytics = await AnalyticsModel.aggregate([
+					{
+						$match: analyticsFilter
+					}
+				]);
 
-      let organizations = await OrganisationModel.aggregate([
-        {
-          $match: getFilterConditions(filters),
-        },
-      ]);
-      for (let organization of organizations) {
-        let warehouseIds = await _getWarehouseIdsByOrg(organization);
-        let analyticsFilter = getAnalyticsFilterConditions(
-          filters,
-          warehouseIds
-        );
-        let Analytics = await AnalyticsModel.aggregate([
-          {
-            $match: analyticsFilter,
-          },
-        ]);
-        organization.analytics = aggregateSalesStats(Analytics);
+				organization.analytics = await getReturnsOrg(organization, Analytics);
+				// organization.analytics = aggregateSalesStats(Analytics);
 
-        const lastMonthStart = moment()
-          .subtract(1, "months")
-          .startOf("month")
-          .format(DATE_FORMAT);
-        const lastMonthEnd = moment()
-          .subtract(1, "months")
-          .endOf("month")
-          .format(DATE_FORMAT);
-        let prevMonthmatchCondition = {
-          uploadDate: {
-            $lte: lastMonthEnd,
-            $gte: lastMonthStart,
-          },
-          warehouseId: {
-            $in: [...warehouseIds],
-          },
-        };
+				const lastMonthStart = moment().subtract(1, 'months').startOf('month').format(DATE_FORMAT);
+				const lastMonthEnd = moment().subtract(1, 'months').endOf('month').format(DATE_FORMAT);
+				let prevMonthmatchCondition = {
+					uploadDate: {
+						$lte: lastMonthEnd,
+						$gte: lastMonthStart,
+					},
+					warehouseId: {
+						$in: [...warehouseIds]
+					}
+				};
 
-        if (filters.sku && filters.sku !== "") {
-          prevMonthmatchCondition.productId = filters.sku;
-        }
-        let prevMonthAnalytics = await AnalyticsModel.aggregate([
-          {
-            $match: prevMonthmatchCondition,
-          },
-        ]);
-        organization.analyticsPrevMonth =
-          aggregateSalesStats(prevMonthAnalytics);
-      }
+				if (filters.sku && filters.sku !== '') {
+					prevMonthmatchCondition.productId = filters.sku;
+				};
+				let prevMonthAnalytics = await AnalyticsModel.aggregate([
+					{
+						$match: prevMonthmatchCondition
+					}]);
+				organization.analyticsPrevMonth = aggregateSalesStats(prevMonthAnalytics);
 
-      return apiResponse.successResponseWithData(
-        res,
-        "Operation success",
-        organizations
-      );
-    } catch (err) {
-      return apiResponse.ErrorResponse(res, err);
-    }
-  },
+			}
+
+			return apiResponse.successResponseWithData(
+				res,
+				"Operation success",
+				organizations
+			);
+		} catch (err) {
+			return apiResponse.ErrorResponse(res, err);
+		}
+	}
+];
+
+/**
+ * getAllStats.
+ *
+ * @returns {Object}
+ */
+exports.getStatsByOrgType = [
+	auth,
+	async function (req, res) {
+		try {
+			const filters = req.query;
+			// const organizations = await OrganisationModel.aggregate([
+			// 	{
+			// 		$lookup: {
+			// 			from: 'warehouses',
+			// 			localField: 'id',
+			// 			foreignField: 'organisationId',
+			// 			as: 'warehouseDetails'
+			// 		}
+			// 	},
+			// 	// {
+			// 	// 	$unwind: {
+			// 	// 		path: '$warehouseDetails'
+			// 	// 	}
+			// 	// },
+			// 	{
+			// 		$lookup: {
+			// 			from: 'abinbevstaticdata',
+			// 			localField: 'warehouseDetails.warehouseAddress.city',
+			// 			foreignField: 'district',
+			// 			as: 'staticData'
+			// 		}
+			// 	},
+			// 	// {
+			// 	// 	$unwind: {
+			// 	// 		path: '$staticData'
+			// 	// 	}
+			// 	// },
+			// 	{
+			// 		$lookup: {
+			// 			from: 'advanced_analytics',
+			// 			localField: 'staticData.depot',
+			// 			foreignField: 'depot',
+			// 			as: 'aanalytics'
+			// 		}
+			// 	},
+			// 	// {
+			// 	// 	$unwind: {
+			// 	// 		path: '$aanalytics'
+			// 	// 	}
+			// 	// },
+			// 	{
+			// 		$match: {"aanalytics.productId": filters.sku, "staticData.district": filters.district}
+			// 	},
+			// 	{
+			// 		$group: {
+			// 			_id: { OrgType: '$type', product: "$aanalytics.productId" },
+			// 			sales: { $sum: "$aanalytics.sales" },
+			// 			targetSales: { $sum: "$aanalytics.targetSales" },
+			// 			returns: { $sum: "$aanalytics.returns" },
+			// 			// product: { "$first": { "productName": "$productName", "productSubName": "$productSubName", "productId": "$productId", "externalId": "$productId" } }
+
+			// 			// analytic: { "$first": { "sales": "$aanalytics.sales", "targetSales": "$aanalytics.targetSales", "returns": "$aanalytics.returns", "externalId": "$aanalytics.productId" } }
+			// 		}
+			// 	}
+
+			// ]);
+
+			const organizations = await OrganisationModel.aggregate([
+				{
+					$match: { $or: [{ type: 'S1' }, { type: 'S2' }, { type: 'S3' }] }
+				},
+				{
+					$lookup: {
+						from: 'warehouses',
+						localField: 'id',
+						foreignField: 'organisationId',
+						as: 'warehouseDetails'
+					}
+				},
+				{
+					$match: { "warehouseDetails.warehouseAddress.city": filters.district }
+				},
+				{
+					$group: {
+						_id: "$type",
+						orgIds: {
+							$addToSet: "$id"
+						}
+					}
+				}
+			]);
+
+			if (organizations) {
+				// const warehouseIds = await _getWarehouseIdsByDistrict(filters.district);
+				for (const organization of organizations)
+					organization.returns = await getReturnsByExternalId(filters.sku, moment().startOf('month'), today, organization.orgIds);
+			}
+
+			return apiResponse.successResponseWithData(
+				res,
+				"Operation success",
+				organizations
+			);
+		} catch (err) {
+			console.log(err);
+
+			return apiResponse.ErrorResponse(res, err);
+		}
+	}
 ];
 
 function getFilterConditions(filters) {
-  let matchCondition = {};
-  if (filters.orgType && filters.orgType !== "") {
-    if (
-      filters.orgType === "BREWERY" ||
-      filters.orgType === "S1" ||
-      filters.orgType === "S2"
-    ) {
-      matchCondition.type = filters.orgType;
-    } else if (filters.orgType === "ALL_VENDORS") {
-      matchCondition.$or = [{ type: "S1" }, { type: "S2" }];
-    }
-  }
+	let matchCondition = {};
+	if (filters.orgType && filters.orgType !== '') {
+		if (filters.orgType === 'BREWERY' || filters.orgType === 'S1' || filters.orgType === 'S2') {
+			matchCondition.type = filters.orgType;
+		} else if (filters.orgType === 'ALL_VENDORS') {
+			matchCondition.$or = [{ type: 'S1' }, { type: 'S2' }];
+		}
+	}
 
-  if (filters.state && filters.state.length) {
-    matchCondition.state = filters.state;
-  }
-  if (filters.district && filters.district.length) {
-    matchCondition.district = filters.district;
-  }
-  if (filters.organization && filters.organization.length) {
-    matchCondition.id = filters.organization;
-  }
-  return matchCondition;
+	if (filters.state && filters.state.length) {
+		matchCondition.state = filters.state;
+	}
+	if (filters.district && filters.district.length) {
+		matchCondition.district = filters.district;
+	}
+	if (filters.organization && filters.organization.length) {
+		matchCondition.id = filters.organization;
+	}
+	return { ...matchCondition, ...{ status: 'ACTIVE' } };
 }
 
 /**
@@ -936,176 +1341,303 @@ exports.getLeadTimes = [
 ];
 
 async function calculateLeadTimeByOrg(supplierOrg) {
-  const warehouses = await OrganisationModel.aggregate([
-    {
-      $match: {
-        id: supplierOrg.id,
-      },
-    },
-    {
-      $group: {
-        _id: "warehouses",
-        warehouses: {
-          $addToSet: "$warehouses",
-        },
-      },
-    },
-    {
-      $unwind: {
-        path: "$warehouses",
-      },
-    },
-    {
-      $unwind: {
-        path: "$warehouses",
-      },
-    },
-    {
-      $group: {
-        _id: "warehouses",
-        warehouseIds: {
-          $addToSet: "$warehouses",
-        },
-      },
-    },
-  ]);
-  let warehouseIds = [];
-  if (warehouses[0] && warehouses[0].warehouseIds) {
-    warehouseIds = warehouses[0].warehouseIds;
-  }
-  let shipmentLeadTimes = await ShipmentModel.aggregate([
-    {
-      $match: {
-        "supplier.locationId": { $in: warehouseIds },
-      },
-    },
-    {
-      $project: {
-        "supplier.id": 1,
-        id: 1,
-        shippingDate: 1,
-        createdAt: 1,
-        actualDeliveryDate: {
-          $dateFromString: {
-            dateString: "$actualDeliveryDate",
-          },
-        },
-        shippingDate: {
-          $dateFromString: {
-            dateString: "$shippingDate",
-          },
-        },
-      },
-    },
-    {
-      $project: {
-        "supplier.id": 1,
-        id: 1,
-        leadtime: {
-          $divide: [
-            { $subtract: ["$actualDeliveryDate", "$shippingDate"] },
-            60 * 1000 * 60,
-          ],
-        },
-      },
-    },
-    {
-      $replaceRoot: {
-        newRoot: {
-          $mergeObjects: ["$$ROOT", "$supplier"],
-        },
-      },
-    },
-    {
-      $group: {
-        _id: "$id",
-        avgLeadTime: {
-          $avg: "$leadtime",
-        },
-      },
-    },
-    {
-      $lookup: {
-        from: "organisations",
-        localField: "_id",
-        foreignField: "id",
-        as: "orgDetails",
-      },
-    },
-  ]);
-  return shipmentLeadTimes;
+	const warehouses = await OrganisationModel.aggregate([
+		{
+			$match: {
+				id: supplierOrg.id
+			}
+		},
+		{
+			$group: {
+				_id: 'warehouses',
+				warehouses: {
+					$addToSet: '$warehouses'
+				}
+			}
+		},
+		{
+			$unwind: {
+				path: '$warehouses'
+			}
+		},
+		{
+			$unwind: {
+				path: '$warehouses'
+			}
+		},
+		{
+			$group: {
+				_id: 'warehouses',
+				warehouseIds: {
+					$addToSet: '$warehouses'
+				}
+			}
+		}
+	]);
+	let warehouseIds = [];
+	if (warehouses[0] && warehouses[0].warehouseIds) {
+		warehouseIds = warehouses[0].warehouseIds;
+	}
+
+	let shipmentLeadTimes = await ShipmentModel.aggregate([
+		{
+			$match: {
+				"supplier.locationId": { $in: warehouseIds }
+			}
+		},
+		{
+			$lookup: {
+				from: 'organisations',
+				localField: 'receiver.id',
+				foreignField: 'id',
+				as: 'receiverOrg'
+			}
+		},
+		{
+			$unwind: {
+				path: '$receiverOrg'
+			}
+		},
+		{
+			$match: {
+				"receiverOrg.type": 'BREWERY'
+			}
+		},
+		{
+			$project: {
+				"supplier.id": 1,
+				id: 1,
+				shippingDate: 1,
+				createdAt: 1,
+				actualDeliveryDate: {
+					$dateFromString: {
+						dateString: '$actualDeliveryDate'
+					}
+				},
+				shippingDate: {
+					$dateFromString: {
+						dateString: '$shippingDate'
+					}
+				}
+			}
+		},
+		{
+			$project: {
+				"supplier.id": 1,
+				id: 1,
+				"leadtime": {
+					"$divide": [
+						{ "$subtract": ["$actualDeliveryDate", "$shippingDate"] },
+						60 * 1000 * 60
+					]
+				},
+
+			}
+		},
+		{
+			$replaceRoot: {
+				newRoot: {
+					$mergeObjects: ['$$ROOT', '$supplier']
+				}
+			}
+		},
+		{
+			$group: {
+				_id: "$id",
+				avgLeadTime: {
+					$avg: "$leadtime"
+				}
+			}
+		},
+		{
+			$lookup: {
+				from: 'organisations',
+				localField: '_id',
+				foreignField: 'id',
+				as: 'orgDetails'
+			}
+		}
+	]);
+	return shipmentLeadTimes;
 }
 
 async function calculateReturnRateByOrg(supplierOrg) {
-  const warehouses = await OrganisationModel.aggregate([
-    {
-      $match: {
-        id: supplierOrg.id,
-      },
-    },
-    {
-      $group: {
-        _id: "warehouses",
-        warehouses: {
-          $addToSet: "$warehouses",
-        },
-      },
-    },
-    {
-      $unwind: {
-        path: "$warehouses",
-      },
-    },
-    {
-      $unwind: {
-        path: "$warehouses",
-      },
-    },
-    {
-      $group: {
-        _id: "warehouses",
-        warehouseIds: {
-          $addToSet: "$warehouses",
-        },
-      },
-    },
-  ]);
-  let warehouseIds = [];
-  if (warehouses[0] && warehouses[0].warehouseIds) {
-    warehouseIds = warehouses[0].warehouseIds;
-  }
+	const warehouses = await OrganisationModel.aggregate([
+		{
+			$match: {
+				id: supplierOrg.id
+			}
+		},
+		{
+			$group: {
+				_id: 'warehouses',
+				warehouses: {
+					$addToSet: '$warehouses'
+				}
+			}
+		},
+		{
+			$unwind: {
+				path: '$warehouses'
+			}
+		},
+		{
+			$unwind: {
+				path: '$warehouses'
+			}
+		},
+		{
+			$group: {
+				_id: 'warehouses',
+				warehouseIds: {
+					$addToSet: '$warehouses'
+				}
+			}
+		}
+	]);
+	let warehouseIds = [];
+	if (warehouses[0] && warehouses[0].warehouseIds) {
+		warehouseIds = warehouses[0].warehouseIds;
+	}
 
-  let Analytics = await AnalyticsModel.find({
-    warehouseId: {
-      $in: [...warehouseIds],
-    },
-  });
-  let totalReturns = 0;
-  let totalSales = 0;
-  let returnRate = 0;
-  for (let analytic of Analytics) {
-    totalReturns = totalReturns + parseInt(analytic.returns);
-    totalSales = totalSales + parseInt(analytic.sales);
-  }
-  returnRate = (totalReturns / totalSales) * 100;
-  return returnRate;
+	let Analytics = await AnalyticsModel
+		.find({
+			warehouseId: {
+				$in: [...warehouseIds]
+			}
+		});
+
+	let totalReturns = 0;
+	let totalSales = 0;
+	let returnRate = 0;
+	for (let analytic of Analytics) {
+		totalReturns = totalReturns + parseInt(analytic.returns);
+		totalSales = totalSales + parseInt(analytic.sales);
+	}
+
+	if (totalReturns && totalSales) {
+		returnRate = parseFloat(((totalReturns / totalSales) * 100)).toFixed(2);
+	}
+	return returnRate;
+
+}
+
+async function calculateDirtyBottlesAndBreakage(supplierOrg) {
+	const warehouses = await OrganisationModel.aggregate([
+		{
+			$match: {
+				id: supplierOrg.id
+			}
+		},
+		{
+			$group: {
+				_id: 'warehouses',
+				warehouses: {
+					$addToSet: '$warehouses'
+				}
+			}
+		},
+		{
+			$unwind: {
+				path: '$warehouses'
+			}
+		},
+		{
+			$unwind: {
+				path: '$warehouses'
+			}
+		},
+		{
+			$group: {
+				_id: 'warehouses',
+				warehouseIds: {
+					$addToSet: '$warehouses'
+				}
+			}
+		}
+	]);
+	let warehouseIds = [];
+	if (warehouses[0] && warehouses[0].warehouseIds) {
+		warehouseIds = warehouses[0].warehouseIds;
+	}
+	let shipments = await ShipmentModel.aggregate([
+		{
+			$match: {
+				"supplier.locationId": { $in: warehouseIds },
+				"supplier.id": supplierOrg.id,
+				"status": "RECEIVED"
+			}
+		},
+		{
+			$project: {
+				shipmentUpdates: 1
+			}
+		}
+	]);
+
+	let dirtyBottles = 0;
+	let breakage = 0;
+	for (let shipment of shipments) {
+		let shipmentUpdates = shipment.shipmentUpdates.filter(sh => sh.updateComment === 'Receive_comment_3');
+		if (shipmentUpdates.length) {
+			dirtyBottles = dirtyBottles + (shipment.rejectionRate ? shipment.rejectionRate : 0);
+		}
+
+		let damagedShipments = shipment.shipmentUpdates.filter(sh => sh.updateComment === 'Receive_comment_1' || sh.updateComment === 'Receive_comment_2');
+		if (damagedShipments.length) {
+			breakage = breakage + (shipment.rejectionRate ? shipment.rejectionRate : 0);
+		}
+	}
+	return { dirtyBottles: dirtyBottles, breakage: breakage };
 }
 
 async function calculateStorageCapacityByOrg(supplierOrg) {
-  const warehouses = await OrganisationModel.aggregate([
-    {
-      $match: {
-        id: supplierOrg.id,
-      },
-    },
-  ]);
-  let bottleCapacity = 0;
-  let sqft = 0;
-  warehouses.forEach((w) => {
-    bottleCapacity = bottleCapacity + (w.bottleCapacity ? w.bottleCapacity : 0);
-    sqft = sqft + (w.sqft ? w.sqft : 0);
-  });
-  return { bottleCapacity, sqft };
+	const warehouses = await OrganisationModel.aggregate([
+		{
+			$match: {
+				id: supplierOrg.id
+			}
+		},
+		{
+			$unwind: {
+				path: '$warehouses'
+			}
+		},
+		{
+			$lookup: {
+				from: 'warehouses',
+				localField: 'warehouses',
+				foreignField: 'id',
+				as: 'war'
+			}
+		},
+		{
+			$unwind: {
+				path: '$war'
+			}
+		},
+		{
+			$replaceRoot: {
+				newRoot: {
+					$mergeObjects: ['$war', '$$ROOT']
+				}
+			}
+		}
+	]);
+	let bottleCapacity = 0;
+	let sqft = 0;
+	for (let w of warehouses) {
+		let newBottleCapacity = parseInt(w.bottleCapacity) ? parseInt(w.bottleCapacity) : 0;
+		bottleCapacity = bottleCapacity + newBottleCapacity;
+		let newSQFT = parseInt(w.sqft) ? parseInt(w.sqft) : 0;
+		sqft = sqft + newSQFT;
+	}
+
+	let storageCapacity = {
+		bottleCapacity: bottleCapacity,
+		sqft: sqft
+	};
+	return storageCapacity;
 }
 
 /**
@@ -1114,40 +1646,79 @@ async function calculateStorageCapacityByOrg(supplierOrg) {
  * @returns {Object}
  */
 exports.getSupplierPerformance = [
-  auth,
-  async function (req, res) {
-    try {
-      const orgType = req.query.supplierType;
-      let matchCondition = {};
-      if (!orgType || orgType === "ALL") {
-        matchCondition = {
-          $or: [{ type: "S1" }, { type: "S2" }, { type: "S3" }],
-        };
-      } else {
-        matchCondition.type = orgType;
-      }
-      const supplierOrgs = await OrganisationModel.aggregate([
-        {
-          $match: matchCondition,
-        },
-      ]);
-      for (const supplier of supplierOrgs) {
-        supplier.leadTime = await calculateLeadTimeByOrg(supplier);
-        supplier.returnRate = await calculateReturnRateByOrg(supplier);
-        supplier.storageCapacity = await calculateStorageCapacityByOrg(
-          supplier
-        );
-      }
+	auth,
+	async function (req, res) {
+		try {
+			const orgType = req.query.supplierType;
+			let matchCondition = {}
+			if (!orgType || orgType === 'ALL') {
+				matchCondition = { $or: [{ type: 'S1' }, { type: 'S2' }, { type: 'S3' }] };
+			} else {
+				matchCondition.type = orgType;
+			}
+			matchCondition.status = 'ACTIVE';
+			const supplierOrgs = await OrganisationModel.aggregate([
+				{
+					$match: matchCondition
+				},
+				{
+					$lookup: {
+						from: 'employees',
+						localField: 'id',
+						foreignField: 'organisationId',
+						as: 'employeeDetails'
+					}
+				},
+				{
+					$project: {
+						"postalAddress": 1,
+						"region": 1,
+						"country": 1,
+						"location": 1,
+						"warehouses": 1,
+						"supervisors": 1,
+						"warehouseEmployees": 1,
+						"primaryContactId": 1,
+						"name": 1,
+						"id": 1,
+						"type": 1,
+						"status": 1,
+						"configuration_id": 1,
+						"typeId": 1,
+						"createdAt": 1,
+						"updatedAt": 1,
+						"affiliations": 1,
+						"employeeDetails": { "$arrayElemAt": ["$employeeDetails", 0] }
+					}
+				},
+				{
+					$replaceRoot: {
+						newRoot: {
+							$mergeObjects: ['$employeeDetails', '$$ROOT']
+						}
+					}
+				}
+			]);
 
-      return apiResponse.successResponseWithData(
-        res,
-        "Operation success",
-        supplierOrgs
-      );
-    } catch (err) {
-      return apiResponse.ErrorResponse(res, err);
-    }
-  },
+			for (const supplier of supplierOrgs) {
+				supplier.leadTime = await calculateLeadTimeByOrg(supplier);
+				supplier.returnRate = await calculateReturnRateByOrg(supplier);
+				supplier.storageCapacity = await calculateStorageCapacityByOrg(supplier);
+				let dirtyBreakage = await calculateDirtyBottlesAndBreakage(supplier);
+				supplier.dirtyBottles = dirtyBreakage.dirtyBottles;
+				supplier.breakage = dirtyBreakage.breakage;
+			}
+
+			return apiResponse.successResponseWithData(
+				res,
+				"Operation success",
+				supplierOrgs
+			);
+
+		} catch (err) {
+			return apiResponse.ErrorResponse(res, err);
+		}
+	}
 ];
 
 /**
@@ -1156,90 +1727,107 @@ exports.getSupplierPerformance = [
  * @returns {Object}
  */
 exports.getAllStats = [
-  auth,
-  async function (req, res) {
-    try {
-      const resPerPage = 10;
-      const filters = req.query;
-      let warehouseIds = await _getWarehouseIds(filters);
+	auth,
+	async function (req, res) {
+		try {
 
-      const page = req.query.page || 1;
-      const totalRecords = await AnalyticsModel.count({ ...req.params });
+			const resPerPage = 10;
+			const filters = req.query;
+			let warehouseIds = await _getWarehouseIds(filters);
 
-      let analyticsFilter = getAnalyticsFilterConditions(filters, warehouseIds);
+			const page = req.query.page || 1;
+			const totalRecords = await AnalyticsModel.count({ ...req.params });
 
-      let Analytics = await AnalyticsModel.find(analyticsFilter)
-        .skip(resPerPage * page - resPerPage)
-        .limit(resPerPage);
-      for (let analytic of Analytics) {
-        analytic["returnRate"] =
-          (parseInt(analytic.returns) / parseInt(analytic.sales)) * 100;
-        analytic["returnRatePrev"] = await calculatePrevReturnRates(
-          filters,
-          analytic
-        );
-      }
+			let analyticsFilter = getAnalyticsFilterConditions(filters, warehouseIds);
 
-      const finalData = {
-        totalRecords: totalRecords,
-        data: Analytics,
-      };
-      return apiResponse.successResponseWithData(
-        res,
-        "Operation success",
-        finalData
-      );
-    } catch (err) {
-      return apiResponse.ErrorResponse(res, err);
-    }
-  },
+			let Analytics = await AnalyticsModel
+				.find(analyticsFilter)
+				.skip((resPerPage * page) - resPerPage)
+				.limit(resPerPage);
+			for (let analytic of Analytics) {
+				analytic['returnRate'] = parseFloat(((parseInt(analytic.returns) / parseInt(analytic.sales)) * 100)).toFixed(2);
+				analytic['returnRatePrev'] = await calculatePrevReturnRates(filters, analytic);
+			}
+
+			const finalData = {
+				totalRecords: totalRecords,
+				data: Analytics
+			}
+			return apiResponse.successResponseWithData(
+				res,
+				"Operation success",
+				finalData
+			);
+		} catch (err) {
+			return apiResponse.ErrorResponse(res, err);
+		}
+	}
 ];
 
 function getSKUGroupByFilters(filters) {
-  let matchCondition = [];
-  if (filters.group_by && filters.group_by !== "") {
-    if (filters.group_by === "state") {
-      matchCondition.push({
-        $group: {
-          _id: "$state",
-          data: {
-            $addToSet: "$$ROOT",
-          },
-        },
-      });
-    } else if (filters.group_by === "date") {
-      if (filters.state)
-        matchCondition.push({
-          $match: {
-            state: filters.state,
-          },
-        });
-      matchCondition.push({
-        $group: {
-          _id: "$uploadDate",
-          data: {
-            $addToSet: "$$ROOT",
-          },
-        },
-      });
-    } else if (filters.group_by === "district") {
-      matchCondition.push({
-        $group: {
-          _id: "$district",
-          data: {
-            $addToSet: "$$ROOT",
-          },
-        },
-      });
-    } else {
-      matchCondition.push({
-        $match: {
-          state: filters.state,
-        },
-      });
-    }
-  }
-  return matchCondition;
+	let matchCondition = [];
+	if (filters.group_by && filters.group_by !== '') {
+		if (filters.group_by === 'state') {
+			matchCondition.push({
+				$group: {
+					_id: '$state',
+					data: {
+						$addToSet: "$$ROOT"
+					}
+				}
+			}
+			);
+		} else if (filters.group_by === 'date') {
+			if (filters.state)
+				matchCondition.push({
+					$match: {
+						state: filters.state
+					}
+				});
+			if (filters.district && filters.district.length) {
+				matchCondition.push({
+					$match: {
+						district: filters.district
+					}
+				});
+			}
+			matchCondition.push(
+				{
+					$group: {
+						_id: '$uploadDate',
+						data: {
+							$addToSet: "$$ROOT"
+						}
+					}
+				});
+
+		} else if (filters.group_by === 'district') {
+			if (filters.district && filters.district.length) {
+				matchCondition.push({
+					$match: {
+						district: filters.district
+					}
+				});
+			}
+			matchCondition.push(
+				{
+					$group: {
+						_id: '$district',
+						data: {
+							$addToSet: "$$ROOT"
+						}
+					}
+				});
+
+		} else {
+			matchCondition.push({
+				$match: {
+					state: filters.state
+				}
+			});
+		}
+	}
+	return matchCondition;
 }
 
 /**
@@ -1248,76 +1836,66 @@ function getSKUGroupByFilters(filters) {
  * @returns {Object}
  */
 exports.getStatsBySKU = [
-  auth,
-  async function (req, res) {
-    try {
-      const filters = req.query;
-      const monthNames = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-      ];
-      let Analytics = await AnalyticsModel.aggregate([
-        // { ...dateConversion(filters) },
-        {
-          $match: getSKUAnalyticsFilterConditions(filters),
-        },
-        {
-          $lookup: {
-            from: "abinbevstaticdata",
-            localField: "depot",
-            foreignField: "depot",
-            as: "depotDetails",
-          },
-        },
-        {
-          $unwind: {
-            path: "$depotDetails",
-          },
-        },
-        {
-          $replaceRoot: {
-            newRoot: {
-              $mergeObjects: ["$depotDetails", "$$ROOT"],
-            },
-          },
-        },
-        {
-          $project: {
-            depotDetails: 0,
-          },
-        },
-        ...getSKUGroupByFilters(filters),
-      ]);
-      let response = [];
-      Analytics.forEach((analytic) => {
-        if (analytic.data) {
-          let temp = aggregateSalesStats(analytic.data);
-          temp["groupedBy"] = analytic._id.toString().includes("GMT")
-            ? monthNames[moment(analytic._id).tz("Etc/GMT").month()]
-            : analytic._id;
-          response.push(temp);
-        }
-      });
+	auth,
+	async function (req, res) {
+		try {
+			const filters = req.query;
+			const monthNames = ["January", "February", "March", "April", "May", "June",
+				"July", "August", "September", "October", "November", "December"
+			];
+			const Analytics = await AnalyticsModel.aggregate([
+				// { ...dateConversion(filters) },
+				{
+					$match: getSKUAnalyticsFilterConditions(filters)
+				},
+				{
+					$lookup: {
+						from: 'abinbevstaticdata',
+						localField: 'depot',
+						foreignField: 'depot',
+						as: 'depotDetails'
+					}
+				},
+				{
+					$unwind: {
+						path: '$depotDetails'
+					}
+				},
+				{
+					$replaceRoot: {
+						newRoot: {
+							$mergeObjects: ['$depotDetails', '$$ROOT']
+						}
+					}
+				},
+				{
+					$project: {
+						depotDetails: 0
+					}
+				},
+				...getSKUGroupByFilters(filters)
+			]);
+			let response = [];
+			for (const analytic of Analytics) {
+				if (analytic.data) {
+					// let temp = aggregateSalesStats(analytic.data);
+					let wIds;
+					if (filters.group_by === 'district')
+						wIds = await _getWarehouseIdsByDistrict(analytic._id);
+					else
+						wIds = await _getWarehouseIdsByDistrict(filters.district);
+					let temp = await getReturns(analytic.data, moment().startOf('month'), today, wIds);
+					temp['groupedBy'] = (analytic._id.toString()).includes('GMT') ? monthNames[moment(analytic._id).tz("Etc/GMT").month()] : analytic._id;
+					response.push(temp);
+				}
+			}
 
-      return apiResponse.successResponseWithData(
-        res,
-        "Operation Success",
-        response
-      );
-    } catch (err) {
-      return apiResponse.ErrorResponse(res, err);
-    }
-  },
+			return apiResponse.successResponseWithData(res, "Operation Success", response);
+
+		} catch (err) {
+			return apiResponse.ErrorResponse(res, err);
+		}
+	}
 ];
 
 /**
@@ -1327,62 +1905,62 @@ exports.getStatsBySKU = [
  */
 
 exports.getSalesTotalOfAllBrands = [
-  auth,
-  async function (req, res) {
-    try {
-      const filters = req.query;
-      console.log(filters);
-      let warehouseIds = await _getWarehouseIds(filters);
-      let analyticsFilter = getAnalyticsFilterConditions(filters, warehouseIds);
-      console.log("analytics: ", warehouseIds);
-      let Analytics = await AnalyticsModel.aggregate([
-        {
-          $match: analyticsFilter,
-        },
-        {
-          $lookup: {
-            from: "products",
-            localField: "productId",
-            foreignField: "externalId",
-            as: "prodDetails",
-          },
-        },
-        {
-          $unwind: {
-            path: "$prodDetails",
-          },
-        },
-        {
-          $replaceRoot: {
-            newRoot: {
-              $mergeObjects: ["$prodDetails", "$$ROOT"],
-            },
-          },
-        },
-        {
-          $project: {
-            prodDetails: 0,
-          },
-        },
-        {
-          $group: {
-            _id: "$manufacturer",
-            sales: { $sum: 1 },
-          },
-        },
-      ]);
+	auth,
+	async function (req, res) {
+		try {
+			const filters = req.query;
+			let warehouseIds = await _getWarehouseIds(filters);
+			let analyticsFilter = getAnalyticsFilterConditions(filters, warehouseIds);
 
-      return apiResponse.successResponseWithData(
-        res,
-        "Operation success",
-        Analytics
-      );
-    } catch (err) {
-      console.log(err);
-      return apiResponse.ErrorResponse(res, err);
-    }
-  },
-];
+			let Analytics = await AnalyticsModel.aggregate([
+				{
+					$match: analyticsFilter
+				},
+				// {
+				// 	$lookup: {
+				// 		from: 'products',
+				// 		localField: 'productId',
+				// 		foreignField: 'externalId',
+				// 		as: 'prodDetails'
+				// 	}
+				// },
+				// {
+				// 	$unwind: {
+				// 		path: '$prodDetails'
+				// 	}
+				// },
+				// {
+				// 	$replaceRoot: {
+				// 		newRoot: {
+				// 			$mergeObjects: ['$prodDetails', '$$ROOT']
+				// 		}
+				// 	}
+				// },
+				// {
+				// 	$project: {
+				// 		prodDetails: 0
+				// 	}
+				// },
+				{
+					$group: {
+						_id: '$brand',
+						sales: { $sum: "$sales" },
+					}
+				}
+			]);
+
+			return apiResponse.successResponseWithData(
+				res,
+				"Operation success",
+				Analytics
+			);
+
+		} catch (err) {
+			console.log(err);
+			return apiResponse.ErrorResponse(res, err);
+		}
+	}
+]
 
 /**
  * Gets monthly sales of Sku's for a particular brand.
@@ -1391,170 +1969,77 @@ exports.getSalesTotalOfAllBrands = [
  */
 
 exports.getMonthlySalesOfSkuByBrand = [
-  auth,
-  async function (req, res) {
-    try {
-      const filters = req.query;
-      let warehouseIds = await _getWarehouseIds(filters);
+	auth,
+	async function (req, res) {
+		try {
+			const filters = req.query;
+			let warehouseIds = await _getWarehouseIds(filters);
 
-      let analyticsFilter = getAnalyticsFilterConditions(filters, warehouseIds);
-      let brandFilter = {};
+			let analyticsFilter = getAnalyticsFilterConditions(filters, warehouseIds);
+			let brandFilter = {};
 
-      if (filters.brand && filters.brand !== "") {
-        brandFilter.manufacturer = filters.brand;
-      }
+			if (filters.brand && filters.brand !== '') {
+				brandFilter.manufacturer = filters.brand;
+			}
 
-      let Analytics = await AnalyticsModel.aggregate([
-        {
-          $match: analyticsFilter,
-        },
-        {
-          $lookup: {
-            from: "products",
-            localField: "productId",
-            foreignField: "externalId",
-            as: "prodDetails",
-          },
-        },
-        {
-          $unwind: {
-            path: "$prodDetails",
-          },
-        },
-        {
-          $replaceRoot: {
-            newRoot: {
-              $mergeObjects: ["$prodDetails", "$$ROOT"],
-            },
-          },
-        },
-        {
-          $project: {
-            prodDetails: 0,
-          },
-        },
-        {
-          $match: brandFilter,
-        },
-        {
-          $group: {
-            _id: {
-              name: "$name",
-              month: { $month: "$uploadDate" },
-            },
-            sales: { $sum: 1 },
-          },
-        },
-        {
-          $group: {
-            _id: "$_id.name",
-            overallSales: { $push: { month: "$_id.month", sales: "$sales" } },
-          },
-        },
-      ]);
+			let Analytics = await AnalyticsModel.aggregate([
+				{
+					$match: analyticsFilter
+				},
+				{
+					$lookup: {
+						from: 'products',
+						localField: 'productId',
+						foreignField: 'externalId',
+						as: 'prodDetails'
+					}
+				},
+				{
+					$unwind: {
+						path: '$prodDetails'
+					}
+				},
+				{
+					$replaceRoot: {
+						newRoot: {
+							$mergeObjects: ['$prodDetails', '$$ROOT']
+						}
+					}
+				},
+				{
+					$project: {
+						prodDetails: 0
+					}
+				},
+				{
+					$match: brandFilter
+				},
+				{
+					$group: {
+						_id: {
+							name: '$name',
+							month: { $month: '$uploadDate' }
+						},
+						sales: { $sum: "$sales" },
+					}
+				},
+				{
+					$group: {
+						"_id": "$_id.name",
+						"overallSales": { "$push": { "month": "$_id.month", "sales": "$sales" } }
+					}
+				}
+			]);
 
-      return apiResponse.successResponseWithData(
-        res,
-        "Operation success",
-        Analytics
-      );
-    } catch (err) {
-      console.log(err);
+			return apiResponse.successResponseWithData(
+				res,
+				"Operation success",
+				Analytics
+			);
+		} catch (err) {
+			console.log(err);
 
-      return apiResponse.ErrorResponse(res, err);
-    }
-  },
-];
-
-const prepareAggregateQueryForLocation = (
-  matchValue,
-  filterValue,
-  returnValue
-) => {
-  return [
-    {
-      $match: {
-        [matchValue]: parseInt(filterValue),
-      },
-    },
-    {
-      $group: {
-        _id: null,
-        [returnValue]: {
-          $push: {
-            name: "$name",
-            id: "$id",
-          },
-        },
-      },
-    },
-  ];
-};
-
-const getLocationByQuery = async (filter) => {
-  //sends all of the regions
-  if (filter.region === "all") {
-    const data = await RegionsModel.aggregate([
-      {
-        $group: {
-          _id: null,
-          regions: {
-            $addToSet: "$name",
-          },
-        },
-      },
-    ]);
-    return data[0].regions;
-  }
-
-  //sends the required cities for the state of a country, region
-  if (filter.region !== "all" && filter.country_id && filter.state_id) {
-    const data = await CitiesModel.aggregate(
-      prepareAggregateQueryForLocation("state_id", filter.state_id, "cities")
-    );
-    return data.length > 0 ? data[0].cities : [];
-  }
-
-  //sends the required states for a country, region
-  if (filter.region !== "all" && filter.country_id) {
-    const data = await StatesModel.aggregate(
-      prepareAggregateQueryForLocation(
-        "country_id",
-        filter.country_id,
-        "states"
-      )
-    );
-    return data.length > 0 ? data[0].states : [];
-  }
-
-  //sends the required countries for a specific region
-  if (filter.region !== "all") {
-    const data = await CountriesModel.aggregate(
-      prepareAggregateQueryForLocation("region", filter.region, "countries")
-    );
-    return data.length > 0 ? data[0].countries : [];
-  }
-};
-
-/**
- * Api to get the location list based on region, country, state, city
- */
-
-exports.getLocation = [
-  async function (req, res) {
-    try {
-      const filters = req.query;
-      const location = await getLocationByQuery(filters);
-
-      return apiResponse.successResponseWithData(
-        res,
-        "Operation success",
-        location
-      );
-    } catch (err) {
-      console.log(err);
-
-      return apiResponse.ErrorResponse(res, err);
-    }
-  },
-];
+			return apiResponse.ErrorResponse(res, err);
+		}
+	}
+]

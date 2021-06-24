@@ -761,6 +761,94 @@ exports.getAllStates = [
     }
   },
 ];
+exports.getCountries = [
+  auth,
+  async (req, res) => {
+    try {
+      const countries = await WarehouseModel.aggregate([{ $match :{'warehouseAddress.region' : req.query.region}},
+      {
+         $group:
+           {
+             _id: "$warehouseAddress.country",
+           }
+       }
+  ]);
+      return apiResponse.successResponseWithData(
+        res,
+        "Operation success",
+        countries
+      );
+    } catch (err) {
+      return apiResponse.ErrorResponse(res, err);
+    }
+  },
+];
+exports.getStatesByCountry = [
+  auth,
+  async (req, res) => {
+    try {
+      const allStates = await WarehouseModel.aggregate([{ $match :{'warehouseAddress.country': req.query.country}},
+      {
+         $group:
+           {
+             _id: "$warehouseAddress.state",
+           }
+       }
+  ]);
+      return apiResponse.successResponseWithData(
+        res,
+        "Operation success",
+        allStates
+      );
+    } catch (err) {
+      return apiResponse.ErrorResponse(res, err);
+    }
+  },
+];
+exports.getCitiesByState = [
+  auth,
+  async (req, res) => {
+    try {
+      const allCities = await WarehouseModel.aggregate([{ $match :{'warehouseAddress.state': req.query.state}},
+      {
+         $group:
+           {
+             _id: "$warehouseAddress.city",
+           }
+       }
+  ]);
+      return apiResponse.successResponseWithData(
+        res,
+        "Operation success",
+        allCities
+      );
+    } catch (err) {
+      return apiResponse.ErrorResponse(res, err);
+    }
+  },
+];
+exports.getWarehousesByCity = [
+  auth,
+  async (req, res) => {
+    try {
+      var allWarehouses = await WarehouseModel.aggregate([{ $match :{'warehouseAddress.city': req.query.city}},
+      {
+         $group:
+           {
+             _id: "$id",
+           }
+       }
+  ]);
+      return apiResponse.successResponseWithData(
+        res,
+        "Operation success",
+        allWarehouses
+      );
+    } catch (err) {
+      return apiResponse.ErrorResponse(res, err);
+    }
+  },
+];
 
 exports.getDistrictsByState = [
   auth,
@@ -1810,7 +1898,7 @@ exports.getBatchDetailsByBatchNumber = [
           );
 
           permission_request = {
-            result: result,
+            role: req.user.role,
             permissionRequired: "viewInventory",
           };
           checkPermissions(permission_request, async (permissionResult) => {
@@ -1912,6 +2000,8 @@ exports.getProductDetailsByWarehouseId = [
       });
       const val = warehouseDetails.warehouseInventory;
       const productList = await InventoryModel.find({ id: val });
+      console.log(warehouseDetails);
+      
       const list = JSON.parse(JSON.stringify(productList[0].inventoryDetails));
       var productArray = [];
       for (j = 0; j < list.length; j++) {
@@ -1921,16 +2011,18 @@ exports.getProductDetailsByWarehouseId = [
           productName: product[0].name,
           productId: product[0].id,
           manufacturer: product[0].manufacturer,
-          quantity: list[j].quantity,
+          quantity: list[j].quantity ? list[j].quantity : 0,
         };
         productArray.push(product1);
       }
+      let { firstLine, secondLine, city, state, country, zipCode } = warehouseDetails.warehouseAddress;
+      let address = firstLine +" "+(secondLine ? secondLine + ' ' : '') + city +' '+ state+' '+zipCode+' '+country;
       var warehouse = {
-        warehouseCountryId: warehouseDetails.country.id,
-        warehouseCountryName: warehouseDetails.country.name,
+        warehouseCountryId: warehouseDetails.country.countryId,
+        warehouseCountryName: warehouseDetails.country.countryName,
         warehouseId: warehouseDetails.id,
         warehouseName: warehouseDetails.title,
-        warehouseAddress: warehouseDetails.postalAddress,
+        warehouseAddress: address,
         warehouseLocation: warehouseDetails.location,
       };
 
@@ -2015,7 +2107,7 @@ exports.getWarehouseDetailsByRegion = [
     try {
       const { region } = req.query;
       const warehouseDetails = await WarehouseModel.find({
-        "region.name": region,
+        "region.regionName": region,
       });
 
       var warehouseArray = [];
@@ -2045,7 +2137,7 @@ exports.getWarehouseDetailsByCountry = [
     try {
       const { country } = req.query;
       const warehouseDetails = await WarehouseModel.find({
-        "country.name": country,
+        "country.countryName": country,
       });
 
       var warehouseArray = [];
@@ -2680,6 +2772,34 @@ function _spreadHeaders(inputObj) {
   return inputObj;
 }
 
+function getBrand(brand) {
+  const ko = ['Knock Out High Punch', 'IP CINNAMON'];
+  const rc = ['RC_STRONG', 'RC_Q', 'RC_P'];
+  const hy = ['HAYWARDS 5000'];
+  const fo = ['FOSTERS STRONG', "FOSTER'S"];
+  const bud = ['Budweiser'];
+  const budm = ['BUDMAGNUMSTRONG'];
+  const becks = ['BECKS', 'BE Xtra Strong'];
+  
+  let returnBrand = brand;
+  if (ko.includes(brand))
+    returnBrand = "KO";
+  else if (rc.includes(brand))
+    returnBrand = "Royal Challenger";
+  else if (hy.includes(brand))
+    returnBrand = "Haywards 5000";
+  else if (fo.includes(brand))
+    returnBrand = "Fosters";
+  else if (bud.includes(brand))
+    returnBrand = "Budweiser";
+  else if (budm.includes(brand))
+    returnBrand = "Budweiser Magnum";
+  else if (becks.includes(brand))
+    returnBrand = "Becks";
+
+  return returnBrand;
+}
+
 exports.uploadSalesData = [
   auth,
   async (req, res) => {
@@ -2705,20 +2825,20 @@ exports.uploadSalesData = [
       let headerRow3 = _spreadHeaders(sheetJSON[2]);
       let headerRow4 = sheetJSON[3];
       let headerRow5 = sheetJSON[4];
-
       let parsedRows = [];
       sheetJSON.forEach((row, index) => {
         if (index > 4) {
           let rowKeys = Object.keys(row);
           rowKeys.forEach((rowKey) => {
             let prod = {};
-            if (headerRow5[rowKey] && headerRow5[rowKey].length) {
+            if (headerRow5[rowKey] && headerRow5[rowKey].length && headerRow5[rowKey] != 'Stock Code') {
+              prod['brand'] = getBrand(headerRow2[rowKey]);
               prod['productName'] = headerRow4[rowKey];
               prod['productSubName'] = headerRow3[rowKey];
               prod['productId'] = headerRow5[rowKey];
               prod['depot'] = row['__EMPTY_1'];
-              prod['sales'] = row[rowKey];
-              prod['targetSales'] = row[rowKey] * (targetPercentage / 100);
+              prod['sales'] = (row[rowKey] === parseInt(row[rowKey], 10)) ? parseInt(row[rowKey]) : 0;
+              prod['targetSales'] = (row[rowKey] === parseInt(row[rowKey], 10)) ? row[rowKey] * (targetPercentage / 100) : 0;
               prod['uploadDate'] = collectedDate;
               let depot = warehouseDistrictMapping.find(w => w.depot === row['__EMPTY_1']);
               prod['warehouseId'] = (depot && depot.warehouseId) ? depot.warehouseId : '';
@@ -2731,7 +2851,6 @@ exports.uploadSalesData = [
       });
 
       let respObj = await AnalyticsModel.insertMany(parsedRows);
-
       return apiResponse.successResponseWithData(
         res,
         `Uploaded Sales Data successfully. Num Records - ${respObj.length}`

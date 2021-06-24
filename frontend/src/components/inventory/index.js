@@ -78,6 +78,7 @@ const Inventory = props => {
      useEffect(() => {
     async function fetchData() {
       const result = await getProductList();
+      console.log(result);
       setProductsList(result.message);
       const resultAnalytics = await getInventoryAnalytics();
       
@@ -358,7 +359,11 @@ const Inventory = props => {
                   <button className="btn btn-link mr-3"><b>View all</b></button>
                 </Link>
               </div>
-              <div className="row overflow">
+              {
+                console.log(productsList)
+              }
+              <div className="overflow" style={{height:"800px",overflowX:"hidden"}}>
+              <div className="row">
                 {productsList?.map((product, index) => (
                   <div className="col-sm-6" key={index}>
                     <div className="d-flex card flex-column align-items-center ml-4"  style={{backgroundColor: colors[index]}}>
@@ -369,6 +374,7 @@ const Inventory = props => {
                     </div>
                   </div>
                 ))}
+                </div>
 
               </div>
             </div>

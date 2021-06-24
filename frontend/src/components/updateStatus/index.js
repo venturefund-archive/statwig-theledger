@@ -167,7 +167,6 @@ const UpdateStatus = (props) => {
                           className="form-control"
                           name="shipmentId"
                           onBlur={handleBlur}
-                          onChange={handleChange}
                           value={values.shipmentId}
                         />
                       </div>
@@ -237,7 +236,7 @@ const UpdateStatus = (props) => {
                       </div>
                       {errors.updateStatusLocation &&
                         touched.updateStatusLocation && (
-                          <span className="error-msg text-danger row justify-content-end col-8">
+                          <span className="error-msg text-danger-US row justify-content-end col-8">
                             {errors.updateStatusLocation}
                           </span>
                         )}
