@@ -463,7 +463,7 @@ class Profile extends React.Component {
                                       height="15"
                                       className="mr-2"
                                     />
-                                    <span>EDIT</span>
+                                    <span>Edit</span>
                                   </button>
                                 </Link>
                                 {/* <button
@@ -694,7 +694,7 @@ class Profile extends React.Component {
                   }}
                 >
                   <img src={Pen} width="15" height="15" className="mr-3" />
-                  <span>EDIT</span>
+                  <span>Edit</span>
                 </button>
               ) : (
                 // </div>
@@ -703,11 +703,11 @@ class Profile extends React.Component {
                     className="btn btn-outline-info mr-2"
                     onClick={this.onCancel}
                   >
-                    <span>CANCEL</span>
+                    <span>Cancel</span>
                   </button>
                   <button className="btn-primary btn" onClick={this.onSubmit}>
                   {/* <button className="btn-primary btn" onClick={this.onSubmit(),()=>{this.onChange()}}> */}
-                    <span>SAVE</span>
+                    <span>Save</span>
                   </button>
                 </div>
               )}
