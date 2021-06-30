@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart } from 'react-chartkick';
 import 'chart.js';
-import { getTemperature } from '../../actions/shipmentActions';
+import { getTemperature, getTemperatureForShipment } from '../../actions/shipmentActions';
 //import './style.scss'
 
 const mockTemperatureData = { data: [
@@ -24,18 +24,15 @@ const Chart = () => {
   }
 
   const prepareTemperatureData = (temperatureData) => {
-    return temperatureData.reduce((obj, item) => (obj[item.temp.temp] = formatUnixTimeStamp(item.temp['UnixTimeStamp']), obj), {});
+    return temperatureData.reduce((obj, item) => (obj[item.temp['temp']] = formatUnixTimeStamp(item.temp['UnixTimeStamp']), obj), {});
   }
 
 
   useEffect(() => {
     const interval = setInterval(() => {
       async function fetchData() {
-        // const result = await getTemperature();
-        const result = mockTemperatureData;
-        console.log("data: ", prepareTemperatureData(result.data));
-        // setTemp(result.data)
-        setTemp(result.data.length > 0 ? prepareTemperatureData(result.data) : {});
+        const result = await getTemperatureForShipment();
+        setTemp(result.length > 0 ? prepareTemperatureData(result) : {});
       }
       fetchData();
     }, 5000);
@@ -43,9 +40,6 @@ const Chart = () => {
       window.clearInterval(interval); // clear the interval in the cleanup function
     };
   }, []);
-
-
-
   return (
     <div>
       <LineChart
@@ -54,10 +48,7 @@ const Chart = () => {
         id="users-chart" height="220px"
         data={temp}
       />
-
     </div>
-
   );
-
 };
 export default Chart;

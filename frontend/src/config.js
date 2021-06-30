@@ -429,7 +429,7 @@ export function config() {
       poDetailsByShipmentId:`${TEST_SERVER_URL}/shipmentmanagement/api/shipping/fetchPOdetailsByShipmentID?shipmentId=`,
       productDetailsByShipmentId:`${TEST_SERVER_URL}/shipmentmanagement/api/shipping/fetchProductdetailsByShipmentID?shipmentId=`,
       trackTemperature: `${TEST_SERVER_URL}/tracktracemanagement/api/track/fetchTemp`,
-      // trackTemperature: `${TEST_SERVER_URL_FOR_ROAMBEE}/integrationmanagement/api/v1/roambee/latestiotdataforshipmentid/SH12345`,
+      trackShipmentTemperature: `${TEST_SERVER_URL_FOR_ROAMBEE}/integrationmanagement/api/v1/roambee/lastteniotsamplesforshipmentid/SH12345`,
       trackProduct: `${TEST_SERVER_URL}/tracktracemanagement/api/track/track?trackingNumber=`,
       getOrganisations:`${TEST_SERVER_URL}/productmanagement/api/organisation/getOrganisations`,
       getOrganizationsByType:`${TEST_SERVER_URL}/usermanagement/api/auth/getOrganizationsByType?id=`,

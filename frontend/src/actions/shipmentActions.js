@@ -164,6 +164,14 @@ export const getTemperature = async () => {
   }
 };
 
+export const getTemperatureForShipment = async () => {
+  try {
+    return await fetch(config().trackShipmentTemperature).then(data => data.json()).then(data => data);
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 export const getShipmentsById = query => {
   try {
     return async dispatch => {
