@@ -164,9 +164,9 @@ export const getTemperature = async () => {
   }
 };
 
-export const getTemperatureForShipment = async () => {
+export const getIotShipmentData = async (url) => {
   try {
-    return await fetch(config().trackShipmentTemperature).then(data => data.json()).then(data => data);
+    return await fetch(url).then(data => data.json()).then(data => data);
   } catch (e) {
     console.log(e);
   }

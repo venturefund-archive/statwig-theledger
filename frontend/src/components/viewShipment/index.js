@@ -22,10 +22,10 @@ import { Link } from 'react-router-dom';
 import { chainOfCustody, updateStatus } from "../../actions/shipmentActions";
 import { receiveShipment } from "../../actions/shipmentActions";
 import { getAddress } from '../../utils/commonHelper';
+import { formatTimeAMPM, getLocalTime } from "../../utils/dateHelper";
 
 const Tracing = (props) => {
-  // console.log('Props');
-  // console.log(props);  
+  // console.log('props');
   const [menu, setMenu] = useState(false);
   const [menuShip, setMenuShip] = useState(false);
   const [menuProduct, setMenuProduct] = useState(false);
@@ -114,16 +114,18 @@ const Tracing = (props) => {
 
                   <div className="d-flex flex-column">
                     <div className="info">Current temperature</div>
-                    <div className="temp">3°C</div>
+                    <div className="temp">{Object.keys(props.latestIotShipmentData).length > 0 
+                    ? props.latestIotShipmentData.temp['temp'] : 0}°C</div>
                   </div>
                 </div>
 
                 <div className="d-flex flex-column">
                   <div className="info">Last Upadated on</div>
-                  <div className="info">06:00 am</div>
+                  <div className="info">{Object.keys(props.latestIotShipmentData).length > 0 
+                  ? formatTimeAMPM(/**props.latestIotShipmentData.temp['UnixTimeStamp']*/ new Date().toString().split(' ')[4]) : ''} </div>
                 </div>
               </div>
-              <Chart />{" "}
+              <Chart lastTenIotShipmentData={props.lastTenIotShipmentData} />{" "}
             </div>
           </div>
           <button
