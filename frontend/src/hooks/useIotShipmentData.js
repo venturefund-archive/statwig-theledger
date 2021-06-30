@@ -28,8 +28,6 @@ export const useIotShipmentData = (url) => {
       async function fetchData() {
         const result = await getIotShipmentData(url);
 
-        console.log('result: ', result);
-
         if (isType('array', result)) {
           const data = result.length > 0 ? prepareTemperatureData(mockTemperatureData.data) : {};
           setIotData(data);
