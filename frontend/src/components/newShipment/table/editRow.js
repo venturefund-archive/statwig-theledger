@@ -79,7 +79,7 @@ if(quantityChecker===1 && typeof(prod)!="undefined" && typeof(prod.name!="undefi
                       }
                     }
                     if(i < productsList.length){
-                    // prod.productQuantity = qty;
+                     prod.productQuantity = qty;
                     console.log("productQuantity is " + prod.productQuantity);
                     updateQuantity();
                     }
@@ -195,6 +195,9 @@ const handleChange = (value) =>
             />
           </div>
         </div>
+        {
+          console.log(String((parseInt(prod.productQuantity))-(prod.productQuantityDelivered==undefined?0:parseInt(prod.productQuantityDelivered))))
+        }
         <div className="col tcell text-center justify-content-center p-2">
           <div className="">
             <input
@@ -202,7 +205,7 @@ const handleChange = (value) =>
               id="checker"
               placeholder="Quantity"
               onKeyPress={numbersOnly}
-              value={prod.productQuantity-(prod.productQuantityDelivered==undefined?"0":prod.productQuantityDelivered)}
+              value={prod.productQuantity}
               
               onChange={(e) => {
               
