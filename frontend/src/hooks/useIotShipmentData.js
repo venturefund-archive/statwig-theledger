@@ -20,9 +20,10 @@ const prepareTemperatureData = (temperatureData) => {
     (obj[item.temp['UnixTimeStamp']] = item.temp['temp'], obj), {});
 }
 
-export const useIotShipmentData = (url) => {
+export const useIotShipmentData = (url, enableStatus) => {
   const [iotData, setIotData] = useState({});
 
+  console.log("enable status: ", enableStatus);
   useEffect(() => {
     const interval = setInterval(() => {
       async function fetchData() {
@@ -38,11 +39,13 @@ export const useIotShipmentData = (url) => {
         }
 
       }
-      fetchData();
+      if(enableStatus) {
+        fetchData();
+      }
     }, 5000);
     return () => {
       window.clearInterval(interval); // clear the interval in the cleanup function
     };
-  }, [url]);
+  }, [url, enableStatus]);
   return iotData;
 }

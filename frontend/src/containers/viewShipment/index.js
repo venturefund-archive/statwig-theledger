@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ViewShipment from '../../components/viewShipment';
 import Header from '../../shared/header';
 import Sidebar from '../../shared/sidebarMenu';
-import { trackProduct, getViewShipment } from "../../actions/shipmentActions";
+import { trackProduct, getViewShipment, fetchIotEnabledApiResponse } from "../../actions/shipmentActions";
 import { useDispatch, useSelector } from 'react-redux';
 import { chainOfCustody, updateStatus, fetchImage } from "../../actions/shipmentActions";
 import { useIotShipmentData } from '../../hooks/useIotShipmentData';
@@ -12,11 +12,9 @@ const ViewShipmentContainer = props => {
   const [trackData, setTrackData] = useState({});
   const [shippmentChainOfCustodyData, setShippmentChainOfCustodyData] = useState([]);
   const [imagesData, setImagesData] = useState([]);
- 
-  const latestIotShipmentData = useIotShipmentData(config().trackLatestShipmentData);
-  const lastTenIotShipmentData = useIotShipmentData(config().trackLastTenIotShipmentData);
-
-  console.log("latestIotShipmentData: ", latestIotShipmentData);
+  const [iotEnabledStatus, setIotEnabledStatus] = useState(false);
+  // const [latestIotShipmentData, setLatestIotShipmentData] = useState({});
+  // const [lastTenIotShipmentData, setLastTenIotShipmentData] = useState({});
 
   const dispatch = useDispatch();
 
@@ -61,6 +59,30 @@ const ViewShipmentContainer = props => {
     fetchData();
   }, []);
 
+  /**
+   * Enable temperature graph based on IotEnabledStatus
+   */
+  useEffect(() => {
+    async function fetchIotEnabledStatus() {
+      const result = await fetchIotEnabledApiResponse(props.match.params.id);
+      console.log("inside the result", result.data.iot_enabled);
+
+      if(result.data.iot_enabled) {
+        setIotEnabledStatus(true);
+     } else {
+        setIotEnabledStatus(false);
+      }
+    }
+    fetchIotEnabledStatus();
+  }, []);
+
+  const latestIotShipmentData = useIotShipmentData(config().trackLatestShipmentData, iotEnabledStatus);
+  const lastTenIotShipmentData = useIotShipmentData(config().trackLastTenIotShipmentData, iotEnabledStatus);
+
+  const navigateToTrakeAndTraceToDisplayIotShipmentTemperature = () => {
+    props.history.push(`/tracing/${props.match.params.id}/shipmentView`)
+  };
+
   return (
     <div className="container-fluid p-0">
       <Header {...props} />
@@ -73,6 +95,8 @@ const ViewShipmentContainer = props => {
             imagesData={imagesData}
             latestIotShipmentData={latestIotShipmentData}
             lastTenIotShipmentData={lastTenIotShipmentData}
+            iotEnabledStatus={iotEnabledStatus}
+            navigateToTrakeAndTraceToDisplayIotShipmentTemperature={navigateToTrakeAndTraceToDisplayIotShipmentTemperature}
             {...props}
           />
         </div>

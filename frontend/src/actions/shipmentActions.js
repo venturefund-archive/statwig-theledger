@@ -168,9 +168,22 @@ export const getIotShipmentData = async (url) => {
   try {
     return await fetch(url).then(data => data.json()).then(data => data);
   } catch (e) {
-    console.log(e);
+    return e.response;
   }
 }
+
+export const fetchIotEnabledApiResponse = async (id) => {
+  try {
+    const result = await axios.get(config().getIotEnabledStatus);
+    return result.data;
+    // return await fetch(config().getIotEnabledStatus)
+    //   .then(data => data.json()).then(data => data);
+  } catch (e) {
+    return e.response;
+  }
+}
+
+
 
 export const getShipmentsById = query => {
   try {
