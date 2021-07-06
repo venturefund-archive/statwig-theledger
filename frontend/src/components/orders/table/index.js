@@ -17,7 +17,6 @@ const Table = props => {
   const handlePageChange  = (event, value) => {
     props.onPageChange(value)
   };
-  console.log(orders);
   orders.sort(function(a,b){
     if(a.id>b.id){
       return -1;
@@ -49,11 +48,11 @@ const Table = props => {
                 status = 'Rejected';
               }
               else if (order.poStatus === 'TRANSIT&FULLYFULFILLED') {
-                statusStyle = 'bg-secondary';
-                status = 'Transit&FullyFilled';
+                statusStyle = 'bg-primary';
+                status = 'Transit and FullyFilled';
               }
               else if (order.poStatus === 'FULLYFULFILLED') {
-                statusStyle = 'bg-secondary';
+                statusStyle = 'bg-primary';
                 status = 'FullyFilled';
               }
 

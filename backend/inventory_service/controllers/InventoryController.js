@@ -1957,6 +1957,7 @@ exports.getProductListCounts = [
     try {
       
       const { warehouseId } = req.user;
+      // const warehouseId  = req.query.id;
       const InventoryId = await WarehouseModel.find({ id: warehouseId });
       const val = InventoryId[0].warehouseInventory;
       const productList = await InventoryModel.find({ id: val });
@@ -1976,10 +1977,22 @@ exports.getProductListCounts = [
             unitofMeasure: product && product[0] && product[0].unitofMeasure,
 
           };
+         
+          
         }   
+        
 
         productArray.push(product1);
       }
+
+      productArray.sort(function(a,b){
+          if(a.quantity>b.quantity){
+            return -1;
+          }
+          else{
+            return 1;
+          }
+        })
      
       return apiResponse.successResponseWithData(res, productArray);
     } catch (err) {
@@ -1987,7 +2000,7 @@ exports.getProductListCounts = [
         "error",
         "<<<<< ShippingOrderService < ShippingController < fetchAllShippingOrders : error (catch block)"
       );
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.ErrorResponse(res, err.message);
     }
   },
 ];
@@ -2603,7 +2616,7 @@ exports.getInventoryProductsByOrganisation = [
   },
 ];
 
-function getFilterConditions(filters) {
+async function getFilterConditions(filters) {
   let matchCondition = {};
   if (filters.orgType && filters.orgType !== "") {
     if (
@@ -2616,11 +2629,57 @@ function getFilterConditions(filters) {
       matchCondition.$or = [{ type: "S1" }, { type: "S2" }];
     }
   }
-  if (filters.state && filters.state.length) {
-    matchCondition.state = filters.state;
-  }
-  if (filters.district && filters.district.length) {
-    matchCondition.district = filters.district;
+  if (filters.district && filters.district.length && !filters.organization) {
+    let matchWarehouseCondition = {};
+    matchCondition.status = 'ACTIVE';
+    if (filters.status && filters.status !== '') {
+      matchCondition.status = filters.status;
+    }
+    if (filters.state && filters.state !== '') {
+      matchWarehouseCondition["warehouseDetails.warehouseAddress.state"] = new RegExp('^'+filters.state+'$', "i");
+    }
+    if (filters.district && filters.district !== '') {
+      matchWarehouseCondition["warehouseDetails.warehouseAddress.city"] = new RegExp('^'+filters.district+'$', "i");
+    }
+
+    if (filters.orgType === "ALL_VENDORS") {
+      matchCondition.$or = [{ type: "S1" }, { type: "S2" }, { type: "S3" }];
+    } else {
+      matchCondition.orgType = filters.orgType;
+    }
+    console.log(matchCondition, matchWarehouseCondition);
+    const organisations = await OrganisationModel.aggregate([
+      {
+        $match: matchCondition,
+      },
+      {
+        $lookup: {
+          from: 'warehouses',
+          localField: 'id',
+          foreignField: 'organisationId',
+          as: 'warehouseDetails'
+        }
+      }, {
+        $unwind: '$warehouseDetails'
+      },
+      {
+        $match: matchWarehouseCondition
+       },
+      {
+        $project: {
+          id: 1,
+          name: 1,
+          type: 1
+        }
+      }
+    ]);
+      
+      let orgs = [];
+      console.log(organisations)
+      for(let org in organisations){
+        orgs.push(organisations[org]['id'])
+      }
+      matchCondition.id = { $in : [...orgs] }
   }
   if (filters.organization && filters.organization.length) {
     matchCondition.id = filters.organization;

@@ -17,10 +17,11 @@ const EditRow = props => {
     handleCategoryChange,
     handleProductChange,
     handleBatchChange,
-    products
+    products,
+    check
   } = props;
   
-  console.log(prod,"Edit rowt")
+  console.log(prod,"Edit rowt",index);
   const [productsList,setProductsList] = useState([]);
   const [quantityChecker,setQuantityChecker] = useState(1);
   useEffect(() => {
@@ -65,7 +66,7 @@ const updateQuantity = () =>
   setQuantityChecker(0);
 }
 
-if(quantityChecker===1 && typeof(prod)!="undefined" && typeof(prod.name!="undefined") && typeof(productsList)!="undefined")
+if(check==="0" && quantityChecker===1 && typeof(prod)!="undefined" && typeof(prod.name!="undefined") && typeof(productsList)!="undefined")
   {
                      let qty;
                     for(var i=0;i<productsList.length;i++)
@@ -79,7 +80,7 @@ if(quantityChecker===1 && typeof(prod)!="undefined" && typeof(prod.name!="undefi
                       }
                     }
                     if(i < productsList.length){
-                    // prod.productQuantity = qty;
+                     prod.productQuantity = qty;
                     console.log("productQuantity is " + prod.productQuantity);
                     updateQuantity();
                     }
@@ -138,8 +139,8 @@ const handleChange = (value) =>
                 /> */}
                 <Select
                   className="no-border"
-                  placeholder="Select Product Category"
-                  value={{label:prod.type?prod.type:"Select Product Category"}}
+                  placeholder={<div className="select-placeholder-text">Select Product Category</div>} 
+                  value={{value: prod.id, label: prod.type}}
                   defaultInputValue={prod.type}
                   onChange={(v) => handleCategoryChange(index, v.value)}
                   options={category}
@@ -164,9 +165,11 @@ const handleChange = (value) =>
                 } */}
                 {enableDelete ?
                 <Select
-                  className="no-border"
-                  placeholder="Select Product Name"
-                  defaultInputValue={prod.name}
+                className="no-border"
+                placeholder= {<div className= "select-placeholder-text" > Product Name </div>} 
+                value={{value: prod.id, label: prod.name}}
+                placeholder="Product Name"
+                   defaultInputValue={prod.name}
                   onChange={(v) => {
                     handleProductChange(index, v);
                     setQuantityChecker(1);
@@ -201,7 +204,7 @@ const handleChange = (value) =>
               id="checker"
               placeholder="Quantity"
               onKeyPress={numbersOnly}
-              value={prod.productQuantity-(prod.productQuantityDelivered==undefined?"0":prod.productQuantityDelivered)}
+              value={prod.productQuantity}
               
               onChange={(e) => {
               
@@ -220,11 +223,23 @@ const handleChange = (value) =>
           <div className="placeholder_id">Unit</div>}
         </div>
       </div>
-        {enableDelete && props.product.length > 1 &&
-          <div className="m-3 bg-light">
-          <span className="del-pad shadow border-none rounded-circle ml-2 " onClick={() => onRemoveRow(index)}><img className=" cursorP  p-1" height="30" src={Delete} /></span>
-          </div>
-        }
+      {
+        // enableDelete && props.product.length > 1 &&
+       //   <div className="m-3 bg-light">
+       //   <span className="del-pad shadow border-none rounded-circle ml-2 " onClick={() => onRemoveRow(index)}><img className=" cursorP  p-1" height="30" src={Delete} /></span>
+       //   </div>
+       }
+
+       {props.product.length > 1 && (
+         <div className="m-2 pl-3 pt-1" style={{position:"relative", left:"10px"}}>
+           <span
+             className="del-pad shadow border-none rounded-circle mr-1"
+             onClick={() => props.onRemoveRow(index)}
+           >
+             <img className="cursorP p-1" height="30" src={Delete} />
+           </span>
+         </div>
+       )}
       </div>
     // <div className="rTableRow"
     //   <div className="rTableCell">

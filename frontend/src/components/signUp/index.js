@@ -21,6 +21,7 @@ import logo from "../../assets/brands/VaccineLedgerlogo.svg";
 import dropdownIcon from '../../assets/icons/dropdown_selected.png';
 import TextField from '@material-ui/core/TextField';
 import {verifyEmailAndPhoneNo} from "../../actions/userActions";
+import { Alert, AlertTitle } from '@material-ui/lab';
 
 const FormPage = (props) => {
 const [organisations, setOrganisations] = useState([]);
@@ -210,7 +211,6 @@ const changeFn = (value_new,e) => {
                   autoCapitalize = 'none'
                   value={(props.email).toLowerCase()}
                   onChange={(e) => { props.onEmailChange(e); handleChange(e);}}
-                  // onBlur={console.log("Deepak")}
                   handleBlur={props.email?verifyEmailAndPhoneNo(`emailId=${props.email}`).then((v)=>{
                     if(v.data.length){
                       setemailerror(true);
@@ -245,8 +245,8 @@ const changeFn = (value_new,e) => {
                       value={props.phone}
                       onChange={(e)=>{props.onphoneChange(e)}}
                       handleBlur={props.phone?verifyEmailAndPhoneNo(`phoneNumber=${props.phone}`).then((v)=>{
-                        console.log(v.data.length);
-                        if(v.data.length){
+                        console.log(v.data,"Data");
+                        if(v.data[0].phoneNumber){
                           setphoneerror(true);
                           setsignupDisable(true);
                         }
@@ -350,7 +350,7 @@ const changeFn = (value_new,e) => {
                   )}
                   </div>
                   {
-                  props.errorMessage && <div className="alert alert-danger">{props.errorMessage}</div>
+                  props.errorMessage && <div className="mt-3 mr-4"> <Alert variant="filled" severity="error"><AlertTitle>Error</AlertTitle>{props.errorMessage}</Alert></div>
                   }
                   
                   <div className="text-center" >
