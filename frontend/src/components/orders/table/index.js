@@ -25,7 +25,6 @@ const Table = props => {
       return 1;
     }
   })
-  console.log(orders,)
   return (
     <div className="table pr-1">
         <div className="rTable">
