@@ -25,6 +25,7 @@ const Table = props => {
       return 1;
     }
   })
+  console.log(orders,)
   return (
     <div className="table pr-1">
         <div className="rTable">
@@ -56,7 +57,7 @@ const Table = props => {
                 status = 'FullyFilled';
               }
 
-              const { customer, products, supplier } = order;
+              const { customer, products, supplier, createdBy } = order;
               return (
               <div className="rTableRow pt-2 pb-2 shadow-none" key={index}>
                     <div className="rTableCell">
@@ -64,7 +65,7 @@ const Table = props => {
                         <img src={user} width="30" height="20" alt="User" className="rounded mr-1 align-self-center" />
                         <div className="flex-column d-flex">
                           <span className="text-primary bold">{visible == 'two' ? supplier.organisation.name : customer.organisation.name}</span>
-                          <p className="address mb-0 text-primary">{visible == 'two' ? supplier.organisation.id : customer.organisation.id}</p>
+                          <p className="address mb-0 text-primary">{visible == 'two' ? createdBy : customer.organisation.id}</p>
                       </div>
                       </div>
                     </div>
