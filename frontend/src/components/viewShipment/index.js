@@ -52,7 +52,7 @@ const Tracing = (props) => {
   const closeModalShipping = () => {
     setOpenShipping(false);
   };
-  console.log("props: ", props.iotEnabledStatus);
+  
   return (
     <div className="tracing">
       <div className="row justify-content-between">
@@ -132,9 +132,9 @@ const Tracing = (props) => {
                         ? formatTimeAMPM(/**props.latestIotShipmentData.temp['UnixTimeStamp']*/ new Date().toString().split(' ')[4]) : ''} </div>
                     </div>
                     <img 
-                      className="zoom-in-image" 
+                      className="zoom-in-icon" 
                       src={zoomInIcon} 
-                      onClick={() => props.navigateToTrakeAndTraceToDisplayIotShipmentTemperature()} />
+                      onClick={() => props.openInTrackingPage()} />
                   </div>
                 </div> :
                 ''}

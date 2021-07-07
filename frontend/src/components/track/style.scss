@@ -264,6 +264,10 @@
     }
   }
 
+  .temperature-graph-panel-information {
+    padding: 15px 0px 20px 0px;
+  }
+
   .zoom-out-icon {
     width: 47px;
     height: 57px;
@@ -283,4 +287,14 @@
     justify-content: flex-start;
     flex-direction: column;
     margin-right: 10px;
+  }
+
+  .zoom-in-icon {
+    width: 47px;
+    height: 57px;
+    border-radius: 10px;
+    border: 0px solid;
+    padding: 5px;
+    background-color: #c2e6fa;
+    cursor: pointer;
   }

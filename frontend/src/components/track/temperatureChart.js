@@ -7,7 +7,7 @@ const Chart = (props) => {
     <div className="col-12">
       <LineChart
         colors={["#FA7923", "#666"]}
-        id="users-chart" height="450px"
+        id="users-chart" height={props.height || '450px'}
         data={props.allIotShipmentData}
       />
     </div>

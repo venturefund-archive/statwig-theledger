@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Chart from './temperature';
+import Chart from './temperatureChart';
 import Map from './map';
 import CurrentTemperature from '../../assets/icons/thermometer.svg';
 import PoChainOfCustody from './pochainofcustody';
@@ -11,6 +11,7 @@ import { useDispatch } from "react-redux";
 import './style.scss';
 import { formatTimeAMPM } from '../../utils/dateHelper';
 import zoomOutIcon from '../../assets/icons/smallscreen.png';
+import zoomInIcon from "../../assets/icons/fullScreen.png"
 
 const Track = (props) => {
   const [value, setValue] = useState('');
@@ -74,26 +75,39 @@ const Track = (props) => {
                   <Map data={shippmentChainOfCustodyData} />
                 </div>
               </div>
-              <div className="panel commonpanle row shadow bg-white mb-4">
-                <div className="row col-12">
-                  <div className="col row ml-3">
-                    <div className="arrow col-1 mr-2">
-                      <img src={CurrentTemperature} width="20" height="20" />
+              <div 
+                className="panel commonpanle row shadow bg-white mb-4" 
+                style={{ minHeight: '400px' }}>
+                <div className="col">
+                  <div className="temperature-graph-panel-information d-flex justify-content-between">
+                    <div className="row ml-4 mb-2">
+                      <div className="arrow mr-2">
+                        <img className="arrow-image" src={CurrentTemperature} width="20" height="20" />
+                      </div>
+
+                      <div className="d-flex flex-column">
+                        <div className="info">Current temperature</div>
+                        <div className="temp">{Object.keys(props.latestIotShipmentData).length > 0
+                          ? props.latestIotShipmentData.temp['temp'] : 0}°C</div>
+                      </div>
                     </div>
 
-                    <div className="col">
-                      <div className="info">Current temperature</div>
-                      <div className="info">3°C</div>
+                    <div className="current-info-container">
+                      <div className="current-info">
+                        <div className="info">Last Upadated on</div>
+                        <div className="info">{Object.keys(props.latestIotShipmentData).length > 0
+                          ? formatTimeAMPM(/**props.latestIotShipmentData.temp['UnixTimeStamp']*/ new Date().toString().split(' ')[4]) : ''} </div>
+                      </div>
+                      <img
+                        src={zoomInIcon}
+                        className='zoom-in-icon'
+                        onClick={() => props.zoomOutTemperatureGraph()}
+                      />
                     </div>
                   </div>
-
-                  <div className="col">
-                    <div className="info col">Last Upadated on</div>
-                    <div className="info col">07:00 am</div>
-                  </div>
-                </div>
-                <div className="row col-12">
-                  <Chart />
+                  <Chart 
+                    allIotShipmentData={props.lastTenIotShipmentData} 
+                    height={'220px'} />{" "}
                 </div>
               </div>
             </div>}
@@ -217,7 +231,7 @@ const Track = (props) => {
                 <img
                   src={zoomOutIcon}
                   className='zoom-out-icon'
-                  onClick={() => props.navigateToOriginalShipmentPage()}
+                  onClick={() => props.enableTracingZoomOutPageForViewShipment ? props.navigateBackToTracingPage() : props.navigateToOriginalShipmentPage()}
                 />
               </div>
             </div>

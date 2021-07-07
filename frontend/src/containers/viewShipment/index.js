@@ -65,7 +65,6 @@ const ViewShipmentContainer = props => {
   useEffect(() => {
     async function fetchIotEnabledStatus() {
       const result = await fetchIotEnabledApiResponse(props.match.params.id);
-      console.log("inside the result", result.data.iot_enabled);
 
       if(result.data.iot_enabled) {
         setIotEnabledStatus(true);
@@ -76,11 +75,11 @@ const ViewShipmentContainer = props => {
     fetchIotEnabledStatus();
   }, []);
 
-  const latestIotShipmentData = useIotShipmentData(config().trackLatestShipmentData, iotEnabledStatus);
-  const lastTenIotShipmentData = useIotShipmentData(config().trackLastTenIotShipmentData, iotEnabledStatus);
+  const latestIotShipmentData = useIotShipmentData(config().trackLatestShipmentData.replace(':shipmentId', props.match.params.id), iotEnabledStatus);
+  const lastTenIotShipmentData = useIotShipmentData(config().trackLastTenIotShipmentData.replace(':shipmentId', props.match.params.id), iotEnabledStatus);
 
-  const navigateToTrakeAndTraceToDisplayIotShipmentTemperature = () => {
-    props.history.push(`/tracing/${props.match.params.id}/shipmentView`)
+  const openInTrackingPage = () => {
+    props.history.push(`/tracing/${props.match.params.id}?status=shipmentView`);
   };
 
   return (
@@ -96,7 +95,7 @@ const ViewShipmentContainer = props => {
             latestIotShipmentData={latestIotShipmentData}
             lastTenIotShipmentData={lastTenIotShipmentData}
             iotEnabledStatus={iotEnabledStatus}
-            navigateToTrakeAndTraceToDisplayIotShipmentTemperature={navigateToTrakeAndTraceToDisplayIotShipmentTemperature}
+            openInTrackingPage={openInTrackingPage}
             {...props}
           />
         </div>

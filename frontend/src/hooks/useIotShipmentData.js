@@ -23,7 +23,6 @@ const prepareTemperatureData = (temperatureData) => {
 export const useIotShipmentData = (url, enableStatus) => {
   const [iotData, setIotData] = useState({});
 
-  console.log("enable status: ", enableStatus);
   useEffect(() => {
     const interval = setInterval(() => {
       async function fetchData() {

@@ -8,12 +8,15 @@ import { turnOff, turnOn } from '../../actions/spinnerActions';
 import moment from 'moment';
 import { useIotShipmentData } from "../../hooks/useIotShipmentData";
 import { config } from "../../config";
+import queryString from 'query-string';
+
 
 const TrackContainer = props => {
   const dispatch = useDispatch();
   const [poChainOfCustodyData, setPoChainOfCustodyData] = useState([]);
   const [shippmentChainOfCustodyData, setShippmentChainOfCustodyData] = useState([]);
   const [viewIotTemperatureSplineline, setViewIotTemperatureSplineline] = useState(false);
+  const [enableTracingZoomOutPageForViewShipment, setEnableTracingZoomOutPageForViewShipment] = useState(false);
   // const searchData = async (id) => {
   //   dispatch(turnOn());
   //   const result = await chainOfCustody(id);
@@ -27,9 +30,10 @@ const TrackContainer = props => {
   //   }
   // }
 
-  const allIotShipmentData = useIotShipmentData(config().trackAllIotShipmentData, props.match.params.status === 'shipmentView' ? true : false);
-  const latestIotShipmentData = useIotShipmentData(config().trackLatestShipmentData, props.match.params.status === 'shipmentView' ? true : false);
-  console.log("allIotShipmentData: ", allIotShipmentData);
+  const { status } = queryString.parse(props.location.search);
+  const lastTenIotShipmentData = useIotShipmentData((config().trackLastTenIotShipmentData).replace(':shipmentId', props.match.params.id), !status && !enableTracingZoomOutPageForViewShipment ? true : false);
+  const allIotShipmentData = useIotShipmentData(config().trackAllIotShipmentData.replace(':shipmentId', props.match.params.id), (status === 'shipmentView' || enableTracingZoomOutPageForViewShipment) ? true : false);
+  const latestIotShipmentData = useIotShipmentData(config().trackLatestShipmentData.replace(':shipmentId', props.match.params.id), true);
 
   const searchData = async (id) => {
     dispatch(turnOn());
@@ -76,14 +80,24 @@ const TrackContainer = props => {
   }
 
   useEffect(() => {
-    const { status } = props.match.params;
-    if(status === 'shipmentView') {
+    const { status } = queryString.parse(props.location.search);
+    if (status === 'shipmentView') {
       setViewIotTemperatureSplineline(true);
     }
-  }, [props.match.params]);
+  }, [props.location.search]);
 
   const navigateToOriginalShipmentPage = () => {
-    props.history.push(`/viewshipment/${props.match.params.id}`)
+    props.history.push(`/viewshipment/${props.match.params.id}`);
+  };
+
+  const zoomOutTemperatureGraph = () => {
+    setEnableTracingZoomOutPageForViewShipment(true);
+    setViewIotTemperatureSplineline(true);
+  };
+
+  const navigateBackToTracingPage = () => {
+    setEnableTracingZoomOutPageForViewShipment(false);
+    setViewIotTemperatureSplineline(false);
   };
 
   return (
@@ -101,6 +115,10 @@ const TrackContainer = props => {
             allIotShipmentData={allIotShipmentData}
             latestIotShipmentData={latestIotShipmentData}
             navigateToOriginalShipmentPage={navigateToOriginalShipmentPage}
+            enableTracingZoomOutPageForViewShipment={enableTracingZoomOutPageForViewShipment}
+            zoomOutTemperatureGraph={zoomOutTemperatureGraph}
+            navigateBackToTracingPage={navigateBackToTracingPage}
+            lastTenIotShipmentData={lastTenIotShipmentData}
             {...props} />
         </div>
       </div>
