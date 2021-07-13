@@ -976,7 +976,7 @@ exports.getOpenOrderIds = [
   },
 ];
 
-exports.fetchInboundPurchaseOrders = [//inbound po with filter(from, orderId, productName, deliveryLocation, date)
+exports.fetchOutboundPurchaseOrders = [//inbound po with filter(from, orderId, productName, deliveryLocation, date)
   auth,
   async (req, res) => {
     try {
@@ -1092,7 +1092,7 @@ exports.fetchInboundPurchaseOrders = [//inbound po with filter(from, orderId, pr
                   Promise.all(findInboundPOData).then(function (results) {
                     return apiResponse.successResponseWithData(
                       res,
-                      "Inbound PO Records",
+                      "Outbound PO Records",
                       {"inboundPOs":inboundPORes, "count":inboundPOsCount}
                     );
                   });
@@ -1126,7 +1126,7 @@ exports.fetchInboundPurchaseOrders = [//inbound po with filter(from, orderId, pr
   },
 ];
 
-exports.fetchOutboundPurchaseOrders = [ //outbound po with filter(to, orderId, productName, deliveryLocation, date)
+exports.fetchInboundPurchaseOrders = [ //outbound po with filter(to, orderId, productName, deliveryLocation, date)
   auth,
   async (req, res) => {
     try {
@@ -1244,7 +1244,7 @@ exports.fetchOutboundPurchaseOrders = [ //outbound po with filter(to, orderId, p
                   Promise.all(findOutboundPOData).then(function (results) {
                     return apiResponse.successResponseWithData(
                       res,
-                      "Outbound PO Records",
+                      "Inbound PO Records",
                       {"outboundPOs":outboundPORes, "count":outboundPOsCount}
                     );
                   });
