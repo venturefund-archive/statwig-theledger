@@ -1959,6 +1959,7 @@ exports.getProductListCounts = [
     try {
       
       const { warehouseId } = req.user;
+      // const warehouseId  = req.query.id;
       const InventoryId = await WarehouseModel.find({ id: warehouseId });
       const val = InventoryId[0].warehouseInventory;
       const productList = await InventoryModel.find({ id: val });
@@ -1971,16 +1972,29 @@ exports.getProductListCounts = [
         {
         
           var product1 = {
+            productCategory:product && product[0] && product[0].type,
             productName: product && product[0] && product[0].name,
             productId: product && product[0] && product[0].id,
             quantity: list && list[0] && list[j].quantity || 0,
-            unitofMeasure: product && product[0] && product[0].unitofMeasure,
-
+            manufacturer:product && product[0] && product[0].manufacturer,
+            unitofMeasure: product && product[0] && product[0].unitofMeasure,         
           };
+         
+          
         }   
+        
 
         productArray.push(product1);
       }
+
+      productArray.sort(function(a,b){
+          if(a.quantity>b.quantity){
+            return -1;
+          }
+          else{
+            return 1;
+          }
+        })
      
       return apiResponse.successResponseWithData(res, productArray);
     } catch (err) {
@@ -1988,7 +2002,7 @@ exports.getProductListCounts = [
         "error",
         "<<<<< ShippingOrderService < ShippingController < fetchAllShippingOrders : error (catch block)"
       );
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.ErrorResponse(res, err.message);
     }
   },
 ];
@@ -2015,6 +2029,7 @@ exports.getProductDetailsByWarehouseId = [
           productId: product[0].id,
           manufacturer: product[0].manufacturer,
           quantity: list[j].quantity ? list[j].quantity : 0,
+          unitofMeasure:product[0].unitofMeasure
         };
         productArray.push(product1);
       }
@@ -2603,24 +2618,74 @@ exports.getInventoryProductsByOrganisation = [
   },
 ];
 
-function getFilterConditions(filters) {
+async function getFilterConditions(filters) {
   let matchCondition = {};
+  if (filters.invDetails && filters.invDetails.length)
+    matchCondition.$or = [{ type: "S1" }, { type: "S2" }, { type: "S3" }];
+  
   if (filters.orgType && filters.orgType !== "") {
     if (
       filters.orgType === "BREWERY" ||
       filters.orgType === "S1" ||
-      filters.orgType === "S2"
+      filters.orgType === "S2" ||
+      filters.orgType === "S3"
     ) {
       matchCondition.type = filters.orgType;
     } else if (filters.orgType === "ALL_VENDORS") {
-      matchCondition.$or = [{ type: "S1" }, { type: "S2" }];
+      matchCondition.$or = [{ type: "S1" }, { type: "S2" }, { type: "S3" }];
     }
   }
-  if (filters.state && filters.state.length) {
-    matchCondition.state = filters.state;
-  }
-  if (filters.district && filters.district.length) {
-    matchCondition.district = filters.district;
+  if (filters.district && filters.district.length && !filters.organization) {
+    let matchWarehouseCondition = {};
+    matchCondition.status = 'ACTIVE';
+    if (filters.status && filters.status !== '') {
+      matchCondition.status = filters.status;
+    }
+    if (filters.state && filters.state !== '') {
+      matchWarehouseCondition["warehouseDetails.warehouseAddress.state"] = new RegExp('^'+filters.state+'$', "i");
+    }
+    if (filters.district && filters.district !== '') {
+      matchWarehouseCondition["warehouseDetails.warehouseAddress.city"] = new RegExp('^'+filters.district+'$', "i");
+    }
+
+    if (filters.orgType === "ALL_VENDORS") {
+      matchCondition.$or = [{ type: "S1" }, { type: "S2" }, { type: "S3" }];
+    } else {
+      matchCondition.orgType = filters.orgType;
+    }
+    console.log(matchCondition, matchWarehouseCondition);
+    const organisations = await OrganisationModel.aggregate([
+      {
+        $match: matchCondition,
+      },
+      {
+        $lookup: {
+          from: 'warehouses',
+          localField: 'id',
+          foreignField: 'organisationId',
+          as: 'warehouseDetails'
+        }
+      }, {
+        $unwind: '$warehouseDetails'
+      },
+      {
+        $match: matchWarehouseCondition
+       },
+      {
+        $project: {
+          id: 1,
+          name: 1,
+          type: 1
+        }
+      }
+    ]);
+      
+      let orgs = [];
+      console.log(organisations)
+      for(let org in organisations){
+        orgs.push(organisations[org]['id'])
+      }
+      matchCondition.id = { $in : [...orgs] }
   }
   if (filters.organization && filters.organization.length) {
     matchCondition.id = filters.organization;
@@ -2635,119 +2700,181 @@ exports.getInventoryProductsByPlatform = [
     try {
       const filters = req.query;
       const skuFilter = {};
-      if (filters.sku && filters.sku.length) {
-        skuFilter.externalId = filters.sku;
+      if (filters.invDetails && filters.invDetails.length) {
+        skuFilter["productDetails.id"] = filters.invDetails;
       }
+      if (filters.sku && filters.sku.length) {
+        skuFilter["productDetails.externalId"] = filters.sku;
+      }
+      const fl = await getFilterConditions(filters);
+      
       const platformInventory = await OrganisationModel.aggregate([
-        {
-          $match: getFilterConditions(filters),
-        },
-        {
-          $unwind: {
-            path: "$warehouses",
-          },
-        },
-        {
-          $project: {
-            warehouses: 1,
-          },
-        },
-        {
-          $lookup: {
-            from: "warehouses",
-            localField: "warehouses",
-            foreignField: "id",
-            as: "warehouseinv",
-          },
-        },
-        {
-          $unwind: {
-            path: "$warehouseinv",
-          },
-        },
-        {
-          $replaceRoot: {
-            newRoot: {
-              $mergeObjects: ["$warehouseinv", "$$ROOT"],
-            },
-          },
-        },
-        {
-          $project: {
-            id: 1,
-            title: 1,
-            warehouseInventory: 1,
-          },
-        },
-        {
-          $lookup: {
-            from: "inventories",
-            localField: "warehouseInventory",
-            foreignField: "id",
-            as: "inv",
-          },
-        },
-        {
-          $unwind: {
-            path: "$inv",
-          },
-        },
-        {
-          $replaceRoot: {
-            newRoot: {
-              $mergeObjects: ["$inv", "$$ROOT"],
-            },
-          },
-        },
-        {
-          $unwind: {
-            path: "$inventoryDetails",
-          },
-        },
-        {
-          $replaceRoot: {
-            newRoot: {
-              $mergeObjects: ["$inventoryDetails", "$$ROOT"],
-            },
-          },
-        },
-        {
-          $group: {
-            _id: "$productId",
-            quantity: {
-              $sum: "$quantity",
-            },
-          },
-        },
-        {
-          $lookup: {
-            from: "products",
-            localField: "_id",
-            foreignField: "id",
-            as: "productDetails",
-          },
-        },
-        {
-          $unwind: {
-            path: "$productDetails",
-          },
-        },
-        {
-          $replaceRoot: {
-            newRoot: {
-              $mergeObjects: ["$productDetails", "$$ROOT"],
-            },
-          },
-        },
-        {
-          $project: {
-            productDetails: 0,
-          },
-        },
-        {
-          $match: skuFilter,
-        },
+              {
+                $match: fl,
+              },
+							{
+								$unwind: "$warehouses"
+							},
+              {
+								$lookup: {
+									from: 'warehouses',
+									localField: 'warehouses',
+									foreignField: 'id',
+									as: 'warehouse'
+								}
+              },
+              {
+								$unwind: "$warehouse"
+							},
+							{
+								$lookup: {
+									from: 'inventories',
+									localField: 'warehouse.warehouseInventory',
+									foreignField: 'id',
+									as: 'inventories'
+								}
+							},
+							{
+								$unwind: "$inventories"
+							},
+							{
+								$unwind: "$inventories.inventoryDetails"
+              },
+              {
+                $lookup: {
+                  from: "products",
+                  localField: "inventories.inventoryDetails.productId",
+                  foreignField: "id",
+                  as: "productDetails",
+                },
+              },
+              {
+                $unwind: {
+                  path: "$productDetails",
+                },
+              },
+              {
+                $match: skuFilter,
+              },
+							{
+								$group: {
+									_id: filters.invDetails ? {id: '$id', pid: '$inventories.inventoryDetails.productId'} : '$inventories.inventoryDetails.productId',
+                  quantity: { $sum: "$inventories.inventoryDetails.quantity" },
+                  org: { "$first": {'name': "$name", 'type': "$type", 'externalId': "$productDetails.externalId", 'product_name': "$productDetails.name", 'shortName': "$productDetails.shortName", 'manufacturer': "$productDetails.manufacturer", 'state': "$warehouse.warehouseAddress.state", 'district': "$warehouse.warehouseAddress.city"} }
+								}
+              },
       ]);
+      
+      // const platformInventory = await OrganisationModel.aggregate([
+      //   {
+      //     $match: getFilterConditions(filters),
+      //   },
+      //   {
+      //     $unwind: {
+      //       path: "$warehouses",
+      //     },
+      //   },
+      //   {
+      //     $project: {
+      //       warehouses: 1,
+      //     },
+      //   },
+      //   {
+      //     $lookup: {
+      //       from: "warehouses",
+      //       localField: "warehouses",
+      //       foreignField: "id",
+      //       as: "warehouseinv",
+      //     },
+      //   },
+      //   {
+      //     $unwind: {
+      //       path: "$warehouseinv",
+      //     },
+      //   },
+      //   {
+      //     $replaceRoot: {
+      //       newRoot: {
+      //         $mergeObjects: ["$warehouseinv", "$$ROOT"],
+      //       },
+      //     },
+      //   },
+      //   {
+      //     $project: {
+      //       id: 1,
+      //       title: 1,
+      //       warehouseInventory: 1,
+      //     },
+      //   },
+      //   {
+      //     $lookup: {
+      //       from: "inventories",
+      //       localField: "warehouseInventory",
+      //       foreignField: "id",
+      //       as: "inv",
+      //     },
+      //   },
+      //   {
+      //     $unwind: {
+      //       path: "$inv",
+      //     },
+      //   },
+      //   {
+      //     $replaceRoot: {
+      //       newRoot: {
+      //         $mergeObjects: ["$inv", "$$ROOT"],
+      //       },
+      //     },
+      //   },
+      //   {
+      //     $unwind: {
+      //       path: "$inventoryDetails",
+      //     },
+      //   },
+      //   {
+      //     $replaceRoot: {
+      //       newRoot: {
+      //         $mergeObjects: ["$inventoryDetails", "$$ROOT"],
+      //       },
+      //     },
+      //   },
+      //   {
+      //     $group: {
+      //       _id: "$productId",
+      //       quantity: {
+      //         $sum: "$quantity",
+      //       },
+      //     },
+      //   },
+      //   {
+      //     $lookup: {
+      //       from: "products",
+      //       localField: "_id",
+      //       foreignField: "id",
+      //       as: "productDetails",
+      //     },
+      //   },
+      //   {
+      //     $unwind: {
+      //       path: "$productDetails",
+      //     },
+      //   },
+      //   {
+      //     $replaceRoot: {
+      //       newRoot: {
+      //         $mergeObjects: ["$productDetails", "$$ROOT"],
+      //       },
+      //     },
+      //   },
+      //   {
+      //     $project: {
+      //       productDetails: 0,
+      //     },
+      //   },
+      //   {
+      //     $match: skuFilter,
+      //   },
+      // ]);
       return apiResponse.successResponseWithData(res, platformInventory);
     } catch (err) {
       logger.log(
@@ -3019,4 +3146,200 @@ exports.getBatchWarehouse = [
       return apiResponse.ErrorResponse(res, err);
     }
   },
+];
+
+exports.deleteProductsFromInventory = [
+    auth,
+    async (req, res) => {
+        try {
+
+            const inventoryTransfer = async (
+                id,
+                quantity,
+                suppId,
+                recvId,
+                next
+            ) => {
+		    console.log("1",id,quantity,suppId,recvId)
+                const checkProduct = await InventoryModel.find({
+                    $and: [{
+                        id: recvId
+                    }, {
+                        "inventoryDetails.productId": id
+                    }],
+                });
+                if (checkProduct != "") {
+                    const recvUpdate = await InventoryModel.update({
+                        id: recvId,
+                        "inventoryDetails.productId": id,
+                    }, {
+                        $inc: {
+                            "inventoryDetails.$.quantity": quantity,
+                        },
+                    });
+                    const suppUpdateRecvTransit = await InventoryModel.update({
+                        id: suppId,
+                        "inventoryDetails.productId": id,
+                    }, {
+                        $inc: {
+                            "inventoryDetails.$.quantity": -quantity,
+                        },
+                    });
+                } else if (checkProduct == "") {
+                    const s = await InventoryModel.update({
+                        id: recvId
+                    }, {
+                        $addToSet: {
+                            inventoryDetails: {
+                                productId: id,
+                                quantity: quantity
+                            }
+                        }
+                    });
+                    const suppUpdateRecvTransit = await InventoryModel.update({
+                        id: suppId,
+                        "inventoryDetails.productId": id,
+                    }, {
+                        $inc: {
+                            "inventoryDetails.$.quantity": -quantity,
+                        },
+                    });
+                }
+                // next("Success")
+            };
+
+            const data = req.body;
+            const suppWarehouseDetails = await WarehouseModel.findOne({
+                id: data.supplier.locationId,
+            });
+            if (suppWarehouseDetails == null) {
+                return apiResponse.ErrorResponse(res, "suppWarehouseDetails not Found");
+            }
+            var suppInventoryId = suppWarehouseDetails.warehouseInventory;
+            const suppInventoryDetails = await InventoryModel.findOne({
+                id: suppInventoryId,
+            });
+            if (suppInventoryDetails == null) {
+                return apiResponse.ErrorResponse(res, "suppInventoryDetails not Found");
+            }
+            const recvWarehouseDetails = await WarehouseModel.findOne({
+                id: data.receiver.locationId,
+            });
+            if (recvWarehouseDetails == null) {
+                return apiResponse.ErrorResponse(res, "recvWarehouseDetails not Found");
+            }
+            var recvInventoryId = recvWarehouseDetails.warehouseInventory;
+            const recvInventoryDetails = await InventoryModel.findOne({
+                id: recvInventoryId,
+            });
+            if (recvInventoryDetails == null) {
+                return apiResponse.ErrorResponse(res, "recvInventoryDetails not Found");
+            }
+
+            const user_id = req.user.id;
+            const email = req.user.emailId;
+            const empData = await EmployeeModel.findOne({
+                emailId: req.user.emailId,
+            });
+            const orgId = empData.organisationId;
+            const orgData = await OrganisationModel.findOne({
+                id: orgId
+            });
+            const orgName = empData.name;
+            const address = orgData.postalAddress;
+            const supplierOrgData = await OrganisationModel.findOne({
+                id: req.body.supplier.id,
+            });
+            const supplierName = supplierOrgData.name;
+            const supplierAddress = supplierOrgData.postalAddress;
+            const receiverId = req.body.receiver.id;
+            const receiverOrgData = await OrganisationModel.findOne({
+                id: req.body.receiver.id,
+            });
+            const receiverName = receiverOrgData.name;
+            const receiverAddress = receiverOrgData.postalAddress;
+            let payload = req.body;
+
+
+            var products = data.products;
+            for (count = 0; count < products.length; count++) {
+                inventoryTransfer(
+                    products[count].productID,
+                    products[count].productQuantity,
+                    suppInventoryId,
+                    recvInventoryId
+                );
+            }
+
+
+            var datee = new Date();
+            datee = datee.toISOString();
+            var evid = Math.random().toString(36).slice(2);
+            let event_data = {
+                eventID: null,
+                eventTime: null,
+                eventType: {
+                    primary: "CREATE",
+                    description: "SHIPMENT_CREATION",
+                },
+                actor: {
+                    actorid: null,
+                    actoruserid: null,
+                },
+                stackholders: {
+                    ca: {
+                        id: "null",
+                        name: "null",
+                        address: "null",
+                    },
+                    actororg: {
+                        id: "null",
+                        name: "null",
+                        address: "null",
+                    },
+                    secondorg: {
+                        id: "null",
+                        name: "null",
+                        address: "null",
+                    },
+                },
+                payload: {
+                    data: {
+                        abc: 123,
+                    },
+                },
+            };
+            event_data.eventID = "ev0000" + evid;
+            event_data.eventTime = datee;
+            event_data.eventType.primary = "DELETE";
+            event_data.eventType.description = "INVENTORY";
+            event_data.actor.actorid = user_id || "null";
+            event_data.actor.actoruserid = email || "null";
+            event_data.stackholders.actororg.id = orgId || "null";
+            event_data.stackholders.actororg.name = orgName || "null";
+            event_data.stackholders.actororg.address = address || "null";
+            event_data.stackholders.ca.id = CENTRAL_AUTHORITY_ID || "null";
+            event_data.stackholders.ca.name = CENTRAL_AUTHORITY_NAME || "null";
+            event_data.stackholders.ca.address = CENTRAL_AUTHORITY_ADDRESS || "null";
+            event_data.stackholders.secondorg.id = receiverId || "null";
+            event_data.stackholders.secondorg.name = receiverName || "null";
+            event_data.stackholders.secondorg.address = receiverAddress || "null";
+
+            event_data.payload.data = payload;
+            async function compute(event_data) {
+                result = await logEvent(event_data);
+                return result;
+            }
+            compute(event_data).then((response) => {
+		    console.log("res",response)
+            });
+
+            return apiResponse.successResponse(
+                res,
+                "Operation success"
+            );
+        } catch (err) {
+            return apiResponse.ErrorResponse(res, err.message);
+        }
+    },
 ];

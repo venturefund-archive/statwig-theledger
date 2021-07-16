@@ -28,6 +28,7 @@ const EditRow = (props) => {
     batchNumber,
     serialNumber,
     products,
+    handleAddMore,
     handleInventoryChange,
     idx,
     prods,
@@ -55,16 +56,25 @@ const EditRow = (props) => {
       var key = e.keyCode || e.which;
       key = String.fromCharCode(key);
     }
-    var regex = /[0-9]/;
-    if (!regex.test(key)) {
-      e.returnValue = false;
-      if (e.preventDefault) e.preventDefault();
+    if(!e.target.value && key==0){
+      e.stopPropagation();
+      e.preventDefault();
+      e.returnValue=false;
+      e.cancelBubble=true;
+      return false;
+    }
+    else{
+      var regex = /[0-9]/;
+      if (!regex.test(key)) {
+        e.returnValue = false;
+        if (e.preventDefault) e.preventDefault();
+      }
     }
   };
 
   return (
     <div className={`${idx > 0 ? `borderTop` : ``}`}>
-      <h6 className="ml-3 text-primary font-weight-bold">Product {idx + 1}</h6>
+      <h6 className="ml-3 text-info font-weight-bold">Product {idx + 1}</h6><br/>
       <div className="d-flex flex-column ml-5 itable">
         <div className="row mb-3">
           <div className={`row ${!addMore ? `col-10` : `col-12`}`}>
@@ -98,12 +108,13 @@ const EditRow = (props) => {
                 groups={category}
               /> */}
               {
-                console.log(categories,productName)
+              console.log(categories)
               }
               <Select
                   className="no-border"
-                  placeholder={categories}
-                  defaultInputValue={inventories.type}
+                  placeholder={<div className="select-placeholder-text">Select Product Category</div>} 
+                  value={categories=="Select Category"?null:{value: categories, label: categories}}
+                   defaultInputValue={inventories.type}
                   onChange={(item) => handleCategoryChange(idx, item.value)}
                   options={category}
                   />
@@ -114,13 +125,13 @@ const EditRow = (props) => {
                 <div className="title col-8 recived-text">
                   <Select
                     className="no-border"
-                    placeholder={productName}
-                    defaultInputValue={inventories.type}
+                    placeholder= {<div className= "select-placeholder-text" > Product Name </div>}
+                    value={(productName=="Select Product" || productName=="")?null:{value: productName, label: productName}}
+                    // defaultInputValue={inventories.type}
                     onChange={(item) =>
                       handleInventoryChange(idx, 'productName', item.name)
                     }
-                    
-                    options={prods}
+                    options={prods.filter(p=>p.type==categories)}
                   />
                 </div>
                 <div className="title recived-text">{productId}</div>
@@ -155,7 +166,7 @@ const EditRow = (props) => {
               {unitofMeasure.name ? <div>{unitofMeasure.name}</div> :<div className="placeholder_name">Unit</div>}</div>
           </div>
           {inventories.length > 1 && (
-            <div className="m-2 pl-3 pt-1">
+            <div className="m-2 pl-3 pt-1" style={{position:"relative", left:"10px"}}>
               <span
                 className="del-pad shadow border-none rounded-circle mr-1"
                 onClick={() => props.onRemoveRow(idx)}
@@ -182,7 +193,7 @@ const EditRow = (props) => {
         </div>
       </div>
       {addMore && (
-        <div className="d-flex ml-4 pl-2 itable w-100">
+        <div className="d-flex ml-4 pl-2 itable w-90">
           <div className=" rTable row col-12">
             <div className="row col-12 mb-2">
               <div className="col theader text-center pro">
@@ -272,7 +283,7 @@ const EditRow = (props) => {
           <div className="mt-4 pt-4">
             <span
               className="del-pad shadow border-none rounded-circle mr-1"
-              onClick={() => setAddMore(false)}
+              onClick={() => {handleAddMore(idx);setAddMore(false)}}
             >
               <img className="cursorP p-1" height="30" src={Delete} />
             </span>

@@ -26,11 +26,23 @@ const EditRow = props => {
       var key = e.keyCode || e.which;
       key = String.fromCharCode(key);
     }
-    var regex = /[0-9]/;
-    if (!regex.test(key)) {
+    // console.log(e);
+    if(!e.target.value && key==0){
+      e.stopPropagation();
+      e.preventDefault();  
       e.returnValue = false;
-      if (e.preventDefault) e.preventDefault();
+      e.cancelBubble = true;
+      return false; 
     }
+    else{
+      var regex = /^\d*[0-9]\d*$/;
+      if (!regex.test(key)) {
+        e.returnValue = false;
+        if (e.preventDefault) e.preventDefault();
+      }
+    }
+    
+    
   }
 
 
@@ -47,14 +59,23 @@ const EditRow = props => {
                   onSelect={item => { handleCategoryChange(index, item) }}
                   groups={category}
                 /> */}
-                <Select 
-                  className="no-border"
-                  placeholder={<div className="select-placeholder-text">Select Product Category</div>} 
-                  
-                  defaultInputValue={prod.type}
-                  onChange={(v) => handleCategoryChange(index, v.value)}
-                  options={category}
-                />
+                
+                  {
+                    console.log(prod.type)
+                  }
+                <Select
+                className="no-border"
+                placeholder={<div className="select-placeholder-text">Select Product Category</div>} 
+                value={(prod.type==undefined || prod.id==undefined || prod.type=="")?null:{value: prod.id, label: prod.type}}
+                defaultInputValue={prod.type}
+                onChange={(v) => handleCategoryChange(index, v.value)}
+                options={category}
+              />
+             
+
+
+                
+             
               </div>
             </div>
           </div>
@@ -68,19 +89,24 @@ const EditRow = props => {
                   onSelect={item => { handleProductChange(index, item) }}
                   groups={products}
                 /> */}
-
-                {
-                  console.log(prod.name==="")
-                }
+               
+                     
+              
                 <Select
-                  className="no-border"
-                  placeholder= {<div className= "select-placeholder-text" > Product Name </div>} 
-                  value={{value: prod.id, label: prod.name}}
-                  placeholder="Product Name"
-                  // defaultInputValue={prod.name?prod.name:"Product Name"}
-                  onChange={(v) => handleProductChange(index, v)}
-                  options={products}
-                />
+                className="no-border"
+                placeholder= {<div className= "select-placeholder-text" > Product Name </div>} 
+                value={(prod.id==undefined || prod.name==undefined || prod.name==="")?null:{value: prod.id, label: prod.name}}
+                placeholder="Product Name"
+                   defaultInputValue={prod.name}
+                  onChange={(v) => {
+                    handleProductChange(index, v);
+                   
+                  }
+                }
+                  options={products.filter(p=>p.type==prod.type)}
+                /> 
+                        
+               
               </div>
               <div className="title recived-text align-self-center">{prod.id ? prod.id : <div className="placeholder_id">Product ID</div>}</div>
             </div>
@@ -93,12 +119,8 @@ const EditRow = props => {
               className="form-control text-center"
               placeholder="Enter Quantity"
               onKeyPress={numbersOnly}
-              value={prod.productQuantity ? prod.productQuantity : prod.quantity}
-              onChange={(e) =>{
-                handleQuantityChange(e.target.value, index);
-                if(e.target.value==="0")
-                  prod.productQuantity="";
-              }}
+              value={prod.productQuantity ? prod.productQuantity : ""}
+              onChange={(e) =>{handleQuantityChange(e.target.value, index)}}
             />
           </div>
         </div>

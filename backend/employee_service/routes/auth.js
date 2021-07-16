@@ -1,17 +1,18 @@
 var express = require("express");
 const AuthController = require("../controllers/AuthController");
+const cuid = require('cuid');
 var multer = require("multer");
-var upload = multer({ dest: "uploads/" });
-// const Storage = multer.diskStorage({
-//   destination(req, file, callback) {
-//     callback(null, "/home/ubuntu/userimages");
-//   },
-//   filename(req, file, callback) {
-//     callback(null, file.originalname);
-//   },
-// });
+// var upload = multer({ dest: "uploads/" });
+const Storage = multer.diskStorage({
+  destination(req, file, callback) {
+    callback(null, "uploads/");
+  },
+  filename(req, file, callback) {
+    callback(null, cuid()+Date.now() + '.jpg');
+  },
+});
 
-// const upload = multer({ storage: Storage });
+const upload = multer({ storage: Storage });
 
 var router = express.Router();
 
@@ -28,6 +29,7 @@ router.get("/createAddress", AuthController.createUserAddress);
 router.post("/assignProductConsumer", AuthController.assignProductConsumer);
 router.post("/addWarehouse", AuthController.addWarehouse);
 router.post("/updateWarehouse", AuthController.updateWarehouseAddress);
+router.post("/switchLocation", AuthController.switchLocation);
 router.get("/getAllRegisteredUsers", AuthController.getAllRegisteredUsers);
 router.get("/getAllUsersByOrganisation/:organisationId", AuthController.getAllUsersByOrganisation);
 router.get("/getAllUsersByWarehouse/:warehouseId", AuthController.getAllUsersByWarehouse);
@@ -41,4 +43,5 @@ router.get("/getwarehouseinfo", AuthController.getwarehouseinfo);
 router.get("/getOrganizationsTypewithauth", AuthController.getOrganizationsTypewithauth);
 router.get("/emailverify", AuthController.emailverify);
 router.post("/registerTwillio", AuthController.createTwilioBinding);
+router.get("/images/:key", AuthController.Image)
 module.exports = router;

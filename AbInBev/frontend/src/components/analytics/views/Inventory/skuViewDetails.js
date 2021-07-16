@@ -21,6 +21,7 @@ import { getAnalyticsAllStats } from '../../../../actions/analyticsAction';
 const iSKUViewDetails = (props) => {
   const { prop } = props;
   const [analytics, setAnalytics] = useState([]);
+  const [isActive, setIsActive] = useState(false);
   const dispatch = useDispatch();
   const [name, setName] = useState(prop.name);
   const [shortName, setShortname] = useState(prop.shortName);
@@ -29,6 +30,15 @@ const iSKUViewDetails = (props) => {
 
   useEffect(() => {
     (async () => {
+      let cond = '';
+      if (props.params) {
+        if(props.params.state)
+          cond = '&state=' + props.params.state;
+        if (props.params.district) {
+          setIsActive(true);
+          cond += '&district=' + props.params.district;
+        }
+      }
       if (props.sku) {
         let n = props.SKUStats.filter((a) => a.externalId == props.sku);
         setName(n[0].name);
@@ -37,7 +47,12 @@ const iSKUViewDetails = (props) => {
       }
       const result = await dispatch(
         getAnalyticsAllStats(
-          '?group_by=state' + (props.sku ? '&sku=' + props.sku : ''),
+          '?group_by=state&inventory=true' +
+            (props.sku ? '&sku=' + props.sku : '') +
+            '&brand=' +
+            prop.manufacturer +
+            '&pid=' +
+            prop.id+cond,
         ),
       );
       setAnalytics(result.data);
@@ -49,9 +64,23 @@ const iSKUViewDetails = (props) => {
   };
 
   const changeSku = async (event) => {
+      let cond = '';
+      if (props.params) {
+        if(props.params.state)
+          cond = '&state=' + props.params.state;
+        if (props.params.district) 
+          cond += '&district=' + props.params.district;
+      }
     let sku = event.target.value;
     const result = await dispatch(
-      getAnalyticsAllStats('?group_by=state' + (sku ? '&sku=' + sku : '')),
+      getAnalyticsAllStats(
+        '?group_by=state&inventory=true' +
+          '&brand=' +
+          prop.manufacturer +
+          (sku ? '&sku=' + sku : '') +
+          '&pid=' +
+          prop.id+cond,
+      ),
     );
     setAnalytics(result.data);
   };
@@ -112,7 +141,7 @@ const iSKUViewDetails = (props) => {
                   <Tooltip />
                   <Area
                     type="monotone"
-                    dataKey="returns"
+                    dataKey="inventory"
                     stroke="#FAAB10"
                     strokeWidth={2}
                     fill="#FAAB10"
@@ -126,21 +155,27 @@ const iSKUViewDetails = (props) => {
             <table className="table">
               <thead>
                 <tr>
-                  <th scope="col">States</th>
+                  <th scope="col">{isActive ? 'District' : 'State'}</th>
                   <th scope="col">Sales</th>
                   <th scope="col">Total Bottle Pool</th>
                 </tr>
               </thead>
               <tbody>
-                {analytics.map((analytic, index) => (
-                  <tr key={index}>
-                    <td scope="row">
-                      <span className="stateLink">{analytic.groupedBy}</span>
-                    </td>
-                    <td>{analytic.sales.toLocaleString('en-IN')}</td>
-                    <td>{analytic.returns.toLocaleString('en-IN')}</td>
+                {analytics.length == 0 ? (
+                  <tr>
+                    <td colspan="3">No Data found</td>
                   </tr>
-                ))}
+                ) : (
+                  analytics.map((analytic, index) => (
+                    <tr key={index}>
+                      <td scope="row">
+                        <span className="stateLink">{analytic.groupedBy}</span>
+                      </td>
+                      <td>{analytic.sales.toLocaleString('en-IN')}</td>
+                      <td>{analytic.inventory.toLocaleString('en-IN')}</td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

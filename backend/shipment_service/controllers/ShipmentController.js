@@ -25,7 +25,7 @@ const CENTRAL_AUTHORITY_ADDRESS = null
 const blockchain_service_url = process.env.URL;
 const shipment_stream = process.env.SHIP_STREAM;
 const axios = require("axios");
-const { uploadFile } = require("../helpers/s3");
+const { uploadFile , getFileStream} = require("../helpers/s3");
 const fs = require('fs');
 const util = require('util');
 const unlinkFile = util.promisify(fs.unlink);
@@ -267,8 +267,8 @@ exports.createShipment = [
       checkToken(req, res, async (result) => {
         if (result.success) {  
           try{
-            data.products.forEach(element => {
-              var product = ProductModel.findOne({ id: element.productID });
+            data.products.forEach(async element => {
+              var product = await ProductModel.findOne({ id: element.productID });
               element.type = product.type
               element.unitofMeasure= product.unitofMeasure
               console.log(product)
@@ -372,9 +372,39 @@ exports.createShipment = [
               });
 
               if (quantityMismatch) {
+                if(po.poStatus === 'CREATED' || po.poStatus === 'ACCEPTED'){
+                  try{
+                    let date = new Date(po.createdAt)
+                    let milliseconds = date.getTime(); 
+                    let d = new Date();
+                    let currentTime = d.getTime();
+                    let orderProcessingTime = currentTime - milliseconds;
+                    let prevOrderCount = await OrganisationModel.find({id: req.user.organisationId});
+                    prevOrderCount = prevOrderCount.totalProcessingTime ? prevOrderCount.totalProcessingTime : 0;
+                    OrganisationModel.updateOne({id: req.user.organisationId}, { $set: {totalProcessingTime: prevOrderCount + orderProcessingTime}})  
+                  } catch (err){
+                    console.log('failed to set orderprocesstime')
+                    console.log(err);                  
+                  }
+                }
                 po.poStatus = "TRANSIT&PARTIALLYFULFILLED";
               } else {
-                po.poStatus = "TRANSIT&FULLYFULFILLED";
+                if(po.poStatus === 'CREATED' || po.poStatus === 'ACCEPTED'){
+                  try{
+                    let date = new Date(po.createdAt)
+                    let milliseconds = date.getTime(); 
+                    let d = new Date();
+                    let currentTime = d.getTime();
+                    let orderProcessingTime = currentTime - milliseconds;
+                    let prevOrderCount = await OrganisationModel.find({id: req.user.organisationId});
+                    prevOrderCount = prevOrderCount.totalProcessingTime ? prevOrderCount.totalProcessingTime : 0;
+                    OrganisationModel.updateOne({id: req.user.organisationId}, { $set: {totalProcessingTime: prevOrderCount + orderProcessingTime}})  
+                  } catch (err){
+                    console.log('failed to set orderpror')
+                    console.log(err);                  
+                  }
+                }
+                po.poStatus = "TRANSIT&FULLYFULFILLED";                        
               }
               await po.save();
               const poidupdate=await RecordModel.findOneAndUpdate({
@@ -859,10 +889,10 @@ exports.receiveShipment = [
 function getFilterConditions(filters) {
   let matchCondition = {};
   if (filters.orgType && filters.orgType !== '') {
-    if (filters.orgType === 'BREWERY' || filters.orgType === 'S1' || filters.orgType === 'S2') {
+    if (filters.orgType === 'BREWERY' || filters.orgType === 'S1' || filters.orgType === 'S2' || filters.orgType === 'S3') {
       matchCondition.type = filters.orgType;
     } else if (filters.orgType === 'ALL_VENDORS') {
-      matchCondition.$or = [{ type: 'S1' }, { type: 'S2' }];
+      matchCondition.$or = [{ type: 'S1' }, { type: 'S2' }, { type: 'S3' }];
     }
   }
 
@@ -878,6 +908,26 @@ function getFilterConditions(filters) {
   return matchCondition;
 }
 
+function matchConditionShipment(filters) {
+  let matchCondition = {$and: []};
+  if (filters.orgType && filters.orgType !== '') {
+    if (filters.orgType === 'BREWERY' || filters.orgType === 'S1' || filters.orgType === 'S2' || filters.orgType === 'S3') {
+      matchCondition.$and.push({ $or: [{ "supplier.org.type": filters.orgType }, { "receiver.org.type": filters.orgType }] });
+    } else if (filters.orgType === 'ALL_VENDORS') {
+      matchCondition.$and.push({ $or: [{ "supplier.org.type": 'S1' }, { "supplier.org.type": 'S2' }, { "supplier.org.type": 'S3' }, { "receiver.org.type": 'S1' }, { "receiver.org.type": 'S2' }, { "receiver.org.type": 'S3' }] } );
+    }
+  }
+
+  if (filters.state && filters.state.length) {
+    matchCondition.$and.push( { $or: [{ "supplier.warehouse.warehouseAddress.state": filters.state.toUpperCase() }, { "receiver.warehouse.warehouseAddress.state": filters.state.toUpperCase() }] } );
+  }
+  if (filters.district && filters.district.length) {
+    matchCondition.$and.push( { $or: [{ "supplier.warehouse.warehouseAddress.city": filters.district.toUpperCase() }, { "receiver.warehouse.warehouseAddress.city": filters.district.toUpperCase() }] } );
+  }
+  
+  return matchCondition;
+}
+
 function getShipmentFilterCondition(filters, warehouseIds) {
   let matchCondition = {};
   if (filters.organization && filters.organization !== '') {
@@ -890,21 +940,23 @@ function getShipmentFilterCondition(filters, warehouseIds) {
           "receiver.id": filters.organization,
         },
       ];
-
     } else if (filters.txn_type === 'SENT') {
-
-      matchCondition = {
-        "supplier.id": filters.organization,
-        status: 'RECEIVED'
+      matchCondition.supplier = {
+        id: filters.organization,
       };
 
     } else if (filters.txn_type === 'RECEIVED') {
-
-      matchCondition = {
-        "receiver.id": filters.organization,
-        status: 'RECEIVED'
+      matchCondition.receiver = {
+        id: filters.organization
       };
+    }
+  }
 
+  if (filters.txn_type && filters.txn_type !== '') {
+    if (filters.txn_type === 'SENT') {
+      matchCondition.status = {$in: ['CREATED', 'SENT']};
+    } else if (filters.txn_type === 'RECEIVED') {
+      matchCondition.status = 'RECEIVED';
     }
   }
 
@@ -974,41 +1026,41 @@ exports.fetchShipmentsForAbInBev = [
           // const { warehouseId } = req.user;
           const filters = req.query;
           try {
-            const warehouses = await OrganisationModel.aggregate([
-              {
-                $match: getFilterConditions(filters)
-              },
-              {
-                $group: {
-                  _id: 'warehouses',
-                  warehouses: {
-                    $addToSet: '$warehouses'
-                  }
-                }
-              },
-              {
-                $unwind: {
-                  path: '$warehouses'
-                }
-              },
-              {
-                $unwind: {
-                  path: '$warehouses'
-                }
-              },
-              {
-                $group: {
-                  _id: 'warehouses',
-                  warehouseIds: {
-                    $addToSet: '$warehouses'
-                  }
-                }
-              }
-            ]);
+            // const warehouses = await OrganisationModel.aggregate([
+            //   {
+            //     $match: getFilterConditions(filters)
+            //   },
+            //   {
+            //     $group: {
+            //       _id: 'warehouses',
+            //       warehouses: {
+            //         $addToSet: '$warehouses'
+            //       }
+            //     }
+            //   },
+            //   {
+            //     $unwind: {
+            //       path: '$warehouses'
+            //     }
+            //   },
+            //   {
+            //     $unwind: {
+            //       path: '$warehouses'
+            //     }
+            //   },
+            //   {
+            //     $group: {
+            //       _id: 'warehouses',
+            //       warehouseIds: {
+            //         $addToSet: '$warehouses'
+            //       }
+            //     }
+            //   }
+            // ]);
             let warehouseIds = [];
-            if (warehouses[0] && warehouses[0].warehouseIds) {
-              warehouseIds = warehouses[0].warehouseIds;
-            }
+            // if (warehouses[0] && warehouses[0].warehouseIds) {
+            //   warehouseIds = warehouses[0].warehouseIds;
+            // }
             const shipments = await ShipmentModel.aggregate([
               {
                 $match: getShipmentFilterCondition(filters, warehouseIds),
@@ -1079,6 +1131,7 @@ exports.fetchShipmentsForAbInBev = [
                   path: "$receiver.org",
                 },
               },
+              {$match: matchConditionShipment(filters)}
             ])
               .sort({
                 createdAt: -1,
@@ -1527,9 +1580,8 @@ exports.getProductsByInventory = [
           $group: {
             _id: "$inventoryDetails.productId",
             productCategory: { $first: "$products.type" },
-	          productName: { $first: "$products.name" },
+	    productName: { $first: "$products.name" },
             manufacturer: { $first: "$products.manufacturer" },
-            unitofMeasure:{$first:"$products.unitofMeasure"},
             productQuantity: { $sum: "$inventoryDetails.quantity" },
             quantity: { $sum: "$inventoryDetails.quantity" },
           },
@@ -1554,32 +1606,9 @@ exports.uploadImage = async function (req, res) {
   checkToken(req, res, async (result) => {
     if (result.success) {
       const Id = req.query.id;
-      // const incrementCounter = await CounterModel.updateOne(
-      //   {
-      //     "counters.name": "shipmentImage",
-      //   },
-      //   {
-      //     $inc: {
-      //       "counters.$.value": 1,
-      //     },
-      //   }
-      // );
-      // console.log(incrementCounter)
-      // const poCounter = await CounterModel.find(
-      //   { "counters.name": "shipmentImage" },
-      //   { "counters.name.$": 1 }
-      // );
-      // console.log(poCounter)
-      // const t = JSON.parse(JSON.stringify(poCounter[0].counters[0]));
       try {
-        // const filename = Id + "-" + t.format + t.value + ".png";
-        // let dir = `/home/ubuntu/shipmentimages`;
-
-        // await moveFile(req.file.path, `${dir}/${filename}`);
         const Upload = await uploadFile(req.file)
-        console.log(Upload)
         await unlinkFile(req.file.path)
-        console.log("Unlinked")
         const update = await ShipmentModel.findOneAndUpdate(
           { id: Id },
           { $push: { imageDetails: `${Upload.key}` } }, { new: true }
@@ -2752,3 +2781,10 @@ exports.fetchairwayBillNumber = [
   },
 ];
 
+exports.Image=[
+  auth,
+  async(req,res)=>{
+    const FileStream = getFileStream(req.params.key);
+    FileStream.pipe(res);
+  }
+]

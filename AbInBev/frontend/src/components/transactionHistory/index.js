@@ -76,7 +76,7 @@ const TransactionHistory = (props) => {
     endDate: new Date(),
     year: new Date().getFullYear(),
     month: new Date().getMonth() + 1,
-    quarter: 0,
+    quarter: 1,
   });
 
   const defaultFilters = {
@@ -91,7 +91,7 @@ const TransactionHistory = (props) => {
     endDate: new Date(),
     year: new Date().getFullYear(),
     month: new Date().getMonth() + 1,
-    quarter: 0,
+    quarter: 1,
   };
 
   const onStartDateChange = (event) => {
@@ -214,6 +214,11 @@ const TransactionHistory = (props) => {
       _filters.state = '';
       _filters.district = '';
       _filters.organization = '';
+      _filters.year = new Date().getFullYear();
+      _filters.month = new Date().getMonth() + 1;
+      _filters.quarter = 1;
+      _filters.startDate = new Date();
+      _filters.endDate = new Date();
       _filters.organizationType = 'BREWERY';
       setSelectedOrganizationType('BREWERY');
     } else {
@@ -222,6 +227,11 @@ const TransactionHistory = (props) => {
       _filters.district = '';
       _filters.organizationType = 'VENDOR';
       _filters.organization = '';
+      _filters.year = new Date().getFullYear();
+      _filters.month = new Date().getMonth() + 1;
+      _filters.quarter = 1;
+      _filters.startDate = new Date();
+      _filters.endDate = new Date();
       setSelectedVendorType('ALL_VENDORS');
       setSelectedOrganizationType('VENDOR');
     }
@@ -502,8 +512,13 @@ const TransactionHistory = (props) => {
                                 <br />
                                 <span className="transactionDate">
                                   <span>FROM:</span>{' '}
-                                  {transaction.receiver.org.type === 'BREWERY' && (transaction.supplier.org.type === 'S2' || transaction.supplier.org.type === 'S3') ? transaction.supplier.org?.S1?.name : transaction.supplier.org.name} - TO:{' '}
-                                  {transaction.receiver.org.name}
+                                  {transaction.receiver.org.type ===
+                                    'BREWERY' &&
+                                  (transaction.supplier.org.type === 'S2' ||
+                                    transaction.supplier.org.type === 'S3')
+                                    ? transaction.supplier.org?.S1?.name
+                                    : transaction.supplier.org.name}{' '}
+                                  - TO: {transaction.receiver.org.name}
                                 </span>
                               </div>
                             </div>
@@ -545,40 +560,72 @@ const TransactionHistory = (props) => {
                         {selectedIndex === index ? (
                           <>
                             <div className="productDetail">
-                              <div className="row supplierOrgName">
-                                {selectedTransaction.supplier &&
-                                selectedTransaction.supplier.org
-                                  ? selectedTransaction.supplier.org.name
-                                  : ''}
+                              <div className="row">
+                                <div
+                                  className="col-md-6"
+                                  style={{ 'margin-bottom': '5px' }}
+                                >
+                                  <span className="productHeader">
+                                    Vendor:&nbsp;
+                                  </span>
+                                  <span>
+                                    {selectedTransaction.supplier &&
+                                    selectedTransaction.supplier.org
+                                      ? selectedTransaction.supplier.org.name
+                                      : ''}
+                                  </span>
+                                </div>
                               </div>
                               <div className="row">
                                 <div className="col-md-3">
                                   <span className="productHeader">
-                                    Transaction ID:&nbsp;&nbsp;
-                                  </span>{' '}
-                                  <span>
-                                    {selectedTransaction.externalShipmentId}
+                                    Transaction ID:&nbsp;
                                   </span>
+                                  <span>{transaction.id}</span>
                                 </div>
                                 <div className="col-md-3">
                                   <span className="productHeader">
-                                    Status: &nbsp;&nbsp;
+                                    Status: &nbsp;
                                   </span>
                                   <span>{selectedTransaction.status}</span>
                                 </div>
                                 <div className="col-md-3">
                                   <span className="productHeader">
-                                    Date: &nbsp;&nbsp;
+                                    Sent Date: &nbsp;
                                   </span>
                                   <span>
-                                    {new Date(selectedTransaction.shippingDate)
+                                    <Moment format="DD/MM/YY">
+                                      {selectedTransaction.createdAt}
+                                    </Moment>
+                                    {/* {new Date(selectedTransaction.createdAt)
                                       .toISOString()
-                                      .slice(0, 10)}
+                                      .slice(0, 10)} */}
                                   </span>
                                 </div>
-                                <div className="col-md-3">
+                                {selectedTransaction.status == 'RECEIVED' && (
+                                  <div className="col-md-3 p-0">
+                                    <span className="productHeader">
+                                      Received Date: &nbsp;
+                                    </span>
+                                    <span>
+                                      <Moment format="DD/MM/YY">
+                                        {selectedTransaction.updatedAt}
+                                      </Moment>
+                                      {/* {new Date(selectedTransaction.createdAt)
+                                      .toISOString()
+                                      .slice(0, 10)} */}
+                                    </span>
+                                  </div>
+                                )}
+                                <div
+                                  className={`col-md-3 ${
+                                    selectedTransaction.status == `RECEIVED`
+                                      ? `pt-3`
+                                      : ``
+                                  }`}
+                                >
                                   <span className="productHeader">
-                                    Challan No: &nbsp;&nbsp;
+                                    Challan No: &nbsp;
                                   </span>
                                   <span>
                                     {selectedTransaction.airWayBillNo}
@@ -623,6 +670,9 @@ const TransactionHistory = (props) => {
                                           <th className="productHeader">
                                             Quantity Received
                                           </th>
+                                          <th className="productHeader">
+                                            Comments
+                                          </th>
                                         </tr>
                                       </thead>
                                       <tbody>
@@ -642,6 +692,15 @@ const TransactionHistory = (props) => {
                                                     {
                                                       product.productQuantityDelivered
                                                     }
+                                                  </td>
+                                                  <td>
+                                                    {selectedTransaction
+                                                      .shipmentUpdates[1]
+                                                      .updateComment != ''
+                                                      ? selectedTransaction
+                                                          .shipmentUpdates[1]
+                                                          .updateComment
+                                                      : '-'}
                                                   </td>
                                                 </tr>
                                               </>

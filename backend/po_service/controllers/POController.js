@@ -632,7 +632,7 @@ exports.addPOsFromExcel = [
                             id: employeeId,
                             postalAddress: address,
                             accountStatus: employeeStatus,
-                            warehouseId: warehouseId
+                            warehouseId: [warehouseId]
                     });
                     await user.save()
                     const org = new OrganisationModel({
@@ -755,7 +755,7 @@ exports.addPOsFromExcel = [
                             id: employeeId,
                             postalAddress: address,
                             accountStatus: employeeStatus,
-                            warehouseId: warehouseId
+                            warehouseId: [warehouseId]
                     });
                     await user.save()
                     const org = new OrganisationModel({
@@ -1000,6 +1000,7 @@ exports.fetchInboundPurchaseOrders = [//inbound po with filter(from, orderId, pr
               let productName = req.query.productName ? req.query.productName : undefined;
               let deliveryLocation = req.query.deliveryLocation ? req.query.deliveryLocation : undefined;
               let orderId = req.query.orderId ? req.query.orderId : undefined;
+              let postatus=req.query.poStatus ? req.query.poStatus:undefined;
               switch (req.query.dateFilter) {
                 case "today":
                   fromDateFilter = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
@@ -1043,6 +1044,11 @@ exports.fetchInboundPurchaseOrders = [//inbound po with filter(from, orderId, pr
               if (fromCustomer) {
                   whereQuery["customer.customerOrganisation"] = fromCustomer
               }
+
+              if(postatus){
+                whereQuery["poStatus"]=postatus
+              }
+
               if (productName) {
                 whereQuery.products = {
                   $elemMatch: {
@@ -1050,6 +1056,8 @@ exports.fetchInboundPurchaseOrders = [//inbound po with filter(from, orderId, pr
                   }
                 }
               }
+
+          
 
               console.log("whereQuery ======>", whereQuery);
               try {
@@ -1070,6 +1078,15 @@ exports.fetchInboundPurchaseOrders = [//inbound po with filter(from, orderId, pr
                     Promise.all(productRes).then(async function (productList) {
                       inboundPOData[`productDetails`] = await productList;
                     });
+                    
+                           let creator = await EmployeeModel.findOne(
+                      {
+                        id: inboundPO.createdBy
+                      });
+                           let creatorOrganisation = await OrganisationModel.findOne(
+                      {
+                              id: creator.organisationId
+                      });
 
                     let supplierOrganisation = await OrganisationModel.findOne(
                       {
@@ -1083,6 +1100,7 @@ exports.fetchInboundPurchaseOrders = [//inbound po with filter(from, orderId, pr
                       {
                         organisationId: inboundPOData.customer.customerOrganisation
                       });
+                    inboundPOData.creatorOrganisation= creatorOrganisation;
                     inboundPOData.supplier[`organisation`] = supplierOrganisation;
                     inboundPOData.customer[`organisation`] = customerOrganisation;
                     inboundPOData.customer[`warehouse`] = customerWareHouse;
@@ -1150,6 +1168,7 @@ exports.fetchOutboundPurchaseOrders = [ //outbound po with filter(to, orderId, p
               let productName = req.query.productName ? req.query.productName : undefined;
               let deliveryLocation = req.query.deliveryLocation ? req.query.deliveryLocation : undefined;
               let orderId = req.query.orderId ? req.query.orderId : undefined;
+              let postatus=req.query.poStatus ? req.query.poStatus:undefined;
               switch (req.query.dateFilter) {
                 case "today":
                   fromDateFilter = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
@@ -1194,6 +1213,10 @@ exports.fetchOutboundPurchaseOrders = [ //outbound po with filter(to, orderId, p
               if (toSupplier) {
                   whereQuery["supplier.supplierOrganisation"] = toSupplier;
               }
+
+              if(postatus){
+                whereQuery["poStatus"]=postatus
+              }
 	      
               if (productName) {
                 whereQuery.products = {
@@ -1234,7 +1257,7 @@ exports.fetchOutboundPurchaseOrders = [ //outbound po with filter(to, orderId, p
                     let customerWareHouse = await WarehouseModel.findOne(
                       {
                         organisationId: outboundPOData.customer.customerOrganisation
-                      });
+                      }); 
                     outboundPOData.supplier[`organisation`] = supplierOrganisation;
                     outboundPOData.customer[`organisation`] = customerOrganisation;
                     outboundPOData.customer[`warehouse`] = customerWareHouse;
@@ -1287,7 +1310,7 @@ exports.fetchProductIdsCustomerLocationsOrganisations = [
       let responseData = {};
       ProductModel.find({},'id name').then (function (productIds){
         WarehouseModel.find({},'id title').then (function (locations){
-          OrganisationModel.find({},'id name').then (function (organisation){
+          OrganisationModel.find({'status':'ACTIVE'},'id name').then (function (organisation){
             responseData[`organisations`] = organisation;
             responseData[`deliveryLocations`] = locations;
             responseData[`productIds`] = productIds;
@@ -1304,7 +1327,7 @@ exports.fetchProductIdsCustomerLocationsOrganisations = [
         'error',
         '<<<<< POService < POController < fetchProductIdsCustomerLocations : error (catch block)',
       );
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.ErrorResponse(res, err.message);
     }
   },
 ]

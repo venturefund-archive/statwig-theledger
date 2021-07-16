@@ -4,6 +4,20 @@ import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts';
 import './style.scss';
 import SideBar from '../../components/sidebar';
 import filterIcon from '../../assets/icons/funnel.svg';
+import Becks from '../../assets/bottles/Becks.png';
+import Fosters from '../../assets/bottles/Fosters.png';
+import Budweiser from '../../assets/bottles/Budweiser.png';
+import BudweiserMagnum from '../../assets/bottles/BudweiserMagnum.png';
+import Haywards5000 from '../../assets/bottles/Haywards5000.png';
+import KO from '../../assets/bottles/KnockOut.png';
+import RoyalChallenger from '../../assets/bottles/RoyalChallenger.png';
+import BBecks from '../../assets/brands/Becks.png';
+import BFosters from '../../assets/brands/Fosters.png';
+import BBudweiser from '../../assets/brands/Budweiser.png';
+import BBudweiserMagnum from '../../assets/brands/BudweiserMagnum.png';
+import BHaywards5000 from '../../assets/brands/Haywards5000.png';
+import BKO from '../../assets/brands/KnockOut.png';
+import BRoyalChallenger from '../../assets/brands/RoyalChallenger.png';
 
 import {
   getProductsInventory,
@@ -19,12 +33,42 @@ const Inventory = (props) => {
   const [selectedInventoryType, setSelectedInventoryType] = useState('BREWERY');
   const [selectedVendorType, setSelectedVendorType] = useState('ALL_VENDORS');
   const [selectedVendor, setSelectedVendor] = useState(null);
+  const [isDetailedView, setIsDetailedView] = useState(false);
 
   const dispatch = useDispatch();
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [SKUs, setSKUs] = useState([]);
   const [organizations, setOrganizations] = useState([]);
+  const [inventory, setInventory] = useState({});
+
+  const brands = [
+    'Becks',
+    'Fosters',
+    'Budweiser',
+    'BudweiserMagnum',
+    'Haywards5000',
+    'RoyalChallenger',
+    'KO',
+  ];
+  const brandsArr = [
+    Becks,
+    Fosters,
+    Budweiser,
+    BudweiserMagnum,
+    Haywards5000,
+    RoyalChallenger,
+    KO,
+  ];
+  const brandsIconArr = [
+    BBecks,
+    BFosters,
+    BBudweiser,
+    BBudweiserMagnum,
+    BHaywards5000,
+    BRoyalChallenger,
+    BKO,
+  ];
 
   const [filterVisibility, setFilterVisibility] = useState({
     state: true,
@@ -40,6 +84,7 @@ const Inventory = (props) => {
     sku: '',
     inventoryType: 'BREWERY',
     organizationType: 'BREWERY',
+    invDetails: '',
   });
 
   const defaultFilters = {
@@ -50,16 +95,30 @@ const Inventory = (props) => {
     sku: '',
     inventoryType: 'BREWERY',
     organizationType: 'BREWERY',
+    invDetails: '',
   };
 
   const onInventoryTypeChange = (inventoryType) => {
+    setIsDetailedView(false);
     setSelectedVendor(null);
     setSelectedInventoryType(inventoryType);
+
     const _filters = { ...filters };
     _filters.inventoryType = inventoryType;
     _filters.organizationType = inventoryType;
     _filters.vendorType = 'ALL_VENDORS';
+    _filters.invDetails = '';
+    _filters.district = '';
+    _filters.state = '';
+    _filters.brewery = '';
+    _filters.sku = '';
+    _filters.organization = '';
     setFilters(_filters);
+    const _filterVisibility = { ...filterVisibility };
+    _filterVisibility.district = false;
+    _filterVisibility.organization = false;
+    _filterVisibility.state = true;
+    setFilterVisibility(_filterVisibility);
     props.applyFilters(_filters);
   };
 
@@ -108,6 +167,7 @@ const Inventory = (props) => {
     props.applyFilters(_filters);
     _getDistrictsByState(selectedState);
     _getOrganizationsByType(_filters);
+    setIsDetailedView(false);
 
     const _filterVisibility = { ...filterVisibility };
     _filterVisibility.district = true;
@@ -134,8 +194,14 @@ const Inventory = (props) => {
       _filters.organization = '';
       setSelectedVendorType('ALL_VENDORS');
     }
+    const _filterVisibility = { ...filterVisibility };
+    _filterVisibility.district = false;
+    _filterVisibility.organization = false;
+    _filterVisibility.state = true;
+    setFilterVisibility(_filterVisibility);
     setFilters(_filters);
     setSelectedVendor(null);
+    setIsDetailedView(false);
     props.applyFilters(_filters);
   };
 
@@ -179,6 +245,19 @@ const Inventory = (props) => {
     _getAllStates();
     _getAllSKUs();
   }, []);
+
+  const onDetails = (inv) => {
+    if (selectedInventoryType !== 'BREWERY' && !isDetailedView) {
+      setIsDetailedView(true);
+      setInventory(inv);
+      console.log(inv);
+
+      const _filters = { ...filters };
+      _filters.invDetails = inv._id;
+      setFilters(_filters);
+      props.applyFilters(_filters);
+    }
+  };
 
   return (
     <div className="container-fluid">
@@ -226,7 +305,7 @@ const Inventory = (props) => {
                               : ''}
                           </span>
                         </div>
-                        <div className="pad-tb-10">
+                        {/* <div className="pad-tb-10">
                           <span className="labelHead">Mobile No:</span>
                           <span>
                             {selectedVendor.organisation &&
@@ -234,7 +313,7 @@ const Inventory = (props) => {
                               ? selectedVendor.organisation.id
                               : ''}
                           </span>
-                        </div>
+                        </div> */}
                         <div className="pad-tb-10">
                           <span className="labelHead">Total Stock:</span>
                           <span>{totalStock}</span>
@@ -253,7 +332,7 @@ const Inventory = (props) => {
                   </div>
                 </>
               ) : (
-                <div className="btn-group mainButtonFilter">
+                <div className="btn-group mainSortingButton">
                   <a
                     className={`btn ${
                       selectedInventoryType === 'BREWERY' ? 'active' : ''
@@ -276,44 +355,146 @@ const Inventory = (props) => {
                   </a>
                 </div>
               )}
-
+              {isDetailedView && (
+                <div className="vCard">
+                  <div className="row">
+                    <div className="col-lg-10 col-md-10 col-sm-12">
+                      <div className="productDetailCard">
+                        <div className="productGrid">
+                          <img
+                            className="productImage"
+                            src={
+                              brandsIconArr[
+                                brands.indexOf(
+                                  inventory.org.manufacturer
+                                    .split(' ')
+                                    .join(''),
+                                )
+                              ]
+                            }
+                          />
+                        </div>
+                        <div className="productcard">
+                          <div className="row">
+                            <div className="col-lg-6 col-md-6 col-sm-12">
+                              <div className="productSection mb-2">
+                                <div className="profile">
+                                  <img
+                                    src={
+                                      brandsArr[
+                                        brands.indexOf(
+                                          inventory.org.manufacturer
+                                            .split(' ')
+                                            .join(''),
+                                        )
+                                      ]
+                                    }
+                                    alt=""
+                                    height="60"
+                                  />
+                                </div>
+                                <div className="info">
+                                  <div className="name">
+                                    {inventory.org.product_name}
+                                  </div>
+                                  <div className="caption">
+                                    {inventory.org.shortName}
+                                  </div>
+                                  <div className="caption">
+                                    {inventory.org.externalId}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="col-lg-6 col-md-6 col-sm-12">
+                              <span className="productText">
+                                Inventory{' '}
+                                <span className="breweryPropertyValue">
+                                  {!isNaN(inventory.quantity)
+                                    ? inventory.quantity.toLocaleString('en-IN')
+                                    : 0}
+                                </span>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="inventoryDetails">
                 <table className="inventorytable">
                   <thead>
                     <tr>
                       <th className="inventoryHeader">
-                        Brand{' '}
+                        {isDetailedView ? 'Vendor' : 'Brand'}{' '}
                         {/*<br/><span className="tableHeadersubtitle">Size</span>*/}
                       </th>
                       <th className="inventoryHeader">
-                        SKU
+                        {isDetailedView ? 'State' : 'SKU'}
                         <br />
-                        <span className="tableHeadersubtitle">Stock Code</span>
+                        <span className="tableHeadersubtitle">
+                          {isDetailedView ? '' : 'Stock Code'}
+                        </span>
                       </th>
                       <th className="inventoryHeader">
-                        Stock Long Description
+                        {isDetailedView ? 'District' : 'Stock Long Description'}
                       </th>
                       <th className="inventoryHeader">Quantity</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {inventories.map((inventory, index) => (
-                      <tr key={index}>
-                        <td className="inventorydesc">
-                          {inventory.manufacturer} <br />
-                          <span className="inventorydescsubtitle">&nbsp;</span>
+                    {inventories.length == 0 ? (
+                      <tr>
+                        <td
+                          colspan="4"
+                          style={{ textAlign: 'center', padding: '20px' }}
+                        >
+                          No Data found
                         </td>
-                        <td className="inventorydesc">
-                          {inventory.name}
-                          <br />
-                          <span className="inventorydescsubtitle">
-                            {inventory.externalId}
-                          </span>
-                        </td>
-                        <td>{inventory.shortName}</td>
-                        <td>{inventory.quantity}</td>
                       </tr>
-                    ))}
+                    ) : (
+                      inventories.map((inventory, index) => (
+                        <tr
+                          key={index}
+                          className="cursorP"
+                          onClick={() => onDetails(inventory)}
+                        >
+                          <td className="inventorydesc">
+                            {isDetailedView
+                              ? inventory.org.name
+                              : inventory.org.manufacturer}{' '}
+                            <br />
+                            <br />
+                            {isDetailedView && (
+                              <span
+                                className={`group ${inventory.org.type?.toLowerCase()}group`}
+                              >
+                                {inventory.org.type} Vendor
+                              </span>
+                            )}
+                          </td>
+                          <td className="inventorydesc">
+                            {isDetailedView
+                              ? inventory.org.state
+                              : inventory.org.product_name}
+                            <br />
+                            {!isDetailedView && (
+                              <span className="inventorydescsubtitle">
+                                {inventory.org.externalId}
+                              </span>
+                            )}
+                          </td>
+                          <td>
+                            {isDetailedView
+                              ? inventory.org.district
+                              : inventory.org.shortName}
+                          </td>
+                          <td>{inventory.quantity.toLocaleString('en-IN')}</td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -433,7 +614,7 @@ const Inventory = (props) => {
                   value={filters.sku}
                   onChange={onSKUChange}
                 >
-                  <option>Select SKU</option>
+                  <option value="">Select SKU</option>
                   {SKUs.map((sku, index) => {
                     return (
                       <option key={index} value={sku.id}>

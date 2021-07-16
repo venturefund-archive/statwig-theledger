@@ -21,8 +21,9 @@ const dotenv = require('dotenv').config();
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const twilio_service_id = process.env.TWILIO_SERVICE_ID;
-const client = require('twilio');
-// const fs = require("fs");
+const client = require('twilio')(accountSid, authToken, {
+  lazyLoading: true
+});
 const moveFile = require("move-file");
 const blockchain_service_url = process.env.URL;
 const stream_name = process.env.INV_STREAM;
@@ -33,7 +34,7 @@ const EmailContent = require('../components/EmailContent');
 const emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const phoneRgex = /^\d{12}$/;
 
-const { uploadFile } = require("../helpers/s3");
+const { uploadFile , getFileStream } = require("../helpers/s3");
 const fs = require('fs');
 const util = require('util');
 const unlinkFile = util.promisify(fs.unlink);
@@ -50,11 +51,11 @@ exports.checkEmail = [
   body('firstName')
     .isLength({ min: 1 })
     .trim()
-    .withMessage('name must be specified.'),
+    .withMessage('Name must be specified.'),
   body('lastName')
     .isLength({ min: 1 })
     .trim()
-    .withMessage('name must be specified.'),
+    .withMessage('Name must be specified.'),
   body('organisationId')
     .isLength({ min: 1 })
     .trim()
@@ -70,7 +71,7 @@ exports.checkEmail = [
       let user;
       let phone = '';
       if (!emailId.match(phoneRgex) && !emailId.match(emailRegex))
-        return Promise.reject('E-mail/Mobile not in valid');
+        return Promise.reject('E-mail/Mobile is not valid');
 
       if (emailId.indexOf('@') > -1)
         user = await EmployeeModel.findOne({ emailId });
@@ -92,8 +93,8 @@ exports.checkEmail = [
   async (req, res) => {
     try {
       if (
-        !req.body.firstName.match('[A-Za-z]') ||
-        !req.body.lastName.match('[A-Za-z]')
+        !req.body.firstName.match('[A-Za-z0-9]') ||
+        !req.body.lastName.match('[A-Za-z0-9]')
       ) {
         logger.log(
           'warn',
@@ -101,7 +102,7 @@ exports.checkEmail = [
         );
         return apiResponse.ErrorResponse(
           res,
-          'Name should only consists of letters',
+          'Name should be specified',
         );
       }
       const errors = validationResult(req);
@@ -154,11 +155,11 @@ exports.checkEmail = [
   body('firstName')
     .isLength({ min: 1 })
     .trim()
-    .withMessage('name must be specified.'),
+    .withMessage('Name must be specified.'),
   body('lastName')
     .isLength({ min: 1 })
     .trim()
-    .withMessage('name must be specified.'),
+    .withMessage('Name must be specified.'),
   // body('authority')
   //   .isLength({ min: 1 })
   //   .trim()
@@ -173,7 +174,7 @@ exports.checkEmail = [
       const emailId=value.toLowerCase().replace('','');
        let user;
        if(!emailId.match(emailRegex))
-         return Promise.reject('E-mail not in valid');
+         return Promise.reject('E-MailId is not valid');
        if(emailId.indexOf('@')>-1)
           user= await EmployeeModel.findOne({emailId});
           if (user) {
@@ -192,7 +193,7 @@ exports.checkEmail = [
        let phone='';
        let user;
         if(!emailId.match(phoneRgex))
-          return Promise.reject('Mobile not in valid');
+          return Promise.reject('Mobile number is not valid');
          phone='+'+ value;
          console.log(phone)
          user = await EmployeeModel.findOne({phoneNumber:phone});
@@ -237,8 +238,8 @@ exports.checkEmail = [
   async (req, res) => {
     try {
       if (
-        !req.body.firstName.match('[A-Za-z]') ||
-        !req.body.lastName.match('[A-Za-z]')
+        !req.body.firstName.match('[A-Za-z0-9]') ||
+        !req.body.lastName.match('[A-Za-z0-9]')
       ) {
         logger.log(
           'warn',
@@ -246,7 +247,7 @@ exports.checkEmail = [
         );
         return apiResponse.ErrorResponse(
           res,
-          'Name should only consists of letters',
+          'Name should be specified',
         );
       }
       /*EmployeeModel.collection.dropIndexes(function(){
@@ -718,6 +719,7 @@ exports.verifyOtp = [
         }
       }
     } catch (err) {
+      console.log(err);
 	logger.log(
         'error',
         '<<<<< UserService < AuthController < verifyConfirm : Error (catch block)',
@@ -805,18 +807,24 @@ exports.updateProfile = [
       const employee = await EmployeeModel.findOne({
         emailId: req.user.emailId,
       });
+      // let phoneNumber = null
+      // if(req.body?.phoneNumber)
+      //    phoneNumber='+'+req.body?.phoneNumber;
       const {
         firstName,
         lastName,
-        phoneNumber,
+        phoneNumber='',
         warehouseId,
         organisation
       } = req.body;
+
       const organisationId = organisation.split('/')[1];
       const organisationName = organisation.split('/')[0];
+
       employee.firstName = firstName;
       employee.lastName = lastName;
-      employee.phoneNumber = "+"+phoneNumber;
+      //employee.phoneNumber = phoneNumber;
+      employee.phoneNumber = phoneNumber?'+'+phoneNumber:null;
       employee.organisationId = organisationId;
       employee.warehouseId = warehouseId;
       await employee.save();
@@ -847,7 +855,7 @@ exports.updateProfile = [
         'error',
         '<<<<< UserService < AuthController < updateProfile : error (catch block)',
       );
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.ErrorResponse(res, err.message);
     }
   },
 ];
@@ -1249,10 +1257,7 @@ exports.updateWarehouseAddress = [
 exports.uploadImage = async function (req, res) {
   checkToken(req, res, async (result) => {
     if (result.success) {
-      const {
-        data
-      } = result;
-      // var filename;
+      const {data} = result;
       const {
         id,
         type,
@@ -1260,38 +1265,8 @@ exports.uploadImage = async function (req, res) {
         action
       } = req.query;
 
-      //     const incrementCounter = await CounterModel.updateOne({
-      //       'counters.name': "employeeImage"
-      //     }, {
-      //       $inc: {
-      //         "counters.$.value": 1
-      //       }
-      //     })
-
-      //     const poCounter = await CounterModel.find({
-      //       "counters.name": "employeeImage"
-      //     }, {
-      //       "counters.name.$": 1
-      //     })
-      //     const t = JSON.parse(JSON.stringify(poCounter[0].counters[0]))
-      //     try {
-      //       if (action == "STOREID")
-      //   filename = t.value + "-" + req.file.filename;
-      //       else if (action == "PROFILE")
-      //   filename = "PROFILE" + "-" +  data.id + ".png"
-      // else
-      //          filename = id + "-" + type + imageSide + "-" + t.format + t.value + ".png";	
-
-      // let dir = `/home/ubuntu/userimages`;
-      //       await moveFile(req.file.path, `${dir}/${filename}`);
-      //     } catch (e) {
-      //       console.log("Error in image upload", e);
-      //       res.status(403).json(e);
-      //     }
-
       try {
         const Upload = await uploadFile(req.file)
-        console.log(Upload)
         await unlinkFile(req.file.path)
         if (action == "KYCUPLOAD") {
           const update = await EmployeeModel.findOneAndUpdate({
@@ -1706,7 +1681,6 @@ exports.createTwilioBinding = [
   auth,
   async (req, res) => {
     try {
-      client(accountSid, authToken);
       console.log("REGISTERING")
       console.log(req.user)
       client.notify.services(twilio_service_id)
@@ -1878,3 +1852,55 @@ exports.emailverify=[
     }
   },
 ];
+
+exports.Image=[
+  auth,
+  async(req,res)=>{
+  const FileStream = getFileStream(req.params.key);
+	FileStream.pipe(res)
+  }
+]
+
+exports.switchLocation = [
+  auth,
+  async (req, res) => {
+    try {
+      const employee = await EmployeeModel.findOne({
+        emailId: req.user.emailId,
+      });
+      const {
+        warehouseId,
+      } = req.body;
+
+      const returnData = { isRefresh: false };
+      if (warehouseId !== req.user.warehouseId) {
+        let userData = {
+          id: employee.id,
+          firstName: employee.firstName,
+          emailId: employee.emailId,
+          role: employee.role,
+          warehouseId: warehouseId,
+          phoneNumber: employee.phoneNumber
+        };
+        //Prepare JWT token for authentication
+        const jwtPayload = userData;
+        const jwtData = {
+          expiresIn: process.env.JWT_TIMEOUT_DURATION,
+        };
+        const secret = process.env.JWT_SECRET;
+        //Generated JWT token with Payload and secret.
+        returnData.isRefresh = true;
+        returnData.token = jwt.sign(jwtPayload, secret, jwtData);
+      }
+      return apiResponse.successResponseWithData(res, 'Switch Location Success', returnData);
+    } catch (err) {
+      logger.log(
+        'error',
+        '<<<<< UserService < AuthController < updateProfile : error (catch block)',
+      );
+      return apiResponse.ErrorResponse(res, err.message);
+    }
+  },
+];
+
+

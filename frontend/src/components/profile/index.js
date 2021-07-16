@@ -11,6 +11,8 @@ import "./style.scss";
 import { config } from "../../config";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
+import { Alert, AlertTitle } from '@material-ui/lab';
+import { getImage } from '../../actions/notificationActions';
 
 
 const axios = require("axios");
@@ -23,7 +25,7 @@ import {
 import { getWarehouseByOrgId } from "../../actions/productActions";
 import PopUpLocation from "./popuplocation";
 
-import Modal from "../../shared/modal";
+import Modal from "./modal/index";
 import { turnOff, turnOn } from "../../actions/spinnerActions";
 class Profile extends React.Component {
   constructor(props) {
@@ -56,6 +58,7 @@ class Profile extends React.Component {
       warehouseAddress_state: "",
       title: "",
       warehouseLocByOrg: [],
+      image: ''
     };
     this.onChange = this.onChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
@@ -130,11 +133,19 @@ class Profile extends React.Component {
         warehouseLocations: wareHouseAddresses,
         warehouseLocByOrg:wareHouseAddresses
       });
-    
+
      this.state.warehouseLocations.map((id)=>{
         this.state.warehouseLocations= this.state.warehouseLocations.filter((data)=>response.data.data.warehouseId.includes(data.id));
       })
+      
+    }
 
+    const that = this;
+    const r = await getImage(this.props.user.photoId);
+    const reader = new window.FileReader();
+    reader.readAsDataURL(r.data); 
+    reader.onload = function () {
+      that.setState({ image: reader.result });
     }
   }
 
@@ -268,7 +279,7 @@ class Profile extends React.Component {
       this.setState({ message: "Error while updating please try again." });
     }
   }
-
+  
   render() {
     const {
       editMode,
@@ -294,8 +305,10 @@ class Profile extends React.Component {
       warehouseAddress_secondline,
       warehouseAddress_state,
       title,
+      image
     } = this.state;
     const imgs = config().fetchProfileImage;
+    
     return (
       <div className="profile">
         <h1 className="breadcrumb">Profile</h1>
@@ -312,7 +325,7 @@ class Profile extends React.Component {
                   />:
                   <img
                     name="photo"
-                    src={`${imgs}${this.props.user.photoId}`}
+                    src={`${image}`}
                     className="rounded rounded-circle"
                   />}
                 </div>
@@ -714,7 +727,8 @@ class Profile extends React.Component {
             </div>
           </div>
         </div>
-        {message && <div className="alert alert-success">{message}</div>}
+        {message && <div> <Alert severity="success"><AlertTitle>Success</AlertTitle>{message}</Alert></div>
+    }
       </div>
     );
   }

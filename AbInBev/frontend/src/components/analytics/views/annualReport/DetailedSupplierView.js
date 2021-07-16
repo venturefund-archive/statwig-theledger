@@ -1,53 +1,61 @@
 import React, { useState, useEffect } from 'react';
-import becks from '../../../../assets/images/becks.png';
-import bottlesIcon from '../../../../assets/becks_330ml.png';
 import profile from '../../../../assets/user.png';
 import Chart from 'react-apexcharts';
 import { getAllOrganisationStats } from '../../../../actions/analyticsAction';
 import { useDispatch } from 'react-redux';
-
+import {
+  PieChart,
+  Pie,
+  Sector,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  RadialBarChart,
+  RadialBar,
+  Legend
+} from 'recharts';
 const DetailedSupplierView = (props) => {
   const { prop, brandsIconArr, brandsArr, brands } = props;
 
-  const [SupplierChartData, setSupplierChartData] = useState({
-    series: [0, 0, 0],
-    options: {
-      chart: {
-        height: 350,
-        type: 'radialBar',
-      },
-      plotOptions: {
-        radialBar: {
-          dataLabels: {
-            name: {
-              fontSize: '22px',
-            },
-            value: {
-              fontSize: '16px',
-            },
-            total: {
-              show: true,
-              label: 'Average Total',
-              formatter: function (w) {
-                let temp = (
-                  w.globals.seriesTotals.reduce((a, b) => {
-                    return a + b;
-                  }, 0) / w.globals.series.length
-                ).toFixed(2);
-                return temp + ' %';
-              },
-            },
-          },
-        },
-      },
-      labels: ['S1 Vendors', 'S2 Vendors', 'S3 Vendors'],
-    },
-  });
+  const [SupplierChartData, setSupplierChartData] = useState([
+    { name: 'S1', value: 0, fill: '#A344B7' },
+    { name: 'S2', value: 0, fill: '#F45733' },
+    { name: 'S3', value: 0, fill: '#FFC700' },
+  ]);
   const [name, setName] = useState(prop.name);
   const [shortName, setShortname] = useState(prop.shortName);
   const [image, setImage] = useState(prop.image);
   const dispatch = useDispatch();
   const [analytics, setAnalytics] = useState([]);
+
+  const COLORS = ['#F9A500', '#8A2BE2', '#298B8B'];
+  const RADIAN = Math.PI / 180;
+  const renderCustomizedLabel = ({
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    percent,
+    index,
+  }) => {
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="white"
+        textAnchor={x > cx ? 'start' : 'end'}
+        dominantBaseline="central"
+      >
+        {`${(percent * 100).toFixed(0)}%`}
+      </text>
+    );
+  };
+
   useEffect(() => {
     (async () => {
       if (props.sku) {
@@ -56,73 +64,90 @@ const DetailedSupplierView = (props) => {
         setShortname(n[0].shortName);
         setImage(n[0].image);
       }
+      let cond = '';
+      if (props.params) {
+        if (props.params.state)
+          cond = '&state=' + props.params.state;
+        if (props.params.district)
+          cond += '&district=' + props.params.district;
+      }
+
 
       let result = await dispatch(
         getAllOrganisationStats(
-          '?sku=' + (props.sku ? props.sku : prop.externalId),
+          '?orgType=' +
+          (props?.Otype ? props.Otype : 'ALL_VENDORS') +
+          '&sku=' +
+          (props.sku ? props.sku : prop.externalId) +
+          '&pid=' +
+          prop.id +
+          '&brand=' +
+          prop.manufacturer + cond,
         ),
       );
-      
-        let n = result.data.filter((a) => a.type == 'S1' || a.type == 'S2' || a.type == 'S3');
-        result.data = n;
+      console.log("result inside the useEffect", result);
+      let n = result.data.filter(
+        (a) => a.type == 'S1' || a.type == 'S2' || a.type == 'S3',
+      );
+      result.data = n;
       if (props.Otype) {
-        if (props.Otype != 'All') {
+        if (props.Otype != 'ALL_VENDORS') {
           n = result.data.filter((a) => a.type == props.Otype);
           result.data = n;
         }
       }
       setAnalytics(result.data);
-      let s1 = 0;
-      let s2 = 0;
-      let s3 = 0;
-      s1 =
-        (result.data.filter((a) => a?.type == 'S1').length /
-          result.data.length) *
-        100;
-      s2 =
-        (result.data.filter((a) => a?.type == 'S2').length /
-          result.data.length) *
-        100;
-      s3 =
-        (result.data.filter((a) => a?.type == 'S3').length /
-          result.data.length) *
-        100;
-      setSupplierChartData({
-        series: [s1, s2, s3],
-        options: {
-          chart: {
-            height: 350,
-            type: 'radialBar',
-          },
-          plotOptions: {
-            radialBar: {
-              dataLabels: {
-                name: {
-                  fontSize: '22px',
-                },
-                value: {
-                  fontSize: '16px',
-                },
-                total: {
-                  // show: true,
-                  // label: 'Average Total',
-                  formatter: function (w) {
-                    let temp = (
-                      w.globals.seriesTotals.reduce((a, b) => {
-                        return a + b;
-                      }, 0) / w.globals.series.length
-                    ).toFixed(2);
-                    return temp + ' %';
-                  },
-                },
-              },
-            },
-          },
-          labels: ['S1 Vendors', 'S2 Vendors', 'S3 Vendors'],
-        },
-      });
+      let s1;
+      let s2;
+      let s3;
+      let s1Length, s2Length, s3Length;
+      s1Length = result.data.filter((a) => a?.type == 'S1').length;
+      s2Length = result.data.filter((a) => a?.type == 'S2').length;
+      s3Length = result.data.filter((a) => a?.type == 'S3').length;
+
+      s1 = result.data.filter((a) => a?.type == 'S1');
+      let s1ActualTotal = s1.reduce(function (prev, cur) {
+        return prev + cur.analytics.actualReturns;
+      }, 0);
+
+      s2 = result.data.filter((a) => a?.type == 'S2');
+      let s2ActualTotal = s2.reduce(function (prev, cur) {
+        return prev + cur.analytics.actualReturns;
+      }, 0);
+
+      s3 = result.data.filter((a) => a?.type == 'S3');
+      let s3ActualTotal = s3.reduce(function (prev, cur) {
+        return prev + cur.analytics.actualReturns;
+      }, 0);
+
+      let s1Data = s1ActualTotal / s1Length;
+      let s2Data = s2ActualTotal / s2Length;
+      let s3Data = s3ActualTotal / s3Length;
+
+      setSupplierChartData([
+        { name: 'S1', value: s1Data, fill: '#A344B7' },
+        { name: 'S2', value: s2Data, fill: '#F45733' },
+        { name: 'S3', value: s3Data, fill: '#FFC700' },
+      ]);
     })();
   }, []);
+
+  const renderLegend = (props) => {
+    const { payload } = props;
+    return (<div style={{ display: 'grid', gap: '2em' }}>
+      {
+        payload.map((entry, index) => (
+          <div className="renderLegend">
+            <div className="renderLegendCircle" style={{ backgroundColor: `${entry.color}` }} />
+            <div style={{ color: `${entry.color}` }}>{entry.payload.name}</div>
+            <div style={{ color: `${entry.color}` }}>{(entry.payload.value).toFixed(2)}%</div>
+          </div>
+        ))
+      }
+    </div>)
+  }
+
+
   return (
     <div>
       <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3">
@@ -138,7 +163,7 @@ const DetailedSupplierView = (props) => {
                   className="productImage"
                   src={
                     brandsIconArr[
-                      brands.indexOf(prop.manufacturer.split(' ').join(''))
+                    brands.indexOf(prop.manufacturer.split(' ').join(''))
                     ]
                   }
                 />
@@ -151,9 +176,9 @@ const DetailedSupplierView = (props) => {
                         <img
                           src={
                             brandsArr[
-                              brands.indexOf(
-                                prop.manufacturer.split(' ').join(''),
-                              )
+                            brands.indexOf(
+                              prop.manufacturer.split(' ').join(''),
+                            )
                             ]
                           }
                           alt=""
@@ -177,7 +202,9 @@ const DetailedSupplierView = (props) => {
                       </span>
                     </span>
                     <div className="captionSubtitle">
-                      Compared to ({!isNaN(prop.returnRatePrev) ?  prop.returnRatePrev : 0}% last month)
+                      Compared to (
+                      {!isNaN(prop.returnRatePrev) ? prop.returnRatePrev : 0}%
+                      last month)
                     </div>
                     <div className="progress progress-line-default">
                       <div
@@ -186,10 +213,15 @@ const DetailedSupplierView = (props) => {
                         aria-valuenow="60"
                         aria-valuemin="0"
                         aria-valuemax="100"
-                        style={{ width: (!isNaN(prop.returnRate) ? prop.returnRate : 0) + '%' }}
+                        style={{
+                          width:
+                            (!isNaN(prop.returnRate) ? prop.returnRate : 0) +
+                            '%',
+                        }}
                       >
                         <span className="sr-only">
-                          {!isNaN(prop.returnRate) ? prop.returnRate : 0}% Complete
+                          {!isNaN(prop.returnRate) ? prop.returnRate : 0}%
+                          Complete
                         </span>
                       </div>
                     </div>
@@ -201,15 +233,37 @@ const DetailedSupplierView = (props) => {
         </div>
 
         <div className="row">
-          <div className="col-lg-4 col-md-4 col-sm-12">
-            <div id="chart">
-              <Chart
-                options={SupplierChartData.options}
-                series={SupplierChartData.series}
-                type="radialBar"
-                height={350}
-              />
-            </div>
+          <div className="col-lg-4 col-md-4 col-sm-12 radialBarChartContainer">
+            <div id="chart"></div>
+            <ResponsiveContainer width="100%" height={350}>
+              <RadialBarChart
+                width={500}
+                height={300}
+                cx={150}
+                cy={150}
+                innerRadius={20}
+                outerRadius={140}
+                barSize={10}
+                data={
+                  SupplierChartData
+                }
+              >
+                <RadialBar
+                  tminAngle={15}
+                  background
+                  cornerRadius="5"
+                  background={() => SupplierChartData.map(item => item.fill)}
+                  clockWise dataKey="value"
+                />
+                <Legend
+                  iconSize={10}
+                  verticalAlign="bottom"
+                  iconType={'circle'}
+                  height={36}
+                  content={renderLegend}
+                />
+              </RadialBarChart>
+            </ResponsiveContainer>
           </div>
           <div className="col-lg-8 col-md-8 col-sm-12">
             <div className="tableDetals">
@@ -222,28 +276,37 @@ const DetailedSupplierView = (props) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {analytics.map((analytic, index) => (
-                    <tr key={index}>
-                      <td scope="row">
-                        <div className="supplierImage justify-content-start">
-                          <img src={profile} className="displayImage" />
-                          <div className="supplierNames justify-content-start">
-                            <span>{analytic.name}</span>
-                            <br />
-                            <span
-                              className={`group ${analytic?.type?.toLowerCase()}group`}
-                            >
-                              {analytic.type} Vendor
-                            </span>
-                          </div>
-                        </div>
-                      </td>
-                      <td>Karnataka</td>
-                      <td>
-                        {!isNaN(analytic.analytics.actualReturns) ? analytic.analytics.actualReturns : 0}%
-                      </td>
+                  {analytics.length == 0 ? (
+                    <tr>
+                      <td colspan="3">No Data found</td>
                     </tr>
-                  ))}
+                  ) : (
+                      analytics.map((analytic, index) => (
+                        <tr key={index}>
+                          <td scope="row">
+                            <div className="supplierImage justify-content-start">
+                              <img src={profile} className="displayImage" />
+                              <div className="supplierNames justify-content-start">
+                                <span>{analytic.name}</span>
+                                <br />
+                                <span
+                                  className={`group ${analytic?.type?.toLowerCase()}group`}
+                                >
+                                  {analytic.type} Vendor
+                              </span>
+                              </div>
+                            </div>
+                          </td>
+                          <td>Karnataka</td>
+                          <td>
+                            {!isNaN(analytic.analytics.actualReturns)
+                              ? analytic.analytics.actualReturns
+                              : 0}
+                          %
+                        </td>
+                        </tr>
+                      ))
+                    )}
                 </tbody>
               </table>
             </div>

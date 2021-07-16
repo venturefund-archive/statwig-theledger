@@ -13,10 +13,10 @@ const ViewOrder = props => {
   const user = useSelector((state) => {
     return state.user;
   });
-  let statusStyle = 'bg-info';
+  let statusStyle = 'bg-primary';
   let status = order.poStatus;
   if  (order?.supplier?.supplierOrganisation === user?.organisationId && order.poStatus === 'CREATED'){
-    statusStyle = 'bg-info';
+    statusStyle = 'bg-primary';
     status = 'Received'
 }
 else if (order?.customer?.customerOrganisation && order.poStatus === 'CREATED'){
@@ -28,9 +28,26 @@ else if (order.poStatus === 'ACCEPTED') {
     statusStyle = 'bg-success';
     status = 'Accepted';
   }else if (order.poStatus === 'REJECTED') {
-    statusStyle = 'bg-warning';
+    statusStyle = 'bg-danger';
     status = 'Rejected';
   }
+  else if (order.poStatus === 'TRANSIT&FULLYFULFILLED') {
+    statusStyle = 'bg-info';
+    status = 'Transit and FullyFilled';
+  }
+  else if (order.poStatus === 'FULLYFULFILLED') {
+    statusStyle = 'bg-warning';
+    status = 'FullyFilled';
+  }
+  else if (order.poStatus === 'TRANSIT&PARTIALLYFULFILLED') {
+    statusStyle = 'bg-info';
+    status = 'Transit and Partially Fulfilled';
+  }
+  else if (order.poStatus === 'PARTIALLYFULFILLED') {
+    statusStyle = 'bg-secondary';
+    status = 'Partially Fulfilled';
+  }
+
 
 
 const onPOStatusChange = async status => {
@@ -123,7 +140,7 @@ const onPOStatusChange = async status => {
           <span className="p-1 text-info font-weight-bold">Product Details</span>
           <div className="row mt-3">
             {order?.products?.map((product, index) =>
-            <div className={`bg-white shadow ${index > 0 ? 'ml-5' : ''}  p-3`}>
+            <div className={`bg-white shadow ${index >= 0 ? 'ml-5 mb-5' : ''}  p-3`} style={{width:"25%"}}>
               <span className= " p-1 font-weight-normal text-primary ">{product.name}</span>
               <div className="row  p-1">
                 <span className="col">Product ID:</span>

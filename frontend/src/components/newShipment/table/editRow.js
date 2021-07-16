@@ -17,10 +17,11 @@ const EditRow = props => {
     handleCategoryChange,
     handleProductChange,
     handleBatchChange,
-    products
+    products,
+    check
   } = props;
-  // console.log("propsinshipment",prod.unitofMeasure[0]==undefined ? null: "vi");
   
+  console.log(prod,"Edit rowt",index);
   const [productsList,setProductsList] = useState([]);
   const [quantityChecker,setQuantityChecker] = useState(1);
   useEffect(() => {
@@ -64,8 +65,8 @@ const updateQuantity = () =>
 {
   setQuantityChecker(0);
 }
-
-if(quantityChecker===1 && typeof(prod)!="undefined" && typeof(prod.name!="undefined") && typeof(productsList)!="undefined")
+console.log("product Quantity is "+ prod.productQuantity);
+if(check==="0" && quantityChecker===1 && typeof(prod)!="undefined" && typeof(prod.name!="undefined") && typeof(productsList)!="undefined")
   {
                      let qty;
                     for(var i=0;i<productsList.length;i++)
@@ -79,7 +80,8 @@ if(quantityChecker===1 && typeof(prod)!="undefined" && typeof(prod.name!="undefi
                       }
                     }
                     if(i < productsList.length){
-                    prod.productQuantity = qty;
+                     prod.productQuantity = qty;
+                     handleQuantityChange(prod.productQuantity, index);
                     console.log("productQuantity is " + prod.productQuantity);
                     updateQuantity();
                     }
@@ -136,14 +138,20 @@ const handleChange = (value) =>
                   onSelect={item => { handleCategoryChange(index, item) }}
                   groups={category}
                 /> */}
+                { enableDelete ?
                 <Select
                   className="no-border"
-                  placeholder="Select Product Category"
-                  value={{label:prod.type?prod.type:"Select Product Category"}}
+                  placeholder={<div className="select-placeholder-text">Select Product Category</div>} 
+                  value={(prod.type==undefined || prod.id==undefined)?null:{value: prod.id, label: prod.type}}
                   defaultInputValue={prod.type}
-                  onChange={(v) => handleCategoryChange(index, v.value)}
+                  onChange={(v) => {
+                    handleCategoryChange(index, v.value,prod.batchNumber);
+                    handleBatchChange(prod.batchNumber, index);
+                  }
+                }
                   options={category}
-                />
+                />: prod.type
+                }
               </div>
             </div>
 </div>
@@ -164,11 +172,14 @@ const handleChange = (value) =>
                 } */}
                 {enableDelete ?
                 <Select
-                  className="no-border"
-                  placeholder="Select Product Name"
-                  defaultInputValue={prod.name}
+                className="no-border"
+                placeholder= {<div className= "select-placeholder-text" > Product Name </div>} 
+                value={(prod.id==undefined || prod.name==undefined || prod.name==="")?null:{value: prod.id, label: prod.name}}
+                placeholder="Product Name"
+                   defaultInputValue={prod.name}
                   onChange={(v) => {
                     handleProductChange(index, v);
+                    handleBatchChange(prod.batchNumber, index);
                     setQuantityChecker(1);
                   }
                 }
@@ -190,6 +201,7 @@ const handleChange = (value) =>
               value={prod.batchNumber}
               onChange={(e) => {
                 handleBatchChange(e.target.value, index);
+                setQuantityChecker(1);
               }}
             />
           </div>
@@ -220,11 +232,23 @@ const handleChange = (value) =>
           <div className="placeholder_id">Unit</div>}
         </div>
       </div>
-        {enableDelete && props.product.length > 1 &&
-          <div className="m-3 bg-light">
-          <span className="del-pad shadow border-none rounded-circle ml-2 " onClick={() => onRemoveRow(index)}><img className=" cursorP  p-1" height="30" src={Delete} /></span>
-          </div>
-        }
+      {
+        // enableDelete && props.product.length > 1 &&
+       //   <div className="m-3 bg-light">
+       //   <span className="del-pad shadow border-none rounded-circle ml-2 " onClick={() => onRemoveRow(index)}><img className=" cursorP  p-1" height="30" src={Delete} /></span>
+       //   </div>
+       }
+
+       {props.product.length > 1 && (
+         <div className="m-2 pl-3 pt-1" style={{position:"relative", left:"10px"}}>
+           <span
+             className="del-pad shadow border-none rounded-circle mr-1"
+             onClick={() => props.onRemoveRow(index)}
+           >
+             <img className="cursorP p-1" height="30" src={Delete} />
+           </span>
+         </div>
+       )}
       </div>
     // <div className="rTableRow"
     //   <div className="rTableCell">

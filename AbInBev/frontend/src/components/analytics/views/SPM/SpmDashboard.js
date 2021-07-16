@@ -70,7 +70,8 @@ const SpmDashboard = (props) => {
                     </div>
                   </td>
                   <td>{perf.postalAddress}</td>
-                  <td>{perf.returnRate ? perf.returnRate : 0}</td>
+                  {/* <td>{perf.returnRate ? perf.returnRate : 0}</td> */}
+                  <td>{0}</td>
                   <td>
                     {selectedRatingIndex !== index ? (
                       <div
@@ -159,18 +160,14 @@ const SpmDashboard = (props) => {
                           <tbody>
                             <tr>
                               <td scope="row">Return Rate</td>
-                              <td>{perf.returnRate ? perf.returnRate : 0}</td>
+                              <td>{perf.returnRate ? perf.returnRate : 0}%</td>
                               <td></td>
                               <td></td>
                             </tr>
                             <tr>
                               <td scope="row">Lead Time</td>
                               <td>
-                                {perf.leadTime &&
-                                perf.leadTime[0] &&
-                                perf.leadTime[0].avgLeadTime
-                                  ? perf.leadTime[0].avgLeadTime
-                                  : 0}
+                                {perf.leadTime?.length ? perf.leadTime[0]?.avgLeadTime > 60 ? Math.round(perf.leadTime[0]?.avgLeadTime/60) + ' H ' + Math.round(perf.leadTime[0]?.avgLeadTime%60) + ' M' : Math.round(perf.leadTime[0]?.avgLeadTime)+" M" : 0}
                               </td>
                               <td></td>
                               <td></td>
@@ -193,13 +190,13 @@ const SpmDashboard = (props) => {
                             </tr>
                             <tr>
                               <td scope="row">Dirty Bottles</td>
-                              <td>{perf.dirtyBottles}</td>
+                              <td>{perf.dirtyBottles}%</td>
                               <td></td>
                               <td></td>
                             </tr>
                             <tr>
                               <td scope="row">Breakage</td>
-                              <td>{perf.breakage}</td>
+                              <td>{perf.breakage}%</td>
                               <td></td>
                               <td></td>
                             </tr>

@@ -17,7 +17,10 @@ const ProductInventory = props => {
   const categoryArray = products.map(
         product => product.type,
   ).filter((value, index, self) => self.indexOf(value) === index);
+
+   console.log(inventories);
   useEffect(() => {
+    //console.log(props.match);
     if (props.match && props.match.params && props.match.params.category){
       let prodArray = [];
       inventories.map((val) => {
@@ -35,11 +38,12 @@ const ProductInventory = props => {
     }
     else {
       setEnable(false);
-      console.log(inventories);
-      
-      setData(inventories.filter(r => r.inventoryQuantity <= 0));
+      const inv = inventories.filter(r => r.inventoryDetails.quantity <= 0);
+      console.log(inv);
+      setData(inventories.filter(r =>  r.inventoryDetails.quantity <= 0));
     }
   }, [inventories, props]);
+  //console.log("propscategory ",data)
 
   const changeType = (cat) => {
     setCategory(cat);
@@ -63,17 +67,19 @@ const ProductInventory = props => {
         <h1 className="breadcrumb">{enable ? 'PRODUCT CATEGORY' : 'PRODUCTS OUT OF STOCK'}</h1>
         <div className="d-flex">
         <Link to="/addNewCategory">
-            <button className="btn btn-yellow">
-              <img src={Add} width="13" height="13" className="mr-2" />
+            <button className="btn btn-yellow mr-4" style={{position:"relative", top:"-15px"}}>
+              <img src={Add} width="13" height="13" className="mr-2 mb-1" />
               <span>Add New Category</span>
             </button>
           </Link>
         </div>
       </div>
       {enable && 
-      <div className="row mb-4">
+        <div class="wrapper mb-5">
+    <div class="longcontent">
+      <div className="row ml-0"> 
         {categoryArray.map(cat => 
-          <div className={`panel m-2 ${category == cat && `active`}`} onClick={() => changeType(cat)}>
+          <div className={`panel m-2 ${category == cat && `active`}`}style={{width:"10%"}} onClick={() => changeType(cat)}>
             <div className="flex flex-column">
               <div className=" picture truck-bg">
                 <img src={TotalInventoryAdded} alt="truck" />
@@ -83,6 +89,8 @@ const ProductInventory = props => {
           </div>
         )}
       </div>
+      </div>
+</div>
       }
       <div className="row">
         <div className=" p-2 rounded full-width-ribbon">
@@ -105,13 +113,16 @@ const ProductInventory = props => {
             </div>
           </div>
         </div>
+        {
+          console.log(data)
+        }
         <div className="ribbon-space col-12">
           {data.map((inv, i) => 
             <div key={i} className="col-12 p-3 mb-3 rounded row bg-white shadow">
               <div className="col-3 txt txtBlue">{inv.products.name?inv.products.name:"N/A"}</div>
               <div className="col-3 txt ">{inv.products.type ? inv.products.type:"N/A"}</div>
               <div className="col-3 txt ">{inv.products.manufacturer?inv.products.manufacturer:"N/A"}</div>
-              <div className="col-3 txt ">{inv.inventoryDetails.quantity?inv.inventoryDetails.quantity:"N/A"}</div>
+              <div className="col-3 txt ">{inv.inventoryDetails.quantity?inv.inventoryDetails.quantity:"N/A"}{"  ("}{inv.products.unitofMeasure?inv.products.unitofMeasure.name:"N/A"}{")"}</div>
             </div>
           )}
           {data?.length === 0 && 

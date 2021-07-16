@@ -19,6 +19,8 @@ import ShipmentFailPopUp from "./shipmentFailPopUp";
 import { Formik } from "formik";
 import Select from 'react-select';
 import Modal from '../../shared/modal'
+import { Alert, AlertTitle } from '@material-ui/lab';
+
 
 import { getProducts, getProductsByCategory, setReviewPos, resetReviewPos , getOrganizationsByTypes} from '../../actions/poActions';
 
@@ -105,6 +107,13 @@ const NewOrder = (props) => {
       // setSenderWarehouses(warehouses.data);
 
       const result = await getProducts();
+      setProducts(result.map(item => {
+        return {
+          value: item.name,
+          label: item.name,
+          ...item
+        };
+      }));
       const categoryArray = result.map(
         product => product.type,
       );
@@ -116,6 +125,7 @@ const NewOrder = (props) => {
                                     }));
     }
     fetchData();
+    dispatch(resetReviewPos({}));
   }, []);
 
   const closeModalFail = () => {
@@ -152,14 +162,7 @@ const NewOrder = (props) => {
       newArr[index]['quantity'] = '';
       setAddProducts(prod => [...newArr]);
       setFieldValue('products', newArr.map(row => ({ "productId": row.id, "id": row.id, "productQuantity": row?.productQuantity ? row?.productQuantity : 0, "name": row.name, "type": row.type, "manufacturer": row.manufacturer,"unitofMeasure":row.unitofMeasure })));
-    
-      setProducts(warehouse.data.map(item => {
-                                      return {
-                                        value: item.name,
-                                        label: item.name,
-                                        ...item
-                                      };
-                                    }));
+
     }
     catch (err) {
       setErrorMessage(err);
@@ -167,25 +170,22 @@ const NewOrder = (props) => {
   }
 
   const onProductChange = (index, item, setFieldValue) => {
-    addProducts.splice(index, 1);
+    addProducts.splice(index, 1,item);
     let newArr = [...addProducts];
-    newArr.push(item);
-    //console.log("rowUnitofMeasure",newArr);
-    setFieldValue('products', newArr.map(row => ({"productId": row.id,"id": row.id,"productQuantity": row?.productQuantity ? row?.productQuantity : '',"quantity": row?.productQuantity ? row?.productQuantity : '',"name": row.name,"type": row.type,"manufacturer": row.manufacturer,"unitofMeasure":row.unitofMeasure})));
-    //console.log("rowUnitofMeasureAfter set",newArr);
+    setFieldValue('products', newArr.map(row => ({"productId": row.id,"id": row.id,"productQuantity": '',"quantity": '',"name": row.name,"type": row.type,"manufacturer": row.manufacturer,"unitofMeasure":row.unitofMeasure})));
     setAddProducts(prod => [...newArr]);
 
     const prodIndex = products.findIndex(p => p.id === item.id);
     let newArray = [...products];
     newArray[prodIndex] = { ...newArray[prodIndex], isSelected: true };
-    setProducts(prod => [...newArray]);
+    // setProducts(prod => [...newArray]);
   }
 
   const onRemoveProduct = (index, setFieldValue) => {
     const prodIndex = products.findIndex(p => p.id === addProducts[index].id);
     let newArray = [...products];
     newArray[prodIndex] = { ...newArray[prodIndex], isSelected: false };
-    setProducts(prod => [...newArray]);
+    // setProducts(prod => [...newArray]);
     addProducts.splice(index, 1);
     let newArr = [...addProducts];
     if (newArr.length > 0)
@@ -347,13 +347,13 @@ const NewOrder = (props) => {
                     type="button"
                     className="btn btn-white bg-white shadow-radius font-bold mb-1"
                     onClick={() => {
-                      let arr = addProducts.filter(p => p.productId != '' && p.id != '' && p.name != '' && p.manufacturer != '' && p.productQuantity != '' && p.productQuantity!=null && p.type != '');
+                      let arr = addProducts.filter(p => p.productId != '' && p.id != '' && p.name != '' && p.manufacturer != '' && p.type != '');
                       if (arr.length == addProducts.length) {
                         let newArr = { productId: '', id: '', name: '', manufacturer: '', productQuantity: '', type: '' };
                         setAddProducts(prod => [...prod, newArr]);
                       }
                       else{
-                        setOrderError("Fill the required Product Details carefully");
+                        setOrderError("Fill all the required Product Details");
                         setAddAnotherProductFailed(true);
                       }
                     }}
@@ -578,11 +578,11 @@ const NewOrder = (props) => {
             <div className="d-flex pt-4 justify-content-between mb-1">
               <div className="value">{quantity}</div>
               <div className="d-flex">
-                <button type="button" className="btn btn-white shadow-radius font-bold mr-2"onClick={() => {dispatch(resetReviewPos({})); props.history.push('/orders')}}>
+                <button type="button" className="btn btn-white shadow-radius font-bold mr-2 mt-3" onClick={() => {dispatch(resetReviewPos({})); props.history.push('/orders')}}>
                   Cancel
                 </button>
 
-                <button className="btn btn-orange fontSize20 font-bold mb-2">
+                <button className="btn btn-orange fontSize20 font-bold mt-3">
                   <img src={OrderIcon} width="20" height="17" className="mr-2 mb-1" />
                   <span>Review Order</span>
                 </button>
@@ -628,15 +628,11 @@ const NewOrder = (props) => {
       )}
 
       {message && (
-        <div className="alert alert-success d-flex justify-content-center mt-3">
-          {message}
-        </div>
+        <div className="d-flex justify-content-center mt-3"> <Alert severity="success"><AlertTitle>Success</AlertTitle>{message}</Alert></div>
       )}
 
       {errorMessage && (
-        <div className="alert alert-danger d-flex justify-content-center mt-3">
-          {errorMessage}
-        </div>
+        <div className="d-flex justify-content-center mt-3"> <Alert severity="error"><AlertTitle>Error</AlertTitle>{errorMessage}</Alert></div>
       )}
     </div>
   );
