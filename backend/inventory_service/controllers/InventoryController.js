@@ -765,7 +765,9 @@ exports.getCountries = [
   auth,
   async (req, res) => {
     try {
-      const countries = await WarehouseModel.aggregate([{ $match :{'warehouseAddress.region' : req.query.region}},
+      const countries = await WarehouseModel.aggregate([{ $match :{
+        // 'warehouseAddress.region' : req.query.region
+      }},
       {
          $group:
            {
