@@ -35,6 +35,7 @@ const AnalyticsModel = require('../models/AnalyticsModel');
 const StateDistrictStaticDataModel = require("../models/StateDistrictStaticDataModel");
 const { request } = require("http");
 const { match } = require("assert");
+const { type } = require("os");
 const logger = init.getLog();
 const CENTRAL_AUTHORITY_ID = null;
 const CENTRAL_AUTHORITY_NAME = null;
@@ -3342,4 +3343,69 @@ exports.deleteProductsFromInventory = [
             return apiResponse.ErrorResponse(res, err.message);
         }
     },
+];
+
+
+exports.searchProduct = [
+  auth,
+  async (req, res) => {
+    try {
+      const { skip, limit,productName,producttype  } = req.query;
+      var warehouseId = "";
+
+      if (!req.query.warehouseId)
+        warehouseId = req.user.warehouseId;
+      else
+        warehouseId = req.query.warehouseId;
+      
+
+      const warehouse = await WarehouseModel.findOne({ id: warehouseId })
+      if (warehouse) {
+        let elementMatchQuery={}
+        elementMatchQuery['id']=warehouse.warehouseInventory
+        if (productName) {
+          elementMatchQuery[`products.name`] = productName;
+        }
+        if (producttype) {
+          elementMatchQuery[`products.type`] = producttype;
+        }
+        const inventory = await InventoryModel.aggregate([
+          
+          { $unwind: "$inventoryDetails" },
+          {
+            $lookup: {
+              from: "products",
+              localField: "inventoryDetails.productId",
+              foreignField: "id",
+              as: "products",
+            },
+          },
+          { $unwind: "$products" },
+          { $match: elementMatchQuery },
+        //   { $project:{
+        //     products:"",
+        //   }
+        // }
+        ])
+          .sort({ createdAt: -1 })
+          .skip(parseInt(skip))
+          .limit(parseInt(limit));
+                   
+        return apiResponse.successResponseWithData(
+          res,
+          "Inventory Details",
+          inventory
+        );
+      } else {
+        return apiResponse.ErrorResponse(
+          res,
+          "Cannot find warehouse for this employee"
+        );
+      }
+    } catch (err) {
+      console.log(err);
+
+      return apiResponse.ErrorResponse(res, err.message);
+    }
+  },
 ];

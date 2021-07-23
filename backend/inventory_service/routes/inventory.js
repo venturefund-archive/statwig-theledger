@@ -70,6 +70,7 @@ router.get("/getCitiesByState", InventoryController.getCitiesByState);
 router.get("/getWarehousesByCity", InventoryController.getWarehousesByCity);
 router.get("/getCountries", InventoryController.getCountries);
 
+router.get("/searchProduct", InventoryController.searchProduct);
 
 
 router.post(
