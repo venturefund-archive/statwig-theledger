@@ -34,6 +34,7 @@ const AnalyticsModel = require('../models/AnalyticsModel');
 const StateDistrictStaticDataModel = require("../models/StateDistrictStaticDataModel");
 const { request } = require("http");
 const { match } = require("assert");
+const { time } = require("console");
 const logger = init.getLog();
 const CENTRAL_AUTHORITY_ID = null;
 const CENTRAL_AUTHORITY_NAME = null;
@@ -2137,19 +2138,30 @@ exports.getCountryDetailsByRegion = [
 ];
 
 exports.getRegions = [
-  auth,
+  // auth,
   async (req, res) => {
     try {
       const {orgType} = req.query;
       var orgs;
+      const orgSet = new Set()
       if(!orgType)
       {
         orgs = await OrganisationModel.find({}).select('region.name');
       }
       else{
-        orgs = await OrganisationModel.find({type:orgType}).select('region.name');
+        orgs = await OrganisationModel.find({type:orgType}).select('region.name id');
+        console.log(orgs);
+        try{
+        const warehouseRegions = await WarehouseModel.find({organisationId :{$in: orgs.map(org => org.id)}}).select('region');
+        for (let warehouse of warehouseRegions) {
+          orgSet.add(warehouse.region);
+        }
+        console.log(orgSet);
+        }
+        catch(err){
+          console.log(err);
+        }
       }
-      const orgSet = new Set()
       for (let org of orgs) {
         orgSet.add(org.region.name);
       }
