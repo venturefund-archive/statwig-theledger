@@ -3,7 +3,7 @@
 # any future command that fails will exit the script
 #set -e
 #test line
-#i Lets write the public key of our aws instance
+# Lets write the public key of our aws instance
 
 eval $(ssh-agent -s)
 echo "$ID_RSA" | tr -d '\r' | ssh-add - > /dev/null
