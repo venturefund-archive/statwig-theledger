@@ -18,13 +18,13 @@ stages:
     # - test
      - deploy
 
-install_dependencies:
-      stage: build
-      script:
-        - npm install
-      artifacts:
-        paths:
-          - node_modules/
+#install_dependencies:
+ #     stage: build
+  #    script:
+   #     - npm install
+    #  artifacts:
+     #   paths:
+      #    - node_modules/
 
             #test_async:
             #stage: test
