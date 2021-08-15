@@ -14,8 +14,8 @@ before_script:
     # - npm install
   
 stages:
-     - build
-     - test
+    # - build
+    # - test
      - deploy
 
 install_dependencies:
@@ -33,7 +33,7 @@ install_dependencies:
 
 deployToAWS:
   only:
-    - master
+    - cicd_test
   stage: deploy
   script:
     - bash deploy/deploy.sh
