@@ -26,7 +26,7 @@ DEPLOY_SERVERS=$SERVER_IP
 # our substring is "," and we replace it with nothing.
 #ALL_SERVERS=(${DEPLOY_SERVERS//,/ })
 #echo "ALL_SERVERS ${ALL_SERVERS}"
-#test
+
 # Lets iterate over this array and ssh into each EC2 instance
 # Once inside the server, run updateAndRestart.sh
 #for server in "${ALL_SERVERS[@]}"
