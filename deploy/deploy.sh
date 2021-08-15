@@ -32,7 +32,8 @@ echo "$ID_RSA" | tr -d '\r' | ssh-add - > /dev/null
 #for server in "${ALL_SERVERS[@]}"
 #do
   echo "deploying to ${SERVER_IP}"
-  ssh root@${SERVER_IP} "cd /home/ec2-user && git clone git@gitlab.com:statwig-public/theledger.git"
+  echo "test"
+  ssh root@54.164.66.73 "cd /home/ec2-user && git clone git@gitlab.com:statwig-public/theledger.git"
 #done
 #testi11
 
