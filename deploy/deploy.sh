@@ -18,7 +18,7 @@ echo "$ID_RSA" | tr -d '\r' | ssh-add - > /dev/null
 
 # we have already setup the DEPLOYER_SERVER in our gitlab settings which is a
 # comma seperated values of ip addresses.
-DEPLOY_SERVERS=$SERVER_IP
+#DEPLOY_SERVERS=$SERVER_IP
 
 # lets split this string and convert this into array
 # In UNIX, we can use this commond to do this
@@ -31,8 +31,8 @@ DEPLOY_SERVERS=$SERVER_IP
 # Once inside the server, run updateAndRestart.sh
 #for server in "${ALL_SERVERS[@]}"
 #do
-  echo "deploying to ${DEPLOY_SERVERS}"
-  ssh root@${DEPLOY_SERVERS} "cd /home/ec2-user && git clone git@gitlab.com:statwig-public/theledger.git"
+  echo "deploying to ${SERVER_IP}"
+  ssh root@${SERVER_IP} "cd /home/ec2-user && git clone git@gitlab.com:statwig-public/theledger.git"
 #done
 #testi11
 
