@@ -6,6 +6,7 @@ const InventoryModel = require('../models/InventoryModel');
 const OrganisationModel = require('../models/OrganisationModel');
 const ConfigurationModel = require('../models/ConfigurationModel');
 const CounterModel = require('../models/CounterModel');
+const RbackModel = require('../models/RbackModel');
 const { body, validationResult} = require('express-validator');
 const { sanitizeBody } = require('express-validator');
 //helper file to prepare responses.
@@ -799,6 +800,7 @@ exports.verifyOtp = [
           };
           const secret = process.env.JWT_SECRET;
           //Generated JWT token with Payload and secret.
+          userData.permissions = await RbackModel.findOne({role});
           userData.token = jwt.sign(jwtPayload, secret, jwtData);
           logger.log(
             'info',
