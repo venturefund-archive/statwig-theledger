@@ -6,6 +6,7 @@ const InventoryModel = require('../models/InventoryModel');
 const OrganisationModel = require('../models/OrganisationModel');
 const ConfigurationModel = require('../models/ConfigurationModel');
 const CounterModel = require('../models/CounterModel');
+const RbacModel = require('../models/RbacModel')
 const { body, validationResult} = require('express-validator');
 const { sanitizeBody } = require('express-validator');
 //helper file to prepare responses.
@@ -297,7 +298,7 @@ exports.checkEmail = [
         //var employeeId = uniqid('emp-');
         var employeeStatus = 'NOTAPPROVED';
         let addr = '';
-        //create organisation if doesn't exists 
+        //create organisation if doesn't exists
         if (req.body.organisationName) {
           const organisationName = req.body.organisationName;
           const organisation = await OrganisationModel.findOne({ name: new RegExp('^'+organisationName+'$', "i") });
@@ -400,11 +401,11 @@ exports.checkEmail = [
         let emailId = null
         if(req.body?.emailId)
           emailId=req.body.emailId.toLowerCase().replace(' ', '');
-        
+
        let phoneNumber = null
         if(req.body?.phoneNumber)
            phoneNumber='+'+req.body?.phoneNumber;
-        
+
         // if (emailId.indexOf('@') === -1)
         //   phoneNumber = '+' + emailId;
         // if(phoneNumber.indexOf('+')===-1)
@@ -466,10 +467,10 @@ exports.checkEmail = [
           event_data.eventType.primary = "CREATE";
           event_data.eventType.description = "USER";
           event_data.payloaData = req.body;
-        
+
           async function compute(event_data) {
             resultt = await logEvent(event_data);
-            return resultt;     
+            return resultt;
           }
           console.log(result);
           compute(event_data).then((response) => {
@@ -740,9 +741,7 @@ exports.verifyOtp = [
         }
         const user = await EmployeeModel.findOne(query);
         if (user && (user.otp == req.body.otp || t_res?.status === 'approved')) {
-
           var address;
-
           if (user.walletAddress == null || user.walletAddress == "wallet12345address") {
             const response = await axios.get(
               `${blockchain_service_url}/createUserAddress`,
@@ -759,7 +758,7 @@ exports.verifyOtp = [
               `${blockchain_service_url}/grantPermission`,
               userData,
             );
-            await EmployeeModel.update(query, { otp: null, walletAddress: address });
+            await EmployeeModel.updateOne(query, { otp: null, walletAddress: address });
           }
           else {
             address = user.walletAddress
@@ -799,6 +798,8 @@ exports.verifyOtp = [
           };
           const secret = process.env.JWT_SECRET;
           //Generated JWT token with Payload and secret.
+          const {role} = user;
+          userData.permissions = await RbacModel.findOne({role});
           userData.token = jwt.sign(jwtPayload, secret, jwtData);
           logger.log(
             'info',
@@ -1363,10 +1364,10 @@ exports.addWarehouse = [
         event_data.eventType.primary = "ADD";
         event_data.eventType.description = "WAREHOUSE";
         event_data.payloaData = req.body;
-      
+
         async function compute(event_data) {
           resultt = await logEvent(event_data);
-          return resultt;     
+          return resultt;
         }
         console.log(result);
         compute(event_data).then((response) => {
@@ -1569,7 +1570,7 @@ exports.getAllRegisteredUsers = [
   async (req, res) => {
     try {
       const resPerPage = 10; // results per page
-      const page = req.query.page || 1; // Page 
+      const page = req.query.page || 1; // Page
       const totalRecords = await EmployeeModel.count({})
       const users = await EmployeeModel.find({}).skip((resPerPage * page) - resPerPage)
         .limit(resPerPage);;
@@ -1664,7 +1665,7 @@ exports.getAllUsersByWarehouse = [
   async (req, res) => {
     try {
       const resPerPage = 10; // results per page
-      const page = req.query.page || 1; // Page 
+      const page = req.query.page || 1; // Page
       const totalRecords = await EmployeeModel.count({ warehouseId: req.params.warehouseId })
       const users = await EmployeeModel.find({ warehouseId: req.params.warehouseId }).skip((resPerPage * page) - resPerPage)
         .limit(resPerPage);;
@@ -1760,7 +1761,7 @@ exports.getAllUsersByOrganisation = [
   async (req, res) => {
     try {
       const resPerPage = 10; // results per page
-      const page = req.query.page || 1; // Page 
+      const page = req.query.page || 1; // Page
       const totalRecords = await EmployeeModel.count({ organisationId: req.params.organisationId })
       const users = await EmployeeModel.find({ organisationId: req.params.organisationId }).skip((resPerPage * page) - resPerPage)
         .limit(resPerPage);;
@@ -1865,7 +1866,7 @@ exports.createTwilioBinding = [
                       address: req.body.token_id
                       })
                       .then(binding => console.log(binding));
-      return apiResponse.successResponse(res,"Succesfully Registered") 
+      return apiResponse.successResponse(res,"Succesfully Registered")
     } catch (err) {
       console.log(err)
       return apiResponse.ErrorResponse(res, err);
@@ -1874,7 +1875,7 @@ exports.createTwilioBinding = [
 ];
 
 exports.getOrganizationsByType = [
-//without auth for new user register 
+//without auth for new user register
   async (req, res) => {
     try {
       const organisationId = req.query.id;
@@ -1986,7 +1987,7 @@ exports.getwarehouseinfo = [
 ];
 
 exports.getOrganizationsTypewithauth = [
-   auth, 
+   auth,
   async (req, res) => {
     try {
       const organisationId = req.query.id;
@@ -2007,9 +2008,9 @@ exports.emailverify=[
   async (req,res)=>{
     try{
       const emailId= req.query.emailId;
-      const phoneNumber=req.query.phoneNumber;   
+      const phoneNumber=req.query.phoneNumber;
       const email= await EmployeeModel.find({$or:[{"phoneNumber":"+"+phoneNumber},{"emailId":emailId}]},'emailId phoneNumber')
-      
+
       return apiResponse.successResponseWithData(
         res,
         "Operation success",
@@ -2074,5 +2075,3 @@ exports.switchLocation = [
     }
   },
 ];
-
-
