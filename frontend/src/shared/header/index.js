@@ -334,8 +334,8 @@ const imgs = config().fetchProfileImage;
               <div className="slider-menu">
                 <React.Fragment>
                   <div className="section">
-                    <button style={{backgroundColor: "#0B65C1", color: "white"}} onClick={() => setNotifications(/*criteria for alert */)}>Alerts</button>
-                    <button style={{backgroundColor: "#0B65C1", color: "white"}} onClick={() => setNotifications(/*criteria for transaction */)}>Transactions</button>
+                    <button style={{backgroundColor: "#0B65C1", color: "white"}} /*onClick={() => setNotifications(criteria for alert)}*/>Alerts</button>
+                    <button style={{backgroundColor: "#0B65C1", color: "white"}} /*onClick={() => setNotifications(criteria for transaction )}*/>Transactions</button>
                   </div>
                   {notifications.map(notification =>  <div className="slider-item">
                     <div className="row justify-content-between align-items-center" onClick={() => clearNotification(notification)}>
