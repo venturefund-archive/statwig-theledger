@@ -224,12 +224,13 @@ const Header = (props) => {
         })
       );
       // console.log("usersLocation",usersLocation);
-
-      if (localStorage.getItem("location") != null) {
-        setLocation((prod) => JSON.parse(localStorage.getItem("location")));
-      } else {
-        setLocation((prod) => warehouses[0]);
-        localStorage.setItem("location", JSON.stringify(warehouses[0]));
+    
+      if(localStorage.getItem("location")!=null){
+        //setLocation(prod=>JSON.parse(localStorage.getItem("location")));
+      }
+      else {
+       setLocation(prod=>warehouses[0]);
+        localStorage.setItem('location', JSON.stringify(warehouses[0]));
       }
       const r = await getImage(profile.photoId);
       const reader = new window.FileReader();
@@ -336,17 +337,22 @@ const Header = (props) => {
           <img src={searchingIcon} onClick={onSeach} alt="searching" />
         </div>
         <div>
-          <div className="user-info ">
-            <div className="notifications">
-              {/*   <Badge badgeContent={1} color="primary"> </Badge> {/*<img src={bellIcon} alt="notification" /><MailIcon />*/}
-
-              {/* <div className="bellicon-wrap" onClick={() => setShowNotifications(!showNotifications)}>
+        
+       <div className="user-info ">
+       <div className="notifications">
+                <img src={bellIcon} onClick={showNotifications} alt="notification" /><bellIcon />
+                  
+                    <div className="bellicon-wrap" onClick={() => setShowNotifications(!showNotifications)}>
             
               {notifications.length > 0 && <span className="badge badge-light">{notifications.length }</span> }
             </div>
             {showNotifications && notifications.length > 0 && (
               <div className="slider-menu">
                 <React.Fragment>
+                  <div className="section">
+                    <button style={{backgroundColor: "#0B65C1", color: "white"}} onClick={() => setNotifications(/*criteria for alert */)}>Alerts</button>
+                    <button style={{backgroundColor: "#0B65C1", color: "white"}} onClick={() => setNotifications(/*criteria for transaction */)}>Transactions</button>
+                  </div>
                   {notifications.map(notification =>  <div className="slider-item">
                     <div className="row justify-content-between align-items-center" onClick={() => clearNotification(notification)}>
                       <div className="col-sm-10">
@@ -365,8 +371,8 @@ const Header = (props) => {
                   </div>)}
                 </React.Fragment>
               </div>
-            )}*/}
-            </div>
+            )}
+            </div>  
             <div className="divider" />
             <div className="location">
               <img src={Location} width="20" height="26" />
