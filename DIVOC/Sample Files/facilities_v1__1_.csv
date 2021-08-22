@@ -1,0 +1,6 @@
+facilityCode,facilityName,contact,operatingHourStart,operatingHourEnd,category,type,status,addressLine1,addressLine2,district,state,pincode,geoLocationLat,geoLocationLon,adminName,adminMobile,errors
+DEL11,Delhi Hospital 11,4444444440,9,18,GOVT,Fixed location,Active,No 23,OMR,Delhi,Delhi,110011,28,77,Sagar6,3333333331,#/Facility: required key [serialNum] not found
+DEL12,Delhi Hospital 12,4444444441,9,18,GOVT,Fixed location,Active,No 23,OMR,Delhi,Delhi,110011,28,77,Sagar7,3333333332,#/Facility: required key [serialNum] not found
+DEL13,Delhi Hospital 13,4444444442,9,18,GOVT,Fixed location,Active,No 23,OMR,Delhi,Delhi,110011,28,77,Sagar8,3333333333,#/Facility: required key [serialNum] not found
+DEL14,Delhi Hospital 14,4444444443,9,18,GOVT,Fixed location,Active,No 23,OMR,Delhi,Delhi,110011,28,77,Sagar9,3333333334,#/Facility: required key [serialNum] not found
+DEL15,Delhi Hospital 15,4444444444,9,18,GOVT,Fixed location,Active,No 23,OMR,Delhi,Delhi,110011,28,77,Sagar10,3333333335,#/Facility: required key [serialNum] not found
