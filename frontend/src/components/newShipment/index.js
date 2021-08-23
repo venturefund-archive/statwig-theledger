@@ -48,7 +48,7 @@ const NewShipment = (props) => {
   const dispatch = useDispatch();
   const [category, setCategory] = useState([]);
   const [OrderId, setOrderId] = useState("Select Order ID");
-  const [senderOrgId, setSenderOrgId] = useState("Select Organisation Name");
+  const [senderOrgId, setSenderOrgId] = useState("null");
   const [orderIdSelected, setOrderIdSelected] = useState(false);
   const [senderOrgLoc, setSenderOrgLoc] = useState(
     "Select Organisation Location"
@@ -412,14 +412,16 @@ if (!error) {
   };
  
   const handleQuantityChange = (value, i) => {
-    
     const soDetailsClone = { ...OrderDetails };
-    if(value > soDetailsClone.products[i].productQuantity){
-      setOrderDetails(soDetailsClone);
-    }else{
+    if(parseInt(value) > parseInt(soDetailsClone.products[i].orderedQuantity)){
+      soDetailsClone.products[i].productQuantity = soDetailsClone.products[i].orderedQuantity;
+      setOrderDetails(soDetailsClone); 
+      alert("Quantity cannot be more than ordered quantity")
+      return
+    }
       soDetailsClone.products[i].productQuantity = value;
       setOrderDetails(soDetailsClone);    
-    }
+    
   };
  
   const handleBatchChange = (value, i) => {
@@ -650,8 +652,14 @@ if (!error) {
                           setFieldValue("OrderId", v.value);
                           setOrderId(v.value);
                           dispatch(turnOn());
-                          const result = await dispatch(getOrder(v.value));
-                          
+                          let result = await dispatch(getOrder(v.value));
+                          for (let i = 0; i < result.poDetails[0].products.length; i++) {
+                            if(result.poDetails[0].products[i].productQuantityShipped){
+                              result.poDetails[0].products[i].productQuantity = parseInt(result.poDetails[0].products[i].productQuantity) - parseInt(result.poDetails[0].products[i].productQuantityShipped);
+                            }
+                            result.poDetails[0].products[i].orderedQuantity =
+                            result.poDetails[0].products[i].productQuantity;
+                          }
                           setReceiverOrgLoc(
                              result.poDetails[0].customer.warehouse.title + '/' + result.poDetails[0].customer.warehouse.postalAddress
                           );
@@ -660,7 +668,6 @@ if (!error) {
                             // result.poDetails[0].customer.organisation.id
                           );
                           setOrderDetails(result.poDetails[0]);
-
                           dispatch(turnOff());
                           setDisabled(true);
                           let warehouse = senderWarehouses.filter((w) => {
@@ -713,6 +720,7 @@ if (!error) {
                             result.poDetails[0].products[i].productQuantityShipped;
                           }
                           console.log(products_temp);
+                          
                          if (result.poDetails[0].products.length > 0) {
                            setProducts(p => []);
                            setAddProducts(p => []);
@@ -746,7 +754,13 @@ if (!error) {
                         setOrderIdSelected(true);
                         dispatch(turnOn());
                         setDisabled(false);
-                        const result = await dispatch(getViewShipment(values.shipmentID));
+                        let result = await dispatch(getViewShipment(values.shipmentID));
+                        for (let i = 0; i < result.products.length; i++) {
+                          if(result.products[i].productQuantityShipped){
+                            result.products[i].productQuantity = parseInt(result.products[i].productQuantity) - parseInt(result.products[i].productQuantityShipped);
+                          }
+                          result.products[i].orderedQuantity = result.products[i].productQuantity;
+                        }
                         dispatch(turnOff());
                         setReceiverOrgLoc();
                         setReceiverOrgId();
@@ -828,8 +842,8 @@ if (!error) {
                 <div className="row">
                   <div className="col-md-6 com-sm-12">
                     <div className="form-group">
-                      <label className="name required-field" htmlFor="organizationName">
-                        Organisation Name
+                      <label className="name" htmlFor="organizationName">
+                        Organisation Name*
                       </label>
                       <div className="line">
                         {/* <DropdownButton
@@ -857,8 +871,8 @@ if (!error) {
 
                   <div className="col-md-6 com-sm-12">
                     <div className="form-group">
-                      <label className="name required-field" htmlFor="orgLocation">
-                        Organisation Location
+                      <label className="name" htmlFor="orgLocation">
+                        Organisation Location*
                       </label>
                       <div className={`line ${errors.fromOrgLoc && touched.fromOrgLoc ? "border-danger" : "" }`}>
                         {/* <DropdownButton
@@ -895,6 +909,8 @@ if (!error) {
                             onWarehouseChange(v.warehouseInventory);
                             setFieldValue("fromOrg", senderOrganisation[0]);
                             setFieldValue("fromOrgLoc", v.value);
+                            // console.log(v.value)
+                            setSenderOrgId(v.value);
                             setAddProducts((prod) => []);
                             let newArr = {
                               productName: "",
@@ -926,7 +942,7 @@ if (!error) {
                 <div className="row">
                   <div className="col-md-6 com-sm-12">
                     <div className="form-group">
-                      <label className="name required-field" htmlFor="organizationType">Organisation Type</label>
+                      <label className="name" htmlFor="organizationType">Organisation Type*</label>
                       <div className={`line ${errors.rtype && touched.rtype ? "border-danger" : "" }`}>
                         <Select
                           styles={customStyles}
@@ -952,8 +968,8 @@ if (!error) {
                 <div className="row">
                   <div className="col-md-6 com-sm-12">
                     <div className="form-group">
-                      <label className="name required-field" htmlFor="organizationName">
-                        Organisation Name
+                      <label className="name" htmlFor="organizationName">
+                        Organisation Name*
                       </label>
                       <div className={`line ${errors.toOrg && touched.toOrg ? "border-danger" : "" }`}>
                         {/* <DropdownButton
@@ -996,7 +1012,7 @@ if (!error) {
 
                   <div className="col-md-6 com-sm-12">
                     <div className="form-group">
-                      <label className="name required-field" htmlFor="delLocation">Delivery Location</label>
+                      <label className="name" htmlFor="delLocation">Delivery Location*</label>
                       <div className={`line ${errors.toOrgLoc && touched.toOrgLoc ? "border-danger" : "" }`}>
                         {/* <DropdownButton
                           name={receiverOrgLoc}
@@ -1046,7 +1062,7 @@ if (!error) {
                 </label>
                 <div className="row">
                   <div className="col-md-6 com-sm-12 mt-2">
-                      <label className="name required-field" htmlFor="organizationName">Transit Number</label>
+                      <label className="name" htmlFor="organizationName">Transit Number*</label>
                       <input
                         className={`input refship ${errors.airWayBillNo && touched.airWayBillNo ? "border-danger" : "" }`}
                         type="text"
@@ -1067,7 +1083,7 @@ if (!error) {
 
                   <div className="col-md-6 com-sm-12 mt-3">
                     <div className="form-group">
-                      <label className="name required-field" htmlFor="delLocation">Shipment Date</label>
+                      <label className="name" htmlFor="delLocation">Shipment Date*</label>
                       <div className={`input refship ${errors.shipmentDate && touched.shipmentDate ? "border-danger" : "" }`}>
                         <DatePicker
                           className="date"
@@ -1102,7 +1118,7 @@ if (!error) {
                 </div>
                 <div className="row">
                 <div className="col-md-6 com-sm-12">
-                    <label className="name required-field" htmlFor="organizationName">Label Code</label>
+                    <label className="name" htmlFor="organizationName">Label Code*</label>
                     <input
                       className={`input refship ${errors.labelCode && touched.labelCode ? "border-danger" : "" }`}
                       type="text"
@@ -1168,6 +1184,7 @@ if (!error) {
               {OrderDetails?.products?.length > 0 && (
                 <EditTable
                 check="1"
+                warehouseID={senderOrgId}
                   product={OrderDetails?.products}
                   handleQuantityChange={(v, i) => {
                     handleQuantityChange(v, i);

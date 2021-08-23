@@ -60,9 +60,9 @@ const Header = (props) => {
   const [search, setSearch] = useState("");
   const [searchString, setSearchString] = useState("");
 
-  const [searchType, setSearchType] = useState("");
-
-  const [searchtemp, setsearchtemp] = useState("");
+  const [searchType, setSearchType] = useState('');
+  const [alertType, setAlertType] = useState('ALERT');
+  const [searchtemp, setsearchtemp] = useState('');
   const [invalidSearch, setInvalidSearch] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -206,23 +206,28 @@ const Header = (props) => {
   const profile = useSelector((state) => {
     return state.user;
   });
+  async function changeNotifications (value){
+    const response = await axios.get(`${config().getAlerts}${value}`);
+    console.log(response.data.data)
+    setNotifications(response.data.data);
+  }
   // const dispatch = useDispatch();
   useEffect(() => {
     dispatch(getUserInfo());
     async function fetchApi() {
-      const response = await getNotifications();
-      setNotifications(response.data);
-
+      // const response = await getNotifications();
+      const response = await axios.get(`${config().getAlerts}${alertType}`);
+      console.log(response.data.data)
+      setNotifications(response.data.data);
+      
       const warehouses = await getActiveWareHouses();
-      setActiveWarehouses(
-        warehouses.map((item) => {
-          return {
-            title: item.name,
-            organisationId: item.name,
-            ...item,
-          };
-        })
-      );
+      setActiveWarehouses(warehouses.filter(i => i.status == 'ACTIVE' || i.status == 'PENDING').map(item=>{
+        return{
+          title: item.name,
+          organisationId: item.name,
+          ...item
+        };
+      }));
       // console.log("usersLocation",usersLocation);
     
       if(localStorage.getItem("location")!=null){
@@ -291,20 +296,17 @@ const Header = (props) => {
 
       <div className="actions">
         <div className="search-form" tabIndex="-1" onKeyDown={onkeydown}>
-          <Autocomplete
-            style={{ width: "130%" }}
-            id="free-solo-demo"
-            freeSolo
-            //value={search}
-            options={options}
-            getOptionLabel={(option) => option._id}
-            filterOptions={filterOptions}
-            placeholder="Search PO ID/ Shipment ID/ Transit Number"
-            onFocus={(e) => (e.target.placeholder = "")}
-            onBlur={(e) =>
-              (e.target.placeholder =
-                "Search PO ID/ Shipment ID/ Transit Number")
-            }
+        <Autocomplete
+        
+        id="free-solo-demo"
+        freeSolo
+        //value={search}
+        options={options}
+        getOptionLabel={(option) => option._id}
+        filterOptions={filterOptions}
+        placeholder="Search PO ID/ Shipment ID/ Transit Number"
+            onFocus={(e) => e.target.placeholder = ''}
+            onBlur={(e) => e.target.placeholder = 'Search PO ID/ Shipment ID/ Transit Number'}
             inputValue={search}
             onInputChange={(event, newInputValue) => {
               setSearch(newInputValue);
@@ -340,7 +342,7 @@ const Header = (props) => {
         
        <div className="user-info ">
        <div className="notifications">
-                <img src={bellIcon} onClick={showNotifications} alt="notification" /><bellIcon />
+                <img src={bellIcon} onClick={() => setShowNotifications(!showNotifications)} alt="notification" /><bellIcon />
                   
                     <div className="bellicon-wrap" onClick={() => setShowNotifications(!showNotifications)}>
             
@@ -350,8 +352,8 @@ const Header = (props) => {
               <div className="slider-menu">
                 <React.Fragment>
                   <div className="section">
-                    <button style={{backgroundColor: "#0B65C1", color: "white"}} onClick={() => setNotifications(/*criteria for alert */)}>Alerts</button>
-                    <button style={{backgroundColor: "#0B65C1", color: "white"}} onClick={() => setNotifications(/*criteria for transaction */)}>Transactions</button>
+                    <button style={{backgroundColor: "#0B65C1", color: "white"}} onClick={() => {setAlertType('ALERT'); changeNotifications('ALERT')}}>Alerts</button>
+                    <button style={{backgroundColor: "#0B65C1", color: "white"}} onClick={() => {setAlertType('TRANSACTION'); changeNotifications('TRANSACTION')}}>Transactions</button>
                   </div>
                   {notifications.map(notification =>  <div className="slider-item">
                     <div className="row justify-content-between align-items-center" onClick={() => clearNotification(notification)}>
@@ -382,26 +384,21 @@ const Header = (props) => {
           <p className="uname"> {activeWarehouses[0]?.warehouseAddress.firstLine}</p>
           </div> */}
 
-            <div
-              className="userName"
-              style={{ fontSize: "4px", marginBottom: "0px" }}
-            >
-              <DropdownButton
-                name={
-                  location?.title +
-                  "\n" +
-                  location?.warehouseAddress?.city +
-                  "," +
-                  location?.warehouseAddress?.country
-                }
-                // name={location?.title}
-                arrowImg={dropdownIcon}
-                onSelect={(item) => {
-                  handleLocation(item);
-                }}
-                groups={activeWarehouses}
-              />
-            </div>
+            <div className="userName">               
+           <DropdownButton
+            name={location?.title+"\n"+location?.warehouseAddress?.city+","+location?.warehouseAddress?.country}
+            // name={location?.title}
+            arrowImg={dropdownIcon}
+            onSelect={item=>{handleLocation(item)}}
+            groups={activeWarehouses}
+          />
+           </div>
+           
+          <div className="userName">
+            <p className="cname">{profile?.organisation?.split('/')[0]}</p>
+           {/*  <p className="uname">{profile.warehouseAddress_city}</p> */}
+           <p className="uname">{profile.firstName} {profile.lastName}</p>
+          </div>
 
             <div className="userName">
               <p className="cname">{profile?.organisation?.split("/")[0]}</p>
@@ -468,17 +465,35 @@ const Header = (props) => {
             <DrawerMenu {...props} close={() => openSidebar(false)} />
           )}
         </div>
-        {invalidSearch && (
-          <Modal
-            close={() => closeModalFail()}
-            size="modal-sm" //for other size's use `modal-lg, modal-md, modal-sm`
-          >
-            <FailedPopUp
-              onHide={closeModalFail} //FailurePopUp
-              // {...modalProps}
-              message="Invalid Search"
-            />
-          </Modal>
+        {menu && (
+          <div className="slider-menu" ref={ref}>
+            {
+              <React.Fragment>
+                <div className="slider-item-text p-2">
+                  <p>{profile.name}</p>
+                  <p>{profile?.organisation?.split('/')[0]}</p>
+                </div>
+                <div 
+                    className="slider-item border-top-0 p-0"
+                    onClick={() => props.history.push('/profile')}
+                >
+                    My Profile
+                </div>
+                <div 
+                    className="slider-item p-0"
+                    onClick={() => props.history.push('/alerts')}
+                >
+                    Settings
+                </div>
+               <div
+                  className="slider-item p-0"
+                  onClick={() => dispatch(logoutUser())}
+                >
+                  Logout
+                </div>
+             </React.Fragment>
+            }
+          </div>
         )}
       </div>
     </div>
