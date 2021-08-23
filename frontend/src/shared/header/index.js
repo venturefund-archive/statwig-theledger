@@ -205,7 +205,7 @@ const ref = useOnclickOutside(() => {
       setNotifications(response.data);
       
       const warehouses = await getActiveWareHouses();
-      setActiveWarehouses(warehouses.filter(i => i.status == 'ACTIVE' || i.status == 'PENDING').map(item=>{
+      setActiveWarehouses(warehouses.map(item=>{
         return{
           title: item.name,
           organisationId: item.name,
@@ -283,7 +283,7 @@ const imgs = config().fetchProfileImage;
       <div className="actions">
         <div className="search-form" tabIndex="-1" onKeyDown={onkeydown}>
         <Autocomplete
-        
+        style={{width:"130%"}}
         id="free-solo-demo"
         freeSolo
         //value={search}
@@ -324,7 +324,7 @@ const imgs = config().fetchProfileImage;
         
        <div className="user-info ">
        <div className="notifications">
-                <img src={bellIcon} onClick={() => setShowNotifications(!showNotifications)} alt="notification" /><bellIcon />
+                <img src={bellIcon} onClick={showNotifications} alt="notification" /><bellIcon />
                   
                     <div className="bellicon-wrap" onClick={() => setShowNotifications(!showNotifications)}>
             
@@ -333,9 +333,13 @@ const imgs = config().fetchProfileImage;
             {showNotifications && notifications.length > 0 && (
               <div className="slider-menu">
                 <React.Fragment>
+                  <div className="nheader" style={{backgroundImage: "linear-gradient(to right, #0092e8, #0a6bc6)"}}>
+                    <text style={{color: "white", fontSize: "20px", fontWeight: "bold", padding: "30px"}}>User Notifications</text> 
+                    <text style={{backgroundColor: "#fa7a23", padding: "5px", color: "white", textAlign: 'right', borderRadius: "6px"}}>{notifications.length} new</text> 
                   <div className="section">
-                    <button style={{backgroundColor: "#0B65C1", color: "white"}} onClick={() => setNotifications(/*criteria for alert */)}>Alerts</button>
-                    <button style={{backgroundColor: "#0B65C1", color: "white"}} onClick={() => setNotifications(/*criteria for transaction */)}>Transactions</button>
+                    <button style={{backgroundColor: "transparent", color: "white", borderColor: "transparent"}} /*onClick={() => setNotifications(criteria for alert)}*/>Alerts</button>
+                    <button style={{backgroundColor: "transparent", color: "white", borderColor: "transparent"}} /*onClick={() => setNotifications(criteria for transaction )}*/>Transactions</button>
+                  </div>
                   </div>
                   {notifications.map(notification =>  <div className="slider-item">
                     <div className="row justify-content-between align-items-center" onClick={() => clearNotification(notification)}>
@@ -366,14 +370,14 @@ const imgs = config().fetchProfileImage;
           <p className="uname"> {activeWarehouses[0]?.warehouseAddress.firstLine}</p>
           </div> */}
 
-            <div className="userName">               
+            <div className="userName" style={{fontSize: "4px", marginBottom:"0px"}}>               
            <DropdownButton
             name={location?.title+"\n"+location?.warehouseAddress?.city+","+location?.warehouseAddress?.country}
             // name={location?.title}
             arrowImg={dropdownIcon}
             onSelect={item=>{handleLocation(item)}}
             groups={activeWarehouses}
-          />
+           />
            </div>
            
           <div className="userName">
@@ -402,29 +406,20 @@ const imgs = config().fetchProfileImage;
           <div className="slider-menu" ref={ref}>
             {
               <React.Fragment>
-                <div className="slider-item-text p-2">
+                <div className="slider-item-text">
                   <p>{profile.name}</p>
                   <p>{profile?.organisation?.split('/')[0]}</p>
                 </div>
-                <div 
-                    className="slider-item border-top-0 p-0"
-                    onClick={() => props.history.push('/profile')}
-                >
-                    My Profile
-                </div>
-                <div 
-                    className="slider-item p-0"
-                    onClick={() => props.history.push('/alerts')}
-                >
-                    Settings
-                </div>
+                <Link className="slider-item border-top-0" to="/profile">
+                  My Profile
+                </Link>
                <div
-                  className="slider-item p-0"
+                  className="slider-item"
                   onClick={() => dispatch(logoutUser())}
                 >
                   Logout
                 </div>
-             </React.Fragment>
+              </React.Fragment>
             }
           </div>
         )}
