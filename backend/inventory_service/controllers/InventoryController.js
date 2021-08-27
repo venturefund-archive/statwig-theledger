@@ -42,7 +42,7 @@ exports.getTotalCount = [
       const {role} = req.user;
       permission_request = {
         role: role,
-        permissionRequired: "viewInventory",
+        permissionRequired: ["viewInventory"],
       };
       checkPermissions(permission_request, (permissionResult) => {
         if (permissionResult.success) {
@@ -64,7 +64,7 @@ exports.getTotalCountOnHold = [
       const {role} = req.user;
       permission_request = {
             role: role,
-            permissionRequired: "viewInventory",
+            permissionRequired: ["viewInventory"],
           };
           checkPermissions(permission_request, (permissionResult) => {
             if (permissionResult.success) {
@@ -86,7 +86,7 @@ exports.getExpiringInventory = [
       const {role} = req.user;
           permission_request = {
             role: role,
-            permissionRequired: "viewInventory",
+            permissionRequired: ["viewInventory"],
           };
           checkPermissions(permission_request, (permissionResult) => {
             if (permissionResult.success) {
@@ -108,7 +108,7 @@ exports.getInventoryforProduct = [
       const {role} = req.user;
           permission_request = {
             role: role,
-            permissionRequired: "viewInventory",
+            permissionRequired: ["viewInventory"],
           };
           checkPermissions(permission_request, (permissionResult) => {
             if (permissionResult.success) {
@@ -131,7 +131,7 @@ exports.getInventoryDetailsForProduct = [
       const { key } = req.query;
           permission_request = {
             role: role,
-            permissionRequired: "viewInventory",
+            permissionRequired: ["viewInventory"],
           };
           checkPermissions(permission_request, async (permissionResult) => {
             if (permissionResult.success) {
@@ -159,7 +159,7 @@ exports.getAllInventoryDetails = [
       const { skip, limit } = req.query;
           permission_request = {
             role: role,
-            permissionRequired: "viewInventory",
+            permissionRequired: ["viewInventory"],
           };
           checkPermissions(permission_request, async (permissionResult) => {
             if (permissionResult.success) {
@@ -652,7 +652,7 @@ exports.addProductsToInventory = [
       });
       permission_request = {
         role: req.user.role,
-        permissionRequired: "addInventory",
+        permissionRequired: ["addInventory"],
       };
       checkPermissions(permission_request, async (permissionResult) => {
         if (permissionResult.success) {
@@ -695,6 +695,7 @@ exports.addProductsToInventory = [
           //      `Product doesn't conatin valid serial numbers range`,
           //    );
           //  }
+          
           const inventory = await InventoryModel.findOne({
             id: warehouse.warehouseInventory,
           });
@@ -859,9 +860,10 @@ exports.addProductsToInventory = [
           let event_data = {
             eventID: null,
             eventTime: null,
+            transactionId: warehouse.warehouseInventory,
             eventType: {
-              primary: "CREATE",
-              description: "SHIPMENT_CREATION",
+              primary: "ADD",
+              description: "INVENTORY",
             },
             actor: {
               actorid: null,
@@ -937,7 +939,7 @@ exports.addInventoriesFromExcel = [
       const {role} = req.user;
           permission_request = {
             role: role,
-            permissionRequired: "addInventory",
+            permissionRequired: ["addInventory"],
           };
           const email = req.user.emailId;
           const user_id = req.user.id;
@@ -1207,7 +1209,7 @@ exports.getGroupedInventoryDetails = [
       const { skip, limit } = req.query;
           permission_request = {
             role: role,
-            permissionRequired: "viewInventory",
+            permissionRequired: ["viewInventory"],
           };
           checkPermissions(permission_request, async (permissionResult) => {
             if (permissionResult.success) {
@@ -1441,7 +1443,7 @@ exports.getInventoryDetailsByBatchNumber = [
       const { batchNumber, skip, limit } = req.query;
           permission_request = {
             role: role,
-            permissionRequired: "viewInventory",
+            permissionRequired: ["viewInventory"],
           };
           checkPermissions(permission_request, async (permissionResult) => {
             if (permissionResult.success) {  
@@ -1471,7 +1473,7 @@ exports.getBatchDetailsByBatchNumber = [
       const { skip, limit, batchNumber } = req.query;
           permission_request = {
             role: role,
-            permissionRequired: "viewInventory",
+            permissionRequired: ["viewInventory"],
           };
           checkPermissions(permission_request, async (permissionResult) => {
             if (permissionResult.success) {
@@ -2751,7 +2753,7 @@ exports.searchProduct = [
       const {role} = req.user;
       permission_request = {
         role: role,
-        permissionRequired: "searchByProductName",
+        permissionRequired: ["searchByProductName"],
       };
       checkPermissions(permission_request, async (permissionResult) => {
         if (permissionResult.success) {
@@ -2848,12 +2850,12 @@ exports.fetchBatchesOfInventory = [
   auth,
   async (req, res) => {
     try {
-      const { productId } = req.query;
-       var warehouseId = req.user.warehouseId;
+      const { productId , wareId} = req.query;
+       var warehouseId = wareId ? wareId : req.user.warehouseId;
        let warehouse = await WarehouseModel.findOne({id: warehouseId}) 
        let inventoryId = warehouse.warehouseInventory
         const batches = await AtomModel.find({productId: productId,"batchNumbers": {$nin: ["", "null", null]}, inventoryIds: inventoryId})
-          .sort({ createdAt: -1 })
+          .sort({"attributeSet.expDate": 1})
         return apiResponse.successResponseWithData(
           res,
           "Batches of product",

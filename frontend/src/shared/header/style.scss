@@ -144,18 +144,27 @@
           min-width: 350px;
           min-height: 300px;
           font-size: 10px;
+
+          .nheader{
+            margin: -16px;
+            justify-content: left;
+            padding: 10px;
+          }
           
           .section {
             display: flex;
             flex-direction: row;
-            left: 50%;
-            
+            margin-bottom: -10px;
+            margin-top: 15px;
+            font-size: 13px;
           }
 
           .slider-item {
             white-space: pre-wrap;
+            background-color: white;
             min-width: 300px;
             font-size: 10px;
+            margin-top: 16px;
             &:first-child {
               border-top: none;
             }

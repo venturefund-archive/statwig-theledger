@@ -1,7 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import DropdownButton from '../dropdownButtonGroup';
-import calenderBlue from '../../assets/icons/calendar-blue.svg';
-import downArrow from '../../assets/icons/up-and-down-dark.svg';
+import React, { useState} from 'react';
 import Delete from '../../assets/icons/Delete.png';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -9,8 +6,8 @@ import mon from '../../assets/icons/brand.svg';
 import Package from '../../assets/icons/package.svg';
 import qty from '../../assets/icons/TotalInventoryAdded_2.png';
 import sdate from '../../assets/icons/ShippingDate.svg';
-import Batch from '../../assets/icons/Batch.png';
-import Serial from '../../assets/icons/Serial.png';
+import Batch from '../../assets/icons/batch.png';
+import Serial from '../../assets/icons/serial.png';
 import Select from 'react-select';
 
 import './style.scss';
@@ -80,11 +77,11 @@ const EditRow = (props) => {
           <div className={`row ${!addMore ? `col-10` : `col-12`}`}>
             <div className="col-3 theader text-center pro">
               <img src={Package} width="16" height="16" />
-              <span className="pl-1 text-muted required-field">Product Category</span>
+              <span className="pl-1 text-muted">Product Category*</span>
             </div>
             <div className="col-5 theader text-center pro">
               <img src={Package} width="16" height="16" />
-              <span className="pl-1 text-muted required-field">Product</span>
+              <span className="pl-1 text-muted">Product*</span>
             </div>
             <div className="col theader ">
               <img src={mon} width="16" height="16" />
@@ -92,7 +89,7 @@ const EditRow = (props) => {
             </div>
             <div className="col theader text-center pro">
               <img src={qty} width="25" height="16" />
-              <span className="pl-1 text-muted required-field">Quantity</span>
+              <span className="pl-1 text-muted">Quantity*</span>
             </div>
           </div>
         </div>
@@ -134,7 +131,7 @@ const EditRow = (props) => {
                     options={prods.filter(p=>p.type==categories)}
                   />
                 </div>
-                <div className="title recived-text">{productId}</div>
+                <div className="title recived-text" style={{position:"relative", top:"7px"}}>{productId}</div>
               </div>
             </div>
             <div className="col mt-1 mb-1 border-right">
@@ -142,6 +139,7 @@ const EditRow = (props) => {
                 <input
                   type="text"
                   className="form-control"
+                  style={{position:"relative", top:"3.5px"}}
                   placeholder="Manufacturer"
                   value={manufacturer}
                   disabled
@@ -154,6 +152,7 @@ const EditRow = (props) => {
                   type="text"
                   onKeyPress={numbersOnly}
                   className="form-control"
+                  style={{position:"relative", top:"3.5px"}}
                   placeholder="Enter Quantity"
                   value={quantity}
                   onChange={(e) =>
@@ -162,7 +161,7 @@ const EditRow = (props) => {
                 />
               </div>
             </div>
-            <div className="title recived-text align-self-center" style={{position:"absolute",right:"20px",display:"block"}}>
+            <div className="title recived-text align-self-center" style={{position:"absolute",right:"20px",top:"20px",display:"block"}}>
               {unitofMeasure.name ? <div>{unitofMeasure.name}</div> :<div className="placeholder_name">Unit</div>}</div>
           </div>
           {inventories.length > 1 && (
@@ -184,10 +183,10 @@ const EditRow = (props) => {
                   setAddMore(true);
                   props.setVisible(true);
                 }}
-                className="btn text-white btn-warning "
+                className="btn btn-warning "
               >
-                <i className="fa fa-plus txt pr-2" aria-hidden="true"></i>
-                <span className="txt">Add More Details</span>
+                <i className="txt-inventory" aria-hidden="true"></i>
+                <span className="txt-inventory"> + &nbsp; Add More Details</span>
               </button>
             </div>
           )}

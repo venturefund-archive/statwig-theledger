@@ -12,7 +12,7 @@ import user from '../../../assets/icons/brand.svg';
 import Quantity from '../../../assets/icons/Quantity.png';
 import Product from '../../../assets/icons/Producttype.png';
 import date from '../../../assets/icons/ShippingDate.svg';
-import Batch from '../../../assets/icons/Batch.png';
+import Batch from '../../../assets/icons/batch.png';
 import TableFilter from './tablefilter.js';
 import axios from 'axios';
 import { config } from '../../../config';
@@ -31,7 +31,8 @@ const EditRow = props => {
     handleProductChange,
     handleBatchChange,
     products,
-    check
+    check,
+    warehouseID
   } = props;
   
   const headers = {
@@ -49,7 +50,7 @@ const EditRow = props => {
     img5: <img src={date} width="15" height="15"/>,
     img6: <img src={Quantity} width="20" height="15"/>,
   };
-  console.log(prod,"Edit rowt",index);
+  // console.log(prod,"Edit rowt",index);
   const [editButtonStatus, setEditButtonStatus] = useState(false);
   const [changeValue, setValue] = useState("");
   const [changebtn, setbtn] = useState(false);
@@ -62,6 +63,7 @@ const EditRow = props => {
   const [batches, setBatches] = useState([]);
   const [selectedBatch, setSelectedBatch] = useState({});
   const [selectedIndex, setSelectedIndex] = useState();
+  const [BatchSelected, setBatchSelected] = useState(false);
   const closeModal = () => setShowModal(false);
   const handleOpen = () => {
     setOpen(true);
@@ -130,7 +132,7 @@ const updateQuantity = () =>
 {
   setQuantityChecker(0);
 }
-console.log("product Quantity is "+ prod.productQuantity);
+// console.log("product Quantity is "+ prod.productQuantity);
 if(check==="0" && quantityChecker===1 && typeof(prod)!="undefined" && typeof(prod.name!="undefined") && typeof(productsList)!="undefined")
   {
                      let qty;
@@ -159,11 +161,12 @@ if(check==="0" && quantityChecker===1 && typeof(prod)!="undefined" && typeof(pro
     // closeModal()
   }
   async function fetchBatches(prod, index){
+    // console.log(warehouseID)
     setSelectedIndex(index);
-    console.log("index, ", selectedIndex )
+    // console.log("index, ", selectedIndex )
     setModelProduct(prod);
-    let res = await axios.get(`${config().fetchBatchesOfInventory}?productId=${prod.id}`)
-    console.log(res.data);
+    let res = await axios.get(`${config().fetchBatchesOfInventory}?productId=${prod.id}&wareId=${warehouseID}`)
+    // console.log(res.data);
     setBatches(res.data.data)
   }
   const numbersOnly = (e) => {
@@ -294,13 +297,7 @@ const editQuantity = (value, index) => {
               value={prod.productQuantity}
               
               onChange={(e) => {
-              
                 handleQuantityChange(e.target.value, index);
-                 console.log(e.target.value);
-                  if(e.target.value==="0")
-                  {
-                    prod.productQuantity = "";
-                  }
                 }}
             />
           </div>
@@ -350,14 +347,14 @@ const editQuantity = (value, index) => {
                <div>
                 <div className="rTableRow mb-1"> 
                         <input className="txt2 ml-3" type="checkbox" id={index} 
-                               onChange={(e) => handleChange({quant: product.quantity, bnp: product.batchNumbers[0]})}>
+                               onChange={(e) => {handleChange({quant: product.quantity, bnp: product.batchNumbers[0]}); setBatchSelected(!BatchSelected);}}>
                         </input>
                         {/* <img src={user} width="27" height="18" alt="User" className="txt1"/> */}
                         <div className="col txt" style={{position:"relative",left:'0%'}}>{ModelProd?.name}</div>
                         <div className="col txt1" style={{position:"relative",left:'6%'}} >{ModelProd?.manufacturer}</div>
                         <div className="col txt1" style={{position:"relative",left:'8%'}} >{product.batchNumbers[0]}</div>
-                        <div className="col txt1" style={{position:"relative",left:'8%'}}>{formatDate(product.attributeSet.mfgDate)}</div>
-                        <div className="col txt1" style={{position:"relative",left:'8%'}}>{formatDate(product.attributeSet.expDate)}</div> 
+                        <div className="col txt1" style={{position:"relative",left:'8%'}}>{(product.attributeSet.mfgDate.length > 0) ?  formatDate(product.attributeSet.mfgDate, "mmyyyy"): "-"}</div>
+                        <div className="col txt1" style={{position:"relative",left:'8%'}}>{(product.attributeSet.expDate.length > 0) ? formatDate(product.attributeSet.expDate, "mmyyyy") : "-"}</div> 
                         <div className="col txt1" style={{position:"relative",left:'4%'}}>
                         <div className="txt1">
                         <input
@@ -401,6 +398,7 @@ const editQuantity = (value, index) => {
                 ) : (
                   <button
                     className="btn-sm btn-yellow d-width"
+                    disabled={!BatchSelected}
                     onClick={onEditClick}
                   >
                     <i className="fa fa-pencil text-center"></i>
@@ -431,7 +429,7 @@ const editQuantity = (value, index) => {
                 </button>
                 <button
                   type="button"
-                  onClick={closeModal}
+                  onClick={() => {closeModal(); setBatchSelected(false); setDisabled(true)}}
                   className="btn btn-outline-dark"
                 >
                   CANCEL

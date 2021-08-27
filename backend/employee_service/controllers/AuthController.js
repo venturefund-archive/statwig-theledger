@@ -9,7 +9,6 @@ const ConfigurationModel = require('../models/ConfigurationModel');
 const CounterModel = require('../models/CounterModel');
 const RbacModel = require('../models/RbacModel')
 const { body, validationResult} = require('express-validator');
-const { sanitizeBody } = require('express-validator');
 //helper file to prepare responses.
 const apiResponse = require('../helpers/apiResponse');
 const utility = require('../helpers/utility');
@@ -25,7 +24,6 @@ const client = require('twilio')(accountSid, authToken, {
 });
 const blockchain_service_url = process.env.URL;
 const stream_name = process.env.INV_STREAM;
-const checkToken = require('../middlewares/middleware').checkToken;
 const init = require('../logging/init');
 const logger = init.getLog();
 const EmailContent = require('../components/EmailContent');
@@ -425,8 +423,9 @@ exports.checkEmail = [
           var datee = new Date();
           datee = datee.toISOString();
           let event_data = {
-            eventID: null,
-            eventTime: null,
+            eventID: evid,
+            eventTime: datee,
+            actorWarehouseId: "null",
             eventType: {
               primary: "CREATE",
               description: "USER",
@@ -462,13 +461,12 @@ exports.checkEmail = [
           event_data.eventTime = datee;
           event_data.eventType.primary = "CREATE";
           event_data.eventType.description = "USER";
-          event_data.payloaData = req.body;
-
+          event_data.payload.data = req.body;
+        
           async function compute(event_data) {
             resultt = await logEvent(event_data);
             return resultt;
           }
-          console.log(result);
           compute(event_data).then((response) => {
             console.log(response);
           });
@@ -587,12 +585,12 @@ exports.sendOtp = [
               'info',
               '<<<<< UserService < AuthController < login : user is active',
             );
-            if (user.phoneNumber) {
-              client.verify.services('VA0410823affc5222e309aca3742ecf315')
-                .verifications
-                .create({ to: user.phoneNumber, channel: 'sms' })
-                .then(verification => console.log(verification.status));
-            }
+            // if (user.phoneNumber) {
+            //   client.verify.services('VA0410823affc5222e309aca3742ecf315')
+            //     .verifications
+            //     .create({ to: user.phoneNumber, channel: 'sms' })
+            //     .then(verification => console.log(verification.status));
+            // }
             let otp = utility.randomNumber(4);
             if (process.env.EMAIL_APPSTORE.includes(user.emailId) && user.emailId != '')
               otp = process.env.OTP_APPSTORE;
@@ -727,12 +725,14 @@ exports.verifyOtp = [
         if (emailId.indexOf('@') === -1) {
           let phone = '+' + emailId;
           query = { phoneNumber: phone };
-          t_res = await client.verify.services('VA0410823affc5222e309aca3742ecf315')
-          .verificationChecks
-          .create({to: phone, code: req.body.otp});
+          // t_res = await client.verify.services('VA0410823affc5222e309aca3742ecf315')
+          // .verificationChecks
+          // .create({to: phone, code: req.body.otp});
         }
         const user = await EmployeeModel.findOne(query);
-        if (user && (user.otp == req.body.otp || t_res?.status === 'approved')) {
+        // if (user && (user.otp == req.body.otp || t_res?.status === 'approved')) {
+        if (user && user.otp == req.body.otp) {
+
           var address;
           if (user.walletAddress == null || user.walletAddress == "wallet12345address") {
             const response = await axios.get(
@@ -756,7 +756,7 @@ exports.verifyOtp = [
             address = user.walletAddress
           }
 
-	  const activeWarehouse = await WarehouseModel.findOne( {$and: [ {"id": {$in: user.warehouseId }},{"status": "ACTIVE" }]})
+          const activeWarehouse = await WarehouseModel.findOne({ $and: [{ "id": { $in: user.warehouseId } }, {$or: [{ status: 'ACTIVE' },{ status: 'PENDING' }, { status: { $exists: false } }]} ]})
     var userData ;
     if(activeWarehouse) {
       userData = {
@@ -840,7 +840,8 @@ exports.userInfo = [
           } = user;
           const org = await OrganisationModel.findOne({ id: organisationId }, 'name configuration_id type');
           const warehouse = await EmployeeModel.findOne({ id }, { _id: 0, warehouseId: 1 });
-          const warehouseArray = await WarehouseModel.find({ id: { "$in": warehouse.warehouseId },$or:[{status: 'ACTIVE'}, {status: {$exists: false}}] })
+          // const warehouseArray = await WarehouseModel.find({ id: { "$in": warehouse.warehouseId },$or:[{status: 'ACTIVE'},{status: 'PENDING'}, {status: {$exists: false}}] })
+          const warehouseArray = await WarehouseModel.find({ id: { "$in": warehouse.warehouseId } })
           var user_data;
           if(org){
             user_data = {
@@ -1032,13 +1033,6 @@ exports.getAllUsers = [
 exports.assignProductConsumer = [
   async (req, res) => {
     try {
-      checkToken(req, res, async result => {
-        if (result.success) {
-          logger.log(
-            'info',
-            '<<<<< InventoryService < InventoryController < getAllInventoryDetails : token verified successfullly, querying data by publisher',
-          );
-          console.log('res', result.data.address);
           var user = new ConsumerModel({
             shipmentId: req.body.consumer.shipmentId,
             name: req.body.consumer.name,
@@ -1055,10 +1049,6 @@ exports.assignProductConsumer = [
             Aadhar: user.aadhar,
             ShipmentId: user.ShipmentId,
           };
-          logger.log(
-            'info',
-            '<<<<< UserService < AuthController < registerConsumer : Successfully saving Consumer',
-          );
 
           let date_ob = new Date();
           let date = ('0' + date_ob.getDate()).slice(-2);
@@ -1075,20 +1065,14 @@ exports.assignProductConsumer = [
               ...{ consumedStatus: 'Y', consumedDate: today },
             },
           };
-          console.log('userData', userData1);
           const response = await axios.post(
             `${blockchain_service_url}/publish`,
             userData1,
           );
           const txnId = response.data.transactionId;
-
           const productQuery = { serialNumber: req.body.vaccine.serialNumber };
           const productFound = await InventoryModel.findOne(productQuery);
           if (productFound) {
-            logger.log(
-              'info',
-              '<<<<< ShipmentService < ShipmentController < createShipment : product found status receive',
-            );
             await InventoryModel.updateOne(productQuery, {
               transactionIds: [...productFound.transactionIds, txnId],
             });
@@ -1098,15 +1082,9 @@ exports.assignProductConsumer = [
             'Registration Success.',
             userData,
           );
-        }
-      });
     } catch (err) {
       console.log('err');
-      logger.log(
-        'error',
-        '<<<<< UserService < AuthController < registerConsumer : Error in catch block',
-      );
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.ErrorResponse(res, err.message);
     }
   },
 ];
@@ -1115,24 +1093,20 @@ exports.getUserWarehouses = [
   auth,
   async (req, res) => {
     try {
+      if(!req.user.organisationId){
+        return apiResponse.ErrorResponse(res, 'User Organisation ID not found');
+      }
+      const orgId = req.user.organisationId;
       const users = await WarehouseModel.find({
-        organisationId: req.user.organisationId
+        organisationId: orgId,
       });
-      logger.log(
-        'info',
-        '<<<<< UserService < AuthController < getAllUsers : retrieved users successfully',
-      );
       return apiResponse.successResponseWithData(
         res,
         "User warehouses",
         users,
       );
     } catch (err) {
-      logger.log(
-        'error',
-        '<<<<< UserService < AuthController < getAllUsers : error(catch block)',
-      );
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.ErrorResponse(res, err.message);
     }
   },
 ];
@@ -1218,6 +1192,7 @@ exports.addWarehouse = [
         let event_data = {
           eventID: null,
           eventTime: null,
+          actorWarehouseId: "null",
           eventType: {
             primary: "ADD",
             description: "WAREHOUSE",
@@ -1251,15 +1226,14 @@ exports.addWarehouse = [
         };
         event_data.eventID = "ev0000" + evid;
         event_data.eventTime = datee;
-        event_data.eventType.primary = "ADD";
+        event_data.eventType.primary = "CREATE";
         event_data.eventType.description = "WAREHOUSE";
-        event_data.payloaData = req.body;
-
+        event_data.payload.data = req.body;
+      
         async function compute(event_data) {
           resultt = await logEvent(event_data);
           return resultt;
         }
-        console.log(result);
         compute(event_data).then((response) => {
           console.log(response);
         });
@@ -1297,7 +1271,7 @@ exports.updateWarehouseAddress = [
        const loc = await getLatLongByCity( req.body.warehouseAddress.city+','+ req.body.warehouseAddress.country);
       const data = req.body;
       data.location = loc;
-      data.status = "NOTVERIFIED";
+      data.status = "PENDING";
       await WarehouseModel.findOneAndUpdate(
         { id: req.query.warehouseId },
         data,
@@ -1319,18 +1293,16 @@ exports.updateWarehouseAddress = [
   },
 ];
 
-exports.uploadImage = async function (req, res) {
-  checkToken(req, res, async (result) => {
-    if (result.success) {
-      const {data} = result;
+exports.uploadImage = [
+  auth,
+  async (req, res)=>{
+    try {
+      const {emailId} = req.user;
       const {
         id,
         type,
-        imageSide,
         action
       } = req.query;
-
-      try {
         const Upload = await uploadFile(req.file)
         await unlinkFile(req.file.path)
         if (action == "KYCUPLOAD") {
@@ -1356,7 +1328,7 @@ exports.uploadImage = async function (req, res) {
             }
           }
           const employee = await EmployeeModel.findOneAndUpdate({
-            emailId: data.emailId
+            emailId: emailId
           }, {
             $push: userData
           }, { new: true });
@@ -1373,14 +1345,14 @@ exports.uploadImage = async function (req, res) {
             }
           }
           const employee = await EmployeeModel.findOneAndUpdate({
-            emailId: data.emailId
+            emailId: emailId
           }, {
             $push: userData
           }, { new: true });
           return apiResponse.successResponseWithData(res, "KYC Image Uploaded", employee)
         } else if (action == "PROFILE") {
           const employeeUpdate = await EmployeeModel.findOneAndUpdate({
-            emailId: data.emailId
+            emailId: emailId
           }, {
             $set: { "photoId": `/usermanagement/api/auth/images/${Upload.key}` }
           }, { new: true });
@@ -1391,69 +1363,50 @@ exports.uploadImage = async function (req, res) {
       }
       catch (err) {
         console.log(err);
-        return apiResponse.ErrorResponse(res, err);
+        return apiResponse.ErrorResponse(res, err.message);
       }
-    } else {
-      return apiResponse.ErrorResponse(res, result)
-    }
-  });
-};
+  }
+]
 
-exports.fetchImage = async function (req, res) {
-  checkToken(req, res, async (result) => {
-    if (result.success) {
-      const {
-        data
-      } = result;
-      const {
-        type
-      } = req.query;
-      var imageArray = [];
+exports.fetchImage = [
+  auth,
+  async (req, res)=>{
+    try {
+      const {emailId} = req.user;
+      const {type} = req.query;
       const findRecord = await EmployeeModel.findOne({
         $and: [{
-          "emailId": data.emailId
+          "emailId": emailId
         }, {
           "userDocuments.idType": type
         }]
       });
       if (findRecord != null) {
-
-        const update = await EmployeeModel.findOne({
+        const imageArray = await EmployeeModel.findOne({
           $and: [{
-            "emailId": data.emailId
+            "emailId": emailId
           }, {
             "userDocuments.idType": type
           }]
         }, {
           "userDocuments.$.imageDetails": 1
-        }).then((result) => {
-          imageArray = result.userDocuments[0].imageDetails;
-        }).catch((e) => {
-          console.log("Err", e)
         })
-
         var resArray = [];
         for (i = 0; i < imageArray.length; i++) {
           const s = "/images/" + imageArray[i];
           resArray.push(s)
         }
       } else {
-        return res.send({
-          success: false,
-          data: "Matching ID number and type not found.! STOREID/Aadhar/Passport"
-        })
-
+        return apiResponse.notFoundResponse(res, "Matching ID number and type not found.! STOREID/Aadhar/Passport")
       }
-      return res.send({
-        success: true,
-        data: resArray
-      })
-
-    } else {
-      res.json(result);
-    }
-  });
-};
+      return apiResponse.successResponseWithData(res, "Image Uploaded", resArray);
+  }
+  catch (err) {
+    console.log(err);
+    return apiResponse.ErrorResponse(res, err.message);
+  }
+}
+]
 
 exports.getAllRegisteredUsers = [
   auth,

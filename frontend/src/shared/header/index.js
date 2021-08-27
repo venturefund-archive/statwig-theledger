@@ -206,6 +206,11 @@ const Header = (props) => {
   const profile = useSelector((state) => {
     return state.user;
   });
+  async function changeNotifications (value){
+    const response = await axios.get(`${config().getAlerts}${value}`);
+    console.log(response.data.data)
+    setNotifications(response.data.data);
+  }
   // const dispatch = useDispatch();
   useEffect(() => {
     dispatch(getUserInfo());
@@ -349,9 +354,12 @@ const Header = (props) => {
             {showNotifications && notifications.length > 0 && (
               <div className="slider-menu">
                 <React.Fragment>
+                  <div className="nheader" style={{backgroundImage: "linear-gradient(to right, #0092e8, #0a6bc6)"}}>
+                    <text style={{color: "white", fontSize: "20px", fontWeight: "bold", padding: "30px"}}>User Notifications</text> 
+                    <text style={{backgroundColor: "#fa7a23", padding: "5px", color: "white", textAlign: 'right', borderRadius: "6px"}}>{notifications.length} new</text> 
                   <div className="section">
-                    <button style={{backgroundColor: "#0B65C1", color: "white"}} onClick={() => setNotifications(/*criteria for alert */)}>Alerts</button>
-                    <button style={{backgroundColor: "#0B65C1", color: "white"}} onClick={() => setNotifications(/*criteria for transaction */)}>Transactions</button>
+                    <button style={{backgroundColor: "#0B65C1", color: "white"}} onClick={() => {setAlertType('ALERT'); changeNotifications('ALERT')}}>Alerts</button>
+                    <button style={{backgroundColor: "#0B65C1", color: "white"}} onClick={() => {setAlertType('TRANSACTION'); changeNotifications('TRANSACTION')}}>Transactions</button>
                   </div>
                   {notifications.map(notification =>  <div className="slider-item">
                     <div className="row justify-content-between align-items-center" onClick={() => clearNotification(notification)}>
@@ -369,6 +377,7 @@ const Header = (props) => {
                       </div>
                     </div>
                   </div>)}
+                  </div>
                 </React.Fragment>
               </div>
             )}

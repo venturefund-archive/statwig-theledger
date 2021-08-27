@@ -208,7 +208,8 @@
   color: #0093e9;
 }
 .drop-pad{
-  padding: 0.5rem 0.3rem;
+  padding: 0.5rem 0.4rem;
+  box-shadow: 0px 2px 4px 2px #00000029 ;
   
 }
 
@@ -234,6 +235,13 @@
 }
 .ribbon-space {
   margin-top: 4rem;
+}
+.txt-inventory{
+  font-weight: 600;
+  font-size: 14px;
+  align-self: center;
+  overflow: hidden;
+  color:#ffffff;
 }
 .txt{
   font-weight: 600;

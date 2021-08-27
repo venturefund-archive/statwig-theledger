@@ -8,7 +8,7 @@ const moveFile = require("move-file");
 const fs = require("fs");
 const QRCode = require("qrcode");
 const uniqid = require("uniqid");
-const symbology = require("symbology");
+// const symbology = require("symbology");
 const array = require("lodash/array");
 
 // Define font files
@@ -47,7 +47,7 @@ exports.getProducts = [
     try {
           permission_request = {
             role: req.user.role,
-            permissionRequired: "viewProductList",
+            permissionRequired: ["viewProductList"],
           };
           checkPermissions(permission_request, async (permissionResult) => {
             if (permissionResult.success) {
@@ -76,7 +76,7 @@ exports.getProductsByCategory = [
     try {
           permission_request = {
             role: req.user.role,
-            permissionRequired: "viewProductList",
+            permissionRequired: ["viewProductList"],
           };
           checkPermissions(permission_request, async (permissionResult) => {
             if (permissionResult.success) {
@@ -105,7 +105,7 @@ exports.getProductInfo = [
     try {
           permission_request = {
             role: req.user.role,
-            permissionRequired: "viewProductInfo",
+            permissionRequired: ["viewProductInfo"],
           };
           checkPermissions(permission_request, async (permissionResult) => {
             if (permissionResult.success) {
@@ -138,7 +138,7 @@ exports.addMultipleProducts = [
     try {
           permission_request = {
             role: req.user.role,
-            permissionRequired: "addNewProduct",
+            permissionRequired: ["addNewProduct"],
           };
           checkPermissions(permission_request, async (permissionResult) => {
             if (permissionResult.success) {
@@ -245,7 +245,7 @@ exports.addProduct = [
       }
           permission_request = {
             role: req.user.role,
-            permissionRequired: "addNewProduct",
+            permissionRequired: ["addNewProduct"],
           };
           checkPermissions(permission_request, async (permissionResult) => {
             if (permissionResult.success) {
@@ -313,7 +313,7 @@ exports.uploadImage = [
     try {
       permission_request = {
         role: req.user.role,
-        permissionRequired: "addProduct",
+        permissionRequired: ["addNewProduct"],
       };
       checkPermissions(permission_request, async (permissionResult) => {
         if (permissionResult.success) {
@@ -350,20 +350,21 @@ exports.generateCodes = async function (req, res) {
 
         qrCodes.push(qrCode);
       }
-    } else if (type === "barcode") {
-      for (let i = 0; i < limit; i++) {
-        const uniqueId = uniqid();
-        const data = await symbology.createStream(
-          {
-            symbology: symbology.Barcode.CODE128,
-            backgroundColor: "ffffff",
-            foregroundColor: "000000",
-          },
-          uniqueId
-        );
-        qrCodes.push(data.data);
-      }
     }
+    // else if (type === "barcode") {
+    //   for (let i = 0; i < limit; i++) {
+    //     const uniqueId = uniqid();
+    //     const data = await symbology.createStream(
+    //       {
+    //         symbology: symbology.Barcode.CODE128,
+    //         backgroundColor: "ffffff",
+    //         foregroundColor: "000000",
+    //       },
+    //       uniqueId
+    //     );
+    //     qrCodes.push(data.data);
+    //   }
+    // }
     const qrCodesImages = qrCodes.map((qrCode) => {
       return { image: qrCode, width: 150 };
     });
