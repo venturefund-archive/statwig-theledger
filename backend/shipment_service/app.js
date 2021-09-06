@@ -34,6 +34,7 @@ if(process.env.NODE_ENV !== "test") {
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: false }));
 app.use(cookieParser());
+app.use(require('express-status-monitor')({title: 'Shipment Service', path: '/shipmentmanagement/api/status'}));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocumentation));
 
 //To allow cross-origin requests
@@ -45,7 +46,7 @@ app.use("/shipmentmanagement/api/", apiRouter);
 
 // throw 404 if URL not found
 app.all("*", function(req, res) {
-	return apiResponse.notFoundResponse(res, "Page not found");
+	return apiResponse.notFoundResponse(res, "API not found");
 });
 
 app.use((err, req, res) => {
