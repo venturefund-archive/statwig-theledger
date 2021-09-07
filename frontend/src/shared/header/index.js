@@ -82,6 +82,13 @@ const Header = (props) => {
     return state.userLocation;
   });
 
+    function notifLength(notif) {
+    if (notif.length!=0){
+      return notif.length;
+    }
+    else return 0;
+  }
+
  function notifIcon(notif) {
     if (notif.eventType=='INVENTORY') {
       return inventoryIcon;
@@ -351,12 +358,10 @@ const Header = (props) => {
         
        <div className="user-info ">
        <div className="notifications">
-                <img src={bellIcon} onClick={() => setShowNotifications(!showNotifications)} alt="notification" /><bellIcon />
-                  
-                    <div className="bellicon-wrap" onClick={() => setShowNotifications(!showNotifications)}>
-            
-              {notifications?.length >=0 && <span className="badge badge-light">{notifications?.length }</span> }
-            </div>
+                <div className="bellicon-wrap" onClick={() => setShowNotifications(!showNotifications)}>
+          <img src={bellIcon} alt="notification" />
+          {<span className="badge badge-light">{notifLength(notifications)}</span> }
+        </div>
             {showNotifications && notifications?.length >= 0 &&(
               <div className="slider-menu">
                 <React.Fragment>
