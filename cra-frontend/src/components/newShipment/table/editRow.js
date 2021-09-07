@@ -64,6 +64,7 @@ const EditRow = props => {
   const [selectedBatch, setSelectedBatch] = useState({});
   const [selectedIndex, setSelectedIndex] = useState();
   const [BatchSelected, setBatchSelected] = useState([]);
+  const [isOpen, setOpen] = useState(false);
   const closeModal = () => setShowModal(false);
   const handleOpen = () => {
     setOpen(true);
@@ -184,7 +185,7 @@ if(check==="0" && quantityChecker===1 && typeof(prod)!="undefined" && typeof(pro
   const numbersOnly = (e) => {
     // Handle paste
     if (e.type === 'paste') {
-      key = event.clipboardData.getData('text/plain');
+      key = e.clipboardData.getData('text/plain');
     } else {
       // Handle key press
       var key = e.keyCode || e.which;

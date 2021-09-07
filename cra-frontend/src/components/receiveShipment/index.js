@@ -18,7 +18,8 @@ import {fetchairwayBillNumber} from '../../actions/shipmentActions';
 import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { Alert, AlertTitle } from '@material-ui/lab';
-//import ModalImage from 'react-modal-image';
+import ModalImage from 'react-modal-image';
+import { getImage } from '../../actions/notificationActions';
 
 const ReceiveShipment = (props) => {
   let shipmentDetails = props.trackData.shipmentDetails;
@@ -63,7 +64,7 @@ const ReceiveShipment = (props) => {
   const [value, setValue] = React.useState(null);
   
   const setFile = (evt) => {
-    setPhotoUrl(URL.createObjectURL(event.target.files[0]));
+    setPhotoUrl(URL.createObjectURL(evt.target.files[0]));
     setPhoto(evt.target.files[0]);
   };
 

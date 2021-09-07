@@ -60,6 +60,7 @@ const AdvanceTableFilter = (props) => {
   const [inventoryProductNameAnchorEl, setInventoryProductNameAnchorEl] = React.useState(null)
   const [inventoryProductCategoryAnchorEl, setInventoryProductCategoryAnchorEl] = React.useState(null)
   const [inventoryManufacturerAnchorEl, setInventoryManufacturerAnchorEl] = React.useState(null)
+  const [inventoryfiFilterOnSelect, setInventoryfiFilterOnSelect] = React.useState(null)
 
   const renderColumn6 = (columnData) => {
     if (columnData === "Status") {
@@ -386,6 +387,11 @@ const AdvanceTableFilter = (props) => {
     props.setInventoryStatusFilterOnSelect(selectedVal);
     handleInventoryStatusClose();
   }
+
+  // const setInventoryfiFilterOnSelect = (selectedVal) => {
+  //   props.setInventoryfiFilterOnSelect(selectedVal);
+  //   handleInventoryStatusClose();
+  // }
 
   const renderColumn4 = (columnData) => {
     if (columnData == "To") {

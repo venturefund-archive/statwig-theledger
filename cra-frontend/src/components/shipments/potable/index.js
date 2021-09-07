@@ -41,7 +41,7 @@ const PoTable = props => {
       setAlertMessage('Success');
       setShowAlertModal(true);
       setShowModal(false);
-      dispatch(getPurchaseStats());
+      // dispatch(getPurchaseStats());
     } else {
       setShowAlertModal(true);
       setAlertMessage('Fail');

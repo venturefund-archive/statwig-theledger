@@ -2,7 +2,7 @@ import React , { useState, useCallback } from "react";
 import ForgotPassword from '../../components/forgotPassword';
 import {forgotPassword} from '../../actions/userActions';
 
-const forgotPasswordContainer = (props) => {
+const ForgotPasswordContainer = (props) => {
   const [email, setEmail] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -33,5 +33,5 @@ const forgotPasswordContainer = (props) => {
   );
 };
 
-export default forgotPasswordContainer;
+export default ForgotPasswordContainer;
 

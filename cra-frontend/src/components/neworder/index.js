@@ -57,6 +57,11 @@ const NewOrder = (props) => {
       return { ...provided, opacity, transition };
     }
   }
+
+  const closeModal = () => {
+    
+  }
+
   const [allOrganisations, setAllOrganisations] = useState([]);
   const [receiverWarehouses, setReceiverWarehouses] = useState([]);
   const [receiverWarehousesCountry,setReceiverWarehousesCountry] = useState([]);
@@ -90,6 +95,7 @@ const NewOrder = (props) => {
   const [country, setCountry] = useState("");
   const [orgType,setOrgType] = useState("");
   const [orgDetails,setOrgDetails] = useState([]);
+  const [fieldValue, setFieldValue] = useState([]);
 
   useEffect(() => {
     async function fetchData() {

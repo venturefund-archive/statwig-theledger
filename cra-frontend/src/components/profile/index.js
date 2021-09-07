@@ -15,7 +15,6 @@ import { Alert, AlertTitle } from '@material-ui/lab';
 import { getImage } from '../../actions/notificationActions';
 import SuccessPopUp from "./successPopup";
 
-const axios = require("axios");
 import {
   getUserInfoUpdated,
   updateProfile,
@@ -28,6 +27,9 @@ import PopUpLocation from "./popuplocation";
 import Modal from "./modal/index";
 import Modal1 from "../../shared/modal";
 import { turnOff, turnOn } from "../../actions/spinnerActions";
+
+const axios = require("axios");
+
 class Profile extends React.Component {
   constructor(props) {
     super(props);
@@ -274,9 +276,9 @@ class Profile extends React.Component {
     
     if (result.status === 200) {
       this.setState({ message: result.data.message, editMode: false });
-      const dispatch = useDispatch();
-      dispatch(getUserInfo());
-      history.push("/profile");
+      // const dispatch = useDispatch();
+      // dispatch(getUserInfo());
+      // history.push("/profile");
     } else {
       this.setState({ message: "Error while updating please try again." });
     }

@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import React, { useEffect, useState } from "react";
 import "./style.scss";
 import { Formik } from "formik";
@@ -124,7 +126,7 @@ const EnterId = (props) => {
         }}
         onSubmit={(values, { setSubmitting }) => {
           setSubmitting(false);
-          updateStatus(values);
+          // updateStatus(values);
         }}
       >
         {({

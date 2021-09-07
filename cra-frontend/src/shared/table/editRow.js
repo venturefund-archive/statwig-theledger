@@ -47,7 +47,7 @@ const EditRow = (props) => {
   const numbersOnly = (e) => {
     // Handle paste
     if (e.type === 'paste') {
-      key = event.clipboardData.getData('text/plain');
+      key = e.clipboardData.getData('text/plain');
     } else {
       // Handle key press
       var key = e.keyCode || e.which;

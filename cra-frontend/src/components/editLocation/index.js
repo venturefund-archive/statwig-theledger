@@ -16,7 +16,7 @@ import Select from 'react-select';
 import "./style.scss";
 import { Formik } from "formik";
 
-const editLocation = (props) => {
+const EditLocation = (props) => {
   const id = props.match.params.id;
 
   console.log(id);
@@ -647,4 +647,4 @@ const editLocation = (props) => {
   );
 };
 
-export default editLocation;
+export default EditLocation;

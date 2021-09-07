@@ -4,7 +4,7 @@ import '../login/style.scss';
 import Key from "../../assets/icons/key.png";
 import hide from "../../assets/icons/hide.png";
 import logo from "../../assets/brands/VaccineLedgerlogo.svg";
-const resetPasswordPage = () => {
+const ResetPasswordPage = () => {
   const [passwordType, setPasswordType] = useState(true);
   const [confirmPasswordType, setConfirmPasswordType] = useState(true);
   return (
@@ -63,5 +63,5 @@ const resetPasswordPage = () => {
   );
 };
 
-export default resetPasswordPage;
+export default ResetPasswordPage;
 

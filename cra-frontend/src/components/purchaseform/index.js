@@ -90,7 +90,7 @@ const PurchaseForm = (props) => {
     let error = false;
     for (let i = 0; i < validations.length; i++) {
       let validationVariable = eval(validations[i]);
-      validationVariable;
+      // validationVariable;
       if (
         validationVariable.length < 1 ||
         validationVariable == 'Select Product' ||

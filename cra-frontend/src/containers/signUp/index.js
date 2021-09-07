@@ -20,6 +20,7 @@ const SignupContainer = (props) => {
   const [adminAwaiting, setAdminAwaiting ] = useState(false);
   const [isNewOrg, setIsNewOrg] = useState(false);
   const [innerWidth,setInnerwidth] = useState(window.innerWidth);
+  const [password, setPassword] = useState('');
   const dispatch = useDispatch();
 
   // const updtaeInnerWidth = () =>{

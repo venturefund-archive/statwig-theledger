@@ -11,6 +11,7 @@ import {
   GET_SHIPMENTSCOUNT_SUCCESS,
   SET_EDIT_SHIPMENT,
   SET_TRACK_SHIPMENT,
+  RECEIVE_SHIPMENT,
 } from '../constants/shipmentConstants';
 import { turnOff, turnOn } from './spinnerActions';
 
@@ -107,7 +108,7 @@ export const trackShipment = shipmentId => {
     };
   } catch (e) {
     return dispatch => {
-      dispatch(resetTrackShipment());
+      // dispatch(resetTrackShipment());
     };
   }
 };

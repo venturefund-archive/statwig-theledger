@@ -35,7 +35,7 @@ const UpdateStatus = (props) => {
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const setFile = (evt) => {
-    setPhotoUrl(URL.createObjectURL(event.target.files[0]));    
+    setPhotoUrl(URL.createObjectURL(evt.target.files[0]));    
     setPhoto(evt.target.files[0]);
   };
 

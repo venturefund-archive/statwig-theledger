@@ -6,7 +6,7 @@ import useOnclickOutside from 'react-cool-onclickoutside';
 import upDownArrow from '../../assets/icons/dropdown.svg';
 import './style.scss';
 
-const dropdownButtonGroup = props => {
+const DropdownButtonGroup = props => {
   const [menu, setMenu] = useState(false);
   const {groups, name, name2, onSelect, isText, value, changeFn, placeholder, dClass, disabled, arrowImg } = props;
 
@@ -68,4 +68,4 @@ const dropdownButtonGroup = props => {
   );
 };
 
-export default dropdownButtonGroup;
+export default DropdownButtonGroup;

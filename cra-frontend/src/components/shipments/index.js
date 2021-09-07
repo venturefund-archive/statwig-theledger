@@ -47,6 +47,7 @@ const ShipmentAnalytic = props => {
   const [count, setCount] = useState(0);
   const [exportFilterData, setExportFilterData] = useState([]);
   const [showExportFilter, setShowExportFilter] = useState(false);
+  var status;
 
   if (!isAuthenticated('inboundShipments') && !isAuthenticated('outboundShipments')) props.history.push(`/profile`);
 

@@ -59,7 +59,7 @@ import { TextField } from '@material-ui/core';
 
     const onCountryChange = async item => {
         setRegion(item)
-        onCountries(item);
+        // onCountries(item);
         const regionResult = await getWareHousesByCountry(item);
         if (regionResult.status === 1) {
             setWareHouses(regionResult.data);

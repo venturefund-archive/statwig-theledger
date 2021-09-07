@@ -13,6 +13,7 @@ const ViewShipmentContainer = props => {
   const [shippmentChainOfCustodyData, setShippmentChainOfCustodyData] = useState([]);
   const [imagesData, setImagesData] = useState([]);
   const [iotEnabledStatus, setIotEnabledStatus] = useState(false);
+  const [imageData, setImageData] = useState([]);
   // const [latestIotShipmentData, setLatestIotShipmentData] = useState({});
   // const [lastTenIotShipmentData, setLastTenIotShipmentData] = useState({});
 

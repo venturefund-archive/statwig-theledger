@@ -19,7 +19,7 @@ import {GetEOLListByDateWindow} from '../../actions/eolAction';
 import {getRegions,  GetCountriesFromWarehouses, GetStatesFromWarehouses, GetCitiesFromWarehouses, GetWarehousesWithCity} from '../../actions/inventoryActions';
 
 import Table from './table'
-const lastMile=(props)=>{
+const LastMile=(props)=>{
     const dispatch = useDispatch();
     // var lastmile = props.lastMile;
     const lastMileCount = useSelector(state => {
@@ -330,4 +330,4 @@ return (
          
 )}
 
-export default lastMile;
+export default LastMile;
