@@ -62,7 +62,7 @@ const Tracing = (props) => {
         <div className='row'>
           <Link to={`/shipments`}>
             <button className='btn btn-outline-primary mr-4 mt-3'>
-              <img src={back} height='17' className='mr-2 mb-1' />
+              <img src={back} height='17' className='mr-2 mb-1' alt='' />
               Back to shipments
             </button>
           </Link>
