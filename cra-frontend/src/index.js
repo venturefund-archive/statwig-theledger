@@ -1,23 +1,23 @@
-import React from 'react';
-import { Provider } from 'react-redux';
-import ReactDOM from 'react-dom';
-import jwt_decode from 'jwt-decode';
-import reportWebVitals from './reportWebVitals';
-import App from './App';
-import configureStore, { history } from './configureStore';
-import { setCurrentUser, logoutUser } from './actions/userActions';
-import setAuthToken from './utils/setAuthToken';
+import React from "react";
+import { Provider } from "react-redux";
+import ReactDOM from "react-dom";
+import jwt_decode from "jwt-decode";
+import reportWebVitals from "./reportWebVitals";
+import App from "./App";
+import configureStore, { history } from "./configureStore";
+import { setCurrentUser, logoutUser } from "./actions/userActions";
+import setAuthToken from "./utils/setAuthToken";
 
 const store = configureStore();
 
 ReactDOM.render(
-    // <React.StrictMode>
-      <Provider store={store}>
-        <App history={history} />
-      </Provider>,
-    // </React.StrictMode>,
-    document.getElementById('root'),
-  );
+  // <React.StrictMode>
+  <Provider store={store}>
+    <App history={history} />
+  </Provider>,
+  // </React.StrictMode>,
+  document.getElementById("root")
+);
 
 setAuthToken();
 // Check for token
@@ -35,8 +35,6 @@ if (localStorage.theLedgerToken) {
     // Logout user
     store.dispatch(logoutUser());
     // Redirect to login
-    window.location.href = '/';
+    window.location.href = "/";
   }
 }
-
-reportWebVitals();
