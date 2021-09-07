@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import "./style.scss";
 import searchingIcon from "../../assets/icons/search.png";
 import bellIcon from "../../assets/icons/notification_blue.png";
@@ -29,15 +30,15 @@ import {
 } from "../../actions/shippingOrderAction";
 import { getOrderIds } from "../../actions/poActions";
 import DropdownButton from "../../shared/dropdownButtonGroup";
-import setAuthToken from '../../utils/setAuthToken';
-import TextField from '@material-ui/core/TextField';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import { createFilterOptions } from '@material-ui/lab/Autocomplete';
-import axios from 'axios';
-import userIcon from '../../assets/icons/user.png';
-import inventoryIcon from '../../assets/icons/inventorynew.png';
-import shipmentIcon from '../../assets/icons/TotalShipmentsCompleted.png';
-import orderIcon from '../../assets/icons/Orders.png'
+import setAuthToken from "../../utils/setAuthToken";
+import TextField from "@material-ui/core/TextField";
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import { createFilterOptions } from "@material-ui/lab/Autocomplete";
+import axios from "axios";
+import userIcon from "../../assets/icons/user.png";
+import inventoryIcon from "../../assets/icons/inventorynew.png";
+import shipmentIcon from "../../assets/icons/TotalShipmentsCompleted.png";
+import orderIcon from "../../assets/icons/Orders.png";
 
 const Header = (props) => {
   const dispatch = useDispatch();
@@ -75,37 +76,27 @@ const Header = (props) => {
     setInvalidSearch(false);
   };
 
-  const usersLocation = useSelector((state) => {
-    return state.userLocation;
-  });
-
- function notifIcon(notif) {
-    if (notif.eventType=='INVENTORY') {
+  function notifIcon(notif) {
+    if (notif.eventType === "INVENTORY") {
       return inventoryIcon;
-    }
-    else if (notif.eventType=='ORDER') {
+    } else if (notif.eventType === "ORDER") {
       return orderIcon;
-    }
-    else if (notif.eventType=='SHIPMENT') {
+    } else if (notif.eventType === "SHIPMENT") {
       return shipmentIcon;
-    }
-    else if (notif.eventType=='SHIPMENT_TRACKING'){
+    } else if (notif.eventType === "SHIPMENT_TRACKING") {
       return userIcon;
     }
   }
 
   function viewUrl(notif) {
-    if (notif.eventType=='INVENTORY') {
-      return 'productlist/';
-    }
-    else if (notif.eventType=='ORDER') {
-      return 'vieworder/';
-    }
-    else if (notif.eventType=='SHIPMENT') {
-      return 'viewshipment/';
-    }
-    else if (notif.eventType=='SHIPMENT_TRACKING'){
-      return 'viewuser/';
+    if (notif.eventType === "INVENTORY") {
+      return "productlist/";
+    } else if (notif.eventType === "ORDER") {
+      return "vieworder/";
+    } else if (notif.eventType === "SHIPMENT") {
+      return "viewshipment/";
+    } else if (notif.eventType === "SHIPMENT_TRACKING") {
+      return "viewuser/";
     }
   }
 
@@ -129,7 +120,7 @@ const Header = (props) => {
   }
 
   const onSeach = () => {
-    if (search.substring(0, 2) == "SH") {
+    if (search.substring(0, 2) === "SH") {
       getAllShipmentIDs().then((result) => {
         let shippingIds = result.map((so) => so.id);
         if (shippingIds.indexOf(search) != -1) {
@@ -137,10 +128,10 @@ const Header = (props) => {
           props.history.replace(`/viewshipment/${search}`);
         } else setInvalidSearch(true);
       });
-    } else if (search.substring(0, 2) == "PO") {
+    } else if (search.substring(0, 2) === "PO") {
       getAllOrderIDs().then((result) => {
         let orderIds = result.map((so) => so.id);
-        if (orderIds.indexOf(search) != -1) {
+        if (orderIds.indexOf(search) !== -1) {
           props.history.push(`/overview`);
           props.history.replace(`/vieworder/${search}`);
         } else setInvalidSearch(true);
@@ -151,7 +142,7 @@ const Header = (props) => {
         let airWayBillNowithshipmentID = result.data;
         let airWayBillNo = result.data.map((so) => so.airWayBillNo);
         dispatch(turnOff());
-        if (airWayBillNo.indexOf(search) != -1) {
+        if (airWayBillNo.indexOf(search) !== -1) {
           let index = airWayBillNo.indexOf(search);
           props.history.push(
             `/tracing/${airWayBillNowithshipmentID[index].id}`
@@ -224,25 +215,24 @@ const Header = (props) => {
       setNotifications(response.data.data);
 
       const warehouses = await getActiveWareHouses();
-      const active = warehouses.filter((i) => i.status == "ACTIVE")
-      .map((item) => {
-        return {
-          title: item.name,
-          organisationId: item.name,
-          ...item,
-        };
-      });
+      const active = warehouses
+        .filter((i) => i.status === "ACTIVE")
+        .map((item) => {
+          return {
+            title: item.name,
+            organisationId: item.name,
+            ...item,
+          };
+        });
       if (localStorage.getItem("location") != null) {
         setLocation((prod) => JSON.parse(localStorage.getItem("location")));
         setActiveWarehouses(active);
       } else {
-        if(active.length > 0)
-        {
-        setLocation((prod) => active[0]);
-        localStorage.setItem("location", JSON.stringify(active[0]));
-        setActiveWarehouses(active);
-        }
-        else{
+        if (active.length > 0) {
+          setLocation((prod) => active[0]);
+          localStorage.setItem("location", JSON.stringify(active[0]));
+          setActiveWarehouses(active);
+        } else {
           setLocation((prod) => warehouses[0]);
           localStorage.setItem("location", JSON.stringify(warehouses[0]));
           setActiveWarehouses(warehouses);
@@ -331,34 +321,83 @@ const Header = (props) => {
               />
             )}
           />
+          {/* <input
+            type="text"
+            // value={search}
+            placeholder="Search PO ID/ Shipment ID/ Transit Number"
+            onFocus={(e) => e.target.placeholder = ''}
+            onBlur={(e) => e.target.placeholder = 'Search PO ID/ Shipment ID/ Transit Number'}
+            onChange={onSearchChange}
+            className= "form-control search-field"
+        /> */}
+
           <img src={searchingIcon} onClick={onSeach} alt='searching' />
-        </div>        
-       <div className="user-info ">
-       <div className="notifications">
-          <img src={bellIcon} onClick={showNotifications} alt="notification" /><bellIcon />
-            <div className="bellicon-wrap" onClick={() => setShowNotifications(!showNotifications)}>
-              {notifications.length >= 0 && <span className="badge badge-light">{notifications.length }</span> }
-            </div>
-            {showNotifications && notifications.length >= 0 && (
-              <div className="slider-menu">
-                  <div className="nheader" style={{backgroundImage: "linear-gradient(to right, #0092e8, #0a6bc6)"}}>
-                    <text style={{color: "white", fontSize: "20px", fontWeight: "bold", padding: "10px"}}>User Notifications</text> 
-                    <text style={{backgroundColor: "#fa7a23", padding: "5px", color: "white", textAlign: 'right', borderRadius: "6px"}}>{notifications.length} new</text> 
-                    <div className="section">
-                      <button style={{backgroundColor: "transparent", color: "white", borderColor: "transparent"}} onClick={() => {setAlertType('ALERT'); changeNotifications('ALERT')}}>Alerts</button>
-                      <button style={{backgroundColor: "transparent", color: "white", borderColor: "transparent"}} onClick={() => {setAlertType('TRANSACTION'); changeNotifications('TRANSACTION')}}>Transactions</button>
-                    </div>
-                  </div>
-                  {notifications.map(notification => 
-                  <div className="slider-item">
-                    <div className="row justify-content-between align-items-center" onClick={() => clearNotification(notification)}>
-                      <div className="col-sm-10">
-                           <img style={{size: '15px', marginLeft: '-20px'}} src={notifIcon(notification)}/>
-                           <a href={"/" + viewUrl(notification) + notification.transactionId} >
-                           {notification.message}
-                           </a>                    
-                      </div>
-                      <div className="col-sm-2">
+        </div>
+        <div>
+          <div className='user-info '>
+            <div className='notifications'>
+              <img
+                src={bellIcon}
+                onClick={showNotifications}
+                alt='notification'
+              />
+              <bellIcon />
+
+              <div
+                className='bellicon-wrap'
+                onClick={() => setShowNotifications(!showNotifications)}
+              >
+                {notifications.length >= 0 && (
+                  <span className='badge badge-light'>
+                    {notifications.length}
+                  </span>
+                )}
+              </div>
+              {showNotifications && notifications.length >= 0 && (
+                <div className='slider-menu'>
+                  <React.Fragment>
+                    <div
+                      className='nheader'
+                      style={{
+                        backgroundImage:
+                          "linear-gradient(to right, #0092e8, #0a6bc6)",
+                      }}
+                    >
+                      <text
+                        style={{
+                          color: "white",
+                          fontSize: "20px",
+                          fontWeight: "bold",
+                          padding: "10px",
+                        }}
+                      >
+                        User Notifications
+                      </text>
+                      <text
+                        style={{
+                          backgroundColor: "#fa7a23",
+                          padding: "5px",
+                          color: "white",
+                          textAlign: "right",
+                          borderRadius: "6px",
+                        }}
+                      >
+                        {notifications.length} new
+                      </text>
+                      <div className='section'>
+                        <button
+                          style={{
+                            backgroundColor: "transparent",
+                            color: "white",
+                            borderColor: "transparent",
+                          }}
+                          onClick={() => {
+                            setAlertType("ALERT");
+                            changeNotifications("ALERT");
+                          }}
+                        >
+                          Alerts
+                        </button>
                         <button
                           style={{
                             backgroundColor: "transparent",
@@ -381,12 +420,24 @@ const Header = (props) => {
                           onClick={() => clearNotification(notification)}
                         >
                           <div className='col-sm-10'>
+                            <div>
                               <img
+                                alt=''
                                 style={{ size: "15px", marginLeft: "-20px" }}
-                                src={notifIcon(notification.message)}
-                              />{" "}
-                              {notification.message}
+                                src={notifIcon(notification)}
+                              />
+                              <Link
+                                to={
+                                  "/" +
+                                  viewUrl(notification) +
+                                  notification.transactionId
+                                }
+                              >
+                                {notification.message}
+                              </Link>
+                            </div>
                           </div>
+
                           <div className='col-sm-2'>
                             <button className='close' aria-label='Close'>
                               <span aria-hidden='true'>&times;</span>
@@ -395,20 +446,27 @@ const Header = (props) => {
                         </div>
                       </div>
                     ))}
+                  </React.Fragment>
                 </div>
               )}
             </div>
-            )}
-            <img className='locationimg' src={Location} />
+            {/* <div className="userName" style={{fontSize: "13px", marginBottom:"0px"}}> 
+          <p className="cname1"><b>{activeWarehouses[0]?.title}</b></p>
+          <p className="uname"> {activeWarehouses[0]?.warehouseAddress.firstLine}</p>
+          </div> */}
+            <img className='locationimg' src={Location} alt='LocationImage' />
+
             <div className='userName'>
               <DropdownButton
-                name={
+                name={(
                   location?.title +
                   "\n" +
                   location?.warehouseAddress?.city +
                   "," +
                   location?.warehouseAddress?.country
-                }
+                )
+                  .substr(0, 25)
+                  .concat("...")}
                 arrowImg={dropdownIcon}
                 onSelect={(item) => {
                   handleLocation(item);
@@ -444,6 +502,7 @@ const Header = (props) => {
                 onClick={() => setMenu(!menu)}
               />
             </div>
+          </div>
           {menu && (
             <div className='slider-menu' ref={ref}>
               {
@@ -474,10 +533,12 @@ const Header = (props) => {
               }
             </div>
           )}
+
           {sidebar && (
             <DrawerMenu {...props} close={() => openSidebar(false)} />
           )}
-        {invalidSearch && 
+        </div>
+        {invalidSearch && (
           <Modal
             close={() => closeModalFail()}
             size='modal-sm' //for other size's use `modal-lg, modal-md, modal-sm`
@@ -488,11 +549,10 @@ const Header = (props) => {
               message='Invalid Search'
             />
           </Modal>
-        }
-  </div> 
-  </div>
-  </div>
-  </div>
-  )
-}  
+        )}
+      </div>
+    </div>
+  );
+};
+
 export default Header;
