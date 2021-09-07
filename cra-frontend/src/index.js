@@ -19,21 +19,13 @@ ReactDOM.render(
 );
 
 setAuthToken();
-// Check for token
 if (localStorage.theLedgerToken) {
-  // Set auth token auth
   setAuthToken(localStorage.theLedgerToken);
-  // Decode token and get user info and exp
   const decoded = jwt_decode(localStorage.theLedgerToken);
-  // Set user and isAuthenticated
   store.dispatch(setCurrentUser(decoded));
-
-  // Check for expired token
   const currenTime = Date.now() / 1000;
   if (decoded.exp < currenTime) {
-    // Logout user
     store.dispatch(logoutUser());
-    // Redirect to login
     window.location.href = "/";
   }
 }

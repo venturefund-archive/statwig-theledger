@@ -22,9 +22,14 @@ export const isType = (type, val) => {
   );
 };
 
-export const isAuthenticated = (permission) => {
+function GetState(permission) {
   const user = useSelector((state) => {
     return state.user;
   });
   return user.permissions.permissions.indexOf(permission) > -1 ? true : false;
-};
+}
+
+export function isAuthenticated(permission) {
+  const result = GetState(permission);
+  return result;
+}
