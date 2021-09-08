@@ -123,7 +123,7 @@ const Header = (props) => {
     if (search.substring(0, 2) === "SH") {
       getAllShipmentIDs().then((result) => {
         let shippingIds = result.map((so) => so.id);
-        if (shippingIds.indexOf(search) != -1) {
+        if (shippingIds.indexOf(search) !== -1) {
           props.history.push("/overview");
           props.history.replace(`/viewshipment/${search}`);
         } else setInvalidSearch(true);
