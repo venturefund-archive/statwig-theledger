@@ -3,7 +3,6 @@ import Pagination from '@material-ui/lab/Pagination';
 import user from '../../../assets/icons/user.svg';
 import './style.scss'
 const Table = props => {
-  const [ batch, setBatch] = useState('');
   const handlePageChange  = (event, value) => {
     props.onPageChange(value)
   };

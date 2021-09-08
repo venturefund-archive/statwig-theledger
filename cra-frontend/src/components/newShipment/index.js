@@ -3,18 +3,16 @@ import { useSelector, useDispatch } from "react-redux";
 import Add from "../../assets/icons/createshipment.png";
 import EditTable from "./table/editTable";
 import "./style.scss";
-import Cancel from "../../assets/icons/cancel.svg";
 import { createShipment,getViewShipment } from "../../actions/shipmentActions";
 import { turnOn, turnOff } from "../../actions/spinnerActions";
 import {
-  getShippingOrderIds,
   getShippingOrderById,
   getWarehouseByOrgId,
   getAllOrganisations,
   getProductsByInventoryId,
 } from "../../actions/shippingOrderAction";
-import { getOrderIds, getOrder, getOpenOrderIds } from "../../actions/poActions";
-import DropdownButton from "../../shared/dropdownButtonGroup";
+import { getOrder, getOpenOrderIds } from "../../actions/poActions";
+// import DropdownButton from "../../shared/dropdownButtonGroup";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import ShipmentPopUp from "./shipmentPopUp";
@@ -23,13 +21,9 @@ import Modal from "../../shared/modal";
 import { Formik } from "formik";
 import Select from 'react-select';
 import {getOrganizationsTypewithauth} from '../../actions/userActions';
-import { getProducts, getProductsByCategory, searchProduct } from "../../actions/poActions";
+import { getProducts, searchProduct } from "../../actions/poActions";
 import {getProductList} from '../../actions/productActions';
-import { Alert, AlertTitle } from '@material-ui/lab';
-import { TextField } from "@material-ui/core";
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
-import FormControl from '@material-ui/core/FormControl';
+// import { Alert, AlertTitle } from '@material-ui/lab';
 
 
 
@@ -50,9 +44,9 @@ const NewShipment = (props) => {
   const [OrderId, setOrderId] = useState("Select Order ID");
   const [senderOrgId, setSenderOrgId] = useState("null");
   const [orderIdSelected, setOrderIdSelected] = useState(false);
-  const [senderOrgLoc, setSenderOrgLoc] = useState(
-    "Select Organisation Location"
-  );
+  // const [senderOrgLoc, setSenderOrgLoc] = useState(
+  //   "Select Organisation Location"
+  // );
   const [selectedWarehouse, setSelectedWarehouse] = useState("")
   const [receiverOrgId, setReceiverOrgId] = useState(
     "Select Organisation Name"
@@ -63,8 +57,7 @@ const NewShipment = (props) => {
   );
   const user = useSelector((state) => state.user);
   const [OrderDetails, setOrderDetails] = useState({});
-  const  [OrderProduct,setOrderProduct] = useState([]);
-  const [po, setPo] = useState("");
+  // const  [OrderProduct,setOrderProduct] = useState([]);
   // const [shipmentDate, setShipmentDate] = useState("");
   // const [estimateDeliveryDate, setEstimateDeliveryDate] = useState("");
   const [message, setMessage] = useState("");
@@ -73,13 +66,13 @@ const NewShipment = (props) => {
   const [openCreatedInventory, setOpenCreatedInventory] = useState(false);
   const [openShipmentFail, setOpenShipmentFail] = useState(false);
   const [shipmentError, setShipmentError] = useState("");
-  const [formatedDate, setformatedDate] = "4-21-2021";
+  // const [formatedDate, setformatedDate] = "4-21-2021";
   const [modalProps, setModalProps] = useState({});
   const [orgTypes, setOrgTypes] = useState([]);
   const [productsList,setProductsList] = useState([]);
-  const profile = useSelector((state) => {
-    return state.user;
-  });
+  // const profile = useSelector((state) => {
+  //   return state.user;
+  // });
   
   const customStyles = {
     placeholder:(provided, state)=>({
@@ -232,35 +225,35 @@ const NewShipment = (props) => {
     }
   };
 
-  const dates = ["shipmentDate", "estimateDeliveryDate"];
+  // const dates = ["shipmentDate", "estimateDeliveryDate"];
 
-  const dateValidation = (date) => {
-    try {
-      let error = false;
-      let a = eval(date[0]);
-      let b = eval(date[1]);
+  // const dateValidation = (date) => {
+  //   try {
+  //     let error = false;
+  //     let a = eval(date[0]);
+  //     let b = eval(date[1]);
 
-      if (a > b) {
-        setShipmentError("Check deliveryDate");
-        setOpenShipmentFail(true);
-        error = true;
-      }
-      return error;
-    } catch (err) {
-      setOpenShipmentFail(true);
-    }
+  //     if (a > b) {
+  //       setShipmentError("Check deliveryDate");
+  //       setOpenShipmentFail(true); 
+  //       error = true;
+  //     }
+  //     return error;
+  //   } catch (err) {
+  //     setOpenShipmentFail(true);
+  //   }
 
-    let error = false;
-    let a = eval(date[0]);
-    let b = eval(date[1]);
+  //   let error = false;
+  //   let a = eval(date[0]);
+  //   let b = eval(date[1]);
 
-    if (a > b) {
-      setShipmentError("Check deliveryDate");
-      setOpenShipmentFail(true);
-      error = true;
-    }
-    return error;
-  };
+  //   if (a > b) {
+  //     setShipmentError("Check deliveryDate");
+  //     setOpenShipmentFail(true);
+  //     error = true;
+  //   }
+  //   return error;
+  // };
 
   const onAssign = async (values) => {
     let error = false;
@@ -302,14 +295,14 @@ if (!error) {
           shipmentDate.getTime() - shipmentDate.getTimezoneOffset() * 60000
         ).toISOString(),
         expectedDeliveryDate:
-          estimateDeliveryDate != ""
+          estimateDeliveryDate !== ""
             ? new Date(
                 estimateDeliveryDate.getTime() -
                   estimateDeliveryDate.getTimezoneOffset() * 60000
               ).toISOString()
             : "",
         actualDeliveryDate:
-          estimateDeliveryDate != ""
+          estimateDeliveryDate !== ""
             ? new Date(
                 estimateDeliveryDate.getTime() -
                   estimateDeliveryDate.getTimezoneOffset() * 60000
@@ -350,7 +343,6 @@ if (!error) {
       } */
       else{
         let i,j;
-        let check = true;
         let nn = data.products.length;
         for(i=0;i<data.products.length;i++)
         {
@@ -469,7 +461,7 @@ if (!error) {
   };
   
 
-  const onProductChange = (index, item, setFieldValue) => {
+ /* const onProductChange = (index, item, setFieldValue) => {
     addProducts.splice(index, 1);
     let newArr = [...addProducts];
     newArr.push(item);
@@ -490,7 +482,8 @@ if (!error) {
     let newArray = [...products];
     newArray[prodIndex] = { ...newArray[prodIndex], isSelected: true };
     setProducts((prod) => [...newArray]);
-  };
+  }; */
+
 // //console.log(allOrganisations,"All org");
 // async function fetchShipmentDetails(id){
 //   const result = await dispatch(getViewShipment(id));
@@ -505,7 +498,7 @@ if (!error) {
   const cloneOrder = OrderDetails;
   cloneOrder.products = inventoryStateClone; 
   setOrderDetails(cloneOrder); 
-  setOrderProduct(inventoryStateClone);
+  // setOrderProduct(inventoryStateClone);
   };
   return (
     <div className="NewShipment">
@@ -555,7 +548,7 @@ if (!error) {
           // if (!values.estimateDeliveryDate) {
           //   errors.estimateDeliveryDate = "Required";
           // }
-          if (!orderIdSelected && values.products.length == 0) {
+          if (!orderIdSelected && values.products.length === 0) {
             errors.products = "Required";
           }
           return errors;
@@ -685,7 +678,7 @@ if (!error) {
                               result.poDetails[0].supplier.organisation
                                 .warehouses;
                             for (let i = 0; i < supplierWarehouse.length; i++) {
-                              return w.id == supplierWarehouse[i];
+                              return w.id === supplierWarehouse[i];
                             }
                           });
                           setFieldValue("fromOrg", senderOrganisation[0]);
@@ -713,7 +706,7 @@ if (!error) {
                           
                           let products_temp = result.poDetails[0].products;
                           for (let i = 0; i < products_temp.length; i++) {
-                            if(result.poDetails[0].products[i].productQuantity==0){
+                            if(result.poDetails[0].products[i].productQuantity===0){
                               products_temp.splice(i,1); 
                               i--;
                             }
@@ -783,7 +776,7 @@ if (!error) {
                         setFieldValue("rtype",);
                         setFieldValue("toOrg","");
                        
-                        if(result.status==500)
+                        if(result.status===500)
                         {
                           setShipmentError('Check Shipment Reference ID');
                           setOpenShipmentFail(true); 
@@ -1007,7 +1000,7 @@ if (!error) {
                           //isDisabled={disabled}
                           placeholder={disabled ? (values.toOrg).split("/")[1] : "Select Organisation Name"}
                           //placeholder={"Select Organisation Name"}
-                          value={values.toOrg==""?"Select Organisation Name":{value: values.toOrg, label: receiverOrgId}}
+                          value={values.toOrg===""?"Select Organisation Name":{value: values.toOrg, label: receiverOrgId}}
                           onChange={(v) => {
                             setFieldValue("toOrgLoc", "");
                             setReceiverOrgId(v.label);
@@ -1016,7 +1009,7 @@ if (!error) {
                           }}
                          
                           defaultInputValue={values.toOrg}
-                          options={allOrganisations.filter(a => a.type == values.rtypeName)}
+                          options={allOrganisations.filter(a => a.type === values.rtypeName)}
                         />
                         {/* {errors.toOrg && touched.toOrg && (
                           <span className="error-msg text-danger">
@@ -1052,7 +1045,7 @@ if (!error) {
                           //isDisabled={disabled}
                           placeholder={disabled ? values.toOrgLoc.split("/")[1] : "Select Delivery Location"}
                           //placeholder={"Select Delivery Location"}
-                          value={values.toOrgLoc==""?"Select Delivery Loction":{value: values.toOrgLoc, label:toOrgLocLabel}}
+                          value={values.toOrgLoc===""?"Select Delivery Loction":{value: values.toOrgLoc, label:toOrgLocLabel}}
                           onChange={(v) => {
                             setFieldValue("toOrgLoc", v.value);
                             settoOrgLocLabel(v.label)
@@ -1110,7 +1103,7 @@ if (!error) {
                               : values.shipmentDate
                           }
                           onKeyDown={(e) =>
-                            e.keyCode != 8 && e.preventDefault()
+                            e.keyCode !== 8 && e.preventDefault()
                           }
                           minDate={new Date()}
                           placeholderText="Enter Shipment Date"
@@ -1173,7 +1166,7 @@ if (!error) {
                           }
                           minDate={new Date()}
                           onKeyDown={(e) =>
-                            e.keyCode != 8 && e.preventDefault()
+                            e.keyCode !== 8 && e.preventDefault()
                           }
                           showYearDropdown
                           dateFormatCalendar="MMMM"
@@ -1376,7 +1369,7 @@ if (!error) {
                 </button>
 
                 <button disabled={!FromLocationSelected} className="btn btn-orange fontSize20 font-bold">
-                  <img src={Add} width="20" height="17" className="mr-2 mb-1" />
+                  <img src={Add} width="20" height="17" className="mr-2 mb-1" alt = ""/>
                   <span>Create Shipment</span>
                 </button>
               </div>
