@@ -1,10 +1,10 @@
-import React, { useState, useEffect} from "react";
+import React from "react";
 import "./style.scss";
-import { Formik } from "formik";
+// import { Formik } from "formik";
 import uploadBlue from '../../assets/icons/UploadBlue.svg';
 import { Link } from "react-router-dom";
 const AddCategory = (props) => {
-    const [editMode,setEditMode]=useState(true);
+    // const [editMode,setEditMode]=useState(true);
   console.log(props);
   return (
     <div>
@@ -23,6 +23,7 @@ const AddCategory = (props) => {
                     src={uploadBlue}
                     style={{height:"150px",width:"100px",marginLeft:"43px"}}
                     className="rounded rounded-circle"
+                    alt = ""
                   />
                 </div>
                 <label class="btn-primary btn browse pl-5 ml-2">ADD IMAGE<input type='file' class="select"/> </label>

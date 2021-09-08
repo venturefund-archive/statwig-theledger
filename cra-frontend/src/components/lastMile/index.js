@@ -9,14 +9,9 @@ import idprrof from '../../assets/icons/idproof.png';
 import patient from '../../assets/icons/patient.png';
 import pingrey from '../../assets/icons/pingrey.png';
 import TableFilter from './tablefilter.js';
-import ExportIcon from '../../assets/icons/Export.svg';
-import dropdownIcon from '../../assets/icons/drop-down.svg';
-import {GetEOLInfoBySerialNumber} from '../../actions/eolAction';
-import {GetEOLInfoByProductId, getEOLInfo} from '../../actions/eolAction';
-import {GetEOLInfoByIdentityId} from '../../actions/eolAction';
-import {GetEOLInfoByPlaceAdministered, getProductsByWarehouse} from '../../actions/eolAction';
-import {GetEOLListByDateWindow} from '../../actions/eolAction';
-import {getRegions,  GetCountriesFromWarehouses, GetStatesFromWarehouses, GetCitiesFromWarehouses, GetWarehousesWithCity} from '../../actions/inventoryActions';
+import { getEOLInfo} from '../../actions/eolAction';
+import {getProductsByWarehouse} from '../../actions/eolAction';
+import {GetCountriesFromWarehouses, GetStatesFromWarehouses, GetCitiesFromWarehouses, GetWarehousesWithCity} from '../../actions/inventoryActions';
 
 import Table from './table'
 const LastMile=(props)=>{
@@ -39,13 +34,12 @@ const LastMile=(props)=>{
     const [products,setProducts] = useState([])
     const [countries,setCountries] = useState([])
     const [Address, setAddress] = useState('')
-    const [countryId,setcountryId] = useState('')
     const [locationCountry,setlocationCountry] = useState('')
     const [locationState,setlocationState] = useState('')
     const [locationName,setlocationName] = useState('')
     const [limit, setLimit] = useState(10);
     const [warehouseTitle,setwarehouseTitle] = useState('')
-    const [skip, setSkip] = useState(0);
+    // const [skip, setSkip] = useState(0);
     const headers = {
         coloumn1: 'Beneficiary Details',
         coloumn2: 'ID Proof',
@@ -53,11 +47,11 @@ const LastMile=(props)=>{
         coloumn4: 'Product',
         coloumn5: 'Date & Time',
     
-        img1: <img src={patient} width="15" height="20" className="pb-1"/>,
-        img2: <img src={idprrof} width="20" height="20" className="pb-1"/>,
-        img3: <img src={mobile} width="16" height="25" className="pb-1"/>,
-        img4: <img src={Product} width="20" height="22" className="pb-1"/>,
-        img5: <img src={Date_time} width="19" height="22" className="pb-1"/>,
+        img1: <img src={patient} width="15" height="20" className="pb-1" alt = ""/>,
+        img2: <img src={idprrof} width="20" height="20" className="pb-1" alt = ""/>,
+        img3: <img src={mobile} width="16" height="25" className="pb-1" alt = ""/>,
+        img4: <img src={Product} width="20" height="22" className="pb-1" alt = ""/>,
+        img5: <img src={Date_time} width="19" height="22" className="pb-1" alt = ""/>,
       };
 
       function cardFill(obj){
@@ -70,7 +64,7 @@ const LastMile=(props)=>{
 useEffect(()=>{
     async function fetchData(){
         // setLastMile(props)
-        const eol_ProductID = await GetEOLInfoByProductId("pro123456");
+        // const eol_ProductID = await GetEOLInfoByProductId("pro123456");
         // const regions = await getRegions();
         // console.log(regions.data[0].country)
         // setCountries(regions.data[0].country)
@@ -85,7 +79,7 @@ useEffect(()=>{
 const onPageChange = async (pageNum) => {
     console.log("onPageChange =========>", pageNum)
     const recordSkip = (pageNum-1)*limit;
-    setSkip(recordSkip);
+    // setSkip(recordSkip);
     dispatch(getEOLInfo(recordSkip, limit, product, country, state, district, location)); 
   };
 
@@ -316,7 +310,7 @@ return (
                 </div>
                 <div class="panel address searchpanel mb-2 mt-3 ml-1 mr-1">
                     <div className="row">
-                        <img src={pingrey} height="20" width="15"></img>
+                        <img src={pingrey} height="20" width="15" alt = ""></img>
                         <div className="ml-2" style={{fontSize:"13px"}}>Address</div>
 
                         </div>

@@ -13,13 +13,13 @@ import currentinventory from '../../assets/icons/CurrentInventory.svg';
 import Expiration from '../../assets/icons/TotalVaccinenearExpiration.svg';
 import TotalVaccineExpired from '../../assets/icons/TotalVaccineExpired.svg';
 import Add from '../../assets/icons/add.svg';
-import user from '../../assets/icons/brand.svg';
-import Package from '../../assets/icons/package.svg';
+// import user from '../../assets/icons/brand.svg';
+// import Package from '../../assets/icons/package.svg';
 import calender from '../../assets/icons/calendar.svg';
 import Status from '../../assets/icons/Status.svg';
 import Quantity from '../../assets/icons/Quantity.png';
-import Product from '../../assets/icons/Producttype.png';import {useDispatch, useSelector} from "react-redux";
-import { getInventories, resetInventories, getInventoryDetails } from "../../actions/inventoryActions";
+import Product from '../../assets/icons/Producttype.png';import {useDispatch} from "react-redux";
+import { getInventories } from "../../actions/inventoryActions";
 import { isAuthenticated } from '../../utils/commonHelper';
 
 const Inventory = props => {
@@ -32,12 +32,12 @@ const Inventory = props => {
     coloumn5: 'Status',
     
 
-    img1: <img src={Product} width="16" height="16" />,
-    img2: <img src={Quantity} width="24" height="16" />,
+    img1: <img src={Product} width="16" height="16" alt=""/>,
+    img2: <img src={Quantity} width="24" height="16" alt=""/>,
     // img3: <img src={user} width="16" height="16" />,
-    img3: <img src={calender} width="16" height="16" />,
-    img4: <img src={Quantity} width="24" height="16" />,
-    img5: <img src={Status} width="16" height="16" />,
+    img3: <img src={calender} width="16" height="16" alt=""/>,
+    img4: <img src={Quantity} width="24" height="16" alt=""/>,
+    img5: <img src={Status} width="16" height="16" alt=""/>,
     
   };
 
@@ -50,8 +50,8 @@ const Inventory = props => {
   const MAX_LENGTH = 20;
   const [inventoryNearExpiration, setInventoryNearExpiration] = useState('');
   const [inventoryExpired, setInventoryExpired] = useState('');
-  const [productCategory, setProductCategory] = useState('');
-  const [stockOut, setStockOut] = useState('');
+  // const [productCategory, setProductCategory] = useState('');
+  // const [stockOut, setStockOut] = useState('');
 
   const [inventoriesCount, setInventoriesCount] = useState('');
   const [currentInventoriesCount, setCurrentInventoriesCount] = useState('');
@@ -72,13 +72,13 @@ const Inventory = props => {
         //   fetchData();
         // }, []);
 
-        const [skip, setSkip] = useState(0);
+        // const [skip, setSkip] = useState(0);
         const [limit, setLimit] = useState(10);
-        const [count, setCount] = useState(0);
+        // const [count, setCount] = useState(0);
         const [dateFilter, setDateFilter] = useState("");
         const [productNameFilter, setProductNameFilter] = useState("");
         const [productCategoryFilter, setProductCategoryFilter] = useState("");
-        const [manufacturerFilter, setManufacturerFilter] = useState("");
+        // const [manufacturerFilter, setManufacturerFilter] = useState("");
         const [statusFilter, setStatusFilter] = useState("");
 
      useEffect(() => {
@@ -107,12 +107,12 @@ const Inventory = props => {
       setInventoryExpired(
         resultAnalytics.data.inventory.batchExpired
       );
-      setProductCategory(
-        resultAnalytics.data.inventory.totalProductCategory
-      )
-      setStockOut(
-        resultAnalytics.data.inventory.stockOut
-      )
+      // setProductCategory(
+      //   resultAnalytics.data.inventory.totalProductCategory
+      // )
+      // setStockOut(
+      //   resultAnalytics.data.inventory.stockOut
+      // )
 
     }
     fetchData();
@@ -122,42 +122,42 @@ const Inventory = props => {
   const onPageChange = async (pageNum) => {
     console.log("onPageChange =========>", pageNum)
     const recordSkip = (pageNum-1)*limit;
-    setSkip(recordSkip);
+    // setSkip(recordSkip);
     dispatch(getInventories(recordSkip, limit, dateFilter, productNameFilter, productCategoryFilter, statusFilter));  //(skip, limit, dateFilter, productName, productCategoryFilter, status)
   };
 
   const setDateFilterOnSelect = async (dateFilterSelected) => {
     console.log("setDateFilterOnSelect =========>", dateFilterSelected)
     setDateFilter(dateFilterSelected);
-    setSkip(0);
+    // setSkip(0);
     dispatch(getInventories(0, limit, dateFilterSelected,  productNameFilter, productCategoryFilter, statusFilter));  //(skip, limit, dateFilter, productName, productCategoryFilter, status)
   }
 
   const setInventoryStatusFilterOnSelect = async (statusFilterSelected) => {
     console.log("setInventoryStatusFilterOnSelect =========>", statusFilterSelected);
     setStatusFilter(statusFilterSelected);
-    setSkip(0);
+    // setSkip(0);
       dispatch(getInventories(0, limit, dateFilter, productNameFilter, productCategoryFilter, statusFilterSelected));  //(skip, limit, dateFilter, productName, productCategoryFilter, status)
   }
 
   const setInventoryProductNameFilterOnSelect = async (productNameFilterSelected) => {
     console.log("setInventoryProductNameFilterOnSelect =========>", productNameFilterSelected)
     setProductNameFilter(productNameFilterSelected);
-    setSkip(0);
+    // setSkip(0);
       dispatch(getInventories(0, limit, dateFilter, productNameFilterSelected, productCategoryFilter, statusFilter));  //(skip, limit, dateFilter, productName, productCategoryFilter, status)
   }
 
   const setInventoryManufacturerFilterOnSelect = async (manufacturerFilterSelected) => {
     console.log("setInventoryManufacturerFilterOnSelect =========>", manufacturerFilterSelected)
-    setManufacturerFilter(manufacturerFilterSelected);
-    setSkip(0);
+    // setManufacturerFilter(manufacturerFilterSelected);
+    // setSkip(0);
       dispatch(getInventories(0, limit, dateFilter, productNameFilter, manufacturerFilterSelected, statusFilter));  //(skip, limit, dateFilter, productName, productManufacturer, status)
   }
 
   const setInventoryProductCategoryFilterOnSelect = async (categoryFilterSelected) => {
     console.log("setInventoryProductCategoryFilterOnSelect =========>", categoryFilterSelected)
     setProductCategoryFilter(categoryFilterSelected);
-    setSkip(0);
+    // setSkip(0);
       dispatch(getInventories(0, limit, dateFilter, productNameFilter, categoryFilterSelected, statusFilter));  //(skip, limit, dateFilter, productName, productCategory, status)
   }
   return (
@@ -168,7 +168,7 @@ const Inventory = props => {
           {isAuthenticated('addInventory') &&
             <Link to="/newinventory">
               <button className="btn btn-yellow mt-2">
-                <img src={Add} width="13" height="13" className="mr-2" />
+                <img src={Add} width="13" height="13" className="mr-2" alt = "" />
                 <span><b>Add Inventory</b></span>
               </button>
             </Link>

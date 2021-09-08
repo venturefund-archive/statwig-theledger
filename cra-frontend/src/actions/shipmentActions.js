@@ -7,8 +7,8 @@ import {
   SET_REVIEW_SHIPMENT,
   SET_TRACING_SHIPMENT,
   SET_VISIBLE_SHIPMENT,
-  GET_SHIPMENTSCOUNT_FAILURE,
-  GET_SHIPMENTSCOUNT_SUCCESS,
+  // GET_SHIPMENTSCOUNT_FAILURE,
+  // GET_SHIPMENTSCOUNT_SUCCESS,
   SET_EDIT_SHIPMENT,
   SET_TRACK_SHIPMENT,
   RECEIVE_SHIPMENT,
@@ -228,12 +228,12 @@ const setShipments = data => {
   };
 };
 
-const setShipmentsCount = data => {
-  return {
-    type: GET_SHIPMENTSCOUNT_SUCCESS,
-    payload: data,
-  };
-};
+// const setShipmentsCount = data => {
+//   return {
+//     type: GET_SHIPMENTSCOUNT_SUCCESS,
+//     payload: data,
+//   };
+// };
 
 export const setReviewShipments = data => {
   return {
@@ -294,12 +294,12 @@ export const resetShipments = data => {
   };
 };
 
-const resetShipmentsCount = data => {
-  return {
-    type: GET_SHIPMENTSCOUNT_FAILURE,
-    payload: data,
-  };
-};
+// const resetShipmentsCount = data => {
+//   return {
+//     type: GET_SHIPMENTSCOUNT_FAILURE,
+//     payload: data,
+//   };
+// };
 
 
 
@@ -352,7 +352,7 @@ export const receiveApi = async (formData) => {
 
 export const chainOfCustodyTrack = async id => {
   try {
-    const configObject = config();
+    // const configObject = config();
     const url = 'http://54.164.66.73:3002/shipmentmanagement/api/shipment/chainOfCustody?shipmentId=' + id;
     const result = await axios.get(url);
     return result;

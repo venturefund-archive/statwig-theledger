@@ -7,7 +7,7 @@ const ProductPopUp = (props) => {
   return (
     <div className="inventorypopup">
       <div className="d-flex  flex-column align-items-center">
-        <img src={Checked} width='60' height='60' className="mb-3" />
+        <img src={Checked} width='60' height='60' className="mb-3" alt = ""/>
         <div className="alert" >
           Success!
         </div>

@@ -156,7 +156,7 @@ const ChartsPage = (props) => {
   )   : (
       <div className="summaryTable justify-content-center ">
       <div className="d-flex flex-column ">
-        <img src={EmptyInventory} height="200" width="200" />
+        <img src={EmptyInventory} height="200" width="200" alt = ""/>
       </div>
       </div>
      )

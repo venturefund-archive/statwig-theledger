@@ -7,14 +7,14 @@ import logo from "../../assets/brands/VaccineLedgerlogo.svg";
 
 
 const ForgotPassword = (props) => {
-  const {email,errorMessage,onForgot,onEmailChange } = props;
+  const {email,onForgot,onEmailChange } = props;
   return (
     <div className="login-wrapper">
       <div className="container">
         <div className="row">
           <div className="col-sm-6 col-lg-6">
             <div className="form-content">
-              <img className="logo" src={logo} />
+              <img className="logo" src={logo} alt = "" />
               <h1>Welcome</h1>
               <p>Reset your Password</p>
             </div>

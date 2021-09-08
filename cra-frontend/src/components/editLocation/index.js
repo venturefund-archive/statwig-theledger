@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from "react";
 import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import DropdownButton from "../../shared/dropdownButtonGroup";
-import Location from "../../assets/icons/CurrentLocation1.png";
 import {updateWarehouse} from "../../actions/userActions";
 import SuccessPopup from "../../shared/PopUp/successPopUp";
-import FailPopup from "../../shared/PopUp/failedPopUp";
 import Modal from "../../shared/modal";
 // import React, { useState,useRef } from 'react';
 import {getWarehouseById} from "../../actions/userActions";
 import {fetchAllRegions,fetchCountriesByRegion,fetchStateByCountry,fetchCitiesByState,} from "../../actions/productActions";
-import Input from '@material-ui/core/Input';
-import Select from 'react-select';
 
 import "./style.scss";
 import { Formik } from "formik";
@@ -47,10 +42,10 @@ const EditLocation = (props) => {
   };
 
 
-  const getDataForWareHouse = async(id) => {
-    const result = await getWarehouseById(id);
-    return result;
-  }
+  // const getDataForWareHouse = async(id) => {
+  //   const result = await getWarehouseById(id);
+  //   return result;
+  // }
 
   useEffect(() => {
     async function fetchData() {
@@ -117,7 +112,7 @@ const EditLocation = (props) => {
     };
 
     const result = await updateWarehouse(data, id);
-    if(result.status = 200){
+    if(result.status === 200){
       console.log('Edit Location');
       console.log(result);
       setAddedLocationModal(true);
@@ -136,9 +131,9 @@ const EditLocation = (props) => {
         }
     }
 }
-  const requestadminforapproval = () => {
+  // const requestadminforapproval = () => {
     //  props.history.push('/profile');
-  };
+  // };
   return (
     <div>
       <div className="addproduct">
@@ -261,7 +256,7 @@ const EditLocation = (props) => {
                             setState("");
                             setCity("");
                           }}
-                          id="controllable-states-demo"               
+                          id="controllable-states-demo"
                           options={allregions}
                           renderInput={(params) => <TextField {...params} />}
                           />

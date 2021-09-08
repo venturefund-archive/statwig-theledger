@@ -1,7 +1,7 @@
 import React  from 'react';
 import './style.scss';
-import Add from '../../assets/icons/add.svg';
-import Order from '../../assets/icons/order.svg';
+// import Add from '../../assets/icons/add.svg';
+// import Order from '../../assets/icons/order.svg';
 import TableFilter from './tableFilter';
 import Table from './table';
 import {
@@ -13,8 +13,8 @@ import mon from '../../assets/icons/brand.svg';
 import Package from '../../assets/icons/package.svg';
 import calender from '../../assets/icons/calendar.svg';
 import Status from '../../assets/icons/Status.svg';
-import ExportIcon from '../../assets/icons/Export.svg';
-import dropdownIcon from '../../assets/icons/drop-down.svg';
+// import ExportIcon from '../../assets/icons/Export.svg';
+// import dropdownIcon from '../../assets/icons/drop-down.svg';
 import upAndDown from '../../assets/icons/sidearrow.svg';
 import TotalInventoryAdded from "../../assets/icons/TotalInventoryAddedcopy.svg";
 import Layers from "../../assets/icons/layers.svg";
@@ -34,13 +34,13 @@ const TransactionProducts = props => {
     coloumn6: 'Mfg Date',
     coloumn7: 'Expiry Date',
 
-    img1: <img src={Package} width="16" height="16" />,
-    img2: <img src={mon} width="16" height="16" />,
-    img3: <img src={Layers} width="16" height="16" />,
-    img4: <img src={TotalInventoryAdded} width="20" height="20" />,
-    img5: <img src={Status} width="16" height="16" />,
-    img6: <img src={calender} width="16" height="16" />,
-    img7: <img src={calender} width="16" height="16" />,
+    img1: <img src={Package} width="16" height="16" alt = "" />,
+    img2: <img src={mon} width="16" height="16" alt = "" />,
+    img3: <img src={Layers} width="16" height="16" alt = "" />,
+    img4: <img src={TotalInventoryAdded} width="20" height="20" alt = "" />,
+    img5: <img src={Status} width="16" height="16" alt = "" />,
+    img6: <img src={calender} width="16" height="16" alt = "" />,
+    img7: <img src={calender} width="16" height="16" alt = "" />,
   
   };
 
@@ -51,7 +51,7 @@ const TransactionProducts = props => {
         <div className="d-flex">
           <Link to="/inventory">
         <button className="btn btn-outline-primary fontSize20 font-weight-bold mr-4">
-          <img src={upAndDown} width="14" height="14" className="mr-2" />
+          <img src={upAndDown} width="14" height="14" className="mr-2" alt = "" />
             <span>Back to Inventory</span>
           </button>
           </Link>

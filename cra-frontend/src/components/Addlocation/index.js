@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from "react";
 import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import DropdownButton from "../../shared/dropdownButtonGroup";
-import Location from "../../assets/icons/CurrentLocation1.png";
-import {addWarehouse, registerUser} from "../../actions/userActions";
+import {addWarehouse} from "../../actions/userActions";
 import SuccessPopup from "../../shared/PopUp/successPopUp";
-import FailPopup from "../../shared/PopUp/failedPopUp";
 import Modal from "../../shared/modal";
 import {fetchAllRegions,fetchCountriesByRegion,fetchStateByCountry,fetchCitiesByState,} from "../../actions/productActions";
-import Select from 'react-select';
 import "./style.scss";
-import { Formik, setIn } from "formik";
-import Input from '@material-ui/core/Input';
+import { Formik } from "formik";
 
 const AddLocation = (props) => {
   const [addressTitle, setAddressTitle] = useState("");
@@ -30,9 +25,6 @@ const AddLocation = (props) => {
   // console.log(addressLine,"Line");
   const [addedLocationModal, setAddedLocationModal] = useState(false);
 
-  const [inputValue1, setInputValue1] = React.useState('');
-  const [inputValue2, setInputValue2] = React.useState('');
-  const [inputValue3, setInputValue3] = React.useState('');
   //Newly Added
   const [allregions,setallregions] = useState([]);
   const [allCountries,setallCountries] = useState([]);
@@ -92,7 +84,7 @@ const AddLocation = (props) => {
     const result = await addWarehouse(data);
     console.log("Result");
     console.log(result);
-    if(result.data.status != 0){
+    if(result.data.status !== 0){
       console.log('Added Location');
       console.log(result);
       setAddedLocationModal(true);
@@ -104,9 +96,9 @@ const AddLocation = (props) => {
     }
   };
 
-  const requestadminforapproval = () => {
+  // const requestadminforapproval = () => {
     //  props.history.push('/profile');
-  };
+  // };
   function search(name, myArray){
     for (var i=0; i < myArray.length; i++) {
         if (myArray[i].name === name) {
@@ -218,8 +210,8 @@ const AddLocation = (props) => {
                             setcountry("");
                             setState("");
                             setCity("");
-                          }}
-                          id="controllable-states-demo"               
+                          }}          
+                          id="controllable-states-demo"                
                           options={allregions}
                           renderInput={(params) => <TextField {...params} label="Select Region"  />}
                           />

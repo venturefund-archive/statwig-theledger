@@ -1,8 +1,8 @@
 import React from 'react'
 import updownarrow from '../../../assets/icons/up-and-down-1.svg';
-import FilterIcon from '../../../assets/icons/Filter.svg';
-import ExportIcon from '../../../assets/icons/Export.svg';
-import dropdownIcon from '../../../assets/icons/drop-down.svg';
+// import FilterIcon from '../../../assets/icons/Filter.svg';
+// import ExportIcon from '../../../assets/icons/Export.svg';
+// import dropdownIcon from '../../../assets/icons/drop-down.svg';
 
 import './style.scss'
 
@@ -18,7 +18,7 @@ const TableFilter = (props) => {
               </div>
               <div className="filterTitle">{props.data.coloumn1}</div>
             <div className="filterAction">
-              <img src={updownarrow} width="9" height="9" />
+              <img src={updownarrow} width="9" height="9" alt = "" />
             </div>
           </div>
         </div>
@@ -30,7 +30,7 @@ const TableFilter = (props) => {
               </div>
               <div className="filterTitle">{props.data.coloumn2}</div>
             <div className="filterAction">
-              <img src={updownarrow} width="9" height="9" />
+              <img src={updownarrow} width="9" height="9" alt = ""/>
             </div>
           </div>
         </div>
@@ -42,7 +42,7 @@ const TableFilter = (props) => {
               </div>
               <div className="filterTitle">{props.data.coloumn3}</div>
             <div className="filterAction">
-              <img src={updownarrow} width="9" height="9" />
+              <img src={updownarrow} width="9" height="9" alt = "" />
             </div>
           </div>
         </div>
@@ -54,7 +54,7 @@ const TableFilter = (props) => {
               </div>
               <div className="filterTitle">{props.data.coloumn4}</div>
             <div className="filterAction">
-              <img src={updownarrow} width="9" height="9" />
+              <img src={updownarrow} width="9" height="9" alt = "" />
             </div>
           </div>
         </div>
@@ -66,7 +66,7 @@ const TableFilter = (props) => {
               </div>
               <div className="filterTitle">{props.data.coloumn5}</div>
             <div className="filterAction">
-              <img src={updownarrow} width="9" height="9" />
+              <img src={updownarrow} width="9" height="9" alt = "" />
             </div>
           </div>
         </div>
@@ -78,7 +78,7 @@ const TableFilter = (props) => {
               </div>
               <div className="filterTitle">{props.data.coloumn6}</div>
             <div className="filterAction">
-              <img src={updownarrow} width="9" height="9" />
+              <img src={updownarrow} width="9" height="9" alt = "" />
             </div>
           </div>
         </div>
@@ -90,7 +90,7 @@ const TableFilter = (props) => {
               </div>
               <div className="filterTitle">{props.data.coloumn7}</div>
             <div className="filterAction">
-              <img src={updownarrow} width="9" height="9" />
+              <img src={updownarrow} width="9" height="9" alt = "" />
             </div>
           </div>
         </div>

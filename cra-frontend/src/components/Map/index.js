@@ -87,7 +87,7 @@ const Map = (props) => {
           let options = { color: color };
           if (warehouseLocation) {
             options.color = colors[0];
-            if (warehouseLocation.latitude == w.location.latitude && warehouseLocation.longitude == w.location.longitude) {
+            if (warehouseLocation.latitude === w.location.latitude && warehouseLocation.longitude ===  w.location.longitude) {
               options.color = colors[Math.floor(Math.random() * 3) + 1];
               options.scale = 2;
             }
