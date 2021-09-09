@@ -7,6 +7,7 @@ import logo from "../../assets/brands/VACCINELEDGER.png";
 import { useDispatch } from "react-redux";
 import Modal from "../../shared/modal";
 import OrganisationPopUp from "../../components/signUp/organisationPopUp";
+import { Link } from "react-router-dom";
 
 const SignupContainer = (props) => {
   const [email, setEmail] = useState("");
@@ -31,6 +32,7 @@ const SignupContainer = (props) => {
   window.onresize = () => {
     setInnerwidth(window.innerWidth);
   };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const onSignup = useCallback(async (values) => {
     let data = {
       firstName,
@@ -78,7 +80,7 @@ const SignupContainer = (props) => {
       let data = {
         firstName,
         lastName,
-        emailId: email != "" ? email : phone,
+        emailId: email !== "" ? email : phone,
         organisationId: organisation.id,
       };
       const result = await checkUser(data);
@@ -117,15 +119,9 @@ const SignupContainer = (props) => {
       <MobileHeader {...props} />
       {innerWidth > 1024 && (
         <nav className='navbar sticky-top navbar-expand-lg'>
-          <a className='navbar-brand' href='#'>
-            <img
-              src={logo}
-              width='230'
-              height='30'
-              alt='logo'
-              onClick={() => props.history.push("/#")}
-            />
-          </a>
+          <Link className='navbar-brand' to='#'>
+            <img src={logo} width='230' height='30' alt='logo' />
+          </Link>
         </nav>
       )}
       <Signup
