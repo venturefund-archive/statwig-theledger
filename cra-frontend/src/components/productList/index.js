@@ -1,7 +1,7 @@
 import React  from 'react';
 import './style.scss';
 import Add from '../../assets/icons/add.svg';
-import Order from '../../assets/icons/order.svg';
+// import Order from '../../assets/icons/order.svg';
 import TableFilter from './tableFilter';
 import Table from './table';
 import {
@@ -35,13 +35,13 @@ const ProductList = props => {
     coloumn7: 'Expiry Date',
     coloumn8: 'Select',
 
-    img1: <img src={Package} width="16" height="16" />,
-    img2: <img src={mon} width="16" height="16" />,
-    img3: <img src={Layers} width="16" height="16" />,
-    img4: <img src={TotalInventoryAdded} width="20" height="20" />,
-    img5: <img src={Status} width="16" height="16" />,
-    img6: <img src={calender} width="16" height="16" />,
-    img7: <img src={calender} width="16" height="16" />,
+    img1: <img src={Package} width="16" height="16" alt=""/>,
+    img2: <img src={mon} width="16" height="16" alt=""/>,
+    img3: <img src={Layers} width="16" height="16" alt=""/>,
+    img4: <img src={TotalInventoryAdded} width="20" height="20" alt=""/>,
+    img5: <img src={Status} width="16" height="16" alt=""/>,
+    img6: <img src={calender} width="16" height="16" alt=""/>,
+    img7: <img src={calender} width="16" height="16" alt=""/>,
   
   };
 
@@ -52,21 +52,21 @@ const ProductList = props => {
         <div className="d-flex">
           <Link to="/inventory">
         <button className="btn btn-outline-primary fontSize20 font-weight-bold mr-4">
-          <img src={upAndDown} width="14" height="14" className="mr-2" />
+          <img src={upAndDown} width="14" height="14" className="mr-2" alt=""/>
             <span>Back to Inventory</span>
           </button>
           </Link>
           <Link to="/addproduct">
           <button className="btn btn-orange fontSize20 font-weight-bold mr-4 product">
-          <img src={Add} width="14" height="14" className="mr-2" />
+          <img src={Add} width="14" height="14" className="mr-2" alt=""/>
             <span>Add New Product</span>
           </button>
           </Link>
           <button className="btn btn-md btn-main-blue export font-weight-bold">
             <div className="d-flex  align-items-center">
-              <img src={ExportIcon} width="16" height="16" className="mr-3" />
+              <img src={ExportIcon} width="16" height="16" className="mr-3" alt=""/>
               <span>Export</span>
-              <img src={dropdownIcon} width="16" height="16" className="ml-3" />
+              <img src={dropdownIcon} width="16" height="16" className="ml-3" alt=""/>
             </div>
           </button>
           

@@ -158,9 +158,9 @@ const Orders = (props) => {
     setOpenExcel(false);
   };
 
-  const closeModal = () => {
-    setOpenCreatedOrder(false);
-  };
+  // const closeModal = () => {
+  //   setOpenCreatedOrder(false);
+  // };
 
   const setData = (v, a = false) => {
     setvisible(v);

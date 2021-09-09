@@ -8,9 +8,9 @@ import {
 import ChartsPage from '../doughnut'
 import SummaryTable from './summaryTable';
 import totalshipments from "../../assets/icons/TotalShipmentsCompleted.svg";
-import totalinventory from "../../assets/icons/TotalInventoryAdded.svg";
+// import totalinventory from "../../assets/icons/TotalInventoryAdded.svg";
 import currentshipment from "../../assets/icons/CurrentShipmentInTransit.svg";
-import Totalshipments from "../../assets/icons/TotalShipments.svg";
+// import Totalshipments from "../../assets/icons/TotalShipments.svg";
 import shipmentsdelayed from "../../assets/icons/TotalShipmentsDelayed.svg";
 import TotalInventoryAdded from '../../assets/icons/TotalProductCategory.png';
 import AverageOrderProcessingTime from '../../assets/icons/Av_or_pr_ti.png';

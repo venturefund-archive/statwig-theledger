@@ -1,10 +1,10 @@
 import React from 'react';
-import { setTracingShipments } from '../../../actions/shipmentActions';
-import { useDispatch } from 'react-redux';
-import alert from '../../../assets/icons/alert.png';
-import location from '../../../assets/icons/CurrentLocationWhite.svg';
-import previous from '../../../assets/icons/previous.png';
-import next from '../../../assets/icons/next.png';
+// import { setTracingShipments } from '../../../actions/shipmentActions';
+// import { useDispatch } from 'react-redux';
+// import alert from '../../../assets/icons/alert.png';
+// import location from '../../../assets/icons/CurrentLocationWhite.svg';
+// import previous from '../../../assets/icons/previous.png';
+// import next from '../../../assets/icons/next.png';
 import user from '../../../assets/icons/user.svg';
 import { Link } from 'react-router-dom';
 import { formatDate } from '../../../utils/dateHelper';

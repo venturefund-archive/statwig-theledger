@@ -21,14 +21,13 @@ const SummaryTable = (props) => {
   });
   const { shipments } = props;
   console.log({ shipments });
-  let supplierAddress, receiverAddress;
   
   return (
     <React.Fragment>
       {shipments.length === 0 ? (
         <div className="summaryTable justify-content-center ">
           <div className="d-flex flex-column ">
-            <img src={EmptyShipments} height="200" width="200" />
+            <img src={EmptyShipments} height="200" width="200" alt = ""/>
           </div>
         </div>
       ) : (
@@ -36,7 +35,7 @@ const SummaryTable = (props) => {
           <div className="rowData">
             <div className="headline">
               <span style={{position:'relative',top:'25%', left:"2px"}}>
-                <img src={shippment} height='14' width='20' className="mr-2"></img>
+                <img src={shippment} height='14' width='20' className="mr-2" alt = ""></img>
                 <b>Shipment ID</b>                
               </span>
             </div>
@@ -49,7 +48,7 @@ const SummaryTable = (props) => {
                       style={{ backgroundColor: "#EAEAEA", marginLeft: 5 }}
                       className="rounded"
                     >
-                      <img style={{ height: 15 }} src={alertShip} />
+                      <img style={{ height: 15 }} src={alertShip} alt = ""/>
                     </span>
                   )}
                 </div>
@@ -59,7 +58,7 @@ const SummaryTable = (props) => {
           <div className="rowData">
             <div className="headline">
             <span style={{position:'relative',top:'25%'}}>
-              <img src={inandoutbound} height='14' width='20' className="mr-2"></img>
+              <img src={inandoutbound} height='14' width='20' className="mr-2" alt = ""></img>
               <b>Type</b>
             </span>  
             </div>
@@ -78,7 +77,7 @@ const SummaryTable = (props) => {
           <div className="rowData">
             <div className="headline">
             <span style={{position:'relative',top:'25%'}}>
-            <img src={shippmentdate} height='15' width='15' className="mr-1"></img>
+            <img src={shippmentdate} height='15' width='15' className="mr-1" alt = ""></img>
             <span style={{fontWeight:600}}>Shipping Date</span>
               </span> 
             </div>
@@ -96,7 +95,7 @@ const SummaryTable = (props) => {
           <div className="rowData">
             <div className="headline">
             <span style={{position:'relative',top:'25%'}}>
-            <img src={received} height='15' width='15' className="mr-2"></img>
+            <img src={received} height='15' width='15' className="mr-2" alt = ""></img>
             <b>From</b> 
             </span>
             </div>
@@ -114,7 +113,7 @@ const SummaryTable = (props) => {
           <div className="rowData">
             <div className="headline">
             <span style={{position:'relative',top:'25%'}}>
-              <img src={sent} height='15' width='20' className="mr-2"></img>
+              <img src={sent} height='15' width='20' className="mr-2" alt = ""></img>
               <b>To</b>
             </span>  
             </div>
@@ -131,7 +130,7 @@ const SummaryTable = (props) => {
           <div className="rowData">
             <div className="headline">
             <span style={{position:'relative',top:'25%'}}>
-            <img src={status} height='15' width='15' className="mr-2"></img>
+            <img src={status} height='15' width='15' className="mr-2" alt = ""></img>
             <b>Status</b>
             </span>  
             </div>
