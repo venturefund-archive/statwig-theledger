@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import EditRow from './editRow';
 import './style.scss';
 

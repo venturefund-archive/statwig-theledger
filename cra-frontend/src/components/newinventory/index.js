@@ -6,22 +6,19 @@ import Modal from '../../shared/modal';
 import InventoryPopUp from './inventorypopup';
 import ExcelPopUp from './excelpopup';
 import FailurePopUp from './failurepopup';
-import uploadBlue from '../../assets/icons/UploadWhite.svg';
+// import uploadBlue from '../../assets/icons/UploadWhite.svg';
 import ExportIcon from '../../assets/icons/Export.svg';
 import dropdownIcon from '../../assets/icons/drop-down.svg';
 import review from '../../assets/icons/review.png';
 import ShipmentFailPopUp from '../neworder/shipmentFailPopUp';
-import { Alert, AlertTitle } from '@material-ui/lab';
+// import { Alert, AlertTitle } from '@material-ui/lab';
 
 import {
-  addMultipleInventories,
   setReviewinventories,
-  resetInventories,
-  addInventoriesFromExcel,
   resetReviewInventories,
 } from '../../actions/inventoryActions';
 import { turnOn, turnOff } from '../../actions/spinnerActions';
-import { getProducts, getProductsByCategory } from '../../actions/poActions';
+import { getProducts } from '../../actions/poActions';
 import { isAuthenticated } from '../../utils/commonHelper';
 
 const NewInventory = (props) => {
@@ -110,7 +107,6 @@ const NewInventory = (props) => {
     setOpenQuantityFailInventory(false);
   };
 
-  var numeric = { year: 'numeric', month: 'numeric' };
 
   const dispatch = useDispatch();
 
@@ -264,7 +260,7 @@ const NewInventory = (props) => {
               <div className="d-flex  align-items-center">
                 <img src={ExportIcon} width="16" height="16" className="mr-3" />
                 <span><b>Import</b></span>
-                <img src={dropdownIcon} width="16" height="16" className="ml-3" />
+                <img src={dropdownIcon} width="16" height="16" className="ml-3" alt= "" />
               </div>
             </button>
           }
@@ -320,7 +316,7 @@ const NewInventory = (props) => {
       {/* <div className="total">Grand Total</div>
       <span className="value">{grandTotal}</span> */}
       <button className="btn-orange btn" onClick={onProceedToReview}>
-        <img src={review} width="20" className="" />
+        <img src={review} width="20" className="" alt = ""/>
         <span className="ml-1"><b>Review Product</b></span>
       </button>
       <button 

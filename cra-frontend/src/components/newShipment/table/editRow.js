@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Delete from '../../../assets/icons/Delete.png';
-import DropdownButton from '../../../shared/dropdownButtonGroup';
+// import DropdownButton from '../../../shared/dropdownButtonGroup';
 import Select from 'react-select';
 import {getProductList} from '../../../actions/productActions';
 import './style.scss';
 import Modal from "../../../shared/modal";
-import CloseIcon from "../../../assets/icons/cross.svg";
-import TotalInventoryAdded from '../../../assets/icons/TotalInventoryAddedcopy.svg';
-import Add from '../../../assets/icons/add.svg';
+// import CloseIcon from "../../../assets/icons/cross.svg";
+// import TotalInventoryAdded from '../../../assets/icons/TotalInventoryAddedcopy.svg';
+// import Add from '../../../assets/icons/add.svg';
 import user from '../../../assets/icons/brand.svg';
 import Quantity from '../../../assets/icons/Quantity.png';
 import Product from '../../../assets/icons/Producttype.png';
@@ -22,9 +22,7 @@ const EditRow = props => {
   const {
     prod,
     handleQuantityChange,
-    handleLabelIdChange,
     index,
-    onRemoveRow,
     enableDelete,
     category,
     handleCategoryChange,
@@ -43,16 +41,15 @@ const EditRow = props => {
     coloumn5: 'Exp Date',
     coloumn6: 'Quantity',
 
-    img1: <img src={Product} width="15" height="15"/>,
-    img2: <img src={user} width="15" height="15"/>,
-    img3: <img src={Batch} width="15" height="15"/>,
-    img4: <img src={date} width="15" height="15"/>,
-    img5: <img src={date} width="15" height="15"/>,
-    img6: <img src={Quantity} width="20" height="15"/>,
+    img1: <img src={Product} width="15" height="15" alt = ""/>,
+    img2: <img src={user} width="15" height="15" alt = ""/>,
+    img3: <img src={Batch} width="15" height="15" alt = ""/>,
+    img4: <img src={date} width="15" height="15" alt = ""/>,
+    img5: <img src={date} width="15" height="15" alt = ""/>,
+    img6: <img src={Quantity} width="20" height="15" alt = ""/>,
   };
   // console.log(prod,"Edit rowt",index);
   const [editButtonStatus, setEditButtonStatus] = useState(false);
-  const [changeValue, setValue] = useState("");
   const [changebtn, setbtn] = useState(false);
   const [addnew, setAddnew] = useState(!props.category);
   const [disabled, setDisabled] = useState(true);
@@ -64,15 +61,8 @@ const EditRow = props => {
   const [selectedBatch, setSelectedBatch] = useState({});
   const [selectedIndex, setSelectedIndex] = useState();
   const [BatchSelected, setBatchSelected] = useState([]);
-  const [isOpen, setOpen] = useState(false);
   const closeModal = () => setShowModal(false);
-  const handleOpen = () => {
-    setOpen(true);
-  };
 
-  const handleClose = () => {
-    setOpen(false);
-  };
 
   const onEditClick = (e) => {
     setDisabled(!disabled);
@@ -91,10 +81,6 @@ const EditRow = props => {
     setbtn(true);
     setDisabled(!disabled);
     setEditButtonStatus(false);
-  };
-
-  const handleBatchQuantityChange = (e) => {
-    setValue(e);
   };
 
   
@@ -133,7 +119,6 @@ const EditRow = props => {
   }
 }
 
-var defaultQuantity  =  "Quantity";
 
 const updateQuantity = () =>
 {

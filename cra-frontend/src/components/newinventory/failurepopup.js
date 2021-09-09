@@ -7,7 +7,7 @@ const FailurePopUp = (props) => {
   return (
     <div className="inventorypopup">
       <div className="d-flex  flex-column align-items-center">
-        <img src={Checked} width='60' height='60' className="mb-3" />
+        <img src={Checked} width='60' height='60' className="mb-3" alt = "" />
         <div className="alert" > Fail!</div>
         <div className="font-weight-bolder error">' {props.inventoryError} '</div>
         <div className="data"> {props.inventoryError == 'Check expiryDate'? null: "cannot be Empty"}</div>
