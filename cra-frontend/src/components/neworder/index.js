@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch, batch, createDispatchHook } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import OrderIcon from '../../assets/icons/order.svg';
 import EditTable from "./table/editTable";
 import "./style.scss";
@@ -8,10 +8,7 @@ import {
   getAllOrganisations,
   getRegions,
   getCountryDetailsByRegion,
-  getOrgTypes,
   getOrganizations,
-  getOrganizationWarehouses,
-  getAddresses   
 
 } from "../../actions/shippingOrderAction";
 // import {
@@ -36,9 +33,6 @@ const NewOrder = (props) => {
     return state?.reviewPo;
   });
   
-  const profile = useSelector((state) => {
-    return state.user;
-  });
   const customStyles = {
     option: (provided, state) => ({
       ...provided,
@@ -71,18 +65,18 @@ const NewOrder = (props) => {
   const [category, setCategory] = useState([]);
   const [addProducts, setAddProducts] = useState(editPo !== null ? editPo.products : [{"productId": "", "id": "", "productQuantity": "", "name": "","manufacturer": " ", "type": ""}]);
   const dispatch = useDispatch();
-  const [senderOrgId, setSenderOrgId] = useState(
-    editPo !== null ? editPo.fromOrgId : "Select Organisation Name"
-  );
-  const [senderOrgType, setSenderOrgType] = useState(
-    editPo !== null ? editPo.typeName : ""
-  );
-  const [receiverOrgId, setReceiverOrgId] = useState(
-    editPo !== null ? editPo.toOrgName : "Select Organisation Name"
-  );
-  const [receiverOrgLoc, setReceiverOrgLoc] = useState(
-    editPo !== null ? editPo.toOrgLocName : "Select Delivery Location"
-  );
+  // const [senderOrgId, setSenderOrgId] = useState(
+  //   editPo !== null ? editPo.fromOrgId : "Select Organisation Name"
+  // );
+  // const [senderOrgType, setSenderOrgType] = useState(
+  //   editPo !== null ? editPo.typeName : ""
+  // );
+  // const [receiverOrgId, setReceiverOrgId] = useState(
+  //   editPo !== null ? editPo.toOrgName : "Select Organisation Name"
+  // );
+  // const [receiverOrgLoc, setReceiverOrgLoc] = useState(
+  //   editPo !== null ? editPo.toOrgLocName : "Select Delivery Location"
+  // );
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [quantity, setquantity] = useState("");
@@ -157,23 +151,23 @@ const NewOrder = (props) => {
   };
 
   
-  const onOrggChange = async(v) =>
-  {
-    console.log("Hi");
-    try{
-      const selOrg = orgDetails.filter((value) => {
-        return value.name==v.label;
-    });
-     console.log("SelOrg is :- ", selOrg);
-      setFieldValue('toOrgLocName',selOrg[0].postalAddress);
-      setFieldValue('toOrgLoc',selOrg[0].warehouses[0]);
+  // const onOrggChange = async(v) =>
+  // {
+  //   console.log("Hi");
+  //   try{
+  //     const selOrg = orgDetails.filter((value) => {
+  //       return value.name==v.label;
+  //   });
+  //    console.log("SelOrg is :- ", selOrg);
+  //     setFieldValue('toOrgLocName',selOrg[0].postalAddress);
+  //     setFieldValue('toOrgLoc',selOrg[0].warehouses[0]);
       
-    }
-    catch(err)
-    {
-      console.log(err);
-    }
-  }
+  //   }
+  //   catch(err)
+  //   {
+  //     console.log(err);
+  //   }
+  // }
   const onOrgChange = async (value) => {
     try {
       const warehouse = await getWarehouseByOrgId(value);
@@ -274,7 +268,7 @@ const NewOrder = (props) => {
 
   const onCategoryChange = async (index, value, setFieldValue) => {
     try {
-      const warehouse = await getProductsByCategory(value);
+      // const warehouse = await getProductsByCategory(value);
       let newArr = [...addProducts];
       newArr[index] = {"productId": "", "id": "", "productQuantity": "", "name": "", "type": value, "manufacturer": "","unitofMeasure":""};
       newArr[index]['quantity'] = '';

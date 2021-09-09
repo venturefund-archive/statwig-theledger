@@ -11,7 +11,7 @@ import Package from "../../assets/icons/package.svg";
 import calender from "../../assets/icons/calendar.svg";
 import Order from "../../assets/icons/orders.svg";
 import Totalshipments from "../../assets/icons/TotalShipment.svg";
-import { useDispatch, useSelector } from "react-redux";
+// import { useDispatch } from "react-redux";
 import ExportIcon from "../../assets/icons/Export.svg";
 import dropdownIcon from "../../assets/icons/drop-down.svg";
 import ExcelPopUp from "./ExcelPopup";
@@ -22,9 +22,6 @@ import {
   getReceivedPOs,
   getOrderIds,
   getProductIdDeliveryLocationsOrganisations,
-  getPOs,
-  resetPOs,
-  resetReviewPos,
   getExportFile,
 } from "../../actions/poActions";
 import { config } from "../../config";
@@ -39,7 +36,7 @@ const Orders = (props) => {
   const [skip, setSkip] = useState(0);
   const [limit, setLimit] = useState(10);
   const [alerts, setAlerts] = useState(false);
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const [outboundRecords, setOutboundRecords] = useState([]);
   const [inboundRecords, setInboundRecords] = useState([]);
   const [dateFilter, setDateFilter] = useState("");
@@ -104,7 +101,6 @@ const Orders = (props) => {
       setPoOrganisationsList(productsLocationsOrganisationsRes.organisations);
       setSkip(0);
     }
-    // dispatch(resetReviewPos({}));
     fetchData();
   }, [visible]);
 
@@ -150,12 +146,12 @@ const Orders = (props) => {
     coloumn5: "Delivery Location",
     coloumn6: "Status",
 
-    img1: <img src={mon} width="16" height="16" />,
-    img2: <img src={calender} width="16" height="16" />,
-    img3: <img src={Order} width="18" height="16" />,
-    img4: <img src={Package} width="16" height="16" />,
-    img5: <img src={Totalshipments} width="18" height="18" />,
-    img6: <img src={Status} width="16" height="16" />,
+    img1: <img src={mon} width="16" height="16" alt = "" />,
+    img2: <img src={calender} width="16" height="16" alt = "" />,
+    img3: <img src={Order} width="18" height="16" alt = ""/>,
+    img4: <img src={Package} width="16" height="16" alt = ""/>,
+    img5: <img src={Totalshipments} width="18" height="18" alt = ""/>,
+    img6: <img src={Status} width="16" height="16" alt = ""/>,
   };
 
   const closeExcelModal = () => {
@@ -421,6 +417,7 @@ const Orders = (props) => {
                   width="20"
                   height="17"
                   className="mr-2 mb-1"
+                  alt = ""
                 />
                 <span style={{ color: "white" }}>
                   <b>Create New Order</b>
@@ -436,11 +433,11 @@ const Orders = (props) => {
               onClick={() => setMenu(!menu)}
             >
               <div className="d-flex align-items-center">
-                <img src={ExportIcon} width="16" height="16" className="mr-2" />
+                <img src={ExportIcon} width="16" height="16" className="mr-2" alt = ""/>
                 <span>
                   <b>Import</b>
                 </span>
-                <img src={dropdownIcon} width="14" height="14" className="ml-2" />
+                <img src={dropdownIcon} width="14" height="14" className="ml-2" alt = ""/>
               </div>
             </button>
           }

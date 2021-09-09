@@ -1,9 +1,9 @@
 import React from 'react';
 import Delete from '../../../assets/icons/Delete.png';
-import DropdownButton from '../../../shared/dropdownButtonGroup';
+// import DropdownButton from '../../../shared/dropdownButtonGroup';
 import Select from 'react-select';
 import './style.scss';
-import Divider from '@material-ui/core/Divider';
+// import Divider from '@material-ui/core/Divider';
 
 const EditRow = props => {
   const {
@@ -121,7 +121,7 @@ const EditRow = props => {
       </div>
       {props.product.length > 0 &&
         <div className=" m-3 bg-light">
-          <span className="del-pad shadow border-none rounded-circle ml-2 " onClick={() => onRemoveRow(index)}><img className=" cursorP  p-1" height="30" src={Delete} /></span>
+          <span className="del-pad shadow border-none rounded-circle ml-2 " onClick={() => onRemoveRow(index)}><img className=" cursorP  p-1" height="30" src={Delete} alt = "" /></span>
         </div>
       }
     </div>

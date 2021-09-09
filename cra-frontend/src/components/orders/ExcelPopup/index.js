@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import './styles.scss';
-import { addPOsFromExcel,setReviewPos } from '../../../actions/poActions';
+import { addPOsFromExcel } from '../../../actions/poActions';
 import { turnOn, turnOff } from '../../../actions/spinnerActions';
 import uploadBlue from '../../../assets/icons/UploadBlue.svg';
 import Modal from '../../../shared/modal';
@@ -35,7 +35,6 @@ const ExcelPopUp = props => {
     
     if (result && result.status === 200 && notNullValues!=0) {
       console.log('success add PO');
-      // dispatch(setReviewPos(result.data.data));
       setopenSuccesfulOrder(true);
       // props.setOpenExcel(false);
       setModalProps({
@@ -66,6 +65,7 @@ const ExcelPopUp = props => {
           width="50"
           height="50"
           className="mt-2"
+          alt = ""
         />
         <div>"Drag and drop" your Excel file here</div>
         <div>or</div>
