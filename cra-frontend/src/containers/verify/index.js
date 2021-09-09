@@ -14,6 +14,7 @@ const VerifyContainer = (props) => {
   const [otp, setOtp] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const dispatch = useDispatch();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const verifyOTP = useCallback(async () => {
     dispatch(turnOn());
     const params = props.location.search.split("emailId=");
@@ -40,6 +41,7 @@ const VerifyContainer = (props) => {
     }
     dispatch(turnOff());
   });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const resendOtp = useCallback(async () => {
     dispatch(turnOn());
     const params = props.location.search.split("emailId=");
