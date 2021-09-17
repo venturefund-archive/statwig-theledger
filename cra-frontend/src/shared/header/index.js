@@ -365,7 +365,7 @@ const Header = (props) => {
                       User Notifications
                     </div>
                     {notifications?.length >= 0 && (
-                      <text
+                      <span
                         style={{
                           position: "relative",
                           left: "40px",
@@ -377,7 +377,7 @@ const Header = (props) => {
                         }}
                       >
                         {notifications?.length} new
-                      </text>
+                      </span>
                     )}
 
                     <div className='tab'>
@@ -425,7 +425,7 @@ const Header = (props) => {
                   </div>
                   {notifications?.length >= 0 ? (
                     notifications?.map((notifications) => (
-                      <div className='slider-item'>
+                      <div className='slider-item' key={notifications.id}>
                         <div onClick={() => clearNotification(notifications)}>
                           <div
                             className='col-sm-10'
