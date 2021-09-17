@@ -97,6 +97,8 @@ const Header = (props) => {
       return "viewshipment/";
     } else if (notif.eventType === "SHIPMENT_TRACKING") {
       return "viewuser/";
+    } else {
+      return "";
     }
   }
 
@@ -166,7 +168,6 @@ const Header = (props) => {
       axios
         .get(`${config().searchProduct}&productType=${searchString}`)
         .then((resp) => {
-          // console.log(resp.data)
           if (resp.data.data.length > 0)
             props.history.push(`/productinventory/${searchString}`);
           else
@@ -204,7 +205,6 @@ const Header = (props) => {
 
   async function changeNotifications(value) {
     const response = await axios.get(`${config().getAlerts}${value}`);
-    console.log(response.data.data.data);
     setNotifications(response.data.data.data);
   }
 
@@ -346,9 +346,7 @@ const Header = (props) => {
                 onClick={() => setShowNotifications(!showNotifications)}
               >
                 {notifications.length && (
-                  <span className='badge badge-light'>
-                    {count}
-                  </span>
+                  <span className='badge badge-light'>{count}</span>
                 )}
               </div>
               {showNotifications && (
@@ -360,7 +358,7 @@ const Header = (props) => {
                         "linear-gradient(to right, #0092e8, #0a6bc6)",
                     }}
                   >
-                    <text
+                    <span
                       style={{
                         color: "white",
                         fontSize: "20px",
@@ -369,9 +367,9 @@ const Header = (props) => {
                       }}
                     >
                       User Notifications
-                    </text>
+                    </span>
                     {notifications?.length >= 0 && (
-                      <text
+                      <span
                         style={{
                           backgroundColor: "#fa7a23",
                           padding: "5px",
@@ -381,7 +379,7 @@ const Header = (props) => {
                         }}
                       >
                         {notifications?.length} new
-                      </text>
+                      </span>
                     )}
                     <div className='section'>
                       <button
@@ -414,7 +412,7 @@ const Header = (props) => {
                   </div>
                   {notifications?.length >= 0 ? (
                     notifications?.map((notifications) => (
-                      <div className='slider-item'>
+                      <div className='slider-item' key={notifications.id}>
                         <div
                           className='row justify-content-between align-items-center'
                           onClick={() => clearNotification(notifications)}

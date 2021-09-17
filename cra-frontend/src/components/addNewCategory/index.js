@@ -30,9 +30,9 @@ const AddCategory = (props) => {
                     alt=''
                   />
                 </div>
-                <label class='btn-primary btn browse pl-5 ml-2'>
+                <label className='btn-primary btn browse pl-5 ml-2'>
                   ADD IMAGE
-                  <input type='file' class='select' />{" "}
+                  <input type='file' className='select' />{" "}
                 </label>
               </div>
 
