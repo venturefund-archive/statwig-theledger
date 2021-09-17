@@ -74,7 +74,11 @@ const Header = (props) => {
       .get(`${config().getSuggestions}?searchString=${e}`)
       .then((resp) => setOptions([...resp.data.data]));
   }
-
+  function getHours(time){
+    let d1 = new Date();
+    let d2 = new Date(time);
+    return Math.floor((d1-d2 / (1000 * 60 * 60)) % 24);
+  }
   const closeModalFail = () => {
     setInvalidSearch(false);
   };
@@ -497,12 +501,12 @@ const Header = (props) => {
               <DropdownButton
                 name={(
                   location?.title +
-                  "\n" +
+                  "|" +
                   location?.warehouseAddress?.city +
                   "," +
                   location?.warehouseAddress?.country
                 )
-                  .substr(0, 25)
+                  .substr(0, 30)
                   .concat("...")}
                 arrowImg={dropdownIcon}
                 onSelect={(item) => {
