@@ -65,7 +65,7 @@ const PopUpLocation = (props) => {
               className='mr-2 mb-1'
               alt='Location'
             />
-            <span>
+            <span className="buttonS">
               <b>Add New Location</b>
             </span>
           </button>
@@ -122,7 +122,7 @@ const PopUpLocation = (props) => {
             updateStatus(wareHouse);
           }}
         >
-          <span>Continue</span>
+          <span>CONTINUE</span>
         </button>
       </div>
       {addedLocationModal && (

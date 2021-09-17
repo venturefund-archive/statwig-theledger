@@ -701,6 +701,13 @@ exports.createShipment = [
           return apiResponse.ErrorResponse(res, "Shipment Not saved");
         }
 
+         if (req.body.shippingDate.includes("/"))
+          {
+              var shipmentData = req.body.shippingDate.split("/")
+              const shippingDate = shipmentData[2]+ "-" + shipmentData[1]+ "-" + shipmentData[0] + "T00:00:00.000Z"
+              data.shippingDate = shippingDate
+          }
+        
         //Blockchain Integration
         const bc_data = {
           Id: data.id,
@@ -2529,6 +2536,9 @@ exports.fetchInboundShipments = [
       let fromSupplier = req.query.from ? req.query.from : undefined;
       let toReceiver = req.query.to ? req.query.to : undefined;
       let shipmentId = req.query.shipmentId ? req.query.shipmentId : undefined;
+      let fromDate = req.query.fromDate ? req.query.fromDate : undefined
+      let toDate = req.query.toDate ? req.query.toDate : undefined
+
       switch (req.query.dateFilter) {
         case "today":
           fromDateFilter = new Date(
@@ -2578,6 +2588,12 @@ exports.fetchInboundShipments = [
 
       if (shipmentId) {
         whereQuery["id"] = shipmentId;
+      }
+
+      if(fromDate && toDate){
+        var firstDate =  new Date(fromDate);
+        var nextDate = new Date(toDate)
+        whereQuery[`createdAt`] = {$gte: firstDate, $lte: nextDate}
       }
 
       if (status) {
@@ -2670,6 +2686,8 @@ exports.fetchOutboundShipments = [
       let fromSupplier = req.query.from ? req.query.from : undefined;
       let toReceiver = req.query.to ? req.query.to : undefined;
       let shipmentId = req.query.shipmentId ? req.query.shipmentId : undefined;
+      let fromDate = req.query.fromDate ? req.query.fromDate : undefined
+      let toDate = req.query.toDate ? req.query.toDate : undefined      
       switch (req.query.dateFilter) {
         case "today":
           fromDateFilter = new Date(
@@ -2720,7 +2738,11 @@ exports.fetchOutboundShipments = [
       if (shipmentId) {
         whereQuery["id"] = shipmentId;
       }
-
+      if(fromDate && toDate){
+        var firstDate =  new Date(fromDate);
+        var nextDate = new Date(toDate)
+        whereQuery[`createdAt`] = {$gte: firstDate, $lte: nextDate}
+      }
       if (status) {
         whereQuery["status"] = status;
       }
