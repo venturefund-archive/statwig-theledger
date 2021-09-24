@@ -145,8 +145,8 @@ const Overview = (props) => {
                 )}
               </div>
             </div>
-            <div className='card-body pl-1'>
-              <div id='chartjs-render-monitor'>
+            <div className='card-body px-5 py-0'>
+              <div id='chartjs-render-monitor' className='py-0'>
                 <ChartsPage {...props} />
               </div>
             </div>
