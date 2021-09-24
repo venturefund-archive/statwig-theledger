@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import Add from "../../assets/icons/createshipment.png";
@@ -833,26 +834,34 @@ console.log(user.organisation)
                         let result = await dispatch(
                           getViewShipment(values.shipmentID)
                         );
-                        if (result.status !== "RECEIVED") {
-                          values.shipmentID = "";
-                          // alert("The shipment has to be delivered first");
-                          setShipmentError("Shipment has to be delivered");
+                        if(values.shipmentID.length === 0){
+                          setShipmentError("Shipment ID cannot be empty");
                           setOpenShipmentFail(true);
                           dispatch(turnOff());
                         }
                         else
                         {
-                          for (let i = 0; i < result.products?.length; i++) {
-                          if (result.products[i].productQuantityShipped) {
-                            result.products[i].productQuantity =
-                              parseInt(result.products[i].productQuantity) -
-                              parseInt(
-                                result.products[i].productQuantityShipped
-                              );
+                          if (result.status !== "RECEIVED") {
+                          values.shipmentID = "";
+                          // alert("The shipment has to be delivered first");
+                          setShipmentError("Shipment has to be delivered");
+                          setOpenShipmentFail(true);
+                          dispatch(turnOff());
                           }
-                          result.products[i].orderedQuantity =
-                            result.products[i].productQuantity;
-                        }
+                          else
+                          {
+                            for (let i = 0; i < result.products?.length; i++) {
+                            if (result.products[i].productQuantityShipped) {
+                              result.products[i].productQuantity =
+                                parseInt(result.products[i].productQuantity) -
+                                parseInt(
+                                  result.products[i].productQuantityShipped
+                                );
+                            }
+                            result.products[i].orderedQuantity =
+                              result.products[i].productQuantity;
+                          }
+                       }
                         dispatch(turnOff());
                         setReceiverOrgLoc();
                         setReceiverOrgId();

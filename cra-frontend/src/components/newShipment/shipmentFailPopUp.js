@@ -19,7 +19,7 @@ const ShipmentFailPopUp = (props) => {
         </div>
         <div className='data'>
           {props.shipmentError === "Check deliveryDate" ||
-          props.shipmentError === "Check Shipment Reference ID"
+          props.shipmentError === "Check Shipment Reference ID" || props.shipmentError === "Shipment ID cannot be empty"
             ? null
             : "cannot be Empty"}
         </div>
