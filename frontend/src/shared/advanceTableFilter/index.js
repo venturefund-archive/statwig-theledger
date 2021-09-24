@@ -672,46 +672,7 @@ const AdvanceTableFilter = (props) => {
         </StyledMenu>
       </div>);
     }
-    // else if (columnData == "Manufacturer") {
-    //   return (<div className="box col">
-    //     <a className="filter-item" onClick={handleInventoryManufacturerClick}>
-    //       <div className="icon mr-2">
-    //         {props.data.img3}
-    //       </div>
-    //       <div className="filterTitle">{props.data.coloumn3}</div>
-    //       <img src={updownarrow} width="10" height="10" className="ml-3" />
-    //     </a>
-    //     <StyledMenu
-    //       id="customized-menu"
-    //       anchorEl={inventoryManufacturerAnchorEl}
-    //       keepMounted
-    //       open={Boolean(inventoryManufacturerAnchorEl)}
-    //       onClose={handleInventoryManufacturerClose}
-    //     >
-    //       <div className="d-flex flex-column align-items-center">
-    //         <StyledMenuItem>
-    //           <Button variant="outlined" color="primary" onClick={() => setInventoryManufacturerFilterOnSelect("")}>Clear</Button>
-    //         </StyledMenuItem>
-    //         {inventoryManufacturerAnchorEl ?
-    //           <Autocomplete
-    //             id="Manufacturer"
-    //             options={props.inventoryFilterData}
-    //             getOptionLabel={(options) => options.manufacturer}
-    //             onChange={(event, newValue) => {
-    //               setInventoryManufacturerFilterOnSelect(newValue.manufacturer)
-    //             }}
-    //             style={{ width: '100%' }}
-    //             renderInput={(params) => <TextField {...params} label={'Search Manufacturer'} variant="outlined" />}
-    //           />
-    //           :
-    //           <div>
-    //             Empty List
-    //         </div>
-    //         }
-    //       </div>
-    //     </StyledMenu>
-    //   </div>);
-    // }
+ 
     else {
       return (<div className="box col">
         <div className="filter-item">
@@ -850,9 +811,19 @@ const AdvanceTableFilter = (props) => {
   }
   const renderColumn1 = (columnData) => {
     if (columnData == "Shipment ID") {
-      return (<div className="box col-2">
-        <a className="filter-item ml-4 mr-3" onClick={handleShipmentIdClick}>
-          <div className="icon ">
+      return (<div className="box col">
+        <a className="filter-item" onClick={() =>
+          {
+            setShowDropDownForShipmentId(!showDropDownForShipmentId);
+            if(!showDropDownForShipmentId) {
+              props.setShowCalendar(false);
+              props.setShowDropDownForFromFilter(false);
+              props.setShowDropDownForToFilter(false);
+              props.setShowExportFilter(false);
+            }
+          }
+        }>
+          <div className="icon mr-2">
             {props.data.img1}
           </div>
           <div className="filterTitle">{props.data.coloumn1}</div>
@@ -1144,7 +1115,7 @@ const AdvanceTableFilter = (props) => {
         {/* </div>
           </div>
         </div> */}
-        <div className="">
+        <div style={{ marginLeft: '10px' }}>
           <div className="box col">
             {/* <button className="btn btn-md btn-blue mr-2">
             <div className="d-flex align-items-center">
@@ -1191,17 +1162,33 @@ const AdvanceTableFilter = (props) => {
               </div>
             </StyledMenu>
             {!props?.isReportDisabled &&
-            <button className="btn-filter-blue ml-2"
-              onClick={() => props.setShowExportFilter(!props.showExportFilter)}
-            >
-              <div className="d-flex  align-items-center">
-                <img src={ExportIcon} width="14" height="14" className="mr-2" />
-                <span>Export</span>
-                <img
-                  src={dropdownIcon}
-                  width="10" height="10"
-                  className="ml-2"
-                />
+              <button className="btn-filter-blue ml-2"
+                onClick={() => {
+                  if (props.type === 'ORDERS' || props.type === 'SHIPMENT') {
+                    props.setShowExportFilter(!props.showExportFilter);
+                    if (!props.showExportFilter && props.type === 'ORDERS') {
+                      setShowDropDownForDeliveryLocation(false);
+                      setShowDropDownForProductName(false);
+                      setShowDropDownForOrderId(false);
+                      setShowCalendar(false);
+                      setShowDropDownForOrderSentTo(false);
+                    } else if(!props.showExportFilter && props.type === 'SHIPMENT') {
+                      setShowDropDownForFromFilter(false);
+                      setShowDropDownForToFilter(false);
+                      setShowDropDownForShipmentId(false);
+                      setShowCalendar(false);
+                    }
+                  }
+                }}
+              >
+                <div className="d-flex  align-items-center">
+                  <img src={ExportIcon} width="14" height="14" className="mr-2" />
+                  <span>Export</span>
+                  <img
+                    src={dropdownIcon}
+                    width="10" height="10"
+                    className="ml-2"
+                  />
                   {
                     props.showExportFilter && props.exportFilterData &&
                     <FilterDropDown

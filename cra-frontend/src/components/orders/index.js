@@ -52,89 +52,240 @@ const Orders = (props) => {
   const [count, setCount] = useState(0);
   const [exportFilterData, setExportFilterData] = useState([]);
   const [showExportFilter, setShowExportFilter] = useState(false);
+
+  const [showCalendar, setShowCalendar] = useState(false);
+
+  const [inBoundData, setInBoundData] = useState([]);
+  const [outBoundData, setOutBoundData] = useState([]);
+
+  const [orderIdData, setOrderIdData] = useState([]);
+  const [orderIdReplicaData, setOrderIdReplicaData] = useState([]);
+  const [showDropDownForOrderId, setShowDropDownForOrderId] = useState(false);
+
+  const [orderSentToData, setOrderSentToData] = useState([]);
+  const [orderSentToReplicaData, setOrderSentToReplicaData] = useState([]);
+  const [showDropDownForOrderSentTo, setShowDropDownForOrderSentTo] = useState(false);
+
+  const [productNameData, setProductNameData] = useState([]);
+  const [productNameReplicaData, setProductNameReplicaData] = useState([]);
+  const [showDropDownForProductName, setShowDropDownForProductName] = useState(false);
+
+  const [deliveryLocationData, setDeliveryLocationData] = useState([]);
+  const [deliveryLocationReplicaData, setDeliveryLocationReplicaData] = useState([]);
+  const [showDropDownForDeliveryLocation, setShowDropDownForDeliveryLocation] = useState(false);
+
+  const [selectedDate, setSelectedDate] = useState(false);
+
+  const [queryKey, setQueryKey] = useState("");
+  const [queryValue, setQueryValue] = useState("");
+
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+
+  const [orderSentToFilter, setOrderSentToFilter] = useState("");
   if (
     !isAuthenticated("viewInboundOrders") &&
     !isAuthenticated("viewOutboundOrders")
   )
-    props.history.push(`/profile`);
-  useEffect(() => {
-    async function fetchData() {
-      if (visible === "one") {
-        setDateFilter("");
-        setProductNameFilter("");
-        setToFilter("");
-        setFromFilter("");
-        setOrderIdFilter("");
-        setStatusFilter("");
-        setLocationFilter("");
-        const outboundRes = await getSentPOs("", "", "", "", "", "", 0, limit); //to, orderId, productName, deliveryLocation, date, statusFilter,skip, limit
-        setOutboundRecords(outboundRes.data.outboundPOs);
-        setCount(outboundRes.data.count);
-      } else {
-        setDateFilter("");
-        setProductNameFilter("");
-        setToFilter("");
-        setFromFilter("");
-        setOrderIdFilter("");
-        setStatusFilter("");
-        setLocationFilter("");
-        const inboundRes = await getReceivedPOs(
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          0,
-          limit
-        ); //from, orderId, productName, deliveryLocation, date,status, skip, limit
-        setInboundRecords(inboundRes.data.inboundPOs);
-        setCount(inboundRes.data.count);
-      }
-      const orderIdListRes = await getOrderIds();
-      setPoOrderIdList(orderIdListRes);
 
-      const productsLocationsOrganisationsRes =
+  props.history.push(`/profile`);
+
+  const getStartDate = (!!startDate && selectedDate) ? getFormatedDate(startDate) : '';
+  const getEndDate = (!!endDate && selectedDate) ? getFormatedDate(endDate) : '';
+
+  useEffect(() => {
+    if (queryKey && queryValue) {
+      if (queryValue === 'orderSentTo') {
+        if (visible === 'one') {
+          async function fetchData() {
+            const outboundRes = await getSentPOs(queryKey, orderIdFilter, productNameFilter, locationFilter, statusFilter, 0, limit, getStartDate, getEndDate, dateFilter); //to, orderId, productName, deliveryLocation, date, statusFilter,skip, limit
+            setOutboundRecords(outboundRes.data.outboundPOs);
+            setCount(outboundRes.data.count);
+          }
+          fetchData();
+        } else {
+          async function fetchData() {
+            const inboundRes = await getReceivedPOs(queryKey, orderIdFilter, productNameFilter, locationFilter, statusFilter, 0, limit, getStartDate, getEndDate, dateFilter); //from, orderId, productName, deliveryLocation, date,status, skip, limit
+            setInboundRecords(inboundRes.data.inboundPOs);
+            setCount(inboundRes.data.count);
+          }
+          fetchData();
+        }
+      } else if (queryValue === 'orderId') {
+        if (visible === 'one') {
+          async function fetchData() {
+            const outboundRes = await getSentPOs(orderSentToFilter, queryKey, productNameFilter, locationFilter, statusFilter, 0, limit, getStartDate, getEndDate, dateFilter); //to, orderId, productName, deliveryLocation, date, statusFilter,skip, limit
+            setOutboundRecords(outboundRes.data.outboundPOs);
+            setCount(outboundRes.data.count);
+          }
+          fetchData();
+        } else {
+          async function fetchData() {
+            const inboundRes = await getReceivedPOs(orderSentToFilter, queryKey, productNameFilter, locationFilter, statusFilter, 0, limit, getStartDate, getEndDate, dateFilter); //from, orderId, productName, deliveryLocation, date,status, skip, limit
+            setInboundRecords(inboundRes.data.inboundPOs);
+            setCount(inboundRes.data.count);
+          }
+          fetchData();
+        }
+      } else if (queryValue === 'productName') {
+        if (visible === 'one') {
+          async function fetchData() {
+            const outboundRes = await getSentPOs(orderSentToFilter, orderIdFilter, queryKey, locationFilter, statusFilter, 0, limit, getStartDate, getEndDate, dateFilter); //to, orderId, productName, deliveryLocation, date, statusFilter,skip, limit
+            setOutboundRecords(outboundRes.data.outboundPOs);
+            setCount(outboundRes.data.count);
+          }
+          fetchData();
+        } else {
+          async function fetchData() {
+            const inboundRes = await getReceivedPOs(orderSentToFilter, orderIdFilter, queryKey, locationFilter, statusFilter, 0, limit, getStartDate, getEndDate, dateFilter); //from, orderId, productName, deliveryLocation, date,status, skip, limit
+            setInboundRecords(inboundRes.data.inboundPOs);
+            setCount(inboundRes.data.count);
+          }
+          fetchData();
+        }
+      } else if (queryValue === 'deliveryLocation') {
+        if (visible === 'one') {
+          async function fetchData() {
+            const outboundRes = await getSentPOs(orderSentToFilter, orderIdFilter, productNameFilter, queryKey, statusFilter, 0, limit, getStartDate, getEndDate, dateFilter); //to, orderId, productName, deliveryLocation, date, statusFilter,skip, limit
+            setOutboundRecords(outboundRes.data.outboundPOs);
+            setCount(outboundRes.data.count);
+          }
+          fetchData();
+        } else {
+          async function fetchData() {
+            const inboundRes = await getReceivedPOs(orderSentToFilter, orderIdFilter, productNameFilter, queryKey, statusFilter, 0, limit, getStartDate, getEndDate, dateFilter); //from, orderId, productName, deliveryLocation, date,status, skip, limit
+            setInboundRecords(inboundRes.data.inboundPOs);
+            setCount(inboundRes.data.count);
+          }
+          fetchData();
+        }
+      }
+    } else {
+      async function fetchData() {
+        if (visible === "one") {
+          setShowDropDownForDeliveryLocation(false);
+          setShowDropDownForOrderId(false);
+          setShowDropDownForOrderSentTo(false);
+          setShowDropDownForProductName(false);
+          setShowExportFilter(false);
+          setShowCalendar(false);
+          const outboundRes = await getSentPOs(orderSentToFilter, orderIdFilter, productNameFilter, locationFilter, statusFilter, 0, limit, getStartDate, getEndDate, dateFilter); //to, orderId, productName, deliveryLocation, date, statusFilter,skip, limit
+          setOutboundRecords(outboundRes.data.outboundPOs);
+          setOutBoundData(outboundRes.data.outboundPOs);
+          setCount(outboundRes.data.count);
+        } else {
+          setShowDropDownForDeliveryLocation(false);
+          setShowDropDownForOrderId(false);
+          setShowDropDownForOrderSentTo(false);
+          setShowDropDownForProductName(false);
+          setShowExportFilter(false);
+          setShowCalendar(false);
+          const inboundRes = await getReceivedPOs(orderSentToFilter, orderIdFilter, productNameFilter, locationFilter, statusFilter, 0, limit, getStartDate, getEndDate, dateFilter); //from, orderId, productName, deliveryLocation, date,status, skip, limit
+          setInboundRecords(inboundRes.data.inboundPOs);
+          setInBoundData(inboundRes.data.inboundPOs);
+          setCount(inboundRes.data.count);
+        }
+
+        setStartDate(prevState => !!prevState ? prevState : new Date());
+        setEndDate(prevState => !!prevState ? prevState : new Date());
+        const orderIdListRes = await getOrderIds();
+        setPoOrderIdList(orderIdListRes);
+
+        const productsLocationsOrganisationsRes =
         await getProductIdDeliveryLocationsOrganisations();
-      // console.log('products location', productsLocationsOrganisationsRes);
-      setPoDeliveryLocationsList(
-        productsLocationsOrganisationsRes.deliveryLocations
-      );
-      setPoProductsList(productsLocationsOrganisationsRes.productIds);
-      setPoOrganisationsList(productsLocationsOrganisationsRes.organisations);
-      setSkip(0);
+        // console.log('products location', productsLocationsOrganisationsRes);
+        setPoDeliveryLocationsList(
+          productsLocationsOrganisationsRes.deliveryLocations
+        );
+        setPoProductsList(productsLocationsOrganisationsRes.productIds);
+        setPoOrganisationsList(productsLocationsOrganisationsRes.organisations);
+        setSkip(0);
+      }
+      fetchData();
     }
-    fetchData();
-  }, [limit, visible]);
+  }, [visible, queryKey, queryValue, limit]);
+
+  useEffect(() => {
+    if (visible === 'one' && outBoundData && outBoundData.length > 0) {
+      if(!orderSentToFilter) {
+        setOrderSentToData([...prepareDropdownData(getUniqueStringFromOrgListForGivenType(outBoundData, 'supplier', 'organisation', 'id'))]);
+        setOrderSentToReplicaData([...prepareDropdownData(getUniqueStringFromOrgListForGivenType(outBoundData, 'supplier', 'organisation', 'id'))]);
+      }
+      
+      if(!orderIdFilter){
+        setOrderIdData([...prepareDropdownData(getUniqueStringFromOrgListForGivenType(outBoundData, 'id'))]);
+        setOrderIdReplicaData([...prepareDropdownData(getUniqueStringFromOrgListForGivenType(outBoundData, 'id'))]);
+      }
+     
+      //BLOCKING THIS FILTER AS SPECIFICS ARE NOT INCLUDED...
+      if(!productNameFilter){
+        
+        // setProductNameData([...prepareDropdownData(getUniqueStringFromOrgListForGivenType(outBoundData, 'id'))]);
+        // setProductNameReplicaData([...prepareDropdownData(getUniqueStringFromOrgListForGivenType(outBoundData, 'id'))]);
+        setProductNameData([]);
+        setProductNameReplicaData([]);
+      }
+     
+      if(!locationFilter){
+        setDeliveryLocationData([...prepareDropdownData(getUniqueStringFromOrgListForGivenType(outBoundData, 'customer', 'warehouse', 'id'))]);
+        setDeliveryLocationReplicaData([...prepareDropdownData(getUniqueStringFromOrgListForGivenType(outBoundData, 'customer', 'warehouse', 'id'))]);
+      }
+      
+    } else if (visible === 'two' && inBoundData && inBoundData.length > 0) {
+
+      if(!orderSentToFilter){
+        setOrderSentToData([...prepareDropdownData(getUniqueStringFromOrgListForGivenType(inBoundData, 'supplier', 'organisation', 'id'))]);
+        setOrderSentToReplicaData([...prepareDropdownData(getUniqueStringFromOrgListForGivenType(inBoundData, 'supplier', 'organisation', 'id'))]);
+      }
+
+      if(!orderIdFilter){
+        setOrderIdData([...prepareDropdownData(getUniqueStringFromOrgListForGivenType(inBoundData, 'id'))]);
+        setOrderIdReplicaData([...prepareDropdownData(getUniqueStringFromOrgListForGivenType(inBoundData, 'id'))]);
+      }
+      
+      if(!productNameFilter){
+        setProductNameData([...prepareDropdownData(getUniqueStringFromOrgListForGivenType(inBoundData, 'id'))]);
+        setProductNameReplicaData([...prepareDropdownData(getUniqueStringFromOrgListForGivenType(inBoundData, 'id'))]);  
+      }
+      
+      if(!locationFilter){
+      setDeliveryLocationData([...prepareDropdownData(getUniqueStringFromOrgListForGivenType(inBoundData, 'customer', 'warehouse', 'id'))]);
+      setDeliveryLocationReplicaData([...prepareDropdownData(getUniqueStringFromOrgListForGivenType(inBoundData, 'customer', 'warehouse', 'id'))]);
+      }
+    }
+  }, [inBoundData, outBoundData, orderSentToFilter, locationFilter, productNameFilter, visible, orderIdFilter]);
 
   const onPageChange = async (pageNum) => {
     const recordSkip = (pageNum - 1) * limit;
     setSkip(recordSkip);
-    if (visible === "one") {
+    if (visible == "one") {
       const outboundRes = await getSentPOs(
-        toFilter,
+        orderSentToFilter,
         orderIdFilter,
         productNameFilter,
         locationFilter,
-        dateFilter,
         statusFilter,
         recordSkip,
-        limit
+        limit,
+        getStartDate,
+        getEndDate,
+        dateFilter
       ); //to, orderId, productName, deliveryLocation, date, skip, limit
       setOutboundRecords(outboundRes.data.outboundPOs);
       setCount(outboundRes.data.count);
     } else {
       const inboundRes = await getReceivedPOs(
-        fromFilter,
+        orderSentToFilter,
         orderIdFilter,
         productNameFilter,
         locationFilter,
-        dateFilter,
         statusFilter,
         recordSkip,
-        limit
+        limit,
+        getStartDate,
+        getEndDate,
+        dateFilter
       ); //from, orderId, productName, deliveryLocation, date, skip, limit
-      console.log(inboundRes.data.inboundPOs);
       setInboundRecords(inboundRes.data.inboundPOs);
       setCount(inboundRes.data.count);
     }
@@ -161,40 +312,42 @@ const Orders = (props) => {
     setOpenExcel(false);
   };
 
-  // const closeModal = () => {
-  //   setOpenCreatedOrder(false);
-  // };
 
   const setData = (v, a = false) => {
     setvisible(v);
     setAlerts(a);
   };
+
   const setDateFilterOnSelect = async (dateFilterSelected) => {
     setDateFilter(dateFilterSelected);
     setSkip(0);
-    if (visible === "one") {
+    if (visible == "one") {
       const outboundRes = await getSentPOs(
-        toFilter,
+        orderSentToFilter,
         orderIdFilter,
         productNameFilter,
         locationFilter,
-        dateFilterSelected,
         statusFilter,
         0,
-        limit
+        limit,
+        getStartDate,
+        getEndDate,
+        dateFilterSelected
       ); //to, orderId, productName, deliveryLocation, date, skip, limit
       setOutboundRecords(outboundRes.data.outboundPOs);
       setCount(outboundRes.data.count);
     } else {
       const inboundRes = await getReceivedPOs(
-        fromFilter,
+        orderSentToFilter,
         orderIdFilter,
         productNameFilter,
         locationFilter,
-        dateFilterSelected,
         statusFilter,
         0,
-        limit
+        limit,
+        getStartDate,
+        getEndDate,
+        dateFilterSelected
       ); //from, orderId, productName, deliveryLocation, date, skip, limit
       setInboundRecords(inboundRes.data.inboundPOs);
       setCount(inboundRes.data.count);
@@ -298,35 +451,40 @@ const Orders = (props) => {
   };
 
   const setStatusFilterOnSelect = async (statusFilterSelected) => {
-    console.log(statusFilterSelected);
     setStatusFilter(statusFilterSelected);
     setSkip(0);
-    if (visible === "one") {
+    if (visible == "one") {
       const outboundRes = await getSentPOs(
-        toFilter,
+        orderSentToFilter,
         orderIdFilter,
         productNameFilter,
         locationFilter,
         dateFilter,
         statusFilterSelected,
         0,
-        limit
+        limit,
+        getStartDate,
+        getEndDate,
+        dateFilter
       ); //to, orderId, productName, deliveryLocation, date,status, skip, limit
-      console.log(outboundRes.data.outboundPOs);
+      
       setOutboundRecords(outboundRes.data.outboundPOs);
       setCount(outboundRes.data.count);
     } else {
       const inboundRes = await getReceivedPOs(
-        fromFilter,
+        orderSentToFilter,
         orderIdFilter,
         productNameFilter,
         locationFilter,
         dateFilter,
         statusFilterSelected,
         0,
-        limit
+        limit,
+        getStartDate,
+        getEndDate,
+        dateFilter
       ); //from, orderId, productName, deliveryLocation, date, skip, limit
-      console.log(inboundRes.data.inboundPOs);
+      
       setInboundRecords(inboundRes.data.inboundPOs);
       setCount(inboundRes.data.count);
     }
@@ -381,38 +539,175 @@ const Orders = (props) => {
     ]);
   }, []);
 
-  const onSelectionOfDropdownValue = (index, type, value) => {
-    setShowExportFilter(false);
-    let url = "";
-    if (visible === "one") {
-      url = `${
-        config().getExportFileForOutboundPurchaseOrdersUrl
-      }?type=${value.toLowerCase()}`;
+  const appendFileName = (value) => {
+    const date = new Date();
+    const YYYYMMDD_format = new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
+      .toISOString()
+      .split("T")[0];
+    const HHMMSS_format = `${date.getHours()}${date.getMinutes()}`;
+    if (visible === 'one') {
+      return `Orders_outbound_${YYYYMMDD_format}_${HHMMSS_format}hrs.${value.toLowerCase() === 'excel' ? 'xlsx' : value.toLowerCase()}`
+    } else {
+      return `Orders_inbound_${YYYYMMDD_format}_${HHMMSS_format}hrs.${value.toLowerCase() === 'excel' ? 'xlsx' : value.toLowerCase()}`
     }
-    if (visible === "two") {
-      url = `${
-        config().getExportFileForInboundPurchaseOrdersUrl
-      }?type=${value.toLowerCase()}`;
+  }
+
+  const onSelectionOfExportDropdown = (index, type, value) => {
+    setShowExportFilter(false);
+    let url = ''
+    if (visible === 'one') {
+      url = `${config().getExportFileForOutboundPurchaseOrdersUrl}?type=${value.toLowerCase()}`;
+    }
+    if (visible === 'two') {
+      url = `${config().getExportFileForInboundPurchaseOrdersUrl}?type=${value.toLowerCase()}`;
     }
 
-    getExportFile(url).then((response) => {
-      if (response.data && response.status !== 200) {
-        console.log("Error while downloading file");
-      } else {
-        const downloadUrl = window.URL.createObjectURL(new Blob([response]));
-        const link = document.createElement("a");
-        link.href = downloadUrl;
-        link.setAttribute(
-          "download",
-          `${uuid()}.${
-            value.toLowerCase() === "excel" ? "xlsx" : value.toLowerCase()
-          }`
-        ); //any other extension
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-      }
+    getExportFile(url)
+      .then(response => {
+        if ((response.data) && response.status !== 200) {
+          console.log('Error while downloading file');
+        } else {
+          const downloadUrl = window.URL.createObjectURL(new Blob([response]));
+          const link = document.createElement('a');
+          link.href = downloadUrl;
+          link.setAttribute('download', appendFileName(value)); //any other extension
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        }
+      })
+  }
+
+  const filterTableByCalendar = async (selectedDateRange) => {
+    setSelectedDate(true);
+    const fromDate = new Date(selectedDateRange.startDate.getTime() - (selectedDateRange.startDate.getTimezoneOffset() * 60000))
+      .toISOString()
+      .split("T")[0];
+
+    setStartDate(() => new Date(fromDate));
+
+    const toDate = new Date(selectedDateRange.endDate.getTime() - (selectedDateRange.endDate.getTimezoneOffset() * 60000))
+      .toISOString()
+      .split("T")[0];
+
+    setEndDate(() => new Date(toDate));
+
+    setShowCalendar(false);
+    setSkip(0);
+
+    if (visible == 'one') {
+      const outboundRes = await getSentPOs(orderSentToFilter, orderIdFilter, productNameFilter, locationFilter, statusFilter, 0, limit, fromDate, toDate, dateFilter); //to, orderId, productName, deliveryLocation, date, statusFilter,skip, limit
+      setOutboundRecords(outboundRes.data.outboundPOs);
+      setCount(outboundRes.data.count);
+    } else {
+      const inboundRes = await getReceivedPOs(orderSentToFilter, orderIdFilter, productNameFilter, locationFilter, statusFilter, 0, limit, fromDate, toDate, dateFilter); //from, orderId, productName, deliveryLocation, date,status, skip, limit
+      setInboundRecords(inboundRes.data.inboundPOs);
+      setCount(inboundRes.data.count);
+    }
+  }
+
+  const prepareDropdownData = (data) => {
+    let finalDropDownData = [];
+    data?.forEach(item => {
+      let obj = {};
+      obj['key'] = item.id ? item['id'] : item.toLowerCase();
+      obj['value'] = item.name ? item['name'] : item;
+      obj['checked'] = false;
+      finalDropDownData.push(obj);
     });
+    return finalDropDownData;
+  }
+
+  const getUniqueStringFromOrgListForGivenType = (data, ...args) => {
+    const availableList = data?.map(item => args.length > 1 ? item && item.hasOwnProperty(args[0]) && item[args[0]].hasOwnProperty(args[1]) && item[args[0]][args[1]].hasOwnProperty(args[2]) && item[args[0]][args[1]][args[2]] : item[args[0]]).filter(item => item);
+    return [...new Set(availableList)];
+  };
+
+  const setCheckedAndUnCheckedOfProvidedList = (typeOriginalData, index) => {
+    return typeOriginalData.map((item, i) => {
+      if (i === index) {
+        item.checked = !item.checked;
+      } else {
+        item.checked = false
+      }
+      return item;
+    });
+  }
+
+  const onSelectionOfDropdownValue = (index, type, value) => {
+    
+    if (type === 'orderSentTo') {
+      setOrderSentToData([...setCheckedAndUnCheckedOfProvidedList(orderSentToData, index)]);
+      setQueryKeyAndQueryValue(setQueryKey, value, setQueryValue, type, orderSentToData, index);
+      if(orderSentToData[index].checked) {
+        setOrderSentToFilter(value);
+      } else {
+        setOrderSentToFilter('');
+      }
+      markOpenedDrownsToFalse();
+    } else if (type === 'orderId') {
+      setOrderIdData([...setCheckedAndUnCheckedOfProvidedList(orderIdData, index)]);
+      setQueryKeyAndQueryValue(setQueryKey, value, setQueryValue, type, orderIdData, index);
+      if(orderIdData[index].checked) {
+        setOrderIdFilter(value);
+      } else {
+        setOrderIdFilter('');
+      }
+      markOpenedDrownsToFalse();
+
+    } else if (type === 'product') {
+      setProductNameData([...setCheckedAndUnCheckedOfProvidedList(productNameData, index)]);
+      setQueryKeyAndQueryValue(setQueryKey, value, setQueryValue, type, productNameData, index);
+      if(productNameData[index].checked) {
+        setProductNameFilter(value);
+      } else {
+        setProductNameFilter('');
+      }
+      markOpenedDrownsToFalse();
+
+    } else if (type === 'deliveryLocation') {
+      setDeliveryLocationData([...setCheckedAndUnCheckedOfProvidedList(deliveryLocationData, index)]);
+      setQueryKeyAndQueryValue(setQueryKey, value, setQueryValue, type, deliveryLocationData, index);
+      if(deliveryLocationData[index].checked) {
+        setLocationFilter(value);
+      } else {
+        setLocationFilter('');
+      }
+      markOpenedDrownsToFalse();
+    }
+  };
+
+  const markOpenedDrownsToFalse = () => {
+    setShowDropDownForProductName(false);
+    setShowDropDownForOrderSentTo(false);
+    setShowDropDownForDeliveryLocation(false);
+    setShowDropDownForOrderId(false)
+  }
+
+  const filterListForSearchInput = (data, searchInput) => data.filter(item => {
+    return item.value.toLowerCase().includes(searchInput.toLowerCase());
+  });
+
+  const onChangeOfSearchForFilterInput = (searchInput, type) => {
+    if (type === 'orderSentTo' && searchInput) {
+      setOrderSentToData(filterListForSearchInput(orderSentToData, searchInput));
+    } else if (type === 'orderId' && searchInput) {
+      setOrderIdData(filterListForSearchInput(orderIdData, searchInput))
+    } else if (type === 'deliveryLocation' && searchInput) {
+      setDeliveryLocationData(filterListForSearchInput(deliveryLocationData, searchInput))
+    } else if (type === 'product' && searchInput) {
+      setProductNameData(filterListForSearchInput(productNameData, searchInput))
+    } else {
+      if (type === 'orderSentTo') {
+        setOrderSentToData([...orderSentToReplicaData]);
+      } else if (type === 'orderId') {
+        setOrderIdData([...orderIdReplicaData]);
+      } else if (type === 'deliveryLocation') {
+        setDeliveryLocationData([...deliveryLocationReplicaData]);
+      } else if (type === 'product') {
+        setProductNameData([...productNameReplicaData]);
+      }
+    }
   };
 
   return (
@@ -507,23 +802,43 @@ const Orders = (props) => {
       </div>
       <div className='full-width-ribben mt-4'>
         <TableFilter
-          visible={visible}
-          data={headers}
-          poOrderIdList={poOrderIdList}
-          poDeliveryLocationsList={poDeliveryLocationsList}
-          poProductsList={poProductsList}
-          poOrganisationsList={poOrganisationsList}
-          setFromToFilterOnSelect={setFromToFilterOnSelect}
-          setOrderIdNameFilterOnSelect={setOrderIdNameFilterOnSelect}
-          setStatusFilterOnSelect={setStatusFilterOnSelect}
-          setProductNameFilterOnSelect={setProductNameFilterOnSelect}
-          setLocationFilterOnSelect={setLocationFilterOnSelect}
-          setDateFilterOnSelect={setDateFilterOnSelect}
-          fb='76%'
-          showExportFilter={showExportFilter}
-          setShowExportFilter={setShowExportFilter}
-          exportFilterData={exportFilterData}
-          onSelectionOfDropdownValue={onSelectionOfDropdownValue}
+           visible={visible}
+           data={headers}
+           poOrderIdList={poOrderIdList}
+           poDeliveryLocationsList={poDeliveryLocationsList}
+           poProductsList={poProductsList}
+           poOrganisationsList={poOrganisationsList}
+           setFromToFilterOnSelect={setFromToFilterOnSelect}
+           setOrderIdNameFilterOnSelect={setOrderIdNameFilterOnSelect}
+           setStatusFilterOnSelect={setStatusFilterOnSelect}
+           setProductNameFilterOnSelect={setProductNameFilterOnSelect}
+           setLocationFilterOnSelect={setLocationFilterOnSelect}
+           setDateFilterOnSelect={setDateFilterOnSelect}
+           fb="76%"
+           showExportFilter={showExportFilter}
+           setShowExportFilter={setShowExportFilter}
+           exportFilterData={exportFilterData}
+           onSelectionOfExportDropdown={onSelectionOfExportDropdown}
+           filterTableByCalendar={filterTableByCalendar}
+           showCalendar={showCalendar}
+           setShowCalendar={setShowCalendar}
+           type={'ORDERS'}
+           onChangeOfSearchForFilterInput={onChangeOfSearchForFilterInput}
+           onSelectionOfDropdownValue={onSelectionOfDropdownValue}
+           orderIdData={orderIdData}
+           setShowDropDownForOrderId={setShowDropDownForOrderId}
+           showDropDownForOrderId={showDropDownForOrderId}
+           productNameData={productNameData}
+           setShowDropDownForProductName={setShowDropDownForProductName}
+           showDropDownForProductName={showDropDownForProductName}
+           deliveryLocationData={deliveryLocationData}
+           setShowDropDownForDeliveryLocation={setShowDropDownForDeliveryLocation}
+           showDropDownForDeliveryLocation={showDropDownForDeliveryLocation}
+           orderSentToData={orderSentToData}
+           setShowDropDownForOrderSentTo={setShowDropDownForOrderSentTo}
+           showDropDownForOrderSentTo={showDropDownForOrderSentTo}
+           startDate={startDate}
+           endDate={endDate}
           isReportDisabled={!isAuthenticated("orderExportReport")}
         />
       </div>
@@ -542,3 +857,20 @@ const Orders = (props) => {
 };
 
 export default Orders;
+
+function getFormatedDate(date) {
+  date = new Date(date);
+  return new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
+    .toISOString()
+    .split("T")[0];
+}
+
+function setQueryKeyAndQueryValue(setQueryValue, value, setQueryType, type, data, index) {
+  if (data[index].checked) {
+    setQueryValue(value);
+    setQueryType(type);
+  } else {
+    setQueryValue();
+    setQueryType(type);
+  }
+}

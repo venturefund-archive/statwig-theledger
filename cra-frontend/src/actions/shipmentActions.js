@@ -35,10 +35,10 @@ export const getShipments = (skip = 0, limit = 5) => {
   };
 };
 
-export const getInboundShipments = async (shipmentId, from, to, dateFilter, status, skip, limit) => {
+export const getInboundShipments = async (shipmentId, from, to, status, skip, limit, fromDate, toDate, dateFilter) => {
   try {
     const result = await axios.get(
-      `${config().fetchInboundShipmentsUrl}?shipmentId=${shipmentId}&from=${from}&to=${to}&dateFilter=${dateFilter}&status=${status}&skip=${skip}&limit=${limit}`,
+      `${config().fetchInboundShipmentsUrl}?shipmentId=${shipmentId}&from=${from}&to=${to}&status=${status}&skip=${skip}&limit=${limit}&fromDate=${fromDate}&toDate=${toDate}&dateFilter=${dateFilter}`,
     );
     return result.data;
   } catch (e) {
@@ -46,10 +46,10 @@ export const getInboundShipments = async (shipmentId, from, to, dateFilter, stat
   }
 };
 
-export const getOutboundShipments = async (shipmentId, from, to, dateFilter, status, skip, limit) => {
+export const getOutboundShipments = async (shipmentId, from, to, status, skip, limit, fromDate, toDate, dateFilter) => {
   try {
     const result = await axios.get(
-      `${config().fetchOutboundShipmentsUrl}?shipmentId=${shipmentId}&from=${from}&to=${to}&dateFilter=${dateFilter}&status=${status}&skip=${skip}&limit=${limit}`,
+      `${config().fetchOutboundShipmentsUrl}?shipmentId=${shipmentId}&from=${from}&to=${to}&status=${status}&skip=${skip}&limit=${limit}&fromDate=${fromDate}&toDate=${toDate}&dateFilter=${dateFilter}`,
     );
     return result.data;
   } catch (e) {
