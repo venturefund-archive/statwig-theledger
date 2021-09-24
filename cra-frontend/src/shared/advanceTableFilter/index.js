@@ -744,7 +744,7 @@ const AdvanceTableFilter = (props) => {
               {props.data.img2}
             </div>
             <div className="filterTitle">{props.data.coloumn2}</div>
-            <img src={updownarrow} width="10" height="10" className="ml-3" />
+            <img src={updownarrow} width="10" height="10" className="ml-1" />
           </a>
           {
             showCalendar && (props.type === 'SHIPMENT' || props.type === 'ORDERS') &&
@@ -818,9 +818,9 @@ const AdvanceTableFilter = (props) => {
   };
 
   const renderColumn1 = (columnData) => {
-    if (columnData === "Shipment ID") {
-      return (<div className="box col">
-        <a className="filter-item" onClick={() =>
+    if (columnData == "Shipment ID") {
+      return (<div className="box col-2">
+        <a className="filter-item ml-4 mr-3" onClick={() =>
           {
             setShowDropDownForShipmentId(!showDropDownForShipmentId);
             if(!showDropDownForShipmentId) {
@@ -835,7 +835,7 @@ const AdvanceTableFilter = (props) => {
             {props.data.img1}
           </div>
           <div className="filterTitle">{props.data.coloumn1}</div>
-          <img src={updownarrow} width="10" height="10" className="ml-3" style={{ position: "relative", left: "140px" }} />
+          <img src={updownarrow} width="10" height="10" class="ml-1" />
         </a>
         {showDropDownForShipmentId && shipmentIdData &&
           <DropDownFilter
@@ -846,7 +846,7 @@ const AdvanceTableFilter = (props) => {
           />
         }
       </div>);
-    } else if (columnData === "To") {
+    } else if (columnData == "To") {
       return (<div className="box col" style={{ position: "relative", left: "-30px" }}>
         <a className="filter-item ml-4" onClick={handlePoToClick}>
           <div className="icon mr-2">
@@ -895,7 +895,7 @@ const AdvanceTableFilter = (props) => {
           </div>
         </StyledMenu>
       </div>);
-    } else if (columnData === "From") {
+    } else if (columnData == "From") {
       return (<div className="box col-2">
         <a className="filter-item ml-4" onClick={handlePoFromClick}>
           <div className="icon mr-2">
@@ -944,7 +944,7 @@ const AdvanceTableFilter = (props) => {
           </div>
         </StyledMenu>
       </div>);
-    } else if (columnData === "Product Name") {
+    } else if (columnData == "Product Name") {
       return (<div className="box col-4">
         <a className="filter-item ml-4" onClick={() => {
           props.setShowDropDownForProductName(!props.showDropDownForProductName);
