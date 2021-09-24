@@ -120,6 +120,7 @@ const ChartsPage = (props) => {
   //const filteredInventoriesKeys = inventoriesKeys.filter(inventory => inventory !== 'tot_qty' && inventory !== 'tot_inv')
 
   const option = {
+    percentageInnerCutout: 80,
     maintainAspectRatio: true,
     responsive: true,
     layout: {
@@ -130,12 +131,14 @@ const ChartsPage = (props) => {
         bottom: 0,
       },
     },
-    legend: {
-      position: "right",
-      padding: 10,
-      labels: {
-        usePointStyle: true,
-        fontFamily: "Source Sans Pro",
+    plugins: {
+      legend: {
+        position: "right",
+        padding: 10,
+        labels: {
+          usePointStyle: true,
+          fontFamily: "Source Sans Pro",
+        },
       },
     },
   };
@@ -144,12 +147,12 @@ const ChartsPage = (props) => {
     <div>
       {validdata ? (
         <MDBContainer>
-          <Doughnut id='doughnut-chart' data={doughnut} options={option} />
+          <Doughnut id="doughnut-chart" data={doughnut} options={option} />
         </MDBContainer>
       ) : (
-        <div className='summaryTable justify-content-center '>
-          <div className='d-flex flex-column '>
-            <img src={EmptyInventory} height='200' width='200' alt='' />
+        <div className="summaryTable justify-content-center ">
+          <div className="d-flex flex-column ">
+            <img src={EmptyInventory} height="250" width="250" alt="" />
           </div>
         </div>
       )}
