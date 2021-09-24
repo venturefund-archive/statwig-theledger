@@ -62,11 +62,11 @@
       }
     }
   }
-  .read{
-     text-decoration: "none";
-     background-color : #f1eeee;
-   }
-  .unread{
+  .read {
+    text-decoration: "none";
+    background-color: #f1eeee;
+  }
+  .unread {
     text-decoration: "none";
     background-color: #fff;
   }
@@ -106,7 +106,7 @@
         border-radius: 7px;
         border-width: 1.5px;
         border-color: #0093e9;
-        font-size: 12px;
+        font-size: 10px;
         &::placeholder {
           color: #0093e9;
         }
@@ -490,7 +490,7 @@
   left: -10px;
   margin: 15px 0px 10px 5px;
   height: 18px;
- }
+}
 .notif-time {
   position: relative;
   top: -10px;

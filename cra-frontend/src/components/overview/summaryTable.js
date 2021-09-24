@@ -34,7 +34,7 @@ const SummaryTable = (props) => {
         <div className="summaryTable mt-2">
           <div className="rowData">
             <div className="headline">
-              <span style={{ position: "relative", top: "25%", left: "2px" }}>
+              <span style={{ position: "relative", top: "25%", left: "0" }}>
                 <img
                   src={shippment}
                   height="14"
@@ -157,7 +157,7 @@ const SummaryTable = (props) => {
               index < 5 ? (
                 <div className="row combine-data pl-3" key={index}>
                   <div className="rTableCell text-left">
-                    <p className="mb-0 bold">{shipment.receiver.org.name}</p>
+                    <p className="to-text-width mb-0 bold">{shipment.receiver.org.name}</p>
                   </div>
                 </div>
               ) : null

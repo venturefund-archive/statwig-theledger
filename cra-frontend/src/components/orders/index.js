@@ -416,7 +416,7 @@ const Orders = (props) => {
   };
 
   return (
-    <div className='orders'>
+    <div className='orders py-3'>
       <div className='d-flex justify-content-between'>
         <h1 className='breadcrumb'>YOUR ORDERS</h1>
         <div className='d-flex'>

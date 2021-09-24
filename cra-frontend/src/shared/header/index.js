@@ -8,7 +8,7 @@ import Location from "../../assets/icons/location_blue.png";
 import InfiniteScroll from "react-infinite-scroll-component";
 import DrawerMenu from "./drawerMenu";
 import { Link } from "react-router-dom";
-import Spinner from "../../components/spinner/index.js"
+import Spinner from "../../components/spinner/index.js";
 import {
   getActiveWareHouses,
   getUserInfo,
@@ -74,13 +74,17 @@ const Header = (props) => {
     setMenu(false);
   });
   const ref1 = useRef(null);
-  useOnclickOutside((ref) => {
-    // console.log(ref.target.className)
-    if(ref.target.className !== "ignore-react-onclickoutside" && ref.target.className !== "badge badge-light")
-    setShowNotifications(false);
-  },
-  { refs: [ref1] }
-  )
+  useOnclickOutside(
+    (ref) => {
+      // console.log(ref.target.className)
+      if (
+        ref.target.className !== "ignore-react-onclickoutside" &&
+        ref.target.className !== "badge badge-light"
+      )
+        setShowNotifications(false);
+    },
+    { refs: [ref1] }
+  );
 
   function onSearchChange(e) {
     setSearchString(e._id);
@@ -124,9 +128,9 @@ const Header = (props) => {
       return "/#";
     }
   }
-  async function readNotification(id){
-    let res = axios.get(`${config().readNotification}${id}`)
-    console.log(res)
+  async function readNotification(id) {
+    let res = axios.get(`${config().readNotification}${id}`);
+    console.log(res);
   }
   async function getAllShipmentIDs() {
     dispatch(turnOn());
@@ -228,17 +232,17 @@ const Header = (props) => {
     });
   }
 
-  function changeNotifications(value, num) {   
-    turnOn()        
-    if(num)
-    setLimit(limit+num)
-   axios.get(`${config().getAlerts}${value}&skip=0&limit=${limit}`).then((response)=>{
-      setNewNotifs(response.data.data.new)
-      setNotifications(response.data.data.data.reverse());
-      if(response.data.data.data?.length === icount)
-        setHasMore(false)
-      setIcount(response.data.data?.data?.length)
-   })
+  function changeNotifications(value, num) {
+    turnOn();
+    if (num) setLimit(limit + num);
+    axios
+      .get(`${config().getAlerts}${value}&skip=0&limit=${limit}`)
+      .then((response) => {
+        setNewNotifs(response.data.data.new);
+        setNotifications(response.data.data.data.reverse());
+        if (response.data.data.data?.length === icount) setHasMore(false);
+        setIcount(response.data.data?.data?.length);
+      });
   }
 
   useEffect(() => {
@@ -250,9 +254,9 @@ const Header = (props) => {
       );
 
       setNotifications(response.data.data.data.reverse());
-      console.log(response.data.data)
+      console.log(response.data.data);
       setCount(response.data.data.totalRecords);
-      setIcount(response.data.data.data.length)
+      setIcount(response.data.data.data.length);
       const warehouses = await getActiveWareHouses();
       const active = warehouses
         .filter((i) => i.status === "ACTIVE")
@@ -280,7 +284,6 @@ const Header = (props) => {
     }
     fetchApi();
   }, [alertType, dispatch]);
-
 
   const handleLocation = async (item) => {
     setLocation(item);
@@ -311,29 +314,29 @@ const Header = (props) => {
   const imgs = config().fetchProfileImage;
 
   return (
-    <div className='header'>
-      <div className='branding'>
-        <div className='mobile-menu' onClick={() => openSidebar(true)}>
-          <i className='fa fa-bars' aria-hidden='true' />
+    <div className="header">
+      <div className="branding">
+        <div className="mobile-menu" onClick={() => openSidebar(true)}>
+          <i className="fa fa-bars" aria-hidden="true" />
         </div>
         <img
           src={logo}
-          alt='vaccineledger'
-          className='logo'
+          alt="vaccineledger"
+          className="logo"
           onClick={() => props.history.push("/overview")}
         />
       </div>
 
-      <div className='actions'>
-        <div className='search-form' tabIndex='-1' onKeyDown={onkeydown}>
+      <div className="actions">
+        <div className="search-form" tabIndex="-1" onKeyDown={onkeydown}>
           <Autocomplete
-            id='free-solo-demo'
+            id="free-solo-demo"
             freeSolo
             //value={search}
             options={options}
             getOptionLabel={(option) => option._id}
             filterOptions={filterOptions}
-            placeholder='Search PO ID/ Shipment ID/ Transit Number'
+            placeholder="Search PO ID/ Shipment ID/ Transit Number"
             onFocus={(e) => (e.target.placeholder = "")}
             onBlur={(e) =>
               (e.target.placeholder =
@@ -350,9 +353,9 @@ const Header = (props) => {
             renderInput={(params) => (
               <TextField
                 {...params}
-                label='Search PO ID/ Shipment ID/ Transit Number'
-                margin='normal'
-                variant='outlined'
+                label="Search PO ID/ Shipment ID/ Transit Number"
+                margin="normal"
+                variant="outlined"
               />
             )}
           />
@@ -366,38 +369,43 @@ const Header = (props) => {
             className= "form-control search-field"
         /> */}
 
-          <img src={searchingIcon} onClick={onSeach} alt='searching' />
+          <img src={searchingIcon} onClick={onSeach} alt="searching" />
         </div>
         <div>
-          <div className='user-info '>
-            <div className='notifications cursorP'>
+          <div className="user-info ">
+            <div className="notifications cursorP">
               <img
-                id='notification'
+                id="notification"
                 className="ignore-react-onclickoutside"
                 src={bellIcon}
                 onClick={() => setShowNotifications(!showNotifications)}
-                alt='notification'
+                alt="notification"
               />
               <div
-                id='notification'
-                className='bellicon-wrap'
+                id="notification"
+                className="bellicon-wrap"
                 onClick={() => setShowNotifications(!showNotifications)}
               >
                 {notifications?.length && (
-                  <span className='badge badge-light'>{count}</span>
+                  <span className="badge badge-light">{count}</span>
                 )}
               </div>
-              {showNotifications && <div className='triangle-up'></div>}
+              {showNotifications && <div className="triangle-up"></div>}
               {showNotifications && (
-                <div ref={ref1}  outsideClickIgnoreClass={'ignore-react-onclickoutside'} className='slider-menu' id="scrollableDiv">
+                <div
+                  ref={ref1}
+                  outsideClickIgnoreClass={"ignore-react-onclickoutside"}
+                  className="slider-menu"
+                  id="scrollableDiv"
+                >
                   <div
-                    className='nheader'
+                    className="nheader"
                     style={{
                       backgroundImage:
                         "linear-gradient(to right, #0092e8, #0a6bc6)",
                     }}
                   >
-                    <div className='user-notification-head'>
+                    <div className="user-notification-head">
                       User Notifications
                     </div>
                     {notifications?.length >= 0 && (
@@ -416,8 +424,8 @@ const Header = (props) => {
                       </span>
                     )}
 
-                    <div className='tab'>
-                      <ul className='nav nav-pills'>
+                    <div className="tab">
+                      <ul className="nav nav-pills">
                         <li
                           className={
                             visible === "one" ? "nav-item-active" : "nav-item"
@@ -428,7 +436,7 @@ const Header = (props) => {
                             changeNotifications("ALERT", 1);
                             setVisible("one");
                             setHasMore(true);
-                            ref1.current.scrollTop = 0
+                            ref1.current.scrollTop = 0;
                           }}
                         >
                           <div
@@ -451,7 +459,7 @@ const Header = (props) => {
                             changeNotifications("TRANSACTION", 1);
                             setVisible("two");
                             setHasMore(true);
-                            ref1.current.scrollTop = 0
+                            ref1.current.scrollTop = 0;
                           }}
                         >
                           <div
@@ -467,7 +475,7 @@ const Header = (props) => {
                       </ul>
                     </div>
                   </div>
-                  <div className='slider-item'>
+                  <div className="slider-item">
                     <InfiniteScroll
                       dataLength={notifications?.length}
                       next={() => changeNotifications(alertType, 10)}
@@ -476,9 +484,13 @@ const Header = (props) => {
                         flexDirection: "column-reverse",
                       }} //To put endMessage and loader to the top.
                       hasMore={hasMore}
-                      loader={<h4><Spinner /></h4>}
+                      loader={
+                        <h4>
+                          <Spinner />
+                        </h4>
+                      }
                       scrollThreshold={1}
-                      scrollableTarget='scrollableDiv'
+                      scrollableTarget="scrollableDiv"
                     >
                       {notifications?.length >= 0 ? (
                         notifications?.map((notifications) =>
@@ -487,24 +499,26 @@ const Header = (props) => {
                               key={notifications.id}
                               to={notifRouting(notifications)}
                               // style={{ textDecoration: "none" }}
-                              className={notifications.isRead ? 'read' : 'unRead'}
-                              style={{ textDecoration:"none" }}
+                              className={
+                                notifications.isRead ? "read" : "unRead"
+                              }
+                              style={{ textDecoration: "none" }}
                               onClick={() => readNotification(notifications.id)}
                             >
                               <div
-                                className='col-sm-10'
+                                className="col-sm-10"
                                 style={{ display: "flex" }}
                               >
                                 <img
-                                  className='notification-icons'
+                                  className="notification-icons"
                                   src={notifIcon(notifications)}
-                                  alt='Icon'
+                                  alt="Icon"
                                 />
-                                <div className='notification-events'>
+                                <div className="notification-events">
                                   {notifications.message}
                                 </div>
                               </div>
-                              <div className='text-secondary notif-time'>
+                              <div className="text-secondary notif-time">
                                 {formatDistanceToNow(
                                   new Date(
                                     parseInt(
@@ -515,8 +529,8 @@ const Header = (props) => {
                                 )}
                               </div>
                               <img
-                                className='toggle-icon'
-                                alt='Drop Down Icon'
+                                className="toggle-icon"
+                                alt="Drop Down Icon"
                                 src={dropdownIcon}
                               ></img>
                             </Link>
@@ -526,19 +540,19 @@ const Header = (props) => {
                               style={{ cursor: "not-allowed" }}
                             >
                               <div
-                                className='col-sm-10'
+                                className="col-sm-10"
                                 style={{ display: "flex" }}
                               >
                                 <img
-                                  className='notification-icons'
+                                  className="notification-icons"
                                   src={notifIcon(notifications)}
-                                  alt='Icon'
+                                  alt="Icon"
                                 />
-                                <div className='notification-events'>
+                                <div className="notification-events">
                                   {notifications.message}
                                 </div>
                               </div>
-                              <div className='text-secondary notif-time'>
+                              <div className="text-secondary notif-time">
                                 {formatDistanceToNow(
                                   new Date(
                                     parseInt(
@@ -552,11 +566,11 @@ const Header = (props) => {
                           )
                         )
                       ) : (
-                        <div className='slider-item'>
-                          <div className='row'>
-                            <div className='col text-center mt-3 mr-5'>
+                        <div className="slider-item">
+                          <div className="row">
+                            <div className="col text-center mt-3 mr-5">
                               <div>
-                                <span className='no-notification'>
+                                <span className="no-notification">
                                   No notifications
                                 </span>
                               </div>
@@ -573,10 +587,10 @@ const Header = (props) => {
           <p className="cname1"><b>{activeWarehouses[0]?.title}</b></p>
           <p className="uname"> {activeWarehouses[0]?.warehouseAddress.firstLine}</p>
           </div> */}
-            <span className='divider' />
-            <img className='locationimg' src={Location} alt='Location' />
+            <span className="divider" />
+            <img className="locationimg" src={Location} alt="Location" />
 
-            <div className='userName'>
+            <div className="userName">
               <DropdownButton
                 name={(
                   location?.title +
@@ -595,19 +609,19 @@ const Header = (props) => {
               />
             </div>
 
-            <div className='userName'>
-              <p className='cname'>{profile?.organisation?.split("/")[0]}</p>
+            <div className="userName">
+              <p className="cname">{profile?.organisation?.split("/")[0]}</p>
               {/*  <p className="uname">{profile.warehouseAddress_city}</p> */}
-              <p className='uname'>
+              <p className="uname">
                 {profile.firstName} {profile.lastName}
               </p>
             </div>
 
-            <div className='userPic'>
+            <div className="userPic">
               <img
                 style={{ objectFit: "cover" }}
                 src={`${image}`}
-                alt='profile'
+                alt="profile"
                 className={`rounded rounded-circle ${
                   `${imgs}${profile.photoId}`
                     ? ``
@@ -616,10 +630,10 @@ const Header = (props) => {
                 onClick={() => setMenu(!menu)}
               />
             </div>
-            <div className='userActions'>
+            <div className="userActions">
               <img
                 src={dropdownIcon}
-                alt='actions'
+                alt="actions"
                 onClick={() => setMenu(!menu)}
               />
             </div>
@@ -627,12 +641,12 @@ const Header = (props) => {
           {menu && (
             <div
               style={{ borderRadius: "5px", marginTop: "5px" }}
-              className='slider-menu'
+              className="slider-menu"
               ref={ref}
             >
               {
                 <React.Fragment>
-                  <div className='slider-item-text p-2'>
+                  <div className="slider-item-text p-2">
                     <p>{profile.name}</p>
                     <p>{profile?.organisation?.split("/")[0]}</p>
                   </div>
@@ -644,19 +658,19 @@ const Header = (props) => {
                     }}
                   >
                     <div
-                      className='slider-item border-top-0 p-1'
+                      className="slider-item border-top-0 p-1"
                       onClick={() => props.history.push("/profile")}
                     >
                       My Profile
                     </div>
                     <div
-                      className='slider-item p-1'
+                      className="slider-item p-1"
                       onClick={() => props.history.push("/settings")}
                     >
                       Settings
                     </div>
                     <div
-                      className='slider-item p-1'
+                      className="slider-item p-1"
                       onClick={() => dispatch(logoutUser())}
                     >
                       Logout
@@ -674,12 +688,12 @@ const Header = (props) => {
         {invalidSearch && (
           <Modal
             close={() => closeModalFail()}
-            size='modal-sm' //for other size's use `modal-lg, modal-md, modal-sm`
+            size="modal-sm" //for other size's use `modal-lg, modal-md, modal-sm`
           >
             <FailedPopUp
               onHide={closeModalFail} //FailurePopUp
               // {...modalProps}
-              message='Invalid Search'
+              message="Invalid Search"
             />
           </Modal>
         )}

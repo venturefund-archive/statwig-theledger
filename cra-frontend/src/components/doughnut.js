@@ -3,6 +3,7 @@ import { Doughnut } from "react-chartjs-2";
 import { MDBContainer } from "mdbreact";
 import { getProductList } from "../actions/productActions";
 import EmptyInventory from "../assets/icons/EmptyInventory-min.png";
+import "./doughnut.css";
 
 const ChartsPage = (props) => {
   const [doughnut, setDoughnut] = useState({});
@@ -120,7 +121,6 @@ const ChartsPage = (props) => {
   //const filteredInventoriesKeys = inventoriesKeys.filter(inventory => inventory !== 'tot_qty' && inventory !== 'tot_inv')
 
   const option = {
-    percentageInnerCutout: 80,
     maintainAspectRatio: true,
     responsive: true,
     layout: {
