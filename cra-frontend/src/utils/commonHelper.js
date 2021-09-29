@@ -31,7 +31,7 @@ function GetState(permission) {
   });
   let permissionArr = [];
   if (user)
-    permissionArr = user.permissions.permissions;
+    permissionArr = user.permissions ? user.permissions.permissions : '';
   else
     permissionArr = localStorage.bkp.split(',');
   return permissionArr.indexOf(permission) > -1 ? true : false;
