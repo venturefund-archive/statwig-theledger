@@ -272,6 +272,18 @@
 }
 .divider1{
   border-left: 1px solid #0000001A;
-  height: 38px;
-  
+  height: 38px; 
+}
+.Calender-icon{
+  position:relative;
+  bottom: 25px;
+  margin-bottom: -30px;
+  float:right;
+  height: 25px;
+  width: 25px;
+}
+.fetch{
+  position: absolute;
+  top: 0.5rem;
+  right: 2rem;
 }

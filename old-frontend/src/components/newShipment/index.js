@@ -771,17 +771,38 @@ if (!error) {
                         setOrderIdSelected(true);
                         dispatch(turnOn());
                         setDisabled(false);
-                        let result = await dispatch(getViewShipment(values.shipmentID));
-                        if(result.status !== "RECEIVED"){
-                          values.shipmentID = ""
-                          alert("The shipment has to be delivered first")
+                        let result = await dispatch(
+                          getViewShipment(values.shipmentID)
+                        );
+                        if(values.shipmentID.length === 0){
+                          setShipmentError("Shipment ID cannot be empty");
+                          setOpenShipmentFail(true);
+                          dispatch(turnOff());
                         }
-                        for (let i = 0; i < result.products.length; i++) {
-                          if(result.products[i].productQuantityShipped){
-                            result.products[i].productQuantity = parseInt(result.products[i].productQuantity) - parseInt(result.products[i].productQuantityShipped);
+                        else
+                        {
+                          if (result.status !== "RECEIVED") {
+                          values.shipmentID = "";
+                          // alert("The shipment has to be delivered first");
+                          setShipmentError("Shipment has to be delivered");
+                          setOpenShipmentFail(true);
+                          dispatch(turnOff());
                           }
-                          result.products[i].orderedQuantity = result.products[i].productQuantity;
-                        }
+                          else
+                          {
+                            for (let i = 0; i < result.products?.length; i++) {
+                              if (result.products[i].productQuantityShipped) {
+                                result.products[i].productQuantity =
+                                  parseInt(result.products[i].productQuantity) -
+                                  parseInt(
+                                    result.products[i].productQuantityShipped
+                                  );
+                              }
+                              result.products[i].orderedQuantity =
+                              result.products[i].productQuantity;
+                            }
+                         }
+                       }
                         dispatch(turnOff());
                         setReceiverOrgLoc();
                         setReceiverOrgId();

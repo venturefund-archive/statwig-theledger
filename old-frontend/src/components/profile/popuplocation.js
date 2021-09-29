@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 import SuccessPopup from "../../shared/PopUp/successPopUp";
 import FailPopup from "../../shared/PopUp/failedPopUp";
 import Modal from "../../shared/modal";
-import { Alert,AlertTitle } from "@material-ui/lab";
+import LocationDropdown from "./LocationDropdown";
 
 const PopUpLocation = (props) => {
   console.log("Pop Up Detail");
@@ -90,8 +90,12 @@ const PopUpLocation = (props) => {
             <label htmlFor="Select Location" className="addLocModal pt-3">
               <b>Select Location</b>
             </label>
-            <div className={`form-controlAddLoc mr-5 ${alertFlag  ? "border-danger" : "" }`}>
-              <DropdownButton
+            <div
+              className={`form-controlAddLoc mr-5 ${
+                alertFlag ? "border-danger" : ""
+              }`}
+            >
+              <LocationDropdown
                 name={selectLocation}
                 // name2="Select Location"
                 onSelect={(v)=>{
