@@ -6,6 +6,7 @@ import OutboundAlert from "../../assets/icons/Outbound_alert.png";
 
 import "./style.scss";
 import { getShipmentAnalytics } from "../../actions/analyticsAction";
+import { Container } from "@material-ui/core";
 
 const Tiles = (props) => {
   const [shipmentAnalytics, setShipmentAnalytics] = useState({});
@@ -18,72 +19,126 @@ const Tiles = (props) => {
   }, []);
 
   return (
-    <div className='row mb-4'>
-      <div className='col'>
-        <div onClick={() => props.setData("one")} className='panel cursorP'>
-          <div className='picture recived-bg'>
-            <img src={Received} alt='truck' />
-          </div>
-          <div className='d-flex flex-column'>
-            <div className='title recived-text font-weight-bold'>
-              Inbound Shipments
-            </div>
-            <div className='recived-text count'>
-              {shipmentAnalytics.inboundShipments}
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className='col'>
-        <div onClick={() => props.setData("two")} className='panel cursorP'>
-          <div className='picture sent-bg'>
-            <img src={Sent} alt='truck' />
-          </div>
-          <div className='d-flex flex-column'>
-            <div className='title sent-text font-weight-bold'>
-              Outbound Shipments
-            </div>
-            <div className='sent-text count'>
-              {shipmentAnalytics.outboundShipments}
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className='col'>
-        <div
-          onClick={() => props.setData("one", true)}
-          className='panel cursorP'
-        >
-          <div className='picture inbound-alert-bg'>
-            <img src={InboundAlert} alt='truck' />
-          </div>
+    // <div className='row mb-4'>
+    //   <div className='col'>
+    //     <div onClick={() => props.setData("one")} className='panel cursorP'>
+    //       <div className='picture recived-bg'>
+    //         <img src={Received} alt='truck' />
+    //       </div>
+    //       <div className='d-flex flex-column'>
+    //         <div className='title recived-text font-weight-bold'>
+    //           Inbound Shipments
+    //         </div>
+    //         <div className='recived-text count'>
+    //           {shipmentAnalytics.inboundShipments}
+    //         </div>
+    //       </div>
+    //     </div>
+    //   </div>
+    //   <div className='col'>
+    //     <div onClick={() => props.setData("two")} className='panel cursorP'>
+    //       <div className='picture sent-bg'>
+    //         <img src={Sent} alt='truck' />
+    //       </div>
+    //       <div className='d-flex flex-column'>
+    //         <div className='title sent-text font-weight-bold'>
+    //           Outbound Shipments
+    //         </div>
+    //         <div className='sent-text count'>
+    //           {shipmentAnalytics.outboundShipments}
+    //         </div>
+    //       </div>
+    //     </div>
+    //   </div>
+    //   <div className='col'>
+    //     <div
+    //       onClick={() => props.setData("one", true)}
+    //       className='panel cursorP'
+    //     >
+    //       <div className='picture inbound-alert-bg'>
+    //         <img src={InboundAlert} alt='truck' />
+    //       </div>
 
-          <div className='d-flex flex-column'>
-            <div className='title inbound-text font-weight-bold'>
-              Inbound Alert
-            </div>
-            <div className='inbound-text count'>
-              {shipmentAnalytics.inboundAlerts}
-            </div>
-          </div>
+    //       <div className='d-flex flex-column'>
+    //         <div className='title inbound-text font-weight-bold'>
+    //           Inbound Alert
+    //         </div>
+    //         <div className='inbound-text count'>
+    //           {shipmentAnalytics.inboundAlerts}
+    //         </div>
+    //       </div>
+    //     </div>
+    //   </div>
+    //   <div className='col'>
+    //     <div
+    //       onClick={() => props.setData("two", true)}
+    //       className='panel cursorP'
+    //     >
+    //       <div className='picture outbound-alert-bg'>
+    //         <img src={OutboundAlert} alt='truck' />
+    //       </div>
+    //       <div className='d-flex flex-column'>
+    //         <div className='title outbound-text font-weight-bold'>
+    //           Outbound Alert
+    //         </div>
+    //         <div className='outbound-text count'>
+    //           {shipmentAnalytics.outboundAlerts}
+    //         </div>
+    //       </div>
+    //     </div>
+    //   </div>
+    // </div>
+
+    <div className="grid-tile-container">
+      <div onClick={() => props.setData("one")} className="grid-tiles cursorP">
+        <div className="picture recived-bg">
+          <img src={Received} alt="truck" />
+        </div>
+
+        <div className="tile-content">
+          <p className="recived-text font-weight-bold">Inbound Shipment</p>
+          <h1 className="count recived-text">
+            {shipmentAnalytics.inboundShipments}
+          </h1>
         </div>
       </div>
-      <div className='col'>
-        <div
-          onClick={() => props.setData("two", true)}
-          className='panel cursorP'
-        >
-          <div className='picture outbound-alert-bg'>
-            <img src={OutboundAlert} alt='truck' />
-          </div>
-          <div className='d-flex flex-column'>
-            <div className='title outbound-text font-weight-bold'>
-              Outbound Alert
-            </div>
-            <div className='outbound-text count'>
-              {shipmentAnalytics.outboundAlerts}
-            </div>
-          </div>
+
+      <div onClick={() => props.setData("two")} className="grid-tiles cursorP">
+        <div className="picture sent-bg">
+          <img src={Sent} alt="truck" />
+        </div>
+
+        <div className="tile-content">
+          <p className="recived-text font-weight-bold">Outbound Shipment</p>
+          <h1 className="count sent-text">
+            {shipmentAnalytics.outboundShipments}
+          </h1>
+        </div>
+      </div>
+
+      <div onClick={() => props.setData("one", true)} className="grid-tiles cursorP">
+        <div className="picture inbound-alert-bg">
+          <img src={InboundAlert} alt="truck" />
+        </div>
+
+        <div className="tile-content">
+          <p className="inbound-text font-weight-bold">Inbound Alert</p>
+          <h1 className="count inbound-text">
+            {shipmentAnalytics.inboundAlerts}
+          </h1>
+        </div>
+      </div>
+
+      <div onClick={() => props.setData("two", true)} className="grid-tiles cursorP">
+        <div className="picture outbound-alert-bg">
+          <img src={OutboundAlert} alt="truck" />
+        </div>
+
+        <div className="tile-content">
+          <p className="outbound-text font-weight-bold">Outbound Alert</p>
+          <h1 className="count outbound-text">
+            {shipmentAnalytics.outboundAlerts}
+          </h1>
         </div>
       </div>
     </div>

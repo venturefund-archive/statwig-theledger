@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./style.scss";
-import Table from "./table";
+import Table from "./table/index";
 import Tabs from "../../shared/tabs";
 import Tiles from "./tiles";
 import Add from "../../assets/icons/createshipment.png";
@@ -403,7 +403,7 @@ const ShipmentAnalytic = (props) => {
           setShowExportFilter={setShowExportFilter}
         />
       </div>
-      <div className='full-width-ribben mt-4'>
+      {/* <div className='full-width-ribben mt-4'>
         <TableFilter
           data={headers}
           shipmentIdList={shipmentIdList}
@@ -420,8 +420,8 @@ const ShipmentAnalytic = (props) => {
           onSelectionOfDropdownValue={onSelectionOfDropdownValue}
           isReportDisabled={!isAuthenticated("shipmentExportReport")}
         />
-      </div>
-      <div className='ribben-space'>
+      </div> */}
+      {/* <div className='ribben-space'> */}
         <Table
           {...props}
           skip={skip}
@@ -429,7 +429,7 @@ const ShipmentAnalytic = (props) => {
           count={count}
           onPageChange={onPageChange}
         />
-      </div>
+      {/* </div> */}
     </div>
   );
 };

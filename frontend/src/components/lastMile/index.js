@@ -214,7 +214,7 @@ const LastMile = (props) => {
           <div className='row'>
             <div className='col tab' style={{ width: "100%" }}>
               <div className=''>
-                <TableFilter data={headers} fb='79%' />
+                <TableFilter data={headers} fb='85%' />
               </div>
             </div>
           </div>

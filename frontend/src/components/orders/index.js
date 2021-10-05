@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./style.scss";
-import Table from "./table";
+import Table from "./table/index";
 import Tabs from "./tabs";
 import Tiles from "./tiles";
 import OrderIcon from "../../assets/icons/order.svg";
@@ -149,12 +149,12 @@ const Orders = (props) => {
     coloumn5: "Delivery Location",
     coloumn6: "Status",
 
-    img1: <img src={mon} width='16' height='16' alt='' />,
-    img2: <img src={calender} width='16' height='16' alt='' />,
-    img3: <img src={Order} width='18' height='16' alt='' />,
-    img4: <img src={Package} width='16' height='16' alt='' />,
-    img5: <img src={Totalshipments} width='18' height='18' alt='' />,
-    img6: <img src={Status} width='16' height='16' alt='' />,
+    img1: <img src={mon} width="16" height="16" alt="" />,
+    img2: <img src={calender} width="16" height="16" alt="" />,
+    img3: <img src={Order} width="18" height="16" alt="" />,
+    img4: <img src={Package} width="16" height="16" alt="" />,
+    img5: <img src={Totalshipments} width="18" height="18" alt="" />,
+    img6: <img src={Status} width="16" height="16" alt="" />,
   };
 
   const closeExcelModal = () => {
@@ -416,19 +416,19 @@ const Orders = (props) => {
   };
 
   return (
-    <div className='orders'>
-      <div className='d-flex justify-content-between'>
-        <h1 className='breadcrumb'>YOUR ORDERS</h1>
-        <div className='d-flex'>
+    <div className="orders">
+      <div className="d-flex justify-content-between">
+        <h1 className="breadcrumb">YOUR ORDERS</h1>
+        <div className="d-flex">
           {isAuthenticated("createOrder") && (
-            <Link to='/neworder'>
-              <button className='btn btn-orange fontSize20 font-bold mt-1'>
+            <Link to="/neworder">
+              <button className="btn btn-orange fontSize20 font-bold mt-1">
                 <img
                   src={OrderIcon}
-                  width='20'
-                  height='17'
-                  className='mr-2 mb-1'
-                  alt=''
+                  width="20"
+                  height="17"
+                  className="mr-2 mb-1"
+                  alt=""
                 />
                 <span style={{ color: "white" }}>
                   <b>Create New Order</b>
@@ -440,47 +440,47 @@ const Orders = (props) => {
           {/* <div className="d-flex flex-column align-items-center"> */}
           {isAuthenticated("importOrder") && (
             <button
-              className='btn-primary btn fontSize20 font-bold mt-1 ml-2'
+              className="btn-primary btn fontSize20 font-bold mt-1 ml-2"
               onClick={() => setMenu(!menu)}
             >
-              <div className='d-flex align-items-center'>
+              <div className="d-flex align-items-center">
                 <img
                   src={ExportIcon}
-                  width='16'
-                  height='16'
-                  className='mr-2'
-                  alt=''
+                  width="16"
+                  height="16"
+                  className="mr-2"
+                  alt=""
                 />
                 <span>
                   <b>Import</b>
                 </span>
                 <img
                   src={dropdownIcon}
-                  width='14'
-                  height='14'
-                  className='ml-2'
-                  alt=''
+                  width="14"
+                  height="14"
+                  className="ml-2"
+                  alt=""
                 />
               </div>
             </button>
           )}
           {menu ? (
-            <div className='menu'>
+            <div className="menu">
               <button
-                className=' btn btn-outline-info mb-2 '
+                className=" btn btn-outline-info mb-2 "
                 onClick={() => setOpenExcel(true)}
               >
                 {" "}
                 Excel
               </button>
-              <button className=' btn btn-outline-info'> Other</button>
+              <button className=" btn btn-outline-info"> Other</button>
             </div>
           ) : null}
           {openExcel && (
             <Modal
-              title='Import'
+              title="Import"
               close={() => closeExcelModal()}
-              size='modal-md' //for other size's use `modal-lg, modal-md, modal-sm`
+              size="modal-md" //for other size's use `modal-lg, modal-md, modal-sm`
             >
               <ExcelPopUp
                 {...props}
@@ -497,7 +497,7 @@ const Orders = (props) => {
       {isAuthenticated("orderAnalytics") && (
         <Tiles {...props} setData={setData} />
       )}
-      <div className='mt-4'>
+      <div className="mt-4">
         <Tabs
           {...props}
           setvisible={setvisible}
@@ -505,7 +505,7 @@ const Orders = (props) => {
           setShowExportFilter={setShowExportFilter}
         />
       </div>
-      <div className='full-width-ribben mt-4'>
+      {/* <div className="full-width-ribben mt-4">
         <TableFilter
           visible={visible}
           data={headers}
@@ -519,15 +519,15 @@ const Orders = (props) => {
           setProductNameFilterOnSelect={setProductNameFilterOnSelect}
           setLocationFilterOnSelect={setLocationFilterOnSelect}
           setDateFilterOnSelect={setDateFilterOnSelect}
-          fb='76%'
+          fb="76%"
           showExportFilter={showExportFilter}
           setShowExportFilter={setShowExportFilter}
           exportFilterData={exportFilterData}
           onSelectionOfDropdownValue={onSelectionOfDropdownValue}
           isReportDisabled={!isAuthenticated("orderExportReport")}
         />
-      </div>
-      <div className='ribben-space'>
+      </div> */}
+      {/* <div className="ribben-space"> */}
         <Table
           {...props}
           skip={skip}
@@ -536,7 +536,7 @@ const Orders = (props) => {
           count={count}
           onPageChange={onPageChange}
         />
-      </div>
+      {/* </div> */}
     </div>
   );
 };

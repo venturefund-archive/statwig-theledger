@@ -3,9 +3,19 @@ import user from "../../../assets/icons/user.svg";
 import { Link } from "react-router-dom";
 import { formatDate } from "../../../utils/dateHelper";
 import Pagination from "@material-ui/lab/Pagination";
-import "./style.scss";
+import mon from "../../../assets/icons/brand.svg";
+import Package from "../../../assets/icons/package.svg";
+import calender from "../../../assets/icons/calendar.svg";
+import Order from "../../../assets/icons/orders.svg";
+import Totalshipments from "../../../assets/icons/TotalShipment.svg";
+import FilterIcon from "../../../assets/icons/Filter.svg";
+import ExportIcon from "../../../assets/icons/Export.svg";
+import dropdownIcon from "../../../assets/icons/drop-down.svg";
+import updownarrow from "../../../assets/icons/up-and-down-1.svg";
+import Status from "../../../assets/icons/Status.svg";
+import "./tablestyle.scss";
 
-const Table = (props) => {
+function Table(props) {
   const { ordrs, visible } = props;
   const orders = ordrs();
   const handlePageChange = (event, value) => {
@@ -18,12 +28,115 @@ const Table = (props) => {
       return 1;
     }
   });
+
+  const truncate = (str, n) => {
+    return str?.length > n ? str.substr(0, n - 1) + "..." : str;
+  };
+
   return (
-    <div className='table pr-1'>
-      <div className='rTable'>
-        <div className=''>
+    <div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th className="cursorP">
+              <img src={mon} width="16" height="16" className="mr-2" alt="" />
+              Order Sent TO
+            </th>
+            <th className="cursorP">
+            <img src={calender} width="16" height="16" className="mr-2" alt="" />
+              Order Date
+            </th>
+            <th className="cursorP" >
+            <img src={Order} width="18" height="16" className="mr-2" alt="" />
+              Order ID
+              <img
+                src={updownarrow}
+                height="10"
+                width="15"
+                style={{float:"right", marginTop:"5px"}}
+                alt=""
+              />
+            </th>
+            <th className="cursorP">
+            <img src={Package} width="16" height="16" className="mr-2" alt="" />
+              Product
+              <img
+                src={updownarrow}
+                height="10"
+                width="15"
+                style={{float:"right", marginTop:"5px"}}
+                alt=""
+              />
+            </th>
+            <th className="cursorP">
+            <img src={Totalshipments} width="18" height="18" className="mr-2" alt="" />
+              Delivery Location
+              <img
+                src={updownarrow}
+                height="10"
+                width="15"
+                style={{float:"right", marginTop:"5px"}}
+                alt=""
+              />
+            </th>
+            <th className="cursorP">
+            <img src={Status} width="16" height="16" className="mr-2" alt="" />
+              Status
+              <img
+                src={updownarrow}
+                height="10"
+                width="15"
+                style={{float:"right", marginTop:"5px"}}
+                alt=""
+              />
+            </th>
+            <th>
+            <button className='btn-filter-info '>
+              <div className='d-flex align-items-center'>
+                <img
+                  src={FilterIcon}
+                  width='13'
+                  height='13'
+                  className='mr-1'
+                  alt='FilterIcon'
+                />
+                <span className='text'>Filter</span>
+                <img
+                  src={dropdownIcon}
+                  width='8'
+                  height='8'
+                  className='ml-1'
+                  alt='Drop Down Icon'
+                />
+              </div>
+            </button>
+            <button
+                className='btn-filter-blue ml-2'
+              >
+                <div className='d-flex  align-items-center'>
+                  <img
+                    src={ExportIcon}
+                    width='13'
+                    height='13'
+                    className='mr-1'
+                    alt='Export Icon'
+                  />
+                  <span className="text">Export</span>
+                  <img
+                    src={dropdownIcon}
+                    width='8'
+                    height='8'
+                    className='ml-1'
+                    alt='DropDownIcon'
+                  />
+                </div>
+              </button>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
           {orders.length === 0 && (
-            <div className='rTableRow pt-2 pb-2 justify-content-center text-muted shadow-none'>
+            <div className="rTableRow pt-2 pb-2 justify-content-center text-muted shadow-none">
               No records found
             </div>
           )}
@@ -54,122 +167,116 @@ const Table = (props) => {
 
             const { customer, products, supplier, creatorOrganisation } = order;
             return (
-              <div
-                className='col-12 p-3 mb-3 ml-1 rounded1 row bg-white shadow'
-                key={index}
-              >
-                <div
-                  className='col-2 txt1 txtBlue'
-                  style={{ position: "relative", left: "-1.5%" }}
-                >
-                  {" "}
-                  {/*rTableCell */}
-                  <div className='userPic text-right d-flex flex-row'>
-                    <img
-                      src={user}
-                      width='27'
-                      height='18'
-                      alt='User'
-                      className='align-self-center'
-                    />
-                    <div className='flex-column d-flex text-left'>
-                      <span className='text-primary bold'>
+              <tr>
+                <td>
+                  <div class="user-info">
+                    <div class="user-info__img">
+                      <img src={user} alt="User" />
+                    </div>
+                    <div class="user-info__basic shipmentId">
+                      <h5 class="mb-0 table-h5-text ">
                         {visible === "two"
                           ? creatorOrganisation?.name
                           : supplier.organisation.name}
-                      </span>
-                      <p className='address mb-0 text-primary'>
+                      </h5>
+                      <p class="mb-0 table-p-text ">
                         {visible === "two"
                           ? creatorOrganisation?.id
                           : supplier.organisation.id}
                       </p>
                     </div>
                   </div>
-                </div>
-                <div
-                  className='col-1 txt1'
-                  style={{ position: "relative", left: "-1%" }}
-                >
-                  {formatDate(order.creationDate)}
-                </div>
-                <div
-                  className='col-1 txt1'
-                  style={{ position: "relative", left: "4%" }}
-                >
-                  <p className='mb-0 bold address mb-0 text-muted'>
-                    {order.id}
-                  </p>
-                </div>
-                <div
-                  className='col-2 txt1'
-                  style={{ position: "relative", left: "8.5%" }}
-                >
-                  <p className='mb-0 bold mb-0 address text-muted'>
-                    {products[0]?.name +
-                      (products.length > 1
-                        ? " + " + (products.length - 1) + " more"
-                        : "")}
-                  </p>
-                </div>
-
-                <div
-                  className='col-2 txt1 ml-5 d-flex flex-column'
-                  style={{ position: "relative", left: "7%" }}
-                >
-                  <span>{customer.warehouse.title}</span>
-                  <span className='text-muted '>
-                    {customer.warehouse && customer.warehouse.warehouseAddress
-                      ? customer.warehouse.warehouseAddress.firstLine +
-                        " " +
-                        customer.warehouse.warehouseAddress.city
-                      : null}
-                  </span>
-                </div>
-
-                <div
-                  className='rTableCell '
-                  style={{ position: "relative", left: "9%" }}
-                >
+                </td>
+                <td>
+                  <div class="user-info">
+                    <h5 class="table-h5-text">
+                      {" "}
+                      {formatDate(order.creationDate)}
+                    </h5>
+                  </div>
+                </td>
+                <td>
+                  <div class="user-info">
+                    <h5 class="table-h5-text text-muted">{order.id}</h5>
+                  </div>
+                </td>
+                <td>
+                  <div class="user-info">
+                    <h5 class="table-h5-text text-muted">
+                      {truncate(
+                        products[0]?.name +
+                          (products.length > 1
+                            ? " + " + (products.length - 1) + " more"
+                            : ""),
+                        15
+                      )}
+                    </h5>
+                  </div>
+                </td>
+                <td>
+                  <div class="user-info__basic">
+                    <h5 class="mb-0 table-h5-text">
+                      {customer.warehouse.title}
+                    </h5>
+                    <p class="text-muted mb-0 table-p-text">
+                      {truncate(customer.warehouse && customer.warehouse.warehouseAddress
+                        ? customer.warehouse.warehouseAddress.firstLine +
+                          " " +
+                          customer.warehouse.warehouseAddress.city
+                        : null, 25)}
+                    </p>
+                  </div>
+                </td>
+                <td>
                   <div
-                    className={`status secondary-bg ${statusStyle}`}
-                    style={{ width: "122px" }}
+                    className={`status secondary-bg ${statusStyle} py-1`}
+                    style={{
+                      width: "122px",
+                      textAlign: "center",
+                      color: "#fff",
+                      borderRadius: "5px",
+                    }}
                   >
                     {status}
                   </div>
-                </div>
-
-                <div
-                  className='rTableCell'
-                  style={{ position: "relative", left: "7%" }}
-                >
-                  <Link to={`/vieworder/${order.id}`} className='button'>
+                </td>
+                <td>
+                  <Link
+                    to={`/vieworder/${order.id}`}
+                    className="button px-2 py-1"
+                    style={{
+                      border: "1px solid #007bff",
+                      borderRadius: "6px",
+                    }}
+                  >
                     View
                   </Link>
-                </div>
-              </div>
+                </td>
+              </tr>
             );
           })}
-          {orders?.length > 0 && (
-            <div className='d-flex flex-row-reverse'>
-              <Pagination
-                showFirstButton
-                showLastButton
-                color='primary'
-                count={Math.ceil(props.count / 10)}
-                onChange={handlePageChange}
-              />
-              <span
-                className='mx-5 my-1 rounded text-dark'
-                style={{ fontSize: "14px" }}
-              >
-                Total Records {props.count}{" "}
-              </span>
-            </div>
-          )}
+          ;
+        </tbody>
+      </table>
+      {orders?.length > 0 && (
+        <div className="d-flex flex-row-reverse">
+          <Pagination
+            showFirstButton
+            showLastButton
+            color="primary"
+            count={Math.ceil(props.count / 10)}
+            onChange={handlePageChange}
+          />
+          <span
+            className="mx-5 my-1 rounded text-dark"
+            style={{ fontSize: "14px" }}
+          >
+            Total Records {props.count}{" "}
+          </span>
         </div>
-      </div>
+      )}
     </div>
   );
-};
+}
 
 export default Table;

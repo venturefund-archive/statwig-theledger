@@ -128,7 +128,7 @@ const Overview = (props) => {
       </div>
 
       <div className='row ribben-space'>
-        <div className='col-sm-12 col-lg-5 col-xl-5 mb-sm-4'>
+        <div className='col-sm-12 col-lg-12 col-xl-5 mb-sm-4'>
           <div className='custom-card'>
             <div className='card-header'>
               <div className='d-flex align-items-center justify-content-between'>
@@ -163,7 +163,7 @@ const Overview = (props) => {
             </div>
           </div>
         </div>
-        <div className='col-sm-12 col-lg-7 col-xl-7 p-lg-0  mb-sm-4'>
+        <div className='col-sm-12 col-lg-12 col-xl-7 p-lg-0  mb-sm-4'>
           <div className='custom-card ml-1'>
             <div className='card-header'>
               <div className='d-flex align-items-center justify-content-between'>
