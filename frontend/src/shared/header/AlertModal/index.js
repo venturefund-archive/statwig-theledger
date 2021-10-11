@@ -146,14 +146,14 @@ const AlertModal = (props) => {
             {AlertTransport.status === "PENDING" && (
               <div className="modal-action">
                 <button
-                  className="btn btn-green"
+                  className="Alert-btn Alert-it btn-green"
                   onClick={() => {UpfetchApi(Transid, "ACCEPTED");
                   props.change(false)}}
                 >
                   Approve
                 </button>
                 <button
-                  className="btn btn-red"
+                  className="Alert-btn Alert-btn-red"
                   onClick={() => {UpfetchApi(Transid, "REJECTED");
                   props.change(false)}}
                 >
