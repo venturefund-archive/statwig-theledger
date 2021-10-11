@@ -40,7 +40,7 @@ const AlertModal = (props) => {
               >
                 <img src={CloseIcon} alt="Close" with="40" height="40" />
               </button>
-              <div className="box">
+              <div className="alert-img">
                 <img src={alertIcon} with="20" height="20" />
               </div>
               <h5>
