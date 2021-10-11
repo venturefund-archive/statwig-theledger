@@ -17,11 +17,11 @@
 }
 
 .table thead tr th:first-child {
-	border-radius: 10px 0 0 10px;
-  }
+  border-radius: 10px 0 0 10px;
+}
 
 .table thead tr th:last-child {
-  border-right:none;
+  border-right: none;
   border-radius: 0 10px 10px 0;
 }
 
@@ -83,4 +83,30 @@
 }
 .text {
   color: white !important;
+}
+.filterSearch{
+  border: 1px solid #0093E9;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding:0 5px;
+}
+.filterText {
+  font-size: 12px;
+  color: #0093E9;
+}
+.head-btn {
+  border: 1px solid #0093E9;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  text-align: center;
+  color: #0093E9;
+  font-size: 12px;
+  border-radius: 6px;
+}
+.head-btn:hover {
+  background: #0093E9;
+  color: #fff;
 }

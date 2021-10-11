@@ -16,6 +16,55 @@ import updownarrow from "../../../assets/icons/up-and-down-1.svg";
 import Status from "../../../assets/icons/Status.svg";
 import Received from "../../../assets/icons/Received1.svg";
 import Sent from "../../../assets/icons/Sent.png";
+import { Menu, InputBase } from "@material-ui/core";
+import MenuItem from "@material-ui/core/MenuItem";
+import { withStyles } from "@material-ui/core/styles";
+import searchingIcon from "../../../assets/icons/search.png";
+
+const StyledMenu = withStyles({
+  paper: {
+    boxShadow: "0px 2px 5px rgba(51, 51, 51, 0.2)",
+  },
+})((props) => (
+  <Menu
+    elevation={0}
+    getContentAnchorEl={null}
+    anchorOrigin={{
+      vertical: "bottom",
+      horizontal: "center",
+    }}
+    transformOrigin={{
+      vertical: "top",
+      horizontal: "center",
+    }}
+    {...props}
+  />
+));
+
+const StyledMenuItem = withStyles((theme) => ({}))(MenuItem);
+
+const optionID = [
+  "None",
+  "Unicef",
+  "Statwig",
+  "Tech",
+  "React",
+  "Java",
+  "Sort",
+  "Luna",
+];
+const optionFrom = [
+  "None",
+  "Atria",
+  "Callisto",
+  "Dione",
+  "Ganymede",
+  "Hangouts Call",
+  "Luna",
+];
+const optionTo = ["None", "Atria", "Callisto", "Dione", "Ganymede"];
+
+const ITEM_HEIGHT = 48;
 
 function Table(props) {
   const dispatch = useDispatch();
@@ -31,12 +80,78 @@ function Table(props) {
   const handlePageChange = (event, value) => {
     props.onPageChange(value);
   };
+
+  // For Filters
+  const [ShipIDfilter, setShipIDfilter] = React.useState(null);
+  const IdOpen = Boolean(ShipIDfilter);
+  const [Fromfilter, setFromfilter] = React.useState(null);
+  const FromOpen = Boolean(Fromfilter);
+  const [Tofilter, setTofilter] = React.useState(null);
+  const ToOpen = Boolean(Tofilter);
+  const [StatusFilter, setStatusFilter] = React.useState(null);
+  const [FilterBtn, setFilterBtn] = React.useState(null);
+  const [ExportBtn, setExportBtn] = React.useState(null);
+
+  // For Order To
+  const ShipIDclick = (event) => {
+    setShipIDfilter(event.currentTarget);
+  };
+
+  const ShipIDclose = () => {
+    setShipIDfilter(null);
+  };
+
+  // For Order Product
+  const Fromclick = (event) => {
+    setFromfilter(event.currentTarget);
+  };
+
+  const Fromclose = () => {
+    setFromfilter(null);
+  };
+
+  // For Order Id
+  const Toclick = (event) => {
+    setTofilter(event.currentTarget);
+  };
+
+  const Toclose = () => {
+    setTofilter(null);
+  };
+
+  // For Status
+  const statusclick = (event) => {
+    setStatusFilter(event.currentTarget);
+  };
+
+  const statusclose = () => {
+    setStatusFilter(null);
+  };
+
+  // For Filter
+  const filterclick = (event) => {
+    setFilterBtn(event.currentTarget);
+  };
+
+  const filterclose = () => {
+    setFilterBtn(null);
+  };
+
+  // For Export
+  const exportclick = (event) => {
+    setExportBtn(event.currentTarget);
+  };
+
+  const exportclose = () => {
+    setExportBtn(null);
+  };
+
   return (
     <div>
       <table class="table">
         <thead>
           <tr>
-            <th className="cursorP">
+            <th className="cursorP" onClick={ShipIDclick}>
               <img src={mon} width="16" height="16" className="mr-2" alt="" />
               Shipment ID
               <img
@@ -47,6 +162,46 @@ function Table(props) {
                 alt=""
               />
             </th>
+
+            {/* Filters with search bar & Scroll////////////////////////////////////////////////////// */}
+            <StyledMenu
+              id="customized-menu"
+              anchorEl={ShipIDfilter}
+              keepMounted
+              open={IdOpen}
+              onClose={ShipIDclose}
+              PaperProps={{
+                style: {
+                  maxHeight: ITEM_HEIGHT * 4.5,
+                  width: "20ch",
+                },
+              }}
+            >
+              <MenuItem>
+                <div className="filterSearch">
+                  <InputBase
+                    placeholder="Search"
+                    style={{ fontSize: "12px" }}
+                  />
+                  <img
+                    src={searchingIcon}
+                    width="12"
+                    height="12"
+                    alt="searching"
+                  />
+                </div>
+              </MenuItem>
+              {optionID.map((option) => (
+                <MenuItem
+                  key={option}
+                  selected={option === "None"}
+                  onClick={ShipIDclose}
+                >
+                  <h6 className="filterText">{option}</h6>
+                </MenuItem>
+              ))}
+            </StyledMenu>
+
             <th className="cursorP">
               <img
                 src={calender}
@@ -56,9 +211,22 @@ function Table(props) {
                 alt=""
               />
               Shipping Date
+              <img
+                src={updownarrow}
+                height="10"
+                width="15"
+                style={{ float: "right", marginTop: "5px" }}
+                alt=""
+              />
             </th>
-            <th className="cursorP">
-              <img src={Received} width="18" height="16" className="mr-2" alt="" />
+            <th className="cursorP" onClick={Fromclick}>
+              <img
+                src={Received}
+                width="18"
+                height="16"
+                className="mr-2"
+                alt=""
+              />
               From
               <img
                 src={updownarrow}
@@ -68,14 +236,48 @@ function Table(props) {
                 alt=""
               />
             </th>
-            <th className="cursorP">
-              <img
-                src={Sent}
-                width="16"
-                height="16"
-                className="mr-2"
-                alt=""
-              />
+
+            {/* Filters with search bar & Scroll////////////////////////////////////////////////////// */}
+            <StyledMenu
+              id="customized-menu"
+              anchorEl={Fromfilter}
+              // keepMounted
+              open={FromOpen}
+              onClose={Fromclose}
+              PaperProps={{
+                style: {
+                  maxHeight: ITEM_HEIGHT * 4.5,
+                  width: "20ch",
+                },
+              }}
+            >
+              <MenuItem>
+                <div className="filterSearch">
+                  <InputBase
+                    placeholder="Search"
+                    style={{ fontSize: "12px" }}
+                  />
+                  <img
+                    src={searchingIcon}
+                    width="12"
+                    height="12"
+                    alt="searching"
+                  />
+                </div>
+              </MenuItem>
+              {optionFrom.map((option) => (
+                <MenuItem
+                  key={option}
+                  selected={option === "None"}
+                  onClick={Fromclose}
+                >
+                  <h6 className="filterText">{option}</h6>
+                </MenuItem>
+              ))}
+            </StyledMenu>
+
+            <th className="cursorP" onClick={Toclick}>
+              <img src={Sent} width="16" height="16" className="mr-2" alt="" />
               To
               <img
                 src={updownarrow}
@@ -85,7 +287,47 @@ function Table(props) {
                 alt=""
               />
             </th>
-            <th className="cursorP">
+
+            {/* Filters with search bar & Scroll////////////////////////////////////////////////////// */}
+            <StyledMenu
+              id="customized-menu"
+              anchorEl={Tofilter}
+              // keepMounted
+              open={ToOpen}
+              onClose={Toclose}
+              PaperProps={{
+                style: {
+                  maxHeight: ITEM_HEIGHT * 4.5,
+                  width: "20ch",
+                },
+              }}
+            >
+              <MenuItem>
+                <div className="filterSearch">
+                  <InputBase
+                    placeholder="Search"
+                    style={{ fontSize: "12px" }}
+                  />
+                  <img
+                    src={searchingIcon}
+                    width="12"
+                    height="12"
+                    alt="searching"
+                  />
+                </div>
+              </MenuItem>
+              {optionTo.map((option) => (
+                <MenuItem
+                  key={option}
+                  selected={option === "None"}
+                  onClick={Toclose}
+                >
+                  <h6 className="filterText">{option}</h6>
+                </MenuItem>
+              ))}
+            </StyledMenu>
+
+            <th className="cursorP" onClick={statusclick}>
               <img
                 src={Status}
                 width="16"
@@ -102,45 +344,122 @@ function Table(props) {
                 alt=""
               />
             </th>
+            <StyledMenu
+              id="customized-menu"
+              anchorEl={StatusFilter}
+              keepMounted
+              open={Boolean(StatusFilter)}
+              onClose={statusclose}
+            >
+              {/* <DateRangePicker
+                calendars={1}
+                value={value}
+                onChange={(newValue) => {
+                  setValue(newValue);
+                }}
+                renderInput={(startProps, endProps) => (
+                  <React.Fragment>
+                    <TextField {...startProps} />
+                    <Box sx={{ mx: 2 }}> to </Box>
+                    <TextField {...endProps} />
+                  </React.Fragment>
+                )}
+              /> */}
+              <StyledMenuItem style={{ width: "160px", color: "#0b65c1" }}>
+                <h6 className="filterText">Shipped</h6>
+              </StyledMenuItem>
+              <StyledMenuItem style={{ width: "160px", color: "#0b65c1" }}>
+                <h6 className="filterText">Delivered</h6>
+              </StyledMenuItem>
+              <StyledMenuItem style={{ width: "160px", color: "#0b65c1" }}>
+                <h6 className="filterText">Alerts</h6>
+              </StyledMenuItem>
+            </StyledMenu>
             <th>
-              <button className="btn-filter-info">
+              <button className="btn-filter-info" onClick={filterclick}>
                 <div className="d-flex align-items-center">
                   <img
                     src={FilterIcon}
-                    width="14"
-                    height="14"
-                    className="mr-2"
+                    width="13"
+                    height="13"
+                    className="mr-1"
                     alt="FilterIcon"
                   />
                   <span className="text">Filter</span>
                   <img
                     src={dropdownIcon}
-                    width="10"
-                    height="10"
-                    className="ml-2"
+                    width="8"
+                    height="8"
+                    className="ml-1"
                     alt="Drop Down Icon"
                   />
                 </div>
               </button>
-              <button className="btn-filter-blue ml-2">
+              <StyledMenu
+                id="customized-menu"
+                anchorEl={FilterBtn}
+                keepMounted
+                open={Boolean(FilterBtn)}
+                onClose={filterclose}
+              >
+                <StyledMenuItem>
+                  <button className="head-btn">Today</button>
+                </StyledMenuItem>
+                <StyledMenuItem>
+                  <button className="head-btn">This Week</button>
+                </StyledMenuItem>
+                <StyledMenuItem>
+                  <button className="head-btn">This Month</button>
+                </StyledMenuItem>
+                <StyledMenuItem>
+                  <button className="head-btn">Last 3 Month</button>
+                </StyledMenuItem>
+                <StyledMenuItem>
+                  <button className="head-btn">Last 6 Month</button>
+                </StyledMenuItem>
+                <StyledMenuItem>
+                  <button className="head-btn">This Year</button>
+                </StyledMenuItem>
+              </StyledMenu>
+              <button className="btn-filter-blue ml-2" onClick={exportclick}>
                 <div className="d-flex  align-items-center">
                   <img
                     src={ExportIcon}
-                    width="14"
-                    height="14"
-                    className="mr-2"
+                    width="13"
+                    height="13"
+                    className="mr-1"
                     alt="Export Icon"
                   />
                   <span className="text">Export</span>
                   <img
                     src={dropdownIcon}
-                    width="10"
-                    height="10"
-                    className="ml-2"
+                    width="8"
+                    height="8"
+                    className="ml-1"
                     alt="DropDownIcon"
                   />
                 </div>
               </button>
+              <StyledMenu
+                id="customized-menu"
+                anchorEl={ExportBtn}
+                keepMounted
+                open={Boolean(ExportBtn)}
+                onClose={exportclose}
+              >
+                <StyledMenuItem>
+                  <button className="head-btn">Excel</button>
+                </StyledMenuItem>
+                <StyledMenuItem>
+                  <button className="head-btn">PDF</button>
+                </StyledMenuItem>
+                <StyledMenuItem>
+                  <button className="head-btn">Mail</button>
+                </StyledMenuItem>
+                <StyledMenuItem>
+                  <button className="head-btn">Print</button>
+                </StyledMenuItem>
+              </StyledMenu>
             </th>
           </tr>
         </thead>

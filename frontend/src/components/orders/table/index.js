@@ -13,7 +13,69 @@ import ExportIcon from "../../../assets/icons/Export.svg";
 import dropdownIcon from "../../../assets/icons/drop-down.svg";
 import updownarrow from "../../../assets/icons/up-and-down-1.svg";
 import Status from "../../../assets/icons/Status.svg";
+import searchingIcon from "../../../assets/icons/search.png";
+import { Menu, InputBase } from "@material-ui/core";
+import MenuItem from "@material-ui/core/MenuItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import { withStyles } from "@material-ui/core/styles";
 import "./tablestyle.scss";
+
+const StyledMenu = withStyles({
+  paper: {
+    boxShadow: "0px 2px 5px rgba(51, 51, 51, 0.2)",
+  },
+})((props) => (
+  <Menu
+    elevation={0}
+    getContentAnchorEl={null}
+    anchorOrigin={{
+      vertical: "bottom",
+      horizontal: "center",
+    }}
+    transformOrigin={{
+      vertical: "top",
+      horizontal: "center",
+    }}
+    {...props}
+  />
+));
+
+const StyledMenuItem = withStyles((theme) => ({}))(MenuItem);
+
+const optionTo = [
+  "None",
+  "Unicef",
+  "Statwig",
+  "Tech",
+  "React",
+  "Java",
+  "Sort",
+  "Luna",
+];
+const optionId = [
+  "None",
+  "Atria",
+  "Callisto",
+  "Dione",
+  "Ganymede",
+  "Hangouts Call",
+  "Luna",
+];
+const optionPro = ["None", "Atria", "Callisto", "Dione", "Ganymede"];
+const optionLoc = [
+  "None",
+  "Atria",
+  "Callisto",
+  "Dione",
+  "Ganymede",
+  "Hangouts Call",
+  "Luna",
+  "Oberon",
+  "Phobos",
+  "Pyxis",
+];
+
+const ITEM_HEIGHT = 48;
 
 function Table(props) {
   const { ordrs, visible } = props;
@@ -21,6 +83,7 @@ function Table(props) {
   const handlePageChange = (event, value) => {
     props.onPageChange(value);
   };
+
   orders.sort(function (a, b) {
     if (a.id > b.id) {
       return -1;
@@ -33,104 +96,439 @@ function Table(props) {
     return str?.length > n ? str.substr(0, n - 1) + "..." : str;
   };
 
+  // For Filters
+  const [OrderTOfilter, setOrderTOfilter] = React.useState(null);
+  const ToOpen = Boolean(OrderTOfilter);
+  const [OrderIDfilter, setOrderIDfilter] = React.useState(null);
+  const IdOpen = Boolean(OrderIDfilter);
+  const [ProductFilter, setProductFilter] = React.useState(null);
+  const ProOpen = Boolean(ProductFilter);
+  const [LocFilter, setLocFilter] = React.useState(null);
+  const LocOpen = Boolean(LocFilter);
+  const [StatusFilter, setStatusFilter] = React.useState(null);
+  const [FilterBtn, setFilterBtn] = React.useState(null);
+  const [ExportBtn, setExportBtn] = React.useState(null);
+
+  // For Order To
+  const orderToclick = (event) => {
+    setOrderTOfilter(event.currentTarget);
+  };
+
+  const orderToclose = () => {
+    setOrderTOfilter(null);
+  };
+
+  // For Order Product
+  const productclick = (event) => {
+    setProductFilter(event.currentTarget);
+  };
+
+  const productclose = () => {
+    setProductFilter(null);
+  };
+
+  // For Order Id
+  const orderIdclick = (event) => {
+    setOrderIDfilter(event.currentTarget);
+  };
+
+  const orderIdclose = () => {
+    setOrderIDfilter(null);
+  };
+
+  // For Location
+  const locclick = (event) => {
+    setLocFilter(event.currentTarget);
+  };
+
+  const locclose = () => {
+    setLocFilter(null);
+  };
+
+  // For Status
+  const statusclick = (event) => {
+    setStatusFilter(event.currentTarget);
+  };
+
+  const statusclose = () => {
+    setStatusFilter(null);
+  };
+
+  // For Filter
+  const filterclick = (event) => {
+    setFilterBtn(event.currentTarget);
+  };
+
+  const filterclose = () => {
+    setFilterBtn(null);
+  };
+
+  // For Export
+  const exportclick = (event) => {
+    setExportBtn(event.currentTarget);
+  };
+
+  const exportclose = () => {
+    setExportBtn(null);
+  };
+
   return (
     <div>
       <table class="table">
         <thead>
           <tr>
-            <th className="cursorP">
+            <th className="cursorP" onClick={orderToclick}>
               <img src={mon} width="16" height="16" className="mr-2" alt="" />
               Order Sent TO
+              <img
+                src={updownarrow}
+                height="10"
+                width="15"
+                style={{ float: "right", marginTop: "5px" }}
+                alt=""
+              />
             </th>
+
+            {/* Filters with search bar & Scroll////////////////////////////////////////////////////// */}
+            <StyledMenu
+              id="customized-menu"
+              anchorEl={OrderTOfilter}
+              keepMounted
+              open={ToOpen}
+              onClose={orderToclose}
+              PaperProps={{
+                style: {
+                  maxHeight: ITEM_HEIGHT * 4.5,
+                  width: "20ch",
+                },
+              }}
+            >
+              <MenuItem>
+                <div className="filterSearch">
+                  <InputBase
+                    placeholder="Search"
+                    style={{ fontSize: "12px" }}
+                  />
+                  <img
+                    src={searchingIcon}
+                    width="12"
+                    height="12"
+                    alt="searching"
+                  />
+                </div>
+              </MenuItem>
+              {optionTo.map((option) => (
+                <MenuItem
+                  key={option}
+                  selected={option === "None"}
+                  onClick={orderToclose}
+                >
+                  <h6 className="filterText">{option}</h6>
+                </MenuItem>
+              ))}
+            </StyledMenu>
+
             <th className="cursorP">
-            <img src={calender} width="16" height="16" className="mr-2" alt="" />
+              <img
+                src={calender}
+                width="16"
+                height="16"
+                className="mr-2"
+                alt=""
+              />
               Order Date
+              <img
+                src={updownarrow}
+                height="10"
+                width="15"
+                style={{ float: "right", marginTop: "5px" }}
+                alt=""
+              />
             </th>
-            <th className="cursorP" >
-            <img src={Order} width="18" height="16" className="mr-2" alt="" />
+            <th className="cursorP" onClick={orderIdclick}>
+              <img src={Order} width="18" height="16" className="mr-2" alt="" />
               Order ID
               <img
                 src={updownarrow}
                 height="10"
                 width="15"
-                style={{float:"right", marginTop:"5px"}}
+                style={{ float: "right", marginTop: "5px" }}
                 alt=""
               />
             </th>
-            <th className="cursorP">
-            <img src={Package} width="16" height="16" className="mr-2" alt="" />
+
+            {/* Filters with search bar & Scroll////////////////////////////////////////////////////// */}
+            <StyledMenu
+              id="customized-menu"
+              anchorEl={OrderIDfilter}
+              // keepMounted
+              open={IdOpen}
+              onClose={orderIdclose}
+              PaperProps={{
+                style: {
+                  maxHeight: ITEM_HEIGHT * 4.5,
+                  width: "20ch",
+                },
+              }}
+            >
+              <MenuItem>
+                <div className="filterSearch">
+                  <InputBase
+                    placeholder="Search"
+                    style={{ fontSize: "12px" }}
+                  />
+                  <img
+                    src={searchingIcon}
+                    width="12"
+                    height="12"
+                    alt="searching"
+                  />
+                </div>
+              </MenuItem>
+              {optionId.map((option) => (
+                <MenuItem
+                  key={option}
+                  selected={option === "None"}
+                  onClick={orderIdclose}
+                >
+                  <h6 className="filterText">{option}</h6>
+                </MenuItem>
+              ))}
+            </StyledMenu>
+
+            <th className="cursorP" onClick={productclick}>
+              <img
+                src={Package}
+                width="16"
+                height="16"
+                className="mr-2"
+                alt=""
+              />
               Product
               <img
                 src={updownarrow}
                 height="10"
                 width="15"
-                style={{float:"right", marginTop:"5px"}}
+                style={{ float: "right", marginTop: "5px" }}
                 alt=""
               />
             </th>
-            <th className="cursorP">
-            <img src={Totalshipments} width="18" height="18" className="mr-2" alt="" />
+              
+            {/* Filters with search bar & Scroll////////////////////////////////////////////////////// */}
+            <StyledMenu
+              id="customized-menu"
+              anchorEl={ProductFilter}
+              keepMounted
+              open={ProOpen}
+              onClose={productclose}
+              PaperProps={{
+                style: {
+                  maxHeight: ITEM_HEIGHT * 4.5,
+                  width: "20ch",
+                },
+              }}
+            >
+              <MenuItem>
+                <div className="filterSearch">
+                  <InputBase
+                    placeholder="Search"
+                    style={{ fontSize: "12px" }}
+                  />
+                  <img
+                    src={searchingIcon}
+                    width="12"
+                    height="12"
+                    alt="searching"
+                  />
+                </div>
+              </MenuItem>
+              {optionPro.map((option) => (
+                <MenuItem
+                  key={option}
+                  selected={option === "None"}
+                  onClick={productclose}
+                >
+                  <h6 className="filterText">{option}</h6>
+                </MenuItem>
+              ))}
+            </StyledMenu>
+
+            <th className="cursorP" onClick={locclick}>
+              <img
+                src={Totalshipments}
+                width="18"
+                height="18"
+                className="mr-2"
+                alt=""
+              />
               Delivery Location
               <img
                 src={updownarrow}
                 height="10"
                 width="15"
-                style={{float:"right", marginTop:"5px"}}
+                style={{ float: "right", marginTop: "5px" }}
                 alt=""
               />
             </th>
-            <th className="cursorP">
-            <img src={Status} width="16" height="16" className="mr-2" alt="" />
+            
+            {/* Filters with search bar & Scroll////////////////////////////////////////////////////// */}
+            <StyledMenu
+              id="customized-menu"
+              anchorEl={LocFilter}
+              keepMounted
+              open={LocOpen}
+              onClose={locclose}
+              PaperProps={{
+                style: {
+                  maxHeight: ITEM_HEIGHT * 4.5,
+                  width: "20ch",
+                },
+              }}
+            >
+              <MenuItem>
+                <div className="filterSearch">
+                  <InputBase
+                    placeholder="Search"
+                    style={{ fontSize: "12px" }}
+                  />
+                  <img
+                    src={searchingIcon}
+                    width="12"
+                    height="12"
+                    alt="searching"
+                  />
+                </div>
+              </MenuItem>
+              {optionLoc.map((option) => (
+                <MenuItem
+                  key={option}
+                  selected={option === "None"}
+                  onClick={locclose}
+                >
+                  <h6 className="filterText">{option}</h6>
+                </MenuItem>
+              ))}
+            </StyledMenu>
+
+            <th className="cursorP" onClick={statusclick}>
+              <img
+                src={Status}
+                width="16"
+                height="16"
+                className="mr-2"
+                alt=""
+              />
               Status
               <img
                 src={updownarrow}
                 height="10"
                 width="15"
-                style={{float:"right", marginTop:"5px"}}
+                style={{ float: "right", marginTop: "5px" }}
                 alt=""
               />
             </th>
+            <StyledMenu
+              id="customized-menu"
+              anchorEl={StatusFilter}
+              keepMounted
+              open={Boolean(StatusFilter)}
+              onClose={statusclose}
+            >
+              <StyledMenuItem style={{ width: "160px", color: "#0b65c1" }}>
+                <h6 className="filterText">Shipped</h6>
+              </StyledMenuItem>
+              <StyledMenuItem style={{ width: "160px", color: "#0b65c1" }}>
+                <h6 className="filterText">Delivered</h6>
+              </StyledMenuItem>
+              <StyledMenuItem style={{ width: "160px", color: "#0b65c1" }}>
+                <h6 className="filterText">Alerts</h6>
+              </StyledMenuItem>
+            </StyledMenu>
             <th>
-            <button className='btn-filter-info '>
-              <div className='d-flex align-items-center'>
-                <img
-                  src={FilterIcon}
-                  width='13'
-                  height='13'
-                  className='mr-1'
-                  alt='FilterIcon'
-                />
-                <span className='text'>Filter</span>
-                <img
-                  src={dropdownIcon}
-                  width='8'
-                  height='8'
-                  className='ml-1'
-                  alt='Drop Down Icon'
-                />
-              </div>
-            </button>
-            <button
-                className='btn-filter-blue ml-2'
+              <button className="btn-filter-info" onClick={filterclick}>
+                <div className="d-flex align-items-center">
+                  <img
+                    src={FilterIcon}
+                    width="13"
+                    height="13"
+                    className="mr-1"
+                    alt="FilterIcon"
+                  />
+                  <span className="text">Filter</span>
+                  <img
+                    src={dropdownIcon}
+                    width="8"
+                    height="8"
+                    className="ml-1"
+                    alt="Drop Down Icon"
+                  />
+                </div>
+              </button>
+              <StyledMenu
+                id="customized-menu"
+                anchorEl={FilterBtn}
+                keepMounted
+                open={Boolean(FilterBtn)}
+                onClose={filterclose}
               >
-                <div className='d-flex  align-items-center'>
+                <StyledMenuItem>
+                  <button className="head-btn">Today</button>
+                </StyledMenuItem>
+                <StyledMenuItem>
+                  <button className="head-btn">This Week</button>
+                </StyledMenuItem>
+                <StyledMenuItem>
+                  <button className="head-btn">This Month</button>
+                </StyledMenuItem>
+                <StyledMenuItem>
+                  <button className="head-btn">Last 3 Month</button>
+                </StyledMenuItem>
+                <StyledMenuItem>
+                  <button className="head-btn">Last 6 Month</button>
+                </StyledMenuItem>
+                <StyledMenuItem>
+                  <button className="head-btn">This Year</button>
+                </StyledMenuItem>
+              </StyledMenu>
+              <button className="btn-filter-blue ml-2" onClick={exportclick}>
+                <div className="d-flex  align-items-center">
                   <img
                     src={ExportIcon}
-                    width='13'
-                    height='13'
-                    className='mr-1'
-                    alt='Export Icon'
+                    width="13"
+                    height="13"
+                    className="mr-1"
+                    alt="Export Icon"
                   />
                   <span className="text">Export</span>
                   <img
                     src={dropdownIcon}
-                    width='8'
-                    height='8'
-                    className='ml-1'
-                    alt='DropDownIcon'
+                    width="8"
+                    height="8"
+                    className="ml-1"
+                    alt="DropDownIcon"
                   />
                 </div>
               </button>
+              <StyledMenu
+                id="customized-menu"
+                anchorEl={ExportBtn}
+                keepMounted
+                open={Boolean(ExportBtn)}
+                onClose={exportclose}
+              >
+                <StyledMenuItem>
+                  <button className="head-btn">Excel</button>
+                </StyledMenuItem>
+                <StyledMenuItem>
+                  <button className="head-btn">PDF</button>
+                </StyledMenuItem>
+                <StyledMenuItem>
+                  <button className="head-btn">Mail</button>
+                </StyledMenuItem>
+                <StyledMenuItem>
+                  <button className="head-btn">Print</button>
+                </StyledMenuItem>
+              </StyledMenu>
             </th>
           </tr>
         </thead>
@@ -219,11 +617,15 @@ function Table(props) {
                       {customer.warehouse.title}
                     </h5>
                     <p class="text-muted mb-0 table-p-text">
-                      {truncate(customer.warehouse && customer.warehouse.warehouseAddress
-                        ? customer.warehouse.warehouseAddress.firstLine +
-                          " " +
-                          customer.warehouse.warehouseAddress.city
-                        : null, 25)}
+                      {truncate(
+                        customer.warehouse &&
+                          customer.warehouse.warehouseAddress
+                          ? customer.warehouse.warehouseAddress.firstLine +
+                              " " +
+                              customer.warehouse.warehouseAddress.city
+                          : null,
+                        25
+                      )}
                     </p>
                   </div>
                 </td>
