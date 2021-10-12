@@ -20,6 +20,9 @@ import { Menu, InputBase } from "@material-ui/core";
 import MenuItem from "@material-ui/core/MenuItem";
 import { withStyles } from "@material-ui/core/styles";
 import searchingIcon from "../../../assets/icons/search.png";
+import AdapterDateFns from "@mui/lab/AdapterDateFns";
+import LocalizationProvider from "@mui/lab/LocalizationProvider";
+import DateRangePicker from "@mui/lab/DateRangePicker";
 
 const StyledMenu = withStyles({
   paper: {
@@ -91,6 +94,9 @@ function Table(props) {
   const [StatusFilter, setStatusFilter] = React.useState(null);
   const [FilterBtn, setFilterBtn] = React.useState(null);
   const [ExportBtn, setExportBtn] = React.useState(null);
+  const [dateFilter, setdateFilter] = React.useState(null);
+
+  const [value, setValue] = React.useState([null, null]);
 
   // For Order To
   const ShipIDclick = (event) => {
@@ -126,6 +132,15 @@ function Table(props) {
 
   const statusclose = () => {
     setStatusFilter(null);
+  };
+
+   // For Order Product
+   const dateclick = (event) => {
+    setdateFilter(event.currentTarget);
+  };
+
+  const dateclose = () => {
+    setdateFilter(null);
   };
 
   // For Filter
@@ -202,7 +217,7 @@ function Table(props) {
               ))}
             </StyledMenu>
 
-            <th className="cursorP">
+            <th className="cursorP" onClick={dateclick}>
               <img
                 src={calender}
                 width="16"
@@ -219,6 +234,47 @@ function Table(props) {
                 alt=""
               />
             </th>
+            <StyledMenu
+              style={{ width: "70%", margin: "10px" }}
+              id="customized-menu"
+              anchorEl={dateFilter}
+              keepMounted
+              open={Boolean(dateFilter)}
+              onClose={dateclose}
+            >
+              <div style={{ padding: "0 20px" }}>
+                <h6>From</h6>
+                <h6 style={{ position: "absolute", top: "8px", left: "55%" }}>
+                  To
+                </h6>
+                <LocalizationProvider
+                  dateAdapter={AdapterDateFns}
+                  style={{ padding: "0 10px" }}
+                >
+                  <DateRangePicker
+                    calendars={1}
+                    value={value}
+                    onChange={(newValue) => {
+                      setValue(newValue);
+                    }}
+                    renderInput={(startProps, endProps) => (
+                      <React.Fragment>
+                        <input
+                          className="filterDate mr-2"
+                          ref={startProps.inputRef}
+                          {...startProps.inputProps}
+                        />
+                        <input
+                          className="filterDate"
+                          ref={endProps.inputRef}
+                          {...endProps.inputProps}
+                        />
+                      </React.Fragment>
+                    )}
+                  />
+                </LocalizationProvider>
+              </div>
+            </StyledMenu>
             <th className="cursorP" onClick={Fromclick}>
               <img
                 src={Received}
@@ -327,7 +383,7 @@ function Table(props) {
               ))}
             </StyledMenu>
 
-            <th className="cursorP" onClick={statusclick}>
+            <th className="cursorP" onClick={statusclick} style={{border:"none"}}>
               <img
                 src={Status}
                 width="16"
@@ -375,7 +431,7 @@ function Table(props) {
                 <h6 className="filterText">Alerts</h6>
               </StyledMenuItem>
             </StyledMenu>
-            <th>
+            <th style={{display:"flex",alignItems:"flex-start"}}>
               <button className="btn-filter-info" onClick={filterclick}>
                 <div className="d-flex align-items-center">
                   <img
@@ -632,7 +688,7 @@ function Table(props) {
             }
             return (
               <tr>
-                <td>
+                <td data-label="Shipment ID">
                   <div class="user-info">
                     <h5 class="table-h5-text shipmentId">{shipment.id}</h5>
                     {shipment?.shipmentAlerts?.length > 0 && (
@@ -645,7 +701,7 @@ function Table(props) {
                     )}
                   </div>
                 </td>
-                <td>
+                <td data-label="Shipping Date">
                   <div class="user-info">
                     <h5 class="table-h5-text">
                       {shipment?.shippingDate?.length === 10
@@ -654,7 +710,7 @@ function Table(props) {
                     </h5>
                   </div>
                 </td>
-                <td>
+                <td data-label="From">
                   <div class="user-info__basic">
                     <h5 class="mb-0 table-h5-text">
                       {shipment.supplier.org ? shipment.supplier.org.name : "-"}
@@ -676,7 +732,7 @@ function Table(props) {
                     </p>
                   </div>
                 </td>
-                <td>
+                <td data-label="To">
                   <div class="user-info__basic">
                     <h5 class="mb-0 table-h5-text">
                       {shipment.receiver.org ? shipment.receiver.org.name : "-"}
@@ -700,14 +756,14 @@ function Table(props) {
                     </p>
                   </div>
                 </td>
-                <td>
+                <td data-label="Status">
                   <div
                     className={`status secondary-bgp p-1 mr-3 text-center ${statusStyle}`}
                   >
                     {status}
                   </div>
                 </td>
-                <td>
+                <td data-label="Actions">
                   <div className="table-btns">
                     <button
                       className="button btn-primary text-light btn-sm mr-3"
