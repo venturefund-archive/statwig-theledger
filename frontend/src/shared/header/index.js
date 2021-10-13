@@ -372,10 +372,36 @@ const Header = (props) => {
             {/* Search bar */}
 
             <div className="searchBar">
-              <InputBase
+            <Autocomplete
+id='free-solo-demo'
+freeSolo
+//value={search}
+options={options}
+getOptionLabel={(option) => option._id}
+filterOptions={filterOptions}
+placeholder='Search PO ID/ Shipment ID/ Transit Number'
+onFocus={(e) => (e.target.placeholder = "")}
+onBlur={(e) =>
+  (e.target.placeholder =
+    "Search PO ID/ Shipment ID/ Transit Number")
+}
+inputValue={search}
+onInputChange={(event, newInputValue) => {
+  setSearch(newInputValue);
+  onSearchChange(newInputValue);
+}}
+onChange={(event, newValue) => {
+  onSearchChange(newValue);
+}}
+renderInput={(params) => {
+  const {InputLabelProps,InputProps,...rest} = params;
+         return (<InputBase
+          {...params.InputProps} {...rest}
                 className="searchInput"
                 placeholder="Search PO ID/ Shipment ID"
-              />
+              /> )
+}}
+/>
               <Search className="navIcons" />
             </div>
           </li>
