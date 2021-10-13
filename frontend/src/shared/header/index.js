@@ -410,7 +410,7 @@ const Header = (props) => {
 
             <li className="navItems notifyList">
               <Badge
-                badgeContent={434}
+                badgeContent={newNotifs}
                 max={999}
                 color="error"
                 className="navIcons"
@@ -420,7 +420,7 @@ const Header = (props) => {
               </Badge>
               {showNotifications && <div className='triangle-up'></div>}
 {showNotifications && (
-  <div ref={ref1}  outsideClickIgnoreClass={'ignore-react-onclickoutside'} className='slider-menu' id="scrollableDiv">
+  <div ref={ref1}  outsideClickIgnoreClass={'ignore-react-onclickoutside'} className='slider-menu1' id="scrollableDiv">
     <div
       className='nheader'
       style={{
@@ -449,6 +449,7 @@ const Header = (props) => {
       <div>
       <img
           className="setting-notif-icon"
+          height={15}
           src={SettingIcon}
           onClick={() => props.history.push("/settings")}
           alt='settings'
@@ -624,13 +625,25 @@ const Header = (props) => {
               </div>
               <div className="navCard">
                 <div className="locationName">
-                  <h1 className="nav-heading">Location Test</h1>
-                  <p className="nav-subheading">Adoni, India...</p>
+                <DropdownButton
+                name={(
+                  location?.title +
+                  "|" +
+                  location?.warehouseAddress?.city +
+                  "," +
+                  location?.warehouseAddress?.country
+                )
+                  .substr(0, 30)
+                  .concat("...")}
+                arrowImg={dropdownIcon}
+                onSelect={(item) => {
+                  handleLocation(item);
+                }}
+                groups={activeWarehouses}
+              />
                 </div>
               </div>
-              <div className="navCard">
-                <ExpandMore className="navIcons" onClick={handleClick2} />
-              </div>
+
 
               <Menu
                 anchorEl={anchorEl2}
