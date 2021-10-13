@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-// import "./style.scss";
+import "./style.scss";
 import searchingIcon from "../../assets/icons/search.png";
 import bellIcon from "../../assets/icons/notification_blue.png";
 import dropdownIcon from "../../assets/icons/dropdown_selected.png";
@@ -73,7 +73,7 @@ const Header = (props) => {
   const [alertType, setAlertType] = useState("ALERT");
   const [invalidSearch, setInvalidSearch] = useState(false);
   const [notifications, setNotifications] = useState([]);
-  const [showNotifications, setShowNotifications] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(true);
   const [image, setImage] = useState("");
   const [activeWarehouses, setActiveWarehouses] = useState([]);
   const [options, setOptions] = useState([]);
@@ -352,174 +352,365 @@ const Header = (props) => {
 
   return (
     <div className="navBar">
-    {/* Container */}
+      {/* Container */}
 
-    <div className="navContainer">
-      {/* Navbar */}
+      <div className="navContainer">
+        {/* Navbar */}
 
-      <nav className="nav">
-        {/* branding */}
+        <nav className="nav">
+          {/* branding */}
 
-        <div className="logo">
-          <img src={logo} alt="logo" />
-        </div>
+          <div className="logo">
+            <img src={logo} alt="logo" />
+          </div>
 
-        {/* Nav Items */}
-        <MenuOutlined className="hambergerMenu" />
+          {/* Nav Items */}
+          <MenuOutlined className="hambergerMenu" />
 
-        <ul className="navList">
-          <li className="navItems">
-            {/* Search bar */}
+          <ul className="navList">
+            <li className="navItems">
 
-            <div className="searchBar">
-            <Autocomplete
-id='free-solo-demo'
-freeSolo
-//value={search}
-options={options}
-getOptionLabel={(option) => option._id}
-filterOptions={filterOptions}
-placeholder='Search PO ID/ Shipment ID/ Transit Number'
-onFocus={(e) => (e.target.placeholder = "")}
-onBlur={(e) =>
-  (e.target.placeholder =
-    "Search PO ID/ Shipment ID/ Transit Number")
-}
-inputValue={search}
-onInputChange={(event, newInputValue) => {
-  setSearch(newInputValue);
-  onSearchChange(newInputValue);
-}}
-onChange={(event, newValue) => {
-  onSearchChange(newValue);
-}}
-renderInput={(params) => {
-  const {InputLabelProps,InputProps,...rest} = params;
-         return (<InputBase
-          {...params.InputProps} {...rest}
-                className="searchInput"
-                placeholder="Search PO ID/ Shipment ID"
-              /> )
-}}
-/>
-              <Search className="navIcons" />
-            </div>
-          </li>
-          {/* Notification Icons */}
+                <Autocomplete
+                  className="searchBar"
+                  freeSolo
+                  id="free-solo-2-demo"
+                  disableClearable
+                  forcePopupIcon={true}
+                  popupIcon={<Search style={{ color: "#0b65c1" }} />}
+                  options={options}
+                  getOptionLabel={(option) => option._id}
+                  filterOptions={filterOptions}
+                  placeholder="Search PO ID/ Shipment ID/ Transit Number"
+                  onFocus={(e) => (e.target.placeholder = "")}
+                  onBlur={(e) =>
+                    (e.target.placeholder =
+                      "Search PO ID/ Shipment ID/ Transit Number")
+                  }
+                  inputValue={search}
+                  onInputChange={(event, newInputValue) => {
+                    setSearch(newInputValue);
+                    onSearchChange(newInputValue);
+                  }}
+                  onChange={(event, newValue) => {
+                    onSearchChange(newValue);
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Search PO ID/ Shipment ID/ Transit Number"
+                      InputProps={{
+                        ...params.InputProps,
+                        type: "search",
+                      }}
+                    />
+                  )}
+                />
+            </li>
+            {/* Notification Icons */}
 
-          <li className="navItems notifyList">
+            <li className="navItems notifyList">
               <Badge
                 badgeContent={434}
                 max={999}
                 color="error"
                 className="navIcons"
+                onClick={()=>setShowNotifications(!showNotifications)}
               >
-                <NotificationsOutlined className="notify" />
+                <NotificationsOutlined className="notify" onClick={()=>setShowNotifications(!showNotifications)}/>
               </Badge>
-          </li>
+              {showNotifications && <div className='triangle-up'></div>}
+{showNotifications && (
+  <div ref={ref1}  outsideClickIgnoreClass={'ignore-react-onclickoutside'} className='slider-menu' id="scrollableDiv">
+    <div
+      className='nheader'
+      style={{
+        backgroundImage:
+          "linear-gradient(to right, #0092e8, #0a6bc6)",
+      }}
+    >
+      <div className='user-notification-head'>
+        User Notifications
+      </div>
+      {notifications?.length >= 0 && (
+        <span
+          style={{
+            position: "relative",
+            left: "40px",
+            backgroundColor: "#fa7a23",
+            padding: "6px",
+            color: "white",
+            borderRadius: "8px",
+            fontSize: "14px",
+          }}
+        >
+          {newNotifs} new
+        </span>
+      )}
+      <div>
+      <img
+          className="setting-notif-icon"
+          src={SettingIcon}
+          onClick={() => props.history.push("/settings")}
+          alt='settings'
+      />
+      </div>
 
-          <Divider
-            orientation="vertical"
-            variant="middle"
-            flexItem
-            className="divider"
-          />
-
-          {/* Location */}
-
-          <li className="navItems location" >
-            <div className="navCard">
-              <LocationOnOutlined className="navIcons" />
+      <div className='tab'>
+        <ul className='nav nav-pills'>
+          <li
+            className={
+              visible === "one" ? "nav-item-active" : "nav-item"
+            }
+            onClick={() => {
+              setLimit(10);
+              setAlertType("ALERT");
+              changeNotifications("ALERT", 1);
+              setVisible("one");
+              setHasMore(true);
+              ref1.current.scrollTop = 0
+            }}
+          >
+            <div
+              className={
+                visible === "one"
+                  ? "nav-link"
+                  : "nav-link tab-text"
+              }
+            >
+              Alerts
             </div>
-            <div className="navCard">
-              <div className="locationName">
-                <h1 className="nav-heading">Location Test</h1>
-                <p className="nav-subheading">Adoni, India...</p>
+          </li>
+          <li
+            className={
+              visible === "two" ? "nav-item-active " : "nav-item"
+            }
+            onClick={() => {
+              setLimit(10);
+              setAlertType("TRANSACTION");
+              changeNotifications("TRANSACTION", 1);
+              setVisible("two");
+              setHasMore(true);
+              ref1.current.scrollTop = 0
+            }}
+          >
+            <div
+              className={
+                visible === "two"
+                  ? "nav-link"
+                  : "nav-link tab-text"
+              }
+            >
+              Transactions
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div className='slider-item'>
+      <InfiniteScroll
+        dataLength={notifications?.length || 0}
+        next={() => changeNotifications(alertType, 10)}
+        style={{
+          display: "flex",
+          flexDirection: "column-reverse",
+        }} //To put endMessage and loader to the top.
+        hasMore={hasMore}
+        loader={<h4><Spinner /></h4>}
+        scrollThreshold={1}
+        scrollableTarget='scrollableDiv'
+      >
+        {notifications?.length >= 0 ? (
+          notifications?.map((notifications) =>
+            notifications.transactionId ? (
+              <Link
+                key={notifications.id}
+                to={notifRouting(notifications)}
+                // style={{ textDecoration: "none" }}
+                className={notifications.isRead ? 'read' : 'unRead'}
+                style={{ textDecoration:"none" }}
+                onClick={() => readNotification(notifications.id)}
+              >
+                <div
+                  className='col-sm-10'
+                  style={{ display: "flex" }}
+                >
+                  <img
+                    className='notification-icons'
+                    src={notifIcon(notifications)}
+                    alt='Icon'
+                  />
+                  <div className='notification-events'>
+                    {notifications.message}
+                  </div>
+                </div>
+                <div className='text-secondary notif-time'>
+                  {formatDistanceToNow(
+                    new Date(
+                      parseInt(
+                        notifications._id.toString().substr(0, 8),
+                        16
+                      ) * 1000
+                    )
+                  )}
+                </div>
+                <img
+                  className='toggle-icon'
+                  alt='Drop Down Icon'
+                  src={dropdownIcon}
+                ></img>
+              </Link>
+            ) : (
+              <div
+                key={notifications.id}
+                style={{ cursor: "not-allowed" }}
+              >
+                <div
+                  className='col-sm-10'
+                  style={{ display: "flex" }}
+                >
+                  <img
+                    className='notification-icons'
+                    src={notifIcon(notifications)}
+                    alt='Icon'
+                  />
+                  <div className='notification-events'>
+                    {notifications.message}
+                  </div>
+                </div>
+                <div className='text-secondary notif-time'>
+                  {formatDistanceToNow(
+                    new Date(
+                      parseInt(
+                        notifications._id.toString().substr(0, 8),
+                        16
+                      ) * 1000
+                    )
+                  )}
+                </div>
+              </div>
+            )
+          )
+        ) : (
+          <div className='slider-item'>
+            <div className='row'>
+              <div className='col text-center mt-3 mr-5'>
+                <div>
+                  <span className='no-notification'>
+                    No notifications
+                  </span>
+                </div>
               </div>
             </div>
-            <div className="navCard">
-              <ExpandMore className="navIcons" onClick={handleClick2}/>
-            </div>
+          </div>
+        )}
+      </InfiniteScroll>
+    </div>
+  </div>
+)}
+            </li>
 
-            <Menu
-              anchorEl={anchorEl2}
-              open={open2}
-              onClose={handleClose2}
-              onClick={handleClose2}
-              PaperProps={{
-                elevation: 0,
-                sx: {
-                  overflow: "visible",
-                  filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
-                  mt: 1.5,
-                  "& .MuiAvatar-root": {
-                    width: 32,
-                    height: 32,
-                    ml: -0.5,
-                    mr: 1,
+            <Divider
+              orientation="vertical"
+              variant="middle"
+              flexItem
+              className="divider"
+            />
+
+            {/* Location */}
+
+            <li className="navItems location">
+              <div className="navCard">
+                <LocationOnOutlined className="navIcons" />
+              </div>
+              <div className="navCard">
+                <div className="locationName">
+                  <h1 className="nav-heading">Location Test</h1>
+                  <p className="nav-subheading">Adoni, India...</p>
+                </div>
+              </div>
+              <div className="navCard">
+                <ExpandMore className="navIcons" onClick={handleClick2} />
+              </div>
+
+              <Menu
+                anchorEl={anchorEl2}
+                open={open2}
+                onClose={handleClose2}
+                onClick={handleClose2}
+                PaperProps={{
+                  elevation: 0,
+                  sx: {
+                    overflow: "visible",
+                    filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                    mt: 1.5,
+                    "& .MuiAvatar-root": {
+                      width: 32,
+                      height: 32,
+                      ml: -0.5,
+                      mr: 1,
+                    },
                   },
-                },
-              }}
-              transformOrigin={{ horizontal: "right", vertical: "top" }}
-              anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-            >
-              <MenuItem>
-                <div className="profileName">
-                  <h1 className="nav-heading">Location 1</h1>
-                  <p className="nav-subheading">Location Address | India</p>
-                </div>
-              </MenuItem>
-              <Divider />
-              <MenuItem>
-                <div className="profileName">
-                  <h1 className="nav-heading">Location 1</h1>
-                  <p className="nav-subheading">Location Address | India</p>
-                </div>
-              </MenuItem>
+                }}
+                transformOrigin={{ horizontal: "right", vertical: "top" }}
+                anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+              >
+                <MenuItem>
+                  <div className="profileName">
+                    <h1 className="nav-heading">Location 1</h1>
+                    <p className="nav-subheading">Location Address | India</p>
+                  </div>
+                </MenuItem>
+                <Divider />
+                <MenuItem>
+                  <div className="profileName">
+                    <h1 className="nav-heading">Location 1</h1>
+                    <p className="nav-subheading">Location Address | India</p>
+                  </div>
+                </MenuItem>
 
-              <Divider />
-              <MenuItem>
-                <div className="profileName">
-                  <h1 className="nav-heading">Location 1</h1>
-                  <p className="nav-subheading">Location Address | India</p>
-                </div>
-              </MenuItem>
+                <Divider />
+                <MenuItem>
+                  <div className="profileName">
+                    <h1 className="nav-heading">Location 1</h1>
+                    <p className="nav-subheading">Location Address | India</p>
+                  </div>
+                </MenuItem>
 
-              <Divider />
-              <MenuItem>
-                <div className="profileName">
-                  <h1 className="nav-heading">Location 1</h1>
-                  <p className="nav-subheading">Location Address | India</p>
-                </div>
-              </MenuItem>
-              <Divider />
-              <MenuItem>
-                <div className="profileName">
-                  <h1 className="nav-heading">Location 1</h1>
-                  <p className="nav-subheading">Location Address | India</p>
-                </div>
-              </MenuItem>
-              <Divider />
-              <MenuItem>
-                <div className="profileName">
-                  <h1 className="nav-heading">Location 1</h1>
-                  <p className="nav-subheading">Location Address | India</p>
-                </div>
-              </MenuItem>
-              <Divider />
-              <MenuItem>
-                <div className="profileName">
-                  <h1 className="nav-heading">Location 1</h1>
-                  <p className="nav-subheading">Location Address | India</p>
-                </div>
-              </MenuItem>
-            </Menu>
-          </li>
+                <Divider />
+                <MenuItem>
+                  <div className="profileName">
+                    <h1 className="nav-heading">Location 1</h1>
+                    <p className="nav-subheading">Location Address | India</p>
+                  </div>
+                </MenuItem>
+                <Divider />
+                <MenuItem>
+                  <div className="profileName">
+                    <h1 className="nav-heading">Location 1</h1>
+                    <p className="nav-subheading">Location Address | India</p>
+                  </div>
+                </MenuItem>
+                <Divider />
+                <MenuItem>
+                  <div className="profileName">
+                    <h1 className="nav-heading">Location 1</h1>
+                    <p className="nav-subheading">Location Address | India</p>
+                  </div>
+                </MenuItem>
+                <Divider />
+                <MenuItem>
+                  <div className="profileName">
+                    <h1 className="nav-heading">Location 1</h1>
+                    <p className="nav-subheading">Location Address | India</p>
+                  </div>
+                </MenuItem>
+              </Menu>
+            </li>
 
-          {/* Location */}
+            {/* Location */}
 
-          <li className="navItems profile">
-            {/* <div className="navCard">
+            <li className="navItems profile">
+              {/* <div className="navCard">
               <div className="profileName">
                 <h1 className="nav-heading">Location Test</h1>
                 <p className="nav-subheading">Adoni, India...</p>
@@ -531,49 +722,68 @@ renderInput={(params) => {
                 size="small"
                 sx={{ ml: 2 }}
               >
-                <Avatar sx={{ width: 32, height: 32 }} src={`${image}`}></Avatar>
+                <Avatar
+                  sx={{ width: 32, height: 32 }}
+                  src={`${image}`}
+                ></Avatar>
               </IconButton>
-            <Menu
-              anchorEl={anchorEl}
-              open={open}
-              onClose={handleClose}
-              onClick={handleClose}
-              PaperProps={{
-                elevation: 0,
-                sx: {
-                  overflow: "visible",
-                  filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
-                  mt: 1.5,
-                  "& .MuiAvatar-root": {
-                    width: 32,
-                    height: 32,
-                    ml: -0.5,
-                    mr: 1,
+              <Menu
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleClose}
+                onClick={handleClose}
+                PaperProps={{
+                  elevation: 0,
+                  sx: {
+                    overflow: "visible",
+                    filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                    mt: 1.5,
+                    "& .MuiAvatar-root": {
+                      width: 32,
+                      height: 32,
+                      ml: -0.5,
+                      mr: 1,
+                    },
                   },
-                },
-              }}
-              transformOrigin={{ horizontal: "right", vertical: "top" }}
-              anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-            >
-              <MenuItem>
-                <div className="profileName">
-                  <h1 className="nav-heading">{profile.name}</h1>
-                  <p className="nav-subheading">{profile?.organisation?.split("/")[0]}</p>
-                </div>
-              </MenuItem>
-              <Divider />
-              <MenuItem style={{ fontSize: "13px" }}   onClick={() => props.history.push("/profile")}  >My profile</MenuItem>
-              <Divider />
-              <MenuItem style={{ fontSize: "13px" }} onClick={() => props.history.push("/settings")}>Settings</MenuItem>
-              <Divider />
-              <MenuItem style={{ fontSize: "13px" }} onClick={() => dispatch(logoutUser())}>Logout</MenuItem>
-            </Menu>
-          </li>
-        </ul>
-      </nav>
+                }}
+                transformOrigin={{ horizontal: "right", vertical: "top" }}
+                anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+              >
+                <MenuItem>
+                  <div className="profileName">
+                    <h1 className="nav-heading">{profile.name}</h1>
+                    <p className="nav-subheading">
+                      {profile?.organisation?.split("/")[0]}
+                    </p>
+                  </div>
+                </MenuItem>
+                <Divider />
+                <MenuItem
+                  style={{ fontSize: "13px" }}
+                  onClick={() => props.history.push("/profile")}
+                >
+                  My profile
+                </MenuItem>
+                <Divider />
+                <MenuItem
+                  style={{ fontSize: "13px" }}
+                  onClick={() => props.history.push("/settings")}
+                >
+                  Settings
+                </MenuItem>
+                <Divider />
+                <MenuItem
+                  style={{ fontSize: "13px" }}
+                  onClick={() => dispatch(logoutUser())}
+                >
+                  Logout
+                </MenuItem>
+              </Menu>
+            </li>
+          </ul>
+        </nav>
+      </div>
     </div>
-  </div>
- 
   );
 };
 export default Header;
