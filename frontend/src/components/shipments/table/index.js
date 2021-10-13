@@ -407,20 +407,6 @@ function Table(props) {
               open={Boolean(StatusFilter)}
               onClose={statusclose}
             >
-              {/* <DateRangePicker
-                calendars={1}
-                value={value}
-                onChange={(newValue) => {
-                  setValue(newValue);
-                }}
-                renderInput={(startProps, endProps) => (
-                  <React.Fragment>
-                    <TextField {...startProps} />
-                    <Box sx={{ mx: 2 }}> to </Box>
-                    <TextField {...endProps} />
-                  </React.Fragment>
-                )}
-              /> */}
               <StyledMenuItem style={{ width: "160px", color: "#0b65c1" }}>
                 <h6 className="filterText">Shipped</h6>
               </StyledMenuItem>

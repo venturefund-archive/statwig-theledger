@@ -21,6 +21,58 @@ import Totalshipments from "../../assets/icons/TotalShipment.svg";
 import updownarrow from "../../assets/icons/up-and-down-1.svg";
 import FilterIcon from "../../assets/icons/Filter.svg";
 import dropdownIcon from "../../assets/icons/drop-down.svg";
+import { Menu, InputBase } from "@material-ui/core";
+import MenuItem from "@material-ui/core/MenuItem";
+import { withStyles } from "@material-ui/core/styles";
+import searchingIcon from "../../assets/icons/search.png";
+import AdapterDateFns from "@mui/lab/AdapterDateFns";
+import LocalizationProvider from "@mui/lab/LocalizationProvider";
+import DateRangePicker from "@mui/lab/DateRangePicker";
+
+
+const StyledMenu = withStyles({
+  paper: {
+    boxShadow: "0px 2px 5px rgba(51, 51, 51, 0.2)",
+  },
+})((props) => (
+  <Menu
+    elevation={0}
+    getContentAnchorEl={null}
+    anchorOrigin={{
+      vertical: "bottom",
+      horizontal: "center",
+    }}
+    transformOrigin={{
+      vertical: "top",
+      horizontal: "center",
+    }}
+    {...props}
+  />
+));
+
+const StyledMenuItem = withStyles((theme) => ({}))(MenuItem);
+
+const ITEM_HEIGHT = 48;
+
+const optionName = [
+  "None",
+  "Unicef",
+  "Statwig",
+  "Tech",
+  "React",
+  "Java",
+  "Sort",
+  "Luna",
+];
+const optionCat = [
+  "None",
+  "Atria",
+  "Callisto",
+  "Dione",
+  "Ganymede",
+  "Hangouts Call",
+  "Luna",
+];
 
 const Inventory = (props) => {
   const headers = {
@@ -263,6 +315,64 @@ const Inventory = (props) => {
       )
     ); //(skip, limit, dateFilter, productName, productCategory, status)
   };
+
+  // Filters
+  const [ProNamefilter, setProNamefilter] = React.useState(null);
+  const ProNameOpen = Boolean(ProNamefilter);
+  const [ProCatfilter, setProCatfilter] = React.useState(null);
+  const ProCatOpen = Boolean(ProCatfilter);
+  const [StatFilter, setStatFilter] = React.useState(null);
+  const [FilterBtn, setFilterBtn] = React.useState(null);
+  const [PdateFilter, setPdateFilter] = React.useState(null);
+
+  const [value, setValue] = React.useState([null, null]);
+
+  // For product name
+  const pronameclick = (event) => {
+    setProNamefilter(event.currentTarget);
+  };
+
+  const pronameclose = () => {
+    setProNamefilter(null);
+  };
+
+
+  // For product category
+  const procatclick = (event) => {
+    setProCatfilter(event.currentTarget);
+  };
+
+  const procatclose = () => {
+    setProCatfilter(null);
+  };
+
+
+  // For Status
+  const statusclick = (event) => {
+    setStatFilter(event.currentTarget);
+  };
+
+  const statusclose = () => {
+    setStatFilter(null);
+  };
+
+  // For Order Product
+  const dateclick = (event) => {
+    setPdateFilter(event.currentTarget);
+  };
+
+  const dateclose = () => {
+    setPdateFilter(null);
+  };
+
+  // For Filter
+  const filterclick = (event) => {
+    setFilterBtn(event.currentTarget);
+  };
+
+  const filterclose = () => {
+    setFilterBtn(null);
+  };
   return (
     <div className="inventory">
       <div className="d-flex justify-content-between">
@@ -428,7 +538,7 @@ const Inventory = (props) => {
         }}
         className="table-headers py-1 mb-3 row no-gutters"
       >
-        <div className="pName bdr py-3 table-in-header">
+        <div className="pName bdr py-3 table-in-header" onClick={pronameclick}>
           <img
             src={Totalshipments}
             width="18"
@@ -445,7 +555,44 @@ const Inventory = (props) => {
             alt=""
           />
         </div>
-        <div className="bdr pCat py-3 table-in-header">
+        <StyledMenu
+              id="customized-menu"
+              anchorEl={ProNamefilter}
+              keepMounted
+              open={ProNameOpen}
+              onClose={pronameclose}
+              PaperProps={{
+                style: {
+                  maxHeight: ITEM_HEIGHT * 4.5,
+                  width: "20ch",
+                },
+              }}
+            >
+              <MenuItem>
+                <div className="filterSearch">
+                  <InputBase
+                    placeholder="Search"
+                    style={{ fontSize: "12px" }}
+                  />
+                  <img
+                    src={searchingIcon}
+                    width="12"
+                    height="12"
+                    alt="searching"
+                  />
+                </div>
+              </MenuItem>
+              {optionName.map((option) => (
+                <MenuItem
+                  key={option}
+                  selected={option === "None"}
+                  onClick={pronameclose}
+                >
+                  <h6 className="filterText">{option}</h6>
+                </MenuItem>
+              ))}
+            </StyledMenu>
+        <div className="bdr pCat py-3 table-in-header" onClick={procatclick}>
           <img
             src={Totalshipments}
             width="18"
@@ -462,7 +609,44 @@ const Inventory = (props) => {
             alt=""
           />
         </div>
-        <div className="bdr pDate py-3 table-in-header">
+        <StyledMenu
+              id="customized-menu"
+              anchorEl={ProCatfilter}
+              keepMounted
+              open={ProCatOpen}
+              onClose={procatclose}
+              PaperProps={{
+                style: {
+                  maxHeight: ITEM_HEIGHT * 4.5,
+                  width: "20ch",
+                },
+              }}
+            >
+              <MenuItem>
+                <div className="filterSearch">
+                  <InputBase
+                    placeholder="Search"
+                    style={{ fontSize: "12px" }}
+                  />
+                  <img
+                    src={searchingIcon}
+                    width="12"
+                    height="12"
+                    alt="searching"
+                  />
+                </div>
+              </MenuItem>
+              {optionCat.map((option) => (
+                <MenuItem
+                  key={option}
+                  selected={option === "None"}
+                  onClick={procatclose}
+                >
+                  <h6 className="filterText">{option}</h6>
+                </MenuItem>
+              ))}
+            </StyledMenu>
+        <div className="bdr pDate py-3 table-in-header" onClick={dateclick}>
           <img
             src={Totalshipments}
             width="18"
@@ -479,6 +663,47 @@ const Inventory = (props) => {
             alt=""
           />
         </div>
+        <StyledMenu
+              style={{ width: "70%", margin: "10px" }}
+              id="customized-menu"
+              anchorEl={PdateFilter}
+              keepMounted
+              open={Boolean(PdateFilter)}
+              onClose={dateclose}
+            >
+              <div style={{ padding: "0 20px" }}>
+                <h6>From</h6>
+                <h6 style={{ position: "absolute", top: "8px", left: "55%" }}>
+                  To
+                </h6>
+                <LocalizationProvider
+                  dateAdapter={AdapterDateFns}
+                  style={{ padding: "0 10px" }}
+                >
+                  <DateRangePicker
+                    calendars={1}
+                    value={value}
+                    onChange={(newValue) => {
+                      setValue(newValue);
+                    }}
+                    renderInput={(startProps, endProps) => (
+                      <React.Fragment>
+                        <input
+                          className="filterDate mr-2"
+                          ref={startProps.inputRef}
+                          {...startProps.inputProps}
+                        />
+                        <input
+                          className="filterDate"
+                          ref={endProps.inputRef}
+                          {...endProps.inputProps}
+                        />
+                      </React.Fragment>
+                    )}
+                  />
+                </LocalizationProvider>
+              </div>
+            </StyledMenu>
         <div className="bdr pQuan py-3 table-in-header">
           <img
             src={Totalshipments}
@@ -488,15 +713,12 @@ const Inventory = (props) => {
             alt=""
           />
           Quantity
-          <img
-            src={updownarrow}
-            height="10"
-            width="15"
-            style={{ float: "right", marginTop: "5px", marginRight: "10px" }}
-            alt=""
-          />
         </div>
-        <div style={{ width: "12%" }} className="pStatus py-3 table-in-header">
+        <div
+          style={{ width: "12%" }}
+          className="pStatus py-3 table-in-header"
+          onClick={statusclick}
+        >
           <img
             src={Totalshipments}
             width="18"
@@ -513,7 +735,24 @@ const Inventory = (props) => {
             alt=""
           />
         </div>
-        <div className="pFil py-2">
+        <StyledMenu
+          id="customized-menu"
+          anchorEl={StatFilter}
+          keepMounted
+          open={Boolean(StatFilter)}
+          onClose={statusclose}
+        >
+          <StyledMenuItem style={{ width: "160px", color: "#0b65c1" }}>
+            <h6 className="filterText">Shipped</h6>
+          </StyledMenuItem>
+          <StyledMenuItem style={{ width: "160px", color: "#0b65c1" }}>
+            <h6 className="filterText">Delivered</h6>
+          </StyledMenuItem>
+          <StyledMenuItem style={{ width: "160px", color: "#0b65c1" }}>
+            <h6 className="filterText">Alerts</h6>
+          </StyledMenuItem>
+        </StyledMenu>
+        <div className="pFil py-2" onClick={filterclick}>
           <button className="btn-filter-info">
             <div className="d-flex align-items-center">
               <img
@@ -534,6 +773,32 @@ const Inventory = (props) => {
             </div>
           </button>
         </div>
+        <StyledMenu
+                id="customized-menu"
+                anchorEl={FilterBtn}
+                keepMounted
+                open={Boolean(FilterBtn)}
+                onClose={filterclose}
+              >
+                <StyledMenuItem>
+                  <button className="head-btn">Today</button>
+                </StyledMenuItem>
+                <StyledMenuItem>
+                  <button className="head-btn">This Week</button>
+                </StyledMenuItem>
+                <StyledMenuItem>
+                  <button className="head-btn">This Month</button>
+                </StyledMenuItem>
+                <StyledMenuItem>
+                  <button className="head-btn">Last 3 Month</button>
+                </StyledMenuItem>
+                <StyledMenuItem>
+                  <button className="head-btn">Last 6 Month</button>
+                </StyledMenuItem>
+                <StyledMenuItem>
+                  <button className="head-btn">This Year</button>
+                </StyledMenuItem>
+              </StyledMenu>
       </div>
 
       <div className="row no-gutter">
