@@ -23,6 +23,9 @@ import searchingIcon from "../../../assets/icons/search.png";
 import AdapterDateFns from "@mui/lab/AdapterDateFns";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
 import DateRangePicker from "@mui/lab/DateRangePicker";
+import TextField from '@mui/material/TextField';
+import Autocomplete from '@mui/material/Autocomplete';
+
 
 const StyledMenu = withStyles({
   paper: {
@@ -43,6 +46,10 @@ const StyledMenu = withStyles({
     {...props}
   />
 ));
+
+const top100Films = [
+  { title: 'The Shawshank Redemption', year: 1994 },
+];
 
 const StyledMenuItem = withStyles((theme) => ({}))(MenuItem);
 
@@ -134,8 +141,8 @@ function Table(props) {
     setStatusFilter(null);
   };
 
-   // For Order Product
-   const dateclick = (event) => {
+  // For Order Product
+  const dateclick = (event) => {
     setdateFilter(event.currentTarget);
   };
 
@@ -193,18 +200,26 @@ function Table(props) {
               }}
             >
               <MenuItem>
-                <div className="filterSearch">
-                  <InputBase
-                    placeholder="Search"
-                    style={{ fontSize: "12px" }}
-                  />
-                  <img
-                    src={searchingIcon}
-                    width="12"
-                    height="12"
-                    alt="searching"
-                  />
-                </div>
+                <Autocomplete
+                  style={{width:"100%", borderRadius:"6px"}}
+                  freeSolo
+                  id="free-solo-2-demo"
+                  disableClearable
+                  forcePopupIcon={true}
+                  popupIcon={<img src={searchingIcon} width="12px" height="12px" />}
+                  options={top100Films.map((option) => option.title)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Search"
+                      size="small"
+                      InputProps={{
+                        ...params.InputProps,
+                        type: "search",
+                      }}
+                    />
+                  )}
+                />
               </MenuItem>
               {optionID.map((option) => (
                 <MenuItem
@@ -308,18 +323,26 @@ function Table(props) {
               }}
             >
               <MenuItem>
-                <div className="filterSearch">
-                  <InputBase
-                    placeholder="Search"
-                    style={{ fontSize: "12px" }}
-                  />
-                  <img
-                    src={searchingIcon}
-                    width="12"
-                    height="12"
-                    alt="searching"
-                  />
-                </div>
+              <Autocomplete
+                  style={{width:"100%", borderRadius:"6px"}}
+                  freeSolo
+                  id="free-solo-2-demo"
+                  disableClearable
+                  forcePopupIcon={true}
+                  popupIcon={<img src={searchingIcon} width="12px" height="12px" />}
+                  options={top100Films.map((option) => option.title)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Search"
+                      size="small"
+                      InputProps={{
+                        ...params.InputProps,
+                        type: "search",
+                      }}
+                    />
+                  )}
+                />
               </MenuItem>
               {optionFrom.map((option) => (
                 <MenuItem
@@ -359,18 +382,26 @@ function Table(props) {
               }}
             >
               <MenuItem>
-                <div className="filterSearch">
-                  <InputBase
-                    placeholder="Search"
-                    style={{ fontSize: "12px" }}
-                  />
-                  <img
-                    src={searchingIcon}
-                    width="12"
-                    height="12"
-                    alt="searching"
-                  />
-                </div>
+              <Autocomplete
+                  style={{width:"100%", borderRadius:"6px"}}
+                  freeSolo
+                  id="free-solo-2-demo"
+                  disableClearable
+                  forcePopupIcon={true}
+                  popupIcon={<img src={searchingIcon} width="12px" height="12px" />}
+                  options={top100Films.map((option) => option.title)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Search"
+                      size="small"
+                      InputProps={{
+                        ...params.InputProps,
+                        type: "search",
+                      }}
+                    />
+                  )}
+                />
               </MenuItem>
               {optionTo.map((option) => (
                 <MenuItem
@@ -383,7 +414,11 @@ function Table(props) {
               ))}
             </StyledMenu>
 
-            <th className="cursorP" onClick={statusclick} style={{border:"none"}}>
+            <th
+              className="cursorP"
+              onClick={statusclick}
+              style={{ border: "none" }}
+            >
               <img
                 src={Status}
                 width="16"
@@ -417,7 +452,7 @@ function Table(props) {
                 <h6 className="filterText">Alerts</h6>
               </StyledMenuItem>
             </StyledMenu>
-            <th style={{display:"flex",alignItems:"flex-start"}}>
+            <th style={{ display: "flex", alignItems: "flex-start" }}>
               <button className="btn-filter-info" onClick={filterclick}>
                 <div className="d-flex align-items-center">
                   <img

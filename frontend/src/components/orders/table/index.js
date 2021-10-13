@@ -22,6 +22,8 @@ import "./tablestyle.scss";
 import AdapterDateFns from "@mui/lab/AdapterDateFns";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
 import DateRangePicker from "@mui/lab/DateRangePicker";
+import TextField from '@mui/material/TextField';
+import Autocomplete from '@mui/material/Autocomplete';
 
 
 const StyledMenu = withStyles({
@@ -80,6 +82,11 @@ const optionLoc = [
 ];
 
 const ITEM_HEIGHT = 48;
+
+const top100Films = [
+  { title: 'The Shawshank Redemption', year: 1994 },
+];
+
 
 function Table(props) {
   const { ordrs, visible } = props;
@@ -220,18 +227,26 @@ function Table(props) {
               }}
             >
               <MenuItem>
-                <div className="filterSearch">
-                  <InputBase
-                    placeholder="Search"
-                    style={{ fontSize: "12px" }}
-                  />
-                  <img
-                    src={searchingIcon}
-                    width="12"
-                    height="12"
-                    alt="searching"
-                  />
-                </div>
+              <Autocomplete
+                  style={{width:"100%", borderRadius:"6px"}}
+                  freeSolo
+                  id="free-solo-2-demo"
+                  disableClearable
+                  forcePopupIcon={true}
+                  popupIcon={<img src={searchingIcon} width="12px" height="12px" />}
+                  options={top100Films.map((option) => option.title)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Search"
+                      size="small"
+                      InputProps={{
+                        ...params.InputProps,
+                        type: "search",
+                      }}
+                    />
+                  )}
+                />
               </MenuItem>
               {optionTo.map((option) => (
                 <MenuItem
@@ -329,18 +344,26 @@ function Table(props) {
               }}
             >
               <MenuItem>
-                <div className="filterSearch">
-                  <InputBase
-                    placeholder="Search"
-                    style={{ fontSize: "12px" }}
-                  />
-                  <img
-                    src={searchingIcon}
-                    width="12"
-                    height="12"
-                    alt="searching"
-                  />
-                </div>
+              <Autocomplete
+                  style={{width:"100%", borderRadius:"6px"}}
+                  freeSolo
+                  id="free-solo-2-demo"
+                  disableClearable
+                  forcePopupIcon={true}
+                  popupIcon={<img src={searchingIcon} width="12px" height="12px" />}
+                  options={top100Films.map((option) => option.title)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Search"
+                      size="small"
+                      InputProps={{
+                        ...params.InputProps,
+                        type: "search",
+                      }}
+                    />
+                  )}
+                />
               </MenuItem>
               {optionId.map((option) => (
                 <MenuItem
@@ -386,18 +409,26 @@ function Table(props) {
               }}
             >
               <MenuItem>
-                <div className="filterSearch">
-                  <InputBase
-                    placeholder="Search"
-                    style={{ fontSize: "12px" }}
-                  />
-                  <img
-                    src={searchingIcon}
-                    width="12"
-                    height="12"
-                    alt="searching"
-                  />
-                </div>
+              <Autocomplete
+                  style={{width:"100%", borderRadius:"6px"}}
+                  freeSolo
+                  id="free-solo-2-demo"
+                  disableClearable
+                  forcePopupIcon={true}
+                  popupIcon={<img src={searchingIcon} width="12px" height="12px" />}
+                  options={top100Films.map((option) => option.title)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Search"
+                      size="small"
+                      InputProps={{
+                        ...params.InputProps,
+                        type: "search",
+                      }}
+                    />
+                  )}
+                />
               </MenuItem>
               {optionPro.map((option) => (
                 <MenuItem
@@ -443,18 +474,26 @@ function Table(props) {
               }}
             >
               <MenuItem>
-                <div className="filterSearch">
-                  <InputBase
-                    placeholder="Search"
-                    style={{ fontSize: "12px" }}
-                  />
-                  <img
-                    src={searchingIcon}
-                    width="12"
-                    height="12"
-                    alt="searching"
-                  />
-                </div>
+              <Autocomplete
+                  style={{width:"100%", borderRadius:"6px"}}
+                  freeSolo
+                  id="free-solo-2-demo"
+                  disableClearable
+                  forcePopupIcon={true}
+                  popupIcon={<img src={searchingIcon} width="12px" height="12px" />}
+                  options={top100Films.map((option) => option.title)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Search"
+                      size="small"
+                      InputProps={{
+                        ...params.InputProps,
+                        type: "search",
+                      }}
+                    />
+                  )}
+                />
               </MenuItem>
               {optionLoc.map((option) => (
                 <MenuItem
