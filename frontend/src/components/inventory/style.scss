@@ -250,3 +250,55 @@
     }
   }
 }
+
+.table-in-header{
+  font-size: 14px;
+  font-weight: bold;
+}
+.bdr{
+  border-right: 2px solid #d6d6d6;
+}
+.pName{
+  width:18%;
+  cursor: pointer;
+}
+.pCat{
+  width:22%;
+  cursor: pointer;
+}
+.pDate{
+  width:9%;
+  cursor: pointer;
+}
+.pQuan{
+  width:12%;
+  cursor: pointer;
+}
+.pStatus{
+  width:12%;
+  cursor: pointer;
+}
+.pFil{
+  width:13%;
+}
+
+@media (max-width: 1200px) {
+  .pName{
+    width:18%;
+  }
+  .pCat{
+    width:35%;
+  }
+  .pDate{
+    width:12%;
+  }
+  .pQuan{
+    width:12%;
+  }
+  .pStatus{
+    width:12%;
+  }
+  .pFil{
+    width:10%;
+  }
+}

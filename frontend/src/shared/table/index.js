@@ -47,7 +47,7 @@ const Table = (props) => {
               >
                 {/*<div className="rTableCell" style={{position:"relative",left:'0%', fontWeight:"600"}}>*/}
                 <div
-                  className='col-4 txt1 text-left'
+                  className='col-3 txt1 text-left'
                   style={{
                     position: "relative",
                     left: "0%",
