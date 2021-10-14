@@ -8,7 +8,7 @@ import Location from "../../assets/icons/location_blue.png";
 import InfiniteScroll from "react-infinite-scroll-component";
 import DrawerMenu from "./drawerMenu";
 import { Link } from "react-router-dom";
-import Spinner from "../../components/spinner/index.js"
+import Spinner from "../../components/spinner/index.js";
 import "./Header.css";
 import {
   Avatar,
@@ -64,6 +64,8 @@ import { formatDistanceToNow } from "date-fns";
 const Header = (props) => {
   // console.log(ABC)
   const dispatch = useDispatch();
+  const [openModal, setOpenModal] = useState(false);
+  const [AlertModalData, setAlertModalData] = useState({});
   const [menu, setMenu] = useState(false);
   const [location, setLocation] = useState({});
   const [sidebar, openSidebar] = useState(false);
@@ -73,7 +75,7 @@ const Header = (props) => {
   const [alertType, setAlertType] = useState("ALERT");
   const [invalidSearch, setInvalidSearch] = useState(false);
   const [notifications, setNotifications] = useState([]);
-  const [showNotifications, setShowNotifications] = useState(true);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [image, setImage] = useState("");
   const [activeWarehouses, setActiveWarehouses] = useState([]);
   const [options, setOptions] = useState([]);
@@ -108,13 +110,17 @@ const Header = (props) => {
     setMenu(false);
   });
   const ref1 = useRef(null);
-  useOnclickOutside((ref) => {
-    // console.log(ref.target.className)
-    if(ref.target.className !== "ignore-react-onclickoutside" && ref.target.className !== "badge badge-light")
-    setShowNotifications(false);
-  },
-  { refs: [ref1] }
-  )
+  useOnclickOutside(
+    (ref) => {
+      // console.log(ref.target.className)
+      if (
+        ref.target.className !== "ignore-react-onclickoutside" &&
+        ref.target.className !== "badge badge-light"
+      )
+        setShowNotifications(false);
+    },
+    { refs: [ref1] }
+  );
 
   function onSearchChange(e) {
     setSearchString(e._id);
@@ -158,9 +164,9 @@ const Header = (props) => {
       return "/#";
     }
   }
-  async function readNotification(id){
-    let res = axios.get(`${config().readNotification}${id}`)
-    console.log(res)
+  async function readNotification(id) {
+    let res = axios.get(`${config().readNotification}${id}`);
+    console.log(res);
   }
   async function getAllShipmentIDs() {
     dispatch(turnOn());
@@ -262,17 +268,17 @@ const Header = (props) => {
     });
   }
 
-  function changeNotifications(value, num) {   
-    turnOn()        
-    if(num)
-    setLimit(limit+num)
-   axios.get(`${config().getAlerts}${value}&skip=0&limit=${limit}`).then((response)=>{
-      setNewNotifs(response.data?.data?.new)
-      setNotifications(response.data.data?.data?.reverse());
-      if(response.data.data?.data?.length === icount)
-        setHasMore(false)
-      setIcount(response.data.data?.data?.length)
-   })
+  function changeNotifications(value, num) {
+    turnOn();
+    if (num) setLimit(limit + num);
+    axios
+      .get(`${config().getAlerts}${value}&skip=0&limit=${limit}`)
+      .then((response) => {
+        setNewNotifs(response.data?.data?.new);
+        setNotifications(response.data.data?.data?.reverse());
+        if (response.data.data?.data?.length === icount) setHasMore(false);
+        setIcount(response.data.data?.data?.length);
+      });
   }
 
   useEffect(() => {
@@ -284,15 +290,14 @@ const Header = (props) => {
       );
 
       setNotifications(response.data.data?.data?.reverse());
-      console.log(response.data?.data)
-      if(response.data?.data?.totalNew)
-      setNewNotifs(response.data?.data?.totalNew)
-      if(response.data?.data?.totalUnRead)
-      setNewNotifs(response.data?.data?.totalUnRead)
-      else
-      setNewNotifs(response.data?.data?.new)
+      console.log(response.data?.data);
+      if (response.data?.data?.totalNew)
+        setNewNotifs(response.data?.data?.totalNew);
+      if (response.data?.data?.totalUnRead)
+        setNewNotifs(response.data?.data?.totalUnRead);
+      else setNewNotifs(response.data?.data?.new);
       setCount(response.data.data?.totalRecords);
-      setIcount(response.data.data?.data?.length)
+      setIcount(response.data.data?.data?.length);
       const warehouses = await getActiveWareHouses();
       const active = warehouses
         .filter((i) => i.status === "ACTIVE")
@@ -320,7 +325,6 @@ const Header = (props) => {
     }
     fetchApi();
   }, [alertType, dispatch]);
-
 
   const handleLocation = async (item) => {
     setLocation(item);
@@ -357,7 +361,7 @@ const Header = (props) => {
       <div className="navContainer">
         {/* Navbar */}
 
-        <nav className="nav">
+        <nav className="navContent">
           {/* branding */}
 
           <div className="logo">
@@ -369,9 +373,8 @@ const Header = (props) => {
 
           <ul className="navList">
             <li className="navItems">
-
-                <Autocomplete
-                  className="searchBar"
+              {/* <Autocomplete 
+                  style={{width:"400px"}}
                   freeSolo
                   id="free-solo-2-demo"
                   disableClearable
@@ -404,209 +407,308 @@ const Header = (props) => {
                       }}
                     />
                   )}
+                /> */}
+              <div className="search-form" tabIndex="-1" onKeyDown={onkeydown}>
+                <Autocomplete
+                  id="free-solo-demo"
+                  freeSolo
+                  //value={search}
+                  forcePopupIcon={true}
+                  popupIcon={<Search style={{ color: "#0b65c1" }} />}
+                  options={options}
+                  getOptionLabel={(option) => option._id}
+                  filterOptions={filterOptions}
+                  placeholder="Search PO ID/ Shipment ID/ Transit Number"
+                  onFocus={(e) => (e.target.placeholder = "")}
+                  onBlur={(e) =>
+                    (e.target.placeholder =
+                      "Search PO ID/ Shipment ID/ Transit Number")
+                  }
+                  inputValue={search}
+                  onInputChange={(event, newInputValue) => {
+                    setSearch(newInputValue);
+                    onSearchChange(newInputValue);
+                  }}
+                  onChange={(event, newValue) => {
+                    onSearchChange(newValue);
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Search PO ID/ Shipment ID"
+                      margin="normal"
+                      variant="outlined"
+                    />
+                  )}
                 />
+              </div>
             </li>
             {/* Notification Icons */}
 
             <li className="navItems notifyList">
-              <Badge
-                badgeContent={434}
-                max={999}
-                color="error"
-                className="navIcons"
-                onClick={()=>setShowNotifications(!showNotifications)}
-              >
-                <NotificationsOutlined className="notify" onClick={()=>setShowNotifications(!showNotifications)}/>
-              </Badge>
-              {showNotifications && <div className='triangle-up'></div>}
-{showNotifications && (
-  <div ref={ref1}  outsideClickIgnoreClass={'ignore-react-onclickoutside'} className='slider-menu' id="scrollableDiv">
-    <div
-      className='nheader'
-      style={{
-        backgroundImage:
-          "linear-gradient(to right, #0092e8, #0a6bc6)",
-      }}
-    >
-      <div className='user-notification-head'>
-        User Notifications
-      </div>
-      {notifications?.length >= 0 && (
-        <span
-          style={{
-            position: "relative",
-            left: "40px",
-            backgroundColor: "#fa7a23",
-            padding: "6px",
-            color: "white",
-            borderRadius: "8px",
-            fontSize: "14px",
-          }}
-        >
-          {newNotifs} new
-        </span>
-      )}
-      <div>
-      <img
-          className="setting-notif-icon"
-          src={SettingIcon}
-          onClick={() => props.history.push("/settings")}
-          alt='settings'
-      />
-      </div>
-
-      <div className='tab'>
-        <ul className='nav nav-pills'>
-          <li
-            className={
-              visible === "one" ? "nav-item-active" : "nav-item"
-            }
-            onClick={() => {
-              setLimit(10);
-              setAlertType("ALERT");
-              changeNotifications("ALERT", 1);
-              setVisible("one");
-              setHasMore(true);
-              ref1.current.scrollTop = 0
-            }}
-          >
-            <div
-              className={
-                visible === "one"
-                  ? "nav-link"
-                  : "nav-link tab-text"
-              }
-            >
-              Alerts
-            </div>
-          </li>
-          <li
-            className={
-              visible === "two" ? "nav-item-active " : "nav-item"
-            }
-            onClick={() => {
-              setLimit(10);
-              setAlertType("TRANSACTION");
-              changeNotifications("TRANSACTION", 1);
-              setVisible("two");
-              setHasMore(true);
-              ref1.current.scrollTop = 0
-            }}
-          >
-            <div
-              className={
-                visible === "two"
-                  ? "nav-link"
-                  : "nav-link tab-text"
-              }
-            >
-              Transactions
-            </div>
-          </li>
-        </ul>
-      </div>
-    </div>
-    <div className='slider-item'>
-      <InfiniteScroll
-        dataLength={notifications?.length || 0}
-        next={() => changeNotifications(alertType, 10)}
-        style={{
-          display: "flex",
-          flexDirection: "column-reverse",
-        }} //To put endMessage and loader to the top.
-        hasMore={hasMore}
-        loader={<h4><Spinner /></h4>}
-        scrollThreshold={1}
-        scrollableTarget='scrollableDiv'
-      >
-        {notifications?.length >= 0 ? (
-          notifications?.map((notifications) =>
-            notifications.transactionId ? (
-              <Link
-                key={notifications.id}
-                to={notifRouting(notifications)}
-                // style={{ textDecoration: "none" }}
-                className={notifications.isRead ? 'read' : 'unRead'}
-                style={{ textDecoration:"none" }}
-                onClick={() => readNotification(notifications.id)}
-              >
-                <div
-                  className='col-sm-10'
-                  style={{ display: "flex" }}
-                >
-                  <img
-                    className='notification-icons'
-                    src={notifIcon(notifications)}
-                    alt='Icon'
-                  />
-                  <div className='notification-events'>
-                    {notifications.message}
-                  </div>
-                </div>
-                <div className='text-secondary notif-time'>
-                  {formatDistanceToNow(
-                    new Date(
-                      parseInt(
-                        notifications._id.toString().substr(0, 8),
-                        16
-                      ) * 1000
-                    )
-                  )}
-                </div>
+              <div className="notifications cursorP">
                 <img
-                  className='toggle-icon'
-                  alt='Drop Down Icon'
-                  src={dropdownIcon}
-                ></img>
-              </Link>
-            ) : (
-              <div
-                key={notifications.id}
-                style={{ cursor: "not-allowed" }}
-              >
+                  width="20px"
+                  height="20px"
+                  id="notification"
+                  className="ignore-react-onclickoutside"
+                  src={bellIcon}
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  alt="notification"
+                />
                 <div
-                  className='col-sm-10'
-                  style={{ display: "flex" }}
+                  id="notification"
+                  className="bellicon-wrap"
+                  onClick={() => setShowNotifications(!showNotifications)}
                 >
-                  <img
-                    className='notification-icons'
-                    src={notifIcon(notifications)}
-                    alt='Icon'
-                  />
-                  <div className='notification-events'>
-                    {notifications.message}
-                  </div>
-                </div>
-                <div className='text-secondary notif-time'>
-                  {formatDistanceToNow(
-                    new Date(
-                      parseInt(
-                        notifications._id.toString().substr(0, 8),
-                        16
-                      ) * 1000
-                    )
+                  {notifications?.length && (
+                    <span className="badge badge-light">{newNotifs}</span>
                   )}
                 </div>
+                {showNotifications && <div className="triangle-up"></div>}
+                {showNotifications && (
+                  <div
+                    ref={ref1}
+                    outsideClickIgnoreClass={"ignore-react-onclickoutside"}
+                    className="slider-menu"
+                    id="scrollableDiv"
+                  >
+                    <div
+                      className="nheader"
+                      style={{
+                        backgroundImage:
+                          "linear-gradient(to right, #0092e8, #0a6bc6)",
+                      }}
+                    >
+                      <div className="user-notification-head">
+                        User Notifications
+                      </div>
+                      {notifications?.length >= 0 && (
+                        <span
+                          style={{
+                            position: "relative",
+                            left: "40px",
+                            backgroundColor: "#fa7a23",
+                            padding: "6px",
+                            color: "white",
+                            borderRadius: "8px",
+                            fontSize: "14px",
+                          }}
+                        >
+                          {newNotifs} new
+                        </span>
+                      )}
+
+                      <div className="noti-tab">
+                        <ul className="nav nav-pills">
+                          <li
+                            className={
+                              visible === "one" ? "nav-item-active" : "nav-item"
+                            }
+                            onClick={() => {
+                              setLimit(10);
+                              setAlertType("ALERT");
+                              changeNotifications("ALERT", 1);
+                              setVisible("one");
+                              setHasMore(true);
+                              ref1.current.scrollTop = 0;
+                            }}
+                          >
+                            <div
+                              className={
+                                visible === "one"
+                                  ? "nav-link"
+                                  : "nav-link tab-text"
+                              }
+                            >
+                              Alerts
+                            </div>
+                          </li>
+                          <li
+                            className={
+                              visible === "two"
+                                ? "nav-item-active "
+                                : "nav-item"
+                            }
+                            onClick={() => {
+                              setLimit(10);
+                              setAlertType("TRANSACTION");
+                              changeNotifications("TRANSACTION", 1);
+                              setVisible("two");
+                              setHasMore(true);
+                              ref1.current.scrollTop = 0;
+                            }}
+                          >
+                            <div
+                              className={
+                                visible === "two"
+                                  ? "nav-link"
+                                  : "nav-link tab-text"
+                              }
+                            >
+                              Transactions
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="slider-item">
+                      <InfiniteScroll
+                        dataLength={notifications?.length || 0}
+                        next={() => changeNotifications(alertType, 10)}
+                        style={{
+                          display: "flex",
+                          flexDirection: "column-reverse",
+                        }} //To put endMessage and loader to the top.
+                        hasMore={hasMore}
+                        loader={
+                          <h4>
+                            <Spinner />
+                          </h4>
+                        }
+                        scrollThreshold={1}
+                        scrollableTarget="scrollableDiv"
+                      >
+                        {notifications?.length >= 0 ? (
+                          notifications?.map((notifications) =>
+                            notifications.transactionId ? (
+                              notifications.eventType !== "REQUEST" ? (
+                                <Link
+                                  key={notifications.id}
+                                  to={notifRouting(notifications)}
+                                  // style={{ textDecoration: "none" }}
+                                  className={
+                                    notifications.isRead ? "read" : "unRead"
+                                  }
+                                  style={{ textDecoration: "none" }}
+                                  onClick={() =>
+                                    readNotification(notifications.id)
+                                  }
+                                >
+                                  <div
+                                    className="col-sm-10"
+                                    style={{ display: "flex" }}
+                                  >
+                                    <img
+                                      className="notification-icons"
+                                      src={notifIcon(notifications)}
+                                      alt="Icon"
+                                    />
+                                    <div className="notification-events">
+                                      {notifications.message}
+                                    </div>
+                                  </div>
+                                  <div className="text-secondary notif-time">
+                                    {formatDistanceToNow(
+                                      new Date(
+                                        parseInt(
+                                          notifications._id
+                                            .toString()
+                                            .substr(0, 8),
+                                          16
+                                        ) * 1000
+                                      )
+                                    )}
+                                  </div>
+                                  <img
+                                    className="toggle-icon"
+                                    alt="Drop Down Icon"
+                                    src={dropdownIcon}
+                                  ></img>
+                                </Link>
+                              ) : (
+                                <div
+                                  className={
+                                    notifications.isRead ? "read" : "unRead"
+                                  }
+                                  onClick={() => {
+                                    setAlertModalData(notifications);
+                                    setOpenModal(true);
+                                  }}
+                                >
+                                  <div
+                                    className="col-sm-10"
+                                    style={{ display: "flex" }}
+                                  >
+                                    <img
+                                      className="notification-icons"
+                                      src={notifIcon(notifications)}
+                                      alt="Icon"
+                                    />
+                                    <div className="notification-events">
+                                      {notifications.message}
+                                    </div>
+                                  </div>
+                                  <div className="text-secondary notif-time">
+                                    {formatDistanceToNow(
+                                      new Date(
+                                        parseInt(
+                                          notifications._id
+                                            .toString()
+                                            .substr(0, 8),
+                                          16
+                                        ) * 1000
+                                      )
+                                    )}
+                                  </div>
+                                  <img
+                                    className="toggle-icon"
+                                    alt="Drop Down Icon"
+                                    src={dropdownIcon}
+                                  ></img>
+                                </div>
+                              )
+                            ) : (
+                              <div
+                                key={notifications.id}
+                                style={{ cursor: "not-allowed" }}
+                              >
+                                <div
+                                  className="col-sm-10"
+                                  style={{ display: "flex" }}
+                                >
+                                  <img
+                                    className="notification-icons"
+                                    src={notifIcon(notifications)}
+                                    alt="Icon"
+                                  />
+                                  <div className="notification-events">
+                                    {notifications.message}
+                                  </div>
+                                </div>
+                                <div className="text-secondary notif-time">
+                                  {formatDistanceToNow(
+                                    new Date(
+                                      parseInt(
+                                        notifications._id
+                                          .toString()
+                                          .substr(0, 8),
+                                        16
+                                      ) * 1000
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                            )
+                          )
+                        ) : (
+                          <div className="slider-item">
+                            <div className="row">
+                              <div className="col text-center mt-3 mr-5">
+                                <div>
+                                  <span className="no-notification">
+                                    No notifications
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </InfiniteScroll>
+                    </div>
+                  </div>
+                )}
               </div>
-            )
-          )
-        ) : (
-          <div className='slider-item'>
-            <div className='row'>
-              <div className='col text-center mt-3 mr-5'>
-                <div>
-                  <span className='no-notification'>
-                    No notifications
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </InfiniteScroll>
-    </div>
-  </div>
-)}
             </li>
 
             <Divider
@@ -620,7 +722,7 @@ const Header = (props) => {
 
             <li className="navItems location">
               <div className="navCard">
-                <LocationOnOutlined className="navIcons" />
+                <img className="locationimg" src={Location} alt="Location" />
               </div>
               <div className="navCard">
                 <div className="locationName">
@@ -709,7 +811,7 @@ const Header = (props) => {
 
             {/* Location */}
 
-            <li className="navItems profile">
+            <li className="navItems">
               {/* <div className="navCard">
               <div className="profileName">
                 <h1 className="nav-heading">Location Test</h1>
@@ -717,13 +819,13 @@ const Header = (props) => {
               </div>
             </div> */}
               <IconButton
-                style={{ margin: 0 }}
+                // style={{ margin: 0 }}
                 onClick={handleClick}
                 size="small"
                 sx={{ ml: 2 }}
               >
                 <Avatar
-                  sx={{ width: 32, height: 32 }}
+                  sx={{ width: 42, height: 42 }}
                   src={`${image}`}
                 ></Avatar>
               </IconButton>
@@ -751,7 +853,8 @@ const Header = (props) => {
               >
                 <MenuItem>
                   <div className="profileName">
-                    <h1 className="nav-heading">{profile.name}</h1>
+                    <h1 className="nav-heading">{profile.name}
+                    </h1>
                     <p className="nav-subheading">
                       {profile?.organisation?.split("/")[0]}
                     </p>
