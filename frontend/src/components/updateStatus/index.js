@@ -27,6 +27,7 @@ const UpdateStatus = (props) => {
   const [openShipmentFail, setOpenShipmentFail] = useState(false);
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [commentEnable, setCommentEnabled] = useState(false)
   const setFile = (evt) => {
     setPhotoUrl(URL.createObjectURL(evt.target.files[0]));
     setPhoto(evt.target.files[0]);
@@ -36,6 +37,25 @@ const UpdateStatus = (props) => {
     setPhoto("");
     setPhotoUrl(undefined);
   };
+
+  const commentsList = [
+    {
+      comment_id : 1,
+      text : 'Damaged in transit'
+    },
+    {
+      comment_id : 2,
+      text : 'Miscount'
+    },
+    {
+      comment_id : 3,
+      text : 'quantity issuess'
+    },
+    {
+      comment_id : 4,
+      text : 'other'
+    }
+  ]
 
   const uploadPhoto = async () => {
     const formData = new FormData();
@@ -231,66 +251,72 @@ const UpdateStatus = (props) => {
                     </div>
 
                     <h6 className='poheads potext m-4'>Comment</h6>
-                    <div className='panel commonpanle mb-5'>
-                      <div className='form-group mb-0'>
-                        <input
-                          type='text'
-                          className='form-control mb-2'
-                          name='comments'
-                          //style={{ flexBasis: "100%" }}
-                          onBlur={handleBlur}
-                          onChange={handleChange}
-                          placeholder='Enter comments here...'
-                          value={values.comments}
-                        />
-                      </div>
-                      {errors.comments && touched.comments && (
+                        <div className='col panel commonpanle' >
+                          <div className=' pt-2 pb-2 d-flex row'>
+                            {commentsList.map((comment,index) => (
+                              <span
+                              onClick={() => `${ comment.text === 'other' ? setCommentEnabled(true) : setCommentEnabled(false)}`}
+                              className='txt-outline text-muted'
+                              >
+                                {comment.text}
+                              </span>
+                            ))}
+                            
+                            {/* <span
+                              onClick={() => setCommentEnabled(false)}
+                              className='txt-outline text-muted'
+                            >
+                              Comment 2
+                            </span>
+                            <span
+                              onClick={() => setCommentEnabled(false)}
+                              className='txt-outline text-muted'
+                            >
+                              Comment 3
+                            </span>
+                            <span
+                              onClick={() => setCommentEnabled(false)}
+                              className='txt-outline text-muted'
+                            >
+                              Comment 4
+                            </span>
+                            <span
+                              onClick={() => setCommentEnabled(false)}
+                              className='txt-outline text-muted'
+                            >
+                              Comment 5
+                            </span>
+                            <span
+                              onClick={() => setCommentEnabled(true)}
+                              className='txt-outline text-muted'
+                            >
+                              Other
+                            </span> */}
+                          </div>
+                        <div
+                            className='form-group'
+                            style={{ width: "150%", height: "60px" }}
+                        >
+                          {commentEnable && (
+                              <input
+                              type='text'
+                              className='form-control mb-2'
+                              name='comments'
+                              //style={{ flexBasis: "100%" }}
+                              onBlur={handleBlur}
+                              onChange={handleChange}
+                              placeholder='Enter comments here...'
+                              value={values.comments}
+                            />
+                          )}
+                          
+                          {errors.comments && touched.comments && (
                         <span className='error-msg text-danger'>
                           {errors.comments}
                         </span>
                       )}
-                      {/* <div className="row mt-3 justify-content-end">
-                        <span className="col row col-6 justify-content-end text-secondary">
-                          Should send an alert?
-                        </span>
-                        <div className="col col-2 ml-2 custom-control custom-radio">
-                          <input
-                            type="radio"
-                            className="custom-control-input"
-                            onBlur={handleBlur}
-                            onChange={handleChange}
-                            value="True"
-                            id="yesradio"
-                            name="alerttrue"
-                          />
-                          <label
-                            className="custom-control-label"
-                            for="yesradio"
-                          >
-                            Yes
-                          </label>
+                </div>
                         </div>
-                        <div className="col col-1 pl-2 custom-control custom-radio">
-                          <input
-                            type="radio"
-                            className="custom-control-input"
-                            onBlur={handleBlur}
-                            onChange={handleChange}
-                            value="False"
-                            id="noradio"
-                            name="alerttrue"
-                          />
-                          <label className="custom-control-label" for="noradio">
-                            No
-                          </label>
-                        </div>
-                      </div>
-                      {errors.alerttrue && touched.alerttrue && (
-                        <span className="error-msg text-danger row justify-content-end col-12">
-                          {errors.alerttrue}
-                        </span>
-                      )} */}
-                    </div>
                   </div>
                   <div className='col '>
                     <div className='row'>
