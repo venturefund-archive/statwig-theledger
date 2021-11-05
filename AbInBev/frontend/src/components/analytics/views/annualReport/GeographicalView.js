@@ -14,6 +14,7 @@ const GeographicalView = (props) => {
   const { states, SKUStats, sku, viewName, brands, brandsArr, Otype } = props;
 
   const [analytics, setAnalytics] = useState([]);
+  const [openModelBox, setOpenModelBox] = useState(false)
   const dispatch = useDispatch();
   // const dispatch = useDispatch();
   // useEffect(() => {
@@ -136,7 +137,33 @@ const GeographicalView = (props) => {
       <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3">
         <h1 className="h2">Analytics</h1>
       </div>
-
+      <div className="uploadBtnContainer">
+        <button className="uploadbtn" onClick={() => setOpenModelBox(true)}>Upload Sales</button>
+      </div>
+      {openModelBox && (
+        <div className="model-box">
+          <label htmlFor="file" className="filterSubHeading mt-3">Upload Sales Data</label>
+          <input
+            id="file"
+            className="filterInput"
+            name="file"
+            type="file"
+            accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+          />
+          <div className="col-md-12" style={{ display: 'flex' }}>
+            <button
+              type="button"
+              className="btn cancelButton mt-4"
+              onClick={() => setOpenModelBox(false)}
+            >
+              Close
+            </button>
+            <button className="btn uploadButton mt-4" type="submit">
+              Upload
+            </button>
+          </div>
+        </div>
+      )}
       <div className="tableDetals">
         <table className="table text-align-left">
           <thead>
@@ -186,9 +213,9 @@ const GeographicalView = (props) => {
                         <img
                           src={
                             brandsArr[
-                              brands.indexOf(
-                                analytic.manufacturer?.split(' ').join(''),
-                              )
+                            brands.indexOf(
+                              analytic.manufacturer?.split(' ').join(''),
+                            )
                             ]
                           }
                           alt=""

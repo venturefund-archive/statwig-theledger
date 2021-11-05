@@ -192,6 +192,10 @@ body {
   font-weight: bold;
   text-transform: uppercase;
   margin-top: 4px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  border: 0;
 }
 .uploadButton {
   background: #54265e 0% 0% no-repeat padding-box;
@@ -204,6 +208,10 @@ body {
   font-weight: bold;
   text-transform: uppercase;
   margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border: 0;
 }
 
 .filterSelect {
@@ -1283,4 +1291,35 @@ body {
   border-radius: 20px;
   font-weight: bolder;
   color:#000000
+}
+
+.uploadBtnContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.uploadbtn {
+  width: 18%;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: open sans;
+  font-weight: bold;
+  background-color: #a20134;
+  color: #ffffff;
+  border:0;
+}
+
+.model-box {
+  background-color: #e5e0e9;
+  height: 15rem;
+  width: 600px;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0px 3px 6px #54265e26;
+  position: absolute;
+  top: 30%;
+  left: 35%;
 }
