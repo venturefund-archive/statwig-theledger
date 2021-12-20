@@ -385,14 +385,12 @@ const Orders = (props) => {
     setShowExportFilter(false);
     let url = "";
     if (visible === "one") {
-      url = `${
-        config().getExportFileForOutboundPurchaseOrdersUrl
-      }?type=${value.toLowerCase()}`;
+      url = `${config().getExportFileForOutboundPurchaseOrdersUrl
+        }?type=${value.toLowerCase()}`;
     }
     if (visible === "two") {
-      url = `${
-        config().getExportFileForInboundPurchaseOrdersUrl
-      }?type=${value.toLowerCase()}`;
+      url = `${config().getExportFileForInboundPurchaseOrdersUrl
+        }?type=${value.toLowerCase()}`;
     }
 
     getExportFile(url).then((response) => {
@@ -404,8 +402,7 @@ const Orders = (props) => {
         link.href = downloadUrl;
         link.setAttribute(
           "download",
-          `${uuid()}.${
-            value.toLowerCase() === "excel" ? "xlsx" : value.toLowerCase()
+          `${uuid()}.${value.toLowerCase() === "excel" ? "xlsx" : value.toLowerCase()
           }`
         ); //any other extension
         document.body.appendChild(link);
@@ -421,7 +418,7 @@ const Orders = (props) => {
         <h1 className='breadcrumb'>YOUR ORDERS</h1>
         <div className='d-flex'>
           {isAuthenticated("createOrder") && (
-            <Link to='/neworder'>
+            <Link to='/createorder'>
               <button className='btn btn-orange fontSize20 font-bold mt-1'>
                 <img
                   src={OrderIcon}

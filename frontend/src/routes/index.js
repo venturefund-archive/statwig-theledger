@@ -9,6 +9,7 @@ import Shipment from "../containers/shipments";
 import NewShipment from "../containers/newshipment";
 import CreateShipment from "../containers/createshipment";
 import NewOrder from "../containers/neworder";
+import CreateOrder from "../containers/createOrder";
 import ViewShipment from "../containers/viewShipment";
 import ViewGMRShipment from "../containers/viewGmrShipment";
 import VerifyShipment from "../containers/verifyshipment";
@@ -89,6 +90,7 @@ const routes = (
     />
     <Route path="/orders" component={requireAuth(Orders)} />
     <Route path="/neworder" component={requireAuth(NewOrder)} />
+    <Route path="/createorder" component={requireAuth(CreateOrder)} />
     <Route path="/vieworder/:id" component={requireAuth(ViewOrder)} />
     <Route path="/revieworder" component={requireAuth(ReviewOrder)} />
     <Route path="/updateStatus/:id" component={requireAuth(UpdateStatus)} />
