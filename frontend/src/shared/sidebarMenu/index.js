@@ -7,7 +7,7 @@ import InventoryIcon from "../../assets/icons/Inventoryselected.png";
 import trackIcon from "../../assets/icons/Track_Traceselected.png";
 import NetworkIcon from "../../assets/icons/blockicon.png";
 import trackSelectedIcon from "../../assets/icons/Track_Traceselected.png";
-import OrderSelectedIcon from "../../assets/icons/OrderSelected.png";
+import OrderSelectedIcon from "../../assets/icons/orderSelected.png";
 import lastMileIcon from "../../assets/icons/lastMile.png";
 import { isAuthenticated } from "../../utils/commonHelper";
 
@@ -20,16 +20,16 @@ const SideBar = ({ match, location, user }) => {
   }, [user]);
 
   return (
-    <div className='sidebar'>
+    <div className="sidebar">
       <ul>
         {isAuthenticated("overview") && enable && (
           <li className={url === "/overview" ? "active" : "inactive"}>
-            <Link to='/overview' className='d-inline-block'>
+            <Link to="/overview" className="d-inline-block">
               <img
                 src={url === "/overview" ? HomeIcon : HomeIcon}
-                alt='Overview'
+                alt="Overview"
               />
-              <span className='ml-2'>Overview</span>
+              <span className="ml-2">Overview</span>
             </Link>
           </li>
         )}
@@ -41,16 +41,16 @@ const SideBar = ({ match, location, user }) => {
                 url === "/orders" || url === "/neworder" ? "active" : ""
               }
             >
-              <Link to='/orders' className='d-inline-block'>
+              <Link to="/orders" className="d-inline-block">
                 <img
                   src={
                     url === "/orders" || url === "/neworder"
                       ? OrderSelectedIcon
                       : OrderSelectedIcon
                   }
-                  alt='Orders'
+                  alt="Orders"
                 />
-                <span className='ml-2'>Orders</span>
+                <span className="ml-2">Orders</span>
               </Link>
             </li>
           )}
@@ -69,7 +69,7 @@ const SideBar = ({ match, location, user }) => {
                 : ""
             }
           >
-            <Link to='/inventory' className='d-inline-block'>
+            <Link to="/inventory" className="d-inline-block">
               <img
                 src={
                   url === "/inventory" ||
@@ -83,9 +83,9 @@ const SideBar = ({ match, location, user }) => {
                     ? InventoryIcon
                     : InventoryIcon
                 }
-                alt='Inventory'
+                alt="Inventory"
               />
-              <span className='ml-2'>Inventory</span>
+              <span className="ml-2">Inventory</span>
             </Link>
           </li>
         )}
@@ -100,7 +100,7 @@ const SideBar = ({ match, location, user }) => {
                 : ""
             }
           >
-            <Link to='/shipments' className='d-inline-block'>
+            <Link to="/shipments" className="d-inline-block">
               <img
                 src={
                   url === "/shipments" ||
@@ -109,43 +109,43 @@ const SideBar = ({ match, location, user }) => {
                     ? shipIcon
                     : shipIcon
                 }
-                alt='Shippment'
+                alt="Shippment"
               />
-              <span className='ml-2'>Shipments</span>
+              <span className="ml-2">Shipments</span>
             </Link>
           </li>
         )}
         {isAuthenticated("overview") && enable && (
           <li className={url === "/dashboard" ? "active" : ""}>
-            <Link to='/dashboard' className='d-inline-block'>
+            <Link to="/dashboard" className="d-inline-block">
               <img
                 src={url === "/dashboard" ? NetworkIcon : NetworkIcon}
-                alt='Shippment'
+                alt="Shippment"
               />
-              <span className='ml-2'>Network</span>
+              <span className="ml-2">Network</span>
             </Link>
           </li>
         )}
         {isAuthenticated("trackAndTrace") && enable && (
           <li className={url === "/track" ? "active" : ""}>
-            <Link to='/track' className='d-inline-block'>
+            <Link to="/track" className="d-inline-block">
               <img
                 src={url === "/track" ? trackSelectedIcon : trackIcon}
-                alt='Track & Trace'
+                alt="Track & Trace"
               />
-              <span className='ml-2'>Track & Trace</span>
+              <span className="ml-2">Track & Trace</span>
             </Link>
           </li>
         )}
         {enable && (
           <li className={url === "/lastMile" ? "active" : ""}>
-            <Link to='/lastMile' className='d-inline-block'>
+            <Link to="/lastMile" className="d-inline-block">
               <img
                 src={url === "/lastMile" ? lastMileIcon : lastMileIcon}
-                alt='lastMile'
+                alt="lastMile"
               />
 
-              <span className='ml-2'>Last Mile</span>
+              <span className="ml-2">Last Mile</span>
             </Link>
           </li>
         )}
