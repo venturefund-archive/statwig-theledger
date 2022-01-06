@@ -217,7 +217,6 @@ class Profile extends React.Component {
         axios
           .post(config().upload, formData, configs)
           .then((response) => {
-            alert("Profile Picture updated Successfully");
             this.setState({ profile_picture: response.data.data });
           })
           .catch((error) => {
@@ -392,16 +391,18 @@ class Profile extends React.Component {
                     </div>
                     <div className="form-group">
                       <label htmlFor="shipmentId">Phone</label>
-                      <PhoneInput
-                        className="form-group"
-                        country={"in"}
-                        placeholder="Enter Phone number"
-                        style={{ position: "absolute", marginLeft: "64%" }}
-                        value={this.state.phoneNumber}
-                        onChange={(phone) =>
-                          this.setState({ phoneNumber: phone })
-                        }
-                      />
+                      <div>
+                        <PhoneInput
+                          className="form-group"
+                          country={"in"}
+                          placeholder="Enter Phone number"
+                          style={{ width: "65% !important" }}
+                          value={this.state.phoneNumber}
+                          onChange={(phone) =>
+                            this.setState({ phoneNumber: phone })
+                          }
+                        />
+                      </div>
                     </div>
 
                     <div className="col">
@@ -411,7 +412,7 @@ class Profile extends React.Component {
                             <b>MY LOCATIONS</b>
                           </h5>
                         </div>
-                        <div className='addloc1'>
+                        <div className="addloc1">
                           {editMode && (
                             <button
                               className="buttonA btn btn-orange font-bold mt-1"
@@ -425,14 +426,14 @@ class Profile extends React.Component {
                           <div className="inventorypopup">
                             {this.state.openModal && (
                               <Modal
-                                class="modal-lg"
+                                className="modal-lg"
                                 style={{ width: "60vw" }}
                                 close={() => this.closeModal()}
                                 size=""
                               >
                                 <PopUpLocation
-                                {...this.props}
-                                closeModal={this.closeModal}
+                                  {...this.props}
+                                  closeModal={this.closeModal}
                                   wareHouses={this.state.warehouseLocByOrg}
                                 />
                               </Modal>
@@ -629,9 +630,16 @@ class Profile extends React.Component {
                       </div>
                       <div className="row date-joined">
                         {this.state.signup_date ? (
-                          <span>Joined on {moment(this.state.signup_date).format("Do MMMM YYYY") === "Invalid date"
-                          ? this.state.signup_date
-                          : moment(this.state.signup_date).format("Do MMMM YYYY")}</span>
+                          <span>
+                            Joined on{" "}
+                            {moment(this.state.signup_date).format(
+                              "Do MMMM YYYY"
+                            ) === "Invalid date"
+                              ? this.state.signup_date
+                              : moment(this.state.signup_date).format(
+                                  "Do MMMM YYYY"
+                                )}
+                          </span>
                         ) : (
                           <span>N/A</span>
                         )}
@@ -775,8 +783,8 @@ class Profile extends React.Component {
                                       <span>N/A</span>
                                     )}
                                   </div>
-                                  <div className="full-address">
-                                    {/* 50 /b/, Takshila Apt, Mahakali Caves Road, Chakala, Andheri (west) Mumbai, Maharashtra, */}
+                                  {/* <div className="full-address">
+                                   
                                     {this.state.warehouseLocations[id]
                                       .warehouseAddress.secondLine ? (
                                       <span>
@@ -786,7 +794,7 @@ class Profile extends React.Component {
                                         }
                                       </span>
                                     ) : null}
-                                  </div>
+                                  </div> */}
                                   <div className="pin-code">
                                     Zipcode :{" "}
                                     {this.state.warehouseLocations[id]

@@ -2,7 +2,6 @@ import React from "react";
 import "./style.scss";
 
 const FilterDropDown = (props) => {
-  console.log("propd: ", props.type);
   return (
     <div
       className={`card rounded bg-white border-white 

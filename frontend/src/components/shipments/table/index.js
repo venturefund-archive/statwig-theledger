@@ -7,6 +7,7 @@ import location from "../../../assets/icons/CurrentLocationWhite.svg";
 import { Link } from "react-router-dom";
 import { formatDate } from "../../../utils/dateHelper";
 import Pagination from "@material-ui/lab/Pagination";
+import AdvanceTableFilter from "../../../shared/advanceTableFilter";
 
 function Table(props) {
   const dispatch = useDispatch();
@@ -25,15 +26,26 @@ function Table(props) {
   return (
     <div>
       <table class="table">
-        {/* <thead>
-        <tr>
-          <th>Shipment ID</th>
-          <th>Shipment Date</th>
-          <th>From</th>
-          <th>To</th>
-          <th>Status</th>
-        </tr>
-      </thead> */}
+        <AdvanceTableFilter
+          data={props.data}
+          shipmentIdList={props.shipmentIdList}
+          supplierReceiverList={
+            props.user.emailId === "gmr@statledger.io"
+              ? []
+              : props.supplierReceiverList
+          }
+          setShipmentIdFilterOnSelect={props.setShipmentIdFilterOnSelect}
+          setFromShipmentFilterOnSelect={props.setFromShipmentFilterOnSelect}
+          setToShipmentFilterOnSelect={props.setToShipmentFilterOnSelect}
+          setStatusFilterOnSelect={props.setStatusFilterOnSelect}
+          setDateFilterOnSelect={props.setDateFilterOnSelect}
+          fb="80%"
+          showExportFilter={props.showExportFilter}
+          setShowExportFilter={props.setShowExportFilter}
+          exportFilterData={props.exportFilterData}
+          onSelectionOfDropdownValue={props.onSelectionOfDropdownValue}
+          isReportDisabled= {props.isReportDisabled}
+        />
         <tbody>
           {/* {shipments.length === 0 && (
             <div className='rTableRow pt-2 pb-2 justify-content-center text-muted shadow-none'>
@@ -190,13 +202,19 @@ function Table(props) {
               statusStyle = "bg-success";
               status = "Delivered";
             }
-            let supplierAddress = shipment.supplier.warehouse.warehouseAddress;
+            let supplierAddress =
+              props.user.emailId === "gmr@statledger.io"
+                ? shipment.supplier.locationId
+                : shipment.supplier.warehouse.warehouseAddress;
             let wLocation = shipment.supplier.warehouse?.location;
             if (wLocation?.length) {
               supplierAddress =
                 wLocation.firstLine + wLocation.secondLine + wLocation.city;
             }
-            let receiverAddress = shipment.receiver.warehouse.warehouseAddress;
+            let receiverAddress =
+              props.user.emailId === "gmr@statledger.io"
+                ? shipment.receiver.locationId
+                : shipment.receiver.warehouse.warehouseAddress;
             let wrLocation = shipment.receiver.warehouse?.location;
             if (wrLocation?.length) {
               supplierAddress =
@@ -229,12 +247,18 @@ function Table(props) {
                 <td>
                   <div class="user-info__basic">
                     <h5 class="mb-0 table-h5-text">
-                      {shipment.supplier.org ? shipment.supplier.org.name : "-"}
+                      {shipment.supplier.org
+                        ? shipment.supplier.org.name
+                        : props.user.emailId === "gmr@statledger.io"
+                        ? shipment.supplier.id
+                        : "-"}
                     </h5>
                     <p class="text-muted mb-0 table-p-text">
                       {`${
                         supplierAddress.firstLine
                           ? supplierAddress.firstLine
+                          : props.user.emailId === "gmr@statledger.io"
+                          ? shipment.supplier.locationId
                           : ""
                       } ${
                         supplierAddress.secondLine
@@ -251,12 +275,18 @@ function Table(props) {
                 <td>
                   <div class="user-info__basic">
                     <h5 class="mb-0 table-h5-text">
-                      {shipment.receiver.org ? shipment.receiver.org.name : "-"}
+                      {shipment.receiver.org
+                        ? shipment.receiver.org.name
+                        : props.user.emailId === "gmr@statledger.io"
+                        ? shipment.receiver.id
+                        : "-"}
                     </h5>
                     <p class="text-muted mb-0 table-p-text">
                       {`${
                         receiverAddress.firstLine
                           ? receiverAddress.firstLine
+                          : props.user.emailId === "gmr@statledger.io"
+                          ? shipment.receiver.locationId
                           : ""
                       }  ${
                         receiverAddress.secondLine
@@ -279,6 +309,10 @@ function Table(props) {
                     >
                       {status}
                     </div>
+                  </div>
+                </td>
+                <td>
+                  <div className="table-btns">
                     <button
                       className="button btn-primary text-light btn-sm mr-3"
                       onClick={() => {
@@ -295,8 +329,12 @@ function Table(props) {
                       <span className="pl-1 text-white">Track</span>
                     </button>
                     <Link
-                      to={`/viewshipment/${shipment.id}`}
-                      className="button btn-sm"
+                      to={`/${
+                        shipment.isCustom === true
+                          ? `viewgmrshipment`
+                          : `viewshipment`
+                      }/${shipment.id}`}
+                      className="button btn-view-link btn-sm"
                       style={{
                         width: "60px",
                         border: "1px solid #007bff",
