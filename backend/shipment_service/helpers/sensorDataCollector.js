@@ -1,10 +1,20 @@
 const SensorModel = require("../models/SensorModel");
+const ShipmentModel = require("../models/ShipmentModel");
+
+exports.getCurrentShipment = async (vehicleId) => {
+  const shipment = await ShipmentModel.find({
+    vehicleId: vehicleId,
+    status: "CREATED",
+  });
+  return shipment.pop();
+};
 
 exports.saveSensorData = async (sensorData) => {
   const sensor = new SensorModel({
     sensorId: sensorData.id,
     vehicleId: sensorData.vehicleID,
-    timepstamp: sensorData.timepstamp,
+    shipmentId: sensorData.shipmentId,
+    timestamp: sensorData.timestamp,
     coordinates: {
       X: sensorData.X,
       Y: sensorData.Y,
@@ -33,7 +43,29 @@ exports.updateSensorData = async (sensorData) => {
         },
       },
     },
-    { new: true, upsert: true }
+    { new: true, upsert: true, sort: { _id: -1 } }
   );
   return sensor;
+};
+
+exports.lastTenSensorData = async (shipmentId) => {
+  const sensorsData = await SensorModel.find({ shipmentId: shipmentId })
+    .sort({ _id: -1 })
+    .limit(50);
+  return sensorsData;
+};
+
+exports.getMinMax = async (shipmentId) => {
+  const sensorsData = await SensorModel.find({ shipmentId: shipmentId }).limit(
+    50
+  );
+  let min = Math.min(
+    ...sensorsData.map((sensor) => sensor.temperature)
+  ).toFixed(2);
+  let max = Math.max(
+    ...sensorsData.map((sensor) => sensor.temperature)
+  ).toFixed(2);
+  max = parseInt(max) + parseInt(max - min);
+  min = parseInt(min) - parseInt(max - min);
+  return { min, max };
 };

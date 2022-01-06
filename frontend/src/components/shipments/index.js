@@ -142,7 +142,7 @@ const ShipmentAnalytic = (props) => {
     coloumn4: "To",
     coloumn6: "Status ",
 
-    img1: <img src={mon} width='16' height='16' alt='' />,
+    img1: <img src={mon} width='16' height='16' alt='Monday' />,
     img2: <img src={calender} width='16' height='16' alt='Calender' />,
     img3: <img src={Received} width='16' height='16' alt='Received' />,
     img4: <img src={Sent} width='16' height='16' alt='Sent' />,
@@ -315,7 +315,7 @@ const ShipmentAnalytic = (props) => {
       { key: "excel", value: "Excel", checked: false },
       { key: "pdf", value: "PDF", checked: false },
       { key: "email", value: "Mail", checked: false },
-      { key: "print", value: "Print", checked: false },
+      // { key: "print", value: "Print", checked: false },
     ]);
   }, []);
 
@@ -332,6 +332,18 @@ const ShipmentAnalytic = (props) => {
         config().getExportFileForOutboundShipmentUrl
       }?type=${value.toLowerCase()}`;
     }
+
+    var today = new Date();
+
+    var nameOfFile;
+
+    if(visible=='one'){
+      nameOfFile = 'shipmentoutbound'+today.getFullYear().toString()+'/'+(today.getMonth()+1).toString()+'/'+today.getDate().toString();
+      // console.log(name, name);
+    }
+    else if(visible=='two'){
+      nameOfFile = 'shipmentinbound'+today.getFullYear()+'/'+(today.getMonth()+1)+'/'+today.getDate();
+    }
     getExportFile(url, value).then((response) => {
       console.log(response);
       if (response.data && response.status !== 200) {
@@ -342,7 +354,7 @@ const ShipmentAnalytic = (props) => {
         link.href = downloadUrl;
         link.setAttribute(
           "download",
-          `${uuid()}.${
+          `${nameOfFile}.${
             value.toLowerCase() === "excel" ? "xlsx" : value.toLowerCase()
           }`
         ); //any other extension
@@ -425,7 +437,7 @@ const ShipmentAnalytic = (props) => {
           />
         </div>
       )}
-      <div className='full-width-ribben mt-4'>
+      {/* <div className='full-width-ribben mt-4'>
         <TableFilter
           data={headers}
           shipmentIdList={shipmentIdList}
@@ -446,7 +458,7 @@ const ShipmentAnalytic = (props) => {
           onSelectionOfDropdownValue={onSelectionOfDropdownValue}
           isReportDisabled={!isAuthenticated("shipmentExportReport")}
         />
-      </div>
+      </div> */}
       <div className='ribben-space'>
         <Table
           {...props}
@@ -454,6 +466,24 @@ const ShipmentAnalytic = (props) => {
           shpmnts={sendData}
           count={count}
           onPageChange={onPageChange}
+          data={headers}
+          shipmentIdList={shipmentIdList}
+          supplierReceiverList={
+            props.user.emailId === "gmr@statledger.io"
+              ? []
+              : supplierReceiverList
+          }
+          setShipmentIdFilterOnSelect={setShipmentIdFilterOnSelect}
+          setFromShipmentFilterOnSelect={setFromShipmentFilterOnSelect}
+          setToShipmentFilterOnSelect={setToShipmentFilterOnSelect}
+          setStatusFilterOnSelect={setStatusFilterOnSelect}
+          setDateFilterOnSelect={setDateFilterOnSelect}
+          fb='80%'
+          showExportFilter={showExportFilter}
+          setShowExportFilter={setShowExportFilter}
+          exportFilterData={exportFilterData}
+          onSelectionOfDropdownValue={onSelectionOfDropdownValue}
+          isReportDisabled={!isAuthenticated("shipmentExportReport")}
         />
       </div>
     </div>

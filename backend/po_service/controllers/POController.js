@@ -1,7 +1,16 @@
-const dotenv = require("dotenv").config();
 const fs = require("fs");
-const moveFile = require("move-file");
 const XLSX = require("xlsx");
+const PdfPrinter = require("pdfmake");
+const { resolve } = require("path");
+const fontDescriptors = {
+  Roboto: {
+    normal: resolve("./controllers/Roboto-Regular.ttf"),
+    bold: resolve("./controllers/Roboto-Medium.ttf"),
+    italics: resolve("./controllers/Roboto-Italic.ttf"),
+    bolditalics: resolve("./controllers/Roboto-MediumItalic.ttf"),
+  },
+};
+const printer = new PdfPrinter(fontDescriptors);
 const axios = require("axios");
 const uniqid = require("uniqid");
 const date = require("date-and-time");
@@ -16,7 +25,6 @@ const EmployeeModel = require("../models/EmployeeModel");
 const logEvent = require("../../../utils/event_logger");
 const WarehouseModel = require("../models/WarehouseModel");
 const InventoryModel = require("../models/InventoryModel");
-//this helper file to prepare responses.
 const apiResponse = require("../helpers/apiResponse");
 const auth = require("../middlewares/jwt");
 const checkPermissions =
@@ -25,10 +33,7 @@ const wrapper = require("../models/DBWrapper");
 const excel = require("node-excel-export");
 const blockchain_service_url = process.env.URL;
 const hf_blockchain_url = process.env.HF_BLOCKCHAIN_URL;
-const stream_name = process.env.SHIP_STREAM;
 const po_stream_name = process.env.PO_STREAM;
-var pdf = require("pdf-creator-node");
-resolve = require("path").resolve;
 const CENTRAL_AUTHORITY_ID = null;
 const CENTRAL_AUTHORITY_NAME = null;
 const CENTRAL_AUTHORITY_ADDRESS = null;
@@ -43,18 +48,15 @@ const userPurchaseOrders = async (
   limit,
   callback
 ) => {
-  var matchCondition = {};
-  if (orgMode != "") var criteria = mode + "." + orgMode;
-  else {
-    var criteria = mode;
-  }
+  let criteria;
+  let matchCondition = {};
+  orgMode != "" ? (criteria = mode + "." + orgMode) : (criteria = mode);
   let newObj = {};
   if (type == "outbound") {
     newObj[criteria] = organisationId;
     matchCondition["$or"] = [newObj, { createdBy: id }];
   } else matchCondition[criteria] = organisationId;
-  var poDetails = [];
-  poDetails = await RecordModel.aggregate([
+  const poDetails = await RecordModel.aggregate([
     {
       $match: matchCondition,
     },
@@ -126,10 +128,10 @@ exports.fetchPurchaseOrders = [
       };
       checkPermissions(permission_request, async (permissionResult) => {
         if (permissionResult.success) {
-          var inboundPOs, outboundPOs, poDetails;
+          let inboundPOs, outboundPOs, poDetails;
           try {
             if (poId != null) {
-              const POs = await userPurchaseOrders(
+              await userPurchaseOrders(
                 "id",
                 "",
                 poId,
@@ -141,16 +143,16 @@ exports.fetchPurchaseOrders = [
                   poDetails = data;
                 }
               );
-              //  console.log(poDetails[0].products)
               await Promise.all(
-                poDetails[0].products.map(async (element) => {
-                  var product = await ProductModel.findOne({ id: element.id });
+                poDetails[0]?.products.map(async (element) => {
+                  const product = await ProductModel.findOne({
+                    id: element.id,
+                  });
                   element.unitofMeasure = product.unitofMeasure;
                 })
               );
-              //  console.log(poDetails[0].products)
             } else {
-              const supplierPOs = await userPurchaseOrders(
+              await userPurchaseOrders(
                 "supplier",
                 "supplierOrganisation",
                 organisationId,
@@ -162,8 +164,7 @@ exports.fetchPurchaseOrders = [
                   inboundPOs = data;
                 }
               );
-
-              const customerPOs = await userPurchaseOrders(
+              await userPurchaseOrders(
                 "customer",
                 "customerOrganisation",
                 organisationId,
@@ -176,7 +177,6 @@ exports.fetchPurchaseOrders = [
                 }
               );
             }
-
             return apiResponse.successResponseWithData(res, "Shipments Table", {
               inboundPOs: inboundPOs,
               outboundPOs: outboundPOs,
@@ -312,60 +312,71 @@ exports.changePOStatus = [
       };
       checkPermissions(permission_request, async (permissionResult) => {
         if (permissionResult.success) {
-          const { orderID, status } = req.body;
-          const po = await RecordModel.findOne({ id: orderID });
-          if (po && po.customer.customer_incharge === address) {
-            const currDateTime = date.format(new Date(), "DD/MM/YYYY HH:mm");
-            const updates = {
-              updatedOn: currDateTime,
-              status: status,
-            };
-            const updateData = await RecordModel.findOneAndUpdate(
-              { id: orderID },
-              {
-                $push: { poUpdates: updates },
-                $set: { poStatus: status },
-              },
-              { new: true }
-            );
-            const event = await Event.findOne({ transactionId: orderID });
-            let newEvent = {
-              eventID: "ev0000" + Math.random().toString(36).slice(2),
-              eventTime: new Date(),
-              transactionId: event.transactionId,
-              eventTypePrimary: event.eventTypePrimary,
-              eventTypeDesc: event.eventTypeDesc,
-              actorId: req.user.id || event.actorId,
-              actorUserId: req.user.emailId || event.actorUserId,
-              caId: event.caId,
-              caName: event.caName,
-              caAddress: event.caAddress,
-              actorOrgId: event.actorOrgId,
-              actorOrgName: event.actorOrgName,
-              actorOrgAddress: event.actorOrgAddress,
-              actorWarehouseId: event.actorWarehouseId,
-              secondaryOrgId: event.secondaryOrgId,
-              secondaryOrgName: event.secondaryOrgName,
-              secondaryOrgAddress: event.secondaryOrgAddress,
-              payloadData: {
-                data: {},
-              },
-            };
-            if (status === "ACCEPTED") newEvent.eventTypePrimary = "RECEIVE";
-            else newEvent.eventTypePrimary = "REJECT";
-            newEvent.payloadData.data = req.body;
-            const event_body = new Event(newEvent);
-            await event_body.save();
-            return apiResponse.successResponseWithData(
-              res,
-              "PO Status",
-              updateData
-            );
-          } else {
-            return apiResponse.ErrorResponse(
-              res,
-              "You are not authorised to change the status"
-            );
+          try {
+            const { orderID, status } = req.body;
+            const po = await RecordModel.findOne({ id: orderID });
+            if (po && po.customer.customer_incharge === address) {
+              const currDateTime = date.format(new Date(), "DD/MM/YYYY HH:mm");
+              const updates = {
+                updatedOn: currDateTime,
+                status: status,
+              };
+              await RecordModel.findOneAndUpdate(
+                { id: orderID },
+                {
+                  $push: { poUpdates: updates },
+                  $set: { poStatus: status },
+                }
+              );
+              try {
+                console.log(req.user);
+                let event = await Event.findOne({ transactionId: orderID });
+                console.log(event);
+                let newEvent = {
+                  eventID: "ev0000" + Math.random().toString(36).slice(2),
+                  eventTime: new Date(),
+                  transactionId: event.transactionId,
+                  eventTypePrimary: event.eventTypePrimary,
+                  eventTypeDesc: event.eventTypeDesc,
+                  actorId: req.user.id || event.actorId,
+                  actorUserId: req.user.emailId || event.actorUserId,
+                  caId: event.caId,
+                  caName: event.caName,
+                  caAddress: event.caAddress,
+                  actorOrgId: event.actorOrgId,
+                  actorOrgName: event.actorOrgName,
+                  actorOrgAddress: event.actorOrgAddress,
+                  actorWarehouseId: event.actorWarehouseId,
+                  secondaryOrgId: event.secondaryOrgId,
+                  secondaryOrgName: event.secondaryOrgName,
+                  secondaryOrgAddress: event.secondaryOrgAddress,
+                  payloadData: {
+                    data: {},
+                  },
+                };
+                if (status === "ACCEPTED")
+                  newEvent.eventTypePrimary = "RECEIVE";
+                else newEvent.eventTypePrimary = "REJECT";
+                newEvent.payloadData.data = req.body;
+                let event_body = new Event(newEvent);
+                let result = await event_body.save();
+                console.log(result);
+              } catch (error) {
+                console.log(error);
+              }
+              return apiResponse.successResponseWithData(
+                res,
+                "PO Status",
+                "Success"
+              );
+            } else {
+              return apiResponse.ErrorResponse(
+                res,
+                "You are not authorised to change the status"
+              );
+            }
+          } catch (e) {
+            return apiResponse.ErrorResponse(res, e.message);
           }
         } else {
           return apiResponse.forbiddenResponse(
@@ -375,7 +386,6 @@ exports.changePOStatus = [
         }
       });
     } catch (err) {
-      console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
     }
   },
@@ -413,8 +423,7 @@ exports.createPurchaseOrder = [
         result.id
       );
     } catch (err) {
-      console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.ErrorResponse(res, err);
     }
   },
 ];
@@ -423,499 +432,472 @@ exports.addPOsFromExcel = [
   auth,
   async (req, res) => {
     try {
-      // const permission_request = {
-      //   role: req.user.role,
-      //   permissionRequired: ['createPO'],
-      // };
-      // checkPermissions(permission_request, async permissionResult => {
-      //   if (permissionResult.success) {
-      try {
-        console.log(req.user);
-        const dir = `uploads`;
-        if (!fs.existsSync(dir)) {
-          fs.mkdirSync(dir);
-        }
-        await moveFile(req.file.path, `${dir}/${req.file.originalname}`);
-        const workbook = XLSX.readFile(`${dir}/${req.file.originalname}`);
-        const sheet_name_list = workbook.SheetNames;
-        const data = XLSX.utils.sheet_to_json(
-          workbook.Sheets[sheet_name_list[0]],
-          { dateNF: "dd/mm/yyyy;@", cellDates: true, raw: false }
-        );
-        //console.log(data)
-        const createdBy = (lastUpdatedBy = req.user.id);
-        let poDataArray = [];
-        poDataArray = data.map((po) => {
-          return {
-            id: po.id || 0,
-            externalId: po["UNICEf PO Number"],
-            creationDate: po["Document Date"],
-            lastUpdatedOn: new Date().toISOString(),
-            poStatus: req.user.id == po["Vendor"] ? "APPROVED" : "CREATED",
-            supplier: {
-              supplierOrganisation: po["Vendor"],
-              name: po["Vendor Name"],
-              // "supplierIncharge": po['Supplier Incharge']
-            },
-            customer: {
-              customerOrganisation: po["IP Code"],
-              name: po["IP Name"],
-              country: po["Country Name"],
-              region: po["Region Name"],
-              address: "NA",
-              // "customerIncharge": po['Customer Incharge'],
-              shippingAddress: {
-                shippingAddressId: po["Plant"],
-                shipmentReceiverId: po["Shipment Receiver Id"] || "NA",
-              },
-            },
-            products: [
-              {
-                productId: po["Material"],
-                id: po["Material"],
-                productQuantity: po["Order Quantity"],
-                quantity: po["Order Quantity"],
-                unitofMeasure: {
-                  id: po["Unit Id"],
-                  name: po["Order Unit"],
-                },
-              },
-            ],
-            createdBy: createdBy,
-            lastUpdatedBy: lastUpdatedBy,
-          };
-        });
-        var incrementCounter = await CounterModel.update(
-          {
-            "counters.name": "poId",
+      const workbook = XLSX.readFile(req.file.path);
+      const sheet_name_list = workbook.SheetNames;
+      const data = XLSX.utils.sheet_to_json(
+        workbook.Sheets[sheet_name_list[0]],
+        { dateNF: "dd/mm/yyyy;@", cellDates: true, raw: false }
+      );
+      const createdBy = req.user.id;
+      let poDataArray = [];
+      poDataArray = data.map((po) => {
+        return {
+          id: po.id || 0,
+          externalId: po["UNICEf PO Number"],
+          creationDate: po["Document Date"],
+          lastUpdatedOn: new Date().toISOString(),
+          poStatus: req.user.id == po["Vendor"] ? "APPROVED" : "CREATED",
+          supplier: {
+            supplierOrganisation: po["Vendor"],
+            name: po["Vendor Name"],
           },
-          {
-            $inc: {
-              "counters.$.value": 1,
+          customer: {
+            customerOrganisation: po["IP Code"],
+            name: po["IP Name"],
+            country: po["Country Name"],
+            region: po["Region Name"],
+            address: "NA",
+            shippingAddress: {
+              shippingAddressId: po["Plant"],
+              shipmentReceiverId: po["Shipment Receiver Id"] || "NA",
             },
-          }
-        );
-        let poCounter = await CounterModel.findOne(
-          { "counters.name": "poId" },
-          { "counters.$": 1 }
-        );
-        let dataRows = 0;
-        for (let i in poDataArray) {
-          if (poDataArray[i].externalId != null) {
-            duplicate = await RecordModel.findOne({
-              externalId: poDataArray[i].externalId,
+          },
+          products: [
+            {
+              productId: po["Material"],
+              id: po["Material"],
+              productQuantity: po["Order Quantity"],
+              quantity: po["Order Quantity"],
+              unitofMeasure: {
+                id: po["Unit Id"],
+                name: po["Order Unit"],
+              },
+            },
+          ],
+          createdBy: createdBy,
+          lastUpdatedBy: createdBy,
+        };
+      });
+      console.log(poDataArray);
+      var incrementCounter = await CounterModel.update(
+        {
+          "counters.name": "poId",
+        },
+        {
+          $inc: {
+            "counters.$.value": 1,
+          },
+        }
+      );
+      let poCounter = await CounterModel.findOne(
+        { "counters.name": "poId" },
+        { "counters.$": 1 }
+      );
+      let dataRows = 0;
+      for (let i in poDataArray) {
+        if (poDataArray[i].externalId != null) {
+          const duplicate = await RecordModel.findOne({
+            externalId: poDataArray[i].externalId,
+          });
+          if (duplicate != null) {
+            console.log("****** Duplicate PO");
+            delete poDataArray[i];
+            i--;
+          } else {
+            poDataArray[i].id =
+              poCounter.counters[0].format + poCounter.counters[0].value++;
+            let productDetails = await ProductModel.findOne({
+              id: poDataArray[i].products[0].productId,
             });
-            if (duplicate != null) {
-              delete poDataArray[i];
-              i--;
+            console.log("PRODUCT DETAILS", productDetails);
+            if (productDetails) {
+              (poDataArray[i].products[0].name = productDetails.name || ""),
+                (poDataArray[i].products[0].type = productDetails.type || ""),
+                (poDataArray[i].products[0].manufacturer =
+                  productDetails.manufacturer || "");
+            } else console.log("PRODUCT NOT FOUND");
+            console.log(dataRows++);
+            const organisationName =
+              poDataArray[i].customer.customerOrganisation;
+            const customerOrganisation = await OrganisationModel.findOne({
+              id: new RegExp("^" + organisationName + "$", "i"),
+            });
+            const customerOrganisationExternal =
+              await OrganisationModel.findOne({
+                externalId: new RegExp("^" + organisationName + "$", "i"),
+              });
+            if (customerOrganisation) {
+              poDataArray[i].customer.name = customerOrganisation.name;
+              poDataArray[i].customer.customerType = customerOrganisation.type;
+              if (
+                !customerOrganisation.warehouses.includes(
+                  poDataArray[i].customer.shippingAddress.shippingAddressId
+                )
+              ) {
+                delete poDataArray[i];
+                continue;
+              }
+            } else if (customerOrganisationExternal) {
+              poDataArray[i].customer.name = customerOrganisationExternal.name;
+              poDataArray[i].customer.customerType =
+                customerOrganisationExternal.type;
+              if (
+                !customerOrganisationExternal.warehouses.includes(
+                  poDataArray[i].customer.shippingAddress.shippingAddressId
+                )
+              ) {
+                delete poDataArray[i];
+                continue;
+              }
             } else {
-              poDataArray[i].id =
-                poCounter.counters[0].format + poCounter.counters[0].value++;
-              let productDetails = await ProductModel.findOne({
-                id: poDataArray[i].products[0].productId,
-              });
-              console.log("PRODUCT DETAILS", productDetails);
-              if (productDetails) {
-                (poDataArray[i].products[0].name = productDetails.name || ""),
-                  (poDataArray[i].products[0].type = productDetails.type || ""),
-                  (poDataArray[i].products[0].manufacturer =
-                    productDetails.manufacturer || "");
-              } else console.log("PRODUCT NOT FOUND");
-              console.log(dataRows++);
-              const organisationName =
-                poDataArray[i].customer.customerOrganisation;
-              const customerOrganisation = await OrganisationModel.findOne({
-                id: new RegExp("^" + organisationName + "$", "i"),
-              });
-              const customerOrganisationExternal =
-                await OrganisationModel.findOne({
-                  externalId: new RegExp("^" + organisationName + "$", "i"),
-                });
-              if (customerOrganisation) {
-                poDataArray[i].customer.name = customerOrganisation.name;
-                poDataArray[i].customer.customerType =
-                  customerOrganisation.type;
-                if (
-                  !customerOrganisation.warehouses.includes(
-                    poDataArray[i].customer.shippingAddress.shippingAddressId
-                  )
-                ) {
-                  delete poDataArray[i];
-                  continue;
+              const country = poDataArray[i].customer?.country
+                ? poDataArray[i].customer?.country
+                : "India";
+              const region = poDataArray[i].customer?.region
+                ? poDataArray[i].customer?.region
+                : "Asia";
+              const address = poDataArray[i].customer?.address
+                ? poDataArray[i].customer?.address
+                : "";
+              const incrementCounterOrg = await CounterModel.update(
+                {
+                  "counters.name": "orgId",
+                },
+                {
+                  $inc: {
+                    "counters.$.value": 1,
+                  },
                 }
-              } else if (customerOrganisationExternal) {
-                poDataArray[i].customer.name =
-                  customerOrganisationExternal.name;
-                poDataArray[i].customer.customerType =
-                  customerOrganisationExternal.type;
-                if (
-                  !customerOrganisationExternal.warehouses.includes(
-                    poDataArray[i].customer.shippingAddress.shippingAddressId
-                  )
-                ) {
-                  delete poDataArray[i];
-                  continue;
+              );
+              const orgCounter = await CounterModel.findOne(
+                { "counters.name": "orgId" },
+                { "counters.$": 1 }
+              );
+              const organisationId =
+                orgCounter.counters[0].format + orgCounter.counters[0].value;
+              const incrementCounterWarehouse = await CounterModel.update(
+                {
+                  "counters.name": "warehouseId",
+                },
+                {
+                  $inc: {
+                    "counters.$.value": 1,
+                  },
                 }
-              } else {
-                const country = poDataArray[i].customer?.country
-                  ? poDataArray[i].customer?.country
-                  : "India";
-                const region = poDataArray[i].customer?.region
-                  ? poDataArray[i].customer?.region
-                  : "Asia";
-                const address = poDataArray[i].customer?.address
-                  ? poDataArray[i].customer?.address
-                  : "";
-                const incrementCounterOrg = await CounterModel.update(
-                  {
-                    "counters.name": "orgId",
+              );
+              const incrementCounterEmp = await CounterModel.update(
+                {
+                  "counters.name": "employeeId",
+                },
+                {
+                  $inc: {
+                    "counters.$.value": 1,
                   },
-                  {
-                    $inc: {
-                      "counters.$.value": 1,
-                    },
-                  }
-                );
-                const orgCounter = await CounterModel.findOne(
-                  { "counters.name": "orgId" },
-                  { "counters.$": 1 }
-                );
-                organisationId =
-                  orgCounter.counters[0].format + orgCounter.counters[0].value;
-                const incrementCounterWarehouse = await CounterModel.update(
-                  {
-                    "counters.name": "warehouseId",
-                  },
-                  {
-                    $inc: {
-                      "counters.$.value": 1,
-                    },
-                  }
-                );
-                const incrementCounterEmp = await CounterModel.update(
-                  {
-                    "counters.name": "employeeId",
-                  },
-                  {
-                    $inc: {
-                      "counters.$.value": 1,
-                    },
-                  }
-                );
-                const warehouseCounter = await CounterModel.findOne(
-                  { "counters.name": "warehouseId" },
-                  { "counters.$": 1 }
-                );
-                warehouseId =
-                  warehouseCounter.counters[0].format +
-                  warehouseCounter.counters[0].value;
-                const empCounter = await CounterModel.findOne(
-                  { "counters.name": "employeeId" },
-                  { "counters.$": 1 }
-                );
-                var employeeId =
-                  empCounter.counters[0].format + empCounter.counters[0].value;
-                var employeeStatus = "NOTAPPROVED";
-                let addr = "";
-                const emailId =
-                  moment().format("YYYY-MM-DDTHH:mm:ss") + "@statledger.com";
-                let phone = "";
-                if (emailId.indexOf("@") === -1) phone = "+" + emailId;
-                const user = new EmployeeModel({
-                  firstName: req.user.firstName || "",
-                  lastName: req.user.id || "",
-                  emailId: phone ? "" : emailId,
-                  phoneNumber: phone,
-                  organisationId: organisationId,
-                  id: employeeId,
-                  postalAddress: address,
-                  accountStatus: employeeStatus,
-                  warehouseId: [warehouseId],
-                });
-                await user.save();
-                const org = new OrganisationModel({
-                  primaryContactId: employeeId ? employeeId : null,
-                  name: poDataArray[i].customer.name,
-                  id: organisationId,
-                  type: "CUSTOMER_SUPPLIER",
-                  status: "NOTVERIFIED",
-                  postalAddress: address,
-                  warehouses: [warehouseId],
-                  warehouseEmployees: [employeeId],
-                  country: {
-                    countryId: "001",
-                    countryName: country,
-                  },
-                  region: {
-                    id: "reg123",
-                    regionName: region,
-                    name: region,
-                  },
-                  configuration_id: "CONF000",
-                  authority: req.body?.authority,
-                  externalId: poDataArray[i].customer.customerOrganisation,
-                });
-                const createdOrg = await org.save();
-                poDataArray[i].customer.customerOrganisation = organisationId;
-                const incrementCounterInv = await CounterModel.update(
-                  {
-                    "counters.name": "inventoryId",
-                  },
-                  {
-                    $inc: {
-                      "counters.$.value": 1,
-                    },
-                  }
-                );
-                const invCounter = await CounterModel.findOne(
-                  { "counters.name": "inventoryId" },
-                  { "counters.$": 1 }
-                );
-                const inventoryId =
-                  invCounter.counters[0].format + invCounter.counters[0].value;
-                const inventoryResult = new InventoryModel({ id: inventoryId });
-                console.log(inventoryResult);
-                await inventoryResult.save();
-                const warehouse = new WarehouseModel({
-                  title: "Office",
-                  id: warehouseId,
-                  warehouseInventory: inventoryId,
-                  organisationId: organisationId,
-                  postalAddress: address,
-                  warehouseAddress: {
-                    firstLine: address,
-                    secondLine: "",
-                    region: region,
-                    city: address,
-                    state: address,
-                    country: country,
-                    landmark: "",
-                  },
-                  country: {
-                    countryId: "001",
-                    countryName: country,
-                  },
-                });
-                await warehouse.save();
-                poDataArray[i].customer.shippingAddress = {
-                  shippingAddressId: warehouseId,
-                  shipmentReceiverId: "NA",
-                };
-              }
-              /////////Supplier ORG DETAILS////////////
-              const supplierOrganisationName =
-                poDataArray[i].supplier.supplierOrganisation;
-              const supplierOrganisation = await OrganisationModel.findOne({
-                id: new RegExp("^" + supplierOrganisationName + "$", "i"),
+                }
+              );
+              const warehouseCounter = await CounterModel.findOne(
+                { "counters.name": "warehouseId" },
+                { "counters.$": 1 }
+              );
+              const warehouseId =
+                warehouseCounter.counters[0].format +
+                warehouseCounter.counters[0].value;
+              const empCounter = await CounterModel.findOne(
+                { "counters.name": "employeeId" },
+                { "counters.$": 1 }
+              );
+              const employeeId =
+                empCounter.counters[0].format + empCounter.counters[0].value;
+              const employeeStatus = "NOTAPPROVED";
+              const emailId =
+                moment().format("YYYY-MM-DDTHH:mm:ss") + "@statledger.com";
+              let phone = "";
+              if (emailId.indexOf("@") === -1) phone = "+" + emailId;
+              const user = new EmployeeModel({
+                firstName: req.user.firstName || "",
+                lastName: req.user.id || "",
+                emailId: phone ? "" : emailId,
+                phoneNumber: phone,
+                organisationId: organisationId,
+                id: employeeId,
+                postalAddress: address,
+                accountStatus: employeeStatus,
+                warehouseId: [warehouseId],
               });
-              const supplierOrganisationExternal =
-                await OrganisationModel.findOne({
-                  externalId: new RegExp(
-                    "^" + supplierOrganisationName + "$",
-                    "i"
-                  ),
-                });
-              if (supplierOrganisation) {
-                poDataArray[i].supplier.name = supplierOrganisation.name;
-                poDataArray[i].supplier.supplierType =
-                  supplierOrganisation.type;
-                poDataArray[i].supplier.shippingAddress = {
-                  shippingAddressId: "NA",
-                  shipmentReceiverId: "NA",
-                };
-              } else if (supplierOrganisationExternal) {
-                poDataArray[i].supplier.name =
-                  supplierOrganisationExternal.name;
-                poDataArray[i].supplier.supplierType =
-                  supplierOrganisationExternal.type;
-                poDataArray[i].supplier.shippingAddress = {
-                  shippingAddressId: "NA",
-                  shipmentReceiverId: "NA",
-                };
-              } else {
-                const country = poDataArray[i].supplier?.country
-                  ? poDataArray[i].supplier?.country
-                  : "India";
-                const region = poDataArray[i].supplier?.region
-                  ? poDataArray[i].supplier?.region
-                  : "Asia";
-                const address = poDataArray[i].supplier?.address
-                  ? poDataArray[i].supplier?.address
-                  : "Address NA";
-                const incrementCounterOrg = await CounterModel.update(
-                  {
-                    "counters.name": "orgId",
+              await user.save();
+              const org = new OrganisationModel({
+                primaryContactId: employeeId ? employeeId : null,
+                name: poDataArray[i].customer.name,
+                id: organisationId,
+                type: "CUSTOMER_SUPPLIER",
+                status: "NOTVERIFIED",
+                postalAddress: address,
+                warehouses: [warehouseId],
+                warehouseEmployees: [employeeId],
+                country: {
+                  countryId: "001",
+                  countryName: country,
+                },
+                region: {
+                  id: "reg123",
+                  regionName: region,
+                  name: region,
+                },
+                configuration_id: "CONF000",
+                authority: req.body?.authority,
+                externalId: poDataArray[i].customer.customerOrganisation,
+              });
+              await org.save();
+              poDataArray[i].customer.customerOrganisation = organisationId;
+              const incrementCounterInv = await CounterModel.update(
+                {
+                  "counters.name": "inventoryId",
+                },
+                {
+                  $inc: {
+                    "counters.$.value": 1,
                   },
-                  {
-                    $inc: {
-                      "counters.$.value": 1,
-                    },
-                  }
-                );
-                const orgCounter = await CounterModel.findOne(
-                  { "counters.name": "orgId" },
-                  { "counters.$": 1 }
-                );
-                organisationId =
-                  orgCounter.counters[0].format + orgCounter.counters[0].value;
-                const incrementCounterWarehouse = await CounterModel.update(
-                  {
-                    "counters.name": "warehouseId",
-                  },
-                  {
-                    $inc: {
-                      "counters.$.value": 1,
-                    },
-                  }
-                );
-                const incrementCounterEmp = await CounterModel.update(
-                  {
-                    "counters.name": "employeeId",
-                  },
-                  {
-                    $inc: {
-                      "counters.$.value": 1,
-                    },
-                  }
-                );
-                const warehouseCounter = await CounterModel.findOne(
-                  { "counters.name": "warehouseId" },
-                  { "counters.$": 1 }
-                );
-                warehouseId =
-                  warehouseCounter.counters[0].format +
-                  warehouseCounter.counters[0].value;
-                const empCounter = await CounterModel.findOne(
-                  { "counters.name": "employeeId" },
-                  { "counters.$": 1 }
-                );
-                var employeeId =
-                  empCounter.counters[0].format + empCounter.counters[0].value;
-                var employeeStatus = "NOTAPPROVED";
-                let addr = "";
-                const emailId =
-                  moment().format("YYYY-MM-DDTHH:mm:ss") + "@statledger.com";
-                let phone = "";
-                if (emailId.indexOf("@") === -1) phone = "+" + emailId;
-                const user = new EmployeeModel({
-                  firstName: req.user.firstName || "",
-                  lastName: req.user.id || "",
-                  emailId: phone ? "" : emailId,
-                  phoneNumber: phone,
-                  organisationId: organisationId,
-                  id: employeeId,
-                  postalAddress: address,
-                  accountStatus: employeeStatus,
-                  warehouseId: [warehouseId],
-                });
-                await user.save();
-                const org = new OrganisationModel({
-                  primaryContactId: employeeId ? employeeId : null,
-                  name: poDataArray[i].supplier.name,
-                  id: organisationId,
-                  type: "CUSTOMER_SUPPLIER",
-                  status: "NOTVERIFIED",
-                  postalAddress: address,
-                  warehouses: [warehouseId],
-                  warehouseEmployees: [employeeId],
-                  country: {
-                    countryId: "001",
-                    countryName: country,
-                  },
-                  region: {
-                    id: "reg123",
-                    regionName: region,
-                    name: region,
-                  },
-                  configuration_id: "CONF000",
-                  authority: req.body?.authority,
-                  externalId: poDataArray[i].supplier.supplierOrganisation,
-                });
-                const createdOrg = await org.save();
-                poDataArray[i].supplier.supplierOrganisation = organisationId;
-                let incrementCounterInv = await CounterModel.update(
-                  {
-                    "counters.name": "inventoryId",
-                  },
-                  {
-                    $inc: {
-                      "counters.$.value": 1,
-                    },
-                  }
-                );
-                const invCounter = await CounterModel.findOne(
-                  { "counters.name": "inventoryId" },
-                  { "counters.$": 1 }
-                );
-                const inventoryId =
-                  invCounter.counters[0].format + invCounter.counters[0].value;
-                const inventoryResult = new InventoryModel({ id: inventoryId });
-                console.log(inventoryResult);
-                await inventoryResult.save();
-                const warehouse = new WarehouseModel({
-                  title: "Office",
-                  id: warehouseId,
-                  warehouseInventory: inventoryId,
-                  organisationId: organisationId,
-                  postalAddress: address,
-                  warehouseAddress: {
-                    firstLine: address,
-                    secondLine: "",
-                    city: address,
-                    state: address,
-                    region: region,
-                    country: country,
-                    landmark: "",
-                  },
-                  country: {
-                    countryId: "001",
-                    countryName: country,
-                  },
-                });
-                await warehouse.save();
-                poDataArray[i].supplier.supplierType = "CUSTOMER_SUPPLIER";
-                poDataArray[i].supplier.shippingAddress = {
-                  shippingAddressId: warehouseId,
-                  shipmentReceiverId: "NA",
-                };
-              }
-              await RecordModel.create(poDataArray[i]);
+                }
+              );
+              const invCounter = await CounterModel.findOne(
+                { "counters.name": "inventoryId" },
+                { "counters.$": 1 }
+              );
+              const inventoryId =
+                invCounter.counters[0].format + invCounter.counters[0].value;
+              const inventoryResult = new InventoryModel({ id: inventoryId });
+              console.log(inventoryResult);
+              await inventoryResult.save();
+              const warehouse = new WarehouseModel({
+                title: "Office",
+                id: warehouseId,
+                warehouseInventory: inventoryId,
+                organisationId: organisationId,
+                postalAddress: address,
+                warehouseAddress: {
+                  firstLine: address,
+                  secondLine: "",
+                  region: region,
+                  city: address,
+                  state: address,
+                  country: country,
+                  landmark: "",
+                },
+                country: {
+                  countryId: "001",
+                  countryName: country,
+                },
+              });
+              await warehouse.save();
+              poDataArray[i].customer.shippingAddress = {
+                shippingAddressId: warehouseId,
+                shipmentReceiverId: "NA",
+              };
             }
+            /////////Supplier ORG DETAILS////////////
+            const supplierOrganisationName =
+              poDataArray[i].supplier.supplierOrganisation;
+            const supplierOrganisation = await OrganisationModel.findOne({
+              id: new RegExp("^" + supplierOrganisationName + "$", "i"),
+            });
+            const supplierOrganisationExternal =
+              await OrganisationModel.findOne({
+                externalId: new RegExp(
+                  "^" + supplierOrganisationName + "$",
+                  "i"
+                ),
+              });
+            if (supplierOrganisation) {
+              poDataArray[i].supplier.name = supplierOrganisation.name;
+              poDataArray[i].supplier.supplierType = supplierOrganisation.type;
+              poDataArray[i].supplier.shippingAddress = {
+                shippingAddressId: "NA",
+                shipmentReceiverId: "NA",
+              };
+            } else if (supplierOrganisationExternal) {
+              poDataArray[i].supplier.name = supplierOrganisationExternal.name;
+              poDataArray[i].supplier.supplierType =
+                supplierOrganisationExternal.type;
+              poDataArray[i].supplier.shippingAddress = {
+                shippingAddressId: "NA",
+                shipmentReceiverId: "NA",
+              };
+            } else {
+              const country = poDataArray[i].supplier?.country
+                ? poDataArray[i].supplier?.country
+                : "India";
+              const region = poDataArray[i].supplier?.region
+                ? poDataArray[i].supplier?.region
+                : "Asia";
+              const address = poDataArray[i].supplier?.address
+                ? poDataArray[i].supplier?.address
+                : "Address NA";
+              const incrementCounterOrg = await CounterModel.update(
+                {
+                  "counters.name": "orgId",
+                },
+                {
+                  $inc: {
+                    "counters.$.value": 1,
+                  },
+                }
+              );
+              const orgCounter = await CounterModel.findOne(
+                { "counters.name": "orgId" },
+                { "counters.$": 1 }
+              );
+              const organisationId =
+                orgCounter.counters[0].format + orgCounter.counters[0].value;
+              const incrementCounterWarehouse = await CounterModel.update(
+                {
+                  "counters.name": "warehouseId",
+                },
+                {
+                  $inc: {
+                    "counters.$.value": 1,
+                  },
+                }
+              );
+              const incrementCounterEmp = await CounterModel.update(
+                {
+                  "counters.name": "employeeId",
+                },
+                {
+                  $inc: {
+                    "counters.$.value": 1,
+                  },
+                }
+              );
+              const warehouseCounter = await CounterModel.findOne(
+                { "counters.name": "warehouseId" },
+                { "counters.$": 1 }
+              );
+              const warehouseId =
+                warehouseCounter.counters[0].format +
+                warehouseCounter.counters[0].value;
+              const empCounter = await CounterModel.findOne(
+                { "counters.name": "employeeId" },
+                { "counters.$": 1 }
+              );
+              const employeeId1 =
+                empCounter.counters[0].format + empCounter.counters[0].value;
+              const employeeStatus1 = "NOTAPPROVED";
+              const emailId =
+                moment().format("YYYY-MM-DDTHH:mm:ss") + "@statledger.com";
+              let phone = "";
+              if (emailId.indexOf("@") === -1) phone = "+" + emailId;
+              const user = new EmployeeModel({
+                firstName: req.user.firstName || "",
+                lastName: req.user.id || "",
+                emailId: phone ? "" : emailId,
+                phoneNumber: phone,
+                organisationId: organisationId,
+                id: employeeId1,
+                postalAddress: address,
+                accountStatus: employeeStatus1,
+                warehouseId: [warehouseId],
+              });
+              await user.save();
+              const org = new OrganisationModel({
+                primaryContactId: employeeId1 ? employeeId1 : null,
+                name: poDataArray[i].supplier.name,
+                id: organisationId,
+                type: "CUSTOMER_SUPPLIER",
+                status: "NOTVERIFIED",
+                postalAddress: address,
+                warehouses: [warehouseId],
+                warehouseEmployees: [employeeId1],
+                country: {
+                  countryId: "001",
+                  countryName: country,
+                },
+                region: {
+                  id: "reg123",
+                  regionName: region,
+                  name: region,
+                },
+                configuration_id: "CONF000",
+                authority: req.body?.authority,
+                externalId: poDataArray[i].supplier.supplierOrganisation,
+              });
+              const createdOrg = await org.save();
+              poDataArray[i].supplier.supplierOrganisation = organisationId;
+              let incrementCounterInv = await CounterModel.update(
+                {
+                  "counters.name": "inventoryId",
+                },
+                {
+                  $inc: {
+                    "counters.$.value": 1,
+                  },
+                }
+              );
+              const invCounter = await CounterModel.findOne(
+                { "counters.name": "inventoryId" },
+                { "counters.$": 1 }
+              );
+              const inventoryId =
+                invCounter.counters[0].format + invCounter.counters[0].value;
+              const inventoryResult = new InventoryModel({ id: inventoryId });
+              console.log(inventoryResult);
+              await inventoryResult.save();
+              const warehouse = new WarehouseModel({
+                title: "Office",
+                id: warehouseId,
+                warehouseInventory: inventoryId,
+                organisationId: organisationId,
+                postalAddress: address,
+                warehouseAddress: {
+                  firstLine: address,
+                  secondLine: "",
+                  city: address,
+                  state: address,
+                  region: region,
+                  country: country,
+                  landmark: "",
+                },
+                country: {
+                  countryId: "001",
+                  countryName: country,
+                },
+              });
+              await warehouse.save();
+              poDataArray[i].supplier.supplierType = "CUSTOMER_SUPPLIER";
+              poDataArray[i].supplier.shippingAddress = {
+                shippingAddressId: warehouseId,
+                shipmentReceiverId: "NA",
+              };
+            }
+            await RecordModel.create(poDataArray[i]);
           }
         }
-        incrementCounter = await CounterModel.update(
-          {
-            "counters.name": "poId",
-          },
-          {
-            $inc: {
-              "counters.$.value": dataRows,
-            },
-          }
-        );
-        return apiResponse.successResponseWithData(
-          res,
-          "Upload Result",
-          poDataArray
-        );
-        //else return apiResponse.ErrorResponse(res,'Data Already Exists')
-      } catch (e) {
-        console.log(e);
-        if (e.code == "11000") {
-          return apiResponse.successResponseWithData(
-            res,
-            "Inserted excluding Duplicate Values",
-            e
-          );
-        } else return apiResponse.ErrorResponse(res, e);
       }
-      //     } else {
-      //       res.json('Sorry! User does not have enough Permissions');
-      //     }
-      //  });
+      incrementCounter = await CounterModel.update(
+        {
+          "counters.name": "poId",
+        },
+        {
+          $inc: {
+            "counters.$.value": dataRows,
+          },
+        }
+      );
+      return apiResponse.successResponseWithData(
+        res,
+        "Upload Result",
+        poDataArray
+      );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      if (err.code == "11000") {
+        return apiResponse.successResponseWithData(
+          res,
+          "Inserted excluding Duplicate Values",
+          err
+        );
+      } else {
+        return apiResponse.ErrorResponse(res, err.message);
+      }
     }
   },
 ];
@@ -923,11 +905,8 @@ exports.addPOsFromExcel = [
 exports.success = [
   async (req, res) => {
     try {
-      const data = req.body;
-      const { phone, payuMoneyId, amount, productinfo } = data;
       // This check is important as sometimes payumoney is sending multiple success responses
       const redirectUrl = "http://localhost:3000/shipments";
-
       return res.redirect(redirectUrl);
     } catch (err) {
       //throw error in json response with status 500.
@@ -973,7 +952,7 @@ exports.createOrder = [
         element.unitofMeasure = product?.unitofMeasure;
         console.log(product);
       });
-      const createdBy = (lastUpdatedBy = req.user.id);
+      const createdBy = req.user.id;
       const purchaseOrder = new RecordModel({
         id: poId,
         externalId,
@@ -983,7 +962,7 @@ exports.createOrder = [
         products,
         lastUpdatedOn,
         createdBy,
-        lastUpdatedBy,
+        lastUpdatedBy: createdBy,
       });
       console.log(purchaseOrder);
       const supplierID = req.body.supplier.supplierOrganisation;
@@ -1036,8 +1015,7 @@ exports.createOrder = [
         Employees: "",
       };
       let token = req.headers["x-access-token"] || req.headers["authorization"]; // Express headers are auto converted to lowercase
-
-      const bc_response = await axios.post(
+      await axios.post(
         `${hf_blockchain_url}/api/v1/transactionapi/record/create`,
         bc_data,
         {
@@ -1046,8 +1024,7 @@ exports.createOrder = [
           },
         }
       );
-
-      const result = await purchaseOrder.save();
+      await purchaseOrder.save();
 
       try {
         var evid = Math.random().toString(36).slice(2);
@@ -1105,16 +1082,9 @@ exports.createOrder = [
         event_data.payload.data = req.body;
         event_data.payload.data.order_id = poId;
         event_data.transactionId = poId;
-        async function compute(event_data) {
-          resultt = await logEvent(event_data);
-          return resultt;
-        }
-        console.log(result);
-        compute(event_data).then((response) => {
-          console.log(response);
-          return apiResponse.successResponseWithData(res, "Created order", {
-            poId: poId,
-          });
+        await logEvent(event_data);
+        return apiResponse.successResponseWithData(res, "Created order", {
+          poId: poId,
         });
       } catch (error) {
         console.log(error);
@@ -1144,8 +1114,7 @@ exports.getOrderIds = [
 
       return apiResponse.successResponseWithData(res, "Order Ids", orderID);
     } catch (err) {
-      console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.ErrorResponse(res, err);
     }
   },
 ];
@@ -1178,8 +1147,7 @@ exports.getOpenOrderIds = [
         orderID
       );
     } catch (err) {
-      console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.ErrorResponse(res, err);
     }
   },
 ];
@@ -1297,7 +1265,6 @@ exports.fetchInboundPurchaseOrders = [
             };
           }
 
-          console.log("whereQuery ======>", whereQuery);
           try {
             let inboundPOsCount = await RecordModel.count(whereQuery);
             RecordModel.find(whereQuery)
@@ -1324,7 +1291,7 @@ exports.fetchInboundPurchaseOrders = [
                     id: inboundPO.createdBy,
                   });
                   let creatorOrganisation = await OrganisationModel.findOne({
-                    id: creator.organisationId,
+                    id: creator?.organisationId,
                   });
 
                   let supplierOrganisation = await OrganisationModel.findOne({
@@ -1588,8 +1555,8 @@ exports.exportInboundPurchaseOrders = [
   auth,
   async (req, res) => {
     try {
-      const { organisationId, role } = req.user;
-      const { skip, limit } = req.query;
+      const { organisationId } = req.user;
+      // const { skip, limit } = req.query;
       let currentDate = new Date();
       let fromDateFilter = 0;
       let fromCustomer = req.query.from ? req.query.from : undefined;
@@ -1683,8 +1650,6 @@ exports.exportInboundPurchaseOrders = [
       try {
         let inboundPOsCount = await RecordModel.count(whereQuery);
         RecordModel.find(whereQuery)
-          .skip(parseInt(skip))
-          .limit(parseInt(limit))
           .sort({ createdAt: -1 })
           .then((inboundPOList) => {
             let inboundPORes = [];
@@ -1706,7 +1671,7 @@ exports.exportInboundPurchaseOrders = [
                 id: inboundPO.createdBy,
               });
               let creatorOrganisation = await OrganisationModel.findOne({
-                id: creator.organisationId,
+                id: creator?.organisationId,
               });
 
               let supplierOrganisation = await OrganisationModel.findOne({
@@ -1728,8 +1693,8 @@ exports.exportInboundPurchaseOrders = [
             Promise.all(findInboundPOData).then(function (results) {
               let data = [];
               let rowData;
-              for (row of inboundPORes) {
-                for (product of row.products) {
+              for (const row of inboundPORes) {
+                for (const product of row.products) {
                   rowData = {
                     id: row.id,
                     createdBy: row.createdBy,
@@ -1751,7 +1716,7 @@ exports.exportInboundPurchaseOrders = [
                 }
               }
               if (req.query.type == "pdf") {
-                res = buildPdfReport(req, res, data);
+                res = buildPdfReport(req, res, data, "Inbound");
               } else {
                 res = buildExcelReport(req, res, data);
                 return apiResponse.successResponseWithData(
@@ -1765,8 +1730,7 @@ exports.exportInboundPurchaseOrders = [
         return apiResponse.ErrorResponse(res, err);
       }
     } catch (err) {
-      console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.ErrorResponse(res, err);
     }
   },
 ];
@@ -1776,8 +1740,8 @@ exports.exportOutboundPurchaseOrders = [
   auth,
   async (req, res) => {
     try {
-      const { organisationId, role, id } = req.user;
-      const { skip, limit } = req.query;
+      const { organisationId, id } = req.user;
+      // let { skip, limit } = req.query;
       let currentDate = new Date();
       let fromDateFilter = 0;
       let toSupplier = req.query.to ? req.query.to : undefined;
@@ -1871,83 +1835,72 @@ exports.exportOutboundPurchaseOrders = [
           },
         };
       }
-
-      try {
-        let outboundPOsCount = await RecordModel.count(whereQuery);
-        RecordModel.find(whereQuery)
-          .skip(parseInt(skip))
-          .limit(parseInt(limit))
-          .sort({ createdAt: -1 })
-          .then((outboundPOList) => {
-            let outboundPORes = [];
-            let findOutboundPOData = outboundPOList.map(async (outboundPO) => {
-              let outboundPOData = JSON.parse(JSON.stringify(outboundPO));
-              outboundPOData[`productDetails`] = [];
-              let outboundProductsArray = outboundPOData.products;
-              let productRes = outboundProductsArray.map(async (product) => {
-                let productDetails = await ProductModel.findOne({
-                  id: product.productId,
-                });
-                return productDetails;
+      let outboundPOsCount = await RecordModel.count(whereQuery);
+      RecordModel.find(whereQuery)
+        .sort({ createdAt: -1 })
+        .then((outboundPOList) => {
+          let outboundPORes = [];
+          let findOutboundPOData = outboundPOList.map(async (outboundPO) => {
+            let outboundPOData = JSON.parse(JSON.stringify(outboundPO));
+            outboundPOData[`productDetails`] = [];
+            let outboundProductsArray = outboundPOData.products;
+            let productRes = outboundProductsArray.map(async (product) => {
+              let productDetails = await ProductModel.findOne({
+                id: product.productId,
               });
-              Promise.all(productRes).then(async function (productList) {
-                outboundPOData[`productDetails`] = await productList;
-              });
-
-              let supplierOrganisation = await OrganisationModel.findOne({
-                id: outboundPO.supplier.supplierOrganisation,
-              });
-              let customerOrganisation = await OrganisationModel.findOne({
-                id: outboundPOData.customer.customerOrganisation,
-              });
-              let customerWareHouse = await WarehouseModel.findOne({
-                organisationId: outboundPOData.customer.customerOrganisation,
-              });
-              outboundPOData.supplier[`organisation`] = supplierOrganisation;
-              outboundPOData.customer[`organisation`] = customerOrganisation;
-              outboundPOData.customer[`warehouse`] = customerWareHouse;
-              outboundPORes.push(outboundPOData);
+              return productDetails;
+            });
+            Promise.all(productRes).then(async function (productList) {
+              outboundPOData[`productDetails`] = await productList;
             });
 
-            Promise.all(findOutboundPOData).then(function (results) {
-              let data = [];
-              let rowData;
-              for (row of outboundPORes) {
-                for (product of row.products) {
-                  rowData = {
-                    id: row.id,
-                    createdBy: row.createdBy,
-                    supplierOrgId: row?.supplier?.organisation?.id,
-                    orderReceiveIncharge: row?.customer?.customerIncharge,
-                    orderReceiverOrg: row?.customer?.customerOrganisation,
-                    productCategory: product.type,
-                    productName: product.name,
-                    manufacturer: product.manufacturer,
-                    productQuantity: product.productQuantity,
-                    productId: product.id,
-                    recieverOrgName: row?.customer?.organisation?.name,
-                    recieverOrgId: row?.customer?.organisation?.id,
-                    recieverOrgLocation:
-                      row?.customer.organisation?.postalAddress,
-                    status: row.poStatus,
-                  };
-                  data.push(rowData);
-                }
-              }
-              if (req.query.type == "pdf") {
-                res = buildPdfReport(req, res, data);
-              } else {
-                res = buildExcelReport(req, res, data);
-                return apiResponse.successResponseWithData(
-                  res,
-                  "Outbound PO Records"
-                );
-              }
+            let supplierOrganisation = await OrganisationModel.findOne({
+              id: outboundPO.supplier.supplierOrganisation,
             });
+            let customerOrganisation = await OrganisationModel.findOne({
+              id: outboundPOData.customer.customerOrganisation,
+            });
+            let customerWareHouse = await WarehouseModel.findOne({
+              organisationId: outboundPOData.customer.customerOrganisation,
+            });
+            outboundPOData.supplier[`organisation`] = supplierOrganisation;
+            outboundPOData.customer[`organisation`] = customerOrganisation;
+            outboundPOData.customer[`warehouse`] = customerWareHouse;
+            outboundPORes.push(outboundPOData);
           });
-      } catch (err) {
-        return apiResponse.ErrorResponse(res, err);
-      }
+
+          Promise.all(findOutboundPOData).then(function (results) {
+            let data = [];
+            let rowData;
+            for (const row of outboundPORes) {
+              for (const product of row.products) {
+                rowData = {
+                  id: row.id,
+                  createdBy: row.createdBy,
+                  supplierOrgId: row?.supplier?.organisation?.id,
+                  orderReceiveIncharge: row?.customer?.customerIncharge,
+                  orderReceiverOrg: row?.customer?.customerOrganisation,
+                  productCategory: product.type,
+                  productName: product.name,
+                  manufacturer: product.manufacturer,
+                  productQuantity: product.productQuantity,
+                  productId: product.id,
+                  recieverOrgName: row?.customer?.organisation?.name,
+                  recieverOrgId: row?.customer?.organisation?.id,
+                  recieverOrgLocation:
+                    row?.customer.organisation?.postalAddress,
+                  status: row.poStatus,
+                };
+                data.push(rowData);
+              }
+            }
+            if (req.query.type == "pdf") {
+              res = buildPdfReport(req, res, data, "Outbound");
+            } else {
+              res = buildExcelReport(req, res, data);
+            }
+          });
+        });
     } catch (err) {
       console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
@@ -2080,33 +2033,77 @@ function buildExcelReport(req, res, dataForExcel) {
   return res.send(report);
 }
 
-function buildPdfReport(req, res, data) {
-  let finalPath = resolve("./models/pdftemplate.html");
-  let html = fs.readFileSync(finalPath, "utf8");
-  var options = {
-    format: "A4",
-    orientation: "landscape",
-    border: "10mm",
-    header: {
-      height: "15mm",
-      contents: '<div style="text-align: center;"><h1>Vaccine Ledger<h1></div>',
-    },
-  };
-  var document = {
-    html: html,
-    data: {
-      orders: data,
-    },
-    path: "./output.pdf",
-    type: "",
-  };
-  pdf
-    .create(document, options)
-    .then((result) => {
-      console.log(result);
-      return res.sendFile(result.filename);
-    })
-    .catch((error) => {
-      console.error(error);
+async function buildPdfReport(req, res, data, orderType) {
+  const rows = [];
+  rows.push([
+    { text: "Order Id", bold: true },
+    { text: "Order created By", bold: true },
+    { text: "Creator Org Id", bold: true },
+    { text: "Creator Org Name", bold: true },
+    { text: "ORG ID - Receiver", bold: true },
+    { text: "Product Category", bold: true },
+    { text: "Product Name", bold: true },
+    { text: "Product ID", bold: true },
+    { text: "Quantity", bold: true },
+    { text: "Manufacturer", bold: true },
+    { text: "Delivery Organization Name", bold: true },
+    { text: "Delivery Organization ID", bold: true },
+    { text: "Delivery Organization Location Details", bold: true },
+    { text: "Status", bold: true },
+  ]);
+  for (let i = 0; i < data.length; i++) {
+    let OrgName = await OrganisationModel.findOne({
+      id: data[i].supplierOrgId,
     });
+    OrgName = OrgName?.name;
+    rows.push([
+      data[i].id || "N/A",
+      data[i].createdBy || "N/A",
+      data[i].supplierOrgId || "N/A",
+      OrgName || "N/A",
+      data[i].orderReceiverOrg || "N/A",
+      data[i].productCategory || "N/A",
+      data[i].productName || "N/A",
+      data[i].productId || "N/A",
+      data[i].productQuantity || "N/A",
+      data[i].manufacturer || "N/A",
+      data[i].recieverOrgName || "N/A",
+      data[i].recieverOrgId || "N/A",
+      data[i].recieverOrgLocation || "N/A",
+      data[i].status || "N/A",
+    ]);
+  }
+
+  const docDefinition = {
+    pageSize: "A3",
+    pageOrientation: "landscape",
+    content: [
+      { text: `${orderType} Purchase order`, fontSize: 34, style: "header" },
+      {
+        table: {
+          headerRows: 1,
+          headerStyle: "header",
+          widths: [70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70],
+          body: rows,
+        },
+      },
+    ],
+    styles: {
+      header: {
+        bold: true,
+        margin: [10, 10, 10, 10],
+      },
+    },
+  };
+
+  const options = { fontLayoutCache: true };
+  const pdfDoc = printer.createPdfKitDocument(docDefinition, options);
+  let temp123;
+  const pdfFile = pdfDoc.pipe((temp123 = fs.createWriteStream("./output.pdf")));
+  const path = pdfFile.path;
+  pdfDoc.end();
+  temp123.on("finish", async function () {
+    return res.sendFile(resolve(path));
+  });
+  return;
 }

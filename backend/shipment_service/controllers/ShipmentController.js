@@ -20,9 +20,8 @@ const CENTRAL_AUTHORITY_NAME = null;
 const CENTRAL_AUTHORITY_ADDRESS = null;
 const checkPermissions =
   require("../middlewares/rbac_middleware").checkPermissions;
-const blockchain_service_url = process.env.URL;
+const logEvent = require("../../../utils/event_logger");
 const hf_blockchain_url = process.env.HF_BLOCKCHAIN_URL;
-const shipment_stream = process.env.SHIP_STREAM;
 const axios = require("axios");
 const { uploadFile, getFileStream } = require("../helpers/s3");
 const fs = require("fs");
@@ -31,8 +30,16 @@ const uniqid = require("uniqid");
 const unlinkFile = util.promisify(fs.unlink);
 const excel = require("node-excel-export");
 const { resolve } = require("path");
-var pdf = require("pdf-creator-node");
-
+var PdfPrinter = require("pdfmake");
+const fontDescriptors = {
+  Roboto: {
+    normal: resolve("./controllers/Roboto-Regular.ttf"),
+    bold: resolve("./controllers/Roboto-Medium.ttf"),
+    italics: resolve("./controllers/Roboto-Italic.ttf"),
+    bolditalics: resolve("./controllers/Roboto-MediumItalic.ttf"),
+  },
+};
+const printer = new PdfPrinter(fontDescriptors);
 const inventoryUpdate = async (
   id,
   quantity,
@@ -115,8 +122,6 @@ const inventoryUpdate = async (
 const poUpdate = async (id, quantity, poId, shipmentStatus, actor, next) => {
   try {
     let event = await Event.findOne({ "payloadData.data.order_id": poId });
-    console.log("event is", event);
-
     var evid = Math.random().toString(36).slice(2);
     var datee = new Date();
     datee = datee.toISOString();
@@ -205,7 +210,6 @@ const poUpdate = async (id, quantity, poId, shipmentStatus, actor, next) => {
     return response;
   } catch (error) {
     console.log(error);
-    return apiResponse.ErrorResponse(res, err.message);
   }
 };
 
@@ -732,10 +736,10 @@ exports.createShipment = [
           Misc: "",
         };
 
-        let token =
+        const token =
           req.headers["x-access-token"] || req.headers["authorization"]; // Express headers are auto converted to lowercase
 
-        const bc_response = await axios.post(
+        await axios.post(
           `${hf_blockchain_url}/api/v1/transactionapi/shipment/create`,
           bc_data,
           {
@@ -744,28 +748,6 @@ exports.createShipment = [
             },
           }
         );
-
-        /*const userData = {
-          stream: shipment_stream,
-          key: shipmentId,
-          address: req.user.walletAddress,
-          data: data,
-        };
-        const response = await axios.post(
-          `${blockchain_service_url}/publish`,
-          userData
-        );
-        await ShipmentModel.findOneAndUpdate(
-          {
-            id: shipmentId,
-          },
-          {
-            $push: {
-              transactionIds: response.data.transactionId,
-            },
-          }
-        );*/
-
         if (data.taggedShipments) {
           const prevTaggedShipments = await ShipmentModel.findOne(
             {
@@ -795,8 +777,7 @@ exports.createShipment = [
 
           if (!quantityMismatch)
             throw new Error("Tagged product quantity not available");
-
-          const tagUpdate = await ShipmentModel.findOneAndUpdate(
+          await ShipmentModel.findOneAndUpdate(
             {
               id: shipmentId,
             },
@@ -815,14 +796,7 @@ exports.createShipment = [
             );
           }
         }
-        async function compute(event_data) {
-          resultt = await logEvent(event_data);
-          return resultt;
-        }
-        compute(event_data).then((response) => {
-          // console.log(response);
-        });
-
+        await logEvent(event_data);
         return apiResponse.successResponseWithData(
           res,
           "Shipment Created Successfully",
@@ -878,6 +852,9 @@ exports.newShipment = [
         products: data.products,
       };
       data.shipmentUpdates = updates;
+      data.isCustom
+        ? (data.vehicleId = data.airWayBillNo)
+        : (data.vehicleId = null);
       const shipment = new ShipmentModel(data);
       const result = await shipment.save();
       if (result == null) {
@@ -910,10 +887,9 @@ exports.newShipment = [
         Products: JSON.stringify(data.products),
         Misc: "",
       };
-
-      let token = req.headers["x-access-token"] || req.headers["authorization"]; // Express headers are auto converted to lowercase
-
-      const bc_response = await axios.post(
+      const token =
+        req.headers["x-access-token"] || req.headers["authorization"]; // Express headers are auto converted to lowercase
+      await axios.post(
         `${hf_blockchain_url}/api/v1/transactionapi/shipment/create`,
         bc_data,
         {
@@ -922,7 +898,6 @@ exports.newShipment = [
           },
         }
       );
-
       return apiResponse.successResponseWithData(
         res,
         "Shipment Created Successfully",
@@ -1340,13 +1315,8 @@ exports.receiveShipment = [
 
           event_data.payload.data = data;
           console.log(event_data);
-          async function compute(event_data) {
-            resultt = await logEvent(event_data);
-            return resultt;
-          }
-          compute(event_data).then((response) => {
-            console.log(response);
-          });
+
+          await logEvent(event_data);
 
           return apiResponse.successResponseWithData(
             res,
@@ -1913,17 +1883,14 @@ exports.viewShipmentGmr = [
       };
       checkPermissions(permission_request, async (permissionResult) => {
         if (permissionResult.success) {
-          await ShipmentModel.findOne({ id: req.query.shipmentId })
-            .then((shipment) => {
-              return apiResponse.successResponseWithData(
-                res,
-                "Shipment",
-                shipment
-              );
-            })
-            .catch((err) => {
-              return apiResponse.ErrorResponse(res, err.message);
-            });
+          const shipment = await ShipmentModel.findOne({
+            id: req.query.shipmentId,
+          });
+          return apiResponse.successResponseWithData(
+            res,
+            "Shipment Details",
+            shipment
+          );
         } else {
           return apiResponse.forbiddenResponse(
             res,
@@ -2124,21 +2091,19 @@ exports.updateTrackingStatus = [
   async (req, res) => {
     try {
       const data = req.body;
-      const currDateTime = date.format(new Date(), "DD/MM/YYYY HH:mm");
-      data.shipmentUpdates.updatedOn = currDateTime;
+      const currentDateTime = date.format(new Date(), "DD/MM/YYYY HH:mm");
+      data.shipmentUpdates.updatedOn = currentDateTime;
       data.shipmentUpdates.updatedBy = req.user.id;
       data.shipmentUpdates.status = "UPDATED";
-
-      const update = await ShipmentModel.update(
+      await ShipmentModel.updateOne(
         { id: req.body.id },
         { $push: { shipmentUpdates: data.shipmentUpdates } }
       );
-      var datee = new Date();
-      datee = datee.toISOString();
-      var evid = Math.random().toString(36).slice(2);
-      let event_data = {
+      const currentDate = new Date().toISOString();
+      const evid = Math.random().toString(36).slice(2);
+      const event_data = {
         eventID: "ev0000" + evid,
-        eventTime: datee,
+        eventTime: currentDate,
         actorWarehouseId: req.user.warehouseId,
         transactionId: req.body.id,
         eventType: {
@@ -2170,14 +2135,7 @@ exports.updateTrackingStatus = [
           data: req.body,
         },
       };
-      console.log(event_data);
-      async function compute(event_data) {
-        resultt = await logEvent(event_data);
-        return resultt;
-      }
-      compute(event_data).then((response) => {
-        console.log(response);
-      });
+      await logEvent(event_data);
       return apiResponse.successResponse(res, "Status Updated");
     } catch (err) {
       return apiResponse.ErrorResponse(res, err.message);
@@ -3556,7 +3514,7 @@ exports.exportInboundShipments = [
   auth,
   async (req, res) => {
     try {
-      const { skip, limit } = req.query;
+      // const { skip, limit } = req.query;
       const { warehouseId } = req.user;
       let currentDate = new Date();
       let fromDateFilter = 0;
@@ -3642,8 +3600,6 @@ exports.exportInboundShipments = [
       try {
         let inboundShipmentsCount = await ShipmentModel.count(whereQuery);
         ShipmentModel.find(whereQuery)
-          .skip(parseInt(skip))
-          .limit(parseInt(limit))
           .sort({ createdAt: -1 })
           .then((inboundShipmentsList) => {
             let inboundShipmentsRes = [];
@@ -3704,7 +3660,7 @@ exports.exportInboundShipments = [
                 }
               }
               if (req.query.type == "pdf") {
-                res = buildPdfReport(req, res, data);
+                res = buildPdfReport(req, res, data, "Inbound");
               } else {
                 res = buildExcelReport(req, res, data);
                 return apiResponse.successResponseWithData(
@@ -3728,7 +3684,7 @@ exports.exportOutboundShipments = [
   auth,
   async (req, res) => {
     try {
-      const { skip, limit } = req.query;
+      // const { skip, limit } = req.query;
       const { warehouseId } = req.user;
       let currentDate = new Date();
       let fromDateFilter = 0;
@@ -3811,8 +3767,6 @@ exports.exportOutboundShipments = [
       try {
         let outboundShipmentsCount = await ShipmentModel.count(whereQuery);
         ShipmentModel.find(whereQuery)
-          .skip(parseInt(skip))
-          .limit(parseInt(limit))
           .sort({ createdAt: -1 })
           .then((outboundShipmentsList) => {
             let outboundShipmentsRes = [];
@@ -3873,7 +3827,7 @@ exports.exportOutboundShipments = [
                 }
               }
               if (req.query.type == "pdf") {
-                res = buildPdfReport(req, res, data);
+                res = buildPdfReport(req, res, data, "Outbound");
               } else {
                 res = buildExcelReport(req, res, data);
                 return apiResponse.successResponseWithMultipleData(
@@ -4047,35 +4001,91 @@ function buildExcelReport(req, res, dataForExcel) {
   return res.send(report);
 }
 
-function buildPdfReport(req, res, data) {
-  let finalPath = resolve("./models/pdftemplate.html");
-  let html = fs.readFileSync(finalPath, "utf8");
-  var options = {
-    format: "A4",
-    orientation: "landscape",
-    border: "10mm",
-    header: {
-      height: "15mm",
-      contents: '<div style="text-align: center;"><h1>Vaccine Ledger<h1></div>',
+function buildPdfReport(req, res, data, orderType) {
+  // console.log(data)
+  var rows = [];
+  rows.push([
+    { text: "Shipment ID", bold: true },
+    { text: "Reference Order ID", bold: true },
+    { text: "Product Category", bold: true },
+    { text: "Product Name", bold: true },
+    { text: "Product ID", bold: true },
+    { text: "Quantity", bold: true },
+    { text: "Batch Number", bold: true },
+    { text: "Manufacturer", bold: true },
+    { text: "From Organization Name", bold: true },
+    { text: "From Organization ID", bold: true },
+    { text: "From Organization Location Details", bold: true },
+    { text: "Delivery Organization Name", bold: true },
+    { text: "Delivery Organization ID", bold: true },
+    { text: "Delivery Organization Location Details", bold: true },
+    { text: "Transit Number", bold: true },
+    { text: "Label Code", bold: true },
+    { text: "Shipment Date", bold: true },
+    { text: "Shipment Estimate Date", bold: true },
+  ]);
+  // console.log(rows[0].length)
+  for (var i = 0; i < data.length; i++) {
+    rows.push([
+      data[i].id || "N/A",
+      data[i].poId || "N/A",
+      data[i].productCategory || "N/A",
+      data[i].productName || "N/A",
+      data[i].productID || "N/A",
+      data[i].productQuantity || "N/A",
+      data[i].batchNumber || "N/A",
+      data[i].manufacturer || "N/A",
+      data[i].supplierOrgName || "N/A",
+      data[i].supplierOrgId || "N/A",
+      data[i].supplierOrgLocation || "N/A",
+      data[i].recieverOrgName || "N/A",
+      data[i].recieverOrgId || "N/A",
+      data[i].recieverOrgLocation || "N/A",
+      data[i].airWayBillNo || "N/A",
+      data[i].label || "N/A",
+      data[i].shippingDate || "N/A",
+      data[i].expectedDeliveryDate || "N/A",
+    ]);
+  }
+
+  var docDefinition = {
+    pageSize: "A3",
+    pageOrientation: "landscape",
+    pageMargins: [30, 30, 1, 5],
+    content: [
+      { text: `${orderType} shipments`, fontSize: 34, style: "header" },
+      {
+        table: {
+          margin: [1, 1, 1, 1],
+          headerRows: 1,
+          headerStyle: "header",
+          widths: [
+            60, 60, 55, 55, 55, 45, 48, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55,
+            55,
+          ],
+          body: rows,
+        },
+      },
+    ],
+    styles: {
+      header: {
+        bold: true,
+        margin: [10, 10, 10, 10],
+      },
     },
   };
-  var document = {
-    html: html,
-    data: {
-      orders: data,
-    },
-    path: "./output.pdf",
-    type: "",
-  };
-  pdf
-    .create(document, options)
-    .then((result) => {
-      console.log(result);
-      return res.sendFile(result.filename);
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+
+  var options = { fontLayoutCache: true };
+  var pdfDoc = printer.createPdfKitDocument(docDefinition, options);
+  var temp123;
+  var pdfFile = pdfDoc.pipe((temp123 = fs.createWriteStream("./output.pdf")));
+  var path = pdfFile.path;
+  pdfDoc.end();
+  temp123.on("finish", async function () {
+    // do send PDF file
+    return res.sendFile(resolve(path));
+  });
+  return;
 }
 
 exports.trackJourneyOnBlockchain = [

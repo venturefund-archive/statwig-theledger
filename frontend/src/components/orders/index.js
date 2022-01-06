@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import "./style.scss";
 import Table from "./table";
@@ -28,6 +28,8 @@ import uuid from "react-uuid";
 import { isAuthenticated } from "../../utils/commonHelper";
 
 const Orders = (props) => {
+
+
   const [menu, setMenu] = useState(false);
   const [openCreatedOrder, setOpenCreatedOrder] = useState(false);
   const [openExcel, setOpenExcel] = useState(false);
@@ -377,7 +379,7 @@ const Orders = (props) => {
       { key: "excel", value: "Excel", checked: false },
       { key: "pdf", value: "PDF", checked: false },
       { key: "email", value: "Mail", checked: false },
-      { key: "print", value: "Print", checked: false },
+      // { key: "print", value: "Print", checked: false },
     ]);
   }, []);
 
@@ -393,6 +395,20 @@ const Orders = (props) => {
         }?type=${value.toLowerCase()}`;
     }
 
+    // console.log('visible', visible);
+
+    var today = new Date();
+
+    var nameOfFile;
+
+    if(visible=='one'){
+      nameOfFile = 'ordersoutbound'+today.getFullYear().toString()+'/'+(today.getMonth()+1).toString()+'/'+today.getDate().toString();
+      // console.log(name, name);
+    }
+    else if(visible=='two'){
+      nameOfFile = 'ordersinbound'+today.getFullYear()+'/'+(today.getMonth()+1)+'/'+today.getDate();
+    }
+
     getExportFile(url).then((response) => {
       if (response.data && response.status !== 200) {
         console.log("Error while downloading file");
@@ -402,9 +418,11 @@ const Orders = (props) => {
         link.href = downloadUrl;
         link.setAttribute(
           "download",
-          `${uuid()}.${value.toLowerCase() === "excel" ? "xlsx" : value.toLowerCase()
+          `${nameOfFile}.${
+            value.toLowerCase() === "excel" ? "xlsx" : value.toLowerCase()
           }`
         ); //any other extension
+        console.log('Link', link);
         document.body.appendChild(link);
         link.click();
         link.remove();
@@ -502,8 +520,14 @@ const Orders = (props) => {
           setShowExportFilter={setShowExportFilter}
         />
       </div>
-      <div className='full-width-ribben mt-4'>
-        <TableFilter
+      <div className='ribben-space'>
+        <Table
+          {...props}
+          skip={skip}
+          ordrs={sendData}
+          visible={visible}
+          count={count}
+          onPageChange={onPageChange}
           visible={visible}
           data={headers}
           poOrderIdList={poOrderIdList}
@@ -522,16 +546,6 @@ const Orders = (props) => {
           exportFilterData={exportFilterData}
           onSelectionOfDropdownValue={onSelectionOfDropdownValue}
           isReportDisabled={!isAuthenticated("orderExportReport")}
-        />
-      </div>
-      <div className='ribben-space'>
-        <Table
-          {...props}
-          skip={skip}
-          ordrs={sendData}
-          visible={visible}
-          count={count}
-          onPageChange={onPageChange}
         />
       </div>
     </div>
