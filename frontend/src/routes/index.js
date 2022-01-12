@@ -51,6 +51,7 @@ import ViewProduct from "../containers/viewProduct";
 import ViewExpiry from "../containers/viewexpiry";
 import SettingsContainer from "../containers/settings";
 import AddProductContainer from "../containers/addproduct";
+import ErrorPageContainer from "../containers/404error/ErrorPageErrorPageContainer";
 
 const routes = (
   <Switch>
@@ -126,6 +127,8 @@ const routes = (
     <Route path="/viewexpiry" component={requireAuth(ViewExpiry)} />
     <Route path="/viewproduct" component={requireAuth(ViewProduct)} />
     <Route path="/addNewProduct" component={AddProductContainer} />
+
+    <Route path="/404Error" component={ErrorPageContainer} />
 
     <Route component={NoMatch} />
   </Switch>
