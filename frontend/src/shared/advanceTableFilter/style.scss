@@ -103,10 +103,10 @@
 
 // Date filters
 .valueDisplay{
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding-bottom: 1rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  padding: 0 1rem;
 }
 .groupFlex{
   display: flex;
@@ -159,4 +159,8 @@
 .rmdp-range {
   background-color: none !important;
   box-shadow: none !important;
+}
+
+.rdrDateDisplayWrapper{
+  background-color:#fff !important;
 }

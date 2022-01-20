@@ -35,6 +35,7 @@
     "react-chartjs-2": "^3.0.5",
     "react-chartkick": "^0.5.2",
     "react-cool-onclickoutside": "^1.6.2",
+    "react-date-range": "^1.4.0",
     "react-datepicker": "^4.2.1",
     "react-dom": "^17.0.2",
     "react-i18next": "^11.15.2",

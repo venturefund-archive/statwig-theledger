@@ -10,12 +10,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 import TextField from "@material-ui/core/TextField";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import FilterDropDown from "../../components/filterDropDown";
-import DateRangePicker from "@mui/lab/DateRangePicker";
-import StaticDateRangePicker from '@mui/lab/StaticDateRangePicker';
-import AdapterDateFns from '@mui/lab/AdapterDateFns';
-import LocalizationProvider from '@mui/lab/LocalizationProvider';
-import Box from '@mui/material/Box';
-import DateFilter from "./DateFilter.jsx";
+import DateFs from "./DateFs.jsx";
 
 const StyledMenu = withStyles({
   paper: {
@@ -1000,7 +995,7 @@ const AdvanceTableFilter = (props) => {
         onClose={dateclose}
         onBlur={dateclose}
       >
-          <DateFilter t={props.t} />
+          <DateFs t={props.t} />
       </StyledMenu>
         </div>
 
@@ -1203,7 +1198,7 @@ const AdvanceTableFilter = (props) => {
               onClose={dateclose}
               onBlur={dateclose}
             >
-                <DateFilter t={props.t} />
+                <DateFs t={props.t} />
             </StyledMenu>
         </th>
       );
@@ -1230,7 +1225,7 @@ const AdvanceTableFilter = (props) => {
               onClose={dateclose}
               onBlur={dateclose}
             >
-                <DateFilter t={props.t} />
+                <DateFs t={props.t} />
             </StyledMenu>
         </th>
       );
