@@ -11,6 +11,7 @@ const AddCategory = (props) => {
   const { t } = props;
   const [manufacturer, setManufacturer] = useState("Select Manufacturer");
   const [categoryName, setcategoryName] = useState("");
+  const [manufacturerName, setManufacturerName] = useState("");
   const [photo, setPhoto] = useState("");
   const [photoUrl, setPhotoUrl] = useState(undefined);
   const [description, setDescription] = useState("");
@@ -29,14 +30,19 @@ const AddCategory = (props) => {
 
   const [catNameErr, setCategoryNameErr] = useState(false);
   const [catDescErr, setDescErr] = useState(false);
+  const [catManufactErr, setManufactErr] = useState(false);
   const validation = () => {
-    if (categoryName === "" || description === "") {
+    if (categoryName === "" || description === "" || manufacturerName === "") {
       if (categoryName === "") {
         setCategoryNameErr(true);
         setBtnVisible(false);
       }
       if (description === "") {
         setDescErr(true);
+        setBtnVisible(false);
+      }
+      if(manufacturerName===""){
+        setManufactErr(true);
         setBtnVisible(false);
       }
     } else {
@@ -49,7 +55,7 @@ const AddCategory = (props) => {
     if (isValid) {
       let formData = new FormData();
 
-      formData.append("manufacturer", manufacturer);
+      formData.append("manufacturer", manufacturerName);
       let unitofMeasure = {
         id: "N/A",
         name: "N/A",
@@ -62,7 +68,8 @@ const AddCategory = (props) => {
       formData.append("description", description);
       formData.append("photo", photo);
       const result = await addNewProduct(formData);
-      if (result.status === 1) {
+      // console.log("Result from add product", result);
+      if (result.success) {
         setOpenCreatedInventory(true);
       }
     }
@@ -124,6 +131,30 @@ const AddCategory = (props) => {
                       setcategoryName(e.target.value);
                     }}
                     value={categoryName}
+                  />
+                </div>
+                <div className='form-group'>
+                  <label
+                    className='required-field'
+                    htmlFor='shipmentId'
+                    style={{ textAlign: "right", paddingRight: "50px" }}
+                  >
+                    {" "}
+                    {t("Manufacturer Name")}
+                  </label>
+                  <input
+                    type='text'
+                    className={`form-control ${
+                      catManufactErr ? "border-danger" : ""
+                    }`}
+                    name='product'
+                    placeholder={t("enter") + " " + t("Manufacturer Name")}
+                    onChange={(e) => {
+                      setBtnVisible(true);
+                      setManufactErr(false);
+                      setManufacturerName(e.target.value);
+                    }}
+                    value={manufacturerName}
                   />
                 </div>
                 <div className='form-group'>
