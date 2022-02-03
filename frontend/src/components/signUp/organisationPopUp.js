@@ -50,11 +50,14 @@ const OrganisationPopUp = (props) => {
   async function fetchAllCountries1(id) {
     let res = await fetchCountriesByRegion(id);
     setallCountries(res.data);
+    console.log("Countries:", res.data);
   }
-  async function fetchAllState1(id) {
-    let res = await fetchStateByCountry(id);
+  async function fetchAllState1() {
+    let res = await fetchStateByCountry(53);
     setallState(res.data);
   }
+
+  fetchAllState1();
   async function fetchAllCity1(id) {
     let res = await fetchCitiesByState(id);
     console.log(res, "All City");
@@ -217,10 +220,9 @@ const OrganisationPopUp = (props) => {
                       </div>
                     </div>
                   </div>
-                  <div className='row'>
+                  {/* <div className='row'>
                     <div className='col-md-6 com-sm-12'>
                       <div className='form-group'>
-                        {/* <label className="required-field col-sm-6" htmlFor="region">Region</label> */}
                         <Autocomplete
                           value={region}
                           onChange={(event, newValue) => {
@@ -231,10 +233,6 @@ const OrganisationPopUp = (props) => {
                             setCity("");
                           }}
                           id='controllable-states-demo'
-                          // inputValue={inputValue1}
-                          // onInputChange={(event, newInputValue) => {
-                          //   setInputValue1(newInputValue);
-                          // }}
                           options={allregions}
                           style={{ width: 425 }}
                           renderInput={(params) => (
@@ -248,30 +246,10 @@ const OrganisationPopUp = (props) => {
                         )}
                       </div>
                     </div>
-                  </div>
-
-                  {/* <AddressField
-                      error={errors.city}
-                      touched={touched.city}
-                      label="City/ Town"
-                      refe="city"
-                      handleChange={handleChange}
-                      handleBlur={handleBlur}
-                      value={values.city}
-                    />
-                    <AddressField
-                      error={errors.state}
-                      touched={touched.state}
-                      label="State"
-                      refe="state"
-                      handleChange={handleChange}
-                      handleBlur={handleBlur}
-                      value={values.state}
-                    /> */}
-                  <div className='row'>
+                  </div> */}
+                  {/* <div className='row'>
                     <div className='col-md-6 com-sm-12'>
                       <div className='form-group'>
-                        {/* <label className="required-field col-sm-6" htmlFor="country">Country</label> */}
                         <Autocomplete
                           value={country}
                           onChange={(event, newValue) => {
@@ -295,7 +273,7 @@ const OrganisationPopUp = (props) => {
                         )}
                       </div>
                     </div>
-                  </div>
+                  </div> */}
                   <div className='row'>
                     <div className='col-md-6 com-sm-12'>
                       <div className='form-group'>

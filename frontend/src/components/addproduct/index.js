@@ -106,9 +106,7 @@ const AddProduct = (props) => {
       );
       formData.append("description", description);
       formData.append("photo", photo);
-      // console.log("formData", productName);
       const result = await addNewProduct(formData);
-      console.log("Result", result);
       if (result.success) {
         setOpenCreatedInventory(true);
       }
@@ -438,7 +436,8 @@ const AddProduct = (props) => {
               size='modal-sm' //for other size's use `modal-lg, modal-md, modal-sm`
             >
               <ProductPopUp
-                onHide={closeModal} t={t} //FailurePopUp
+                onHide={closeModal}
+                t={t} //FailurePopUp
               />
             </Modal>
           )}
