@@ -30,11 +30,11 @@ const Inventory = (props) => {
     displayColoumn4: t("quantity"),
     displayColoumn5: t("status"),
 
-    img1: <img src={Product} width="16" height="16" alt="Product" />,
-    img2: <img src={Quantity} width="24" height="16" alt="Quantity" />,
-    img3: <img src={calender} width="16" height="16" alt="Calender" />,
-    img4: <img src={Quantity} width="24" height="16" alt="Quantity" />,
-    img5: <img src={Status} width="16" height="16" alt="Status" />,
+    img1: <img src={Product} width='16' height='16' alt='Product' />,
+    img2: <img src={Quantity} width='24' height='16' alt='Quantity' />,
+    img3: <img src={calender} width='16' height='16' alt='Calender' />,
+    img4: <img src={Quantity} width='24' height='16' alt='Quantity' />,
+    img5: <img src={Status} width='16' height='16' alt='Status' />,
   };
 
   if (!isAuthenticated("viewInventory")) props.history.push(`/profile`);
@@ -49,6 +49,8 @@ const Inventory = (props) => {
   const [inventoriesCount, setInventoriesCount] = useState("");
   const [currentInventoriesCount, setCurrentInventoriesCount] = useState("");
   const [productsList, setProductsList] = useState([]);
+  const [fromFilterDate, setFromFilterDate] = useState();
+  const [toFilterDate, setToFilterDate] = useState();
   const dispatch = useDispatch();
   const colors = [
     "#D8E5FB",
@@ -167,6 +169,29 @@ const Inventory = (props) => {
     ); //(skip, limit, dateFilter, productName, productCategoryFilter, status)
   };
 
+  const onSelectionDateFilter = async (value) => {
+    const fromDate =
+      value[0] === "" ? "" : new Date(new Date(value[0]).toDateString());
+    setFromFilterDate(fromDate);
+    if (value.length > 1) {
+      const toDate =
+        value[0] === "" ? "" : new Date(new Date(value[1]).toDateString());
+      setToFilterDate(toDate);
+      dispatch(
+        getInventories(
+          0,
+          limit,
+          dateFilter,
+          productNameFilter,
+          productCategoryFilter,
+          statusFilter,
+          fromDate ? fromDate?.toISOString() : null,
+          toDate ? toDate?.toISOString() : null
+        )
+      );
+    }
+  };
+
   const setDateFilterOnSelect = async (dateFilterSelected) => {
     setDateFilter(dateFilterSelected);
     // setSkip(0);
@@ -183,10 +208,6 @@ const Inventory = (props) => {
   };
 
   const setInventoryStatusFilterOnSelect = async (statusFilterSelected) => {
-    // console.log(
-    //   "setInventoryStatusFilterOnSelect =========>",
-    //   statusFilterSelected
-    // );
     setStatusFilter(statusFilterSelected);
     // setSkip(0);
     dispatch(
@@ -204,10 +225,6 @@ const Inventory = (props) => {
   const setInventoryProductNameFilterOnSelect = async (
     productNameFilterSelected
   ) => {
-    // console.log(
-    //   "setInventoryProductNameFilterOnSelect =========>",
-    //   productNameFilterSelected
-    // );
     setProductNameFilter(productNameFilterSelected);
     // setSkip(0);
     dispatch(
@@ -225,10 +242,6 @@ const Inventory = (props) => {
   const setInventoryManufacturerFilterOnSelect = async (
     manufacturerFilterSelected
   ) => {
-    // console.log(
-    //   "setInventoryManufacturerFilterOnSelect =========>",
-    //   manufacturerFilterSelected
-    // );
     // setManufacturerFilter(manufacturerFilterSelected);
     // setSkip(0);
     dispatch(
@@ -246,10 +259,6 @@ const Inventory = (props) => {
   const setInventoryProductCategoryFilterOnSelect = async (
     categoryFilterSelected
   ) => {
-    // console.log(
-    //   "setInventoryProductCategoryFilterOnSelect =========>",
-    //   categoryFilterSelected
-    // );
     setProductCategoryFilter(categoryFilterSelected);
     // setSkip(0);
     dispatch(
@@ -264,14 +273,14 @@ const Inventory = (props) => {
     ); //(skip, limit, dateFilter, productName, productCategory, status)
   };
   return (
-    <div className="inventory">
-      <div className="d-flex justify-content-between">
-        <h2 className="breadcrumb">{t("inventory")}</h2>
-        <div className="d-flex">
+    <div className='inventory'>
+      <div className='d-flex justify-content-between'>
+        <h2 className='breadcrumb'>{t("inventory")}</h2>
+        <div className='d-flex'>
           {isAuthenticated("addInventory") && (
-            <Link to="/newinventory">
-              <button className="btn btn-yellow mt-2">
-                <img src={Add} width="13" height="13" className="mr-2" alt="" />
+            <Link to='/newinventory'>
+              <button className='btn btn-yellow mt-2'>
+                <img src={Add} width='13' height='13' className='mr-2' alt='' />
                 <span>
                   <b>{t("add_inventory")}</b>
                 </span>
@@ -281,19 +290,19 @@ const Inventory = (props) => {
         </div>
       </div>
       {isAuthenticated("inventoryAnalytics") && (
-        <div className="mb-4">
+        <div className='mb-4'>
           <Cards
             inventoriesCount={inventoriesCount}
             inventoryAnalytics={inventoryAnalytics}
             currentInventoriesCount={currentInventoriesCount}
             inventoryNearExpiration={inventoryNearExpiration}
             inventoryExpired={inventoryExpired}
-            setData={props.setData}
+            // setData={props.setData}
             t={t}
           />
         </div>
       )}
-      <div className="full-width-ribben">
+      <div className='full-width-ribben'>
         <TableFilter
           // isReportDisabled={!isAuthenticated("inventoryExportReport")}
           isReportDisabled={true}
@@ -303,6 +312,7 @@ const Inventory = (props) => {
           setInventoryProductNameFilterOnSelect={
             setInventoryProductNameFilterOnSelect
           }
+          onSelectionDateFilter={onSelectionDateFilter}
           setInventoryManufacturerFilterOnSelect={
             setInventoryManufacturerFilterOnSelect
           }
@@ -311,14 +321,14 @@ const Inventory = (props) => {
           setInventoryProductCategoryFilterOnSelect={
             setInventoryProductCategoryFilterOnSelect
           }
-          fb="80%"
+          fb='80%'
           t={t}
-          filterPage="inventory"
+          filterPage='inventory'
         />
       </div>
-      <div className="ribben-space">
-        <div className="row no-gutter">
-          <div className="col-sm-12 col-xl-9 rTableHeader">
+      <div className='ribben-space'>
+        <div className='row no-gutter'>
+          <div className='col-sm-12 col-xl-9 rTableHeader'>
             <Table
               data={tableHeaders}
               {...props}
@@ -327,31 +337,31 @@ const Inventory = (props) => {
               onPageChange={onPageChange}
             />
           </div>
-          <div className="col-sm-12 col-xl-3">
+          <div className='col-sm-12 col-xl-3'>
             {isAuthenticated("viewProductList") && (
-              <div className="list-container">
-                <div className="d-flex justify-content-between align-items-center ml-3">
+              <div className='list-container'>
+                <div className='d-flex justify-content-between align-items-center ml-3'>
                   <h4>
                     <b>{t("product_list")}</b>
                   </h4>
-                  <Link to="/productcategory">
-                    <button className="btn btn-link mr-1">
+                  <Link to='/productcategory'>
+                    <button className='btn btn-link mr-1'>
                       <b>{t("view_all")}</b>
                     </button>
                   </Link>
                 </div>
                 <div
-                  className="overflow ml-3"
+                  className='overflow ml-3'
                   style={{ height: "720px", overflowX: "hidden" }}
                 >
-                  <div className="row">
+                  <div className='row'>
                     {productsList?.map((product, index) => (
-                      <div className="col-sm-6" key={index}>
+                      <div className='col-sm-6' key={index}>
                         <div
-                          className="d-flex card flex-column align-items-center"
+                          className='d-flex card flex-column align-items-center'
                           style={{ backgroundColor: colors[index] }}
                         >
-                          <div className="round-sign">
+                          <div className='round-sign'>
                             {product.productName.length <= MAX_LENGTH ? (
                               <div>{product.productName}</div>
                             ) : (
@@ -363,7 +373,7 @@ const Inventory = (props) => {
                           </div>
 
                           {/* <p className="product">{product.productName}</p> */}
-                          <h3 className="qty">
+                          <h3 className='qty'>
                             {t("quantity")} : {product.quantity}
                             <span>{"  ("}</span>
                             {product.unitofMeasure &&

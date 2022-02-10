@@ -11,7 +11,7 @@ import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { getImage } from "../../actions/notificationActions";
 import SuccessPopUp from "./successPopup";
-
+import Select from "react-select";
 import { getUserInfoUpdated, updateProfile } from "../../actions/userActions";
 import { getWarehouseByOrgId } from "../../actions/productActions";
 import PopUpLocation from "./popuplocation";
@@ -44,15 +44,10 @@ class Profile extends React.Component {
       wareIds: [],
       signup_date: "",
       warehouseLocations: [],
-      warehouseAddress_country: "",
-      warehouseAddress_city: "",
-      warehouseAddress_firstline: "",
-      warehouseAddress_zipcode: "",
-      warehouseAddress_secondline: "",
-      warehouseAddress_state: "",
       title: "",
       warehouseLocByOrg: [],
       image: "",
+      preferredLanguage: "EN",
     };
     this.onChange = this.onChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
@@ -62,7 +57,7 @@ class Profile extends React.Component {
 
   async componentDidMount() {
     const response = await getUserInfoUpdated();
-    if (response.status === 200) {
+    if (response?.status === 200) {
       const {
         profile_picture,
         email,
@@ -75,17 +70,11 @@ class Profile extends React.Component {
         status,
         role,
         location,
-        warehouseAddress_country,
-        warehouseAddress_city,
-        warehouseAddress_firstline,
-        warehouseAddress_zipcode,
-        warehouseAddress_secondline,
-        warehouseAddress_state,
         signup_date,
         title,
+        preferredLanguage,
+        warehouses,
       } = response.data.data;
-      // console.log("User Data");
-      // console.log(response.data.data);
       this.setState({
         profile_picture,
         email,
@@ -99,30 +88,19 @@ class Profile extends React.Component {
         role,
         profileData: response.data.data,
         location,
-        warehouseAddress_country,
-        warehouseAddress_city,
-        warehouseAddress_firstline,
-        warehouseAddress_zipcode,
-        warehouseAddress_secondline,
-        warehouseAddress_state,
+        warehouseLocations: warehouses,
         signup_date,
         title,
+        preferredLanguage,
       });
-      // if((this.state.profileData.phoneNumber).includes("+")){
-      //   this.setState({phoneNumber:(this.state.profileData.phoneNumber).replace('+','')});
-      //   // this.setState({phoneNumber:(this.state.profileData.phoneNumber).slice(1,(this.state.profileData.phoneNumber).length)});
-      // }
-      // console.log(this.state.profileData.phoneNumber.replace('+',''),"Profile Data");
-    } else {
-      //error
     }
-
     const item = this.state.organisation.split("/")[1];
     const wareHouseResponse = await getWarehouseByOrgId(item);
-    if (wareHouseResponse.status === 1) {
+    console.log(wareHouseResponse)
+    if (wareHouseResponse.status === 1 || wareHouseResponse.success) {
       const wareHouseIdResult = wareHouseResponse.data.map((txn) => txn.id);
       const wareHouseAddresses = wareHouseResponse.data;
-      // console.log(wareHouseAddresses,"All warehouses");
+      console.log(wareHouseAddresses)
       this.setState({
         wareIds: wareHouseIdResult,
         warehouseLocations: response.data.data.warehouses.filter(
@@ -133,14 +111,10 @@ class Profile extends React.Component {
         ),
         warehouseLocByOrg: wareHouseAddresses,
       });
-
-      //  this.state.warehouseLocations.map((id)=>{
-      //     this.state.warehouseLocations= this.state.warehouseLocations.filter((data)=>response.data.data.warehouseId.includes(data.id));
-      //   })
     }
 
     const that = this;
-    const r = await getImage(this.props.user.photoId);
+    const r = await getImage(this.props.user?.photoId);
     const reader = new window.FileReader();
     reader.readAsDataURL(r.data);
     reader.onload = function () {
@@ -149,9 +123,7 @@ class Profile extends React.Component {
   }
 
   closeModal() {
-    console.log("Closed Model called");
     this.setState({ openModal: false, message: "" });
-    // props.history.push("/Addlocation");
   }
   onCancel() {
     const {
@@ -198,7 +170,6 @@ class Profile extends React.Component {
     });
   }
   onChange() {
-    console.log(this.state.selectedFile, "selected");
     const formData = new FormData();
     formData.append("photo", this.state.selectedFile);
     const configs = {
@@ -222,15 +193,7 @@ class Profile extends React.Component {
           .catch((error) => {
             alert(error);
           });
-        // this.setState({ selectedFile: null });
       }
-      // else if(!(this.state.selectedFile).type.match('image.*')){
-      //   alert("Please Select only image file");
-      // };'
-
-      //  else {
-      //   alert("File not selected, Please try again");
-      //  }
     }
   }
 
@@ -250,6 +213,7 @@ class Profile extends React.Component {
       warehouseAddress_secondline,
       warehouseAddress_state,
       title,
+      preferredLanguage,
     } = this.state;
     phoneNumber = phoneNumber ? phoneNumber.replaceAll("+", "") : "";
     const data = {
@@ -266,6 +230,7 @@ class Profile extends React.Component {
       warehouseAddress_secondline,
       warehouseAddress_state,
       title,
+      preferredLanguage,
     };
 
     const result = await updateProfile(data);
@@ -390,11 +355,12 @@ class Profile extends React.Component {
                         }
                       />
                     </div>
-                    <div className="form-group">
+                    <div className="form-group2">
                       <label htmlFor="shipmentId">{t("phone")}</label>
                       <PhoneInput
-                        className="form-group"
-                        country={"in"}
+                        className="form-group mobile-number"
+                        country={"cr"}
+                        preferredCountries={["cr"]}
                         placeholder={t("enter_phone_number")}
                         // style={{ position: "absolute", marginLeft: "64%" }}
                         value={this.state.phoneNumber}
@@ -403,7 +369,22 @@ class Profile extends React.Component {
                         }
                       />
                     </div>
-
+                    <div className="form-group">
+                      <label htmlFor="">{t("language")}</label>
+                      <Select
+                        noOptionsMessage={() => t("no_options")}
+                        className="my-form-width"
+                        placeholder={t("select_the_language")}
+                        style={{ fontSize: "14px" }}
+                        options={[
+                          { value: "EN", label: "English" },
+                          { value: "ES", label: "Español" },
+                        ].map((v) => v)}
+                        onChange={(language) =>
+                          this.setState({ preferredLanguage: language.value })
+                        }
+                      />
+                    </div>
                     <div className="col">
                       <div className="row">
                         <div className="row location">
@@ -414,7 +395,7 @@ class Profile extends React.Component {
                         <div className="addloc1">
                           {editMode && (
                             <button
-                              className="buttonA btn btn-orange font-bold mt-1"
+                              className="buttonA btn btn-S btn-orange font-bold mt-1"
                               onClick={() => {
                                 this.setState({ openModal: true });
                               }}
@@ -867,7 +848,7 @@ class Profile extends React.Component {
                     close={() => this.closeModal()}
                     size="modal-sm" //for other size's use `modal-lg, modal-md, modal-sm`
                   >
-                    <SuccessPopUp onHide={this.closeModal} />
+                    <SuccessPopUp onHide={this.closeModal} t={t} />
                   </Modal1>
                 )}
               </div>

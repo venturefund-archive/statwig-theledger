@@ -49,7 +49,7 @@ const PopUpLocation = (props) => {
       }
     }
   };
-
+console.log(props.wareHouses)
   return (
     <div className="addLocation">
       <center>
@@ -60,7 +60,7 @@ const PopUpLocation = (props) => {
 
       <div className="wrapper1">
         <Link to={"/Addlocation"}>
-          <button className="btn btn-orange fontSize18" type="button">
+          <button className="btn btn-orange fontSize18 center-display" type="button">
             <img
               src={Location1}
               width="20"
@@ -68,7 +68,7 @@ const PopUpLocation = (props) => {
               className="mr-2 mb-1"
               alt="Location"
             />
-            <span className="buttonS">
+            <span className="buttonS btn-space">
               <b>{t('add_new_location')}</b>
             </span>
           </button>
@@ -108,13 +108,11 @@ const PopUpLocation = (props) => {
                 // name2="Select Location"
                 onSelect={(v) => {
                   setAlertFlag(false);
-                  console.log("Location Selected");
-                  console.log(v);
                   setWareHouse({ ...v });
                   setSelectLocation(v.title);
-                  console.log(wareHouse);
                 }}
                 groups={props.wareHouses}
+                type="AddLocationType"
               />
             </div>
           </div>
@@ -139,7 +137,8 @@ const PopUpLocation = (props) => {
           size="modal-sm" //for other size's use `modal-lg, modal-md, modal-sm`
         >
           <SuccessPopup
-            onHide={closeModalAddedLocation} //FailurePopUp
+            onHide={closeModalAddedLocation}
+            t={t} //FailurePopUp
           />
         </Modal>
       )}

@@ -146,6 +146,12 @@ const NewInventory = (props) => {
 
     return error;
   };
+
+  const importError = (message) =>{
+    setInventoryError(message);
+    setOpenFailInventory(true);
+  }
+
   const checkValidationErrors = (validations) => {
     let error = false;
     inventoryState.forEach((inventory) => {
@@ -290,7 +296,11 @@ const NewInventory = (props) => {
               <ExcelPopUp
                 {...props}
                 onHide={closeExcelModal} //FailurePopUp
+                importError={importError}
                 setOpenCreatedInventory={setOpenCreatedInventory}
+                setOpenExcel={setOpenExcel}
+                setInventoryError={setInventoryError}
+                setOpenFailInventory={setOpenFailInventory}
               />
             </Modal>
           )}
@@ -348,6 +358,7 @@ const NewInventory = (props) => {
           size='modal-sm' //for other size's use `modal-lg, modal-md, modal-sm`
         >
           <InventoryPopUp
+          t={t}
             onHide={closeModal} //FailurePopUp
           />
         </Modal>
@@ -359,6 +370,7 @@ const NewInventory = (props) => {
           size='modal-sm' //for other size's use `modal-lg, modal-md, modal-sm`
         >
           <FailurePopUp
+          t={t}
             onHide={closeModalFail} //FailurePopUp
             inventoryError={inventoryError}
           />
@@ -370,6 +382,7 @@ const NewInventory = (props) => {
           size='modal-sm' //for other size's use `modal-lg, modal-md, modal-sm`
         >
           <ShipmentFailPopUp
+          t={t}
             onHide={closeModalFail1} //FailurePopUp
             shipmentError={inventoryError}
           />

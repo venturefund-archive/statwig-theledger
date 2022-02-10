@@ -40,13 +40,15 @@ export const getInboundShipments = async (
   dateFilter,
   status,
   skip,
-  limit
+  limit,
+  fromDate,
+  toDate
 ) => {
   try {
     const result = await axios.get(
       `${
         config().fetchInboundShipmentsUrl
-      }?shipmentId=${shipmentId}&from=${from}&to=${to}&dateFilter=${dateFilter}&status=${status}&skip=${skip}&limit=${limit}`
+      }?shipmentId=${shipmentId}&from=${from}&to=${to}&dateFilter=${dateFilter}&status=${status}&fromDate=${fromDate}&toDate=${toDate}&skip=${skip}&limit=${limit}`
     );
     return result.data;
   } catch (e) {
@@ -61,13 +63,15 @@ export const getOutboundShipments = async (
   dateFilter,
   status,
   skip,
-  limit
+  limit,
+  fromDate,
+  toDate
 ) => {
   try {
     const result = await axios.get(
       `${
         config().fetchOutboundShipmentsUrl
-      }?shipmentId=${shipmentId}&from=${from}&to=${to}&dateFilter=${dateFilter}&status=${status}&skip=${skip}&limit=${limit}`
+      }?shipmentId=${shipmentId}&from=${from}&to=${to}&dateFilter=${dateFilter}&status=${status}&fromDate=${fromDate}&toDate=${toDate}&skip=${skip}&limit=${limit}`
     );
     return result.data;
   } catch (e) {
@@ -396,6 +400,17 @@ export const chainOfCustodyTrack = async (id) => {
     const result = await axios.get(url);
     return result;
   } catch (e) {
+    return e.response;
+  }
+};
+
+export const temperatureGraph = async (shipmentId, page) => {
+  try {
+    const url = config().temperatureGraph;
+    const result = await axios.get(url, { params: { shipmentId, page } });
+    return result.data;
+  } catch (e) {
+    console.log(e);
     return e.response;
   }
 };

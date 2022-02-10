@@ -4,11 +4,7 @@ import Chart from "./temperature";
 import ShipmentSummary from "./shipmentsummary";
 import ShipmentDetails from "./shipmentdetails";
 import ProductList from "./productlist";
-// import Map from "./map";
-import { config } from "../../config";
 import currentinventory from "../../assets/icons/CurrentInventory.svg";
-import CurrentTemperature from "../../assets/icons/CurrentTemperature.svg";
-import zoomInIcon from "../../assets/icons/chain-icon.png";
 import back from "../../assets/icons/back.png";
 import UpdateStatus from "../../assets/icons/Update_Status.png";
 import "./style.scss";
@@ -16,14 +12,7 @@ import ChainOfCustody from "./chainofcustody";
 import Modal from "../../shared/modal";
 import { isAuthenticated } from "../../utils/commonHelper";
 import ViewShippingModal from "../shipments/shippingOrder/viewShippingModal";
-import { io } from "socket.io-client";
-import { fromUnixTime } from "date-fns";
-
 const ViewGMRShipment = (props) => {
-  const [sensorData, setSensorData] = useState([]);
-  const [minMax, setMinMax] = useState({});
-  const [currentTemperature, setCurrentTemperature] = useState("");
-  const [lastUpdateTime, setLastUpdateTime] = useState("");
   const [menuShip, setMenuShip] = useState(false);
   const [menuProduct, setMenuProduct] = useState(false);
   const [highLight, setHighLight] = useState(false);
@@ -34,33 +23,9 @@ const ViewGMRShipment = (props) => {
   const shippmentChainOfCustodyData = props.shippmentChainOfCustodyData;
   const { id } = props.match.params;
   if (!isAuthenticated("viewShipment")) props.history.push(`/profile`);
-
   const closeModalShipping = () => {
     setOpenShipping(false);
   };
-
-  useEffect(() => {
-    console.log("SOCKETURL", config().temperatureSocketUrl);
-    const socket = io(config().temperatureSocketUrl, {
-      path: "/shipmentmanagement/api/socket",
-      transports: ["websocket"],
-    });
-    socket.on("connect", () => {
-      socket.emit("join", props.match.params.id);
-      socket.on("graphMeta", (metaData) => {
-        setMinMax(metaData);
-      });
-      socket.on("sensorData", (data) => {
-        const time = fromUnixTime(data.timestamp);
-        setCurrentTemperature(data.temperature);
-        setLastUpdateTime(time.toLocaleString("en-IN"));
-        const array = sensorData;
-        array.push([time, data.temperature]);
-        if (array.length > 50) array.shift();
-        setSensorData(array);
-      });
-    });
-  }, [props.match.params.id]);
 
   return (
     <div className='tracing'>
@@ -69,7 +34,7 @@ const ViewGMRShipment = (props) => {
         <div className='row'>
           <Link to={`/shipments`}>
             <button className='btn btn-outline-primary mr-4 mt-3'>
-              <img src={back} height='17' className='mr-2 mb-1' alt='' />
+              <img src={back} height='17' className='mr-2 mb-1' alt='Back' />
               Back to shipments
             </button>
           </Link>
@@ -121,57 +86,15 @@ const ViewGMRShipment = (props) => {
         </div>
         <div className='col-sm-8'>
           <p className='heading'>TEMPERATURE</p>
-          <div className='row mb-4 mt-0'>
-            <div className='col panel commonpanle' style={{ height: "360px" }}>
-              <div className='d-flex justify-content-between mb-4'>
-                <div className='row ml-4 mb-2'>
-                  <img
-                    style={{ width: "2rem", height: "3.5rem" }}
-                    className='temperature-icon mr-2'
-                    src={CurrentTemperature}
-                    alt='Current Temperature'
-                  />
-                  <div className='d-flex flex-column'>
-                    <div className='info'>Current temperature</div>
-                    <div className='temp'>
-                      {currentTemperature ? currentTemperature : 0}
-                      {""}
-                      °C
-                    </div>
-                  </div>
-                </div>
-                <div className='d-flex'>
-                  <img
-                    style={{ width: "3.5rem", height: "3.5rem" }}
-                    className='temperature-icon mr-2'
-                    src={zoomInIcon}
-                    alt='Zoom in'
-                  />
-                  <div className='current-info'>
-                    <div className='info'>Last Updated on</div>
-                    <div
-                      className='info'
-                      style={{ fontSize: "13px", marginTop: "1rem" }}
-                    >
-                      {lastUpdateTime
-                        ? lastUpdateTime
-                        : new Date().toLocaleString("en-IN")}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              {/* <Map data={shippmentChainOfCustodyData} />{" "} */}
-              <Chart lastTemperatureData={sensorData} metaData={minMax} />
-            </div>
-          </div>
-          <button
+          <Chart shipmentId={id} />
+          {/* <button
             className='btn btn-outline-* fontSize200 enlargeTemperature float-right'
             onClick={() =>
               window.open("http://iot.vaccineledger.com", "_blank")
             }
           >
             SHOW MORE
-          </button>
+          </button> */}
           {openShipping && (
             <Modal
               title='Shipping Order Details'

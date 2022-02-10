@@ -34,9 +34,6 @@
   //   margin-top: -1.35rem;
   // }
   .location-add {
-    position: absolute;
-    top: 10px;
-    // left: -85px;
     min-width: 0rem;
     font-size: 12px;
     font-weight: 400;
@@ -115,4 +112,10 @@
   @media screen and (min-width:"1766px"){
     left: 245px;
   }
+}
+.dropdown-menu{
+  right:0 !important;
+  left:unset !important;
+  top:0.6rem !important;
+  max-height: 30rem !important;
 }

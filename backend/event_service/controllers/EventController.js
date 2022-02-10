@@ -80,8 +80,8 @@ exports.deleteEventById = [
         });
       }
     } catch (err) {
-      // console.log(err);
-      return apiResponse.ErrorResponse(res, err);
+      console.log(err);
+      return apiResponse.ErrorResponse(res, err.message);
     }
   },
 ];
@@ -105,9 +105,16 @@ exports.getAllEventsWithFilter = [
         ? req.query.productManufacturer
         : undefined;
       let status = req.query.status ? req.query.status : undefined;
-      let date = req.query.date ? req.query.date : undefined;
-      let fromDate = req.query.fromDate ? req.query.fromDate : undefined;
-      let toDate = req.query.toDate ? req.query.toDate : undefined;
+      let date =
+        req.query.date && req.query.date !== "" ? req.query.date : undefined;
+      let fromDate =
+        req.query.fromDate && req.query.fromDate !== ""
+          ? req.query.fromDate
+          : undefined;
+      let toDate =
+        req.query.toDate && req.query.toDate !== ""
+          ? req.query.toDate
+          : undefined;
 
       switch (req.query.dateFilter) {
         case "today":
@@ -153,7 +160,6 @@ exports.getAllEventsWithFilter = [
         default:
           fromDateFilter = 0;
       }
-
       let elementMatchQuery = {};
       elementMatchQuery[`$or`] = [
         { eventTypeDesc: "SHIPMENT" },
@@ -162,7 +168,6 @@ exports.getAllEventsWithFilter = [
       if (date) {
         var givenDate = new Date(date);
         var abc = givenDate;
-        // givenDate = givenDate.toISOString();
         var nextDate = abc.setDate(abc.getDate() + 1);
         nextDate = new Date(nextDate);
         // nextDate = nextDate.split('T')[0];
@@ -290,7 +295,6 @@ exports.getAllEventsWithFilter = [
           let inventoryRecords = [];
           await Promise.all(
             eventRecords.map(async function (event) {
-              // console.log(event);
               let eventRecord = JSON.parse(JSON.stringify(event));
               let payloadRecord = event.payloadData;
               eventRecord[`inventoryQuantity`] =
@@ -308,7 +312,8 @@ exports.getAllEventsWithFilter = [
               }
               eventRecord[`payloadData`] = payloadRecord;
               if (
-                eventRecord["eventTypePrimary"] !== "ADD" &&
+                eventRecord["eventTypePrimary"] !== "BUY" &&
+                // eventRecord["eventTypePrimary"] !== "ADD" &&
                 eventRecord[`shipmentDetails`] === null
               )
                 console.log("deleted entry");
@@ -321,7 +326,7 @@ exports.getAllEventsWithFilter = [
           });
         });
     } catch (err) {
-      // console.log(err);
+      console.log(err);
       return apiResponse.ErrorResponse(res, err);
     }
   },
@@ -343,7 +348,7 @@ exports.fetchProductDetailsList = [
         );
       });
     } catch (err) {
-      // console.log(err);
+      console.log(err);
       return apiResponse.ErrorResponse(res, err);
     }
   },

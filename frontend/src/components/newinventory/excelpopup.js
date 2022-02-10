@@ -9,8 +9,8 @@ import { turnOn, turnOff } from "../../actions/spinnerActions";
 import uploadBlue from "../../assets/icons/UploadBlue.svg";
 
 const ExcelPopUp = (props) => {
-  const { t } = props;
-  const [excel, setExcel] = useState("");
+  const { t , setOpenExcel, setOpenFailInventory, setInventoryError} = props;
+  const [excel, setExcel] = useState(null);
   const dispatch = useDispatch();
 
   const setExcelFile = (evt) => {
@@ -20,38 +20,53 @@ const ExcelPopUp = (props) => {
   const uploadExcel = async () => {
     let formData = new FormData();
     formData.append("excel", excel);
-    console.log(formData);
     dispatch(turnOn());
     const result = await addInventoriesFromExcel(formData);
-    if (result.status === 200) {
+    if (result.status === 200 && result.data.data?.length !== 0) {
       dispatch(setReviewinventories(result.data.data));
       props.history.push("/reviewinventory");
+    } else if(result.status === 200 && result.data.data?.length === 0) {
+      setOpenExcel(false);
+      setInventoryError('all_products_are_expired');
+      setOpenFailInventory(true);
+    }
+    if(result.status === 500){
+      props.importError(result.data.message);
     }
     dispatch(turnOff());
   };
   return (
     <div className='excelpopup col'>
-      <div className='d-flex flex-column upload mb-5 ml-5'>
+      <div className='d-flex flex-column upload mb-5 ml-5' style={excel === null ? {height: '200px'} : {height: '220px'}}>
         <img
           src={uploadBlue}
           name='photo'
           width='50'
           height='50'
-          className='mt-2'
-          alt='Upload'
+          className='mt-3'
+          alt=''
         />
-        <div>"{t('drag_drop')}" {t('your_excel_file_here')}</div>
-        <div>{t('or')}</div>
-        <div className='mb-3 excelSpace mt-4 ml-0'>
-          <label htmlFor="fileE"
-            className='mb-3 excelSpace ml-0 text-center' >{t('select_a_file')}</label>
+        <div>
+          "{t("drag_drop")}" {t("your_excel_file_here")}
+        </div>
+        <div>{t("or")}</div>
+        <div className='row' style={{position: 'relative'}}
+        >
+          <label htmlFor='fileE' className='mb-3 mt-3 btn btn-primary d-center' style={{
+            display: "block",
+            margin: "0 auto"
+          }}>
+            {t("select_a_file")}
+          </label>
+
           <input
             type='file'
-            id="fileE"
-            style={{ visibility: 'hidden' }}
+            id='fileE'
+            style={{ visibility: "hidden" }}
             className='mb-3 excelSpace'
             onChange={setExcelFile}
           />
+          {excel !== null && <p className="file-name">{excel?.name}</p>}
         </div>
       </div>
       <div className='row justify-content-between'>
@@ -61,10 +76,10 @@ const ExcelPopUp = (props) => {
             className='btn-outline-primary btn mr-3'
             onClick={props.onHide}
           >
-            {t('cancel')}
+            {t("cancel")}
           </button>
-          <button className='btn-primary btn mr-4' onClick={uploadExcel}>
-            {t('import')}
+          <button className='btn-primary btn mr-4 import-disable-button' disabled={excel === null ? true : false} onClick={uploadExcel}>
+            {t("import")}
           </button>
         </div>
       </div>

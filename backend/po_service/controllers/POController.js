@@ -12,7 +12,6 @@ const fontDescriptors = {
 };
 const printer = new PdfPrinter(fontDescriptors);
 const axios = require("axios");
-const uniqid = require("uniqid");
 const date = require("date-and-time");
 const moment = require("moment");
 const POModel = require("../models/POModel");
@@ -26,6 +25,7 @@ const logEvent = require("../../../utils/event_logger");
 const WarehouseModel = require("../models/WarehouseModel");
 const InventoryModel = require("../models/InventoryModel");
 const apiResponse = require("../helpers/apiResponse");
+const { responses } = require("../helpers/responses");
 const auth = require("../middlewares/jwt");
 const checkPermissions =
   require("../middlewares/rbac_middleware").checkPermissions;
@@ -127,7 +127,7 @@ exports.fetchPurchaseOrders = [
         permissionRequired: ["viewPO"],
       };
       checkPermissions(permission_request, async (permissionResult) => {
-        if (permissionResult.success) {
+        if (permissionResult.success)  {
           let inboundPOs, outboundPOs, poDetails;
           try {
             if (poId != null) {
@@ -143,12 +143,15 @@ exports.fetchPurchaseOrders = [
                   poDetails = data;
                 }
               );
+              if(poDetails.length)
               await Promise.all(
                 poDetails[0]?.products.map(async (element) => {
                   const product = await ProductModel.findOne({
-                    id: element.id,
+                    $or: [{ name: element.id }, { id: element.id }],
                   });
-                  element.unitofMeasure = product.unitofMeasure;
+                  element.unitofMeasure = product?.unitofMeasure;
+                  element.manufacturer = product?.manufacturer;
+                  element.type = product?.type;
                 })
               );
             } else {
@@ -359,20 +362,19 @@ exports.changePOStatus = [
                 else newEvent.eventTypePrimary = "REJECT";
                 newEvent.payloadData.data = req.body;
                 let event_body = new Event(newEvent);
-                let result = await event_body.save();
-                console.log(result);
+                await event_body.save();
               } catch (error) {
                 console.log(error);
               }
               return apiResponse.successResponseWithData(
                 res,
-                "PO Status",
-                "Success"
+                responses(req.user.preferredLanguage).po_status,
+                responses(req.user.preferredLanguage).success
               );
             } else {
               return apiResponse.ErrorResponse(
                 res,
-                "You are not authorised to change the status"
+                responses(req.user.preferredLanguage).not_authorized
               );
             }
           } catch (e) {
@@ -381,7 +383,7 @@ exports.changePOStatus = [
         } else {
           return apiResponse.forbiddenResponse(
             res,
-            "User does not have enough Permissions"
+            responses(req.user.preferredLanguage).no_permission
           );
         }
       });
@@ -405,8 +407,21 @@ exports.createPurchaseOrder = [
       } = req.body;
       const { createdBy, lastUpdatedBy } = req.user.id;
       creationDate = new Date(creationDate);
+      const poId = await CounterModel.findOneAndUpdate(
+        {
+          "counters.name": "productId",
+        },
+        {
+          $inc: {
+            "counters.$.value": 1,
+          },
+        },
+        {
+          new: true,
+        }
+      );
       const purchaseOrder = new RecordModel({
-        id: uniqid("po-"),
+        id: poId.counters[5].format + poId.counters[5].value,
         externalId,
         creationDate,
         supplier,
@@ -419,7 +434,7 @@ exports.createPurchaseOrder = [
       const result = await purchaseOrder.save();
       return apiResponse.successResponseWithData(
         res,
-        "Created PO Success",
+        responses(req.user.preferredLanguage).success,
         result.id
       );
     } catch (err) {
@@ -434,6 +449,7 @@ exports.addPOsFromExcel = [
     try {
       const workbook = XLSX.readFile(req.file.path);
       const sheet_name_list = workbook.SheetNames;
+      let errorsArr = [];
       const data = XLSX.utils.sheet_to_json(
         workbook.Sheets[sheet_name_list[0]],
         { dateNF: "dd/mm/yyyy;@", cellDates: true, raw: false }
@@ -444,7 +460,7 @@ exports.addPOsFromExcel = [
         return {
           id: po.id || 0,
           externalId: po["UNICEf PO Number"],
-          creationDate: po["Document Date"],
+          creationDate: new Date().toISOString(),
           lastUpdatedOn: new Date().toISOString(),
           poStatus: req.user.id == po["Vendor"] ? "APPROVED" : "CREATED",
           supplier: {
@@ -478,8 +494,7 @@ exports.addPOsFromExcel = [
           lastUpdatedBy: createdBy,
         };
       });
-      console.log(poDataArray);
-      var incrementCounter = await CounterModel.update(
+      let incrementCounter = await CounterModel.updateOne(
         {
           "counters.name": "poId",
         },
@@ -494,6 +509,7 @@ exports.addPOsFromExcel = [
         { "counters.$": 1 }
       );
       let dataRows = 0;
+
       for (let i in poDataArray) {
         if (poDataArray[i].externalId != null) {
           const duplicate = await RecordModel.findOne({
@@ -501,6 +517,7 @@ exports.addPOsFromExcel = [
           });
           if (duplicate != null) {
             console.log("****** Duplicate PO");
+            errorsArr.push(poDataArray[i]);
             delete poDataArray[i];
             i--;
           } else {
@@ -509,14 +526,12 @@ exports.addPOsFromExcel = [
             let productDetails = await ProductModel.findOne({
               id: poDataArray[i].products[0].productId,
             });
-            console.log("PRODUCT DETAILS", productDetails);
             if (productDetails) {
               (poDataArray[i].products[0].name = productDetails.name || ""),
                 (poDataArray[i].products[0].type = productDetails.type || ""),
                 (poDataArray[i].products[0].manufacturer =
                   productDetails.manufacturer || "");
-            } else console.log("PRODUCT NOT FOUND");
-            console.log(dataRows++);
+            }
             const organisationName =
               poDataArray[i].customer.customerOrganisation;
             const customerOrganisation = await OrganisationModel.findOne({
@@ -884,7 +899,7 @@ exports.addPOsFromExcel = [
       );
       return apiResponse.successResponseWithData(
         res,
-        "Upload Result",
+        responses(req.user.preferredLanguage || "EN").upload_result,
         poDataArray
       );
     } catch (err) {
@@ -892,7 +907,7 @@ exports.addPOsFromExcel = [
       if (err.code == "11000") {
         return apiResponse.successResponseWithData(
           res,
-          "Inserted excluding Duplicate Values",
+          responses(req.user.preferredLanguage).inserted_ex_duplicates,
           err
         );
       } else {
@@ -950,7 +965,6 @@ exports.createOrder = [
         var product = await ProductModel.findOne({ id: element.productId });
         element.type = product?.type;
         element.unitofMeasure = product?.unitofMeasure;
-        console.log(product);
       });
       const createdBy = req.user.id;
       const purchaseOrder = new RecordModel({
@@ -964,22 +978,25 @@ exports.createOrder = [
         createdBy,
         lastUpdatedBy: createdBy,
       });
-      console.log(purchaseOrder);
       const supplierID = req.body.supplier.supplierOrganisation;
       const supplierOrgData = await OrganisationModel.findOne({
         id: req.body.supplier.supplierOrganisation,
       });
       if (supplierOrgData == null) {
-        console.log("Supplier not defined");
-        return apiResponse.ErrorResponse(res, "Supplier  not defined");
+        return apiResponse.ErrorResponse(
+          res,
+          responses(req.user.preferredLanguage).supplier_not_defined
+        );
       }
 
       const receiverOrgData = await OrganisationModel.findOne({
         id: req.body.customer.customerOrganisation,
       });
       if (receiverOrgData == null) {
-        console.log("customer not defined");
-        return apiResponse.ErrorResponse(res, "Receiver not defined");
+        return apiResponse.ErrorResponse(
+          res,
+          responses(req.user.preferredLanguage).receiver_not_defined
+        );
       }
       var datee = new Date();
       datee = datee.toISOString();
@@ -1083,9 +1100,13 @@ exports.createOrder = [
         event_data.payload.data.order_id = poId;
         event_data.transactionId = poId;
         await logEvent(event_data);
-        return apiResponse.successResponseWithData(res, "Created order", {
-          poId: poId,
-        });
+        return apiResponse.successResponseWithData(
+          res,
+          responses(req.user.preferredLanguage).created_order,
+          {
+            poId: poId,
+          }
+        );
       } catch (error) {
         console.log(error);
       }
@@ -1324,7 +1345,7 @@ exports.fetchInboundPurchaseOrders = [
         } else {
           return apiResponse.forbiddenResponse(
             res,
-            "User doesn't have enough Permissions"
+            responses(req.user.preferredLanguage).no_permission
           );
         }
       });
@@ -1509,7 +1530,7 @@ exports.fetchOutboundPurchaseOrders = [
         } else {
           return apiResponse.forbiddenResponse(
             res,
-            "User doesn't have enough Permissions"
+            responses(req.user.preferredLanguage).no_permission
           );
         }
       });
@@ -1568,6 +1589,8 @@ exports.exportInboundPurchaseOrders = [
         : undefined;
       let orderId = req.query.orderId ? req.query.orderId : undefined;
       let poStatus = req.query.poStatus ? req.query.poStatus : undefined;
+      let fromDate = req.query.fromDate ? req.query.fromDate : undefined;
+      let toDate = req.query.toDate ? req.query.toDate : undefined;
       switch (req.query.dateFilter) {
         case "today":
           fromDateFilter = new Date(
@@ -1620,6 +1643,12 @@ exports.exportInboundPurchaseOrders = [
 
       if (fromDateFilter) {
         whereQuery["createdAt"] = { $gte: fromDateFilter };
+      }
+
+      if (fromDate && toDate) {
+        var firstDate = new Date(fromDate);
+        var nextDate = new Date(toDate);
+        whereQuery[`creationDate`] = { $gte: firstDate, $lte: nextDate };
       }
 
       if (organisationId) {
@@ -1753,6 +1782,8 @@ exports.exportOutboundPurchaseOrders = [
         : undefined;
       let orderId = req.query.orderId ? req.query.orderId : undefined;
       let poStatus = req.query.poStatus ? req.query.poStatus : undefined;
+      let fromDate = req.query.fromDate ? req.query.fromDate : undefined;
+      let toDate = req.query.toDate ? req.query.toDate : undefined;
       switch (req.query.dateFilter) {
         case "today":
           fromDateFilter = new Date(
@@ -1805,6 +1836,12 @@ exports.exportOutboundPurchaseOrders = [
 
       if (fromDateFilter) {
         whereQuery["createdAt"] = { $gte: fromDateFilter };
+      }
+
+      if (fromDate && toDate) {
+        var firstDate = new Date(fromDate);
+        var nextDate = new Date(toDate);
+        whereQuery[`creationDate`] = { $gte: firstDate, $lte: nextDate };
       }
 
       if (organisationId) {

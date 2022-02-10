@@ -26,7 +26,7 @@ function Cards(props) {
   return (
     <div className="grid-tile-container">
           <Link to="/productcategory">
-            <div onClick={() => props.setData("one")} className="grid-tiles">
+            <div className="grid-tiles">
               <div className="picture truck-bg">
                 <img src={TotalInventoryAdded} alt="truck" />
               </div>
@@ -47,10 +47,10 @@ function Cards(props) {
               </div>
 
               <div className="tile-content">
-                <p className="sent-text font-weight-bold">
+                <p className="recived-text-cards font-weight-bold">
                 {t('product_out_of_stock')}
                 </p>
-                <h1 className="count sent-text">
+                <h1 className="count recived-text-cards">
                   {props.currentInventoriesCount}
                   {props.inventoryAnalytics?.stockOut}
                 </h1>
@@ -65,10 +65,10 @@ function Cards(props) {
               </div>
 
               <div className="tile-content">
-                <p className="recived-text font-weight-bold">
+                <p className="sent-text font-weight-bold">
                 {t('batch_near_expiration')}
                 </p>
-                <h1 className="count recived-text">
+                <h1 className="count sent-text">
                   {props.inventoryNearExpiration}
                 </h1>
               </div>
@@ -82,8 +82,8 @@ function Cards(props) {
               </div>
 
               <div className="tile-content">
-                <p className="transit-text font-weight-bold">{t('batch_expired')}</p>
-                <h1 className="count transit-text">{props.inventoryExpired}</h1>
+                <p className="inbound-text font-weight-bold">{t('batch_expired')}</p>
+                <h1 className="count inbound-text">{props.inventoryExpired}</h1>
               </div>
             </div>
           </Link>

@@ -80,6 +80,7 @@ exports.createNewAlert = [
         });
         alert.active = alertSubscription;
         await alert.save();
+        return apiResponse.successResponse(res, "Alert created");
       } else return apiResponse.ErrorResponse(res, "NO USER FOUND");
     } catch (err) {
       console.log(err);
@@ -96,7 +97,6 @@ exports.createNewAlert = [
     try {
       let Alert
       Alert = await Alerts.findOne({ username: req.user.id })
-      console.log(Alert)
       if (Alert) {
         let newAlert = {
           id: utility.randomNumber(10),
@@ -111,7 +111,6 @@ exports.createNewAlert = [
         if (req.body.eventSecondary== 'SHIPMENT' || req.body.eventSecondary == 'ORDER') {
           newAlert['transactionId'] = req.body.transactionId;
         }
-        console.log(newAlert)
         Alert.alerts.push(newAlert)
         Alert.save(function (err, result) {
           if (err) {
@@ -124,7 +123,6 @@ exports.createNewAlert = [
       } else {
         EmployeeModel.findOne({ id : req.user.id }).then(async (user) => {
           if (user) {
-            console.log(user)
             const { id, firstName, lastName, emailId, phoneNumber } = user
             const alertData = {
               id: utility.randomNumber(10),
@@ -139,7 +137,6 @@ exports.createNewAlert = [
             if (req.body.eventSecondary == 'SHIPMENT' || req.body.eventSecondary == 'ORDER') {
               alertData['transactionId'] = req.body.transactionId;
              }        
-            console.log(alertData)
             const alert = new Alerts({
               id: utility.randomNumber(10),
               username: req.user.id,
@@ -194,6 +191,22 @@ exports.deleteAlert = [
         }
       );
       return apiResponse.successResponse(res, "Alerts Deleted Successfully");
+    } catch (err) {
+      return apiResponse.ErrorResponse(res, err.message);
+    }
+  },
+];
+
+exports.getAllAlerts = [
+  auth,
+  async function (req, res) {
+    try {
+      const data = await Alerts.find({ username: req.user.id });
+      return apiResponse.successResponseWithData(
+        res,
+        "Alerts fetched Successfully",
+        data
+      );
     } catch (err) {
       return apiResponse.ErrorResponse(res, err.message);
     }

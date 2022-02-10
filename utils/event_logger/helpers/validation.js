@@ -1,7 +1,7 @@
 const Joi = require("joi");
 const eventSchema = Joi.object().keys({
-  eventID: Joi.string().min(1).max(50).required(),
-  transactionId: Joi.string().min(1).max(50),
+  eventID: Joi.string().required(),
+  transactionId: Joi.string().required(),
   eventTime: Joi.string().required(),
   eventType: Joi.object().keys({
     primary: Joi.string().min(3).max(50).required(),
@@ -10,29 +10,28 @@ const eventSchema = Joi.object().keys({
   actor: Joi.object().keys({
     actorid: Joi.string().min(1).max(50).required(),
     actoruserid: Joi.string().min(1).max(50).required(),
-    // actoruserid: Joi.string().email({ tlds: { allow: false } }),
   }),
   stackholders: Joi.object().keys({
     ca: Joi.object().keys({
-      id: Joi.string().min(1).max(50).required(),
-      name: Joi.string().min(1).max(50).required(),
-      address: Joi.string().min(1).max(100).required(),
+      id: Joi.string().optional().allow(null),
+      name: Joi.string().optional().allow(null),
+      address: Joi.string().optional().allow(null),
     }),
     actororg: Joi.object().keys({
-      id: Joi.string().min(1).max(50).required(),
-      name: Joi.string().min(1).max(50).required(),
-      address: Joi.string().min(1).max(100).required(),
+      id: Joi.string().optional().allow(null),
+      name: Joi.string().optional().allow(null),
+      address: Joi.string().optional().allow(null),
     }),
     secondorg: Joi.object().keys({
-      id: Joi.string().min(1).max(50).required(),
-      name: Joi.string().min(1).max(50).required(),
-      address: Joi.string().min(1).max(100).required(),
+      id: Joi.string().optional().allow(null),
+      name: Joi.string().optional().allow(null),
+      address: Joi.string().optional().allow(null),
     }),
   }),
   payload: Joi.object().keys({
     data: Joi.any().optional(),
   }),
-  actorWarehouseId: Joi.string().min(1).max(50),
+  actorWarehouseId: Joi.string().optional().allow(null),
 });
 
 function validate(data) {

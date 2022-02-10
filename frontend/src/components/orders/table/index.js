@@ -30,6 +30,7 @@ function Table(props) {
       <AdvanceTableFilter
           visible={props.visible}
           data={props.data}
+          shouldEnable={true}
           poOrderIdList={props.poOrderIdList}
           poDeliveryLocationsList={props.poDeliveryLocationsList}
           poProductsList={props.poProductsList}
@@ -45,14 +46,15 @@ function Table(props) {
           setShowExportFilter={props.setShowExportFilter}
           exportFilterData={props.exportFilterData}
           onSelectionOfDropdownValue={props.onSelectionOfDropdownValue}
+          onSelectionDateFilter={props.onSelectionDateFilter}
           isReportDisabled={props.isReportDisabled}
           t={t}
           filterPage="orders"
         />
         <tbody>
           {orders.length === 0 && (
-            <div className="rTableRow pt-2 pb-2 justify-content-center text-muted shadow-none">
-              {t('no_records_found')}
+            <div className="FullWidth rTableRow pt-2 pb-2 text-center justify-content-center ">
+              <span className="text-muted shadow-none">{t('no_records_found')}</span>
             </div>
           )}
           {orders.map((order, index) => {
@@ -79,6 +81,10 @@ function Table(props) {
             statusStyle = "bg-warning";
             status = t('partiallyfilled');
           }
+          else if (order.poStatus === "CANCELLED") {
+            statusStyle = "bg-primary";
+            status = t('cancelled');
+          }
 
             const { customer, products, supplier, creatorOrganisation } = order;
             return (
@@ -92,12 +98,12 @@ function Table(props) {
                       <h5 className="mb-0 table-h5-text ">
                         {visible === "two"
                           ? creatorOrganisation?.name
-                          : supplier.organisation.name}
+                          : supplier.organisation?.name}
                       </h5>
                       <p className="mb-0 table-p-text ">
                         {visible === "two"
                           ? creatorOrganisation?.id
-                          : supplier.organisation.id}
+                          : supplier.organisation?.id}
                       </p>
                     </div>
                   </div>
@@ -119,7 +125,7 @@ function Table(props) {
                   <div className="user-info">
                     <h5 className="table-h5-text text-muted">
                       {truncate(
-                        products[0]?.name +
+                        (products[0]?.name || products[0]?.productId) +
                         (products.length > 1
                           ? " + " + (products.length - 1) + " more"
                           : ""),

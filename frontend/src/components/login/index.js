@@ -106,8 +106,8 @@ const FormLoginPage = (props) => {
                     </div>
                     <div style={{ position: "absolute", left: "-20px" }}>
                       <PhoneInput
-                        country={"in"}
-                        preferredCountries={["in"]}
+                        country={"cr"}
+                        preferredCountries={["cr"]}
                         placeholder={t('enter_phone_number')}
                         inputProps={{
                           name: "phone",
@@ -125,7 +125,7 @@ const FormLoginPage = (props) => {
                       {" "}
                       <Alert variant='filled' severity='error'>
                         <AlertTitle>{t('error')}</AlertTitle>
-                        {errorMessage}
+                        {t(errorMessage)}
                       </Alert>
                     </div>
                   )}

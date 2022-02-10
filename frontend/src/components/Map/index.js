@@ -1,18 +1,15 @@
 import React, { useRef, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import mapboxgl from "!mapbox-gl"; // eslint-disable-line import/no-webpack-loader-syntax
-import MapboxLanguage from '@mapbox/mapbox-gl-language';
+import MapboxLanguage from "@mapbox/mapbox-gl-language";
 import "mapbox-gl/dist/mapbox-gl.css";
 import "./Map.css";
-
-// eslint-disable-next-line import/no-webpack-loader-syntax
-mapboxgl.workerClass = require('worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker').default;
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoidGhyaW5ldGhyYSIsImEiOiJja2wzdDAwMWYwN3JuMm5uMTQxcjQyb2w2In0.XfGU-QlqlhgTpjm2I_Ye9Q";
 
 const Map = (props) => {
-  const { lang } = props;
+  const { t, lang } = props;
   const mapContainerRef = useRef(null);
   const [lng, setLng] = useState(5);
   const [lat, setLat] = useState(34);
@@ -202,11 +199,11 @@ const Map = (props) => {
         .setLngLat([popL.long, popL.lat])
         .setHTML(
           `<div class="pt-1 text-white pb-1 pl-2 pr-2">
-              <div class="row"><span class="col-5 disabled">Shipment ID:</span> <span class=" col-3 font-weight-bold">${shipment.id}</span></div>
+              <div class="row"><span class="col-7 disabled">${t("shipment_id")}:</span> <span class=" col-3 font-weight-bold">${shipment.id}</span></div>
               <div class="row"> <span class="col-5 disabled text-decoration-underline"> ${user?.walletAddress}</span> </div>
               <div class="row pt-1 pb-1">
                 <div class="col-1"> </div> 
-                <div class="col-2 disabled">From</div> 
+                <div class="col-2 disabled">${t("from")}:</div> 
                 <div class="col">
                   <div class="font-weight-bold">${shipment.supplier.org.name} </div>
                   <div class="disabled">${shipment.supplier?.warehouse?.warehouseAddress?.city}</div>
@@ -214,7 +211,7 @@ const Map = (props) => {
               </div>
               <div class="row pt-1 pb-1">
                 <div class="col-1"> </div>
-                <div class="col-2 disabled">To</div>
+                <div class="col-2 disabled">${t("to")}:</div>
                 <div class="col">
                   <div class="font-weight-bold">${shipment.receiver.org.name}</div>
                   <div class="disabled">${shipment.receiver?.warehouse?.warehouseAddress?.city}</div>
@@ -225,11 +222,6 @@ const Map = (props) => {
         .addTo(map);
     }
 
-    // var fg = new mapboxgl.featureGroup(markers);
-    // map.fitBounds(fg.getBounds());
-    // console.log(fg.getBounds());
-
-    // Add navigation control (the +/- zoom buttons)
     map.addControl(new mapboxgl.NavigationControl(), "top-right");
 
     map.on("move", () => {
@@ -237,7 +229,7 @@ const Map = (props) => {
       setLat(map.getCenter().lat.toFixed(4));
       setZoom(map.getZoom().toFixed(2));
     });
-    const language = new MapboxLanguage({defaultLanguage: lang});
+    const language = new MapboxLanguage({ defaultLanguage: lang });
     map.addControl(language);
     // Clean up on unmount
     return () => map.remove();

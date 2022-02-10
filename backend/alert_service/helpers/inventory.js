@@ -4,7 +4,7 @@ const { checkPermissionAwait } = require("../middlewares/rbac_middleware");
 const { asyncForEach } = require("./utility");
 
 async function getEligibleUsers(warehouseId) {
-  let eligibleUsers = [];
+  const eligibleUsers = [];
   const users = await EmployeeModel.find({
     warehouseId: { $in: [warehouseId] },
     accountStatus: "ACTIVE",
@@ -31,6 +31,7 @@ async function getEligibleUsers(warehouseId) {
 exports.inventoryAdd = async (event) => {
   let txnId = event?.transactionId;
   let template = `"Inventory - ${txnId}" has been Added`;
+  let templateSpanish = `Se agregó "Inventario - ${txnId}"`;
   if (event?.actorId) {
     const actor = await EmployeeModel.findOne({ id: event.actorId });
     let dataSender = {
@@ -38,7 +39,7 @@ exports.inventoryAdd = async (event) => {
       email: actor.emailId,
       mobile: actor.phoneNumber,
       subject: `Inventory Alert`,
-      content: template,
+      content: actor.preferredLanguage == "EN" ? template : templateSpanish,
       type: "ALERT",
       eventType: "INVENTORY",
       transactionId: txnId,
@@ -49,6 +50,7 @@ exports.inventoryAdd = async (event) => {
 exports.inventoryUpdate = async (event) => {
   let txnId = event?.transactionId;
   let template = `"Inventory - ${txnId}" has been Updated`;
+  let templateSpanish = `"Inventario - ${txnId}" ha sido actualizado`;
   if (event?.actorId) {
     const actor = await EmployeeModel.findOne({ id: event.actorId });
     let dataSender = {
@@ -56,7 +58,7 @@ exports.inventoryUpdate = async (event) => {
       email: actor.emailId,
       mobile: actor.phoneNumber,
       subject: `Inventory Alert`,
-      content: template,
+      content: actor.preferredLanguage == "EN" ? template : templateSpanish,
       type: "ALERT",
       eventType: "INVENTORY",
       transactionId: txnId,
@@ -67,6 +69,7 @@ exports.inventoryUpdate = async (event) => {
 exports.inventoryNearExpiry = async (event) => {
   let txnId = event?.transactionId;
   let template = `"Inventory - ${txnId}" (Quantity : ${event?.quantity}) will expire soon`;
+  let templateSpanish = `"Inventario - ${txnId}" (Cantidad: ${event?.cantidad}) caducará pronto`;
   const employees = await getEligibleUsers(event.actorWarehouseId);
   await asyncForEach(employees, async (user) => {
     const dataReceiver = {
@@ -74,7 +77,7 @@ exports.inventoryNearExpiry = async (event) => {
       email: user.emailId,
       mobile: user.phoneNumber,
       subject: `Inventory Alert`,
-      content: template,
+      content: user.preferredLanguage == "EN" ? template : templateSpanish,
       type: "ALERT",
       eventType: "INVENTORY",
       transactionId: txnId,
@@ -85,6 +88,7 @@ exports.inventoryNearExpiry = async (event) => {
 exports.inventoryExpired = async (event) => {
   const txnId = event.transactionId;
   const template = `"Inventory - ${txnId}" (Quantity : ${event?.quantity}) has expired`;
+  const templateSpanish = `"Inventario - ${txnId}" (Cantidad: ${event?.quantity}) ha caducado`;
   const employees = await getEligibleUsers(event.actorWarehouseId);
   await asyncForEach(employees, async (user) => {
     const dataReceiver = {
@@ -92,7 +96,7 @@ exports.inventoryExpired = async (event) => {
       email: user.emailId,
       mobile: user.phoneNumber,
       subject: `Inventory Alert`,
-      content: template,
+      content: user.preferredLanguage == "EN" ? template : templateSpanish,
       type: "ALERT",
       eventType: "INVENTORY",
       transactionId: txnId,

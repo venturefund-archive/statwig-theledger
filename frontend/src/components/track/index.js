@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Chart from "./temperatureChart";
 import Map from "./map";
 import CurrentTemperature from "../../assets/icons/thermometer.svg";
@@ -10,6 +10,7 @@ import "./style.scss";
 import { formatTimeAMPM } from "../../utils/dateHelper";
 import zoomOutIcon from "../../assets/icons/smallScreen.png";
 import { isAuthenticated } from "../../utils/commonHelper";
+import { useTranslation } from "react-i18next";
 
 const Track = (props) => {
   const [value, setValue] = useState("");
@@ -19,6 +20,13 @@ const Track = (props) => {
   const [isSubmitted, setIsSubmitted] = useState(
     props.match.params.id ? true : false
   );
+  const { i18n } = useTranslation();  // langDetector.detect()
+  console.log("lang", i18n.language);
+
+  useEffect(() => {
+    props.setTrackTraceData({ setValue, value, resetData, setIsSubmitted })
+  }, [value])
+
   const {
     poChainOfCustodyData,
     shippmentChainOfCustodyData,
@@ -27,7 +35,7 @@ const Track = (props) => {
     lang,
     t
   } = props;
-
+  console.log(shippmentChainOfCustodyData)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   // const onSeach = useCallback(async (v = value) => {
   //   if (v) {
@@ -36,6 +44,12 @@ const Track = (props) => {
   //   } else setMsg("Required");
   //   setIsSubmitted(true);
   // });
+
+  useEffect(() => {
+    props.setTrackTraceData({ setValue, value, resetData, setIsSubmitted })
+  }, [value])
+
+
 
   if (!isAuthenticated("trackAndTrace")) props.history.push(`/profile`);
 
@@ -76,6 +90,17 @@ const Track = (props) => {
       onSeach();
     }
   };
+
+
+  const searchPlaceHolder = () => {
+    if (i18n.language === "es") {
+      let placeHolder = t('Enter_Order_ID_or_Serial_No._or_Shipment_No._or_Transit_No.')
+      placeHolder = placeHolder.split(" ").splice(0, 16).join(" ");
+      return `${placeHolder}...`
+    } else {
+      return t('Enter_Order_ID_or_Serial_No._or_Shipment_No._or_Transit_No.')
+    }
+  }
 
   return (
     <div className='track'>
@@ -135,7 +160,7 @@ const Track = (props) => {
                   <div className='search-form'>
                     <input
                       type='text'
-                      placeholder='Enter Order ID or Serial No. or Shipment No. or Transit No.'
+                      placeholder={searchPlaceHolder()}
                       onChange={onSearchChange}
                       //className="form-control border border-primary search-field"
                       className='form-control border-blue search-field border-8'
@@ -147,7 +172,7 @@ const Track = (props) => {
                       alt='searching'
                     />
                   </div>
-                  {isSubmitted && <span className='redTxt'>{msg}</span>}
+                  {isSubmitted && <span className='redTxt'>{t(msg)}</span>}
                 </div>
               </>
             ) : (
@@ -168,7 +193,7 @@ const Track = (props) => {
                         className='mr-2 mb-1'
                         alt='Back'
                       />
-                        <span className='fontSize20'>{t('back_to_search')}</span>
+                      <span className='fontSize20'>{t('back_to_search')}</span>
                     </button>
                   )}
                 </div>
@@ -213,9 +238,7 @@ const Track = (props) => {
                         .map((r, i) => (
                           <SoChainOfCustody
                             len={
-                              row.shipmentUpdates.filter(
-                                (s) => s.status === "RECEIVED"
-                              ).length
+                              row.length
                             }
                             i={i}
                             v={visible}
@@ -226,6 +249,7 @@ const Track = (props) => {
                             setOp={setOp}
                             data={row}
                             update={r}
+                            update={r}
                             index={i + 3}
                             parentIndex={
                               newArr.length && row.id !== value ? cIndex : index
@@ -234,8 +258,8 @@ const Track = (props) => {
                               shippmentChainOfCustodyData.length - 1 === index
                                 ? 1
                                 : newArr.length && row.id !== value
-                                ? newArr.length
-                                : 1
+                                  ? newArr.length
+                                  : 1
                             }
                             container={2 + i}
                             t={t}
@@ -281,9 +305,9 @@ const Track = (props) => {
                     {Object.keys(props.latestIotShipmentData).length > 0
                       ? formatTimeAMPM(
                           /**props.latestIotShipmentData.temp['UnixTimeStamp']*/ new Date()
-                            .toString()
-                            .split(" ")[4]
-                        )
+                          .toString()
+                          .split(" ")[4]
+                      )
                       : ""}{" "}
                   </div>
                 </div>

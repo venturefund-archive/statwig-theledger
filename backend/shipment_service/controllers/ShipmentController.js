@@ -15,10 +15,11 @@ const ProductModel = require("../models/ProductModel");
 const AtomModel = require("../models/AtomModel");
 const Event = require("../models/EventModal");
 const Record = require("../models/RecordModel");
+const Sensor = require("../models/SensorModel");
 const moment = require("moment");
-const CENTRAL_AUTHORITY_ID = null;
-const CENTRAL_AUTHORITY_NAME = null;
-const CENTRAL_AUTHORITY_ADDRESS = null;
+const CENTRAL_AUTHORITY_ID = "null";
+const CENTRAL_AUTHORITY_NAME = "null";
+const CENTRAL_AUTHORITY_ADDRESS = "null";
 const checkPermissions =
   require("../middlewares/rbac_middleware").checkPermissions;
 const logEvent = require("../../../utils/event_logger");
@@ -32,7 +33,9 @@ const unlinkFile = util.promisify(fs.unlink);
 const excel = require("node-excel-export");
 const { resolve } = require("path");
 const PdfPrinter = require("pdfmake");
+const { responses } = require("../helpers/responses");
 const { asyncForEach } = require("../helpers/utility");
+const { fromUnixTime } = require("date-fns");
 const fontDescriptors = {
   Roboto: {
     normal: resolve("./controllers/Roboto-Regular.ttf"),
@@ -319,11 +322,10 @@ exports.createShipment = [
         data.shippingDate = shippingDate;
       }
       data.shippingDate = new Date(data.shippingDate);
-      data.products.forEach(async (element) => {
-        var product = await ProductModel.findOne({ id: element.productID });
+      await asyncForEach(data.products, async (element) => {
+        const product = await ProductModel.findOne({ id: element.productID });
         element.type = product.type;
         element.unitofMeasure = product.unitofMeasure;
-        console.log(product);
       });
       const shipmentCounter = await CounterModel.findOneAndUpdate(
         {
@@ -347,19 +349,28 @@ exports.createShipment = [
         emailId: req.user.emailId,
       });
       if (empData == null) {
-        return apiResponse.ErrorResponse(res, "Email is not found");
+        return apiResponse.ErrorResponse(
+          res,
+          responses(req.user.preferredLanguage).email_not_found
+        );
       }
       const orgId = empData.organisationId;
       const orgName = empData.name;
       const orgData = await OrganisationModel.findOne({ id: orgId });
       if (orgData == null) {
-        return apiResponse.ErrorResponse(res, "orgData is not found");
+        return apiResponse.ErrorResponse(
+          res,
+          responses(req.user.preferredLanguage).orgdata_not_found
+        );
       }
       const address = orgData.postalAddress;
       const confId = orgData.configuration_id;
       const confData = await ConfigurationModel.findOne({ id: confId });
       if (confData == null) {
-        return apiResponse.ErrorResponse(res, "Configuration is not found");
+        return apiResponse.ErrorResponse(
+          res,
+          responses(req.user.preferredLanguage).config_not_found
+        );
       }
       const process = confData.process;
       const supplierID = req.body.supplier.id;
@@ -368,14 +379,20 @@ exports.createShipment = [
       });
       if (supplierOrgData == null) {
         console.log("Supplier not defined");
-        return apiResponse.ErrorResponse(res, "Supplier  not defined");
+        return apiResponse.ErrorResponse(
+          res,
+          responses(req.user.preferredLanguage).supplier_not_defined
+        );
       }
 
       const receiverOrgData = await OrganisationModel.findOne({
         id: req.body.receiver.id,
       });
       if (receiverOrgData == null) {
-        return apiResponse.ErrorResponse(res, "Receiver not defined");
+        return apiResponse.ErrorResponse(
+          res,
+          responses(req.user.preferredLanguage).receiver_not_defined
+        );
       }
 
       const supplierName = supplierOrgData.name;
@@ -398,38 +415,39 @@ exports.createShipment = [
           id: data.poId,
         });
         if (po == null) {
-          return apiResponse.ErrorResponse(res, "Order ID  not defined");
+          return apiResponse.ErrorResponse(
+            res,
+            responses(req.user.preferredLanguage).orderid_not_defined
+          );
         }
         let quantityMismatch = false;
         po.products.every((product) => {
           data.products.every((p) => {
-            const po_product_quantity =
-              product.productQuantity || product.quantity;
-            const alreadyShipped = product.productQuantityShipped || null;
-            let shipment_product_qty;
-            if (alreadyShipped) {
-              console.log(
-                "values are" + parseInt(p.productQuantity),
-                parseInt(alreadyShipped)
-              );
-              shipment_product_qty =
-                parseInt(p.productQuantity) + parseInt(alreadyShipped);
-            } else {
-              shipment_product_qty = p.productQuantity;
-            }
-
-            console.log(
-              po_product_quantity,
-              shipment_product_qty,
-              alreadyShipped
-            );
-            if (
-              parseInt(shipment_product_qty, 10) <
-              parseInt(po_product_quantity, 10)
-            ) {
-              quantityMismatch = true;
-              console.log("quantityMismatch is ", quantityMismatch);
-              return false;
+            if (product.id === p.productID) {
+              const po_product_quantity =
+                product.productQuantity || product.quantity;
+              const alreadyShipped =
+                parseInt(product.productQuantityShipped || 0) +
+                  parseInt(product.productQuantityDelivered || 0) || null;
+              let shipment_product_qty;
+              if (alreadyShipped) {
+                shipment_product_qty =
+                  parseInt(p.productQuantity) + parseInt(alreadyShipped);
+              } else {
+                shipment_product_qty = p.productQuantity;
+              }
+              if (
+                parseInt(shipment_product_qty, 10) <
+                parseInt(po_product_quantity, 10)
+              ) {
+                quantityMismatch = true;
+                console.log("quantityMismatch is ", quantityMismatch);
+                return false;
+              } else if (
+                parseInt(shipment_product_qty) === parseInt(po_product_quantity)
+              ) {
+                quantityMismatch = false;
+              }
             }
           });
         });
@@ -457,7 +475,6 @@ exports.createShipment = [
                 }
               );
             } catch (err) {
-              console.log("failed to set ORDER PROCESSING TIME");
               console.log(err);
             }
           }
@@ -485,7 +502,6 @@ exports.createShipment = [
                 }
               );
             } catch (err) {
-              console.log("failed to set orderpror");
               console.log(err);
             }
           }
@@ -503,7 +519,10 @@ exports.createShipment = [
           }
         );
         if (poidupdate == null) {
-          return apiResponse.ErrorResponse(res, "Product not Updated");
+          return apiResponse.ErrorResponse(
+            res,
+            responses(req.user.preferredLanguage).product_not_updated
+          );
         }
       }
       if (flag != "N") {
@@ -513,7 +532,7 @@ exports.createShipment = [
         if (suppWarehouseDetails == null) {
           return apiResponse.ErrorResponse(
             res,
-            "suppWarehouseDetails not Found"
+            responses(req.user.preferredLanguage).supplier_not_found
           );
         }
         var suppInventoryId = suppWarehouseDetails.warehouseInventory;
@@ -523,7 +542,8 @@ exports.createShipment = [
         if (suppInventoryDetails == null) {
           return apiResponse.ErrorResponse(
             res,
-            "suppInventoryDetails not Found"
+            "suppInventoryDetails" +
+              responses(req.user.preferredLanguage).not_found
           );
         }
         const recvWarehouseDetails = await WarehouseModel.findOne({
@@ -532,7 +552,8 @@ exports.createShipment = [
         if (recvWarehouseDetails == null) {
           return apiResponse.ErrorResponse(
             res,
-            "recvWarehouseDetails not Found"
+            "recvWarehouseDetails" +
+              responses(req.user.preferredLanguage).not_found
           );
         }
         var recvInventoryId = recvWarehouseDetails.warehouseInventory;
@@ -542,7 +563,8 @@ exports.createShipment = [
         if (recvInventoryDetails == null) {
           return apiResponse.ErrorResponse(
             res,
-            "recvInventoryDetails not Found"
+            "recvInventoryDetails" +
+              responses(req.user.preferredLanguage).not_found
           );
         }
         var products = data.products;
@@ -578,7 +600,7 @@ exports.createShipment = [
               }
             );
           } else if (products[count].serialNumber != null) {
-            const serialNumbers = product.serialNumbersRange.split("-");
+            const serialNumbers = products[count].serialNumbersRange.split("-");
             let atomsArray = [];
             if (serialNumbers.length > 1) {
               const serialNumbersFrom = parseInt(
@@ -633,9 +655,9 @@ exports.createShipment = [
               address: CENTRAL_AUTHORITY_NAME || null,
             },
             actororg: {
-              id: orgId,
-              name: orgName,
-              address: address,
+              id: orgId || null,
+              name: orgName || null,
+              address: address || null,
             },
             secondorg: {
               id: null,
@@ -659,7 +681,10 @@ exports.createShipment = [
         const shipment = new ShipmentModel(data);
         const result = await shipment.save();
         if (result == null) {
-          return apiResponse.ErrorResponse(res, "Shipment Not saved");
+          return apiResponse.ErrorResponse(
+            res,
+            responses(req.user.preferredLanguage).shipment_not_saved
+          );
         }
 
         //Blockchain Integration
@@ -729,7 +754,7 @@ exports.createShipment = [
           });
 
           if (!quantityMismatch)
-            throw new Error("Tagged product quantity not available");
+            throw new Error(responses(req.user.preferredLanguage).tagged_error);
           await ShipmentModel.findOneAndUpdate(
             {
               id: shipmentId,
@@ -752,7 +777,7 @@ exports.createShipment = [
         await logEvent(event_data);
         return apiResponse.successResponseWithData(
           res,
-          "Shipment Created Successfully",
+          responses(req.user.preferredLanguage).shipment_created,
           result
         );
       }
@@ -811,7 +836,10 @@ exports.newShipment = [
       const shipment = new ShipmentModel(data);
       const result = await shipment.save();
       if (result == null) {
-        return apiResponse.ErrorResponse(res, "Shipment Not saved");
+        return apiResponse.ErrorResponse(
+          res,
+          responses(req.user.preferredLanguage).shipment_not_saved
+        );
       }
 
       //Blockchain Integration
@@ -853,7 +881,7 @@ exports.newShipment = [
       );
       return apiResponse.successResponseWithData(
         res,
-        "Shipment Created Successfully",
+        responses(req.user.preferredLanguage).shipment_created,
         result
       );
     } catch (err) {
@@ -958,7 +986,7 @@ exports.receiveShipment = [
 
                 if (receivedQuantity > actuallyShippedQuantity)
                   throw new Error(
-                    "Received quantity cannot be greater than Actual quantity"
+                    responses(req.user.preferredLanguage).rec_quantity_error
                   );
 
                 var quantityDifference =
@@ -1001,20 +1029,30 @@ exports.receiveShipment = [
           let quantityMismatch = false;
           po.products.every((product) => {
             data.products.every((p) => {
-              const po_product_quantity =
-                product.productQuantity || product.quantity;
-              let shipment_product_qty = 0;
-              if (product.productQuantityDelivered)
-                shipment_product_qty =
-                  parseInt(product.productQuantityDelivered, 10) +
-                  parseInt(p.productQuantity, 10);
-              else shipment_product_qty = p.productQuantity;
-
-              if (
-                parseInt(shipment_product_qty) < parseInt(po_product_quantity)
-              ) {
-                quantityMismatch = true;
-                return false;
+              if (product.id === p.productID) {
+                // console.log(product, p)
+                const po_product_quantity =
+                  product.productQuantity || product.quantity;
+                let shipment_product_qty = 0;
+                if (product.productQuantityDelivered)
+                  shipment_product_qty =
+                    parseInt(product.productQuantityDelivered) +
+                    parseInt(p.productQuantity);
+                else shipment_product_qty = p.productQuantity;
+                // console.log(shipment_product_qty, po_product_quantity)
+                if (
+                  parseInt(shipment_product_qty) < parseInt(po_product_quantity)
+                ) {
+                  console.log("mismatch");
+                  quantityMismatch = true;
+                  return false;
+                } else if (
+                  parseInt(shipment_product_qty) ===
+                  parseInt(po_product_quantity)
+                ) {
+                  console.log("full now");
+                  quantityMismatch = false;
+                }
               }
             });
           });
@@ -1235,13 +1273,13 @@ exports.receiveShipment = [
 
           return apiResponse.successResponseWithData(
             res,
-            "Shipment Received",
+            responses(req.user.preferredLanguage).shipment_received,
             updateData
           );
         } else {
           return apiResponse.successResponse(
             res,
-            "Cannot receive  a Shipment without SO and PO"
+            responses(req.user.preferredLanguage).shipment_cannot_receive
           );
         }
       } else {
@@ -1825,8 +1863,8 @@ exports.fetchGMRShipments = [
   auth,
   async (req, res) => {
     try {
-      const skip = req.query || 0;
-      const limit = req.query || 30;
+      const skip = req.query.skip || 0;
+      const limit = req.query.skip || 30;
       const count = await ShipmentModel.count({ isCustom: true });
       const shipments = await ShipmentModel.find({ isCustom: true })
         .skip(parseInt(skip))
@@ -1876,11 +1914,14 @@ exports.updateStatus = [
         { new: true }
       );
       if (!update) {
-        return apiResponse.notFoundResponse(res, "Shipment not found");
+        return apiResponse.notFoundResponse(
+          res,
+          responses(req.user.preferredLanguage).shipment_not_found
+        );
       }
       return apiResponse.successResponseWithData(
         res,
-        " Status Updated ",
+        responses(req.user.preferredLanguage).status_updated,
         update
       );
     } catch (err) {
@@ -2027,7 +2068,10 @@ exports.updateTrackingStatus = [
         },
       };
       await logEvent(event_data);
-      return apiResponse.successResponse(res, "Status Updated");
+      return apiResponse.successResponse(
+        res,
+        responses(req.user.preferredLanguage).status_updated
+      );
     } catch (err) {
       console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
@@ -2102,7 +2146,7 @@ exports.chainOfCustody = [
 
               return apiResponse.successResponseWithData(
                 res,
-                "Status Updated",
+                responses(req.user.preferredLanguage).status_updated,
                 {
                   poChainOfCustody: poDetails,
                   shipmentChainOfCustody: shipments,
@@ -2236,7 +2280,7 @@ exports.chainOfCustody = [
 
               return apiResponse.successResponseWithData(
                 res,
-                "Status Updated",
+                responses(req.user.preferredLanguage).status_updated,
                 {
                   poChainOfCustody: poDetails,
                   shipmentChainOfCustody: shipments,
@@ -2245,12 +2289,15 @@ exports.chainOfCustody = [
             } else {
               return apiResponse.validationErrorWithData(
                 res,
-                "ID does not exists, please try tracking existing IDs"
+                responses(req.user.preferredLanguage).id_not_exists
               );
             }
           }
         } else {
-          return apiResponse.forbiddenResponse(res, "Access denied");
+          return apiResponse.forbiddenResponse(
+            res,
+            responses(req.user.preferredLanguage).no_permission
+          );
         }
       });
     } catch (err) {
@@ -2335,7 +2382,7 @@ exports.fetchShipmentIds = [
             } else {
               return apiResponse.validationErrorWithData(
                 res,
-                "ID does not exists, please try tracking existing IDs"
+                responses(req.user.preferredLanguage).id_not_exists
               );
             }
           } else {
@@ -2460,7 +2507,7 @@ exports.fetchShipmentIds = [
 
               return apiResponse.successResponseWithData(
                 res,
-                "Status Updated",
+                responses(req.user.preferredLanguage).status_updated,
                 {
                   poChainOfCustody: poDetails,
                   shipmentChainOfCustody: shipments,
@@ -2469,12 +2516,15 @@ exports.fetchShipmentIds = [
             } else {
               return apiResponse.validationErrorWithData(
                 res,
-                "ID does not exists, please try tracking existing IDs"
+                responses(req.user.preferredLanguage).id_not_exists
               );
             }
           }
         } else {
-          return apiResponse.forbiddenResponse(res, "Access denied");
+          return apiResponse.forbiddenResponse(
+            res,
+            responses(req.user.preferredLanguage).no_permission
+          );
         }
       });
     } catch (err) {
@@ -2490,12 +2540,26 @@ exports.fetchShipmentIds = [
       const { warehouseId } = req.user;
       await ShipmentModel.find(
         {
-          $or: [
+          $and: [
             {
-              "supplier.locationId": warehouseId,
+              $or: [
+                {
+                  "supplier.locationId": warehouseId,
+                },
+                {
+                  "receiver.locationId": warehouseId,
+                },
+              ],
             },
             {
-              "receiver.locationId": warehouseId,
+              $or: [
+                {
+                  "supplier.id": req.user.organisationId,
+                },
+                {
+                  "receiver.id": req.user.organisationId,
+                },
+              ],
             },
           ],
         },
@@ -2524,15 +2588,16 @@ exports.fetchInboundShipments = [
     try {
       const { skip, limit } = req.query;
       const { warehouseId } = req.user;
+      const status = req.query.status ? req.query.status : undefined;
+      const fromSupplier = req.query.from ? req.query.from : undefined;
+      const toReceiver = req.query.to ? req.query.to : undefined;
+      const shipmentId = req.query.shipmentId
+        ? req.query.shipmentId
+        : undefined;
+      const fromDate = req.query.fromDate ? req.query.fromDate : undefined;
+      const toDate = req.query.toDate ? req.query.toDate : undefined;
       let currentDate = new Date();
       let fromDateFilter = 0;
-      let status = req.query.status ? req.query.status : undefined;
-      let fromSupplier = req.query.from ? req.query.from : undefined;
-      let toReceiver = req.query.to ? req.query.to : undefined;
-      let shipmentId = req.query.shipmentId ? req.query.shipmentId : undefined;
-      let fromDate = req.query.fromDate ? req.query.fromDate : undefined;
-      let toDate = req.query.toDate ? req.query.toDate : undefined;
-
       switch (req.query.dateFilter) {
         case "today":
           fromDateFilter = new Date(
@@ -2585,8 +2650,8 @@ exports.fetchInboundShipments = [
       }
 
       if (fromDate && toDate) {
-        var firstDate = new Date(fromDate);
-        var nextDate = new Date(toDate);
+        const firstDate = new Date(fromDate);
+        const nextDate = new Date(toDate);
         whereQuery[`shippingDate`] = { $gte: firstDate, $lte: nextDate };
       }
 
@@ -2613,54 +2678,41 @@ exports.fetchInboundShipments = [
       if (toReceiver) {
         whereQuery["receiver.id"] = toReceiver;
       }
-      console.log("In bound whereQuery ======>", whereQuery);
-      try {
-        let inboundShipmentsCount = await ShipmentModel.count(whereQuery);
-        ShipmentModel.find(whereQuery)
-          .skip(parseInt(skip))
-          .limit(parseInt(limit))
-          .sort({ createdAt: -1 })
-          .then((inboundShipmentsList) => {
-            let inboundShipmentsRes = [];
-            let findInboundShipmentData = inboundShipmentsList.map(
-              async (inboundShipment) => {
-                let inboundShipmentData = JSON.parse(
-                  JSON.stringify(inboundShipment)
-                );
-                let supplierOrganisation = await OrganisationModel.findOne({
-                  id: inboundShipmentData.supplier.id,
-                });
-                let supplierWarehouse = await WarehouseModel.findOne({
-                  id: inboundShipmentData.supplier.locationId,
-                });
-                let receiverOrganisation = await OrganisationModel.findOne({
-                  id: inboundShipmentData.receiver.id,
-                });
-                let receiverWarehouse = await WarehouseModel.findOne({
-                  id: inboundShipmentData.receiver.locationId,
-                });
-                inboundShipmentData.supplier[`org`] = supplierOrganisation;
-                inboundShipmentData.supplier[`warehouse`] = supplierWarehouse;
-                inboundShipmentData.receiver[`org`] = receiverOrganisation;
-                inboundShipmentData.receiver[`warehouse`] = receiverWarehouse;
-                inboundShipmentsRes.push(inboundShipmentData);
-              }
-            );
+      const inboundShipmentsCount = await ShipmentModel.count(whereQuery);
+      const inboundShipmentsList = await ShipmentModel.find(whereQuery)
+        .skip(parseInt(skip))
+        .limit(parseInt(limit))
+        .sort({ createdAt: -1 });
+      let inboundShipmentsRes = [];
+      await asyncForEach(inboundShipmentsList, async (inboundShipment) => {
+        let inboundShipmentData = JSON.parse(JSON.stringify(inboundShipment));
+        const supplierOrganisation = await OrganisationModel.findOne({
+          id: inboundShipmentData.supplier.id,
+        });
+        const supplierWarehouse = await WarehouseModel.findOne({
+          id: inboundShipmentData.supplier.locationId,
+        });
+        const receiverOrganisation = await OrganisationModel.findOne({
+          id: inboundShipmentData.receiver.id,
+        });
+        const receiverWarehouse = await WarehouseModel.findOne({
+          id: inboundShipmentData.receiver.locationId,
+        });
+        inboundShipmentData.supplier["org"] = supplierOrganisation;
+        inboundShipmentData.supplier["warehouse"] = supplierWarehouse;
+        inboundShipmentData.receiver["org"] = receiverOrganisation;
+        inboundShipmentData.receiver["warehouse"] = receiverWarehouse;
+        inboundShipmentsRes.push(inboundShipmentData);
+      });
 
-            Promise.all(findInboundShipmentData).then(function (results) {
-              return apiResponse.successResponseWithMultipleData(
-                res,
-                "Inbound Shipment Records",
-                {
-                  inboundShipments: inboundShipmentsRes,
-                  count: inboundShipmentsCount,
-                }
-              );
-            });
-          });
-      } catch (err) {
-        return apiResponse.ErrorResponse(res, err.message);
-      }
+      return apiResponse.successResponseWithMultipleData(
+        res,
+        "Inbound Shipment Records",
+        {
+          inboundShipments: inboundShipmentsRes,
+          count: inboundShipmentsCount,
+        }
+      );
     } catch (err) {
       return apiResponse.ErrorResponse(res, err.message);
     }
@@ -2959,7 +3011,7 @@ exports.trackJourney = [
 
           if (inwardShipments == null)
             throw new Error(
-              "ID does not exists..Please try searching with existing IDs"
+              responses(req.user.preferredLanguage).id_not_exists
             );
 
           shipmentsArray = inwardShipments.taggedShipments;
@@ -3181,7 +3233,7 @@ exports.trackJourney = [
 
           if (poDetails == null)
             throw new Error(
-              "Order ID does not exists..Please try searching with existing IDs"
+              responses(req.user.preferredLanguage).id_not_exists
             );
 
           if (poDetails.shipments.length > 0) {
@@ -3336,8 +3388,15 @@ exports.checkShipmentID = [
       const { shipmentId } = req.query;
       const checkShipment = await ShipmentModel.find({ id: shipmentId });
       if (checkShipment.length > 0)
-        return apiResponse.successResponse(res, "Shipment found");
-      else return apiResponse.ErrorResponse(res, "Shipment not found");
+        return apiResponse.successResponse(
+          res,
+          responses(req.user.preferredLanguage).shipment_found
+        );
+      else
+        return apiResponse.ErrorResponse(
+          res,
+          responses(req.user.preferredLanguage).shipment_not_found
+        );
     } catch (err) {
       return apiResponse.ErrorResponse(res, err.message);
     }
@@ -3399,6 +3458,8 @@ exports.exportInboundShipments = [
       let fromSupplier = req.query.from ? req.query.from : undefined;
       let toReceiver = req.query.to ? req.query.to : undefined;
       let shipmentId = req.query.shipmentId ? req.query.shipmentId : undefined;
+      let fromDate = req.query.fromDate ? req.query.fromDate : undefined;
+      let toDate = req.query.toDate ? req.query.toDate : undefined;
       switch (req.query.dateFilter) {
         case "today":
           fromDateFilter = new Date(
@@ -3450,6 +3511,12 @@ exports.exportInboundShipments = [
         whereQuery["id"] = shipmentId;
       }
 
+      if (fromDate && toDate) {
+        var firstDate = new Date(fromDate);
+        var nextDate = new Date(toDate);
+        whereQuery[`shippingDate`] = { $gte: firstDate, $lte: nextDate };
+      }
+
       if (status) {
         if (status == "RECEIVED") {
           whereQuery["status"] = status;
@@ -3473,7 +3540,6 @@ exports.exportInboundShipments = [
       if (toReceiver) {
         whereQuery["receiver.id"] = toReceiver;
       }
-      console.log("In bound whereQuery ======>", whereQuery);
       try {
         let inboundShipmentsCount = await ShipmentModel.count(whereQuery);
         ShipmentModel.find(whereQuery)
@@ -3569,6 +3635,8 @@ exports.exportOutboundShipments = [
       let fromSupplier = req.query.from ? req.query.from : undefined;
       let toReceiver = req.query.to ? req.query.to : undefined;
       let shipmentId = req.query.shipmentId ? req.query.shipmentId : undefined;
+      let fromDate = req.query.fromDate ? req.query.fromDate : undefined;
+      let toDate = req.query.toDate ? req.query.toDate : undefined;
       switch (req.query.dateFilter) {
         case "today":
           fromDateFilter = new Date(
@@ -3620,6 +3688,12 @@ exports.exportOutboundShipments = [
         whereQuery["id"] = shipmentId;
       }
 
+      if (fromDate && toDate) {
+        var firstDate = new Date(fromDate);
+        var nextDate = new Date(toDate);
+        whereQuery[`shippingDate`] = { $gte: firstDate, $lte: nextDate };
+      }
+
       if (status) {
         whereQuery["status"] = status;
       }
@@ -3640,7 +3714,6 @@ exports.exportOutboundShipments = [
         whereQuery["receiver.id"] = toReceiver;
       }
 
-      console.log("Out bound whereQuery ======>", whereQuery);
       try {
         let outboundShipmentsCount = await ShipmentModel.count(whereQuery);
         ShipmentModel.find(whereQuery)
@@ -3751,115 +3824,115 @@ function buildExcelReport(req, res, dataForExcel) {
 
   const specification = {
     id: {
-      displayName: "Shipment ID",
+      displayName: req.t("Shipment_ID"),
       headerStyle: styles.headerDark,
       cellStyle: styles.cellGreen,
       width: 120,
     },
     poId: {
-      displayName: "Reference Order ID",
+      displayName: req.t("Reference_Order_ID"),
       headerStyle: styles.headerDark,
       cellStyle: styles.cellGreen,
       width: "10",
     },
     productCategory: {
-      displayName: "Product Category",
+      displayName: req.t("Product_Category"),
       headerStyle: styles.headerDark,
       cellStyle: styles.cellGreen,
       width: 220,
     },
     productName: {
-      displayName: "Product Name",
+      displayName: req.t("Product_Name"),
       headerStyle: styles.headerDark,
       cellStyle: styles.cellGreen,
       width: 220,
     },
     productID: {
-      displayName: "Product ID",
+      displayName: req.t("Product_ID"),
       headerStyle: styles.headerDark,
       cellStyle: styles.cellGreen,
       width: 220,
     },
     productQuantity: {
-      displayName: "Quantity",
+      displayName: req.t("Quantity"),
       headerStyle: styles.headerDark,
       cellStyle: styles.cellGreen,
       width: 220,
     },
     batchNumber: {
-      displayName: "Batch Number",
+      displayName: req.t("Batch_Number"),
       headerStyle: styles.headerDark,
       cellStyle: styles.cellGreen,
       width: 220,
     },
     note: {
-      displayName: "Expiry Date",
+      displayName: req.t("Expiry_Date"),
       headerStyle: styles.headerDark,
       cellStyle: styles.cellGreen,
       width: 220,
     },
     manufacturer: {
-      displayName: "Manufacturer",
+      displayName: req.t("Manufacturer"),
       headerStyle: styles.headerDark,
       cellStyle: styles.cellGreen,
       width: 220,
     },
     supplierOrgName: {
-      displayName: "From Organization Name",
+      displayName: req.t("From_Organization_Name"),
       headerStyle: styles.headerDark,
       cellStyle: styles.cellGreen,
       width: 220,
     },
     supplierOrgId: {
-      displayName: "From Organization ID",
+      displayName: req.t("From_Organization_ID"),
       headerStyle: styles.headerDark,
       cellStyle: styles.cellGreen,
       width: 220,
     },
     supplierOrgLocation: {
-      displayName: "From Organization Location Details",
+      displayName: req.t("From_Organization_Location_Details"),
       headerStyle: styles.headerDark,
       cellStyle: styles.cellGreen,
       width: 220,
     },
     recieverOrgName: {
-      displayName: "Delivery Organization Name",
+      displayName: req.t("Delivery_Organization_Name"),
       headerStyle: styles.headerDark,
       cellStyle: styles.cellGreen,
       width: 220,
     },
     recieverOrgId: {
-      displayName: "Delivery Organization ID",
+      displayName: req.t("Delivery_Organization_ID"),
       headerStyle: styles.headerDark,
       cellStyle: styles.cellGreen,
       width: 220,
     },
     recieverOrgLocation: {
-      displayName: "Delivery Organization Location Details",
+      displayName: req.t("Delivery_Organization_Location_Details"),
       headerStyle: styles.headerDark,
       cellStyle: styles.cellGreen,
       width: 220,
     },
     airWayBillNo: {
-      displayName: "Transit Number",
+      displayName: req.t("Transit_Number"),
       headerStyle: styles.headerDark,
       cellStyle: styles.cellGreen,
       width: 220,
     },
     label: {
-      displayName: "Label Code",
+      displayName: req.t("Label_Code"),
       headerStyle: styles.headerDark,
       cellStyle: styles.cellGreen,
       width: 220,
     },
     shippingDate: {
-      displayName: "Shipment Date",
+      displayName: req.t("Shipment_Date"),
       headerStyle: styles.headerDark,
       cellStyle: styles.cellGreen,
       width: 220,
     },
     expectedDeliveryDate: {
-      displayName: "Shipment Estimate Date",
+      displayName: req.t("Shipment_Estimate_Date"),
       headerStyle: styles.headerDark,
       cellStyle: styles.cellGreen,
       width: 220,
@@ -3879,29 +3952,27 @@ function buildExcelReport(req, res, dataForExcel) {
 }
 
 function buildPdfReport(req, res, data, orderType) {
-  // console.log(data)
   var rows = [];
   rows.push([
-    { text: "Shipment ID", bold: true },
-    { text: "Reference Order ID", bold: true },
-    { text: "Product Category", bold: true },
-    { text: "Product Name", bold: true },
-    { text: "Product ID", bold: true },
-    { text: "Quantity", bold: true },
-    { text: "Batch Number", bold: true },
-    { text: "Manufacturer", bold: true },
-    { text: "From Organization Name", bold: true },
-    { text: "From Organization ID", bold: true },
-    { text: "From Organization Location Details", bold: true },
-    { text: "Delivery Organization Name", bold: true },
-    { text: "Delivery Organization ID", bold: true },
-    { text: "Delivery Organization Location Details", bold: true },
-    { text: "Transit Number", bold: true },
-    { text: "Label Code", bold: true },
-    { text: "Shipment Date", bold: true },
-    { text: "Shipment Estimate Date", bold: true },
+    { text: req.t("Shipment_ID"), bold: true },
+    { text: req.t("Reference_Order_ID"), bold: true },
+    { text: req.t("Product_Category"), bold: true },
+    { text: req.t("Product_Name"), bold: true },
+    { text: req.t("Product_ID"), bold: true },
+    { text: req.t("Quantity"), bold: true },
+    { text: req.t("Batch_Number"), bold: true },
+    { text: req.t("Manufacturer"), bold: true },
+    { text: req.t("From_Organization_Name"), bold: true },
+    { text: req.t("From_Organization_ID"), bold: true },
+    { text: req.t("From_Organization_Location_Details"), bold: true },
+    { text: req.t("Delivery_Organization_Name"), bold: true },
+    { text: req.t("Delivery_Organization_ID"), bold: true },
+    { text: req.t("Delivery_Organization_Location_Details"), bold: true },
+    { text: req.t("Transit_Number"), bold: true },
+    { text: req.t("Label_Code"), bold: true },
+    { text: req.t("Shipment_Date"), bold: true },
+    { text: req.t("Shipment_Estimate_Date"), bold: true },
   ]);
-  // console.log(rows[0].length)
   for (var i = 0; i < data.length; i++) {
     rows.push([
       data[i].id || "N/A",
@@ -3930,7 +4001,7 @@ function buildPdfReport(req, res, data, orderType) {
     pageOrientation: "landscape",
     pageMargins: [30, 30, 1, 5],
     content: [
-      { text: `${orderType} shipments`, fontSize: 34, style: "header" },
+      { text: req.t(`${orderType} shipments`), fontSize: 34, style: "header" },
       {
         table: {
           margin: [1, 1, 1, 1],
@@ -4152,7 +4223,6 @@ exports.trackJourneyOnBlockchain = [
             };
             outwardShipmentsArray.push(shipmentOutwardData);
           }
-          console.log("outwardShipmentArray", outwardShipmentsArray);
 
           const shipmentQueryTracked = {
             selector: {
@@ -4245,7 +4315,6 @@ exports.trackJourneyOnBlockchain = [
 ];
 
 function matchConditionShipmentOnBlockchain(filters) {
-  console.log("mc", filters);
   let matchCondition = {
     $and: [],
   };
@@ -4320,7 +4389,6 @@ function matchConditionShipmentOnBlockchain(filters) {
       ],
     });
   }
-  console.log("mcres", JSON.stringify(matchCondition));
   return matchCondition;
 }
 
@@ -4370,7 +4438,6 @@ function getShipmentFilterConditionOnBlockhain(filters, warehouseIds) {
       let endDateOfTheMonth = moment(startDateOfTheMonth)
         .endOf("month")
         .format(DATE_FORMAT);
-      console.log(startDateOfTheMonth, endDateOfTheMonth);
       matchCondition.createdOn = {
         $gte: new Date(`${startDateOfTheMonth}T00:00:00.0Z`),
         $lte: new Date(`${endDateOfTheMonth}T23:59:59.0Z`),
@@ -4385,7 +4452,6 @@ function getShipmentFilterConditionOnBlockhain(filters, warehouseIds) {
         .quarter(filters.quarter)
         .endOf("quarter")
         .format(DATE_FORMAT);
-      console.log(startDateOfTheQuarter, endDateOfTheQuarter);
       matchCondition.createdOn = {
         $gte: new Date(`${startDateOfTheQuarter}T00:00:00.0Z`),
         $lte: new Date(`${endDateOfTheQuarter}T23:59:59.0Z`),
@@ -4404,7 +4470,6 @@ function getShipmentFilterConditionOnBlockhain(filters, warehouseIds) {
       if (filters.year === currentYear) {
         endDateOfTheYear = currentDate;
       }
-      console.log(startDateOfTheYear, endDateOfTheYear);
       matchCondition.createdOn = {
         $gte: new Date(startDateOfTheYear),
         $lte: new Date(endDateOfTheYear),
@@ -4490,7 +4555,6 @@ exports.fetchShipmentsForAbInBevOnBlockchain = [
           receiverWarehouseDetails: receiverWarehouseDetails.data.data,
           //receiverOrgDetails: receiverOrgDetails.data.data,
         };
-        //                console.log("123",shipmentInwardData)
         shipmentsArray.push(shipmentInwardData);
       }
 
@@ -4631,6 +4695,116 @@ exports.warehousesOrgsExportToBlockchain = [
       }
       return apiResponse.successResponseWithData(res, "Export success", orgs);
     } catch (err) {
+      return apiResponse.ErrorResponse(res, err.message);
+    }
+  },
+];
+
+exports.sensorHistory = [
+  auth,
+  async (req, res) => {
+    try {
+      const shipmentId = req.query.shipmentId;
+      const page = req.query.page || 1;
+      const limit = 30;
+      const count = await Sensor.countDocuments({
+        shipmentId: shipmentId,
+      });
+      let nextPage = true;
+      if ((count - limit) * page - 1 < 0) {
+        nextPage = false;
+      }
+      const arrayLogs = await Sensor.aggregate([
+        {
+          $match: { shipmentId: shipmentId },
+        },
+        {
+          $sort: { _id: -1 },
+        },
+        {
+          $skip: (page - 1) * limit,
+        },
+        {
+          $limit: limit,
+        },
+        {
+          $sort: { _id: 1 },
+        },
+      ]);
+      const history = await Sensor.aggregate([
+        {
+          $match: { shipmentId: shipmentId },
+        },
+        {
+          $sort: { _id: -1 },
+        },
+        {
+          $skip: (page - 1) * limit,
+        },
+        {
+          $limit: limit,
+        },
+        {
+          $sort: { _id: 1 },
+        },
+        {
+          $group: {
+            _id: "$sensorId",
+            data: { $push: "$$ROOT" },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            data: 1,
+            name: "$_id",
+          },
+        },
+      ]);
+
+      const historyArray = new Array();
+
+      for (const sensor of history) {
+        for (const data of sensor.data) {
+          const time = fromUnixTime(data.timestamp);
+          const found = historyArray.find((o, i) => {
+            if (o.name === data.sensorId) {
+              historyArray[i] = {
+                name: o.name,
+                data: [...o.data, [time, data.temperature]],
+              };
+              return true; // stop searching
+            }
+          });
+          if (!found) {
+            historyArray.push({
+              name: sensor.name,
+              data: [[time, data.temperature]],
+            });
+          }
+        }
+      }
+
+      const min =
+        (
+          Math.min(...arrayLogs.map((sensor) => sensor.temperature)) - 2
+        ).toFixed(2) || 0;
+      const max =
+        (
+          Math.max(...arrayLogs.map((sensor) => sensor.temperature)) + 2
+        ).toFixed(2) || 0;
+      return apiResponse.successResponseWithData(res, "Sensor History", {
+        page: page,
+        limit: limit,
+        nextPage: nextPage,
+        graph: historyArray,
+        metaData: {
+          min,
+          max,
+        },
+      });
+    } catch (err) {
+      console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
     }
   },
