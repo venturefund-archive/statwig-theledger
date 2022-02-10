@@ -314,7 +314,7 @@
   "Success": "Éxito",
   "Request_Successfully_Sent_for_Approval": "Solicitud enviada con éxito para su aprobación",
   "OK": "OK",
-  "language": "idioma",
+  "language": "Idioma",
   "select_the_language": "Seleccione el idioma",
   "batch_details": "Detalles del Lote",
   "Email/Mobile must be specified": "Email/Móvil Debe especificarse",
@@ -380,5 +380,9 @@
   "all_products_are_expired": "Todos los productos están vencidos",
   "shipmentinbound": "envío entrante",
   "shipmentoutbound": "envío saliente",
-  "sold":"Vendida"
+  "sold":"Vendida",
+  "the_product":"El producto",
+  "not_found_in_inventory":"no se encuentra en el inventario",
+  "there_no_products_type":"No hay productos pertenecientes al tipo:",
+  "in_your_inventory":"en tu inventario"
 }
