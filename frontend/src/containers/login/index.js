@@ -27,6 +27,7 @@ const LoginContainer = (props) => {
     dispatch(turnOn());
     const data = { emailId: email !== "" ? email : phone };
     const result = await sendOtp(data, i18n.language);
+    console.log("Result from login:", result);
     if (result?.status === 200) {
       props.history.push(`/verify?emailId=${email !== "" ? email : phone}`);
     } else if (result?.status === 500) {

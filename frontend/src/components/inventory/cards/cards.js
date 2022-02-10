@@ -15,7 +15,7 @@ function Cards(props) {
     pendingOrders: 0,
     rejectedOrders: 0,
   });
-  const {t} = props;
+  const { t } = props;
   useEffect(() => {
     async function fetchData() {
       const result = await getOrderAnalytics();
@@ -25,56 +25,104 @@ function Cards(props) {
   }, []);
   return (
     <div className="grid-tile-container">
-          <Link to="/productcategory">
-            <div className="grid-tiles">
-              <div className="picture truck-bg">
-                <img src={TotalInventoryAdded} alt="truck" />
-              </div>
+      <Link to="/productcategory">
+        <div className="grid-tiles">
+          <div className="picture truck-bg">
+            <img src={TotalInventoryAdded} alt="truck" />
+          </div>
 
-              <div className="tile-content">
-                <p className="truck-text font-weight-bold">{t('total_product_category')}</p>
-                <h1 className="count truck-text">
-                  {props.inventoriesCount} {props.inventoryAnalytics?.totalProductCategory}
-                </h1>
-              </div>
+          <div className="tile-content">
+            <p className="truck-text font-weight-bold">{t('total_product_category')}</p>
+            <h1 className="count truck-text">
+              {props.inventoriesCount} {props.inventoryAnalytics?.totalProductCategory}
+            </h1>
+          </div>
+        </div>
+      </Link>
+
+      {props.inventoryAnalytics?.stockOut == 0 ?
+        <div className="grid-tiles">
+          <div className="picture sent-bg">
+            <img src={currentinventory} alt="truck" />
+          </div>
+
+          <div className="tile-content">
+            <p className="recived-text-cards font-weight-bold">
+              {t('product_out_of_stock')}
+            </p>
+            <h1 className="count recived-text-cards">
+              {props.currentInventoriesCount}
+              {props.inventoryAnalytics?.stockOut}
+            </h1>
+          </div>
+        </div> :
+        <Link to="/productoutofstock">
+          <div className="grid-tiles">
+            <div className="picture sent-bg">
+              <img src={currentinventory} alt="truck" />
             </div>
-          </Link>
 
-          <Link to="/productoutofstock">
-            <div className="grid-tiles">
-              <div className="picture sent-bg">
-                <img src={currentinventory} alt="truck" />
-              </div>
-
-              <div className="tile-content">
-                <p className="recived-text-cards font-weight-bold">
+            <div className="tile-content">
+              <p className="recived-text-cards font-weight-bold">
                 {t('product_out_of_stock')}
-                </p>
-                <h1 className="count recived-text-cards">
-                  {props.currentInventoriesCount}
-                  {props.inventoryAnalytics?.stockOut}
-                </h1>
-              </div>
+              </p>
+              <h1 className="count recived-text-cards">
+                {props.currentInventoriesCount}
+                {props.inventoryAnalytics?.stockOut}
+              </h1>
             </div>
-          </Link>
+          </div>
+        </Link>
+      }
 
-          <Link to="/batchnearexpiry/product">
-            <div className="grid-tiles">
-              <div className="picture recived-bg">
-                <img src={Expiration} alt="truck" />
-              </div>
 
-              <div className="tile-content">
-                <p className="sent-text font-weight-bold">
+      {props.inventoryNearExpiration == 0 ?
+        <div className="grid-tiles">
+          <div className="picture recived-bg">
+            <img src={Expiration} alt="truck" />
+          </div>
+
+          <div className="tile-content">
+            <p className="sent-text font-weight-bold">
+              {t('batch_near_expiration')}
+            </p>
+            <h1 className="count sent-text">
+              {props.inventoryNearExpiration}
+            </h1>
+          </div>
+        </div>
+        :
+        <Link to="/batchnearexpiry/product">
+          <div className="grid-tiles">
+            <div className="picture recived-bg">
+              <img src={Expiration} alt="truck" />
+            </div>
+
+            <div className="tile-content">
+              <p className="sent-text font-weight-bold">
                 {t('batch_near_expiration')}
-                </p>
-                <h1 className="count sent-text">
-                  {props.inventoryNearExpiration}
-                </h1>
-              </div>
+              </p>
+              <h1 className="count sent-text">
+                {props.inventoryNearExpiration}
+              </h1>
             </div>
-          </Link>
+          </div>
+        </Link>
+      }
 
+      {
+        props.inventoryExpired == 0 ?
+          <div className="grid-tiles">
+            <div className="picture transit-bg">
+              <img src={TotalVaccineExpired} alt="truck" />
+            </div>
+
+            <div className="tile-content">
+              <p className="inbound-text font-weight-bold">{t('batch_expired')}</p>
+              <h1 className="count inbound-text">{props.inventoryExpired}</h1>
+            </div>
+          </div>
+          :
           <Link to="/batchexpired">
             <div className="grid-tiles">
               <div className="picture transit-bg">
@@ -87,7 +135,9 @@ function Cards(props) {
               </div>
             </div>
           </Link>
-        </div>
+      }
+
+    </div>
   );
 }
 
