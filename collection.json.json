@@ -1,0 +1,80 @@
+{
+	"info": {
+		"_postman_id": "0bc8d681-3ccb-4133-803f-4355fdc2e58f",
+		"name": "CICD",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Login Copy",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZWFkZDRmNTZhYjk4MTBiMWVmNDM0ZGYiLCJlbWFpbCI6InNhdGhlZXNoa3VtYXIudHJAZ21haWwuY29tIiwiYWRkcmVzcyI6IjEycDYyS24xUFBaZDdOOVpNUFFqb3lwb3p5a2VXMWhZQThlcmpmIiwiaWF0IjoxNTg5ODMzMzk2LCJleHAiOjE1ODk4NDA1OTZ9.dKMTOMFyEfeXRmOnSpoZ9f0IgC6fiVSdnmaNheEgHmc",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "otp",
+							"value": "2625",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "emailId",
+							"value": "dev@statwig.com",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://test.vaccineledger.com/usermanagement/api/auth/sendOtp?email={{email}}",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"usermanagement",
+						"api",
+						"auth",
+						"sendOtp"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "{{email}}"
+						},
+						{
+							"key": "password",
+							"value": "123456",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
