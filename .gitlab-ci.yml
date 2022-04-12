@@ -8,4 +8,10 @@ postman_tests:
         entrypoint: [""]
     script:
         - newman --version
-        - newman run collection.json
+        - npm install -g newman-reporter-html
+        - newman run collection.json --reporters cli,html --reporter-html-export report.html
+    artifacts:
+        untracked: false
+        expire_in: 30 days
+        paths:
+            - "report.html"
