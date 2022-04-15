@@ -9,7 +9,7 @@ postman_tests:
     script:
         - newman --version
         - npm install -g newman-reporter-html
-        - newman run collection.json --reporters cli,html --reporter-html-export report.html
+        - newman run collection1.json --reporters cli,html --reporter-html-export report.html
     artifacts:
         untracked: false
         expire_in: 30 days
