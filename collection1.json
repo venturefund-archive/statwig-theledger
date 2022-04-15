@@ -1,0 +1,1073 @@
+{
+	"info": {
+		"_postman_id": "0bc8d681-3ccb-4133-803f-4355fdc2e58f",
+		"name": "CICD",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Login Copy",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZWFkZDRmNTZhYjk4MTBiMWVmNDM0ZGYiLCJlbWFpbCI6InNhdGhlZXNoa3VtYXIudHJAZ21haWwuY29tIiwiYWRkcmVzcyI6IjEycDYyS24xUFBaZDdOOVpNUFFqb3lwb3p5a2VXMWhZQThlcmpmIiwiaWF0IjoxNTg5ODMzMzk2LCJleHAiOjE1ODk4NDA1OTZ9.dKMTOMFyEfeXRmOnSpoZ9f0IgC6fiVSdnmaNheEgHmc",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "otp",
+							"value": "2625",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "emailId",
+							"value": "dev@statwig.com",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "https://test.vaccineledger.com/usermanagement/api/auth/sendOtp?email=hema@statwig.com",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"usermanagement",
+						"api",
+						"auth",
+						"sendOtp"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "hema@statwig.com"
+						},
+						{
+							"key": "password",
+							"value": "123456",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Verify Confirm OTP Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var headerValue = pm.response.json().data.token;\r",
+							"\r",
+							"pm.environment.set(\"token\",headerValue);\r",
+							"console.log(\"he\",pm.environment.get(\"token\"));\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "emailId",
+							"value": "hema@statwig.com",
+							"type": "text"
+						},
+						{
+							"key": "otp",
+							"value": "1234",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://test.vaccineledger.com/usermanagement/api/auth/verifyOtp",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"usermanagement",
+						"api",
+						"auth",
+						"verifyOtp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "userInfo Copy",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmI2YmRkNGM2NjBlMjYxMGIzNjY5YTAiLCJlbWFpbCI6IkNvcGVuaGFnZW5AZ21haWwuY29tIiwiYWRkcmVzcyI6IjE2VU5iWVoxbUhIc1FBS1A4Z0djRXoxS2tUeGhwTnJ3eGFSVnFSIiwicm9sZSI6IkVSUCBTcGVjaWFsaXN0IiwiaWF0IjoxNjA2MzkwMzMyLCJleHAiOjE2MDYzOTc1MzJ9.pA8fS65woJgZsQJkF00XlzauzVMipOOhqwtApIu9Ah4",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "https://test.vaccineledger.com/usermanagement/api/auth/userInfo",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"usermanagement",
+						"api",
+						"auth",
+						"userInfo"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ViewShipment Copy",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://test.vaccineledger.com/shipmentmanagement/api/shipment/viewShipment?shipmentId=SH100940",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"shipmentmanagement",
+						"api",
+						"shipment",
+						"viewShipment"
+					],
+					"query": [
+						{
+							"key": "shipmentId",
+							"value": "SH100940"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "createShipment Copy",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1Zjc0OWM1Nzg1MmIwMjZkYjlmMmQ4ZjkiLCJlbWFpbCI6ImhlbWFAc3RhdHdpZy5jb20iLCJhZGRyZXNzIjoiMVhhYzU4RzhXTksyWWRhQXB0cDZnRkM2dHBVMmc2ZG5iZTdMTUUiLCJpYXQiOjE2MDE0OTUwNDYsImV4cCI6MTYwMTUwMjI0Nn0.8nlGkmtZYxRsa1OV5OlYKuQL7QWdeCt1P5ik91ukeyg",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"airWayBillNo\":\"GH678\",\"poId\":null,\"label\":{\"labelId\":\"FG567\",\"labelType\":\"QR_2DBAR\"},\"taggedShipments\":\"\",\"externalShipmentId\":\"\",\"supplier\":{\"id\":\"ORG100001\",\"locationId\":\"WAR100126\"},\"receiver\":{\"id\":\"ORG100004\",\"locationId\":\"WAR100511\"},\"shippingDate\":\"2022-04-15T00:00:00.000Z\",\"expectedDeliveryDate\":\"2022-04-29T00:00:00.000Z\",\"actualDeliveryDate\":\"2022-04-29T00:00:00.000Z\",\"status\":\"CREATED\",\"products\":[{\"productCategory\":\"Equipment\",\"productID\":\"prod-405\",\"productQuantity\":23,\"batchNumber\":\"33333\",\"productName\":\"Oxygen concentrators\",\"manufacturer\":\"ABC Manufacturer\"}]}"
+				},
+				"url": {
+					"raw": "https://test.vaccineledger.com/shipmentmanagement/api/shipment/createShipment",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"shipmentmanagement",
+						"api",
+						"shipment",
+						"createShipment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "FetchShipments",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://test.vaccineledger.com/shipmentmanagement/api/shipment/fetchShipments?skip=0&limit=5",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"shipmentmanagement",
+						"api",
+						"shipment",
+						"fetchShipments"
+					],
+					"query": [
+						{
+							"key": "skip",
+							"value": "0"
+						},
+						{
+							"key": "limit",
+							"value": "5"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "FetchAllShipments",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://test.vaccineledger.com/shipmentmanagement/api/shipment/fetchAllShipments",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"shipmentmanagement",
+						"api",
+						"shipment",
+						"fetchAllShipments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ChainOfCustody",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://test.vaccineledger.com/shipmentmanagement/api/shipment/chainOfCustody?shipmentId=SH100934",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"shipmentmanagement",
+						"api",
+						"shipment",
+						"chainOfCustody"
+					],
+					"query": [
+						{
+							"key": "shipmentId",
+							"value": "SH100934"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "FetchImage",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://test.vaccineledger.com/shipmentmanagement/api/shipment/fetchImage?id=SH100934",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"shipmentmanagement",
+						"api",
+						"shipment",
+						"fetchImage"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "SH100934"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getProductsByInventory",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://test.vaccineledger.com/shipmentmanagement/api/shipment/getProductsByInventory",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"shipmentmanagement",
+						"api",
+						"shipment",
+						"getProductsByInventory"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fetchShipmentIds",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://test.vaccineledger.com/shipmentmanagement/api/shipment/fetchShipmentIds",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"shipmentmanagement",
+						"api",
+						"shipment",
+						"fetchShipmentIds"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getInventoryAnalytics",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://test.vaccineledger.com/analyticsmanagement/api/analytics/getInventoryAnalytics",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"analyticsmanagement",
+						"api",
+						"analytics",
+						"getInventoryAnalytics"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getProducts",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://test.vaccineledger.com/productmanagement/api/products/getProducts",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"productmanagement",
+						"api",
+						"products",
+						"getProducts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fetchProductDetailsList",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://test.vaccineledger.com/eventmanagement/api/event/fetchProductDetailsList",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"eventmanagement",
+						"api",
+						"event",
+						"fetchProductDetailsList"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "addProductsToInventory",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"products\":[{\"productId\":\"prod-405\",\"batchNumber\":\"GH6788\",\"mfgDate\":\"2022-03-31T18:30:00.000Z\",\"expDate\":\"2022-11-30T18:30:00.000Z\",\"quantity\":1000,\"serialNumbersRange\":\"\",\"unitOfMeasure\":\"EA\"}]}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://test.vaccineledger.com/inventorymanagement/api/inventory/addProductsToInventory",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"inventorymanagement",
+						"api",
+						"inventory",
+						"addProductsToInventory"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "createOrder",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"externalId\":\"\",\"supplier\":{\"supplierIncharge\":null,\"supplierOrganisation\":\"ORG100004\",\"supplierType\":\"VENDOR\"},\"customer\":{\"customerIncharge\":null,\"customerOrganisation\":\"ORG100010\",\"customerType\":\"CONSIGNEE\",\"region\":\"Asia\",\"country\":\"India\",\"shippingAddress\":{\"shippingAddressId\":\"WAR100010\",\"shipmentReceiverId\":null}},\"lastUpdatedOn\":\"2022-04-15T03:52:01.566Z\",\"creationDate\":\"2022-04-15T03:52:01.566Z\",\"poStatus\":\"CREATED\",\"products\":[{\"productId\":\"prod-405gztrkywmo7dh\",\"id\":\"prod-405gztrkywmo7dh\",\"productQuantity\":\"100\",\"name\":\"abc\",\"type\":\"Equipment\",\"manufacturer\":\"ABC Manufacturer\",\"unitofMeasure\":{\"id\":\"112\",\"name\":\"112\"}}]}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://test.vaccineledger.com/pomanagement/api/po/createOrder",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"pomanagement",
+						"api",
+						"po",
+						"createOrder"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getOrderAnalytics",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://test.vaccineledger.com/analyticsmanagement/api/analytics/getOrderAnalytics",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"analyticsmanagement",
+						"api",
+						"analytics",
+						"getOrderAnalytics"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fetchOutboundPurchaseOrders?to=&orderId=&productName=&dateFilter=&deliveryLocation=&poStatus=&fromDate=&toDate=&skip=0&limit=10",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://test.vaccineledger.com/pomanagement/api/po/fetchOutboundPurchaseOrders?to=&orderId=&productName=&dateFilter=&deliveryLocation=&poStatus=&fromDate=&toDate=&skip=0&limit=10",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"pomanagement",
+						"api",
+						"po",
+						"fetchOutboundPurchaseOrders"
+					],
+					"query": [
+						{
+							"key": "to",
+							"value": ""
+						},
+						{
+							"key": "orderId",
+							"value": ""
+						},
+						{
+							"key": "productName",
+							"value": ""
+						},
+						{
+							"key": "dateFilter",
+							"value": ""
+						},
+						{
+							"key": "deliveryLocation",
+							"value": ""
+						},
+						{
+							"key": "poStatus",
+							"value": ""
+						},
+						{
+							"key": "fromDate",
+							"value": ""
+						},
+						{
+							"key": "toDate",
+							"value": ""
+						},
+						{
+							"key": "skip",
+							"value": "0"
+						},
+						{
+							"key": "limit",
+							"value": "10"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fetchInboundPurchaseOrders",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://test.vaccineledger.com/pomanagement/api/po/fetchInboundPurchaseOrders?from=&orderId=&productName=&dateFilter=&deliveryLocation=&poStatus=&fromDate=&toDate=&skip=0&limit=10",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"pomanagement",
+						"api",
+						"po",
+						"fetchInboundPurchaseOrders"
+					],
+					"query": [
+						{
+							"key": "from",
+							"value": ""
+						},
+						{
+							"key": "orderId",
+							"value": ""
+						},
+						{
+							"key": "productName",
+							"value": ""
+						},
+						{
+							"key": "dateFilter",
+							"value": ""
+						},
+						{
+							"key": "deliveryLocation",
+							"value": ""
+						},
+						{
+							"key": "poStatus",
+							"value": ""
+						},
+						{
+							"key": "fromDate",
+							"value": ""
+						},
+						{
+							"key": "toDate",
+							"value": ""
+						},
+						{
+							"key": "skip",
+							"value": "0"
+						},
+						{
+							"key": "limit",
+							"value": "10"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getShipmentAnalytics",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://test.vaccineledger.com/analyticsmanagement/api/analytics/getShipmentAnalytics",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"analyticsmanagement",
+						"api",
+						"analytics",
+						"getShipmentAnalytics"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fetchInboundShipments",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://test.vaccineledger.com/shipmentmanagement/api/shipment/fetchInboundShipments?shipmentId=&from=&to=&dateFilter=&status=&fromDate=&toDate=&skip=0&limit=20",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"shipmentmanagement",
+						"api",
+						"shipment",
+						"fetchInboundShipments"
+					],
+					"query": [
+						{
+							"key": "shipmentId",
+							"value": ""
+						},
+						{
+							"key": "from",
+							"value": ""
+						},
+						{
+							"key": "to",
+							"value": ""
+						},
+						{
+							"key": "dateFilter",
+							"value": ""
+						},
+						{
+							"key": "status",
+							"value": ""
+						},
+						{
+							"key": "fromDate",
+							"value": ""
+						},
+						{
+							"key": "toDate",
+							"value": ""
+						},
+						{
+							"key": "skip",
+							"value": "0"
+						},
+						{
+							"key": "limit",
+							"value": "20"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getsearchsuggestions",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://test.vaccineledger.com/inventorymanagement/api/inventory/getsearchsuggestions?searchString=PO100641",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"inventorymanagement",
+						"api",
+						"inventory",
+						"getsearchsuggestions"
+					],
+					"query": [
+						{
+							"key": "searchString",
+							"value": "PO100641"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getOverviewAnalytics",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://test.vaccineledger.com/analyticsmanagement/api/analytics/getOverviewAnalytics",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"analyticsmanagement",
+						"api",
+						"analytics",
+						"getOverviewAnalytics"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fetchPurchaseOrders",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://test.vaccineledger.com/pomanagement/api/po/fetchPurchaseOrders?poId=PO100641&skip=0&limit=1",
+					"protocol": "https",
+					"host": [
+						"test",
+						"vaccineledger",
+						"com"
+					],
+					"path": [
+						"pomanagement",
+						"api",
+						"po",
+						"fetchPurchaseOrders"
+					],
+					"query": [
+						{
+							"key": "poId",
+							"value": "PO100641"
+						},
+						{
+							"key": "skip",
+							"value": "0"
+						},
+						{
+							"key": "limit",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
