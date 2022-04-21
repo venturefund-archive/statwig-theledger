@@ -15,7 +15,7 @@ const Login = (props) => {
     } else {
       setShowErrorMessage(false);
       setErrorMessage('');
-      const result = await onSendOtp(email);
+      const result = await onSendOtp((!isNaN(email) && email.charAt(0) != '+') ? "+91 " + email : email);
       if (result) {
         setShowErrorMessage(true);
         setErrorMessage(result);
@@ -46,11 +46,12 @@ const Login = (props) => {
           <input
             onKeyDown={onkeydown}
             name="username"
-            className={`form-control username ${
-              showErrorMessage && `border border-danger`
-            }`}
+            className={`form-control username ${showErrorMessage && `border border-danger`
+              }`}
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value)
+            }}
           />
           {showErrorMessage ? (
             <h4 className="error-message text-danger">{errorMessage}</h4>

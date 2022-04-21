@@ -50,8 +50,8 @@ const Home = (props) => {
       setShowSignUpCompletedMessage(true);
       setSteps(5);
     } else {
-      const err = result.data.data[0];
-      setErrorMessage(err.msg);
+      const err = result.data.message;
+      setErrorMessage(err);
       return err;
     }
   });
