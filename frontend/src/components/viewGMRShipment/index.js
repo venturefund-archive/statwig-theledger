@@ -17,6 +17,7 @@ import ViewShippingModal from "../shipments/shippingOrder/viewShippingModal";
 import { customReceiveShipment } from "../../actions/shipmentActions";
 import SuccessPopup from "./successPopup";
 import FailedPopup from "./FailedPopup";
+import Product from "./product";
 
 const ViewGMRShipment = (props) => {
   const { t } = props;
@@ -115,8 +116,16 @@ const ViewGMRShipment = (props) => {
             setHighLight={setHighLight}
           />
 
-          <h6 className='heading mt-4 mb-3'>PRODUCT LIST</h6>
+          {/* <h6 className='heading mt-4 mb-3'>PRODUCT LIST</h6>
           <ProductList
+            shipments={tracking}
+            productHighLight={productHighLight}
+            setProductHighLight={setProductHighLight}
+            menuProduct={menuProduct}
+            setMenuProduct={setMenuProduct}
+          /> */}
+          <h6 className='heading mt-4 mb-3'>PRODUCT DETAILS</h6>
+          <Product
             shipments={tracking}
             productHighLight={productHighLight}
             setProductHighLight={setProductHighLight}

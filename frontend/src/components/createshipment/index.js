@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import Select from "react-select";
 import Add from "../../assets/icons/createshipment.png";
 import CalenderIcon from "../../assets/icons/date_icon.png";
 import EditTable from "./table/editTable";
@@ -14,11 +15,37 @@ import Modal from "../../shared/modal";
 import { Formik } from "formik";
 import { getProducts } from "../../actions/poActions";
 
+const customStyles = {
+  // placeholder: (provided, state) => ({
+  //   color: state.isDisabled ? "black" : "grey",
+  // }),
+  option: (provided, state) => ({
+    ...provided,
+    borderBottom: "1px solid #d6d6d6",
+  }),
+  control: () => ({
+    display: "flex",
+  }),
+  indicatorSeparator: () => ({
+    display: "none",
+  }),
+  singleValue: (provided, state) => {
+    const opacity = state.isDisabled ? 0.5 : 1;
+    const transition = "opacity 300ms";
+    return { ...provided, opacity, transition };
+  },
+};
+
 const CreateShipment = (props) => {
   const { t } = props;
   const [senderOrganisation, setSenderOrganisation] = useState([]);
   const [products, setProducts] = useState([]);
-  const [addProducts, setAddProducts] = useState([]);
+  const [addProducts, setAddProducts] = useState([{productName: "",
+  manufacturer: "",
+  productQuantity: "",
+  batchNumber: "",
+  unitofMeasure: "Kgs",
+  type: "",}]);
   const dispatch = useDispatch();
   const [category, setCategory] = useState([]);
   const [OrderId] = useState("Select Order ID");
@@ -246,6 +273,79 @@ const CreateShipment = (props) => {
           dirty,
         }) => (
           <form onSubmit={handleSubmit} className='mb-3'>
+             <div className='row mb-3'>
+              <div className='col bg-white formContainer low mr-3'>
+                <div className='row mt-3'>
+                  <div className='col-md-6 col-sm-12'>
+                    <div className='form-group'>
+                      <label className='name' htmlFor='orderID'>
+                        {t("order_id")}
+                      </label>
+                      <div className='line'>
+                        <Select
+                          noOptionsMessage={() => t("no_options")}
+                          styles={customStyles}
+                          placeholder={t("enter") + " " + t("order_id")}
+    
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className='col-md-6 com-sm-12'>
+                    <label
+                      className='name'
+                      htmlFor='shipmentID'
+                      style={{ position: "relative", top: "0.5rem" }}
+                    >
+                      {t("reference_shipment_id")}
+                    </label>
+                    <input
+                      className='refship' //input
+                      type='text'
+                      id='referenceShipmentId'
+                      name='shipmentID'
+                    />
+                  </div>
+                </div>
+                <div className='fetch'>
+                  {values.shipmentID.length > 0 ? (
+                    <span
+                      style={{ height: "25px", width: "50px" }}
+                      className='btn btn-fetch'
+                    >
+                      <span
+                        style={{
+                          position: "relative",
+                          top: "-6px",
+                          fontSize: "12px",
+                          left: "-11px",
+                        }}
+                      >
+                        {t("fetch") === "Fetch" ? "Fetch" : "obtener"}
+                      </span>
+                    </span>
+                  ) : (
+                    <span
+                      style={{ height: "25px", width: "60px" }}
+                      className='btn fetchDisable'
+                    >
+                      <span
+                        style={{
+                          position: "relative",
+                          top: "-6px",
+                          fontSize: "12px",
+                          left: "-11px",
+                        }}
+                      >
+                        {t("fetch") === "Fetch" ? "Fetch" : "Obtener"}
+                      </span>
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+
             <div className='row mb-3'>
               <div className='col bg-white formContainer low mr-3'>
                 <label htmlFor='client' className='headsup'>

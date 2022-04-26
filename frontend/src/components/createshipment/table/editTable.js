@@ -22,6 +22,7 @@ const EditTable = (props) => {
           )}
         </div>
         <div>
+          {console.log(props.product)}
           {props.product.map((product, index) => (
             <EditRow key={index} prod={product} {...props} index={index} />
           ))}
