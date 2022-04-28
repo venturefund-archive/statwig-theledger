@@ -15,6 +15,7 @@ const CreateShipmentContainer = (props) => {
           <CreateShipment {...props} t={t} />
         </div>
       </div>
+      
     </div>
   );
 };

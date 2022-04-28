@@ -14,6 +14,7 @@ import ShipmentFailPopUp from "./shipmentFailPopUp";
 import Modal from "../../shared/modal";
 import { Formik } from "formik";
 import { getProducts } from "../../actions/poActions";
+import OrganisationPopUp from "../signUp/organisationPopUp";
 
 const customStyles = {
   // placeholder: (provided, state) => ({
@@ -40,6 +41,8 @@ const CreateShipment = (props) => {
   const { t } = props;
   const [senderOrganisation, setSenderOrganisation] = useState([]);
   const [products, setProducts] = useState([]);
+  const [CheckTabs, setCheckTabs] = useState(true);
+  const [showModal, setShowModal] = useState(true);
   const [addProducts, setAddProducts] = useState([{productName: "",
   manufacturer: "",
   productQuantity: "",
@@ -202,8 +205,26 @@ const CreateShipment = (props) => {
     setOrderDetails(soDetailsClone);
   };
 
+  const onkeydown = (event) => {
+    if (event.keyCode === 13) {
+    }
+  };
+
+  const closeModal2 = () => {
+    setShowModal(false);
+  };
+
   return (
     <div className='NewShipment'>
+      {showModal && (
+        <Modal
+          isMandatory={true}
+          close={() => closeModal2()}
+          size="modal-md" //for other size's use `modal-lg, modal-md, modal-sm`
+        >
+          <OrganisationPopUp onHide={closeModal} />
+        </Modal>
+      )}
       <h1 className='breadcrumb'>CREATE SHIPMENT</h1>
       <Formik
         enableReinitialize={true}
@@ -273,7 +294,7 @@ const CreateShipment = (props) => {
           dirty,
         }) => (
           <form onSubmit={handleSubmit} className='mb-3'>
-             <div className='row mb-3'>
+            {CheckTabs && (<div className='row mb-3'>
               <div className='col bg-white formContainer low mr-3'>
                 <div className='row mt-3'>
                   <div className='col-md-6 col-sm-12'>
@@ -343,8 +364,7 @@ const CreateShipment = (props) => {
                   )}
                 </div>
               </div>
-            </div>
-
+            </div>)}
 
             <div className='row mb-3'>
               <div className='col bg-white formContainer low mr-3'>
@@ -357,20 +377,17 @@ const CreateShipment = (props) => {
                       <label className='name' htmlFor='organizationName'>
                         {t("organisation_name")}*
                       </label>
-                      <input
-                        className={`input refship ${
-                          errors.fromOrg && touched.fromOrg
-                            ? "border-danger"
-                            : ""
-                        }`}
-                        type='text'
-                        id='organizationName'
-                        name='fromOrg'
-                        value={values.fromOrg}
-                        onBlur={handleBlur}
-                        placeholder='Enter Organisation Name'
-                        onChange={handleChange}
-                      />
+                      <div className='line'>
+                        <Select
+                          noOptionsMessage={() => t("no_options")}
+                          styles={customStyles}
+                          isDisabled={false}
+                          value={values.fromOrg}
+                          onBlur={handleBlur}
+                          placeholder='Enter Organisation Name'
+                          onChange={handleChange}
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -379,25 +396,27 @@ const CreateShipment = (props) => {
                       <label className='name' htmlFor='orgLocation'>
                         {t("organisation_location")}*
                       </label>
-                      <input
-                        className={`input refship ${
-                          errors.fromOrgLoc && touched.fromOrgLoc
-                            ? "border-danger"
-                            : ""
-                        }`}
-                        type='text'
-                        id='orgLocation'
-                        name='fromOrgLoc'
-                        value={values.fromOrgLoc}
-                        onBlur={handleBlur}
-                        placeholder='Enter Organisation Location'
-                        onChange={handleChange}
-                      />
+                      <div
+                        className={`line ${errors.fromOrgLoc && touched.fromOrgLoc
+                          ? "border-danger"
+                          : ""
+                          }`}
+                      >
+                        <Select
+                          noOptionsMessage={() => t("no_options")}
+                          styles={customStyles}
+                          isDisabled={false}
+                          placeholder={
+                            t("select") + " " + t("organisation_location")
+                          }
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+
 
             <div className='row mb-3'>
               <div className='col bg-white formContainer low mr-3'>
@@ -410,42 +429,53 @@ const CreateShipment = (props) => {
                       <label className='name' htmlFor='organizationName'>
                         {t("organisation_name")}*
                       </label>
-                      <input
-                        className={`input refship ${
-                          errors.fromOrgLoc && touched.fromOrgLoc
-                            ? "border-danger"
-                            : ""
-                        }`}
-                        type='text'
-                        id='organizationName'
-                        name='toOrg'
-                        value={values.toOrg}
-                        onBlur={handleBlur}
-                        placeholder='Enter Organisation Name'
-                        onChange={handleChange}
-                      />
+                      <div
+                        className={`line ${errors.toOrg && touched.toOrg ? "border-danger" : ""
+                          }`}
+                      >
+                        <Select
+                          noOptionsMessage={() => t("no_options")}
+                          styles={customStyles}
+                          value={values.toOrg}
+                          onBlur={handleBlur}
+                          onChange={handleChange}
+                          placeholder={
+                             t("select") + " " + t("organisation_name")
+                          }
+                          
+                        
+                        />
+                      </div>
                     </div>
                   </div>
+
 
                   <div className='col-md-6 com-sm-12'>
                     <div className='form-group'>
                       <label className='name' htmlFor='delLocation'>
                         {t("delivery_location")}*
                       </label>
-                      <input
-                        className={`input refship ${
-                          errors.fromOrgLoc && touched.fromOrgLoc
-                            ? "border-danger"
-                            : ""
-                        }`}
-                        type='text'
-                        id='delLocation'
-                        name='toOrgLoc'
-                        value={values.toOrgLoc}
-                        onBlur={handleBlur}
-                        placeholder='Enter Organisation Location'
-                        onChange={handleChange}
-                      />
+                      <div
+                        className={`line ${errors.toOrgLoc && touched.toOrgLoc
+                          ? "border-danger"
+                          : ""
+                          }`}
+                      >
+                       
+                        <Select
+                          styles={customStyles}
+                  
+                          placeholder={
+                            t("select_delivery_location")
+                          }
+                          value={values.toOrgLoc}
+                          onBlur={handleBlur}
+                          onChange={handleChange}
+
+                          noOptionsMessage={() => t("no_options")}
+                        />
+                
+                      </div>
                     </div>
                   </div>
                 </div>

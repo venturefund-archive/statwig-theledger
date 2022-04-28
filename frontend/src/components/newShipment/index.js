@@ -858,29 +858,6 @@ const NewShipment = (props) => {
                 <label htmlFor='client' className='headsup'>
                   {t("from")}
                 </label>
-                {/* <div className="row">
-                  <div className="col-md-6 com-sm-12">
-                    <div className="form-group">
-                      <label htmlFor="organizationType">Organisation Type*</label>
-                      <div className="form-control">
-                        <Select
-                          styles={customStyles}
-                          isDisabled={disabled}
-                          placeholder="Select Organisation Type"
-                          onChange={(v) => {
-                            setFieldValue('type', v?.value);
-                            setFieldValue('typeName', v?.label);
-                          }}
-                          defaultInputValue={values.typeName}
-                          options={orgTypes}
-                        />
-                        {errors.type && touched.type && (
-                          <span className="error-msg text-danger">{errors.type}</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div> */}
                 <div className='row'>
                   <div className='col-md-6 com-sm-12'>
                     <div className='form-group'>
@@ -888,12 +865,6 @@ const NewShipment = (props) => {
                         {t("organisation_name")}*
                       </label>
                       <div className='line'>
-                        {/* <DropdownButton
-                          name={senderOrganisation[0]}
-                          disabled={true}
-                          onSelect={() => {}}
-                          groups={senderOrganisation}
-                        /> */}
                         <Select
                           noOptionsMessage={() => t("no_options")}
                           styles={customStyles}
@@ -924,32 +895,6 @@ const NewShipment = (props) => {
                           : ""
                           }`}
                       >
-                        {/* <DropdownButton
-                          name={senderOrgLoc}
-                          name2="Select Organisation Location"
-                          disabled={false}
-                          onSelect={(v) => {
-                            onWarehouseChange(v.warehouseInventory);
-                            setFieldValue("fromOrg", senderOrganisation[0]);
-                            setSenderOrgLoc(
-                              v?.warehouseAddress
-                                ? v?.title + '/' + v?.warehouseAddress?.firstLine +
-                                    ", " +
-                                    v?.warehouseAddress?.city
-                                : v?.title + '/' + v.postalAddress
-                            );
-                            setFieldValue("fromOrgLoc", v.id);
-                      //      setFieldValue("products", []);
-                            setAddProducts((prod) => []);
-                            let newArr = {
-                              productName: "",
-                              manufacturer: "",
-                              productQuantity: "",
-                            };
-                            setAddProducts((prod) => [...prod, newArr]);
-                          }}
-                          groups={senderWarehouses}
-                        /> */}
                         <Select
                           noOptionsMessage={() => t("no_options")}
                           styles={customStyles}
@@ -995,11 +940,6 @@ const NewShipment = (props) => {
                               )
                           )}
                         />
-                        {/* {errors.fromOrgLoc && touched.fromOrgLoc && (
-                          <span className="error-msg text-danger">
-                            {errors.fromOrgLoc}
-                          </span>
-                        )} */}
                       </div>
                     </div>
                   </div>

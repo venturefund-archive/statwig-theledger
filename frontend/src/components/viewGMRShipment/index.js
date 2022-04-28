@@ -18,6 +18,7 @@ import { customReceiveShipment } from "../../actions/shipmentActions";
 import SuccessPopup from "./successPopup";
 import FailedPopup from "./FailedPopup";
 import Product from "./product";
+import Map from "../viewShipment/map";
 
 const ViewGMRShipment = (props) => {
   const { t } = props;
@@ -28,6 +29,20 @@ const ViewGMRShipment = (props) => {
   const [openShipping, setOpenShipping] = useState(false);
   const [receiveShipmentModal, setreceiveShipmentModal] = useState(false);
   const [FailPopUp, setFailPopUp] = useState(false);
+  const [CheckTabs, setCheckTabs] = useState([
+    {
+      name:"temperature",
+      check:true,
+    },
+    {
+      name:"driver",
+      check:true,
+    },
+    {
+      name:"maps",
+      check:false,
+    }
+  ]);
   const tracking = props.trackData;
   const status = tracking.status;
   const shippmentChainOfCustodyData = props.shippmentChainOfCustodyData;
@@ -37,6 +52,7 @@ const ViewGMRShipment = (props) => {
     setOpenShipping(false);
   };
 
+  console.log("check", CheckTabs[0].check);
   const receiveShipment = async (id) => {
     const res = await customReceiveShipment(id);
     if (res.success) {
@@ -147,15 +163,22 @@ const ViewGMRShipment = (props) => {
         </div>
         <div className='col-sm-8'>
           <div className='d-flex'>
-            <div className='col-sm-7'>
+            {CheckTabs[0].check && (<div className={`${CheckTabs[1].check ?  "col-sm-7" : "col"}`}>
               <p className='heading'>TEMPERATURE</p>
               <Chart shipmentId={id} />
-            </div>
-            <div className='col-sm-5 ml-2'>
+            </div>)}
+            {CheckTabs[1].check && (<div className={`${CheckTabs[0].check ?  "col-sm-5 ml-2" : "col" }`}>
               <p className='heading'>DRIVER STATS</p>
               <DriverGraph shipmentId={id} />
-            </div>
+            </div>)}
           </div>
+          {CheckTabs[2].check && (
+          <div className='row mb-4 mt-0'>
+            <div className='col' style={{ height: "350px" }}>
+              <p className='heading'>{t("geographical_tracking")}</p>
+              <Map data={shippmentChainOfCustodyData} t={t} />{" "}
+            </div>
+          </div>)}
           {openShipping && (
             <Modal
               title='Shipping Order Details'
