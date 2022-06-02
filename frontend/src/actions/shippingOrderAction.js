@@ -45,18 +45,18 @@ export const getShippingOrderById = async (id) => {
   }
 };
 
-export const getWarehouseByOrgId = async (id,type) => {
+export const getWarehouseByOrgId = async (id) => {
   try {
-    const result = await axios.get(config().getWarehouseByOrgId + id +`&userType=${type}`);
+    const result = await axios.get(config().getWarehouseByOrgId + id);
     return result.data;
   } catch (e) {
     return [];
   }
 };
 
-export const getAllOrganisations = async (type) => {
+export const getAllOrganisations = async () => {
   try {
-    const result = await axios.get(`${config().getOrganisations}?type=${type}`);
+    const result = await axios.get(config().getOrganisations);
     return result.data;
   } catch (e) {
     return [];
@@ -64,7 +64,7 @@ export const getAllOrganisations = async (type) => {
 };
 
 export const getProductsByInventoryId = async (id) => {
-  try { 
+  try {
     const result = await axios.get(config().getProductsByInventoryUrl + id);
     return result.data;
   } catch (e) {

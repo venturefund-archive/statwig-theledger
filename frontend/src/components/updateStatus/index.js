@@ -24,8 +24,7 @@ const UpdateStatus = (props) => {
   const dispatch = useDispatch();
   const profile = useSelector((state) => {
     return state.user;
-  });  
-  const intelEnabled = props.user.type == "Third Party Logistics" ? true : false;
+  });
   const { id } = props.match.params;
   const billNo = shipmentData?.airWayBillNo;
   const { quantity, weight } = useState("");
@@ -192,7 +191,7 @@ const UpdateStatus = (props) => {
     setOpenUpdatedStatus(false);
     props.history.push(
       `/${
-      intelEnabled === true ? `viewgmrshipment` : `viewshipment`
+        shipment.isCustom === true ? `viewgmrshipment` : `viewshipment`
       }/${id}`
     );
   };
@@ -262,7 +261,7 @@ const UpdateStatus = (props) => {
                           value={values.shipmentId}
                         />
                       </div>
-                      {intelEnabled ? (
+                      {props.user.isCustom ? (
                         <div>
                           <div className='form-group'>
                             <label className='mt-3 text-secondary'>
@@ -354,7 +353,7 @@ const UpdateStatus = (props) => {
                         />
                       </div>
                     </div>
-                    {intelEnabled ? (
+                    {props.user.isCustom ? (
                       <div>
                         <h6 className='poheads potext m-4'>
                           Shipment Cargo Status
@@ -702,7 +701,7 @@ const UpdateStatus = (props) => {
                         </>
                       )}
                     </div>
-                    {intelEnabled && (
+                    {props.user.isCustom && (
                       <>
                         <h6 className='poheads potext m-4'>{t("comment")}</h6>
                         <div className='panel commonpanle mb-5'>
@@ -812,7 +811,7 @@ const UpdateStatus = (props) => {
                       onClick={() =>
                         props.history.push(
                           `/${
-                            intelEnabled === true
+                            shipment.isCustom === true
                               ? `viewgmrshipment`
                               : `viewshipment`
                           }/${id}`
