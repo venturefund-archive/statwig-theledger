@@ -1,0 +1,23 @@
+.network-left-content-space{
+    width: 20rem;
+    background-color: rgb(198, 255, 236);
+    height: calc( 100vh - 85px );
+    position: fixed !important;
+    top: 85px !important;
+    left: 130px !important;
+    overflow-y: auto;
+}
+.network-right-content-space{
+    width: 100%;
+    background-color: rgb(170, 185, 204);
+    height: 200vh;
+}
+
+.network-grid-container{
+    display: grid;
+    grid-template-columns: 20rem 1fr;
+}
+
+.my-content{
+    height: 1200px;
+}
