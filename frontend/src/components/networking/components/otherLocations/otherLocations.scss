@@ -1,0 +1,27 @@
+.other-locations-heading{
+    font-size: 1.87rem;
+    color: var(--dark-black);
+    margin-bottom:0; 
+}
+.other-locations-text{
+    color:var(--light-grey);
+    font-size:1.1rem
+}
+.other-locations-buttons-container{
+    border:2px solid var(--teal);
+    border-radius:0.4rem;
+}
+.other-locations-buttons-container .active{
+    color:var(--white);
+    background-color: var(--teal);
+}
+.other-locations-buttons-container .inactive{
+    color:var(--teal);
+    background-color: var(--white);
+}
+.other-loc-btn{
+    font-size: 1rem;
+    border: none;
+    border-radius: 0.3rem;
+    padding: 0.8rem 1.42rem;
+}

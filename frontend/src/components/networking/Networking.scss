@@ -1,6 +1,6 @@
 .network-left-content-space{
-    width: 20rem;
-    background-color: rgb(198, 255, 236);
+    width: 22rem;
+    background-color: var(--white);
     height: calc( 100vh - 85px );
     position: fixed !important;
     top: 85px !important;
@@ -15,7 +15,7 @@
 
 .network-grid-container{
     display: grid;
-    grid-template-columns: 20rem 1fr;
+    grid-template-columns: 22rem 1fr;
 }
 
 .my-content{

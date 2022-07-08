@@ -1,0 +1,30 @@
+.location-cards-container {
+  gap: 1rem;
+}
+.location-card-container {
+  background: transparent
+    linear-gradient(155deg, #ffafbd 0%, #ffc3a0 59%, #ff9557 100%) 0% 0%
+    no-repeat padding-box;
+    padding: 15px;
+}
+.loc-card {
+  width: 155px;
+  height: 220px;
+  border-radius: 11px;
+}
+.partner-card-container {
+  background: #4e6af1 0% 0% no-repeat padding-box;
+}
+.loction-small-box{
+  background-color: var(--white-200);
+  border-radius: 15px;
+  width:55px;
+  height:56px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.location-icon{
+  width:34px;
+  height: 34px;
+}

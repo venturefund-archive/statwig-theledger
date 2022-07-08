@@ -1,0 +1,42 @@
+.searchCountries{
+    width:100%;
+    background-color: var(--grey-100);
+    border:none;
+    padding:0.8rem 0.5rem;
+    border-radius: 6px;
+    position: relative;
+}
+.search-icon{
+    position: absolute;
+    right:40px;
+}
+
+input[type="search"]::-webkit-search-cancel-button {
+    display: none;
+  }
+  .countries-list-heading{
+    color:var(--light-grey);
+    margin-top: 1.8rem;
+  }
+  .country-list-dropdown{
+    background: #F7F7F7 0% 0% no-repeat padding-box;
+    border:1px solid var(--grey-100);
+    padding: 0.8rem 0;
+  }
+  .list-options{
+    color:var(--grey);
+    font-size: 13px;
+  }
+  .unordered-country-list{
+    border: 1px solid var(--grey-100);
+    background-color: var(--white-200);
+  }
+  .country-list-item{
+    color:var(--blue-800);
+    font-size: 0.9rem;
+    margin:0.2rem 0;
+    padding: 0 1rem;
+  }
+  .fa-angle-down{
+    cursor: pointer;
+  }

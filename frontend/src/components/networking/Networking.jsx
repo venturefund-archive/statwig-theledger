@@ -1,5 +1,6 @@
 import React from "react";
 import "./Networking.scss";
+import NetworkSidebar from "./components/networkSidebar/NetworkSidebar";
 
 export default function Networking() {
   return (
@@ -7,7 +8,9 @@ export default function Networking() {
       <div className="network-grid-container">
         <div className="network-left">
           <div className="network-left-content-space">
-            <div className="my-content">Network Left Area</div>
+            <div className="my-content">
+              <NetworkSidebar/>
+            </div>
           </div>
         </div>
         <div className="network-right">
