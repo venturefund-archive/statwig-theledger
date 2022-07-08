@@ -14,7 +14,9 @@ body{
   justify-content: center;
   align-items: center;
 }
-
+.color-white{
+  color:var(--white-200);
+}
 .error-template {
   margin-top: 10%;
   padding: 40px 15px;
