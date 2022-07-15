@@ -1,6 +1,6 @@
 import React from "react";
 
-const TopSellerProduct = ({ bigBoxColor, smallBoxColor }) => {
+const TopSellerProduct = ({ bigBoxColor, smallBoxColor, Distributor }) => {
   return (
     <>
       <div
@@ -14,13 +14,17 @@ const TopSellerProduct = ({ bigBoxColor, smallBoxColor }) => {
           <i class="fa-solid fa-prescription-bottle-medical light"></i>
         </div>
         <div className="best-seller-content">
-          <p className="mi-body-md f-500 mi-reset">Paractamol</p>
-          <div className="mi-table-data">
-            <p className="mi-body-sm black f-700 mi-reset">10000</p>
-            <p className="mi-body-xs grey f-500 mi-reset mi-no-wrap">
-              ( Packs )
-            </p>
+          <div className="product-details">
+            <p className="mi-body-md f-500 mi-reset">Paractamol</p>
+            <div className="mi-table-data">
+              <p className="mi-body-xs black f-700 mi-reset">10000 (Pks)</p>
+            </div>
           </div>
+          {Distributor && (
+            <div className="manufacturer-details">
+              <p className="mi-body-sm grey f-400 mi-reset">ABC Manufacturer</p>
+            </div>
+          )}
         </div>
       </div>
     </>

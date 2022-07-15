@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
 import Table from "@mui/material/Table";
@@ -7,7 +7,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import BestSellerRow from "./BestSellerRow";
 
-export default function BestSeller() {
+export default function BestSeller({ Distributor }) {
   const Data = [
     {
       id: "1",
@@ -50,6 +50,14 @@ export default function BestSeller() {
               <TableCell className="mi-custom-tableHead">
                 <p className="mi-body-sm mi-reset grey-400">Product Name</p>
               </TableCell>
+              {Distributor && (
+                <TableCell className="mi-custom-tableHead">
+                  <p className="mi-body-sm mi-reset grey-400">
+                    Manufacturer Name
+                  </p>
+                </TableCell>
+              )}
+
               <TableCell className="mi-custom-tableHead">
                 <p className="mi-body-sm mi-reset grey-400">
                   No. of units sold
@@ -60,7 +68,7 @@ export default function BestSeller() {
           </TableHead>
           <TableBody>
             {Data.map((rows) => (
-              <BestSellerRow key={rows.id} />
+              <BestSellerRow key={rows.id} Distributor={Distributor} />
             ))}
           </TableBody>
         </Table>

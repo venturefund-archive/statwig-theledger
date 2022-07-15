@@ -5,7 +5,7 @@ import Outstock from "./outofstock/Outstock";
 import "./Report.scss";
 import Tab from "./tabs/Tab";
 
-export default function Reports() {
+export default function Reports({ Distributor }) {
   const [MainTab, setMainTab] = useState("INSTOCK");
   const [SubTab, setSubTab] = useState("MY");
   return (
@@ -28,9 +28,9 @@ export default function Reports() {
         </div>
 
         <div className="report-table-container">
-          {MainTab === "INSTOCK" && <Instock />}
-          {MainTab === "OUTSTOCK" && <Outstock />}
-          {MainTab === "BESTSELLER" && <BestSeller />}
+          {MainTab === "INSTOCK" && <Instock Distributor={Distributor} />}
+          {MainTab === "OUTSTOCK" && <Outstock Distributor={Distributor} />}
+          {MainTab === "BESTSELLER" && <BestSeller Distributor={Distributor} />}
         </div>
       </div>
     </div>

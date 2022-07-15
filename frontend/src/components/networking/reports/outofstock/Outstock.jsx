@@ -7,7 +7,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import OutstockRow from "./OutstockRow";
 
-export default function Outstock() {
+export default function Outstock({ Distributor }) {
   const Data = [
     {
       id: "1",
@@ -50,6 +50,13 @@ export default function Outstock() {
               <TableCell className="mi-custom-tableHead">
                 <p className="mi-body-sm mi-reset grey-400">Product Name</p>
               </TableCell>
+              {Distributor && (
+                <TableCell className="mi-custom-tableHead">
+                  <p className="mi-body-sm mi-reset grey-400">
+                    Manufacturer Name
+                  </p>
+                </TableCell>
+              )}
               <TableCell className="mi-custom-tableHead">
                 <p className="mi-body-sm mi-reset grey-400">
                   Product out of stock
@@ -60,7 +67,7 @@ export default function Outstock() {
           </TableHead>
           <TableBody>
             {Data.map((rows) => (
-              <OutstockRow key={rows.id} />
+              <OutstockRow key={rows.id} Distributor={Distributor} />
             ))}
           </TableBody>
         </Table>

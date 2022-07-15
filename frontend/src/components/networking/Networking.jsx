@@ -9,11 +9,15 @@ const label = { inputProps: { "aria-label": "Checkbox demo" } };
 
 export default function Networking() {
   const [MobileDashboard, setMobileDashboard] = useState(false);
+  const [Distributor, setDistributor] = useState(false);
   return (
     <div className="network-main-layout">
       <div className="network-grid-container">
         <div className={`network-dashboard ${MobileDashboard && "active"}`}>
-          <NetworkDashboard setMobileDashboard={setMobileDashboard} />
+          <NetworkDashboard
+            setMobileDashboard={setMobileDashboard}
+            Distributor={Distributor}
+          />
         </div>
         <div className="network-workspace">
           <div className="network-map-holder">
@@ -38,7 +42,7 @@ export default function Networking() {
             <NetworkMap />
           </div>
           <div className="network-report-holders">
-            <Reports />
+            <Reports Distributor={Distributor} />
           </div>
         </div>
       </div>

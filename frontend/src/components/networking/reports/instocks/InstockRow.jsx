@@ -8,7 +8,7 @@ import DialogContent from "@mui/material/DialogContent";
 import BatchDetails from "./batchDetails/BatchDetails";
 import NetworkGraph from "../../networkGraphs/NetworkGraph";
 
-export default function InstockRow() {
+export default function InstockRow({ Distributor }) {
   const [open, setOpen] = React.useState(false);
 
   const handleClickOpen = () => {
@@ -35,7 +35,7 @@ export default function InstockRow() {
         sx={{ "& > *": { borderBottom: "unset !important" } }}
         className="mi-custom-tableRow"
       >
-        <TableCell className="mi-custom-cell mi-radius-first mi-first-cell-padding">
+        <TableCell className="mi-custom-cell mi-radius-first">
           <div className="mi-table-data">
             <div className="table-icon-space">
               <i class="fa-solid fa-prescription-bottle-medical"></i>
@@ -54,6 +54,13 @@ export default function InstockRow() {
             </Tooltip>
           </div>
         </TableCell>
+        {Distributor && (
+        <TableCell className="mi-custom-cell">
+          <div className="mi-table-data">
+            <p className="mi-body-md black f-700 mi-reset">ABC Manufacturer</p>
+          </div>
+        </TableCell>
+        )}
         <TableCell className="mi-custom-cell">
           <div className="mi-table-data">
             <p className="mi-body-md black f-700 mi-reset">10000</p>

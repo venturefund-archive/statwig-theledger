@@ -1,7 +1,7 @@
 import React from "react";
 import TopSellerProduct from "./TopSellerProduct";
 
-const TopSeller = () => {
+const TopSeller = ({ Distributor }) => {
   const smallBoxColorsArray = [
     "#FDCD42",
     "#FE8E68",
@@ -30,6 +30,7 @@ const TopSeller = () => {
           <TopSellerProduct
             bigBoxColor={bigBoxColor}
             smallBoxColor={smallBoxColorsArray[index]}
+            Distributor={Distributor}
           />
         ))}
       </div>
