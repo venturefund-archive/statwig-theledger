@@ -3741,124 +3741,6 @@ exports.fetchOutboundShipments = [
   },
 ];
 
-exports.fetchSupplierAndReceiverList = [
-  auth,
-  async (req, res) => {
-    try {
-      // const { warehouseId } = req.user;
-      // let supplierReceiverList = await OrganisationModel.find( { warehouses: warehoueseId }, ['id', 'name']);
-      let supplierReceiverList = await OrganisationModel.find({}, [
-        "id",
-        "name",
-      ]);
-
-      if (supplierReceiverList) {
-        return apiResponse.successResponseWithMultipleData(
-          res,
-          "supplierReceiverList",
-          supplierReceiverList
-        );
-      }
-    } catch (err) {
-      return apiResponse.ErrorResponse(res, err.message);
-    }
-  },
-];
-
-exports.fetchAllWarehouseShipments = [
-  auth,
-  async (req, res) => {
-    try {
-      const { skip, limit } = req.query;
-      const { emailId, phoneNumber } = req.user;
-      let empDetails;
-      if (emailId) empDetails = await EmployeeModel.findOne({ emailId });
-      else {
-        empDetails = await EmployeeModel.findOne({ phoneNumber });
-      }
-      const warehouses = empDetails.warehouseId;
-      const shipments = await ShipmentModel.aggregate([
-        {
-          $match: {
-            $or: [
-              {
-                "supplier.locationId": { $in: warehouses },
-              },
-              {
-                "receiver.locationId": { $in: warehouses },
-              },
-            ],
-          },
-        },
-        {
-          $lookup: {
-            from: "warehouses",
-            localField: "supplier.locationId",
-            foreignField: "id",
-            as: "supplier.warehouse",
-          },
-        },
-        {
-          $unwind: {
-            path: "$supplier.warehouse",
-          },
-        },
-        {
-          $lookup: {
-            from: "organisations",
-            localField: "supplier.warehouse.organisationId",
-            foreignField: "id",
-            as: "supplier.org",
-          },
-        },
-        {
-          $unwind: {
-            path: "$supplier.org",
-          },
-        },
-        {
-          $lookup: {
-            from: "warehouses",
-            localField: "receiver.locationId",
-            foreignField: "id",
-            as: "receiver.warehouse",
-          },
-        },
-        {
-          $unwind: {
-            path: "$receiver.warehouse",
-          },
-        },
-        {
-          $lookup: {
-            from: "organisations",
-            localField: "receiver.warehouse.organisationId",
-            foreignField: "id",
-            as: "receiver.org",
-          },
-        },
-        {
-          $unwind: {
-            path: "$receiver.org",
-          },
-        },
-      ])
-        .sort({
-          createdAt: -1,
-        })
-        .skip(parseInt(skip))
-        .limit(parseInt(limit));
-      return apiResponse.successResponseWithData(
-        res,
-        "Shipments Table",
-        shipments
-      );
-    } catch (err) {
-      return apiResponse.ErrorResponse(res, err.message);
-    }
-  },
-];
-
 exports.trackJourney = [
   auth,
   async (req, res) => {
@@ -4266,6 +4148,127 @@ exports.trackJourney = [
     }
   },
 ];
+
+
+exports.fetchSupplierAndReceiverList = [
+  auth,
+  async (req, res) => {
+    try {
+      // const { warehouseId } = req.user;
+      // let supplierReceiverList = await OrganisationModel.find( { warehouses: warehoueseId }, ['id', 'name']);
+      let supplierReceiverList = await OrganisationModel.find({}, [
+        "id",
+        "name",
+      ]);
+
+      if (supplierReceiverList) {
+        return apiResponse.successResponseWithMultipleData(
+          res,
+          "supplierReceiverList",
+          supplierReceiverList
+        );
+      }
+    } catch (err) {
+      return apiResponse.ErrorResponse(res, err.message);
+    }
+  },
+];
+
+exports.fetchAllWarehouseShipments = [
+  auth,
+  async (req, res) => {
+    try {
+      const { skip, limit } = req.query;
+      const { emailId, phoneNumber } = req.user;
+      let empDetails;
+      if (emailId) empDetails = await EmployeeModel.findOne({ emailId });
+      else {
+        empDetails = await EmployeeModel.findOne({ phoneNumber });
+      }
+      const warehouses = empDetails.warehouseId;
+      const shipments = await ShipmentModel.aggregate([
+        {
+          $match: {
+            $or: [
+              {
+                "supplier.locationId": { $in: warehouses },
+              },
+              {
+                "receiver.locationId": { $in: warehouses },
+              },
+            ],
+          },
+        },
+        {
+          $lookup: {
+            from: "warehouses",
+            localField: "supplier.locationId",
+            foreignField: "id",
+            as: "supplier.warehouse",
+          },
+        },
+        {
+          $unwind: {
+            path: "$supplier.warehouse",
+          },
+        },
+        {
+          $lookup: {
+            from: "organisations",
+            localField: "supplier.warehouse.organisationId",
+            foreignField: "id",
+            as: "supplier.org",
+          },
+        },
+        {
+          $unwind: {
+            path: "$supplier.org",
+          },
+        },
+        {
+          $lookup: {
+            from: "warehouses",
+            localField: "receiver.locationId",
+            foreignField: "id",
+            as: "receiver.warehouse",
+          },
+        },
+        {
+          $unwind: {
+            path: "$receiver.warehouse",
+          },
+        },
+        {
+          $lookup: {
+            from: "organisations",
+            localField: "receiver.warehouse.organisationId",
+            foreignField: "id",
+            as: "receiver.org",
+          },
+        },
+        {
+          $unwind: {
+            path: "$receiver.org",
+          },
+        },
+      ])
+        .sort({
+          createdAt: -1,
+        })
+        .skip(parseInt(skip))
+        .limit(parseInt(limit));
+      return apiResponse.successResponseWithData(
+        res,
+        "Shipments Table",
+        shipments
+      );
+    } catch (err) {
+      return apiResponse.ErrorResponse(res, err.message);
+    }
+  },
+];
+
+
 
 exports.checkShipmentID = [
   auth,
