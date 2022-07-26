@@ -823,6 +823,7 @@ exports.createShipment = [
     }
   },
 ];
+
 exports.createShipmentForTpl = [
   auth,
   async (req, res) => {

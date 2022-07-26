@@ -44,7 +44,7 @@ const OrganisationPopUp = (props) => {
     
     async function fetchUnregisteredOrgs() {
       let arr = await fetchUnregisteredOrganisations();
-      let temp = arr.data.map((elem) => elem.name);
+      let temp = arr?.data?.map((elem) => elem.name);
       setUnregisteredOrganisations(temp);
     }
     fetchUnregisteredOrgs();
@@ -222,8 +222,7 @@ const OrganisationPopUp = (props) => {
 														className="form-control2"
 														name="name"
 														value={values.name}
-														handleChange={handleChange}
-														handleBlur={handleBlur}
+														onBlur={handleBlur}
 														//error={errors.name}
 														touched={touched.name}
 														onChange={(e) => {
@@ -375,8 +374,7 @@ const OrganisationPopUp = (props) => {
 													className="form-controll"
 													name="line1"
 													value={values.line1}
-													handleChange={handleChange}
-													handleBlur={handleBlur}
+													onBlur={handleBlur}
 													//error={errors.line1}
 													touched={touched.line1}
 													onChange={(e) => {
@@ -413,8 +411,7 @@ const OrganisationPopUp = (props) => {
 													className="form-control2"
 													name="pincode"
 													value={values.pincode}
-													handleChange={handleChange}
-													handleBlur={handleBlur}
+													onBlur={handleBlur}
 													//error={errors.pincode}
 													touched={touched.pincode}
 													onChange={(e) => {

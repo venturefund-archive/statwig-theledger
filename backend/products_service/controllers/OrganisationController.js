@@ -66,7 +66,6 @@ exports.getUnregisteredOrganisations = [
   },
 ];
 
-
 exports.saveNewOrg = [
   auth,
   async (req, res) => {
