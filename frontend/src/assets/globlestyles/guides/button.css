@@ -96,6 +96,11 @@
   border:1px solid var(--darkblue);
   color:var(--white);
 }
+.mi-blue-btn{
+  background-color: #2585F3;
+  color:var(--light);
+  border:1px solid #2585F3;
+}
 .mi-btn-red {
   background-color: var(--btn-red);
   border: 1px solid var(--btn-red);

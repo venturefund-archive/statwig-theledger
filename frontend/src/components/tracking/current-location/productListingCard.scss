@@ -1,0 +1,21 @@
+.productlisting-card-container{
+    background-color: #F6FBFF;
+    padding : 0.5rem 0.4rem;
+    border-radius: 9px;
+    margin-bottom: 1rem;
+}
+.product-listing-unordered-list{
+    margin-top: 1rem;
+}
+.product-listing-item{
+    font-size: 14px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width:15.625rem;
+}
+.color-green{
+    color:var(--green);
+}
+.color-blue{
+    color:var(--blue-900)
+}

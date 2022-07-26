@@ -38,7 +38,9 @@ export default function Tracking() {
           {LocationTab === "CHAIN" && <ChainofCustody />}
           {LocationTab === "LOCATION" && <CurrentLocation />}
         </div>
-        <div className="tracking-map-area"></div>
+        <div className="tracking-map-area">
+          
+        </div>
       </div>
     </div>
   );

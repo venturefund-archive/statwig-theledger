@@ -1,0 +1,42 @@
+.current-location-icon{
+    color:var(--crimson-red);
+    font-size: 1.3rem;
+}
+.current-location-icon-ctn{
+    background-color: var(--grey-800);
+    padding: 0.3rem 0.6rem;
+    border-radius: 5px;
+    margin-right: 1rem;
+}
+.current-loc-org-name{
+    color:var(--blue-900);
+}
+.current-loc-address{
+    color:var(--grey-900);
+    font-size: 14px;
+}
+.current-loc-date{
+    color:var(--black-900);
+    font-weight: 600;
+    font-size: 14px;
+    
+}
+.current-loc-org-name,.current-loc-address{
+    margin: 0;
+}
+.current-location-header{
+    border-bottom: 1px solid var(--grey-100);
+ 
+}
+.current-location-container{
+    background-color: var(--white-200);
+    border-radius: 15px;
+    padding:1rem;
+    box-shadow: 1px 3px 10px #0000000F;
+    margin-bottom: 1rem;
+}
+.product-listing-heading{
+    color:#333333;
+    font-weight: 600;
+    font-size: 1rem;
+}
