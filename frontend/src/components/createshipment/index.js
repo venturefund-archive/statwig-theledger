@@ -305,6 +305,7 @@ const CreateShipment = (props) => {
 		// dates.forEach(date => { if (!error) dateValidation(date) });
 		const {
 			toOrg,
+			fromOrg,
 			airWayBillNo,
 			reset,
 			labelCode,
@@ -336,7 +337,7 @@ const CreateShipment = (props) => {
 				taggedShipments: shipmentID,
 				externalShipmentId: "",
 				supplier: {
-					id: user.organisationId,
+					id: fromOrg.split("/")[0],
 					locationId: fromOrgLoc,
 				},
 				receiver: {
