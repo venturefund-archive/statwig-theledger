@@ -841,7 +841,7 @@ const Header = (props) => {
                 anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
               >
                 <MenuItem>
-                  <div className='profileName'>
+                  <div className='profileName mi-flex'>
                     <h1 className='nav-heading'>{profile?.firstName}</h1>
                     <p className='nav-subheading'>
                       {profile?.organisation?.split("/")[0]}

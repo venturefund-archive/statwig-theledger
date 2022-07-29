@@ -15,7 +15,7 @@
 }
 .read {
   text-decoration: "none";
-  background-color: #f1eeee;
+  background-color: #f2f2f2;
 }
 .unread {
   text-decoration: "none";
@@ -100,7 +100,7 @@
 }
 .nav-subheading {
   font-size: 0.8rem;
-  margin: 0 !important;
+  margin : 0 0 0 0.4rem !important;
   color: #0b65c1;
   font-weight: normal !important;
 }

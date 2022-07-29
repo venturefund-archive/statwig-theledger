@@ -724,7 +724,7 @@ const Orders = (props) => {
         <Cards {...props} setData={setData} t={t} />
       )}
       <div className="mt-4">
-        <Tabs
+        <Tabs style={{cursor:"pointer"}}
           {...props}
           setvisible={setvisible}
           visible={visible}

@@ -113,6 +113,8 @@
     left: 5px;
     right: -15px;
     will-change: transform;
+    min-width: 400px;
+    overflow-x: hidden;
   }
   .dropdownIcon {
     position: absolute;
@@ -144,4 +146,7 @@
 }
 .loc-text {
   color: #0b65c1 !important;
+}
+.dropdown-item{
+  white-space:normal !important;
 }

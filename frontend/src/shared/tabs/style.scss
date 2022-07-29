@@ -2,8 +2,8 @@
 
 .tabs {
   border-bottom: 3px solid #d6d6d6;
-  margin-left: -5rem;
-  padding-left: 5rem;
+  // margin-left: -5rem;
+  padding-left: -5rem;
 
   ul {
     li {
@@ -32,4 +32,7 @@
       }
     }
   }
+}
+.nav-link{
+  cursor: pointer;
 }

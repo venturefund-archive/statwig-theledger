@@ -18,8 +18,17 @@ export const AddLocation = (props) => {
 
   return (
     <div>
-      <div className='addproduct'>
-        <h1 className='breadcrumb'>{t("ADD_NEW_LOCATION")}</h1>
+      <div className="addproduct">
+        <h1
+          className="vl-heading-bdr black f-700"
+          style={{
+            paddingBottom: "10px",
+            paddingTop: "10px",
+            marginBottom: "1.2rem",
+          }}
+        >
+          {t("ADD_NEW_LOCATION")}
+        </h1>
         <AddLocationCard {...props} />
       </div>
     </div>
@@ -127,8 +136,8 @@ export const AddLocationCard = (props) => {
 
   return (
     <>
-      <div className='card'>
-        <div className='card-body'>
+      <div className="card">
+        <div className="card-body">
           <Formik
             enableReinitialize={true}
             initialValues={{
@@ -177,23 +186,23 @@ export const AddLocationCard = (props) => {
               setFieldValue,
               dirty,
             }) => (
-              <form onSubmit={handleSubmit} className='mb-3'>
-                <div className='row'>
+              <form onSubmit={handleSubmit} className="mb-3">
+                <div className="row">
                   <div
                     className={
                       props.popup ? `col-md-12 com-sm-12` : `col-md-6 com-sm-12`
                     }
                   >
-                    <div className='form-group'>
-                      <label className='col-sm-6' htmlFor='addressTitle'>
+                    <div className="form-group">
+                      <label className="col-sm-6" htmlFor="addressTitle">
                         {t("Address_Title")}*
                       </label>
                       <input
                         style={{ flexBasis: "47%" }}
-                        className='addlocP'
-                        type='text'
-                        id='referenceShipmentId'
-                        name='addressTitle'
+                        className="addlocP"
+                        type="text"
+                        id="referenceShipmentId"
+                        name="addressTitle"
                         placeholder={t("Enter_Title")}
                         value={values.addressTitle}
                         onBlur={handleBlur}
@@ -209,23 +218,23 @@ export const AddLocationCard = (props) => {
                     </div>
                   </div>
                 </div>
-                <div className='row'>
+                <div className="row">
                   <div
                     className={
                       props.popup ? `col-md-12 com-sm-12` : `col-md-6 com-sm-12`
                     }
                   >
-                    <div className='form-group'>
-                      <label className='col-sm-6' htmlFor='region'>
+                    <div className="form-group">
+                      <label className="col-sm-6" htmlFor="region">
                         {t("Region")}*
                       </label>
-                      <div className='' style={{ flexBasis: "47%" }}>
+                      <div className="" style={{ flexBasis: "47%" }}>
                         <Autocomplete
                           value={region}
-                          labelId='demo-simple-select-label'
-                          id='demo-simple-select controllable-states-demo'
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select controllable-states-demo"
                           placeholder={
-                            <div className='select-placeholder-text'>
+                            <div className="select-placeholder-text">
                               {t("Select_Region")}
                             </div>
                           }
@@ -242,7 +251,7 @@ export const AddLocationCard = (props) => {
                           )}
                         />
                         {errors.region && touched.region && (
-                          <span className='error-msg text-danger-ANL'>
+                          <span className="error-msg text-danger-ANL">
                             {errors.region}
                           </span>
                         )}
@@ -250,22 +259,22 @@ export const AddLocationCard = (props) => {
                     </div>
                   </div>
                 </div>
-                <div className='row'>
+                <div className="row">
                   <div
                     className={
                       props.popup ? `col-md-12 com-sm-12` : `col-md-6 com-sm-12`
                     }
                   >
-                    <div className='form-group'>
-                      <label className='col-sm-6' htmlFor='country'>
+                    <div className="form-group">
+                      <label className="col-sm-6" htmlFor="country">
                         {t("Country")}*
                       </label>
-                      <div className='' style={{ flexBasis: "47%" }}>
+                      <div className="" style={{ flexBasis: "47%" }}>
                         <Autocomplete
-                          labelId='demo-simple-select-label'
-                          id='demo-simple-select controllable-states-demo'
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select controllable-states-demo"
                           placeholder={
-                            <div className='select-placeholder-text'>
+                            <div className="select-placeholder-text">
                               {t("Select_Country")}
                             </div>
                           }
@@ -289,7 +298,7 @@ export const AddLocationCard = (props) => {
                         />
 
                         {errors.country && touched.country && (
-                          <span className='error-msg text-danger-ANL'>
+                          <span className="error-msg text-danger-ANL">
                             {errors.country}
                           </span>
                         )}
@@ -297,22 +306,22 @@ export const AddLocationCard = (props) => {
                     </div>
                   </div>
                 </div>
-                <div className='row'>
+                <div className="row">
                   <div
                     className={
                       props.popup ? `col-md-12 com-sm-12` : `col-md-6 com-sm-12`
                     }
                   >
-                    <div className='form-group'>
-                      <label className='col-sm-6' htmlFor='state'>
+                    <div className="form-group">
+                      <label className="col-sm-6" htmlFor="state">
                         {t("State")}*
                       </label>
-                      <div className='' style={{ flexBasis: "47%" }}>
+                      <div className="" style={{ flexBasis: "47%" }}>
                         <Autocomplete
-                          labelId='demo-simple-select-label'
-                          id='demo-simple-select controllable-states-demo'
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select controllable-states-demo"
                           placeholder={
-                            <div className='select-placeholder-text'>
+                            <div className="select-placeholder-text">
                               {t("Select_State")}
                             </div>
                           }
@@ -329,7 +338,7 @@ export const AddLocationCard = (props) => {
                           )}
                         />
                         {errors.state && touched.state && (
-                          <span className='error-msg text-danger-ANL'>
+                          <span className="error-msg text-danger-ANL">
                             {errors.state}
                           </span>
                         )}
@@ -338,22 +347,22 @@ export const AddLocationCard = (props) => {
                   </div>
                 </div>
 
-                <div className='row'>
+                <div className="row">
                   <div
                     className={
                       props.popup ? `col-md-12 com-sm-12` : `col-md-6 com-sm-12`
                     }
                   >
-                    <div className='form-group'>
-                      <label className='col-sm-6' htmlFor='city'>
+                    <div className="form-group">
+                      <label className="col-sm-6" htmlFor="city">
                         {t("City")}*
                       </label>
-                      <div className='' style={{ flexBasis: "47%" }}>
+                      <div className="" style={{ flexBasis: "47%" }}>
                         <Autocomplete
-                          labelId='demo-simple-select-label'
-                          id='demo-simple-select controllable-states-demo'
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select controllable-states-demo"
                           placeholder={
-                            <div className='select-placeholder-text'>
+                            <div className="select-placeholder-text">
                               {t("Select_City")}
                             </div>
                           }
@@ -377,7 +386,7 @@ export const AddLocationCard = (props) => {
                           renderInput={(params) => <TextField {...params} label="Select City"  />}
                         /> */}
                         {errors.city && touched.city && (
-                          <span className='error-msg text-danger-ANL'>
+                          <span className="error-msg text-danger-ANL">
                             {errors.city}
                           </span>
                         )}
@@ -386,22 +395,22 @@ export const AddLocationCard = (props) => {
                   </div>
                 </div>
 
-                <div className='row'>
+                <div className="row">
                   <div
                     className={
                       props.popup ? `col-md-12 com-sm-12` : `col-md-6 com-sm-12`
                     }
                   >
-                    <div className='form-group'>
-                      <label className='col-sm-6' htmlFor='addressLine'>
+                    <div className="form-group">
+                      <label className="col-sm-6" htmlFor="addressLine">
                         {t("Address_Line")}*
                       </label>
                       <input
                         style={{ flexBasis: "47%" }}
-                        id='standard-basic'
+                        id="standard-basic"
                         placeholder={t("Enter_Address_Line")}
-                        className='addlocP mt-2'
-                        name='addressTitle'
+                        className="addlocP mt-2"
+                        name="addressTitle"
                         value={values.addressLine}
                         onBlur={handleBlur}
                         onChange={(e) => {
@@ -427,23 +436,23 @@ export const AddLocationCard = (props) => {
                     </div>
                   </div>
                 </div>
-                <div className='row'>
+                <div className="row">
                   <div
                     className={
                       props.popup ? `col-md-12 com-sm-16` : `col-md-6 com-sm-16`
                     }
                   >
-                    <div className='form-group'>
-                      <label className='col-sm-6' htmlFor='Select Location'>
+                    <div className="form-group">
+                      <label className="col-sm-6" htmlFor="Select Location">
                         {t("pincode")}*
                       </label>
                       <input
-                        type='number'
+                        type="number"
                         style={{ flexBasis: "47%" }}
-                        id='standard-basic'
+                        id="standard-basic"
                         placeholder={t("pincode")}
-                        className='addlocP mt-2'
-                        name='pincode'
+                        className="addlocP mt-2"
+                        name="pincode"
                         value={values.pincode}
                         onBlur={handleBlur}
                         onChange={(e) => {
@@ -473,9 +482,9 @@ export const AddLocationCard = (props) => {
                     </div>
                   </div>
                 </div>
-                <div className='d-flex flex-row-reverse'>
+                <div className="d-flex flex-row-reverse">
                   <button
-                    className='btn btn-yellow float-right font-weight-bold'
+                    className="btn btn-yellow float-right font-weight-bold"
                     disabled={
                       !(
                         values.addressTitle &&
@@ -485,15 +494,15 @@ export const AddLocationCard = (props) => {
                         addressLine.length > 0
                       )
                     }
-                    type='submit'
+                    type="submit"
                   >
                     <span>
                       {!intelEnabled ? t("Request_Admin_For_Approval") : "Save"}
                     </span>
                   </button>
                   <button
-                    type='button'
-                    className='btn btn-white shadow-radius font-bold mr-3 font-weight-bold'
+                    type="button"
+                    className="mi-btn mi-btn-md mi-btn-blue font-bold mr-3 font-weight-bold"
                     onClick={() => {
                       if (props?.popup) {
                         props.close();
@@ -525,7 +534,7 @@ export const AddLocationCard = (props) => {
       {addedLocationModal && (
         <Modal
           close={() => closeModalAddedLocation()}
-          size='modal-sm' //for other size's use `modal-lg, modal-md, modal-sm`
+          size="modal-sm" //for other size's use `modal-lg, modal-md, modal-sm`
         >
           <SuccessPopup
             onHide={closeModalAddedLocation} //FailurePopUp

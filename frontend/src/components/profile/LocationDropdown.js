@@ -89,7 +89,7 @@ const LocationDropdown = (props) => {
         <div
           ref={ref}
           className={`dropdown-menu show dropdownCard ${dClass}`}
-          style={{ width: "23vw" }}
+          style={{ width: "10vw" }}
         >
           {(groups && groups.length) ?
             (groups.map((item, index) => {
@@ -110,6 +110,7 @@ const LocationDropdown = (props) => {
                             fontWeight: "bolder",
                             color: "#0093e9",
                             width: "50%",
+                            minWidth:"500px"
                           }}
                         >
                           {item.title}
