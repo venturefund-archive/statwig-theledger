@@ -53,12 +53,12 @@ const LastMile = (props) => {
     coloumn4: t("product"),
     coloumn5: t("date_time"),
 
-    img1: <img src={patient} width="15" height="20" className="pb-1" alt="" />,
-    img2: <img src={idprrof} width="20" height="20" className="pb-1" alt="" />,
-    img3: <img src={mobile} width="16" height="25" className="pb-1" alt="" />,
-    img4: <img src={Product} width="20" height="22" className="pb-1" alt="" />,
+    img1: <img src={patient} width="14" height="19" className="pb-1" alt="" />,
+    img2: <img src={idprrof} width="16" height="16" className="pb-1" alt="" />,
+    img3: <img src={mobile} width="16" height="16" className="pb-1" alt="" />,
+    img4: <img src={Product} width="16" height="16" className="pb-1" alt="" />,
     img5: (
-      <img src={Date_time} width="19" height="22" className="pb-1" alt="" />
+      <img src={Date_time} width="16" height="16" className="pb-1" alt="" />
     ),
   };
 
@@ -175,7 +175,7 @@ const LastMile = (props) => {
       dispatch(
         getEOLInfo(0, 10, country, state, district, location, product, region)
       );
-    }
+     }       
   };
 
   return (
@@ -190,9 +190,13 @@ const LastMile = (props) => {
             <div className="col tab" style={{ width: "76%" }}>
               <div className="">
                 <TableFilter data={headers} fb="85%" />
+                     
+            
               </div>
             </div>
           </div>
+              
+            
           <div className="ribben-space" style={{ width: "76%" }}>
             <Table
               {...props}
@@ -204,7 +208,6 @@ const LastMile = (props) => {
             />
           </div>
         </div>
-
         <div className="col-xl-3">
           <div className="dashbar">
             <div className="d-flex flex-column mb-2 region pt-4">

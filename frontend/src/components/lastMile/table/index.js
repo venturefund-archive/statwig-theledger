@@ -2,26 +2,35 @@ import React from "react";
 import Pagination from "@material-ui/lab/Pagination";
 import user from "../../../assets/icons/user.svg";
 import "./style.scss";
+import LastMile from "..";
+import { Count } from "../../../utils/dateHelper";
+import { setLastMileCount } from "../../../actions/eolAction";
 const Table = (props) => {
   const { t } = props;
   const handlePageChange = (event, value) => {
     props.onPageChange(value);
   };
   var orgTypeArray = [...props.lastMile];
+  console.log(orgTypeArray);
   return (
     <div className='producttable'>
       <div className='rTable pt-2'>
-        <div>
+      {orgTypeArray.length !== 0 ? (<div>
           {orgTypeArray.map((lastmile, index) => (
             <div key={index} onClick={() => props.cardFill(lastmile)}>
               <div className='rTableRow pt-3 pb-3'>
-                <img
+              <div className="user-info ml-4">
+                    <div className="user-image-holder">
+                    <i class="bx bxs-user"></i>
+                    </div>
+                    </div>
+                {/* <img
                   src={user}
                   width='27'
                   height='18'
                   alt='User'
                   className='ml-4'
-                />
+                /> */}
                 <div className='rTableCell'>
                   {lastmile.eol_info.first_name +
                     " " +
@@ -47,6 +56,7 @@ const Table = (props) => {
           ))}
           {orgTypeArray?.length > 0 && (
             <div className='d-flex flex-row-reverse'>
+          
               <Pagination
                 showFirstButton
                 showLastButton
@@ -59,7 +69,8 @@ const Table = (props) => {
               </span>
             </div>
           )}
-        </div>
+        </div>) : (<div>No Records Found</div>)}
+        
       </div>
     </div>
   );
