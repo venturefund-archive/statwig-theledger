@@ -4,17 +4,19 @@ import "./NetworkDashboard.scss";
 import OtherLocations from "./otherLocations/OtherLocations";
 import TopSeller from "./topSeller/TopSeller";
 
-const NetworkDashboard = ({ setMobileDashboard }) => {
+const NetworkDashboard = (props) => {
+  const { bestseller, inStock, manufacturer, oManufacturer, partnerLocation, outStock, setReportWarehouse, MylocationFilter, setMylocationFilter,  user, setMobileDashboard, TopBestseller, setPartnerLocation } = props;
+
   return (
     <div className="network-sidebar-container">
       <div className="dashboard-card">
-        <ManufacturerHeader setMobileDashboard={setMobileDashboard} />
+        <ManufacturerHeader user={user} manufacturer={manufacturer} partnerLocation={partnerLocation} MylocationFilter={MylocationFilter} setMylocationFilter={setMylocationFilter} oManufacturer={oManufacturer} setMobileDashboard={setMobileDashboard} setPartnerLocation={setPartnerLocation} />
       </div>
       <div className="dashboard-card">
-        <TopSeller />
+        <TopSeller bestseller={TopBestseller} />
       </div>
       <div className="dashboard-card">
-        <OtherLocations />
+        <OtherLocations setReportWarehouse={(param) => setReportWarehouse(param)} oManufacturer={oManufacturer} user={user} />
       </div>
     </div>
   );

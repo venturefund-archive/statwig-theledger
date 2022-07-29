@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import "./LocationCard.scss";
 
-export default function LocationCard() {
-  const [MylocationFilter, setMylocationFilter] = useState(false);
-  const [PartnerlocationFilter, setPartnerlocationFilter] = useState(false);
+export default function LocationCard({oManufacturer, manufacturer, setPartnerLocation, partnerLocation, MylocationFilter, setMylocationFilter}) {
+  
+  // const [PartnerlocationFilter, setPartnerlocationFilter] = useState(false);
   return (
     <div className="location-card-container">
       <div
@@ -20,16 +20,16 @@ export default function LocationCard() {
           <p className="mi-body-sm mi-reset">Location</p>
         </div>
         <div className="location-card-bottom">
-          <h1 className="mi-title-sm f-700 mi-reset">100</h1>
+          <h1 className="mi-title-sm f-700 mi-reset">{manufacturer?.myLocations}</h1>
           {/* <p className="mi-body-sm f-500 mi-reset">ABC Manufacturer</p> */}
         </div>
       </div>
       <div
         className={`location-card partner-card ${
-          PartnerlocationFilter && "active"
+          partnerLocation && "active"
         }`}
         onClick={() => {
-          setPartnerlocationFilter(!PartnerlocationFilter);
+          setPartnerLocation(!partnerLocation);
         }}
       >
         <div className="location-card-top">
@@ -40,7 +40,7 @@ export default function LocationCard() {
           <p className="mi-body-sm  mi-reset">Location</p>
         </div>
         <div className="location-card-bottom">
-          <h1 className="mi-title-sm f-700 mi-reset">2100</h1>
+          <h1 className="mi-title-sm f-700 mi-reset">{manufacturer?.partnerLocations}</h1>
         </div>
       </div>
     </div>

@@ -6,6 +6,7 @@ const RecordModel = require("../models/RecordModel");
 const RequestModel = require("../models/RequestModel");
 const WarehouseModel = require("../models/WarehouseModel");
 const InventoryModel = require("../models/InventoryModel");
+const InventoryAnalyticsModel = require("../models/InventoryAnalytics");
 const EmployeeModel = require("../models/EmployeeModel");
 const ConfigurationModel = require("../models/ConfigurationModel");
 const OrganisationModel = require("../models/OrganisationModel");
@@ -36,7 +37,7 @@ const { resolve } = require("path");
 const PdfPrinter = require("pdfmake");
 const { responses } = require("../helpers/responses");
 const { asyncForEach } = require("../helpers/utility");
-const { fromUnixTime } = require("date-fns");
+const { fromUnixTime, format, startOfMonth } = require("date-fns");
 const fontDescriptors = {
   Roboto: {
     normal: resolve("./controllers/Roboto-Regular.ttf"),
@@ -46,6 +47,7 @@ const fontDescriptors = {
   },
 };
 const printer = new PdfPrinter(fontDescriptors);
+
 async function inventoryUpdate(
   id,
   quantity,
@@ -55,34 +57,58 @@ async function inventoryUpdate(
   shipmentStatus
 ) {
   if (shipmentStatus == "CREATED") {
-    await InventoryModel.updateOne(
+    const updatedInventory = await InventoryModel.findOneAndUpdate(
       {
         id: suppId,
         "inventoryDetails.productId": id,
       },
       {
         $inc: {
-          "inventoryDetails.$.quantity": -quantity,
+          "inventoryDetails.$.quantity": -parseInt(quantity),
+          "inventoryDetails.$.quantityInTransit": parseInt(quantity),
+          "inventoryDetails.$.totalSales": parseInt(quantity),
         },
+      },
+      {
+        new: true,
       }
     );
-    await InventoryModel.updateOne(
+    const index = updatedInventory.inventoryDetails.findIndex((object) => {
+      return object.productId === id;
+    });
+    await InventoryAnalyticsModel.updateOne(
       {
-        id: suppId,
-        "inventoryDetails.productId": id,
+        inventoryId: suppId,
+        date: format(startOfMonth(new Date()), "yyyy-MM-dd"),
+        productId: id,
       },
       {
-        $inc: {
-          "inventoryDetails.$.quantityInTransit": parseInt(quantity),
+        $set: {
+          quantity: updatedInventory.inventoryDetails[index].quantity,
+          quantityInTransit:
+            updatedInventory.inventoryDetails[index].quantityInTransit,
+          sales: updatedInventory.inventoryDetails[index].quantity,
         },
+        $setOnInsert: {
+          openingBalance:
+            quantity + updatedInventory.inventoryDetails[index].quantity,
+        },
+      },
+      {
+        upsert: true,
       }
     );
   }
-  const checkProduct = await InventoryModel.find({
-    $and: [{ id: recvId }, { "inventoryDetails.productId": id }],
-  });
-  if (shipmentStatus == "RECEIVED" && checkProduct != "") {
+  if (shipmentStatus == "RECEIVED") {
     await InventoryModel.updateOne(
+      { id: recvId },
+      {
+        $addToSet: {
+          inventoryDetails: { productId: id },
+        },
+      }
+    );
+    const updatedInventory = await InventoryModel.findOneAndUpdate(
       {
         id: recvId,
         "inventoryDetails.productId": id,
@@ -91,8 +117,34 @@ async function inventoryUpdate(
         $inc: {
           "inventoryDetails.$.quantity": quantity,
         },
+      },
+      {
+        new: true,
       }
     );
+    const index = updatedInventory.inventoryDetails.findIndex((object) => {
+      return object.productId === id;
+    });
+    await InventoryAnalyticsModel.updateOne(
+      {
+        inventoryId: recvId,
+        date: format(startOfMonth(new Date()), "yyyy-MM-dd"),
+        productId: id,
+      },
+      {
+        $set: {
+          quantity: updatedInventory.inventoryDetails[index].quantity,
+        },
+        $setOnInsert: {
+          openingBalance:
+            updatedInventory.inventoryDetails[index].quantity - quantity,
+        },
+      },
+      {
+        upsert: true,
+      }
+    );
+
     await InventoryModel.updateOne(
       {
         id: suppId,
@@ -104,19 +156,15 @@ async function inventoryUpdate(
         },
       }
     );
-  } else if (shipmentStatus == "RECEIVED" && checkProduct == "") {
-    await InventoryModel.updateOne(
-      { id: recvId },
-      { $addToSet: { inventoryDetails: { productId: id, quantity: quantity } } }
-    );
-    await InventoryModel.updateOne(
+    await InventoryAnalyticsModel.updateOne(
       {
-        id: suppId,
-        "inventoryDetails.productId": id,
+        inventoryId: suppId,
+        date: format(startOfMonth(new Date()), "yyyy-MM-dd"),
+        productId: id,
       },
       {
         $inc: {
-          "inventoryDetails.$.quantityInTransit": -quantity,
+          quantityInTransit: -quantity,
         },
       }
     );
@@ -183,16 +231,6 @@ async function poUpdate(id, quantity, poId, shipmentStatus, actor) {
         {
           $inc: {
             "products.$.productQuantityShipped": -quantity,
-          },
-        }
-      );
-      await RecordModel.updateOne(
-        {
-          id: poId,
-          "products.productId": id,
-        },
-        {
-          $inc: {
             "products.$.productQuantityDelivered": quantity,
           },
         }
@@ -286,7 +324,6 @@ async function userShipments(mode, warehouseId, skip, limit) {
       createdAt: -1,
     })
     .skip(parseInt(skip))
-
     .limit(parseInt(limit));
   for (let i = 0; i < shipments.length; i++) {
     for (let j = 0; j < shipments[i].shipmentUpdates.length; j++) {
@@ -588,7 +625,7 @@ exports.createShipment = [
             data.poId,
             "CREATED"
           );
-          if (flag == "Y")
+          if (flag == "Y" && data.poId != null)
             await poUpdate(
               products[count].productId,
               products[count].productQuantity,
@@ -604,7 +641,7 @@ exports.createShipment = [
             await AtomModel.updateOne(
               {
                 batchNumbers: products[count].batchNumber,
-                inventoryIds: suppInventoryId,
+                currentInventory: suppInventoryId,
               },
               {
                 $inc: {
@@ -623,14 +660,15 @@ exports.createShipment = [
             if (serialNumbers.length > 1) {
               if (Array.isArray(products[count].serialNumbersRange)) {
                 for (let i = 0; i < serialNumbers.length; i++) {
-                  const updateAtoms = await AtomModel.findOneAndUpdate(
+                  const updateAtoms = await AtomModel.updateOne(
                     {
                       id: `${serialNumbers[i]}`,
-                      inventoryIds: suppInventoryId,
+                      currentInventory: suppInventoryId,
                     },
                     {
                       $set: {
-                        "inventoryIds.$": recvInventoryId,
+                        currentInventory: recvInventoryId,
+                        status: "TRANSIT",
                       },
                     }
                   );
@@ -645,14 +683,15 @@ exports.createShipment = [
                 );
                 const serialNumberText = serialNumbers[1].split(/(\d+)/)[0];
                 for (let i = serialNumbersFrom; i <= serialNumbersTo; i++) {
-                  const updateAtoms = await AtomModel.findOneAndUpdate(
+                  const updateAtoms = await AtomModel.updateOne(
                     {
                       id: `${serialNumberText}${i}`,
-                      inventoryIds: suppInventoryId,
+                      currentInventory: suppInventoryId,
                     },
                     {
                       $set: {
-                        "inventoryIds.$": recvInventoryId,
+                        currentInventory: recvInventoryId,
+                        status: "TRANSIT",
                       },
                     }
                   );
@@ -888,7 +927,6 @@ exports.createShipmentForTpl = [
           responses(req.user.preferredLanguage).config_not_found
         );
       }
-      const process = confData.process;
       const supplierID = req.body.supplier.id;
       const supplierOrgData = await TplOrgModel.findOne({
         id: req.body.supplier.id,
@@ -1343,7 +1381,7 @@ exports.receiveShipment = [
               data.id,
               "RECEIVED"
             );
-            if (flag == "Y")
+            if (flag == "Y" && data.poId != null)
               await poUpdate(
                 products[count].productId,
                 products[count].productQuantity,
@@ -1355,20 +1393,26 @@ exports.receiveShipment = [
             if (products[count].batchNumber != null) {
               const checkBatch = await AtomModel.find({
                 $and: [
-                  { inventoryIds: recvInventoryId },
+                  { currentInventory: recvInventoryId },
                   { batchNumbers: products[count].batchNumber },
                 ],
               });
 
               if (checkBatch.length > 0) {
-                const update = await AtomModel.update(
+                await AtomModel.updateOne(
                   {
                     batchNumbers: products[count].batchNumber,
-                    inventoryIds: recvInventoryId,
+                    currentInventory: recvInventoryId,
                   },
                   {
                     $inc: {
                       quantity: parseInt(products[count].productQuantity),
+                    },
+                    $addToSet: {
+                      inventoryIds: recvInventoryId,
+                    },
+                    $set: {
+                      status: "HEALTHY",
                     },
                   }
                 );
@@ -1382,13 +1426,12 @@ exports.receiveShipment = [
                   quantity: products[count].productQuantity,
                   productId: products[count].productID,
                   inventoryIds: recvInventoryId,
-                  lastInventoryId: "",
-                  lastShipmentId: "",
+                  currentInventory: recvInventoryId,
                   poIds: [],
                   shipmentIds: [],
                   txIds: [],
                   batchNumbers: products[count].batchNumber,
-                  atomStatus: "Healthy",
+                  status: "HEALTHY",
                   attributeSet: {
                     mfgDate: products[count].mfgDate,
                     expDate: products[count].batchNumber.expDate,
@@ -1791,13 +1834,11 @@ exports.receiveShipment = [
                   quantity: products[count].productQuantity,
                   productId: products[count].productID,
                   inventoryIds: recvInventoryId,
-                  lastInventoryId: "",
-                  lastShipmentId: "",
                   poIds: [],
                   shipmentIds: [],
                   txIds: [],
                   batchNumbers: products[count].batchNumber,
-                  atomStatus: "Healthy",
+                  status: "HEALTHY",
                   attributeSet: {
                     mfgDate: products[count].mfgDate,
                     expDate: products[count].batchNumber.expDate,

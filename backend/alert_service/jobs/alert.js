@@ -2,7 +2,7 @@ const Atoms = require("../models/AtomsModel");
 const WarehouseModel = require("../models/WarehouseModel");
 const OrderModel = require("../models/RecordModel");
 const moment = require("moment");
-const { alertListener, inventoryListener } = require("./listener");
+const { alertListener, inventoryListener } = require("../helpers/listener");
 
 async function checkProductExpiry() {
   try {
@@ -15,7 +15,7 @@ async function checkProductExpiry() {
       productExpired(
         product.productId,
         product.quantity,
-        product.inventoryIds,
+        product.currentInventory,
         "EXPIRED"
       );
     }
@@ -38,7 +38,7 @@ async function checkProductNearExpiry() {
       productExpired(
         product.productId,
         product.quantity,
-        product.inventoryIds,
+        product.currentInventory,
         "NEAR_EXPIRY"
       );
     }
