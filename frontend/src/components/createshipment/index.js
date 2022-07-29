@@ -217,6 +217,41 @@ const CreateShipment = (props) => {
 		setOpenShipmentFail(false);
 	};
 
+  const onWarehouseChange = async (value) => {
+    try {
+      if (!intelEnabled) {
+        const prods = await getProductsByInventoryId(value);
+        if (prods.data.length === 0) {
+          alert("No products available in this warehouse");
+          setErrorMessage("err");
+          return false;
+        }
+        setProducts(
+          prods.data.map((item) => {
+            return {
+              value: item.name,
+              label: item.name,
+              ...item,
+            };
+          })
+        );
+        setProductsList(
+          prods.data.map((item) => {
+            return {
+              value: item.name,
+              label: item.name,
+              ...item,
+            };
+          })
+        );
+        return true;
+      }
+    } catch (err) {
+      setErrorMessage(err);
+      return false;
+    }
+  };
+
 	const onOrgChange = async (value) => {
 		try {
 			const userType = intelEnabled ? "TPL" : "regular";
