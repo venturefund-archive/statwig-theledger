@@ -26,12 +26,12 @@ export const getBestSellerSummary = async (reportWarehouse) => {
   }
 };
 
-export const getmanufacturerInStockReport = async (reportWarehouse, date) => {
+export const getmanufacturerInStockReport = async (reportWarehouse, date, type, pname) => {
   try {
     date = date ? format(startOfMonth(new Date(date)), "yyyy-MM-dd") : "";
     const url = config().getmanufacturerInStockReportUrl;
     const result = await axios.get(
-      url + `?warehouseId=${reportWarehouse}&date=${date}`
+      url + `?warehouseId=${reportWarehouse}&date=${date}&type=${type ? type : ''}&id=${pname ? pname : ''}`
     );
     return result.data;
   } catch (e) {
@@ -39,13 +39,40 @@ export const getmanufacturerInStockReport = async (reportWarehouse, date) => {
     return false;
   }
 };
+export const getInStockFilterOptions = async (reportWarehouse, date) => {
+  try {
+    date = date ? format(startOfMonth(new Date(date)), "yyyy-MM-dd") : "";
+    const url = config().getmanufacturerInStockFilterOptions;
+    const result = await axios.get(
+      url + `?warehouseId=${reportWarehouse}&date=${date}`
+    );
+    return result.data.data;
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+};
 
-export const getmanufacturerOutStockReport = async (reportWarehouse, date) => {
+export const getOutStockFilterOptions = async (reportWarehouse, date) => {
+  try {
+    date = date ? format(startOfMonth(new Date(date)), "yyyy-MM-dd") : "";
+    const url = config().getmanufacturerOutStockFilterOptions;
+    const result = await axios.get(
+      url + `?warehouseId=${reportWarehouse}&date=${date}`
+    );
+    return result.data.data;
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+};
+
+export const getmanufacturerOutStockReport = async (reportWarehouse, date, type, pname) => {
   try {
     date = date ? format(startOfMonth(new Date(date)), "yyyy-MM-dd") : "";
     const url = config().getmanufacturerOutStockReportUrl;
     const result = await axios.get(
-      url + `?warehouseId=${reportWarehouse}&date=${date}`
+      url + `?warehouseId=${reportWarehouse}&date=${date}&type=${type ? type : ''}&id=${pname ? pname : ''}`
     );
     return result.data;
   } catch (e) {
@@ -80,6 +107,27 @@ export const getManufacturerFilterOptions = async (type, regExp) => {
     const url = config().getManufacturerFilterOptions;
     const result = await axios.get(url + `?type=${type}&regExp=${regExp}`);
     return result.data;
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+};
+
+export const getReports = async (report, fileType, reportWarehouse, date) => {
+  try {
+    let url;
+    date = date ? format(startOfMonth(new Date(date)), "yyyy-MM-dd") : "";
+    if (report === "INSTOCK") url = config().getmanufacturerInStockReportUrl;
+    if (report === "OUTSTOCK") url = config().getmanufacturerOutStockReportUrl;
+    if (report === "BESTSELLER") url = config().getBestSellersUrl;
+    const res = await axios.get(
+      url +
+        `?warehouseId=${reportWarehouse}&date=${date}&reportType=${fileType}`,
+      {
+        responseType: "blob",
+      }
+    );
+    return res.data;
   } catch (e) {
     console.log(e);
     return false;

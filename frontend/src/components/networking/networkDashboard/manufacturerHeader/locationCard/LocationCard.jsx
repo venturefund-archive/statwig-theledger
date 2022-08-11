@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import "./LocationCard.scss";
 
 export default function LocationCard({
@@ -15,6 +15,7 @@ export default function LocationCard({
       <div
         className={`location-card my-card ${MylocationFilter && "active"}`}
         onClick={() => {
+          setPartnerLocation(false);
           setMylocationFilter(!MylocationFilter);
         }}
       >
@@ -31,10 +32,16 @@ export default function LocationCard({
           </h1>
           {/* <p className="mi-body-sm f-500 mi-reset">ABC Manufacturer</p> */}
         </div>
+        {MylocationFilter && (
+          <div className='check-box-icon'>
+            <i className='fa-solid fa-circle-check'></i>
+          </div>
+        )}
       </div>
       <div
         className={`location-card partner-card ${partnerLocation && "active"}`}
         onClick={() => {
+          setMylocationFilter(false);
           setPartnerLocation(!partnerLocation);
         }}
       >
@@ -47,9 +54,16 @@ export default function LocationCard({
         </div>
         <div className='location-card-bottom'>
           <h1 className='mi-title-sm f-700 mi-reset'>
-            {manufacturer?.partnerLocations ? manufacturer?.partnerLocations : 0 }
+            {manufacturer?.partnerLocations
+              ? manufacturer?.partnerLocations
+              : 0}
           </h1>
         </div>
+        {partnerLocation && (
+          <div className='check-box-icon'>
+            <i className='fa-solid fa-circle-check'></i>
+          </div>
+        )}
       </div>
     </div>
   );
