@@ -232,3 +232,9 @@
   width: 100%;
   height: 100%;
 }
+.overflow{
+  inline-size: 150px;
+  overflow-wrap : break-word;
+  hyphens: manual;
+  overflow: hidden;
+}

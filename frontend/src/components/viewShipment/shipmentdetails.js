@@ -42,7 +42,7 @@ const ShipmentDetails = (props) => {
               {props.shipments.supplier?.warehouse?.postalAddress.split(",")[0]}
             </li>
           ) : (
-            <li className='mb-1'>
+            <li className='mb-1 overflow'>
               {props.shipments.supplier?.org?.postalAddress.split(",")[0]}
             </li>
           )}
