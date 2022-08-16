@@ -260,33 +260,10 @@ const Orders = (props) => {
 		setData(visible);
 	};
 
-	const headers = {
-		coloumn1: visible === "one" ? "Order Sent To" : "Order CreatedBy",
-		coloumn2: "Order Date",
-		coloumn3: "Order ID",
-		coloumn4: "Product",
-		coloumn5: "Delivery Location",
-		coloumn6: "Status",
-
-		displayColoumn1: visible === "one" ? t("order_sent_to") : t("order_created_by"),
-		displayColoumn2: t("order_date"),
-		displayColoumn3: t("order_id"),
-		displayColoumn4: t("product"),
-		displayColoumn5: t("delivery_location"),
-		displayColoumn6: t("status"),
-
-		img1: <img src={mon} width="16" height="16" alt="" />,
-		img2: <img src={calender} width="16" height="16" alt="" />,
-		img3: <img src={Order} width="18" height="16" alt="" />,
-		img4: <img src={Package} width="16" height="16" alt="" />,
-		img5: <img src={Totalshipments} width="18" height="18" alt="" />,
-		img6: <img src={Status} width="16" height="16" alt="" />,
-	};
-
 	const closeExcelModal = () => {
 		setOpenExcel(false);
 	};
-
+	
 	const setDateFilterOnSelect = async (dateFilterSelected) => {
 		setDateFilter(dateFilterSelected);
 		setSkip(0);
@@ -328,9 +305,32 @@ const Orders = (props) => {
 		}
 	};
 
-	// const closeModal = () => {
+// const closeModal = () => {
 	//   setOpenCreatedOrder(false);
 	// };
+
+	const headers = {
+		coloumn1: visible === "one" ? "Order Sent To" : "Order CreatedBy",
+		coloumn2: "Order Date",
+		coloumn3: "Order ID",
+		coloumn4: "Product",
+		coloumn5: "Delivery Location",
+		coloumn6: "Status",
+
+		displayColoumn1: visible === "one" ? t("order_sent_to") : t("order_created_by"),
+		displayColoumn2: t("order_date"),
+		displayColoumn3: t("order_id"),
+		displayColoumn4: t("product"),
+		displayColoumn5: t("delivery_location"),
+		displayColoumn6: t("status"),
+
+		img1: <img src={mon} width="16" height="16" alt="" />,
+		img2: <img src={calender} width="16" height="16" alt="" />,
+		img3: <img src={Order} width="18" height="16" alt="" />,
+		img4: <img src={Package} width="16" height="16" alt="" />,
+		img5: <img src={Totalshipments} width="18" height="18" alt="" />,
+		img6: <img src={Status} width="16" height="16" alt="" />,
+	};
 
 	const setData = (v, a = false) => {
 		setvisible(v);
@@ -470,6 +470,15 @@ const Orders = (props) => {
 		}
 	};
 
+	useEffect(() => {
+		setExportFilterData([
+			{ key: "excel", value: "excel", label: t("excel"), checked: false },
+			{ key: "pdf", value: "pdf", label: t("pdf"), checked: false },
+			// { key: "email", value: "mail", label: t("mail"), checked: false },
+			// { key: "print", value: "Print", checked: false },
+		]);
+	}, [t]);
+
 	const setFromToFilterOnSelect = async (fromToFilterSelected) => {
 		setFromFilter(fromToFilterSelected);
 		setToFilter(fromToFilterSelected);
@@ -510,15 +519,6 @@ const Orders = (props) => {
 			setCount(inboundRes.data.count);
 		}
 	};
-
-	useEffect(() => {
-		setExportFilterData([
-			{ key: "excel", value: "excel", label: t("excel"), checked: false },
-			{ key: "pdf", value: "pdf", label: t("pdf"), checked: false },
-			// { key: "email", value: "mail", label: t("mail"), checked: false },
-			// { key: "print", value: "Print", checked: false },
-		]);
-	}, [t]);
 
 	const onSelectionDateFilter = async (value) => {
 		const fromDate = value[0] === "" ? "" : new Date(new Date(value[0]).toDateString());
