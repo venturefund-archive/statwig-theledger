@@ -16,9 +16,9 @@ import "./style.scss";
 import { Formik } from "formik";
 
 const EditLocation = (props) => {
-  const id = props.match.params.id;
   const [addressTitle, setAddressTitle] = useState("");
   const [addressLine, setAddressLine] = useState("");
+  const id = props.match.params.id;
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [country, setCountry] = useState("");
@@ -45,6 +45,38 @@ const EditLocation = (props) => {
   //   const result = await getWarehouseById(id);
   //   return result;
   // }
+
+  const updateStatus = async (values, id) => {
+    const data = {
+      title: values.addressTitle,
+      organisationId: props.user.organisationId,
+      postalAddress: props.user.postalAddress,
+      region: values.region,
+      country: props.user.warehouseAddress_country,
+      location: {
+        longitude: "0",
+        latitude: "0",
+        geohash: "1231nejf923453",
+      },
+      warehouseAddress: {
+        firstLine: values.addressLine,
+        region: values.region,
+        secondLine: null,
+        city: values.city,
+        state: values.state,
+        country: values.country,
+        landmark: null,
+        zipCode: values.pincode,
+      },
+      supervisors: [],
+      employeess: [],
+    };
+
+    const result = await updateWarehouse(data, id);
+    if (result.status === 200) {
+      setAddedLocationModal(true);
+    }
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -86,38 +118,6 @@ const EditLocation = (props) => {
     let res = await fetchCitiesByState(id);
     setallCity(res.data);
   }
-
-  const updateStatus = async (values, id) => {
-    const data = {
-      title: values.addressTitle,
-      organisationId: props.user.organisationId,
-      postalAddress: props.user.postalAddress,
-      region: values.region,
-      country: props.user.warehouseAddress_country,
-      location: {
-        longitude: "0",
-        latitude: "0",
-        geohash: "1231nejf923453",
-      },
-      warehouseAddress: {
-        firstLine: values.addressLine,
-        region: values.region,
-        secondLine: null,
-        city: values.city,
-        state: values.state,
-        country: values.country,
-        landmark: null,
-        zipCode: values.pincode,
-      },
-      supervisors: [],
-      employeess: [],
-    };
-
-    const result = await updateWarehouse(data, id);
-    if (result.status === 200) {
-      setAddedLocationModal(true);
-    }
-  };
 
   function search(name, myArray) {
     for (var i = 0; i < myArray.length; i++) {
