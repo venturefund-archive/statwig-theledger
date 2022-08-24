@@ -300,7 +300,7 @@ const EditRow = (props) => {
               id='checker'
               placeholder={t("quantity")}
               onKeyPress={numbersOnly}
-              value={prod.productQuantity}
+              value={prod.productQuantity<0?(-1*prod.productQuantity):prod.productQuantity}
               onChange={(e) => {
                 if (
                   Object.keys(selectedBatch).length === 0 ||
