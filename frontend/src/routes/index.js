@@ -53,11 +53,16 @@ import SettingsContainer from "../containers/settings";
 import AddProductContainer from "../containers/addproduct";
 import NetworkingContainer from "../containers/networking/NetworkingContainer";
 import TrackingContainer from "../containers/tracking/TrackingContainer";
+import Connection from "../containers/login_register/Connection";
+import Landing from "../containers/home/Landing";
 
 const routes = (
   <Switch>
     <Route exact path='/' component={Home} />
+    <Route exact path='/home' component={Landing} />
     <Route exact path='/login' component={Login} />
+    <Route exact path='/login/:id' component={Connection} />
+    <Route exact path='/register/:id' component={Connection} />
     <Route path='/verify' component={Verify} />
     <Route path='/signup' component={Signup} />
     <Route path='/overview' component={requireAuth(OverView)} />
