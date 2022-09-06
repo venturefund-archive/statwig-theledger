@@ -32,16 +32,16 @@ export default function Account() {
   ];
   return (
     <section className="account-section">
-      <div className="mi-connection-container">
+      <div className="vl-connection-container">
         <form action="" className="account-form-container">
           <hgroup className="form-headers">
-            <h1 className="mi-heading f-700 mi-black">Create your Account</h1>
-            <h2 className="mi-subheading f-400 mi-grey-xs mi-line-sm">
+            <h1 className="vl-heading f-700 vl-black">Create your Account</h1>
+            <h2 className="vl-subheading f-400 vl-grey-xs vl-line-sm">
               Join VaccineLedger to ensure quality and safety of your Vaccines
               using Blockchain
             </h2>
           </hgroup>
-          <section className="mi-input-group form-auto-fill-section">
+          <section className="vl-input-group form-auto-fill-section">
             <div className="input-two-column">
               <TextField fullWidth variant="outlined" label="First Name" />
               <TextField fullWidth variant="outlined" label="Last Name" />
@@ -64,7 +64,7 @@ export default function Account() {
                   defaultValue="female"
                   name="radio-buttons-group"
                 >
-                  <div className="mi-radio-btn mi-align-center">
+                  <div className="vl-radio-btn vl-align-center">
                     <Radio
                       checked={RadioValue === "existing"}
                       onChange={handleChange}
@@ -72,18 +72,18 @@ export default function Account() {
                       name="radio-buttons"
                       inputProps={{ "aria-label": "A" }}
                     />
-                    <p className="mi-body f-400 mi-grey-md mi-line-sm">
+                    <p className="vl-body f-400 vl-grey-md vl-line-sm">
                       Existing Organization
                     </p>
                   </div>
-                  <div className="mi-radio-btn mi-align-center">
+                  <div className="vl-radio-btn vl-align-center">
                     <Radio
                       onChange={handleChange}
                       value="new"
                       name="radio-buttons"
                       inputProps={{ "aria-label": "B" }}
                     />
-                    <p className="mi-body f-400 mi-grey-md mi-line-sm">
+                    <p className="vl-body f-400 vl-grey-md vl-line-sm">
                       New Organization
                     </p>
                   </div>
@@ -108,7 +108,7 @@ export default function Account() {
                 />
               </div>
             ) : (
-              <div className="mi-input-groups">
+              <div className="vl-input-groups">
                 <div className="input-full-column">
                   <Autocomplete
                     fullWidth
@@ -120,7 +120,7 @@ export default function Account() {
                 </div>
                 <div className="verify-terms-card-sm">
                   <Checkbox />
-                  <h2 className="mi-subheading f-400 mi-grey-xs">
+                  <h2 className="vl-subheading f-400 vl-grey-xs">
                     Skip the Organization Registration
                   </h2>
                 </div>
@@ -132,7 +132,7 @@ export default function Account() {
               RadioValue === "existing" && "top-space"
             } `}
           >
-            <button className="mi-btn mi-btn-md mi-btn-full mi-btn-primary">
+            <button className="vl-btn vl-btn-md vl-btn-full vl-btn-primary">
               Continue
             </button>
           </section>

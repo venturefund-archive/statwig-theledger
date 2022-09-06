@@ -12,9 +12,9 @@ import Client8 from "../../../assets/images/client/client8.jpg";
 export default function Client() {
   return (
     <section className="client-section section-space">
-      <div className="mi-page-container">
+      <div className="vl-page-container">
         <div className="section-headers">
-          <h1 className="mi-heading f-500 mi-black">Our Partners</h1>
+          <h1 className="vl-heading f-500 vl-black">Our Partners</h1>
         </div>
         <div className="client-container">
           <figure className="client-card">

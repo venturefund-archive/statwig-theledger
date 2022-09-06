@@ -29,18 +29,18 @@ export default function Organization() {
   ];
   return (
     <section className="account-section">
-      <div className="mi-connection-container">
+      <div className="vl-connection-container">
         <form action="" className="account-form-container">
           <hgroup className="form-headers">
-            <h1 className="mi-heading f-700 mi-black">
+            <h1 className="vl-heading f-700 vl-black">
               Register your Organization
             </h1>
-            <h2 className="mi-subheading f-400 mi-grey-xs mi-line-sm">
+            <h2 className="vl-subheading f-400 vl-grey-xs vl-line-sm">
               Almost there, Please provide the below details to regsiter your
               organization with us
             </h2>
           </hgroup>
-          <section className="mi-input-group form-auto-fill-section">
+          <section className="vl-input-group form-auto-fill-section">
             <div className="input-single-column">
               <TextField
                 fullWidth
@@ -83,19 +83,19 @@ export default function Organization() {
             <section className="terms-condition">
               <div className="verify-terms-card">
                 <Checkbox />
-                <h2 className="mi-subheading f-400 mi-grey-xs">
+                <h2 className="vl-subheading f-400 vl-grey-xs">
                   By checking this your are agree to the{" "}
-                  <span className="mi-blue">Terms & conditions</span> of
-                  <span className="mi-blue"> Vaccineledger</span>
+                  <span className="vl-blue">Terms & conditions</span> of
+                  <span className="vl-blue"> Vaccineledger</span>
                 </h2>
               </div>
             </section>
           </section>
           <section className="call-two-btn-action">
-            <button className="mi-btn mi-btn-md mi-btn-full mi-btn-grey">
+            <button className="vl-btn vl-btn-md vl-btn-full vl-btn-grey">
               Skip
             </button>
-            <button className="mi-btn mi-btn-md mi-btn-full mi-btn-primary">
+            <button className="vl-btn vl-btn-md vl-btn-full vl-btn-primary">
               Register
             </button>
           </section>

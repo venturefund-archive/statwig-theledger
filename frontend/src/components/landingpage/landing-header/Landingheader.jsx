@@ -34,7 +34,7 @@ export default function Landingheader() {
   });
   return (
     <header className="landing-header">
-      <div className="mi-page-container">
+      <div className="vl-page-container">
         <nav className="landing-navbar">
           <figure className="brand-logo">
             <img
@@ -46,22 +46,22 @@ export default function Landingheader() {
           <ul className="landing-navlist">
             <li className="landing-nav-item">
               <Link to="/" className="landing-nav-link active">
-                <p className="mi-body">Home</p>
+                <p className="vl-body">Home</p>
               </Link>
             </li>
             <li className="landing-nav-item">
               <Link to="/" className="landing-nav-link">
-                <p className="mi-body">Services</p>
+                <p className="vl-body">Services</p>
               </Link>
             </li>
             <li className="landing-nav-item">
               <Link to="/" className="landing-nav-link">
-                <p className="mi-body">Contact Us</p>
+                <p className="vl-body">Contact Us</p>
               </Link>
             </li>
             <li className="landing-nav-item mobile-nav-item">
               <Link to="/" className="landing-nav-link">
-                <p className="mi-body">Gitlab Repository</p>
+                <p className="vl-body">Gitlab Repository</p>
               </Link>
             </li>
             <li
@@ -84,7 +84,7 @@ export default function Landingheader() {
                       />
                     </div>
 
-                    <p className="mi-body">Eng</p>
+                    <p className="vl-body">Eng</p>
                   </>
                 ) : (
                   <>
@@ -96,7 +96,7 @@ export default function Landingheader() {
                       />
                     </div>
 
-                    <p className="mi-body">Spa</p>
+                    <p className="vl-body">Spa</p>
                   </>
                 )}
 
@@ -119,7 +119,7 @@ export default function Landingheader() {
                     />
                   </div>
 
-                  <p className="mi-body">English</p>
+                  <p className="vl-body">English</p>
                 </article>
                 <article
                   className="language-card no-border"
@@ -136,21 +136,21 @@ export default function Landingheader() {
                     />
                   </div>
 
-                  <p className="mi-body">Spanish</p>
+                  <p className="vl-body">Spanish</p>
                 </article>
               </section>
             </li>
 
             {/* Mobile Link */}
-            <li className="landing-nav-item tablet-menu-icon mi-link">
+            <li className="landing-nav-item tablet-menu-icon vl-link">
               <div className="landing-nav-link active">
-                <i className="fa-solid fa-bars mi-body"></i>
+                <i className="fa-solid fa-bars vl-body"></i>
               </div>
             </li>
           </ul>
-          <div className="landing-nav-item mobile-menu-icon mi-link">
+          <div className="landing-nav-item mobile-menu-icon vl-link">
             <div className="landing-nav-link active">
-              <i className="fa-solid fa-bars mi-body"></i>
+              <i className="fa-solid fa-bars vl-body"></i>
             </div>
           </div>
         </nav>

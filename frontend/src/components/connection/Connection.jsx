@@ -28,54 +28,54 @@ export default function Connection() {
               <section className="our-benefits-container">
                 <article className="benefit-card">
                   <img src={check} alt="check" className="check-icon" />
-                  <p className="mi-subheading f-500 mi-white">
+                  <p className="vl-subheading f-500 vl-white">
                     Maintain your Orders
                   </p>
                   <div className="straight-line"></div>
                 </article>
                 <article className="benefit-card">
                   <img src={check} alt="check" className="check-icon" />
-                  <p className="mi-subheading f-500 mi-white">
+                  <p className="vl-subheading f-500 vl-white">
                     Real Time shipment details
                   </p>
                   <div className="straight-line"></div>
                 </article>
                 <article className="benefit-card">
                   <img src={check} alt="check" className="check-icon" />
-                  <p className="mi-subheading f-500 mi-white">Track & Trace</p>
+                  <p className="vl-subheading f-500 vl-white">Track & Trace</p>
                   <div className="straight-line"></div>
                 </article>
                 <article className="benefit-card">
                   <img src={check} alt="check" className="check-icon" />
-                  <p className="mi-subheading f-500 mi-white">
+                  <p className="vl-subheading f-500 vl-white">
                     View your Partner Locations
                   </p>
                   <div className="straight-line"></div>
                 </article>
                 <article className="benefit-card">
                   <img src={check} alt="check" className="check-icon" />
-                  <p className="mi-subheading f-500 mi-white">
+                  <p className="vl-subheading f-500 vl-white">
                     Alerts and Notifications
                   </p>
                   <div className="straight-line"></div>
                 </article>
                 <article className="benefit-card">
                   <img src={check} alt="check" className="check-icon" />
-                  <p className="mi-subheading f-500 mi-white">
+                  <p className="vl-subheading f-500 vl-white">
                     Monitor Cold chain conditions
                   </p>
                   <div className="straight-line"></div>
                 </article>
                 <article className="benefit-card">
                   <img src={check} alt="check" className="check-icon" />
-                  <p className="mi-subheading f-500 mi-white">
+                  <p className="vl-subheading f-500 vl-white">
                     Efficiently manage your inventory
                   </p>
                 </article>
               </section>
             </div>
             <div className="powerby">
-              <p className="mi-small f-700 mi-white">Powered by</p>
+              <p className="vl-small f-700 vl-white">Powered by</p>
               <img src={statwig} alt="statwig" className="statwig-power-logo" />
             </div>
             <img
@@ -97,13 +97,13 @@ export default function Connection() {
           </div>
           <div className="connection-body-container">
             <section
-              className="back-navigation mi-link mi-grey-xs"
+              className="back-navigation vl-link vl-grey-xs"
               onClick={() => {
                 history.push("/")
               }}
             >
               <i className="fa-solid fa-arrow-left"></i>
-              <p className="mi-subheading f-400">Back</p>
+              <p className="vl-subheading f-400">Back</p>
             </section>
             <div className="login-system-layout">
               {connection === "account" && <Account />}

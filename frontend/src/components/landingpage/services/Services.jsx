@@ -7,9 +7,9 @@ import service from "./data/service";
 export default function Services() {
   return (
     <section className="service-section section-space">
-      <div className="mi-page-container">
+      <div className="vl-page-container">
         <div className="section-headers">
-          <h1 className="mi-heading f-500 mi-black">Our Services</h1>
+          <h1 className="vl-heading f-500 vl-black">Our Services</h1>
         </div>
         <div className="service-card-container">
           {service.map((card) => (

@@ -8,12 +8,12 @@ export default function Newscard({ Image, title, content, url }) {
         <img src={Image} alt="news" className="newscard-logo-image" />
       </figure>
       <div className="newscard-content">
-        <p className="mi-subheading mi-line-md mi-grey-md">
-          <span className="f-500 mi-black">{title}</span>
+        <p className="vl-subheading vl-line-md vl-grey-md">
+          <span className="f-500 vl-black">{title}</span>
           {content}
         </p>
         <div className="call-to-action">
-          <div className="mi-btn mi-btn-sm mi-btn-secondary">Explore More</div>
+          <div className="vl-btn vl-btn-sm vl-btn-secondary">Explore More</div>
         </div>
       </div>
     </section>
