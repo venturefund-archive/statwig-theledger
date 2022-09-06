@@ -5,9 +5,9 @@ import VaccineLedgerLogo from "../../assets/logos/vaccineledger.svg";
 import statwig from "../../assets/logos/statwig-logo.png";
 import check from "../../assets/icons/check.svg";
 import Illustration from "../../assets/images/illustration/illustration.png";
-import Account from "../../components/signUp/Account";
-import Organization from "../../components/signUp/Organization";
-import Verify from "../../components/verify/Verify";
+import Account from "./account/Account";
+import Organization from "./organization/Organization";
+import Verify from "./verify/Verify";
 import { useHistory } from "react-router-dom";
 import { useParams } from "react-router-dom";
 
