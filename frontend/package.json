@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@alch/alchemy-web3": "^1.4.6",
     "@emotion/styled": "^11.8.1",
     "@mapbox/mapbox-gl-language": "^1.0.0",
     "@material-ui/core": "^4.11.4",
@@ -12,6 +13,7 @@
     "@react-google-maps/api": "^2.12.0",
     "@toruslabs/torus-embed": "^1.27.3",
     "apexcharts": "^3.35.4",
+    "autoprefixer": "^10.4.8",
     "axios": "^0.24.0",
     "chart.js": "^3.8.2",
     "chartkick": "^4.2.0",
@@ -81,6 +83,6 @@
     ]
   },
   "resolutions": {
-    "autoprefixer": "10.4.5"
+    "autoprefixer": "10.4.8"
   }
 }

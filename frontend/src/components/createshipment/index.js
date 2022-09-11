@@ -30,6 +30,9 @@ import { config } from "../../config";
 import axios from "axios";
 import { AddLocationCard } from "../../components/Addlocation/index";
 import OrganisationPopUp from "../signUp/organisationPopUp";
+const contract = require("../../contracts/Shipments.json");
+const contractAddress = "0x6aE3A3FdFA40550456d39025F8A3De214886c5f8";
+const shipmentContract = new web3.eth.Contract(contract.abi, contractAddress);
 
 const CreateShipment = (props) => {
   const { t } = props;

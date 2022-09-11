@@ -169,6 +169,7 @@ export function config() {
       getmanufacturerOutStockReportUrl: `${LOCAL_SERVER_URL_ANALYTICS}/analyticsmanagement/api/network/outOfStockReport`,
       getManufacturerWarehouses: `${LOCAL_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getManufacturerWarehouses`,
       getManufacturerFilterOptions: `${LOCAL_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getManufacturerFilterOptions`,
+      verifyAuth: `${LOCAL_SERVER_URL_USER}/usermanagement/api/auth/verifyAuth`
     },
     test: {
       getOrganizationsUrl: `${TEST_SERVER_URL}/inventorymanagement/api/inventory/getOrganizations?orgType=`,
@@ -322,7 +323,8 @@ export function config() {
       getManufacturerFilterOptions: `${TEST_SERVER_URL}/inventorymanagement/api/inventory/getManufacturerFilterOptions`,
       getmanufacturerInStockFilterOptions: `${TEST_SERVER_URL}/analyticsmanagement/api/network/inStockFilterOptions`,
       getmanufacturerOutStockFilterOptions: `${TEST_SERVER_URL}/analyticsmanagement/api/network/outStockFilterOptions`,
-      verifyAuth: `${TEST_SERVER_URL}/usermanagement/api/auth/verifyAuth`
+      //verifyAuth: `${TEST_SERVER_URL}/usermanagement/api/auth/verifyAuth`
+      verifyAuth: `${LOCAL_SERVER_URL_USER}/usermanagement/api/auth/verifyAuth`
     },
     prod: {
       getOrganizationsUrl: `${PROD_SERVER_URL}/inventorymanagement/api/inventory/getOrganizations?orgType=`,
