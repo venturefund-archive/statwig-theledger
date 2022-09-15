@@ -34,8 +34,6 @@ const NewShipment = (props) => {
   const [senderWarehouses, setSenderWarehouses] = useState([]);
   const [receiverWarehouses, setReceiverWarehouses] = useState([]);
   const [disabled, setDisabled] = useState(false);
-  const [fetchdisabled, setfetchdisabled] = useState(false);
-  const [pofetchdisabled] = useState(false);
   const [FromLocationSelected, setFromLocationSelected] = useState(false);
   const [products, setProducts] = useState([]);
   const [addProducts, setAddProducts] = useState([]);
@@ -43,6 +41,12 @@ const NewShipment = (props) => {
     "Select Organisation Location"
   );
   const dispatch = useDispatch();
+  const [fetchdisabled, setfetchdisabled] = useState(false);
+  const [pofetchdisabled] = useState(false);
+  const [toOrgLocLabel, settoOrgLocLabel] = useState("");
+  const [receiverOrgLoc, setReceiverOrgLoc] = useState(
+    t("select_delivery_location")
+  );
   const [category, setCategory] = useState([]);
   const [OrderId, setOrderId] = useState("Select Order ID");
   const [senderOrgId, setSenderOrgId] = useState("null");
@@ -51,10 +55,6 @@ const NewShipment = (props) => {
   const [selectedWarehouse, setSelectedWarehouse] = useState("");
   const [receiverOrgId, setReceiverOrgId] = useState(
     "Select Organisation Name"
-  );
-  const [toOrgLocLabel, settoOrgLocLabel] = useState("");
-  const [receiverOrgLoc, setReceiverOrgLoc] = useState(
-    t("select_delivery_location")
   );
   const user = useSelector((state) => state.user);
   const [OrderDetails, setOrderDetails] = useState({});
@@ -96,6 +96,15 @@ const NewShipment = (props) => {
     const result = await getShippingOrderById(item);
     setOrderDetails(result);
     dispatch(turnOff());
+  };
+
+  const closeModal = () => {
+    setOpenCreatedInventory(false);
+    props.history.push("/shipments");
+  };
+
+  const closeModalFail = () => {
+    setOpenShipmentFail(false);
   };
 
   useEffect(() => {
@@ -178,15 +187,6 @@ const NewShipment = (props) => {
 
     fetchData();
   }, [props.location, user.organisation]);
-
-  const closeModal = () => {
-    setOpenCreatedInventory(false);
-    props.history.push("/shipments");
-  };
-
-  const closeModalFail = () => {
-    setOpenShipmentFail(false);
-  };
 
   const onOrgChange = async (value) => {
     try {
@@ -761,14 +761,13 @@ const NewShipment = (props) => {
                                 result.products[i].orderedQuantity =
                                   result.products[i].productQuantity;
                               }
-                              dispatch(turnOff());
-                              setReceiverOrgLoc();
-                              setReceiverOrgId();
                               setFieldValue("fromOrg", "");
                               setFieldValue("fromOrgLoc", "");
                               setFieldValue("rtype");
                               setFieldValue("toOrg", "");
-
+                              dispatch(turnOff());
+                              setReceiverOrgLoc();
+                              setReceiverOrgId();
                               if (result.status === 500) {
                                 setShipmentError(t("check_shipment_reference_id"));
                                 setOpenShipmentFail(true);
@@ -805,8 +804,8 @@ const NewShipment = (props) => {
                                     result.products[i].productID;
                                 }
                                 if (result.products.length > 0) {
-                                  setProducts((p) => []);
                                   setAddProducts((p) => []);
+                                  setProducts((p) => []);
                                   setFieldValue("products", products_temp);
                                 } else setFieldValue("products", []);
                               }
