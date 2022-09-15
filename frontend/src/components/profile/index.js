@@ -516,6 +516,7 @@ class Profile extends React.Component {
                               </div>
                               <div className="card-body">
                                 <input
+                                readOnly
                                   className="total-input"
                                   value={
                                     this.state.warehouseLocations[id]
@@ -529,6 +530,7 @@ class Profile extends React.Component {
                                   placeholder={t("city")}
                                 />
                                 <input
+                                readOnly
                                   className="total-input"
                                   value={
                                     this.state.warehouseLocations[id]
@@ -542,6 +544,7 @@ class Profile extends React.Component {
                                   placeholder={t("state")}
                                 />
                                 <input
+                                readOnly
                                   className="total-input"
                                   value={
                                     this.state.warehouseLocations[id]
@@ -556,6 +559,7 @@ class Profile extends React.Component {
                                 />
 
                                 <input
+                                readonly
                                   className="full-address-input"
                                   value={
                                     this.state.warehouseLocations[id]
@@ -570,6 +574,7 @@ class Profile extends React.Component {
                                   placeholder={t("address")}
                                 />
                                 <input
+                                readOnly
                                   className="full-address-input"
                                   value={
                                     this.state.warehouseLocations[id]
@@ -585,6 +590,7 @@ class Profile extends React.Component {
                                 />
 
                                 <input
+                                readOnly
                                   className="pin-code-input"
                                   value={
                                     this.state.warehouseLocations[id]
