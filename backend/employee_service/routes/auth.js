@@ -235,6 +235,7 @@ router.post("/deleteProfilePicture", AuthController.deleteProfilePicture);
  *          description: Image uploaded successfully
 */ 
 router.post("/upload", upload.single("profile"), AuthController.uploadImage);
+<<<<<<< HEAD
 // routes/auth.js
 /**
  * @openapi
@@ -300,6 +301,8 @@ router.post("/assignProductConsumer", AuthController.assignProductConsumer);
  *           description: Warehouse added successfully
 */ 
 
+=======
+>>>>>>> a84d2b3267603bc84e097adfa070de9b19348a1f
 router.post("/addWarehouse", AuthController.addWarehouse);
 // routes/auth.js
 /**
