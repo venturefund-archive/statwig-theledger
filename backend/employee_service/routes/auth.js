@@ -29,20 +29,33 @@ const router = express.Router();
  *      - name: firstName
  *        in: body
  *        description: first name of the user
+ *        schema:
+ *         example: 
+ *          value: John
  *      - name: lastName
  *        in: body
  *        description: last name of the user
+ *        schema:
+ *         example: 
+ *          value: Doe
  *      - name: organisationId
  *        in: body
  *        description: OrganisationId of the user
+ *        schema:
+ *         example:
+ *          value: 1234
  *      - name: EmailID
  *        in: body
  *        description: email id of user
+ *        schema: 
+ *         example: 
+ *          value: johndoe@gmail.com
  *    produces:
  *      - application/json
  *    responses:
  *        '200':
  *          description: Email is valid
+ * 
 */
 router.post("/check", AuthController.checkEmail);
 // routes/auth.js
@@ -58,15 +71,27 @@ router.post("/check", AuthController.checkEmail);
  *      - name: firstName
  *        in: body
  *        description: first name of the user
+ *        schema:
+ *         example: 
+ *          value: John
  *      - name: lastName
  *        in: body
  *        description: last name of the user
+ *        schema:
+ *         example: 
+ *          value: Doe
  *      - name: organisationId
  *        in: body
  *        description: OrganisationId of the user
+ *        schema:
+ *         example:
+ *          value: 1234
  *      - name: EmailID
  *        in: body
  *        description: email id of user
+ *        schema: 
+ *         example: 
+ *          value: johndoe@gmail.com
  *    produces:
  *      - application/json
  *    responses:
@@ -88,6 +113,9 @@ router.post("/register", AuthController.register);
  *      - name: EmailID
  *        in: body
  *        description: email id of user
+ *        schema:
+ *         example: 
+ *          value: johndoe@gmail.com
  *    produces:
  *      - application/json
  *    responses:
@@ -109,9 +137,15 @@ router.post("/sendOtp", AuthController.sendOtp);
  *      - name: emailID
  *        in: body
  *        description: EMAILID of the user
+ *        schema:
+ *         example: 
+ *          value: johndoe@gmail.com
  *      - name: otp
  *        in: body
  *        description: otp sent to the user
+ *        schema:
+ *         example: 
+ *          value: 458621(sample otp)
  *    produces:
  *      - application/json
  *    responses:
@@ -125,7 +159,7 @@ router.post("/verifyOtp", AuthController.verifyOtp);
 /**
  * @openapi
  * /userInfo:
- *  post:
+ *  get:
  *    summary: Fetches user information 
  *    tags:
  *      - Employee Service
@@ -140,7 +174,7 @@ router.get("/userInfo", AuthController.userInfo);
 /**
  * @openapi
  * /getAllUsers:
- *  post:
+ *  get:
  *    summary: Fetches user information of all users
  *    tags:
  *      - Employee Service
@@ -164,6 +198,9 @@ router.get("/getAllUsers", AuthController.getAllUsers);
  *      - name: EmailID
  *        in: body
  *        description: EmailID of user
+ *        schema:
+ *         example: 
+ *          value: johndoe@gmail.com
  * 
 */
 router.post("/verifyAuth", AuthController.verifyAuthentication);
@@ -180,18 +217,33 @@ router.post("/verifyAuth", AuthController.verifyAuthentication);
  *      - name: firstName
  *        in: body
  *        description: first name of the user
+ *        schema:
+ *         example: 
+ *          value: John
  *      - name: lastName
  *        in: body
  *        description: last name of the user
+ *        schema:
+ *         example: 
+ *          value: Doe
  *      - name: organisationId
  *        in: body
  *        description: OrganisationId of the user
+ *        schema:
+ *         example: 
+ *          value: 1234
  *      - name: EmailID
  *        in: body
  *        description: email id of user
+ *        schema:
+ *         example: 
+ *          value: johndoe@gmail.com
  *      - name: warehouseId
  *        in: body
  *        description: warehouseId of the user
+ *        schema:
+ *         example: 
+ *          value: #345
  *    produces:
  *      - application/json
  *    responses:
@@ -235,53 +287,53 @@ router.post("/deleteProfilePicture", AuthController.deleteProfilePicture);
  *          description: Image uploaded successfully
 */ 
 router.post("/upload", upload.single("profile"), AuthController.uploadImage);
-<<<<<<< HEAD
-// routes/auth.js
-/**
- * @openapi
- * /createAddress:
- *   get:
- *     tags:
- *       - Employee Service
- *     description: Create new blockchain address corresponding to logged in user
- *     responses:
- *         '200':
- *           description: User Address Created
-*/
-router.get("/createAddress", AuthController.createUserAddress);
-// routes/auth.js
-/**
- * @openapi
- * /assignProductConsumer:
- *  post:
- *    summary: Publish product to blockchain
- *    tags:
- *      - Employee Service
- *    description: Publish product to blockchain corresponding to logged-in user
- *    parameters:
- *      - name: shipmentID
- *        in: body
- *        description: shipmentId of the consumer
- *      - name: Name
- *        in: body
- *        description:  name of the consumer
- *      - name: gender
- *        in: body
- *        description: gender of the consumer
- *      - name: age
- *        in: body
- *        description: age of the consumer
- *      - name: aadhar
- *        in: body
- *        description: aadhar card number of the consumer
- *    produces:
- *      - application/json
- *    responses:
- *        '200':
- *          description: product consumer success
-*/ 
 
-router.post("/assignProductConsumer", AuthController.assignProductConsumer);
+// // routes/auth.js
+// /**
+//  * @openapi
+//  * /createAddress:
+//  *   get:
+//  *     tags:
+//  *       - Employee Service
+//  *     description: Create new blockchain address corresponding to logged in user
+//  *     responses:
+//  *         '200':
+//  *           description: User Address Created
+// */
+// router.get("/createAddress", AuthController.createUserAddress);
+// // routes/auth.js
+// /**
+//  * @openapi
+//  * /assignProductConsumer:
+//  *  post:
+//  *    summary: Publish product to blockchain
+//  *    tags:
+//  *      - Employee Service
+//  *    description: Publish product to blockchain corresponding to logged-in user
+//  *    parameters:
+//  *      - name: shipmentID
+//  *        in: body
+//  *        description: shipmentId of the consumer
+//  *      - name: Name
+//  *        in: body
+//  *        description:  name of the consumer
+//  *      - name: gender
+//  *        in: body
+//  *        description: gender of the consumer
+//  *      - name: age
+//  *        in: body
+//  *        description: age of the consumer
+//  *      - name: aadhar
+//  *        in: body
+//  *        description: aadhar card number of the consumer
+//  *    produces:
+//  *      - application/json
+//  *    responses:
+//  *        '200':
+//  *          description: product consumer success
+// */ 
+
+// router.post("/assignProductConsumer", AuthController.assignProductConsumer);
 // routes/auth.js
 /**
  * @openapi
@@ -294,6 +346,9 @@ router.post("/assignProductConsumer", AuthController.assignProductConsumer);
  *       - name: id
  *         in: body
  *         description: id of the warehouse to be added
+ *         schema:
+ *          example: 
+ *           value: 2344
  *     produces:
  *       - application/json
  *     responses:
@@ -301,8 +356,6 @@ router.post("/assignProductConsumer", AuthController.assignProductConsumer);
  *           description: Warehouse added successfully
 */ 
 
-=======
->>>>>>> a84d2b3267603bc84e097adfa070de9b19348a1f
 router.post("/addWarehouse", AuthController.addWarehouse);
 // routes/auth.js
 /**
@@ -316,6 +369,9 @@ router.post("/addWarehouse", AuthController.addWarehouse);
  *       - name: warehouseId
  *         in: body
  *         description: id of the pending warehouse to be added
+ *         schema:
+ *          example: 
+ *           value: 2345
  *     produces:
  *       - application/json
  *     responses:
@@ -335,6 +391,9 @@ router.post("/pushWarehouse", AuthController.pushWarehouse);
  *       - name: warehouseId
  *         in: body
  *         description: id of the warehouse to be updated
+ *         schema:
+ *          example: 
+ *           value: 2353
  *     produces:
  *       - application/json
  *     responses:
@@ -354,6 +413,9 @@ router.post("/updateWarehouse", AuthController.updateWarehouseAddress);
  *       - name: warehouseId
  *         in: body
  *         description: Updated Address of warehouse in JSON format
+ *         schema:
+ *          example: 
+ *           value: 2345
  *     produces:
  *       - application/json
  *     responses:
@@ -412,7 +474,7 @@ router.get(
 /**
  * @openapi
  * /uploadImage:
- *   get:
+ *   post:
  *     tags:
  *       - Employee Service
  *     responses:
@@ -522,7 +584,7 @@ router.get(
 /**
  * @openapi
  * /emailverify:
- *   post:
+ *   get:
  *     tags:
  *       - Employee Service
  *     description: Verify email with corresponding emailID and Phone Number
@@ -530,9 +592,15 @@ router.get(
  *       - name: emailID
  *         in: body
  *         description: EmailID of corresponding user 
+ *         schema:
+ *          example: 
+ *           value: johndoe@gmail.com
  *       - name: phone number
  *         in: body
  *         description: phone number of corresponding user 
+ *         schema:
+ *          example: 
+ *           value: 9123098712
  *     produces:
  *       - application/json
  *     responses:
