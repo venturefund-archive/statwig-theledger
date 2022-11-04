@@ -288,52 +288,6 @@ router.post("/deleteProfilePicture", AuthController.deleteProfilePicture);
 */ 
 router.post("/upload", upload.single("profile"), AuthController.uploadImage);
 
-// // routes/auth.js
-// /**
-//  * @openapi
-//  * /createAddress:
-//  *   get:
-//  *     tags:
-//  *       - Employee Service
-//  *     description: Create new blockchain address corresponding to logged in user
-//  *     responses:
-//  *         '200':
-//  *           description: User Address Created
-// */
-// router.get("/createAddress", AuthController.createUserAddress);
-// // routes/auth.js
-// /**
-//  * @openapi
-//  * /assignProductConsumer:
-//  *  post:
-//  *    summary: Publish product to blockchain
-//  *    tags:
-//  *      - Employee Service
-//  *    description: Publish product to blockchain corresponding to logged-in user
-//  *    parameters:
-//  *      - name: shipmentID
-//  *        in: body
-//  *        description: shipmentId of the consumer
-//  *      - name: Name
-//  *        in: body
-//  *        description:  name of the consumer
-//  *      - name: gender
-//  *        in: body
-//  *        description: gender of the consumer
-//  *      - name: age
-//  *        in: body
-//  *        description: age of the consumer
-//  *      - name: aadhar
-//  *        in: body
-//  *        description: aadhar card number of the consumer
-//  *    produces:
-//  *      - application/json
-//  *    responses:
-//  *        '200':
-//  *          description: product consumer success
-// */ 
-
-// router.post("/assignProductConsumer", AuthController.assignProductConsumer);
 // routes/auth.js
 /**
  * @openapi
