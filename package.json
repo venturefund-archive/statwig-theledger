@@ -1,0 +1,25 @@
+{
+  "name": "theledger",
+  "version": "1.0.0",
+  "description": "Vaccine Ledger",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/statwig-public/theledger.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/statwig-public/theledger/issues"
+  },
+  "homepage": "https://gitlab.com/statwig-public/theledger#readme",
+  "dependencies": {
+    "yarn": "^1.22.19"
+  }
+}

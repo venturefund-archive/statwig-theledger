@@ -4,7 +4,7 @@ import PoCard from "./PoCard";
 import "./ChainofCustody.scss";
 import TrackIllustration from "../../../assets/images/track.webp";
 
-export default function ChainofCustody({ trackingData }) {
+export default function ChainofCustody({ trackingData, t }) {
 	const poDetails = trackingData?.poDetails;
 
 	return trackingData ? (
@@ -33,7 +33,7 @@ export default function ChainofCustody({ trackingData }) {
 		<div className="tracking-illustation">
 			<img src={TrackIllustration} alt="tracking" />
 			<p className="mi-body-md f-500 grey mi-reset">
-				Try search using your Tracking ID to track your Products/Shipment
+			{t("try_search_using_your")} {t("tracking_id_to_track_your")} {t("products/shipment")}
 			</p>
 		</div>
 	);

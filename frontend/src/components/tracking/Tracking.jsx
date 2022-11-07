@@ -73,7 +73,7 @@ export default function Tracking() {
 				<div className="tracking-content-area">
 					<div className="tracking-header">
 						<h1 style={{ paddingBottom: "10px" }} className="vl-heading-bdr black f-700 mi-reset">
-							Track & Trace
+							{t("track_&_trace")}
 						</h1>
 						<div className="tracking-search-bar">
 							<div className="mi-flex-ac">
@@ -90,11 +90,11 @@ export default function Tracking() {
 						</div>
 					</div>
 					<div className="tab-buttons">
-						<Tab layout="button" LocationTab={LocationTab} setLocationTab={setLocationTab} />
+						<Tab layout="button" LocationTab={LocationTab} setLocationTab={setLocationTab} t={t}/>
 					</div>
-					{LocationTab === "CHAIN" && <ChainofCustody trackingData={trackingData} />}
+					{LocationTab === "CHAIN" && <ChainofCustody trackingData={trackingData} t={t}/>}
 					{LocationTab === "LOCATION" && (
-						<CurrentLocation currentLocationData={trackingData?.currentLocationData} />
+						<CurrentLocation currentLocationData={trackingData?.currentLocationData} t={t} />
 					)}
 				</div>
 				<div className="tracking-map-area">

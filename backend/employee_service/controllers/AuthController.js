@@ -70,7 +70,7 @@ exports.checkEmail = [
       if (user) {
         return Promise.reject("account_already_exists");
       }
-    }),
+    })
   async (req, res) => {
     try {
       if (

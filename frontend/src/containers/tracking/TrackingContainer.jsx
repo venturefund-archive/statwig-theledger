@@ -12,7 +12,7 @@ const TrackingContainer = (props) => {
       <div className="d-flex">
         <Sidebar {...props} t={t} />
         <div className="Network-content">
-          <Tracking />
+          <Tracking t={t} />
         </div>
       </div>
     </div>

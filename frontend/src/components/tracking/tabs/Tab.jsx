@@ -1,7 +1,7 @@
 import React from "react";
 import "./tab.scss";
 
-export default function Tab({ layout, LocationTab, setLocationTab }) {
+export default function Tab({ layout, LocationTab, setLocationTab, t}) {
   return (
     <>
       {layout === "button" && (
@@ -13,7 +13,7 @@ export default function Tab({ layout, LocationTab, setLocationTab }) {
             onClick={() => setLocationTab("CHAIN")}
           >
             <i className='fa-solid fa-link'></i>
-            <p className='mi-body-sm f-500 mi-reset'>Chain of custody</p>
+            <p className='mi-body-sm f-500 mi-reset'>{t("chain_of_custody")}</p>
           </div>
           <div
             className={`tab-button-grid tab-last-child tab-left-border ${
@@ -22,7 +22,7 @@ export default function Tab({ layout, LocationTab, setLocationTab }) {
             onClick={() => setLocationTab("LOCATION")}
           >
             <i className='fa-solid fa-location-crosshairs'></i>
-            <p className='mi-body-sm  f-500 mi-reset'>Current Location</p>
+            <p className='mi-body-sm  f-500 mi-reset'>{t("current_location")}</p>
           </div>
         </div>
       )}

@@ -12,6 +12,7 @@ export default function Networking(props) {
     setReportWarehouse,
     MainTab,
     setMainTab,
+    t,
   } = props;
 
   const [MobileDashboard, setMobileDashboard] = useState(false);

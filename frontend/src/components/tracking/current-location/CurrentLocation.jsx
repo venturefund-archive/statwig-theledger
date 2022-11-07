@@ -3,7 +3,7 @@ import "./CurrentLocation.scss";
 import TrackLocationCard from "./LocationCard";
 import TrackIllustration from "../../../assets/images/track.webp";
 
-export default function CurrentLocation({ currentLocationData }) {
+export default function CurrentLocation({ currentLocationData, t }) {
 	return currentLocationData ? (
 		<div>
 			{currentLocationData &&
@@ -17,7 +17,7 @@ export default function CurrentLocation({ currentLocationData }) {
 		<div className="tracking-illustation">
 			<img src={TrackIllustration} alt="tracking" />
 			<p className="mi-body-md f-500 grey mi-reset">
-				Try search using your Tracking ID to track your Products/Shipment
+				{t("try_search_using_your")} {t("tracking_id_to_track_your")} {t("products/shipment")}
 			</p>
 		</div>
 	);
