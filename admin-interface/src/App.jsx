@@ -8,11 +8,12 @@ import Dashboard from "./pages/statwig-admin/Dashboard/Dashboard";
 import Locations from "./pages/statwig-admin/Locations/Locations";
 import Organization from "./pages/statwig-admin/Organization/Organization";
 import ViewUsers from "./pages/statwig-admin/ViewUsers/ViewUsers";
-import OrgHeader from "./shared/OrgHeader/OrgHeader";
-import StatwigHeader from "./shared/StatwigHeader/StatwigHeader";
+import OrgHeader from "./shared/Header/OrgHeader/OrgHeader";
+import StatwigHeader from "./shared/Header/StatwigHeader/StatwigHeader";
+
 
 export default function App() {
-  const [AdminType, setAdminType] = useState("1");
+  const [AdminType, setAdminType] = useState("2");
   return (
     <BrowserRouter>
       {AdminType === "1" && (

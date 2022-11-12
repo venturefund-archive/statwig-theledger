@@ -131,6 +131,45 @@
   color: var(--blue) !important;
   box-shadow: var(--shadow);
 }
+
+.switch-button {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 1.2rem;
+  background-color: var(--analytic-active-1);
+  color: var(--white);
+  border-radius: 1rem;
+  cursor: pointer;
+}
+
+.link-right-space {
+  margin-right: 0.65rem;
+}
+
+.switch-button-container {
+  display: flex;
+}
+
+@media screen and (max-width: 1168px) {
+  .admin-nav-left {
+    display: flex;
+    gap: 3rem !important;
+  }
+  .admin-nav-right {
+    display: flex;
+    gap: 1.6rem !important;
+  }
+  .admin-nav-list {
+    display: flex;
+    align-items: stretch;
+    gap: 1.6rem !important;
+  }
+  .switch-button-container {
+    display: none !important;
+  }
+}
+
 @media screen and (max-width: 992px) {
   .profile-name-card {
     display: none;

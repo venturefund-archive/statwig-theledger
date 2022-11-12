@@ -1,10 +1,10 @@
 import React from "react";
-import vaccineledger from "../../assets/files/brands/vaccineledger.svg";
-import profile from "../../assets/files/profile/profile.jpg";
+import vaccineledger from "../../../assets/files/brands/vaccineledger.svg";
+import profile from "../../../assets/files/profile/profile.jpg";
 import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import Badge from "@mui/material/Badge";
-import "./OrgHeader.css";
+import "../Header.css";
 
 export default function OrgHeader() {
   let location = useLocation();
@@ -45,7 +45,10 @@ export default function OrgHeader() {
                     location.pathname === "/org/roles" && "active"
                   } ${location.pathname === "/org/product-list" && "active"}`}
                 >
-                  <p className="vl-note">Configuration</p>
+                  <p className="vl-note">
+                    <span className="link-right-space">Configuration</span>
+                    <i class="fa-solid fa-caret-down"></i>
+                  </p>
                 </div>
                 <div className={`configure-list active `}>
                   <Link to="/org/roles" className="btn-dropdown-card vl-link">
@@ -62,7 +65,18 @@ export default function OrgHeader() {
             </ul>
           </article>
           <article className="admin-nav-right">
-            <ul className="admin-nav-list">
+            <ul className="admin-nav-list switch-button-container">
+              <li className="admin-nav-item configure-link">
+                <div className="switch-button">
+                  <p className="vl-note">Admin</p>
+                  <i class="fa-solid fa-caret-down"></i>
+                </div>
+                <div className={`configure-list active `}>
+                  <div className="btn-dropdown-card vl-link">
+                    <p className="vl-note f-500">Switch to User</p>
+                  </div>
+                </div>
+              </li>
               <li className="admin-nav-item">
                 <Link className="admin-nav-link">
                   <Badge color="error" variant="dot">
