@@ -500,5 +500,23 @@
   "side_point-4":"Ver las ubicaciones de sus socios",
   "side_point-5":"Alertas y Notificaciones",
   "side_point-6":"Supervisar las condiciones de la cadena de frío",
-  "side_point-7":"Administre eficientemente su inventario"
+  "side_point-7":"Administre eficientemente su inventario",
+  "my": "Mi",
+  "reports": "Informes",
+  "product_cateogry": "Categoría de producto",
+  "partner": "Socio",
+  "best_seller": "Mejor vendedor",
+  "view_reports": "Ver informes",
+  "other_locations": "Otras ubicaciones",
+  "search_by_organizations_or_countries": "Buscar por organizaciones o países",
+  "country_list": "Lista de países",
+  "out_of_stock": "Agotado",
+  "in_stock": "En stock",
+  "organization_list": "Lista de organizaciones",
+  "product_manufacturer": "Fabricante de productos",
+  "no_of_units_sold": "Número de unidades vendidas",
+  "opening_balance": "Saldo de apertura",
+  "opening_current_in_stock_(qty)": "Apertura actual en stock (cantidad)"
+
+
 }

@@ -477,8 +477,26 @@
   "side_point-4":"View your Partner Locations",
   "side_point-5":"Alerts and Notifications",
   "side_point-6":"Monitor Cold chain conditions",
-  "side_point-7":"Efficiently manage your inventory"
-  
-  
+  "side_point-7":"Efficiently manage your inventory",
+  "my": "My",
+  "partner": "Partner",
+  "other_locations": "Other Locations",
+  "best_seller": "Best Seller",
+  "view_reports": "View Reports",
+  "search_by_organizations_or_countries": "Search by Organizations or Countries",
+  "country_list": "Country List",
+  "out_of_stock": "Out of Stock",
+  "in_stock": "In - Stock",
+  "organization_list": "Organization List",
+  "reports": "Reports",
+  "product_category": "Product Category",
+  "product_name": "Product Name",
+  "product_manufacturer": "Product Manufacturer",
+  "no_of_units_sold": "No. of Units Sold",
+  "opening_balance": "Opening Balance",
+  "opening_current_in_stock_(qty)": "Opening Current In Stock (Qty)",
+  "product_manufacturer": "Product Manufacturer",
+  "product_out_of_stock": "Product Out of Stock",
+  "export": "Export"
 
 }
