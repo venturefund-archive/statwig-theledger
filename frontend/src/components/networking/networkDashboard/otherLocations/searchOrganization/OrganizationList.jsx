@@ -32,7 +32,7 @@ const OrganizationList = ({ orgName, user, orgId, setReportWarehouse }) => {
                 <i className="fa-solid fa-location-dot mr-2"></i>
               </span>
               <button
-                className="link-button"
+                className="link-button mi-body-md mr-2"
                 onClick={() => setReportWarehouse(warehouse?.warehouseId)}
                 key={index}
               >
