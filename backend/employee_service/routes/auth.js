@@ -19,7 +19,7 @@ const router = express.Router();
 // routes/auth.js
 /**
  * @openapi
- * /check:
+ * /usermanagement/api/auth/check:
  *  post:
  *    summary: Check Validity 
  *    tags:
@@ -61,7 +61,7 @@ router.post("/check", AuthController.checkEmail);
 // routes/auth.js
 /**
  * @openapi
- * /register:
+ * /usermanagement/api/auth/register:
  *  post:
  *    summary: Register new user
  *    tags:
@@ -103,7 +103,7 @@ router.post("/register", AuthController.register);
 // routes/auth.js
 /**
  * @openapi
- * /sendOtp:
+ * /usermanagement/api/auth/sendOtp:
  *  post:
  *    summary: Send otp to user
  *    tags:
@@ -127,7 +127,7 @@ router.post("/sendOtp", AuthController.sendOtp);
 // routes/auth.js
 /**
  * @openapi
- * /verifyOtp:
+ * /usermanagement/api/auth/verifyOtp:
  *  post:
  *    summary: Verify OTP 
  *    tags:
@@ -158,7 +158,7 @@ router.post("/verifyOtp", AuthController.verifyOtp);
 // routes/auth.js
 /**
  * @openapi
- * /userInfo:
+ * /usermanagement/api/auth/userInfo:
  *  get:
  *    summary: Fetches user information 
  *    tags:
@@ -173,7 +173,7 @@ router.get("/userInfo", AuthController.userInfo);
 // routes/auth.js
 /**
  * @openapi
- * /getAllUsers:
+ *  /usermanagement/api/auth/getAllUsers:
  *  get:
  *    summary: Fetches user information of all users
  *    tags:
@@ -188,7 +188,7 @@ router.get("/getAllUsers", AuthController.getAllUsers);
 // routes/auth.js
 /**
  * @openapi
- * /verifyauth:
+ *  /usermanagement/api/auth/verifyauth:
  *   post:
  *     tags:
  *       - Employee Service
@@ -207,7 +207,7 @@ router.post("/verifyAuth", AuthController.verifyAuthentication);
 // routes/auth.js
 /**
  * @openapi
- * /UpdateProfile:
+ *  /usermanagement/api/auth/UpdateProfile:
  *  post:
  *    summary: Update profile of user
  *    tags:
@@ -254,7 +254,7 @@ router.post("/updateProfile", AuthController.updateProfile);
 // routes/auth.js
 /**
  * @openapi
- * /deleteProfilePicture:
+ *  /usermanagement/api/auth/deleteProfilePicture:
  *   post:
  *     tags:
  *       - Employee Service
@@ -271,7 +271,7 @@ router.post("/deleteProfilePicture", AuthController.deleteProfilePicture);
 // routes/auth.js
 /**
  * @openapi
- * /upload:
+ *  /usermanagement/api/auth/upload:
  *  post:
  *    summary: Upload the profile profile picture
  *    tags:
@@ -291,7 +291,7 @@ router.post("/upload", upload.single("profile"), AuthController.uploadImage);
 // routes/auth.js
 /**
  * @openapi
- * /addWarehouse:
+ *  /usermanagement/api/auth/addWarehouse:
  *   post:
  *     tags:
  *       - Employee Service
@@ -314,7 +314,7 @@ router.post("/addWarehouse", AuthController.addWarehouse);
 // routes/auth.js
 /**
  * @openapi
- * /pushWarehouse:
+ *  /usermanagement/api/auth/pushWarehouse:
  *   post:
  *     tags:
  *       - Employee Service
@@ -336,7 +336,7 @@ router.post("/pushWarehouse", AuthController.pushWarehouse);
 // routes/auth.js
 /**
  * @openapi
- * /updateWarehouse:
+ *  /usermanagement/api/auth/updateWarehouse:
  *   post:
  *     tags:
  *       - Employee Service
@@ -358,7 +358,7 @@ router.post("/updateWarehouse", AuthController.updateWarehouseAddress);
 // routes/auth.js
 /**
  * @openapi
- * /switchLocation:
+ *  /usermanagement/api/auth/switchLocation:
  *   post:
  *     tags:
  *       - Employee Service
@@ -380,7 +380,7 @@ router.post("/switchLocation", AuthController.switchLocation);
 // routes/auth.js
 /**
  * @openapi
- * /getAllRegisteredUsers:
+ *  /usermanagement/api/auth/getAllRegisteredUsers:
  *   get:
  *     tags:
  *       - Employee Service
@@ -393,7 +393,7 @@ router.get("/getAllRegisteredUsers", AuthController.getAllRegisteredUsers);
 // routes/auth.js
 /**
  * @openapi
- * /getAllRegisteredUsers/:organisationId:
+ *  /usermanagement/api/auth/getAllRegisteredUsers/:organisationId:
  *   get:
  *     tags:
  *       - Employee Service
@@ -410,7 +410,7 @@ router.get(
 // routes/auth.js
 /**
  * @openapi
- * /getAllRegisteredUsers/:warehouseId:
+ *  /usermanagement/api/auth/getAllRegisteredUsers/:warehouseId:
  *   get:
  *     tags:
  *       - Employee Service
@@ -427,7 +427,7 @@ router.get(
 // routes/auth.js
 /**
  * @openapi
- * /uploadImage:
+ *  /usermanagement/api/auth/uploadImage:
  *   post:
  *     tags:
  *       - Employee Service
@@ -440,7 +440,7 @@ router.post("/uploadImage", upload.single("photo"), AuthController.uploadImage);
 // routes/auth.js
 /**
  * @openapi
- * /fetchImage:
+ *  /usermanagement/api/auth/fetchImage:
  *   get:
  *     tags:
  *       - Employee Service
@@ -453,7 +453,7 @@ router.get("/fetchImage", AuthController.fetchImage);
 // routes/auth.js
 /**
  * @openapi
- * /getUserWarehouses:
+ *  /usermanagement/api/auth/getUserWarehouses:
  *   get:
  *     tags:
  *       - Employee Service
@@ -466,7 +466,7 @@ router.get("/getUserWarehouses", AuthController.getUserWarehouses);
 // routes/auth.js
 /**
  * @openapi
- * /getOrganizationsByType:
+ *  /usermanagement/api/auth/getOrganizationsByType:
  *   get:
  *     tags:
  *       - Employee Service
@@ -482,7 +482,7 @@ router.get(
 // routes/auth.js
 /**
  * @openapi
- * /getOrganizationsByType:
+ *  /usermanagement/api/auth/getOrganizationsByType:
  *   get:
  *     tags:
  *       - Employee Service
@@ -495,7 +495,7 @@ router.get("/getOrganizationsByType", AuthController.getOrganizationsByType);
 // routes/auth.js
 /**
  * @openapi
- * /getwarehouseByType:
+ *  /usermanagement/api/auth/getwarehouseByType:
  *   get:
  *     tags:
  *       - Employee Service
@@ -508,7 +508,7 @@ router.get("/getwarehouseByType", AuthController.getwarehouseByType);
 // routes/auth.js
 /**
  * @openapi
- * /getwarehouseinfo:
+ *  /usermanagement/api/auth/getwarehouseinfo:
  *   get:
  *     tags:
  *       - Employee Service
@@ -521,7 +521,7 @@ router.get("/getwarehouseinfo", AuthController.getwarehouseinfo);
 // routes/auth.js
 /**
  * @openapi
- * /getOrganizationsByTypewithauth:
+ *  /usermanagement/api/auth/getOrganizationsByTypewithauth:
  *   get:
  *     tags:
  *       - Employee Service
@@ -537,7 +537,7 @@ router.get(
 // routes/auth.js
 /**
  * @openapi
- * /emailverify:
+ *  /usermanagement/api/auth/emailverify:
  *   get:
  *     tags:
  *       - Employee Service
@@ -565,7 +565,7 @@ router.get("/emailverify", AuthController.emailverify);
 // routes/auth.js
 /**
  * @openapi
- * /images/:key:
+ *  /usermanagement/api/auth/images/:key:
  *   get:
  *     tags:
  *       - Employee Service
@@ -579,7 +579,7 @@ router.get("/images/:key", AuthController.Image);
 // routes/auth.js
 /**
  * @openapi
- * /googleLogin:
+ *  /usermanagement/api/auth/googleLogin:
  *   post:
  *     tags:
  *       - Employee Service
@@ -593,7 +593,7 @@ router.post("/googleLogin", AuthController.googleLogIn);
 // routes/auth.js
 /**
  * @openapi
- * /deleteProfile:
+ *  /usermanagement/api/auth/deleteProfile:
  *   delete:
  *     tags:
  *       - Employee Service
