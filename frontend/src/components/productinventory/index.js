@@ -180,7 +180,7 @@ const ProductInventory = (props) => {
           <Link to='/addNewCategory'>
             <button
               className='btn btn-yellow mr-3'
-              style={{ position: "relative", top: "-15px" }}
+              style={{ position: "relative", top: "5px" }}
             >
               <img
                 src={Add}

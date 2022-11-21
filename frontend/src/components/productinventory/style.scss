@@ -2,22 +2,21 @@
 
 .productinventory {
   margin-top: 5px;
-  padding-right: 6rem;
-  padding-left: 4rem;
+  padding-left: 3rem;
   //overflow: hidden;
   @media (max-width: $md) {
     padding-right: 10px;
     padding-left: 10px;
   }
   .breadcrumb {
-    margin-top: -10px;
+    margin-top: 5px;
     margin-left: -5px;
   }
 
   .full-width-ribbon {
     position: absolute;
-    left: 0;
-    right: -5px;
+    left: 0px;
+    right: 0px;
     background-color: #eaeaea;
     .filter {
       margin-left: 8rem;

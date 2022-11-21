@@ -30,7 +30,7 @@ const ProductInventoryContainer = (props) => {
       <Header {...props} t={t} />
       <div className='d-flex'>
         <Sidebar {...props} t={t} />
-        <div className='content'>
+        <div className='Network-content'>
           <ProductInventory
             inventories={inventories}
             products={products}
