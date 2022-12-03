@@ -212,8 +212,8 @@ async function createOrg({
     return "Organisation name exists!";
   }
 
-  const country = address?.country ? address?.country : "India";
-  const region = address?.region ? address?.region : "Asia";
+  const country = address?.country ? address?.country : "Costa Rica";
+  const region = address?.region ? address?.region : "Americas";
   const addr =
     address?.line1 +
     ", " +
@@ -273,7 +273,8 @@ async function createOrg({
     region: region,
     country: country,
     configuration_id: "CONF000",
-    authority: req.body?.authority,
+	authority: req.body?.authority,
+	parentOrgId: req.user.organisationId 
   });
   await organisation.save();
 
@@ -591,8 +592,8 @@ exports.register = [
 				if (organisation && organisation.isRegistered) {
 					organisationId = organisation.id;
 				} else {
-					const country = req.body?.address?.country ? req.body.address?.country : "India";
-					const region = req.body?.address?.region ? req.body.address?.region : "Asia";
+					const country = req.body?.address?.country ? req.body.address?.country : "Costa Rica";
+					const region = req.body?.address?.region ? req.body.address?.region : "Americas";
 					const address = req.body?.address ? req.body.address : {};
 					if (!skipOrgRegistration) {
 						addr =
@@ -2356,8 +2357,8 @@ exports.addNewOrganisation = [
 				);
 			}
 
-			const country = req.body?.address?.country ? req.body.address?.country : "India";
-			const region = req.body?.address?.region ? req.body.address?.region : "Asia";
+			const country = req.body?.address?.country ? req.body.address?.country : "Costa Rica";
+			const region = req.body?.address?.region ? req.body.address?.region : "Americas";
 			const addr =
 				address?.line1 + ", " + address?.city + ", " + address?.state + ", " + address?.pincode;
 
@@ -2690,19 +2691,19 @@ exports.addOrgsFromExcel = [
         console.log(data.entries());
         const formatedData = new Array();
         for (const [index, user] of data.entries()) {
-          const firstName = user["FIRST NAME"];
+          const firstName = user["NAME"];
           const lastName = user["LAST NAME"];
           const emailId = user["EMAIL"];
-          const phoneNumber = user["PHONE"];
-          const organisationName = user["ORG NAME"];
-          const type = user["ORG TYPE"];
+          const phoneNumber = user["TELEPHONE"];
+          const organisationName = user["ORGANIZATION'S NAME"];
+          const type = user["ORGANIZATION TYPE"];
           const address = {
             city: user["CITY"],
             country: user["COUNTRY"],
-            line1: user["ADDRESS LINE"],
-            pincode: user["PINCODE"],
-            region: user["REGION"],
-            state: user["STATE"],
+            line1: user["CANTON"],
+            pincode: user["POSTAL CODE"],
+            region: user["DISTRICT"],
+            state: user["PROVINCE"],
           };
 
           formatedData[index] = {
