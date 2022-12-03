@@ -125,7 +125,7 @@ export default function UsersRow({ rows, defaultRoles, t }) {
                 checked ? "f-400 vl-black" : "f-400 vl-grey-sm"
               }`}
             >
-              {`${rows.location}, ${rows.city}, ${rows.country}, ${rows.region}`}
+              {`${rows.location?.postalAddress}, ${rows.location?.city}, ${rows.location?.country}, ${rows.location?.region}`}
             </p>
             <div className='vl-table-icon' onClick={() => setOpen(!open)}>
               {open ? (

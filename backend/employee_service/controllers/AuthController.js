@@ -2926,6 +2926,7 @@ exports.getOrgUsers = [
         {
           $match: getUserCondition(req.query, req.user.organisationId),
         },
+		{ $sort : { "createdAt" : -1 } },
         {
           $lookup: {
             from: "organisations",
@@ -2934,6 +2935,17 @@ exports.getOrgUsers = [
             as: "orgs",
           },
         },
+        {
+          $lookup: {
+            from: "warehouses",
+            localField: "warehouseId",
+            foreignField: "id",
+            as: "warehouses",
+          },
+        },
+		{
+			$unwind: "$warehouses"
+		},
         {
           $project: {
             _id: 0,
@@ -2948,7 +2960,7 @@ exports.getOrgUsers = [
             emailId: 1,
             postalAddress: 1,
             createdAt: 1,
-            location: "$orgs.postalAddress",
+            location: "$warehouses.warehouseAddress",
             city: "$orgs.city",
             region: "$orgs.region",
             country: "$orgs.country",
