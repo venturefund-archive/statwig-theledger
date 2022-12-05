@@ -1,7 +1,7 @@
 {
   "name": "address_service",
   "version": "1.0.0",
-  "description": "",
+  "description": "Admin - Address Service",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js",
@@ -18,23 +18,20 @@
   },
   "homepage": "https://github.com/StaTwig/admin#readme",
   "dependencies": {
+    "axios": "^1.2.0",
     "cors": "^2.8.5",
-    "debug": "^4.3.1",
     "dotenv": "^8.2.0",
-    "express": "^4.17.1",
-    "express-jwt": "^6.0.0",
+    "express": "^4.18.2",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.11.15",
+    "mongoose": "^6.7.5",
     "morgan": "^1.10.0",
     "move-file": "^2.0.0",
-    "multer": "^1.4.2",
+    "multer": "^1.4.5-lts.1",
     "nanoid": "^3.1.20",
-    "node-fetch": "^2.6.1",
-    "xlsx": "^0.16.9",
-    "winston": "^3.3.3",
-    "winston-logzio": "^5.1.2"
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "eslint": "^8.29.0",
     "nodemon": "^2.0.7"
   }
 }

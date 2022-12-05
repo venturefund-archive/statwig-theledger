@@ -12,23 +12,18 @@ const nanoid = customAlphabet("1234567890abcdef", 10);
 const XLSX = require("xlsx");
 const fs = require("fs");
 const moveFile = require("move-file");
-const fetch = require("node-fetch");
+const axios = require("axios");
 
 exports.addressOfOrg = [
   auth,
   async (req, res) => {
     try {
-      await Organisation.find({ id: req.user.organisationId })
-        .then((org) => {
-          return apiResponse.successResponseWithData(
-            res,
-            "Organisations Addresses",
-            org
-          );
-        })
-        .catch((err) => {
-          return apiResponse.ErrorResponse(res, err);
-        });
+      const org = await Organisation.find({ id: req.user.organisationId })
+      return apiResponse.successResponseWithData(
+        res,
+        "Organizations Addresses",
+        org
+      );
     } catch (err) {
       return apiResponse.ErrorResponse(res, err);
     }
@@ -39,17 +34,12 @@ exports.addressesOfOrgWarehouses = [
   auth,
   async (req, res) => {
     try {
-      await Warehouse.find({$and: [{organisationId: req.user.organisationId},{status:"ACTIVE"}]})
-        .then((warehouses) => {
-          return apiResponse.successResponseWithData(
-            res,
-            "Warehouses Addresses",
-            warehouses
-          );
-        })
-        .catch((err) => {
-          return apiResponse.ErrorResponse(res, err);
-        });
+      const warehouses = await Warehouse.find({ $and: [{ organisationId: req.user.organisationId }, { status: "ACTIVE" }] })
+      return apiResponse.successResponseWithData(
+        res,
+        "Warehouses Addresses",
+        warehouses
+      );
     } catch (err) {
       return apiResponse.ErrorResponse(res, err);
     }
@@ -57,7 +47,7 @@ exports.addressesOfOrgWarehouses = [
 ];
 
 function getConditionForLocationApprovals(type, id) {
-  let matchConditions = { };
+  let matchConditions = {};
   // let matchConditions = { status: "NOTVERIFIED" };
   matchConditions = {
     $or: [{ status: "NOTVERIFIED" }, { status: "PENDING" }],
@@ -69,10 +59,9 @@ function getConditionForLocationApprovals(type, id) {
 exports.getLocationApprovals = [
   auth,
   async (req, res) => {
-    // console.log('Request', req);
     try {
       const orgType = req.user.organisationType;
-      await Warehouse.aggregate([
+      const warehouses = await Warehouse.aggregate([
         {
           $match: getConditionForLocationApprovals(
             orgType,
@@ -88,7 +77,7 @@ exports.getLocationApprovals = [
             pipeline: [
               {
                 $match: {
-                  $expr: { $in: ["$$wid", {$ifNull: ["$pendingWarehouseId", []]}] },
+                  $expr: { $in: ["$$wid", { $ifNull: ["$pendingWarehouseId", []] }] },
                 },
               },
             ],
@@ -97,20 +86,13 @@ exports.getLocationApprovals = [
         },
         { $unwind: "$employee" }
       ])
-        .then((warehouses) => {
-          return apiResponse.successResponseWithData(
-            res,
-            "Warehouses details",
-            warehouses
-          );
-        })
-        .catch((err) => {
-          console.log('error1',err);
-          return apiResponse.ErrorResponse(res, err);
-        });
+      return apiResponse.successResponseWithData(
+        res,
+        "Warehouses details",
+        warehouses
+      );
     } catch (err) {
-      console.log('Error2', err);
-
+      console.log(err);
       return apiResponse.ErrorResponse(res, err);
     }
   },
@@ -120,21 +102,16 @@ exports.updateAddressOrg = [
   auth,
   async (req, res) => {
     try {
-      await Organisation.findOneAndUpdate(
+      const org = await Organisation.findOneAndUpdate(
         { id: req.user.organisationId },
         req.body.address,
         { new: true }
       )
-        .then((org) => {
-          return apiResponse.successResponseWithData(
-            res,
-            "Organisation Address Updated",
-            org
-          );
-        })
-        .catch((err) => {
-          return apiResponse.ErrorResponse(res, err);
-        });
+      return apiResponse.successResponseWithData(
+        res,
+        "Organization Address Updated",
+        org
+      );
     } catch (err) {
       return apiResponse.ErrorResponse(res, err);
     }
@@ -145,21 +122,16 @@ exports.updateWarehouseAddress = [
   auth,
   async (req, res) => {
     try {
-      await Warehouse.findOneAndUpdate(
+      const warehouse = await Warehouse.findOneAndUpdate(
         { id: req.query.warehouseId },
         req.body.WarehouseAddress,
         { new: true }
       )
-        .then((warehouse) => {
-          return apiResponse.successResponseWithData(
-            res,
-            "Warehouse Address Updated",
-            warehouse
-          );
-        })
-        .catch((err) => {
-          return apiResponse.ErrorResponse(res, err);
-        });
+      return apiResponse.successResponseWithData(
+        res,
+        "Warehouse Address Updated",
+        warehouse
+      );
     } catch (err) {
       return apiResponse.ErrorResponse(res, err);
     }
@@ -201,7 +173,7 @@ exports.AddWarehouse = [
         employees,
         warehouseAddress,
       } = req.body;
-      const incrementCounterWarehouse = await CounterModel.update(
+      await CounterModel.update(
         {
           "counters.name": "warehouseId",
         },
@@ -221,21 +193,21 @@ exports.AddWarehouse = [
         warehouseCounter.counters[0].value;
       //const warehouseId = "war-" + nanoid();
       let employee = [];
-    if(employees != undefined && employees.length > 0){
-      employee = employees
-    }
-    else{
-      employee.push(req.user.id);
-    }
-    employee.forEach(async(emp) => {
-    const employeewarehouse = await EmployeeModel.findOneAndUpdate({
-     id: emp,
-   },{
-     $push: {warehouseId: warehouseId}
-   },{
-     new: true
-   });
-  });
+      if (employees != undefined && employees.length > 0) {
+        employee = employees
+      }
+      else {
+        employee.push(req.user.id);
+      }
+      employee.forEach(async (emp) => {
+        await EmployeeModel.findOneAndUpdate({
+          id: emp,
+        }, {
+          $push: { warehouseId: warehouseId }
+        }, {
+          new: true
+        });
+      });
       const warehouse = new Warehouse({
         id: warehouseId,
         title,
@@ -360,68 +332,60 @@ exports.addAddressesFromExcel = [
         let warehouseId =
           warehouseCounter.counters[0].format +
           (parseInt(warehouseCounter.counters[0].value) + parseInt(index));
-
-        fetch(
-          "https://nominatim.openstreetmap.org/search/" +
-            address.city +
-            "?format=json&addressdetails=1&limit=1"
-        )
-          .then((res) => res.json())
-          .then(async (res) => {
-          const user = await EmployeeModel.findOne({
-            $or: [
-              { emailId: address.user },
-              { phoneNumber: address.user },
-            ]
-          })
-          console.log("USERS IS ",user);
-            const reqData = {
-              id: warehouseId,
-              warehouseInventory: inventoryResult.id,
-              title: address.title,
-              organisationId: req.user.organisationId,
-              warehouseAddress: {
-                firstLine: address.line,
-                secondLine: "",
-                city: address.city,
-                state: address.state,
-                country: address.country,
-                landmark: "",
-                zipCode: address.pincode,
-              },
-              country: {
-                countryId: "001",
-                countryName: address.country,
-              },
-              region: {
-                regionId: "reg123",
-                regionName: "Earth Prime",
-              },
-              location: {
-                longitude: res?.length ? res[0].lon : "12.12323453534",
-                latitude: res?.length ? res[0].lat : "13.123435345435",
-                geohash: "1231nejf923453",
-              },
-              supervisors: [],
-              employees: [user.id],
-            };
-            let warehouse = new Warehouse(reqData);
-            const warehouseRes = await warehouse.save();
-            console.log(warehouseRes);
-            if (address?.user) {
-              await EmployeeModel.updateOne(
-                {
-                  $or: [
-                    { emailId: address.user },
-                    { phoneNumber: address.user },
-                  ],
-                },
-                { $push: { warehouseId: warehouseId } }
-              );
-            }
-          });
+        const latlong = await axios.get("https://nominatim.openstreetmap.org/search/" +
+          address.city +
+          "?format=json&addressdetails=1&limit=1")
+        const user = await EmployeeModel.findOne({
+          $or: [
+            { emailId: address.user },
+            { phoneNumber: address.user },
+          ]
+        })
+        const reqData = {
+          id: warehouseId,
+          warehouseInventory: inventoryResult.id,
+          title: address.title,
+          organisationId: req.user.organisationId,
+          warehouseAddress: {
+            firstLine: address.line,
+            secondLine: "",
+            city: address.city,
+            state: address.state,
+            country: address.country,
+            landmark: "",
+            zipCode: address.pincode,
+          },
+          country: {
+            countryId: "001",
+            countryName: address.country,
+          },
+          region: {
+            regionId: "reg123",
+            regionName: "Earth Prime",
+          },
+          location: {
+            longitude: latlong.data?.length ? latlong.data[0].lon : "12.12323453534",
+            latitude: latlong.data?.length ? latlong.data[0].lat : "13.123435345435",
+            geohash: "1231nejf923453",
+          },
+          supervisors: [],
+          employees: [user.id],
+        };
+        const warehouse = new Warehouse(reqData);
+        await warehouse.save();
+        if (address?.user) {
+          await EmployeeModel.updateOne(
+            {
+              $or: [
+                { emailId: address.user },
+                { phoneNumber: address.user },
+              ],
+            },
+            { $push: { warehouseId: warehouseId } }
+          );
+        }
       }
-      await CounterModel.update(
+      await CounterModel.updateOne(
         {
           "counters.name": "warehouseId",
         },
@@ -431,7 +395,7 @@ exports.addAddressesFromExcel = [
           },
         }
       );
-      await CounterModel.update(
+      await CounterModel.updateOne(
         {
           "counters.name": "inventoryId",
         },
@@ -458,62 +422,54 @@ exports.modifyLocation = [
         { id: id },
         { status: type === 1 ? "ACTIVE" : "REJECTED" }
       )
-        .then(async (warehouse) => {
-          await ConfigurationModel.findOne({ id: "CONF000" })
-            .select("active_locations")
-            .then(async (conf) => {
-              if (conf?.active_locations === 1 && type == 1) {
-                await EmployeeModel.updateOne(
-                  {
-                    id: eid,
-                  },
-                  {
-                    $set: {
-                      warehouseId: [id],
-                    },
-                    $pull: {
-                      pendingWarehouseId: id
-                    }
-                  }
-                );
-              }
-              else if (type == 1) {
-                await EmployeeModel.updateOne(
-                  {
-                    id: eid,
-                  },
-                  {
-                    $push: {
-                      warehouseId: id
-                    },
-                    $pull: {
-                      pendingWarehouseId: id
-                    }
-                  }
-                );
-              } else {
-                await EmployeeModel.updateOne(
-                  {
-                    id: eid,
-                  },
-                  {
-                    $pull: {
-                      pendingWarehouseId: id,
-                    },
-                  }
-                );
-              }
-            });
-
-          return apiResponse.successResponseWithData(
-            res,
-            "Location " + (type == 1 ? "approved" : "rejected"),
-            []
-          );
-        })
-        .catch((err) => {
-          return apiResponse.ErrorResponse(res, err);
-        });
+      const conf = await ConfigurationModel.findOne({ id: "CONF000" })
+        .select("active_locations")
+      if (conf?.active_locations === 1 && type == 1) {
+        await EmployeeModel.updateOne(
+          {
+            id: eid,
+          },
+          {
+            $set: {
+              warehouseId: [id],
+            },
+            $pull: {
+              pendingWarehouseId: id
+            }
+          }
+        );
+      }
+      else if (type == 1) {
+        await EmployeeModel.updateOne(
+          {
+            id: eid,
+          },
+          {
+            $push: {
+              warehouseId: id
+            },
+            $pull: {
+              pendingWarehouseId: id
+            }
+          }
+        );
+      } else {
+        await EmployeeModel.updateOne(
+          {
+            id: eid,
+          },
+          {
+            $pull: {
+              pendingWarehouseId: id,
+            },
+          }
+        );
+      }
+      return apiResponse.successResponseWithData(
+        res,
+        "Location " + (type == 1 ? "approved" : "rejected"),
+        []
+      );
     } catch (err) {
       return apiResponse.ErrorResponse(res, err);
     }
@@ -524,14 +480,14 @@ exports.getCountries = [
   auth,
   async (req, res) => {
     try {
-      const countries = await WarehouseModel.aggregate([{ $match :{'warehouseAddress.region' : req.query.region}},
+      const countries = await WarehouseModel.aggregate([{ $match: { 'warehouseAddress.region': req.query.region } },
       {
-         $group:
-           {
-             _id: "$warehouseAddress.country",
-           }
-       }
-  ]);
+        $group:
+        {
+          _id: "$warehouseAddress.country",
+        }
+      }
+      ]);
       return apiResponse.successResponseWithData(
         res,
         "Operation success",
@@ -546,14 +502,14 @@ exports.getStatesByCountry = [
   auth,
   async (req, res) => {
     try {
-      const allStates = await WarehouseModel.aggregate([{ $match :{'warehouseAddress.country': req.query.country}},
+      const allStates = await WarehouseModel.aggregate([{ $match: { 'warehouseAddress.country': req.query.country } },
       {
-         $group:
-           {
-             _id: "$warehouseAddress.state",
-           }
-       }
-  ]);
+        $group:
+        {
+          _id: "$warehouseAddress.state",
+        }
+      }
+      ]);
       return apiResponse.successResponseWithData(
         res,
         "Operation success",
@@ -564,18 +520,19 @@ exports.getStatesByCountry = [
     }
   },
 ];
+
 exports.getCitiesByState = [
   auth,
   async (req, res) => {
     try {
-      const allCities = await WarehouseModel.aggregate([{ $match :{'warehouseAddress.state': req.query.state}},
+      const allCities = await WarehouseModel.aggregate([{ $match: { 'warehouseAddress.state': req.query.state } },
       {
-         $group:
-           {
-             _id: "$warehouseAddress.city",
-           }
-       }
-  ]);
+        $group:
+        {
+          _id: "$warehouseAddress.city",
+        }
+      }
+      ]);
       return apiResponse.successResponseWithData(
         res,
         "Operation success",

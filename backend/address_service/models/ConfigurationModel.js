@@ -1,4 +1,4 @@
-var mongoose = require("mongoose");
+const mongoose = require("mongoose");
 ConfigurationSchema = new mongoose.Schema(
   {
     id: {
