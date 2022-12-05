@@ -48,9 +48,9 @@ export const getVaccinationDetailsByVial = async (vaccineVialId) => {
 	}
 };
 
-export const getVialsUtilised = async () => {
+export const getVialsUtilised = async (data) => {
 	try {
-		const result = await axios.get(`${config().getVialsUtilised}`);
+		const result = await axios.post(`${config().getVialsUtilised}`, data);
 		return result;
 	} catch (err) {
 		throw err;

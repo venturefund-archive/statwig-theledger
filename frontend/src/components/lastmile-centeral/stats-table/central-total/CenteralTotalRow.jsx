@@ -1,5 +1,6 @@
 import { TableCell, TableRow } from "@mui/material";
 import React from "react";
+import { formatDate } from "../../../../utils/dateHelper";
 
 export default function CenteralTotalRow({ data }) {
   return (
@@ -31,7 +32,7 @@ export default function CenteralTotalRow({ data }) {
       </TableCell>
       <TableCell component="th" scope="row" align="center">
         <div className="vl-table-body-column">
-          <p className="vl-body f-500 ">Date</p>
+          <p className="vl-body f-500 ">{formatDate(data.date)}</p>
         </div>
       </TableCell>
     </TableRow>

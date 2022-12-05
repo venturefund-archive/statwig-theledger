@@ -15,7 +15,7 @@ function valuetext(value) {
 }
 
 export default function Filterbar(props) {
-	const { setFilters, t } = props;
+	const { tableType, setFilters, t } = props;
 
 	const [cities, setCities] = useState([""]);
 	const [organisations, setOrgnisations] = useState([""]);
@@ -92,52 +92,53 @@ export default function Filterbar(props) {
 				<h1 className="vl-subheading f-500 vl-black">{t("filter")}</h1>
 			</div>
 			<div className="Filterbar--body">
-				<div className="Filterbar--filterCard">
-					<div className="filterCard-header">
-						<div className="filterCard-inner-header">
-							<p className="vl-body f-500 vl-grey-md">{t("gender")}</p>
-							<button onClick={() => handleClear("gender")} className="filter-clear-btn">
-								{t("clear")}
-							</button>
+				{tableType !== "units" && (
+					<div className="Filterbar--filterCard">
+						<div className="filterCard-header">
+							<div className="filterCard-inner-header">
+								<p className="vl-body f-500 vl-grey-md">{t("gender")}</p>
+								<button onClick={() => handleClear("gender")} className="filter-clear-btn">
+									{t("clear")}
+								</button>
+							</div>
+							<p className="vl-note f-400 vl-grey-xs">{t("gender_msg")}</p>
 						</div>
-						<p className="vl-note f-400 vl-grey-xs">{t("gender_msg")}</p>
+						<div className="filterCard-body side-space border-btm">
+							<FormControl>
+								<RadioGroup
+									className="mui-custom-radio-group"
+									name="radio-buttons-group"
+									onClick={(event) => setGender(event.target.value)}
+								>
+									<FormControlLabel
+										name="gender"
+										checked={gender === "MALE"}
+										value="MALE"
+										id="male"
+										control={<Radio />}
+										label={t("male")}
+									/>
+									<FormControlLabel
+										name="gender"
+										checked={gender === "FEMALE"}
+										value="FEMALE"
+										id="female"
+										control={<Radio />}
+										label={t("female")}
+									/>
+									<FormControlLabel
+										name="gender"
+										checked={gender === "GENERAL"}
+										value="GENERAL"
+										id="general"
+										control={<Radio />}
+										label={t("others")}
+									/>
+								</RadioGroup>
+							</FormControl>
+						</div>
 					</div>
-					<div className="filterCard-body side-space border-btm">
-						<FormControl>
-							<RadioGroup
-								className="mui-custom-radio-group"
-								name="radio-buttons-group"
-								onClick={(event) => setGender(event.target.value)}
-							>
-								<FormControlLabel
-                  name="gender"
-									checked={gender === "MALE"}
-									value="MALE"
-									id="male"
-									control={<Radio />}
-									label={t("male")}
-								/>
-								<FormControlLabel
-                  name="gender"
-									checked={gender === "FEMALE"}
-									value="FEMALE"
-									id="female"
-									control={<Radio />}
-									label={t("female")}
-								/>
-								<FormControlLabel
-                  name="gender"
-									checked={gender === "GENERAL"}
-									value="GENERAL"
-									id="general"
-									control={<Radio />}
-									label={t("others")}
-								/>
-							</RadioGroup>
-						</FormControl>
-					</div>
-				</div>
-
+				)}
 				<div className="Filterbar--filterCard">
 					<div className="filterCard-header">
 						<div className="filterCard-inner-header">
@@ -184,66 +185,68 @@ export default function Filterbar(props) {
 					</div>
 				)}
 
-				<div className="Filterbar--filterCard">
-					<div className="filterCard-header">
-						<div className="filterCard-inner-header">
-							<p className="vl-body f-500 vl-grey-md">{t("age")}</p>
-							<button onClick={() => handleClear("age")} className="filter-clear-btn">
-								{t("clear")}
-							</button>
+				{tableType !== "units" && (
+					<div className="Filterbar--filterCard">
+						<div className="filterCard-header">
+							<div className="filterCard-inner-header">
+								<p className="vl-body f-500 vl-grey-md">{t("age")}</p>
+								<button onClick={() => handleClear("age")} className="filter-clear-btn">
+									{t("clear")}
+								</button>
+							</div>
+							<p className="vl-note f-400 vl-grey-xs">Search the results by Organization Name</p>
 						</div>
-						<p className="vl-note f-400 vl-grey-xs">Search the results by Organization Name</p>
+						<div className="filterCard-body side-space">
+							<FormControl>
+								<RadioGroup
+									className="mui-custom-radio-group"
+									defaultValue="range"
+									name="radio-buttons-group"
+									value={ageType}
+									onClick={(event) => setAgeType(event.target.value)}
+								>
+									<FormControlLabel
+										checked={ageType === "single"}
+										value="single"
+										control={<Radio />}
+										label="Individual Age"
+									/>
+									<FormControlLabel
+										checked={ageType === "range"}
+										value="range"
+										control={<Radio />}
+										label="Range Group"
+									/>
+								</RadioGroup>
+							</FormControl>
+							{ageType === "range" ? (
+								<div className="slider-select">
+									<Slider
+										getAriaLabel={() => "Temperature range"}
+										value={ageRange}
+										onChange={handleChange}
+										valueLabelDisplay="auto"
+										getAriaValueText={valuetext}
+									/>
+								</div>
+							) : (
+								<div className="filterCard-body border-btm">
+									<TextField
+										type="number"
+										value={ageRange[0]}
+										onChange={(event) => {
+											let temp = event.target.value;
+											setAgeRange([temp, temp]);
+										}}
+										InputProps={{
+											inputProps: { min: 0, max: 120 },
+										}}
+									/>
+								</div>
+							)}
+						</div>
 					</div>
-					<div className="filterCard-body side-space">
-						<FormControl>
-							<RadioGroup
-								className="mui-custom-radio-group"
-								defaultValue="range"
-								name="radio-buttons-group"
-								value={ageType}
-								onClick={(event) => setAgeType(event.target.value)}
-							>
-								<FormControlLabel
-									checked={ageType === "single"}
-									value="single"
-									control={<Radio />}
-									label="Individual Age"
-								/>
-								<FormControlLabel
-									checked={ageType === "range"}
-									value="range"
-									control={<Radio />}
-									label="Range Group"
-								/>
-							</RadioGroup>
-						</FormControl>
-						{ageType === "range" ? (
-							<div className="slider-select">
-								<Slider
-									getAriaLabel={() => "Temperature range"}
-									value={ageRange}
-									onChange={handleChange}
-									valueLabelDisplay="auto"
-									getAriaValueText={valuetext}
-								/>
-							</div>
-						) : (
-							<div className="filterCard-body border-btm">
-								<TextField
-									type="number"
-									value={ageRange[0]}
-									onChange={(event) => {
-										let temp = event.target.value;
-										setAgeRange([temp, temp]);
-									}}
-									InputProps={{
-										inputProps: { min: 0, max: 120 },
-									}}
-								/>
-							</div>
-						)}
-					</div>
-				</div>
+				)}
 			</div>
 		</section>
 	);

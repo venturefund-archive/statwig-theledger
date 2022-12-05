@@ -15,12 +15,12 @@ const { resolve } = require("path");
 const fs = require("fs");
 
 const fontDescriptors = {
-  Roboto: {
-    normal: resolve("./controllers/Roboto-Regular.ttf"),
-    bold: resolve("./controllers/Roboto-Medium.ttf"),
-    italics: resolve("./controllers/Roboto-Italic.ttf"),
-    bolditalics: resolve("./controllers/Roboto-MediumItalic.ttf"),
-  },
+	Roboto: {
+		normal: resolve("./controllers/Roboto-Regular.ttf"),
+		bold: resolve("./controllers/Roboto-Medium.ttf"),
+		italics: resolve("./controllers/Roboto-Italic.ttf"),
+		bolditalics: resolve("./controllers/Roboto-MediumItalic.ttf"),
+	},
 };
 const printer = new PdfPrinter(fontDescriptors);
 
@@ -114,8 +114,8 @@ exports.vaccinateIndividual = [
 				{ _id: 1, id: 1, inventoryDetails: { $elemMatch: { productId: productId } } },
 			);
 
-			if(existingInventory?.inventoryDetails?.length) {
-				if(existingInventory.inventoryDetails[0].quantity < 1) {
+			if (existingInventory?.inventoryDetails?.length) {
+				if (existingInventory.inventoryDetails[0].quantity < 1) {
 					return apiResponse.ErrorResponse(res, "Inventory exhausted!");
 				}
 			}
@@ -126,7 +126,7 @@ exports.vaccinateIndividual = [
 				status: "HEALTHY",
 			});
 
-			if(!existingAtom?.quantity) {
+			if (!existingAtom?.quantity) {
 				return apiResponse.ErrorResponse(res, "Batch Exhausted!");
 			}
 
@@ -238,8 +238,8 @@ exports.vaccinateMultiple = [
 				{ _id: 1, id: 1, inventoryDetails: { $elemMatch: { productId: productId } } },
 			);
 
-			if(existingInventory?.inventoryDetails?.length) {
-				if(existingInventory.inventoryDetails[0].quantity < 1) {
+			if (existingInventory?.inventoryDetails?.length) {
+				if (existingInventory.inventoryDetails[0].quantity < 1) {
 					return apiResponse.ErrorResponse(res, "Inventory exhausted!");
 				}
 			}
@@ -250,7 +250,7 @@ exports.vaccinateMultiple = [
 				status: "HEALTHY",
 			});
 
-			if(!existingAtom?.quantity) {
+			if (!existingAtom?.quantity) {
 				return apiResponse.ErrorResponse(res, "Batch Exhausted!");
 			}
 
@@ -438,8 +438,8 @@ const buildWarehouseQuery = async (user, city, organisationName) => {
 
 		let warehouseIds = userDetails.warehouseId;
 
-		// If user is powerUser show organisation wide details
-		if (userDetails.role === "powerUser") {
+		// If user is admin show organisation wide details
+		if (userDetails.role === "admin") {
 			let warehouses = await WarehouseModel.find({
 				organisationId: userDetails.organisationId,
 				status: "ACTIVE",
@@ -566,6 +566,7 @@ const generateVaccinationsList = async (filters) => {
 		now.setHours(0, 0, 0, 0);
 
 		const vaccinationDetails = [];
+		const todaysVaccinationDetails = [];
 		for (let i = 0; i < warehouses.length; ++i) {
 			const vaccineVials = warehouses[i].vaccinations;
 			for (let j = 0; j < vaccineVials.length; ++j) {
@@ -589,8 +590,13 @@ const generateVaccinationsList = async (filters) => {
 						location: warehouses[i].warehouseAddress.city,
 						gender: doses[k].gender,
 						age: doses[k].age,
+						date: createdAt,
 					};
 					vaccinationDetails.push(data);
+
+					if (now.toDateString() === createdAt.toDateString()) {
+						todaysVaccinationDetails.push(data);
+					}
 				}
 			}
 		}
@@ -602,6 +608,7 @@ const generateVaccinationsList = async (filters) => {
 				unitsUtilized: vialsUtilized,
 			},
 			vaccinationDetails: vaccinationDetails,
+			todaysVaccinationDetails: todaysVaccinationDetails,
 		};
 
 		return result;
@@ -644,7 +651,7 @@ exports.getAnalytics = [
 			const userDetails = await EmployeeModel.findOne({ id: user.id });
 			let warehouseIds = userDetails.warehouseId;
 			let query = {};
-			if (userDetails.role === "powerUser") {
+			if (userDetails.role === "admin") {
 				let warehouses = await WarehouseModel.find({
 					organisationId: userDetails.organisationId,
 					status: "ACTIVE",
@@ -695,24 +702,14 @@ exports.getVialsUtilised = [
 	async (req, res) => {
 		try {
 			const user = req.user;
-			const userDetails = await EmployeeModel.findOne({ id: user.id });
-			let warehouseIds = userDetails.warehouseId;
-			let query = {};
-			if (userDetails.role === "powerUser") {
-				let warehouses = await WarehouseModel.find({
-					organisationId: userDetails.organisationId,
-					status: "ACTIVE",
-				});
-				warehouseIds = warehouses.map((warehouse) => warehouse.id);
-			}
-			const organisation = await OrganisationModel.findOne({
-				id: userDetails.organisationId,
-			});
-			if (organisation.type !== "GoverningBody") {
-				query = { warehouseId: { $in: warehouseIds } };
-			}
+			const { city, organisation } = req.body;
 
-			const vialsUtilized = await VaccineVialModel.find(query);
+			const warehouseQuery = await buildWarehouseQuery(user, city, organisation);
+
+			const warehouses = await WarehouseModel.find(warehouseQuery);
+			const warehouseIds = warehouses.map((warehouse) => warehouse.id);
+
+			const vialsUtilized = await VaccineVialModel.find({ warehouseId: { $in: warehouseIds } });
 
 			return apiResponse.successResponseWithData(res, "Vaccine Vial Details", vialsUtilized);
 		} catch (err) {
@@ -730,7 +727,7 @@ exports.getVaccinationsList = [
 			const userDetails = await EmployeeModel.findOne({ id: user.id });
 			let warehouseIds = userDetails.warehouseId;
 			let query = {};
-			if (userDetails.role === "powerUser") {
+			if (userDetails.role === "admin") {
 				let warehouses = await WarehouseModel.find({
 					organisationId: userDetails.organisationId,
 					status: "ACTIVE",
@@ -793,7 +790,7 @@ exports.getCitiesAndOrgsForFilters = [
 			let warehouseIds = userDetails.warehouseId;
 			let query = {};
 
-			if (userDetails.role === "powerUser") {
+			if (userDetails.role === "admin") {
 				let warehouses = await WarehouseModel.find({
 					organisationId: userDetails.organisationId,
 					status: "ACTIVE",
