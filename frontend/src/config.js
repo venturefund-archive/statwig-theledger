@@ -1,6 +1,6 @@
 
 export const SERVER_URL =
-  process.env.REACT_APP_SERVER_URL || "https://vaccineledger.com";
+  process.env.REACT_APP_SERVER_URL || "https://test.vaccineledger.com";
 export const SERVER_URL_FOR_ROAMBEE = "https://integrations.vaccineledger.com";
 export const LOCAL_SERVER_URL_USER = "http://localhost:3001";
 export const LOCAL_SERVER_URL_SHIPPINGORDER = "http://localhost:3013";
@@ -230,8 +230,6 @@ export function config() {
       fetchAllRoles: `${LOCAL_SERVER_URL_RBAC}/rbacmanagement/api/getRoles`,
       fetchPermissionsByRole: `${LOCAL_SERVER_URL_RBAC}/rbacmanagement/api/getPermissions`,
       updatePermissions: `${LOCAL_SERVER_URL_RBAC}/rbacmanagement/api/updatePermissions`,
-
-
     },
     prod: {
       getOrganizationsUrl: `${SERVER_URL}/inventorymanagement/api/inventory/getOrganizations?orgType=`,
