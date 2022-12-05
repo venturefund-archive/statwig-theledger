@@ -40,43 +40,46 @@ exports.fetchBatchById = [
 
 			const warehouse = await WarehouseModel.findOne({ id: warehouseId });
 
-			const productDetails = await EmployeeModel.aggregate([
-				{ $match: { id: userId } },
-				{
-					$lookup: {
-						from: "atoms",
-						let: {
-							inventoryId: warehouse.warehouseInventory,
-							batchNumber: batchNumber,
-						},
-						pipeline: [
-							{
-								$match: {
-									$expr: {
-										$and: [
-											{ $eq: ["$currentInventory", "$$inventoryId"] },
-											{ $eq: ["$status", "HEALTHY"] },
-											{ $in: ["$$batchNumber", "$batchNumbers"] },
-										],
+			const productDetails = await EmployeeModel.aggregate(
+				[
+					{ $match: { id: userId } },
+					{
+						$lookup: {
+							from: "atoms",
+							let: {
+								inventoryId: warehouse.warehouseInventory,
+								batchNumber: batchNumber,
+							},
+							pipeline: [
+								{
+									$match: {
+										$expr: {
+											$and: [
+												{ $eq: ["$currentInventory", "$$inventoryId"] },
+												{ $eq: ["$status", "HEALTHY"] },
+												{ $in: ["$$batchNumber", "$batchNumbers"] },
+											],
+										},
 									},
 								},
-							},
-						],
-						as: "atom",
+							],
+							as: "atom",
+						},
 					},
-				},
-				{ $unwind: "$atom" },
-				{
-					$lookup: {
-						from: "products",
-						localField: "atom.productId",
-						foreignField: "id",
-						as: "product",
+					{ $unwind: "$atom" },
+					{
+						$lookup: {
+							from: "products",
+							localField: "atom.productId",
+							foreignField: "id",
+							as: "product",
+						},
 					},
-				},
-				{ $unwind: "$product" },
-				{ $project: { atom: 1, product: 1 } },
-			]);
+					{ $unwind: "$product" },
+					{ $project: { atom: 1, product: 1 } },
+				],
+				{ collation: { locale: "en", strength: 2 } },
+			);
 
 			if (productDetails) {
 				if (productDetails.length) {
