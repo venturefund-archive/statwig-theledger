@@ -1,5 +1,4 @@
-export const SERVER_URL = process.env.REACT_APP_ADMIN_SERVER_URL || "https://vaccineledger.com";
-export const SERVER_URL_VL = process.env.REACT_APP_SERVER_URL || 'https://vaccineledger.com';
+export const SERVER_URL = process.env.REACT_APP_SERVER_URL || "https://test.vaccineledger.com";
 export const LOCAL_SERVER_URL_USER = "//localhost:3001";
 export const LOCAL_SERVER_URL_ADDRESS = "//localhost:3001";
 export const LOCAL_SERVER_URL_AFFILIATION = "//localhost:3002";
@@ -60,14 +59,13 @@ export function config() {
       fetchAllRoles: `${SERVER_URL}/api/rbac_service/getRoles`,
       fetchPermissionsByRole: `${SERVER_URL}/api/rbac_service/getPermissions`,
       updatePermissions: `${SERVER_URL}/api/rbac_service/updatePermissions`,
-
-      //The 4 endpoints below are written in theledger repo, Modify the server address after merging the VLadmin portal to test.vl.com
-      fetchAllRegions: `${SERVER_URL_VL}/productmanagement/api/location?region=all`,
-      fetchCountriesByRegion: `${SERVER_URL_VL}/productmanagement/api/location?region=`,
-      fetchStateByCountry: `${SERVER_URL_VL}/productmanagement/api/location?country_id=`,
-      fetchCitiesByState: `${SERVER_URL_VL}/productmanagement/api/location?state_id=`,
+      fetchAllRegions: `${SERVER_URL}/productmanagement/api/location?region=all`,
+      fetchCountriesByRegion: `${SERVER_URL}/productmanagement/api/location?region=`,
+      fetchStateByCountry: `${SERVER_URL}/productmanagement/api/location?country_id=`,
+      fetchCitiesByState: `${SERVER_URL}/productmanagement/api/location?state_id=`,
     },
     prod: {
+      imgDomainUrl: `${SERVER_URL}`,
       sendOtpUrl: `${SERVER_URL}/api/employee_service/auth/sendOtp`,
       verifyOtpUrl: `${SERVER_URL}/api/employee_service/auth/verifyOtp`,
       getApprovalsUrl: `${SERVER_URL}/api/employee_service/getApprovals`,
@@ -112,18 +110,15 @@ export function config() {
       addNewOrgTypesUrl: `${SERVER_URL}/api/configuration_service/addNewOrgType`,
       getLocationApprovalUrl: `${SERVER_URL}/api/address_service/getLocationApprovals`,
       modifyLocationUrl: `${SERVER_URL}/api/address_service/modifyLocation`,
-      imgDomainUrl: `${SERVER_URL}`,
       getCountryDataUrl: `${SERVER_URL}/api/address_service/getCountries`,
       getRegionDataUrl: `${SERVER_URL}/api/address_service/getRegions`,
       fetchAllRoles: `${SERVER_URL}/api/rbac_service/getRoles`,
       fetchPermissionsByRole: `${SERVER_URL}/api/rbac_service/getPermissions`,
       updatePermissions: `${SERVER_URL}/api/rbac_service/updatePermissions`,
-
-      //The 4 endpoints below are written in theledger repo, Modify the server address after merging the VLadmin portal to test.vl.com
-      fetchAllRegions: `${SERVER_URL_VL}/productmanagement/api/location?region=all`,
-      fetchCountriesByRegion: `${SERVER_URL_VL}/productmanagement/api/location?region=`,
-      fetchStateByCountry: `${SERVER_URL_VL}/productmanagement/api/location?country_id=`,
-      fetchCitiesByState: `${SERVER_URL_VL}/productmanagement/api/location?state_id=`,
+      fetchAllRegions: `${SERVER_URL}/productmanagement/api/location?region=all`,
+      fetchCountriesByRegion: `${SERVER_URL}/productmanagement/api/location?region=`,
+      fetchStateByCountry: `${SERVER_URL}/productmanagement/api/location?country_id=`,
+      fetchCitiesByState: `${SERVER_URL}/productmanagement/api/location?state_id=`,
     },
   };
 

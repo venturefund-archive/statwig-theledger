@@ -275,7 +275,8 @@ const NewShipment = (props) => {
         airWayBillNo,
         poId: reset && reset !== "Select Order ID" ? reset : null,
         label: {
-          labelId: labelCode,
+          // labelId: labelCode ? labelCode : Date.now(),
+          labelId: Date.now(),
           labelType: "QR_2DBAR",
         },
         taggedShipments: shipmentID,
@@ -482,9 +483,9 @@ const NewShipment = (props) => {
           if (!values.airWayBillNo) {
             errors.airWayBillNo = "Required";
           }
-          if (!values.labelCode) {
-            errors.labelCode = "Required";
-          }
+          // if (!values.labelCode) {
+          //   errors.labelCode = "Required";
+          // }
           if (!values.shipmentDate) {
             errors.shipmentDate = "Required";
           }
@@ -1060,7 +1061,7 @@ const NewShipment = (props) => {
                             onOrgChange(v.value);
                           }}
                           options={allOrganisations.filter((org) => {
-                            if (user.type === "DISTRIBUTORS" && (values.rtypeName === "PHARMACY" || values.rtypeName === "FARMACIA")) {
+                            if ((user.type === "DISTRIBUTORS" || user.type === "DROGUERIA") && (values.rtypeName === "PHARMACY" || values.rtypeName === "Farmacia")) {
                               return org.type === values.rtypeName && org.parentOrgId === user.organisationId
                             }
                             return org.type === values.rtypeName
@@ -1223,7 +1224,7 @@ const NewShipment = (props) => {
                 <div className='row'>
                   <div className='col-md-6 com-sm-12'>
                     <label className='name' htmlFor='organizationName'>
-                      {t("label_code")}*
+                      {t("label_code")}
                     </label>
                     <input
                       className={`input refship`}
