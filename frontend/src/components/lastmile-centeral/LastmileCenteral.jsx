@@ -8,7 +8,9 @@ import {
 import AnalyticTiles from "../../shared/stats-tile/AnalyticTiles";
 import Filterbar from "./filterbar/Filterbar";
 import "./LastmileCenteral.css";
-import CenteralStatsTable from "./stats-table/CenteralStatsTable";
+import CenteralTodayTable from "./stats-table/central-today/CenteralTodayTable";
+import CenteralTotalTable from "./stats-table/central-total/CenteralTotalTable";
+import CenteralUnitsTable from "./stats-table/central-units/CenteralUnitsTable";
 
 let useClickOutside = (handler) => {
   let domNode = useRef();
@@ -32,6 +34,7 @@ let useClickOutside = (handler) => {
 
 export default function LastmileCenteral(props) {
   const [analytics, setAnalytics] = useState();
+  const [TableSwitch, setTableSwitch] = useState("today");
   const [filters, setFilters] = useState({});
   const { t } = useTranslation();
 
@@ -116,12 +119,14 @@ export default function LastmileCenteral(props) {
         <div className="LastmileCenteral--Stats-filters">
           <AnalyticTiles
             layout="2"
-            variant="1"
-            title={t("total_units_utilized")}
-            stat={analytics?.unitsUtilized ? analytics.unitsUtilized : 0}
-            link="/units"
+            variant="3"
+            title={t("no_beneficiaries_vaccinated_today")}
+            stat={
+              analytics?.todaysVaccinations ? analytics.todaysVaccinations : 0
+            }
+            link="today"
+            setTableSwitch={setTableSwitch}
           />
-
           <AnalyticTiles
             layout="2"
             variant="2"
@@ -129,20 +134,27 @@ export default function LastmileCenteral(props) {
             stat={
               analytics?.totalVaccinations ? analytics.totalVaccinations : 0
             }
-            link="/units"
+            link="total"
+            setTableSwitch={setTableSwitch}
           />
-
           <AnalyticTiles
             layout="2"
-            variant="3"
-            title={t("no_beneficiaries_vaccinated_today")}
-            stat={
-              analytics?.todaysVaccinations ? analytics.todaysVaccinations : 0
-            }
-            link="/units"
+            variant="1"
+            title={t("total_units_utilized")}
+            stat={analytics?.unitsUtilized ? analytics.unitsUtilized : 0}
+            link="units"
+            setTableSwitch={setTableSwitch}
           />
         </div>
-        <CenteralStatsTable t={t} vaccinationList={vaccinationList} />
+        {TableSwitch === "today" && (
+          <CenteralTodayTable t={t} vaccinationList={vaccinationList} />
+        )}
+        {TableSwitch === "total" && (
+          <CenteralTotalTable t={t} vaccinationList={vaccinationList} />
+        )}
+        {TableSwitch === "units" && (
+          <CenteralUnitsTable t={t} vaccinationList={vaccinationList} />
+        )}
       </div>
       <div className="LastmileCenteral--filter-wrapper">
         <Filterbar t={t} setFilters={setFilters} {...props} />
