@@ -9,6 +9,8 @@ export default function AnalyticTiles({
   layout,
   onClick,
   name,
+  link,
+  setTableSwitch,
 }) {
   const { t } = useTranslation();
 
@@ -22,12 +24,12 @@ export default function AnalyticTiles({
     <>
       {layout === "1" && (
         <div className={`AnalyticTiles--container tile-variant-${variant}`}>
-          <div className='AnalyticTiles-insideWrapper'>
-            <div className='stats-content-wrappe vl-light'>
-              <p className='vl-subheading f-500 vl-light'>{title}</p>
-              <h1 className='vl-title f-700'>{stat}</h1>
+          <div className="AnalyticTiles-insideWrapper">
+            <div className="stats-content-wrappe vl-light">
+              <p className="vl-subheading f-500 vl-light">{title}</p>
+              <h1 className="vl-title f-700">{stat}</h1>
             </div>
-            <div className='action-content-wrapper'>
+            <div className="action-content-wrapper">
               <button
                 onClick={handleClick}
                 className={`Analytic-btn tile-btn-variant-${variant}`}
@@ -42,11 +44,12 @@ export default function AnalyticTiles({
       {layout === "2" && (
         <div
           className={`AnalyticTiles--container tile-variant-${variant} vl-cursor-pointer `}
+          onClick={() => setTableSwitch(link)}
         >
-          <div className='AnalyticTiles-insideWrapper'>
-            <div className='stats-content-wrappe vl-light'>
-              <p className='vl-note f-500 vl-light'>{title}</p>
-              <h1 className='vl-title f-700'>{stat}</h1>
+          <div className="AnalyticTiles-insideWrapper">
+            <div className="stats-content-wrappe vl-light">
+              <p className="vl-note f-500 vl-light">{title}</p>
+              <h1 className="vl-title f-700">{stat}</h1>
             </div>
           </div>
         </div>

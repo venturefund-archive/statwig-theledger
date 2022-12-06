@@ -56,6 +56,37 @@ exports.addressesOfOrgWarehouses = [
   },
 ];
 
+exports.fetchWarehousesByOrgId = [
+	auth,
+	async (req, res) => {
+		try {
+			if (!req.query?.orgId) {
+				return apiResponse.validationErrorWithData(res, "Org Id not provided", { orgId: orgId });
+			}
+
+			const warehouses = await Warehouse.aggregate([
+				{ $match: { $and: [{ organisationId: req.query.orgId }] } },
+				{
+					$lookup: {
+						from: "employees",
+						let: { warehouseId: "$id" },
+						pipeline: [
+							{ $match: { $expr: { $in: ["$$warehouseId", "$warehouseId"] } } },
+							{ $count: "total" },
+						],
+						as: "employeeCount",
+					},
+				},
+				{ $unwind: "$employeeCount" },
+			])
+
+			return apiResponse.successResponseWithData(res, "Warehouses Addresses", warehouses);
+		} catch (err) {
+			return apiResponse.ErrorResponse(res, err);
+		}
+	},
+];
+
 function getConditionForLocationApprovals(type, id) {
   let matchConditions = { };
   // let matchConditions = { status: "NOTVERIFIED" };
@@ -542,6 +573,7 @@ exports.getCountries = [
     }
   },
 ];
+
 exports.getStatesByCountry = [
   auth,
   async (req, res) => {
@@ -564,6 +596,7 @@ exports.getStatesByCountry = [
     }
   },
 ];
+
 exports.getCitiesByState = [
   auth,
   async (req, res) => {

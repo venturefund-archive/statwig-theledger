@@ -1,32 +1,28 @@
 import { TableCell, TableRow } from "@mui/material";
 import React from "react";
+import { formatDate } from "../../../../utils/dateHelper";
 
-export default function CenteralStatsRow({ data }) {
+export default function CenteralUnitsRow({ data, index }) {
 	return (
 		<TableRow className="vl-mui-custom-tr">
 			<TableCell component="th" scope="row" align="center">
 				<div className="vl-table-body-column">
-					<p className="vl-body f-500 ">#{data.batchNumber}</p>
+					<p className="vl-body f-500 ">{index}</p>
 				</div>
 			</TableCell>
 			<TableCell component="th" scope="row" align="center">
 				<div className="vl-table-body-column">
-					<p className="vl-body f-500 ">{data.organisationName}</p>
+					<p className="vl-body f-500 ">{data.batchNumber}</p>
 				</div>
 			</TableCell>
 			<TableCell component="th" scope="row" align="center">
 				<div className="vl-table-body-column">
-					<p className="vl-body f-500 ">{data.location}</p>
+					<p className="vl-body f-500 ">{data.numberOfDoses}</p>
 				</div>
 			</TableCell>
 			<TableCell component="th" scope="row" align="center">
 				<div className="vl-table-body-column">
-					<p className="vl-body f-500 ">{data.gender}</p>
-				</div>
-			</TableCell>
-			<TableCell component="th" scope="row" align="center">
-				<div className="vl-table-body-column">
-					<p className="vl-body f-500 ">{data.age}</p>
+					<p className="vl-body f-500 ">{formatDate(data.createdAt)}</p>
 				</div>
 			</TableCell>
 		</TableRow>

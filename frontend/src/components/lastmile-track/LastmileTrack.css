@@ -70,6 +70,12 @@
   align-items: center;
   justify-content: center;
 }
+.Table--Empty-container-alt {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .Table--empty-illustartion {
   padding-top: 3rem;
   display: flex;

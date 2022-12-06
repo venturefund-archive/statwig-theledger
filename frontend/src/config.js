@@ -1,6 +1,6 @@
 
 export const SERVER_URL =
-  process.env.REACT_APP_SERVER_URL || "https://test.vaccineledger.com";
+  process.env.REACT_APP_SERVER_URL || "https://vaccineledger.com";
 export const SERVER_URL_FOR_ROAMBEE = "https://integrations.vaccineledger.com";
 export const LOCAL_SERVER_URL_USER = "http://localhost:3001";
 export const LOCAL_SERVER_URL_SHIPPINGORDER = "http://localhost:3013";
@@ -189,6 +189,7 @@ export function config() {
       getApprovalsUrl: `${LOCAL_SERVER_URL_USER}/usermanagement/api/getApprovals`,
       getPermissionsUrl: `${LOCAL_SERVER_URL_RBAC}/rbacmanagement/api/getPermissions`,
       getWareHousesUrl: `${LOCAL_SERVER_URL_ADDRESS}/api/address_service/fetchWarehouses`,
+      fetchWarehousesByOrgId: `${LOCAL_SERVER_URL_ADDRESS}/api/address_service/fetchWarehousesByOrgId`,
       verifyOrgUserUrl: `${LOCAL_SERVER_URL_USER}/usermanagement/api/acceptApproval`,
       updateOrgUrl: `${LOCAL_SERVER_URL_USER}/usermanagement/api/updateOrg`,
       rejectOrgUserUrl: `${LOCAL_SERVER_URL_USER}/usermanagement/api/rejectApproval`,
@@ -199,6 +200,7 @@ export function config() {
       addUsersFromExcel: `${LOCAL_SERVER_URL_USER}/usermanagement/api/auth/addUsersFromExcel`,
       getWarehouseUsers: `${LOCAL_SERVER_URL_USER}/usermanagement/api/auth/getWarehouseUsers`,
       getOrgUrl: `${LOCAL_SERVER_URL_USER}/usermanagement/api/getOrgs`,
+      getOrgDetails: `${LOCAL_SERVER_URL_USER}/usermanagement/api/getOrgDetails`,
       getOrgAnalytics: `${LOCAL_SERVER_URL_USER}/usermanagement/api/getOrgAnalytics`,
       getOrgUserAnalytics: `${LOCAL_SERVER_URL_USER}/usermanagement/api/auth/getOrgUserAnalytics`,
       getOrgActiveUsers: `${LOCAL_SERVER_URL_USER}/usermanagement/api/auth/getOrgActiveUsers`,
@@ -399,6 +401,7 @@ export function config() {
       getApprovalsUrl: `${SERVER_URL}/usermanagement/api/getApprovals`,
       getPermissionsUrl: `${SERVER_URL}/rbacmanagement/api/getPermissions`,
       getWareHousesUrl: `${SERVER_URL}/api/address_service/fetchWarehouses`,
+      fetchWarehousesByOrgId: `${SERVER_URL}/api/address_service/fetchWarehousesByOrgId`,
       verifyOrgUserUrl: `${SERVER_URL}/usermanagement/api/acceptApproval`,
       updateOrgUrl: `${SERVER_URL}/usermanagement/api/updateOrg`,
       rejectOrgUserUrl: `${SERVER_URL}/usermanagement/api/rejectApproval`,
@@ -409,6 +412,7 @@ export function config() {
       addUsersFromExcel: `${SERVER_URL}/usermanagement/api/auth/addUsersFromExcel`,
       getWarehouseUsers: `${SERVER_URL}/usermanagement/api/auth/getWarehouseUsers`,
       getOrgUrl: `${SERVER_URL}/usermanagement/api/getOrgs`,
+      getOrgDetails: `${SERVER_URL}/usermanagement/api/getOrgDetails`,
       getOrgAnalytics: `${SERVER_URL}/usermanagement/api/getOrgAnalytics`,
       getOrgUserAnalytics: `${SERVER_URL}/usermanagement/api/auth/getOrgUserAnalytics`,
       getOrgActiveUsers: `${SERVER_URL}/usermanagement/api/auth/getOrgActiveUsers`,
