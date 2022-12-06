@@ -298,6 +298,7 @@ const EditRow = (props) => {
 							<div className="col mt-1 mb-1 border-right">
 								<div className="">
 									<DatePicker
+										dateFormat="dd/MM/yyyy"
 										className="form-control text-center manufacturingPlaceholder"
 										onChange={(date) => {
 											handleInventoryChange(idx, "manufacturingDate", date);
@@ -331,6 +332,7 @@ const EditRow = (props) => {
 							<div className="col mt-1 mb-1 border-right">
 								<div className="">
 									<DatePicker
+										dateFormat="dd/MM/yyyy"
 										className="form-control text-center manufacturingPlaceholder"
 										selected={expiryDate ? new Date(Date.parse(expiryDate)) : expiryDate}
 										onChange={(date) => {

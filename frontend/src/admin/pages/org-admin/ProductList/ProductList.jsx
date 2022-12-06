@@ -85,7 +85,9 @@ export default function AdminProductList(props) {
 				setOpenSuccessPopup(true);
 				console.log("Calling reset!");
 				reset({
+					productCategory: "",
 					productName: "",
+					manufacturer: "",
 					unitOfMeasure: "",
 				});
 				console.log("watch - ", watch());
@@ -148,6 +150,11 @@ export default function AdminProductList(props) {
 													freeSolo={true}
 													options={categories}
 													{...field}
+													value={
+														typeof field.value === "string"
+															? categories.find((cat) => cat === field.value)
+															: field.value || null
+													}
 													onChange={(event, value) => {
 														field.onChange(value);
 													}}
@@ -182,6 +189,7 @@ export default function AdminProductList(props) {
 													label={t("product_name")}
 													multiline
 													{...field}
+													value={field.value ? field.value : ""}
 													error={Boolean(errors.productName)}
 													helperText={errors.productName && "Product Name is required!"}
 												/>
@@ -194,10 +202,25 @@ export default function AdminProductList(props) {
 											render={({ field }) => (
 												<Autocomplete
 													fullWidth
+													freeSolo={true}
 													options={manufacturers}
 													{...field}
+													value={
+														typeof field.value === "string"
+															? manufacturers.find((manufacturer) => manufacturer === field.value)
+															: field.value || null
+													}
 													onChange={(event, value) => {
 														field.onChange(value);
+													}}
+													filterOptions={(options, params) => {
+														const filtered = filter(options, params);
+														const { inputValue } = params;
+														const isExisting = options.some((option) => inputValue === option);
+														if (inputValue !== "" || !isExisting) {
+															filtered.push(inputValue);
+														}
+														return filtered;
 													}}
 													renderInput={(params) => (
 														<TextField
@@ -221,6 +244,7 @@ export default function AdminProductList(props) {
 													label={t("unit_of_measure")}
 													multiline
 													{...field}
+													value={field.value ? field.value : ""}
 													error={Boolean(errors.unitOfMeasure)}
 													helperText={errors.unitOfMeasure && "Unit Of Measure is required!"}
 												/>

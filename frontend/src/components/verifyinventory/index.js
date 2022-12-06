@@ -16,6 +16,7 @@ import Expire from "../../assets/icons/ship_date.png";
 import Batch from "../../assets/icons/batch.png";
 import Serial from "../../assets/icons/serial.png";
 import "./style.scss";
+import { formatDate } from "../../utils/dateHelper";
 
 const VerifyInventory = (props) => {
   const { t, i18n } = props;
@@ -188,25 +189,27 @@ const VerifyInventory = (props) => {
                     className='col-1'
                     style={{ flex: "0 0 11.333333%", maxWidth: "11.333333%" }}
                   >
-                    {reviewInventory?.manufacturingDate
+                    {formatDate(new Date(reviewInventory?.manufacturingDate))}
+                    {/* {reviewInventory?.manufacturingDate
                       ? `0${manufMonth}`.slice(-2) +
                       "/" +
                       new Date(
                         Date.parse(reviewInventory?.manufacturingDate)
                       ).getFullYear()
-                      : ""}
+                      : ""} */}
                   </span>
                   <span
                     className='col-1'
                     style={{ flex: "0 0 11.333333%", maxWidth: "11.333333%" }}
                   >
-                    {reviewInventory?.expiryDate
+                    {formatDate(new Date(reviewInventory?.expiryDate))}
+                    {/* {reviewInventory?.expiryDate
                       ? `0${new Date(expiryMonth).getMonth() + 1}`.slice(-2) +
                       "/" +
                       new Date(
                         Date.parse(reviewInventory.expiryDate)
                       ).getFullYear()
-                      : ""}
+                      : ""} */}
                   </span>
                   <span className={i18n.language === "en" ? "col-2" : "col-1"}>
                     {reviewInventory?.batchNumber}
