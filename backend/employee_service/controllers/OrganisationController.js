@@ -17,7 +17,16 @@ const XLSX = require("xlsx");
 
 const EmployeeIdMap = new Map();
 
-async function createOrg({ firstName, lastName, emailId, phoneNumber, organisationName, type, address, parentOrgName }) {
+async function createOrg({
+	firstName,
+	lastName,
+	emailId,
+	phoneNumber,
+	organisationName,
+	type,
+	address,
+	parentOrgName,
+}) {
 	const organisationExists = await OrganisationModel.findOne({
 		name: new RegExp("^" + organisationName + "$", "i"),
 	});
@@ -80,7 +89,7 @@ async function createOrg({ firstName, lastName, emailId, phoneNumber, organisati
 		region: region,
 		country: country,
 		configuration_id: "CONF000",
-		parentOrgId: parentOrg.id
+		parentOrgId: parentOrg.id,
 	});
 	await organisation.save();
 
@@ -141,7 +150,7 @@ async function createOrg({ firstName, lastName, emailId, phoneNumber, organisati
 		postalAddress: addr,
 		accountStatus: "ACTIVE",
 		warehouseId: warehouseId == "NA" ? [] : [warehouseId],
-		role: "admin"
+		role: "admin",
 	});
 	await user.save();
 
@@ -329,7 +338,9 @@ exports.getOrgDetails = [
 			const orgId = req.query?.orgId;
 
 			if (!orgId) {
-				return apiResponse.validationErrorWithData(req, res, "Org Id not provided", { orgId: orgId });
+				return apiResponse.validationErrorWithData(req, res, "Org Id not provided", {
+					orgId: orgId,
+				});
 			}
 
 			const organisation = await OrganisationModel.findOne({ id: orgId });
@@ -527,11 +538,41 @@ exports.updateOrg = [
 	},
 ];
 
+exports.checkDuplicateOrgName = [
+	auth,
+	async (req, res) => {
+		try {
+			const { organisationName } = req.query;
+			const organisationExists = await OrganisationModel.findOne({
+				name: new RegExp("^" + organisationName + "$", "i"),
+				isRegistered: true,
+			});
+
+			if (organisationExists) {
+				return apiResponse.successResponseWithData(req, res, "Organisation Exists!", true);
+			} else {
+				return apiResponse.successResponseWithData(req, res, "Organisation does not exist!", false);
+			}
+		} catch (err) {
+			console.log(err);
+			return apiResponse.ErrorResponse(req, res, err.message);
+		}
+	},
+];
+
 exports.addNewOrganisation = [
 	auth,
 	async (req, res) => {
 		try {
-			const { firstName, lastName, emailId, phoneNumber, organisationName, type, address } = req.body;
+			const {
+				firstName,
+				lastName,
+				emailId,
+				phoneNumber,
+				organisationName,
+				type,
+				address,
+			} = req.body;
 			const organisationExists = await OrganisationModel.findOne({
 				name: new RegExp("^" + organisationName + "$", "i"),
 			});
@@ -596,7 +637,7 @@ exports.addNewOrganisation = [
 				region: region,
 				country: country,
 				configuration_id: "CONF000",
-				parentOrgId: req.user.organisationId
+				parentOrgId: req.user.organisationId,
 			});
 			await organisation.save();
 
@@ -663,7 +704,7 @@ exports.addNewOrganisation = [
 				password: "",
 				orgName: "org1MSP",
 				role: "",
-				email: emailId ? formatedEmail : formatedPhone
+				email: emailId ? formatedEmail : formatedPhone,
 			};
 			await axios.post(`${hf_blockchain_url}/api/v1/register`, bc_data);
 
@@ -721,32 +762,32 @@ exports.addOrgsFromExcel = [
 	async (req, res) => {
 		try {
 			const dir = `uploads`;
-			if (!fs.existsSync(dir))
-				fs.mkdirSync(dir);
+			if (!fs.existsSync(dir)) fs.mkdirSync(dir);
 			await moveFile(req.file.path, `${dir}/${req.file.originalname}`);
 			const workbook = XLSX.readFile(`${dir}/${req.file.originalname}`);
 			const sheet_name_list = workbook.SheetNames;
-			const data = XLSX.utils.sheet_to_json(
-				workbook.Sheets[sheet_name_list[0]],
-				{ dateNF: "dd/mm/yyyy;@", cellDates: true, raw: false }
-			);
+			const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]], {
+				dateNF: "dd/mm/yyyy;@",
+				cellDates: true,
+				raw: false,
+			});
 			const formatedData = new Array();
 			for (const [index, user] of data.entries()) {
-				const firstName = user["FIRST NAME"]
-				const lastName = user["LAST NAME"]
-				const emailId = user["EMAIL"]
-				const phoneNumber = user["PHONE"]
-				const organisationName = user["ORG NAME"]
-				const type = user["ORG TYPE"]
-				const parentOrgName = user["PARENT ORG"]
+				const firstName = user["FIRST NAME"];
+				const lastName = user["LAST NAME"];
+				const emailId = user["EMAIL"];
+				const phoneNumber = user["PHONE"];
+				const organisationName = user["ORG NAME"];
+				const type = user["ORG TYPE"];
+				const parentOrgName = user["PARENT ORG"];
 				const address = {
 					city: user["CITY"],
 					country: user["COUNTRY"],
 					line1: user["ADDRESS LINE"],
 					pincode: user["PINCODE"],
 					region: user["REGION"],
-					state: user["STATE"]
-				}
+					state: user["STATE"],
+				};
 				formatedData[index] = {
 					firstName,
 					lastName,
@@ -755,7 +796,7 @@ exports.addOrgsFromExcel = [
 					organisationName,
 					type,
 					parentOrgName,
-					address
+					address,
 				};
 			}
 			const promises = [];
@@ -763,14 +804,8 @@ exports.addOrgsFromExcel = [
 				promises.push(createOrg(orgData));
 			}
 			await Promise.all(promises);
-			return apiResponse.successResponseWithData(
-				req,
-				res,
-				"success",
-				formatedData
-			);
-		}
-		catch (err) {
+			return apiResponse.successResponseWithData(req, res, "success", formatedData);
+		} catch (err) {
 			console.log(err);
 			return apiResponse.ErrorResponse(req, res, err);
 		}
