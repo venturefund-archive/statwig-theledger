@@ -742,10 +742,10 @@ exports.addOrgsFromExcel = [
 				const address = {
 					city: user["CITY"],
 					country: user["COUNTRY"],
-					line1: user["ADDRESS LINE"],
-					pincode: user["PINCODE"],
-					region: user["REGION"],
-					state: user["STATE"]
+					line1: user["ADDRESS"] || user["CANTON"],
+					pincode: user["PINCODE"] || user["POSTAL CODE"],
+					region: user["REGION"] || user["DISTRICT"],
+					state: user["STATE"] || user["PROVINCE"]
 				}
 				formatedData[index] = {
 					firstName,

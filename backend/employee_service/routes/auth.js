@@ -1,5 +1,6 @@
 const express = require("express");
 const AuthController = require("../controllers/AuthController");
+const OrganisationController = require("../controllers/OrganisationController");
 const cuid = require("cuid");
 const multer = require("multer");
 
@@ -67,7 +68,7 @@ router.post(
 router.post(
   "/addOrgsFromExcel",
   upload.single("excel"),
-  AuthController.addOrgsFromExcel
+  OrganisationController.addOrgsFromExcel
 );
 router.get("/getAllUsers", AuthController.getAllUsers);
 router.get("/getOrgUsers", AuthController.getOrgUsers);
