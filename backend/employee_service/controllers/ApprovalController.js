@@ -16,9 +16,6 @@ const moveFile = require("move-file");
 const { getLatLongByCity } = require("../helpers/getLatLong");
 const XLSX = require("xlsx");
 
-const axios = require("axios");
-const blockchain_service_url = process.env.URL;
-
 async function createWarehouse(warehouseExists, wareId, payload, employeeId) {
   if (warehouseExists) {
     await EmployeeModel.findOneAndUpdate(
@@ -26,9 +23,6 @@ async function createWarehouse(warehouseExists, wareId, payload, employeeId) {
       { $push: { warehouseId: wareId } },
     );
   }
-
-
-
   const invCounter = await CounterModel.findOneAndUpdate(
     { "counters.name": "inventoryId" },
     {
@@ -176,19 +170,12 @@ exports.acceptApproval = [
         $and: [{ accountStatus: "NOTAPPROVED" }, { id: id }],
       })
       if (employee) {
-        const response = await axios.get(`${blockchain_service_url}/createUserAddress`)
-        const walletAddress = response.data.items;
-        const userData = {
-          walletAddress,
-        };
-        await axios.post(`${blockchain_service_url}/grantPermission`, userData)
         const emp = await EmployeeModel.findOneAndUpdate(
           { id: id },
           {
             $set: {
               accountStatus: "ACTIVE",
               isConfirmed: true,
-              walletAddress,
               role,
               phoneNumber,
             },
@@ -309,7 +296,7 @@ exports.addUser = [
       const phoneNumber = req.body.phoneNumber
         ? "+" + req.body.phoneNumber
         : null;
-      const incrementCounterEmployee = await CounterModel.updateOne(
+      await CounterModel.updateOne(
         {
           "counters.name": "employeeId",
         },
@@ -357,16 +344,13 @@ exports.addUser = [
         name: firstName,
         organisation: organisationName,
       });
-      mailer
+      await mailer
         .send(
           constants.addUser.from,
           req.body.emailId,
           constants.addUser.subject,
           emailBody
         )
-        .catch((err) => {
-          console.log("Error in mailing user!");
-        });
       return apiResponse.successResponse(req, res, "User Added");
     } catch (err) {
       return apiResponse.ErrorResponse(req, res, err);
@@ -398,82 +382,54 @@ exports.updateUserRole = [
 
 exports.activateUser = [
   auth,
-  (req, res) => {
+  async (req, res) => {
     try {
       const { organisationName } = req.user;
       const { id, role } = req.query;
-      EmployeeModel.findOne({ id: id })
-        .then((employee) => {
-          if (employee) {
-            if (
-              employee.isConfirmed &&
-              employee.accountStatus == "ACTIVE"
-            ) {
-              return apiResponse.successResponseWithData(
-                req,
-                res,
-                " User is already Active",
-                employee
-              );
-            } else {
-              axios
-                .get(`${blockchain_service_url}/createUserAddress`)
-                .then((response) => {
-                  const walletAddress = response.data.items;
-                  const userData = {
-                    walletAddress,
-                  };
-                  axios
-                    .post(
-                      `${blockchain_service_url}/grantPermission`,
-                      userData
-                    )
-                    .then(() => console.log("posted"));
-                  EmployeeModel.findOneAndUpdate(
-                    { id: id },
-                    {
-                      $set: {
-                        accountStatus: "ACTIVE",
-                        isConfirmed: true,
-                        walletAddress,
-                        role,
-                      },
-                    },
-                    { new: true }
-                  )
-                    .exec()
-                    .then((emp) => {
-                      let emailBody = RequestApproved({
-                        name: emp.firstName,
-                        organisation: organisationName,
-                      });
-                      // Send confirmation email
-                      try {
-                        mailer.send(
-                          constants.appovalEmail.from,
-                          emp.emailId,
-                          constants.appovalEmail.subject,
-                          emailBody
-                        );
-                      } catch (mailError) {
-                        console.log(mailError);
-                      }
-                      return apiResponse.successResponseWithData(
-                        req,
-                        res,
-                        `User Activated`,
-                        emp
-                      );
-                    });
-                });
-            }
-          } else {
-            return apiResponse.notFoundResponse(req, res, "User Not Found");
-          }
-        })
-        .catch((err) => {
-          return apiResponse.ErrorResponse(req, res, err);
-        });
+      const employee = await EmployeeModel.findOne({ id: id })
+      if (employee) {
+        if (
+          employee.isConfirmed &&
+          employee.accountStatus == "ACTIVE"
+        ) {
+          return apiResponse.successResponseWithData(
+            req,
+            res,
+            " User is already Active",
+            employee
+          );
+        } else {
+          const emp = await EmployeeModel.findOneAndUpdate(
+            { id: id },
+            {
+              $set: {
+                accountStatus: "ACTIVE",
+                isConfirmed: true,
+                role,
+              },
+            },
+            { new: true }
+          )
+          const emailBody = RequestApproved({
+            name: emp.firstName,
+            organisation: organisationName,
+          });
+          await mailer.send(
+            constants.appovalEmail.from,
+            emp.emailId,
+            constants.appovalEmail.subject,
+            emailBody
+          );
+          return apiResponse.successResponseWithData(
+            req,
+            res,
+            `User Activated`,
+            emp
+          );
+        }
+      } else {
+        return apiResponse.notFoundResponse(req, res, "User Not Found");
+      }
     } catch (err) {
       return apiResponse.ErrorResponse(req, res, err);
     }
@@ -574,7 +530,7 @@ exports.addUsersFromExcel = [
         }
 
         for (const user of formatedData) {
-          const incrementCounterEmployee = await CounterModel.updateOne(
+          await CounterModel.updateOne(
             {
               "counters.name": "employeeId",
             },

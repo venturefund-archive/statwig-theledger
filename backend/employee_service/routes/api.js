@@ -3,13 +3,13 @@ const authRouter = require("./auth");
 const userQueryRouter = require("./userQuery");
 const demoRequestRouter = require("./demoRequest");
 const authController = require("../controllers/AuthController")
-const { getPendingOrgs, getOrgs, updateOrg, getOrgAnalytics, addNewOrganisation, checkDuplicateOrgName } = require("../controllers/OrganisationController");
+const { getPendingOrgs, getOrgs, getOrgDetails, updateOrg, getOrgAnalytics, addNewOrganisation, checkDuplicateOrgName } = require("../controllers/OrganisationController");
 const {
-    getApprovals,
-    acceptApproval,
-    rejectApproval,
-    addUser
-  } = require("../controllers/ApprovalController");
+  getApprovals,
+  acceptApproval,
+  rejectApproval,
+  addUser
+} = require("../controllers/ApprovalController");
 const app = express();
 
 app.use("/auth/", authRouter);
@@ -20,6 +20,7 @@ app.get("/deactivateUser", authController.deactivateUser); // /deactivateUser?id
 app.get("/updateUserRole", authController.updateUserRole);
 
 app.get("/getOrgs", getOrgs);
+app.get("/getOrgDetails", getOrgDetails);
 app.get("/getPendingOrgs", getPendingOrgs);
 app.get("/getOrgAnalytics", getOrgAnalytics);
 app.get("/checkDuplicateOrgName", checkDuplicateOrgName);
