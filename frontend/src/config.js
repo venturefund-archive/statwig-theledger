@@ -443,7 +443,7 @@ export function config() {
       getRegionDataUrl: `${SERVER_URL}/api/address_service/getRegions`,
       fetchAllRoles: `${SERVER_URL}/rbacmanagement/api/getRoles`,
       fetchPermissionsByRole: `${SERVER_URL}/rbacmanagement/api/getPermissions`,
-      updatePermissions: `${LOCAL_SERVER_URL_RBAC}/rbacmanagement/api/updatePermissions`,
+      updatePermissions: `${SERVER_URL}/rbacmanagement/api/updatePermissions`,
     },
   };
 
