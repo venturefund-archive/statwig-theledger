@@ -72,7 +72,6 @@ const Header = (props) => {
   const history = useHistory();
   const [openModal, setOpenModal] = useState(false);
   const [AlertModalData, setAlertModalData] = useState({});
-  const [menu, setMenu] = useState(false);
   const [location, setLocation] = useState({});
   const [search, setSearch] = useState("");
   const [searchString, setSearchString] = useState("");
@@ -92,30 +91,10 @@ const Header = (props) => {
   const [hasMore, setHasMore] = useState(true);
   const [ProfileClickBtn, setProfileClickBtn] = useState(false);
 
-  let domNode = useClickOutside(() => {
+  const domNode = useClickOutside(() => {
     setProfileClickBtn(false);
   });
 
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const [anchorEl2, setAnchorEl2] = React.useState(null);
-  const open2 = Boolean(anchorEl2);
-  const handleClick2 = (event) => {
-    setAnchorEl2(event.currentTarget);
-  };
-  const handleClose2 = () => {
-    setAnchorEl2(null);
-  };
-  const ref = useOnclickOutside(() => {
-    setMenu(false);
-  });
   const ref1 = useRef(null);
   useOnclickOutside(
     (ref) => {
@@ -128,9 +107,6 @@ const Header = (props) => {
     { refs: [ref1] }
   );
 
-  const closeModalFail = () => {
-    setInvalidSearch(false);
-  };
   function notifIcon(notif) {
     if (notif.eventType === "INVENTORY") {
       return inventoryIcon;
@@ -386,14 +362,14 @@ const Header = (props) => {
         break;
       }
     }
-  });
+  }, [searchPermissions]);
 
   const handleUiSwitch = () => {
     // Check whether user has enough rights
-    if (profile.type === "CENTRAL_AUTHORITY"|| profile.role === "GoverningBody") {
+    if (profile.type === "CENTRAL_AUTHORITY" || profile.role === "GoverningBody") {
       history.push("/statwig/dashboard");
     }
-    else if (profile.role === "admin" ) {
+    else if (profile.role === "admin") {
       history.push("/org/dashboard");
     }
   };
@@ -975,6 +951,7 @@ const Header = (props) => {
                               LangOption === "en" ? SpanishFlag : EnglishFlag
                             }
                             className="lang__flag"
+                            alt="flag"
                           />
                         </div>
                       </div>

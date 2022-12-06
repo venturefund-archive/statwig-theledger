@@ -2922,19 +2922,27 @@ exports.getOrgUsers = [
 	auth,
 	async (req, res) => {
 		try {
-			console.log(getUserCondition(req.query, req.user.organisationId));
 			const users = await EmployeeModel.aggregate([
 				{
 					$match: getUserCondition(req.query, req.user.organisationId),
 				},
 				{
 					$lookup: {
-						from: "organisations",
-						localField: "organisationId",
-						foreignField: "id",
-						as: "orgs",
+						from: "warehouses",
+						let: { warehouseId: "$warehouseId" },
+						pipeline: [
+							{
+								$match: {
+									$expr: {
+										$and: [{ $in: ["$id", "$$warehouseId"] }, { $eq: ["$status", "ACTIVE"] }],
+									},
+								},
+							},
+						],
+						as: "warehouses",
 					},
 				},
+				{ $unwind: "$warehouses" },
 				{
 					$project: {
 						_id: 0,
@@ -2949,10 +2957,10 @@ exports.getOrgUsers = [
 						emailId: 1,
 						postalAddress: 1,
 						createdAt: 1,
-						location: "$orgs.postalAddress",
-						city: "$orgs.city",
-						region: "$orgs.region",
-						country: "$orgs.country",
+						location: "$warehouses.warehouseAddress.firstLine",
+						city: "$warehouses.warehouseAddress.city",
+						region: "$warehouses.warehouseAddress.region",
+						country: "$warehouses.warehouseAddress.country",
 					},
 				},
 				{ $skip: parseInt(req.query.skip) || 0 },
@@ -2960,14 +2968,13 @@ exports.getOrgUsers = [
 			]);
 
 			return apiResponse.successResponseWithData(
-				req,
 				res,
 				"Organisation Users",
 				users
 			);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.ErrorResponse(res, err);
 		}
 	},
 ];

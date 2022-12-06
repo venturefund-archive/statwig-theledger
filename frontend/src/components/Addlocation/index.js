@@ -278,7 +278,7 @@ export const AddLocationCard = (props) => {
                             setCity("");
                           }}
                           options={allCountries.map(
-                            (option) => option.spanishName
+                            (option) => option.spanishName ? option.spanishName : option.name
                           )}
                           renderInput={(params) => (
                             <TextField

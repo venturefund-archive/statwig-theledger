@@ -1,5 +1,5 @@
-var mongoose = require("mongoose");
-var EmployeeSchema = new mongoose.Schema(
+const mongoose = require("mongoose");
+const EmployeeSchema = new mongoose.Schema(
   {
     id: { type: String, required: false, unique: true },
     emailId: {
