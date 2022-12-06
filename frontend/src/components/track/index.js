@@ -210,8 +210,8 @@ const Track = (props) => {
                               shippmentChainOfCustodyData.length - 1 === index
                                 ? 1
                                 : newArr.length && row.id !== value
-                                ? newArr.length
-                                : 1
+                                  ? newArr.length
+                                  : 1
                             }
                             container={2 + i}
                             t={t}
@@ -257,9 +257,9 @@ const Track = (props) => {
                     {Object.keys(props.latestIotShipmentData).length > 0
                       ? formatTimeAMPM(
                           /**props.latestIotShipmentData.temp['UnixTimeStamp']*/ new Date()
-                            .toString()
-                            .split(" ")[4]
-                        )
+                          .toString()
+                          .split(" ")[4]
+                      )
                       : ""}{" "}
                   </div>
                 </div>
