@@ -399,7 +399,7 @@ export function config() {
       getCitiesAndOrgsForFilters: `${SERVER_URL}/lastmilemanagement/api/vaccination/getCitiesAndOrgsForFilters`,
       exportVaccinationList: `${SERVER_URL}/lastmilemanagement/api/vaccination/exportVaccinationList`,
       getApprovalsUrl: `${SERVER_URL}/usermanagement/api/getApprovals`,
-      getPermissionsUrl: `${LOCAL_SERVER_URL_RBAC}/rbacmanagement/api/getPermissions`,
+      getPermissionsUrl: `${SERVER_URL}/rbacmanagement/api/getPermissions`,
       getWareHousesUrl: `${SERVER_URL}/api/address_service/fetchWarehouses`,
       fetchWarehousesByOrgId: `${SERVER_URL}/api/address_service/fetchWarehousesByOrgId`,
       verifyOrgUserUrl: `${SERVER_URL}/usermanagement/api/acceptApproval`,
