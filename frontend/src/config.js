@@ -1,6 +1,6 @@
 
 export const SERVER_URL =
-  process.env.REACT_APP_SERVER_URL || "https://vaccineledger.com";
+  process.env.REACT_APP_SERVER_URL || "https://test.vaccineledger.com";
 export const SERVER_URL_FOR_ROAMBEE = "https://integrations.vaccineledger.com";
 export const LOCAL_SERVER_URL_USER = "http://localhost:3001";
 export const LOCAL_SERVER_URL_SHIPPINGORDER = "http://localhost:3013";
@@ -399,7 +399,7 @@ export function config() {
       getCitiesAndOrgsForFilters: `${SERVER_URL}/lastmilemanagement/api/vaccination/getCitiesAndOrgsForFilters`,
       exportVaccinationList: `${SERVER_URL}/lastmilemanagement/api/vaccination/exportVaccinationList`,
       getApprovalsUrl: `${SERVER_URL}/usermanagement/api/getApprovals`,
-      getPermissionsUrl: `${SERVER_URL}/rbacmanagement/api/getPermissions`,
+      getPermissionsUrl: `${LOCAL_SERVER_URL_RBAC}/rbacmanagement/api/getPermissions`,
       getWareHousesUrl: `${SERVER_URL}/api/address_service/fetchWarehouses`,
       fetchWarehousesByOrgId: `${SERVER_URL}/api/address_service/fetchWarehousesByOrgId`,
       verifyOrgUserUrl: `${SERVER_URL}/usermanagement/api/acceptApproval`,
@@ -443,7 +443,7 @@ export function config() {
       getRegionDataUrl: `${SERVER_URL}/api/address_service/getRegions`,
       fetchAllRoles: `${SERVER_URL}/rbacmanagement/api/getRoles`,
       fetchPermissionsByRole: `${SERVER_URL}/rbacmanagement/api/getPermissions`,
-      updatePermissions: `${SERVER_URL}/rbacmanagement/api/updatePermissions`,
+      updatePermissions: `${LOCAL_SERVER_URL_RBAC}/rbacmanagement/api/updatePermissions`,
     },
   };
 

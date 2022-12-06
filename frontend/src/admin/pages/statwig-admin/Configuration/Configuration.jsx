@@ -19,6 +19,7 @@ import Permission from "./Permission/Permission";
 import { createFilterOptions } from "@material-ui/lab";
 import { turnOff, turnOn } from "../../../../actions/spinnerActions";
 import { useTranslation } from "react-i18next";
+import { useRef } from "react";
 
 const filter = createFilterOptions();
 
@@ -34,6 +35,9 @@ export default function Configuration(props) {
 	const [permissions, setPermissions] = useState({});
 	const [updatedPermissions, setUpdatedPermissions] = useState(null);
 	const [openSuccessPopup, setOpenSuccessPopup] = useState(false);
+	const [existingRole, setExistingRole] = useState(true);
+
+	const roleRef = useRef(null);
 
 	async function getUserRoles() {
 		const roles = await getAllRoles();
@@ -93,30 +97,14 @@ export default function Configuration(props) {
 	async function updatePermissions(permissionType, data) {
 		let updates = updatedPermissions;
 		updates[permissionType] = data;
-		console.log(updates, updatedPermissions);
 		setUpdatedPermissions(updates);
 	}
 
-	const [open, setOpen] = React.useState(false);
-	const [open2, setOpen2] = React.useState(false);
-	const [fullWidth] = React.useState(true);
-	const [maxWidth] = React.useState("md");
-
-	const handleClickOpen = () => {
-		setOpen(true);
-	};
-
-	const handleClose = () => {
-		setOpen(false);
-	};
-
-	const handleClickOpen2 = () => {
-		setOpen2(true);
-	};
-
-	const handleClose2 = () => {
-		setOpen2(false);
-	};
+	const handleAddNewRole = () => {
+		setSelectedRole("");
+		setExistingRole(false);
+		roleRef.current.focus();
+	}
 
 	const closeModal = () => {
 		setOpenSuccessPopup(false);
@@ -133,24 +121,23 @@ export default function Configuration(props) {
 								<p className="vl-subheading f-700">{t("configuration")}</p>
 								<p className="vl-body f-400 vl-grey-sm">{t("roles_permissions")}</p>
 							</div>
-							{/* <div className="config-btn-group">
-                <button
+							<div className="config-btn-group">
+								{/* <button
                   className="vl-btn vl-btn-md vl-btn-secondary"
                   onClick={handleClickOpen2}
                 >
                   Assign Role to User
-                </button>
-                <button
-                  className="vl-btn vl-btn-md vl-btn-primary"
-                  onClick={handleClickOpen}
-                >
-                  Add Roles
-                </button>
-              </div> */}
+                </button> */}
+								<button className="vl-btn vl-btn-md vl-btn-primary" onClick={handleAddNewRole}>
+									Add Roles
+								</button>
+							</div>
 						</div>
 
 						<div className="input-set">
-							<p className="vl-body f-500 vl-black">{t("select_role")}</p>
+							<p className="vl-body f-500 vl-black">
+								{existingRole ? t("select_role") : "Add New Role"}
+							</p>
 							<div className="input-full-column-space">
 								<Autocomplete
 									fullWidth
@@ -167,21 +154,10 @@ export default function Configuration(props) {
 										}
 										return filtered;
 									}}
-									renderInput={(params) => <TextField {...params} label="Role" />}
+									renderInput={(params) => (
+										<TextField inputRef={roleRef} {...params} label="Role" />
+									)}
 								/>
-								{/* <Select
-									fullWidth
-									id="combo-box-demo"
-									className="vl-role-select"
-									onChange={(e) => setSelectedRole(e.target.value)}
-									value={selectedRole}
-								>
-									{uniq.map((role) => (
-										<MenuItem value={role} key={role}>
-											{role}
-										</MenuItem>
-									))}
-								</Select> */}
 							</div>
 						</div>
 
@@ -219,17 +195,6 @@ export default function Configuration(props) {
 					/>
 				</Modal>
 			)}
-			<Dialog fullWidth={fullWidth} maxWidth={maxWidth} open={open} onClose={handleClose}>
-				<DialogContent sx={{ padding: "0rem !important" }}>
-					<AddRole handleClose={handleClose} />
-				</DialogContent>
-			</Dialog>
-
-			<Dialog fullWidth={fullWidth} maxWidth={maxWidth} open={open2} onClose={handleClose2}>
-				<DialogContent sx={{ padding: "0rem !important" }}>
-					<AssignRole handleClose2={handleClose2} />
-				</DialogContent>
-			</Dialog>
 		</>
 	);
 }
