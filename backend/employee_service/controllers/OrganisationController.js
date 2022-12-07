@@ -422,6 +422,12 @@ exports.getOrgAnalytics = [
 											status: "$status",
 										},
 									},
+									orgInitials: {
+										$firstN: {
+											input: "$name",
+											n: 5,
+										},
+									},
 								},
 							},
 							{
@@ -433,6 +439,7 @@ exports.getOrgAnalytics = [
 											else: "NA",
 										},
 									},
+									orgInitials: 1,
 								},
 							},
 						],
@@ -466,11 +473,11 @@ exports.getOrgAnalytics = [
 				{ $unwind: "$total" },
 				{ $unwind: "$active" },
 			]);
-			console.log(analytics);
 			const analyticsObject = {
 				totalCount: analytics[0].total.count,
 				activeCount: analytics[0].active.count,
 				inactiveCount: analytics[0].total.count - analytics[0].active.count,
+				orgInitials: analytics[0].total.orgInitials,
 			};
 			return apiResponse.successResponseWithData(req, res, "Organisation list", analyticsObject);
 		} catch (err) {

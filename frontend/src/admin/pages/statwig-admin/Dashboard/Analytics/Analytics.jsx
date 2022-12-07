@@ -3,11 +3,11 @@ import "./Analytics.css";
 import AnalyticsCard from "../../../../common/AnalyticsCard/AnalyticsCard";
 import Graphs from "../../../../components/Graphs/Graphs";
 
-export default function Analytics({ t }) {
+export default function Analytics({ t, analytics }) {
   return (
     <section className="Analytics-area">
       <div className="analytics-one-column-layout">
-        <AnalyticsCard t={t} layout="type1" name="orgs" />
+        <AnalyticsCard t={t} layout="type1" name="orgs" analytics={analytics} />
       </div>
       <div className="analytics-two-column-layout">
         <AnalyticsCard

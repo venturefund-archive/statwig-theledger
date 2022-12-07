@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
-import { getPendingOrgs } from "../../../actions/organisationActions";
+import { getOrgAnalytics, getPendingOrgs } from "../../../actions/organisationActions";
 import StatwigHeader from "../../../shared/Header/StatwigHeader/StatwigHeader";
 import Analytics from "./Analytics/Analytics";
 import "./Dashboard.css";
@@ -21,6 +21,11 @@ export default function Dashboard(props) {
   const pendingOrgs = useSelector(
     (state) => state.organisationReducer.pendingOrgs
   );
+  const { orgAnalytics } = useSelector((state) => state.organisationReducer);
+
+  useEffect(() => {
+    dispatch(getOrgAnalytics());
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(getPendingOrgs());
@@ -37,7 +42,7 @@ export default function Dashboard(props) {
         <div className="admin-container">
           <div className="admin-dashboard-container admin-section-space">
             <div className="dashboard-left-space">
-              <Analytics t={t} />
+              <Analytics t={t} analytics={orgAnalytics} />
             </div>
             <div className="dashboard-right-space">
               <Pendings
