@@ -82,8 +82,8 @@ export default function Connection(props) {
               pincode: values.pincode,
               city: values.city,
               state: values.state,
-              country: values.country,
-              region: values.region,
+              country: values.country ? values.country : "Costa Rica",
+              region: values.region ? values.region : "Americas",
             };
           } else {
             reqData.skipOrgRegistration = true;

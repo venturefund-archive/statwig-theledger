@@ -119,6 +119,7 @@ async function createWarehouse(warehouseExists, wareId, payload, employeeId) {
     },
   );
 }
+
 exports.getApprovals = [
   auth,
   async (req, res) => {

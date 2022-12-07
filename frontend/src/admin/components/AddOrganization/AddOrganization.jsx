@@ -16,6 +16,11 @@ import { turnOff, turnOn } from "../../actions/spinnerActions";
 import { addNewOrganisation } from "../../actions/userActions";
 import Modal from "../../../shared/modal";
 import SuccessPopup from "../../shared/Popup/SuccessPopup";
+import {
+	checkDuplicateEmail,
+	checkDuplicatePhone,
+	checkDuplicateOrgName,
+} from "../../../utils/dataValidator";
 
 export default function AddOrganization({ resetFlag, handleClose, t }) {
 	const dispatch = useDispatch();
@@ -76,6 +81,7 @@ export default function AddOrganization({ resetFlag, handleClose, t }) {
 		watch,
 		control,
 		setValue,
+		setError,
 		formState: { errors },
 		handleSubmit,
 	} = useForm({
@@ -100,6 +106,39 @@ export default function AddOrganization({ resetFlag, handleClose, t }) {
 
 	const onSubmit = async (values) => {
 		try {
+			let flag = false;
+			if (values.email) {
+				await checkDuplicateEmail(values.email).catch((err) => {
+					setError("email", {
+						type: "custom",
+						message: err.message,
+					});
+					flag = true;
+				});
+			}
+
+			if (values.phone) {
+				await checkDuplicatePhone(values.phone).catch((err) => {
+					setError("phone", {
+						type: "custom",
+						message: err.message,
+					});
+					flag = true;
+				});
+			}
+
+			await checkDuplicateOrgName(values.organizationName).catch((err) => {
+				setError("organizationName", {
+					type: "custom",
+					message: err.message,
+				});
+				flag = true;
+			});
+
+			if (flag) {
+				return;
+			}
+
 			dispatch(turnOn());
 			let payload = {
 				firstName: values.firstName,
@@ -233,6 +272,9 @@ export default function AddOrganization({ resetFlag, handleClose, t }) {
 									/>
 								)}
 							/>
+							{errors.phone?.type === "custom" ? (
+								<span className="error-msg text-dangerS">{errors.phone?.message}</span>
+							) : null}
 						</div>
 					</div>
 					<div className="input-set">
@@ -273,7 +315,11 @@ export default function AddOrganization({ resetFlag, handleClose, t }) {
 										label={t("organization_name")}
 										{...field}
 										error={Boolean(errors.organizationName)}
-										helperText={errors.organizationName && "Organisation Name is required!"}
+										helperText={
+											errors.organizationName?.type === "required"
+												? "Organization Name is required!"
+												: errors.organizationName?.message
+										}
 									/>
 								)}
 							/>
