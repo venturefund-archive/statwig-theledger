@@ -1182,6 +1182,7 @@ const NewShipment = (props) => {
                           }`}
                       >
                         <DatePicker
+                          dateFormat="dd/MM/yyyy"
                           ref={ref1}
                           className='date'
                           selected={
@@ -1256,6 +1257,7 @@ const NewShipment = (props) => {
                           }`}
                       >
                         <DatePicker
+                          dateFormat="dd/MM/yyyy"
                           ref={ref2}
                           className='date'
                           placeholderText={t("enter_delivery_date")}

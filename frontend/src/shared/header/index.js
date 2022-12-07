@@ -351,16 +351,18 @@ const Header = (props) => {
     },
   };
 
-  const searchPermissions = props.user.permissions.search;
+  const searchPermissions = props.user?.permissions?.search;
 
   const [allowSearch, setAllowSearch] = useState(false);
 
   useEffect(() => {
-    for (const property in searchPermissions) {
-      if (searchPermissions[property]) {
-        setAllowSearch(true);
-        break;
-      }
+    if(searchPermissions) {
+      for (const property in searchPermissions) {
+				if (searchPermissions[property]) {
+					setAllowSearch(true);
+					break;
+				}
+			}
     }
   }, [searchPermissions]);
 

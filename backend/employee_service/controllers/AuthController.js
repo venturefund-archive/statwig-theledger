@@ -2698,13 +2698,14 @@ exports.getOrgUsers = [
 			]);
 
 			return apiResponse.successResponseWithData(
+				req,
 				res,
 				"Organisation Users",
 				users
 			);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err);
+			return apiResponse.ErrorResponse(req, res, err);
 		}
 	},
 ];
@@ -2779,7 +2780,6 @@ exports.getOrgUserAnalytics = [
 				{ $unwind: "$total" },
 				{ $unwind: "$active" },
 			]);
-			console.log(analytics);
 			const analyticsObject = {
 				totalCount: analytics[0].total.count,
 				activeCount: analytics[0].active.count,
