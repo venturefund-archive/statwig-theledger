@@ -160,6 +160,7 @@ const NewInventory = (props) => {
   };
 
   const importError = (message) => {
+    console.log(message);
     setInventoryError(message);
     setOpenFailInventory(true);
   };
