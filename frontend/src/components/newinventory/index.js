@@ -17,6 +17,7 @@ import {
 import { turnOn, turnOff } from "../../actions/spinnerActions";
 import { getProducts } from "../../actions/poActions";
 import { isAuthenticated } from "../../utils/commonHelper";
+import { isBefore } from "date-fns";
 
 const NewInventory = (props) => {
   const { t } = props;
@@ -115,33 +116,21 @@ const NewInventory = (props) => {
   const newMonth = `0${month}`.slice(-2);
   const todayDate = newMonth + "/" + new Date().getFullYear();
   const dateValidationFields = ["expiryDate"];
-  const expiryDateValidation = (date) => {
-    let error = false;
-    inventoryState.forEach((inventory) => {
-      if (error) return;
-      let validationVariable = inventory.expiryDate;
-      let a = new Date(
-        Date.parse(
-          typeof validationVariable == "string"
-            ? validationVariable
-            : validationVariable.toLocaleDateString()
-        )
-      ).getFullYear();
-      let b = todayDate.slice(-4);
-      let c = `0${new Date(validationVariable).getMonth() + 1}`.slice(-2);
-      let d = todayDate.substring(0, 2);
-      a = a.toString();
-      console.log(validationVariable);
-      console.log(a, b, c, d);
-      if (a < b || (a === b && c <= d)) {
-        setInventoryError("Check expiryDate");
-        setOpenFailInventory(true);
-        error = true;
-      }
-    });
 
-    return error;
-  };
+  const expiryDateValidation = (date) => {
+		let error = false;
+		inventoryState.forEach((inventory) => {
+			if (error) return;
+			let expDate = new Date(inventory.expiryDate).setHours(0, 0, 0, 0);
+			let today = new Date().setHours(0, 0, 0, 0);
+			if (isBefore(expDate, today)) {
+				setInventoryError("Check expiryDate");
+				setOpenFailInventory(true);
+				error = true;
+			}
+		});
+		return error;
+	};
 
   const checkValidationErrors = (validations) => {
     let error = false;

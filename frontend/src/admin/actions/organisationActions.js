@@ -716,6 +716,17 @@ export const getPendingOrgs = () => {
 			return result;
 		};
 	} catch (e) {
-		throw Error(e.message);
+		return e.response;
+	}
+};
+
+export const validateUniqueOrgName = async (organisationName) => {
+	try {
+		const result = await axios.get(
+			`${config().checkDuplicateOrgName}?organisationName=${organisationName}`,
+		);
+		return result;
+	} catch (error) {
+		return error.response;
 	}
 };

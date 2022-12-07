@@ -109,29 +109,29 @@ exports.vaccinateIndividual = [
 
 			const warehouse = await WarehouseModel.findOne({ id: warehouseId });
 
-			const existingInventory = await InventoryModel.findOne(
-				{ id: warehouse.warehouseInventory },
-				{ _id: 1, id: 1, inventoryDetails: { $elemMatch: { productId: productId } } },
-			);
-
-			if (existingInventory?.inventoryDetails?.length) {
-				if (existingInventory.inventoryDetails[0].quantity < 1) {
-					return apiResponse.ErrorResponse(res, "Inventory exhausted!");
-				}
-			}
-
-			const existingAtom = await AtomModel.findOne({
-				currentInventory: warehouse.warehouseInventory,
-				batchNumbers: batchNumber,
-				status: "HEALTHY",
-			});
-
-			if (!existingAtom?.quantity) {
-				return apiResponse.ErrorResponse(res, "Batch Exhausted!");
-			}
-
 			// Open a new bottle if first dose
 			if (!vaccineVialId) {
+				const existingInventory = await InventoryModel.findOne(
+					{ id: warehouse.warehouseInventory },
+					{ _id: 1, id: 1, inventoryDetails: { $elemMatch: { productId: productId } } },
+				);
+	
+				if (existingInventory?.inventoryDetails?.length) {
+					if (existingInventory.inventoryDetails[0].quantity < 1) {
+						return apiResponse.ErrorResponse(res, "Inventory exhausted!");
+					}
+				}
+	
+				const existingAtom = await AtomModel.findOne({
+					currentInventory: warehouse.warehouseInventory,
+					batchNumbers: batchNumber,
+					status: "HEALTHY",
+				});
+	
+				if (!existingAtom?.quantity) {
+					return apiResponse.ErrorResponse(res, "Batch Exhausted!");
+				}	
+
 				const vaccineVialCounter = await CounterModel.findOneAndUpdate(
 					{
 						"counters.name": "vaccineVialId",

@@ -3,7 +3,7 @@ const authRouter = require("./auth");
 const userQueryRouter = require("./userQuery");
 const demoRequestRouter = require("./demoRequest");
 const authController = require("../controllers/AuthController")
-const { getPendingOrgs, getOrgs, getOrgDetails, updateOrg, getOrgAnalytics, addNewOrganisation } = require("../controllers/OrganisationController");
+const { getPendingOrgs, getOrgs, getOrgDetails, updateOrg, getOrgAnalytics, addNewOrganisation, checkDuplicateOrgName } = require("../controllers/OrganisationController");
 const {
   getApprovals,
   acceptApproval,
@@ -23,6 +23,7 @@ app.get("/getOrgs", getOrgs);
 app.get("/getOrgDetails", getOrgDetails);
 app.get("/getPendingOrgs", getPendingOrgs);
 app.get("/getOrgAnalytics", getOrgAnalytics);
+app.get("/checkDuplicateOrgName", checkDuplicateOrgName);
 app.post("/addNewOrganisation", addNewOrganisation);
 app.get("/updateUserRole", authController.updateUserRole);
 app.post("/updateOrg", updateOrg);

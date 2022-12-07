@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { formatDate } from "../../../utils/dateHelper.js";
 import Ungrouped from "../ungrouped.js";
 import "./style.scss";
 const Table = (props) => {
@@ -36,26 +37,10 @@ const Table = (props) => {
                     : inventory.createdAt}
                 </div>
                 <div className="rTableCell ml-5">
-                  {inventory.manufacturingDate
-                    ? inventory.manufacturingDate.length > 11
-                      ? inventory.manufacturingDate.substring(5, 7) +
-                        "/" +
-                        inventory.manufacturingDate.substring(0, 4)
-                      : inventory.manufacturingDate.split("/")[1] +
-                        "/" +
-                        inventory.manufacturingDate.split("/")[2]
-                    : "NAN"}
+                  {formatDate(inventory.manufacturingDate)}
                 </div>
                 <div className="rTableCell">
-                  {inventory.expiryDate
-                    ? inventory.expiryDate.length > 11
-                      ? inventory.expiryDate.substring(5, 7) +
-                        "/" +
-                        inventory.expiryDate.substring(0, 4)
-                      : inventory.expiryDate.split("/")[1] +
-                        "/" +
-                        inventory.expiryDate.split("/")[2]
-                    : "NAN"}
+                  {formatDate(inventory.expiryDate)}
                 </div>
                 <div className="rTableCell">
                   {batch === inventory.batchNumber ? (
