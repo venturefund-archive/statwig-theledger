@@ -5,13 +5,16 @@ import { useTranslation } from "react-i18next";
 import Tracking from "../../components/tracking/Tracking";
 
 const TrackingContainer = (props) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   return (
-    <div className="container-fluid p-0">
+    <div className='container-fluid p-0'>
       <Header {...props} t={t} />
-      <div className="d-flex">
+      <div className='d-flex'>
         <Sidebar {...props} t={t} />
-        <div className="Network-content" style={{pointerEvents: props.demoLogin ? "none" : "auto" }}>
+        <div
+          className='Network-content'
+          style={{ pointerEvents: props.demoLogin ? "none" : "auto" }}
+        >
           <Tracking />
         </div>
       </div>

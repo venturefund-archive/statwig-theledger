@@ -31,7 +31,7 @@
     }
   }
 
-  .vl-card-subtext{
+  .vl-card-subtext {
     font-weight: bold;
     position: relative;
     top: 8px;
@@ -190,7 +190,7 @@
 
     .count1 {
       color: var(--primary);
-     
+
       @media (max-width: $lg) {
         font-size: 1.375rem;
       }
@@ -201,7 +201,7 @@
 
     .count2 {
       color: var(--tale);
-     
+
       @media (max-width: $lg) {
         font-size: 1.375rem;
       }
@@ -212,7 +212,7 @@
 
     .count3 {
       color: var(--blue);
-     
+
       @media (max-width: $lg) {
         font-size: 1.375rem;
       }
@@ -223,7 +223,7 @@
 
     .count4 {
       color: var(--orange);
-      
+
       @media (max-width: $lg) {
         font-size: 1.375rem;
       }
@@ -233,9 +233,8 @@
     }
 
     .count5 {
-
       color: var(--yellow);
-      
+
       @media (max-width: $lg) {
         font-size: 1.375rem;
       }

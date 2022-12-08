@@ -16,7 +16,6 @@ import ProductList from "../containers/productList";
 import trackAndTrace from "../containers/trackAndTrace";
 import Track from "../containers/track";
 import ProductTracing from "../containers/productTracing";
-import Network from "../containers/network";
 import Profile from "../containers/profile";
 import AdminProfile from "../containers/adminprofile";
 import DashBoard from "../containers/dashboard";
@@ -28,10 +27,7 @@ import ViewOrder from "../containers/vieworder";
 import ReviewOrder from "../containers/revieworder";
 import enterId from "../containers/EnterId";
 import AddProduct from "../containers/addproduct";
-import Signup from "../containers/signUp";
-import ForgotPassword from "../containers/forgotPassword";
 import resetPasswordPage from "../containers/resetPassword";
-import Home from "../containers/home";
 import UpdateStatus from "../containers/updateStatus";
 import ReceiveShipment from "../containers/receiveShipment";
 import AddLocation from "../containers/Addlocation";
@@ -66,7 +62,6 @@ import AdminProductList from "../admin/pages/org-admin/ProductList/ProductList";
 
 const routes = (
   <Switch>
-    {/* <Route exact path='/' component={Home} /> */}
     <Route exact path='/' component={LandingContainer} />
     <Route exact path='/signup'>
       <ConnectionContainer connection="account" />
@@ -80,11 +75,7 @@ const routes = (
     <Route exact path='/success'>
       <ConnectionContainer connection="success" />
     </Route>
-   {/* <Route exact path='/login' component={Login} />
-    <Route path='/verify' component={Verify} />
-    <Route path='/signup' component={Signup} /> */}
     <Route path='/overview' component={requireAuth(OverView)} />
-    <Route path='/forgotPassword' component={ForgotPassword} />
     <Route path='/resetPassword' component={resetPasswordPage} />
     <Route path='/profile' component={requireAuth(Profile)} />
     <Route path='/settings' component={requireAuth(SettingsContainer)} />

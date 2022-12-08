@@ -72,17 +72,17 @@ export const checkDuplicatePhone = async (phoneNumber) => {
 export const checkDuplicateOrgName = async (orgName) => {
 	try {
 		if (orgName) {
-      const result = await validateUniqueOrgName(orgName);
-      if(result.status === 200) {
-        if(result.data.data) {
-          throw new Error("Duplicate Organisation Name!");
-        } else {
-          return true;
-        }
-      } else {
-        console.log(result.data.message);
-        throw new Error("Request Failed!");
-      }
+			const result = await validateUniqueOrgName(orgName);
+			if (result.status === 200) {
+				if (result.data.data) {
+					throw new Error("Duplicate Organisation Name!");
+				} else {
+					return true;
+				}
+			} else {
+				console.log(result.data.message);
+				throw new Error("Request Failed!");
+			}
 		} else {
 			throw new Error("Please provide an Organisation Name!");
 		}

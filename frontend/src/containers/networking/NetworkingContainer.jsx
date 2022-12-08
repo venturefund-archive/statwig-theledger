@@ -31,7 +31,7 @@ const NetworkingContainer = (props) => {
   const [InstockId, setInstockId] = useState("");
   const date = new Date();
   const [startDate, setStartDate] = useState(
-    new Date(date.getFullYear(), date.getMonth(), 1)
+    new Date(date.getFullYear(), date.getMonth(), 1),
   );
   const [manufacturer, setManufacturer] = useState({
     myLocations: 0,
@@ -54,7 +54,7 @@ const NetworkingContainer = (props) => {
   const getInstock = async (startDate) => {
     const inStock = await getmanufacturerInStockReport(
       reportWarehouse,
-      startDate
+      startDate,
     );
     if (inStock) setInStock(inStock.data.inStockReport);
     if (inStock) setReportWarehouse(inStock.data.warehouseId);
@@ -68,7 +68,7 @@ const NetworkingContainer = (props) => {
   const getOutStock = async () => {
     const outStock = await getmanufacturerOutStockReport(
       reportWarehouse,
-      startDate
+      startDate,
     );
     if (outStock) setOutStock(outStock.data.outOfStockReport);
     if (outStock) setReportWarehouse(outStock.data.warehouseId);
@@ -78,7 +78,7 @@ const NetworkingContainer = (props) => {
       "",
       "",
       partnerLocation,
-      MylocationFilter
+      MylocationFilter,
     );
     setManufacturer(warehouses.data);
   };
@@ -91,6 +91,7 @@ const NetworkingContainer = (props) => {
     getInstockFilters();
     getTopBestsellers();
   }, []);
+
   useEffect(() => {
     async function filterInstockReports() {
       let pname;
@@ -108,7 +109,7 @@ const NetworkingContainer = (props) => {
         reportWarehouse,
         startDate,
         type,
-        pname
+        pname,
       );
 
       setInStock(inStock.data.inStockReport);
@@ -132,7 +133,7 @@ const NetworkingContainer = (props) => {
         reportWarehouse,
         startDate,
         type,
-        pname
+        pname,
       );
 
       setOutStock(outStock.data.outOfStockReport);
