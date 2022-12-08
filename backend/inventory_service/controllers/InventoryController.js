@@ -575,8 +575,6 @@ exports.addProductsToInventory = [
           id: element.productId
         });
         element.type = product.type;
-        element.mfgDate = parse(element.mfgDate, "dd/MM/yyyy", new Date());
-        element.expDate = parse(element.expDate, "dd/MM/yyyy", new Date());
       }
       const permission_request = {
         role: req.user.role,
@@ -630,7 +628,8 @@ exports.addProductsToInventory = [
               responses(req.user.preferredLanguage).duplicated_sno
             );
           }
-          for(const product of products){
+          for (const product of products) {
+            console.log("Product", product)
             const inventoryId = warehouse.warehouseInventory;
             const checkProduct = await InventoryModel.find({
               $and: [
@@ -895,8 +894,8 @@ exports.addInventoriesFromExcel = [
                 manufacturer: manufacturerName,
                 quantity: quantity,
                 unitofMeasure: { id: unitOfMeasure, name: unitOfMeasure },
-                manufacturingDate: mfgDate,
-                expiryDate: expDate,
+                manufacturingDate: parse(mfgDate, "dd/MM/yyyy", new Date()),
+                expiryDate: parse(expDate, "dd/MM/yy", new Date()),
               }
             } else {
               return apiResponse.ErrorResponse(
@@ -2458,7 +2457,7 @@ exports.deleteProductsFromInventory = [
       const receiverAddress = receiverOrgData.postalAddress;
       const payload = req.body;
 
-      for(const product of data.products) {
+      for (const product of data.products) {
         await inventoryTransfer(
           product?.productID,
           product?.productQuantity,
