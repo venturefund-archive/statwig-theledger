@@ -53,7 +53,7 @@ export default function Contact({
           if (watchEmail.match(emailRegex) === null) {
             setError("email", {
               type: "custom",
-              message: "Email ID is invalid!",
+              message: `${t("email")} ${t("is_invalid")}!`,
             });
             reject("Invalid email!");
           }
@@ -63,7 +63,7 @@ export default function Contact({
           if (isValidPhoneNumber(watchPhone) === false) {
             setError("phone", {
               type: "custom",
-              message: "Phone Number is invalid!",
+              message: `${t("phone")} ${t("is_invalid")}!`,
             });
             reject("Invalid phone!");
           }
@@ -75,7 +75,7 @@ export default function Contact({
           } else {
             setError("email", {
               type: "custom",
-              message: "Duplicate Email ID!",
+              message: `${t("duplicate")} ${t("email")}!`,
             });
             reject("Duplicate EmailId/Phone!");
           }
@@ -107,7 +107,7 @@ export default function Contact({
         if (result.status === 200) {
           setAlertDetails({
             type: "success",
-            message: "Your request is received!",
+            message: t("your_request_is_received"),
           });
           handleAlertClick();
           dispatch(turnOff());
@@ -149,7 +149,9 @@ export default function Contact({
                   label={t("name")}
                   {...field}
                   error={Boolean(errors.name)}
-                  helperText={Boolean(errors.name) && "Name is required!"}
+                  helperText={
+                    Boolean(errors.name) && `${t("name")} ${t("is_required")}!`
+                  }
                 />
               )}
             />
@@ -168,7 +170,7 @@ export default function Contact({
                   error={Boolean(errors.email)}
                   helperText={
                     errors.email?.type === "required"
-                      ? "Email is required!"
+                      ? `${t("email")} ${t("is_required")}!`
                       : errors.email?.message
                   }
                 />
@@ -215,7 +217,8 @@ export default function Contact({
                   {...field}
                   error={Boolean(errors.companyName)}
                   helperText={
-                    Boolean(errors.companyName) && "Company Name is required!"
+                    Boolean(errors.companyName) &&
+                    `${t("company")} ${t("is_required")}`
                   }
                 />
               )}
@@ -234,7 +237,8 @@ export default function Contact({
                   {...field}
                   error={Boolean(errors.designation)}
                   helperText={
-                    Boolean(errors.designation) && "Designation is required!"
+                    Boolean(errors.designation) &&
+                    `${t("des")} ${t("is_required")}`
                   }
                 />
               )}
@@ -253,7 +257,7 @@ export default function Contact({
                   error={Boolean(errors.softwareApplication)}
                   helperText={
                     Boolean(errors.softwareApplication) &&
-                    "Software Application is required!"
+                    `${t("software")} ${t("is_required")}`
                   }
                 />
               )}
@@ -274,7 +278,7 @@ export default function Contact({
                   error={Boolean(errors.numberOfEmployees)}
                   helperText={
                     Boolean(errors.numberOfEmployees) &&
-                    "Number of employees is required!"
+                    `${t("no_of_work")} ${t("is_required")}`
                   }
                 />
               )}
