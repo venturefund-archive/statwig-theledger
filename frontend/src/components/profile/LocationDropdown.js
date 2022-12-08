@@ -117,9 +117,9 @@ const LocationDropdown = (props) => {
 
                         <span className='regionCountry'>
                           {
-                            item?.warehouseAddress?.region +
+                            (item?.warehouseAddress?.region || item?.region?.regionName?.regionName) +
                             ", " +
-                            item?.warehouseAddress?.country
+                            (item?.warehouseAddress?.country || item?.country?.countryName?.countryName)
                             //  + " " +
                             //   item.postalAddress
                           }
