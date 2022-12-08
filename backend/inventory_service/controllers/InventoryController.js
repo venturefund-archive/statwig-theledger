@@ -1,5 +1,4 @@
 const { body, validationResult } = require("express-validator");
-const moveFile = require("move-file");
 require("../utils/date");
 const XLSX = require("xlsx");
 const apiResponse = require("../helpers/apiResponse");
@@ -15,7 +14,7 @@ const EmployeeModel = require("../models/EmployeeModel");
 const AtomModel = require("../models/AtomModel");
 const ProductModel = require("../models/ProductModel");
 const NotificationModel = require("../models/NotificationModel");
-const { format, startOfMonth } = require("date-fns");
+const { format, startOfMonth, parse } = require("date-fns");
 const { responses } = require("../helpers/responses");
 const logEvent = require("../../../utils/event_logger");
 const checkPermissions =
@@ -549,9 +548,18 @@ exports.addProductsToInventory = [
   auth,
   body("products")
     .isLength({ min: 1 })
-    .withMessage("Products  must be specified."),
+    .withMessage("Products must be specified"),
   async (req, res) => {
     try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return apiResponse.validationErrorWithData(
+          res,
+          responses(req.user.preferredLanguage).validation_error,
+          errors.array()
+        );
+      }
+      let warehouseId;
       const email = req.user.emailId;
       const user_id = req.user.id;
       const empData = await EmployeeModel.findOne({
@@ -562,20 +570,14 @@ exports.addProductsToInventory = [
       const orgName = empData.name;
       const orgData = await OrganisationModel.findOne({ id: orgId });
       const address = orgData?.postalAddress;
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return apiResponse.validationErrorWithData(
-          res,
-          responses(req.user.preferredLanguage).validation_error,
-          errors.array()
-        );
-      }
-      let payload = req.body;
-      let warehouseId;
-      payload.products.forEach((element) => {
-        const product = ProductModel.findOne({ id: element.productId });
+      for (const element of req.body.products) {
+        const product = await ProductModel.findOne({
+          id: element.productId
+        });
         element.type = product.type;
-      });
+        element.mfgDate = parse(element.mfgDate, "dd/MM/yyyy", new Date());
+        element.expDate = parse(element.expDate, "dd/MM/yyyy", new Date());
+      }
       const permission_request = {
         role: req.user.role,
         permissionRequired: ["addInventory"],
@@ -602,7 +604,7 @@ exports.addProductsToInventory = [
               res,
               responses(req.user.preferredLanguage).cant_find_warehouse_inv
             );
-          let atoms = [];
+          const atoms = [];
           products.forEach((product) => {
             const serialNumbers = product.serialNumbersRange?.split("-");
             if (serialNumbers?.length > 1) {
@@ -628,9 +630,7 @@ exports.addProductsToInventory = [
               responses(req.user.preferredLanguage).duplicated_sno
             );
           }
-          var duplicateBatch = false;
-          var duplicateBatchNo = "";
-          await utility.asyncForEach(products, async (product) => {
+          for(const product of products){
             const inventoryId = warehouse.warehouseInventory;
             const checkProduct = await InventoryModel.find({
               $and: [
@@ -764,9 +764,9 @@ exports.addProductsToInventory = [
               });
               if (batchDup) {
                 await AtomModel.updateOne(
-									{ id: batchDup.id },
-									{ quantity: batchDup.quantity + atomsArray[i].quantity },
-								);
+                  { id: batchDup.id },
+                  { quantity: batchDup.quantity + atomsArray[i].quantity },
+                );
               } else {
                 insertAtomsArray.push(atomsArray[i]);
               }
@@ -792,7 +792,7 @@ exports.addProductsToInventory = [
                 upsert: true,
               }
             );
-          });
+          }
           // if (duplicateBatch) {
           //   return apiResponse.ErrorResponse(
           //     res,
@@ -832,7 +832,7 @@ exports.addProductsToInventory = [
               },
             },
             payload: {
-              data: payload,
+              data: req.body
             },
           };
           await logEvent(event_data);
@@ -866,11 +866,9 @@ exports.addInventoriesFromExcel = [
           if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir);
           }
-          await moveFile(req.file.path, `${dir}/${req.file.originalname}`);
-          const workbook = XLSX.readFile(`${dir}/${req.file.originalname}`);
-          const sheet_name_list = workbook.SheetNames;
-          let data = XLSX.utils.sheet_to_json(
-            workbook.Sheets[sheet_name_list[0]],
+          const workbook = XLSX.readFile(req.file.path);
+          const data = XLSX.utils.sheet_to_json(
+            workbook.Sheets[workbook.SheetNames[0]],
             { dateNF: "dd/mm/yyyy;@", cellDates: true, raw: false }
           );
 
@@ -2124,9 +2122,7 @@ exports.uploadSalesData = [
       if (recordExists && recordExists.length) {
         throw new Error("Record for the given month already exists!");
       }
-
-      await moveFile(req.file.path, `${dir}/${req.file.originalname}`);
-      const workbook = XLSX.readFile(`${dir}/${req.file.originalname}`);
+      const workbook = XLSX.readFile(req.file.path);
       const sheet_name_list = workbook.SheetNames;
 
       var range = XLSX.utils.decode_range(
@@ -2462,14 +2458,14 @@ exports.deleteProductsFromInventory = [
       const receiverAddress = receiverOrgData.postalAddress;
       const payload = req.body;
 
-      utility.asyncForEach(data.products, async (product) => {
+      for(const product of data.products) {
         await inventoryTransfer(
           product?.productID,
           product?.productQuantity,
           suppWarehouseDetails?.warehouseInventory,
           recvWarehouseDetails?.warehouseInventory
         );
-      });
+      }
 
       const datee = new Date().toISOString();
       const evid = Math.random().toString(36).slice(2);
