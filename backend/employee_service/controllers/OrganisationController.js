@@ -343,8 +343,58 @@ exports.getOrgDetails = [
 				});
 			}
 
-			const organisation = await OrganisationModel.findOne({ id: orgId });
-			if (!organisation) {
+			const organisation = await OrganisationModel.aggregate([
+				{ $match: { id: orgId } },
+				{
+					$lookup: {
+						from: "warehouses",
+						let: { organisationId: "$id" },
+						pipeline: [
+							{
+								$facet: {
+									activeWarehouses: [
+										{
+											$match: {
+												$expr: {
+													$and: [
+														{ $eq: ["$organisationId", "$$organisationId"] },
+														{ $eq: ["$status", "ACTIVE"] },
+													],
+												},
+											},
+										},
+										{ $count: "activeWarehouses" },
+									],
+									inactiveWarehouses: [
+										{
+											$match: {
+												$expr: {
+													$and: [
+														{ $eq: ["$organisationId", "$$organisationId"] },
+														{ $ne: ["$status", "ACTIVE"] },
+													],
+												},
+											},
+										},
+										{ $count: "inactiveWarehouses" },
+									],
+								},
+							},
+							{ $unwind: { path: "$activeWarehouses", preserveNullAndEmptyArrays: true } },
+							{ $unwind: { path: "$inactiveWarehouses", preserveNullAndEmptyArrays: true } },
+							{
+								$project: {
+									activeWarehouseCount: "$activeWarehouses.activeWarehouses",
+									inactiveWarehouseCount: "$inactiveWarehouses.inactiveWarehouses",
+								},
+							},
+						],
+						as: "warehouseCount",
+					},
+				},
+				{ $unwind: "$warehouseCount" },
+			]);
+			if (!organisation?.length) {
 				throw new Error("Organisation not found!");
 			}
 
@@ -352,7 +402,50 @@ exports.getOrgDetails = [
 				req,
 				res,
 				"Organisation details fetched!",
-				organisation,
+				organisation[0],
+			);
+		} catch (err) {
+			console.log(err);
+			return apiResponse.ErrorResponse(req, res, err);
+		}
+	},
+];
+
+exports.getWarehouseAndUsersById = [
+	auth,
+	async (req, res) => {
+		try {
+			const warehouseId = req.query?.warehouseId;
+
+			if (!warehouseId) {
+				return apiResponse.validationErrorWithData(req, res, "Warehouse Id not provided", {
+					warehouseId: warehouseId,
+				});
+			}
+
+			const warehouseDetails = await WarehouseModel.aggregate([
+				{ $match: { id: warehouseId } },
+				{
+					$lookup: {
+						from: "employees",
+						let: { warehouseId: "$id" },
+						pipeline: [
+							{ $match: { $expr: { $and: [{ $in: ["$$warehouseId", "$warehouseId"] }] } } },
+						],
+						as: "employees",
+					},
+				},
+			]);
+
+			if (!warehouseDetails) {
+				throw new Error("Warehouse not found!");
+			}
+
+			return apiResponse.successResponseWithData(
+				req,
+				res,
+				"Warehouse details fetched!",
+				warehouseDetails[0],
 			);
 		} catch (err) {
 			console.log(err);
@@ -546,12 +639,11 @@ exports.updateOrg = [
 ];
 
 exports.checkDuplicateOrgName = [
-	auth,
 	async (req, res) => {
 		try {
 			const { organisationName } = req.query;
 			const organisationExists = await OrganisationModel.findOne({
-				name: new RegExp("^" + organisationName + "$", "i"),
+				name: new RegExp("^" + organisationName.trim() + "$", "i"),
 				isRegistered: true,
 			});
 

@@ -13,6 +13,7 @@ const excel = require("node-excel-export");
 const PdfPrinter = require("pdfmake");
 const { resolve } = require("path");
 const fs = require("fs");
+const CountryModel = require("../models/CountryModel");
 
 const fontDescriptors = {
 	Roboto: {
@@ -777,11 +778,53 @@ exports.getVaccinationsList = [
 	},
 ];
 
+exports.getCitiesAndOrgsForFilters = [
+	auth,
+	async (req, res) => {
+		try {
+			const country = await CountryModel.aggregate([
+				{ $match: { name: "Costa Rica" } },
+				{
+					$lookup: {
+						from: "cities",
+						localField: "id",
+						foreignField: "country_id",
+						as: "cities",
+					},
+				},
+			]);
+			if (!country || !country.length) {
+				throw new Error("Something went wrong!");
+			}
+
+			let cities = country[0].cities.map((city) => city.name);
+
+			let orgs = await OrganisationModel.find({ type: { $in: ["PHARMACY", "Hospital"] } });
+			orgs = orgs.map((org) => org.name);
+
+			const result = {
+				cities: cities,
+				organisations: orgs,
+			};
+
+			return apiResponse.successResponseWithData(res, "Cities and orgs for filters", result);
+		} catch (err) {
+			console.log(err);
+			return apiResponse.ErrorResponse(res, err.message);
+		}
+	},
+];
+
 /**
+ * =======================================================================================
+ * 																							DO NOT DELETE
+ * 										---------------------------------------------------------------
+ * 											Required for general VL, the new API is Costa Rica Specific
+ *
  * Returns list of pharmacies in case of governing body &
  * Returns list of cities the pharmacies are located in
  */
-exports.getCitiesAndOrgsForFilters = [
+exports.getCitiesAndOrgsForFiltersOld = [
 	auth,
 	async (req, res) => {
 		try {
@@ -839,6 +882,7 @@ exports.getCitiesAndOrgsForFilters = [
 		}
 	},
 ];
+// =======================================================================================
 
 function buildExcelReport(req, res, dataForExcel) {
 	const styles = {
@@ -874,7 +918,7 @@ function buildExcelReport(req, res, dataForExcel) {
 			width: 120,
 		},
 		organisationName: {
-			displayName: "Organisation Name",
+			displayName: "Manufacturer Name",
 			headerStyle: styles.headerDark,
 			cellStyle: styles.cellGreen,
 			width: 220,
@@ -897,17 +941,23 @@ function buildExcelReport(req, res, dataForExcel) {
 			cellStyle: styles.cellGreen,
 			width: 60,
 		},
+		date: {
+			displayName: "Date",
+			headerStyle: styles.headerDark,
+			cellStyle: styles.cellGreen,
+			width: 120,
+		},
 	};
 
 	const report = excel.buildExport([
 		{
-			name: "Report Shipment",
+			name: "Vaccination Report",
 			specification: specification,
 			data: dataForExcel,
 		},
 	]);
 
-	res.attachment("report.xlsx");
+	res.attachment("VaccinationReport.xlsx");
 	return res.send(report);
 }
 
@@ -915,18 +965,21 @@ function buildPdfReport(req, res, data, orderType) {
 	var rows = [];
 	rows.push([
 		{ text: "Batch Number", bold: true },
-		{ text: "Organisation Name", bold: true },
+		{ text: "Manufacturer Name", bold: true },
 		{ text: "Location", bold: true },
 		{ text: "Gender", bold: true },
 		{ text: "Age", bold: true },
+		{ text: "Date", bold: true },
 	]);
 	for (var i = 0; i < data.length; i++) {
+		const date = data[i].date ? new Date(data[i].date).toLocaleDateString() : "N/A";
 		rows.push([
 			data[i].batchNumber || "N/A",
 			data[i].organisationName || "N/A",
 			data[i].location || "N/A",
 			data[i].gender || "N/A",
 			data[i].age || "N/A",
+			date,
 		]);
 	}
 
@@ -935,13 +988,13 @@ function buildPdfReport(req, res, data, orderType) {
 		pageOrientation: "portrait",
 		pageMargins: [30, 30, 2, 2],
 		content: [
-			{ text: "Vaccinations List", fontSize: 34, style: "header" },
+			{ text: "Vaccinations List", fontSize: 32, style: "header" },
 			{
 				table: {
 					margin: [1, 1, 1, 1],
 					headerRows: 1,
 					headerStyle: "header",
-					widths: [100, 200, 100, 60, 30],
+					widths: [90, 140, 100, 60, 25, 70],
 					body: rows,
 				},
 			},
@@ -957,7 +1010,7 @@ function buildPdfReport(req, res, data, orderType) {
 	var options = { fontLayoutCache: true };
 	var pdfDoc = printer.createPdfKitDocument(docDefinition, options);
 	var temp123;
-	var pdfFile = pdfDoc.pipe((temp123 = fs.createWriteStream("./report.pdf")));
+	var pdfFile = pdfDoc.pipe((temp123 = fs.createWriteStream("./VaccinationReport.pdf")));
 	var path = pdfFile.path;
 	pdfDoc.end();
 	temp123.on("finish", async function () {
