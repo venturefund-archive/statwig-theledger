@@ -450,57 +450,56 @@ exports.addPOsFromExcel = [
     try {
       const workbook = XLSX.readFile(req.file.path);
       const sheet_name_list = workbook.SheetNames;
-      let errorsArr = [];
-      let warningArr = [];
-      let invalidArr = [];
+      const errorsArr = [];
+      const warningArr = [];
+      const invalidArr = [];
       const data = XLSX.utils.sheet_to_json(
         workbook.Sheets[sheet_name_list[0]],
         { dateNF: "dd/mm/yyyy;@", cellDates: true, raw: false }
       );
 
-      // Validate incoming Excel columns
       const expectedColNames =
         req.user.preferredLanguage === "EN"
           ? [
-              "UNICEf PO Number",
-              "PO Item#",
-              "Vendor",
-              "Vendor Name",
-              "Document Date",
-              "Your Reference",
-              "Incoterms",
-              "Incoterms (Part 2)",
-              "Material",
-              "Material Description",
-              "Plant",
-              "Country Name",
-              "Region Name",
-              "Order Quantity",
-              "Order Unit",
-              "Unit Id",
-              "IP Code",
-              "IP Name",
-            ]
+            "UNICEf PO Number",
+            "PO Item#",
+            "Vendor",
+            "Vendor Name",
+            "Document Date",
+            "Your Reference",
+            "Incoterms",
+            "Incoterms (Part 2)",
+            "Material",
+            "Material Description",
+            "Plant",
+            "Country Name",
+            "Region Name",
+            "Order Quantity",
+            "Order Unit",
+            "Unit Id",
+            "IP Code",
+            "IP Name",
+          ]
           : [
-              "UNICEf PO Número",
-              "PO Articulo#",
-              "Vendedor",
-              "Nombre Del Vendedor",
-              "Fecha Del Documento",
-              "Tu Referencia",
-              "Incoterms",
-              "Incoterms (Part 2)",
-              "Material",
-              "Material Descripción",
-              "Planta",
-              "Nombre Del País",
-              "Nombre De La Región",
-              "Ordene La Cantidad",
-              "Unidad De Pedido",
-              "Unidad Id",
-              "IP Código",
-              "IP Nombre",
-            ];
+            "UNICEf PO Número",
+            "PO Articulo#",
+            "Vendedor",
+            "Nombre Del Vendedor",
+            "Fecha Del Documento",
+            "Tu Referencia",
+            "Incoterms",
+            "Incoterms (Part 2)",
+            "Material",
+            "Material Descripción",
+            "Planta",
+            "Nombre Del País",
+            "Nombre De La Región",
+            "Ordene La Cantidad",
+            "Unidad De Pedido",
+            "Unidad Id",
+            "IP Código",
+            "IP Nombre",
+          ];
 
       if (!compareArrays(expectedColNames, Object.keys(data[0]))) {
         // Invalid format logic
@@ -594,8 +593,8 @@ exports.addPOsFromExcel = [
             } else {
               console.log(
                 'Product not found -- "' +
-                  poDataArray[i].products[0].name +
-                  '" -- Skipping it.'
+                poDataArray[i].products[0].name +
+                '" -- Skipping it.'
               );
               invalidArr.push(poDataArray[i]);
               delete poDataArray[i];
@@ -1426,7 +1425,6 @@ exports.fetchInboundPurchaseOrders = [
 ];
 
 exports.fetchOutboundPurchaseOrders = [
-  //outbound po with filter(to, orderId, productName, deliveryLocation, date)
   auth,
   async (req, res) => {
     try {
@@ -1542,61 +1540,55 @@ exports.fetchOutboundPurchaseOrders = [
               },
             };
           }
-          try {
-            let outboundPOsCount = await RecordModel.count(whereQuery);
-            RecordModel.find(whereQuery)
-              .skip(parseInt(skip))
-              .limit(parseInt(limit))
-              .sort({ createdAt: -1 })
-              .then((outboundPOList) => {
-                let outboundPORes = [];
-                let findOutboundPOData = outboundPOList.map(
-                  async (outboundPO) => {
-                    let outboundPOData = JSON.parse(JSON.stringify(outboundPO));
-                    outboundPOData[`productDetails`] = [];
-                    let outboundProductsArray = outboundPOData.products;
-                    let productRes = outboundProductsArray.map(
-                      async (product) => {
-                        let productDetails = await ProductModel.findOne({
-                          id: product.productId,
-                        });
-                        return productDetails;
-                      }
-                    );
-                    Promise.all(productRes).then(async function (productList) {
-                      outboundPOData[`productDetails`] = await productList;
-                    });
-
-                    let supplierOrganisation = await OrganisationModel.findOne({
-                      id: outboundPO.supplier.supplierOrganisation,
-                    });
-                    let customerOrganisation = await OrganisationModel.findOne({
-                      id: outboundPOData.customer.customerOrganisation,
-                    });
-                    let customerWareHouse = await WarehouseModel.findOne({
-                      organisationId:
-                        outboundPOData.customer.customerOrganisation,
-                    });
-                    outboundPOData.supplier[`organisation`] =
-                      supplierOrganisation;
-                    outboundPOData.customer[`organisation`] =
-                      customerOrganisation;
-                    outboundPOData.customer[`warehouse`] = customerWareHouse;
-                    outboundPORes.push(outboundPOData);
-                  }
-                );
-
-                Promise.all(findOutboundPOData).then(function (results) {
-                  return apiResponse.successResponseWithData(
-                    res,
-                    "Outbound PO Records",
-                    { outboundPOs: outboundPORes, count: outboundPOsCount }
-                  );
-                });
+          const outboundPOsCount = await RecordModel.count(whereQuery);
+          const outboundPOList = await RecordModel.count(whereQuery)
+            .skip(parseInt(skip))
+            .limit(parseInt(limit))
+            .sort({ createdAt: -1 })
+          let outboundPORes = [];
+          let findOutboundPOData = outboundPOList.map(
+            async (outboundPO) => {
+              let outboundPOData = JSON.parse(JSON.stringify(outboundPO));
+              outboundPOData[`productDetails`] = [];
+              let outboundProductsArray = outboundPOData.products;
+              let productRes = outboundProductsArray.map(
+                async (product) => {
+                  let productDetails = await ProductModel.findOne({
+                    id: product.productId,
+                  });
+                  return productDetails;
+                }
+              );
+              Promise.all(productRes).then(async function (productList) {
+                outboundPOData[`productDetails`] = await productList;
               });
-          } catch (err) {
-            return apiResponse.ErrorResponse(res, err);
-          }
+
+              let supplierOrganisation = await OrganisationModel.findOne({
+                id: outboundPO.supplier.supplierOrganisation,
+              });
+              let customerOrganisation = await OrganisationModel.findOne({
+                id: outboundPOData.customer.customerOrganisation,
+              });
+              let customerWareHouse = await WarehouseModel.findOne({
+                organisationId:
+                  outboundPOData.customer.customerOrganisation,
+              });
+              outboundPOData.supplier[`organisation`] =
+                supplierOrganisation;
+              outboundPOData.customer[`organisation`] =
+                customerOrganisation;
+              outboundPOData.customer[`warehouse`] = customerWareHouse;
+              outboundPORes.push(outboundPOData);
+            }
+          );
+
+          Promise.all(findOutboundPOData).then(() => {
+            return apiResponse.successResponseWithData(
+              res,
+              "Outbound PO Records",
+              { outboundPOs: outboundPORes, count: outboundPOsCount }
+            );
+          });
         } else {
           return apiResponse.forbiddenResponse(
             res,
@@ -1817,7 +1809,7 @@ exports.exportInboundPurchaseOrders = [
               if (req.query.type == "pdf") {
                 res = buildPdfReport(req, res, data, "Inbound");
               } else {
-                res = buildExcelReport(req, res, data);
+                res = buildExcelReport(req, res, data, "Inbound");
                 return apiResponse.successResponseWithData(
                   res,
                   "Outbound PO Records"
@@ -2004,7 +1996,7 @@ exports.exportOutboundPurchaseOrders = [
             if (req.query.type == "pdf") {
               res = buildPdfReport(req, res, data, "Outbound");
             } else {
-              res = buildExcelReport(req, res, data);
+              res = buildExcelReport(req, res, data, "Outbound");
             }
           });
         });
@@ -2015,7 +2007,7 @@ exports.exportOutboundPurchaseOrders = [
   },
 ];
 
-function buildExcelReport(req, res, dataForExcel) {
+function buildExcelReport(req, res, dataForExcel, orderType) {
   const styles = {
     headerDark: {
       fill: {
@@ -2129,7 +2121,7 @@ function buildExcelReport(req, res, dataForExcel) {
 
   const report = excel.buildExport([
     {
-      name: "Report Shipment",
+      name: req.t(`${orderType}_Orders`),
       specification: specification,
       data: dataForExcel,
     },
@@ -2222,29 +2214,29 @@ exports.syncPoReceivers_DO_NOT_USE = [
   async (req, res) => {
     try {
       const records = await RecordModel.find({
-				$and: [
-					{ "customer.customerOrganisation": { $ne: null } },
-					{ "customer.customerIncharge": null },
-				],
-			});
+        $and: [
+          { "customer.customerOrganisation": { $ne: null } },
+          { "customer.customerIncharge": null },
+        ],
+      });
       console.log(records.length);
-      for(let i = 0; i < records.length; ++i) {
-        const org = await OrganisationModel.findOne({id: records[i].customer.customerOrganisation});
-        if(!org) {
+      for (let i = 0; i < records.length; ++i) {
+        const org = await OrganisationModel.findOne({ id: records[i].customer.customerOrganisation });
+        if (!org) {
           console.log("Org not found - ", records[i].customer.customerOrganisation);
           continue;
         }
         await RecordModel.findOneAndUpdate(
-					{ id: records[i].id },
-					{ $set: { "customer.customerIncharge": org.primaryContactId } },
-					{ new: true },
-				).then((res) => {
-					console.log("Updated - ", res.id);
-				});
+          { id: records[i].id },
+          { $set: { "customer.customerIncharge": org.primaryContactId } },
+          { new: true },
+        ).then((res) => {
+          console.log("Updated - ", res.id);
+        });
       }
 
       return apiResponse.successResponse(res, "Success!");
-    } catch(err) {
+    } catch (err) {
       console.log(err);
       return apiResponse.ErrorResponse(res, "Some err - " + err.message);
     }
