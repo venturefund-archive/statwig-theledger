@@ -586,12 +586,13 @@ const generateVaccinationsList = async (filters) => {
 				}
 				for (let k = 0; k < doses.length; ++k) {
 					const data = {
+						date: createdAt,
 						batchNumber: vaccineVials[j].batchNumber,
 						organisationName: vaccineVials[j]?.product?.manufacturer,
-						location: warehouses[i].warehouseAddress.city,
-						gender: doses[k].gender,
 						age: doses[k].age,
-						date: createdAt,
+						gender: doses[k].gender,
+						state: warehouses[i].warehouseAddress.state,
+						city: warehouses[i].warehouseAddress.city,
 					};
 					vaccinationDetails.push(data);
 
@@ -911,6 +912,12 @@ function buildExcelReport(req, res, dataForExcel) {
 	};
 
 	const specification = {
+		date: {
+			displayName: "Date",
+			headerStyle: styles.headerDark,
+			cellStyle: styles.cellGreen,
+			width: 120,
+		},
 		batchNumber: {
 			displayName: "Batch Number",
 			headerStyle: styles.headerDark,
@@ -923,11 +930,11 @@ function buildExcelReport(req, res, dataForExcel) {
 			cellStyle: styles.cellGreen,
 			width: 220,
 		},
-		location: {
-			displayName: "Location",
+		age: {
+			displayName: "Age",
 			headerStyle: styles.headerDark,
 			cellStyle: styles.cellGreen,
-			width: 220,
+			width: 60,
 		},
 		gender: {
 			displayName: "Gender",
@@ -935,17 +942,17 @@ function buildExcelReport(req, res, dataForExcel) {
 			cellStyle: styles.cellGreen,
 			width: 120,
 		},
-		age: {
-			displayName: "Age",
+		state: {
+			displayName: "State",
 			headerStyle: styles.headerDark,
 			cellStyle: styles.cellGreen,
-			width: 60,
+			width: 220,
 		},
-		date: {
-			displayName: "Date",
+		city: {
+			displayName: "City",
 			headerStyle: styles.headerDark,
 			cellStyle: styles.cellGreen,
-			width: 120,
+			width: 220,
 		},
 	};
 
@@ -964,28 +971,30 @@ function buildExcelReport(req, res, dataForExcel) {
 function buildPdfReport(req, res, data, orderType) {
 	var rows = [];
 	rows.push([
+		{ text: "Date", bold: true },
 		{ text: "Batch Number", bold: true },
 		{ text: "Manufacturer Name", bold: true },
-		{ text: "Location", bold: true },
-		{ text: "Gender", bold: true },
 		{ text: "Age", bold: true },
-		{ text: "Date", bold: true },
+		{ text: "Gender", bold: true },
+		{ text: "State", bold: true },
+		{ text: "City", bold: true },
 	]);
 	for (var i = 0; i < data.length; i++) {
 		const date = data[i].date ? new Date(data[i].date).toLocaleDateString() : "N/A";
 		rows.push([
+			date,
 			data[i].batchNumber || "N/A",
 			data[i].organisationName || "N/A",
-			data[i].location || "N/A",
-			data[i].gender || "N/A",
 			data[i].age || "N/A",
-			date,
+			data[i].gender || "N/A",
+			data[i].state || "N/A",
+			data[i].city || "N/A",
 		]);
 	}
 
 	var docDefinition = {
 		pageSize: "A4",
-		pageOrientation: "portrait",
+		pageOrientation: "landscape",
 		pageMargins: [30, 30, 2, 2],
 		content: [
 			{ text: "Vaccinations List", fontSize: 32, style: "header" },
@@ -994,7 +1003,7 @@ function buildPdfReport(req, res, data, orderType) {
 					margin: [1, 1, 1, 1],
 					headerRows: 1,
 					headerStyle: "header",
-					widths: [90, 140, 100, 60, 25, 70],
+					widths: [80, 100, 150, 50, 80, 120, 120],
 					body: rows,
 				},
 			},
