@@ -13,12 +13,27 @@ function ResultCard({ age, gender, variant }) {
 
   return (
     <div className={`Result-single-card result-variant-${variant}`}>
-      <div className="more-action-btn">
-        <i className="fa-solid fa-ellipsis-vertical"></i>
-      </div>
       <div className="result-stats">
-        <h1 className="vl-title f-700 vl-black">{t("age")}: {age}</h1>
-        <h2 className="vl-subheading f-500 vl-black">{t("gender")} : {gender}</h2>
+        <h1 className="vl-heading f-700 vl-black">
+          {t("age")}: {age} <span className="vl-note f-400">Months</span>
+        </h1>
+        <h2 className="vl-subheading f-500 vl-black">
+          {t("gender")} : {gender}
+        </h2>
+      </div>
+      <div className="edit_delete_btn">
+        <button className="card_btn btn_delete">
+          <span>
+            <i class="fa-solid fa-trash-can"></i>
+          </span>
+          Delete
+        </button>
+        <button className="card_btn btn_edit">
+          <span>
+            <i class="fa-solid fa-pencil"></i>
+          </span>
+          Edit
+        </button>
       </div>
     </div>
   );
@@ -84,7 +99,9 @@ export default function Beneficiary(props) {
             <div className="Product-field-grid">
               <div className="field-header">
                 <i className="fa-solid fa-building"></i>
-                <p className="vl-body f-500 vl-blue">{t("manufacturer_name")} :</p>
+                <p className="vl-body f-500 vl-blue">
+                  {t("manufacturer_name")} :
+                </p>
               </div>
               <p className="vl-body f-500 vl-blue">
                 {batchDetails.product.manufacturer}
@@ -120,12 +137,20 @@ export default function Beneficiary(props) {
                         {doses?.length ? doses.length : 0}
                       </p>
                     </div>
-                    <button
-                      className="vl-btn vl-btn-sm vl-btn-primary"
-                      onClick={props.completeVaccination}
-                    >
-                      {t("complete")}
-                    </button>
+                    <div className="complete_btn_groups">
+                      <button
+                        className="vl-btn vl-btn-sm vl-btn-alert"
+                        onClick={props.completeVaccination}
+                      >
+                        {t("save_complete")}
+                      </button>
+                      <button
+                        className="vl-btn vl-btn-sm vl-btn-primary"
+                        onClick={props.completeVaccination}
+                      >
+                        {t("complete")}
+                      </button>
+                    </div>
                   </div>
                   <div className="Result-body">
                     {doses.map((dose, index) => (

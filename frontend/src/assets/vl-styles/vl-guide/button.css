@@ -69,6 +69,13 @@
   cursor: default;
 }
 
+.vl-btn-alert {
+  background-color: var(--error-red);
+  border: 2px solid var(--error-red);
+  color: var(--white);
+  cursor: pointer;
+}
+
 @media screen and (min-width: 586px) {
   .vl-btn-lg {
     padding: 1rem 2rem;

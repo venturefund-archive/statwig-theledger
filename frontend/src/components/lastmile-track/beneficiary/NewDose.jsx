@@ -3,10 +3,21 @@ import { Select, MenuItem, TextField, Autocomplete } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { vaccinateIndividual } from "../../../actions/lastMileActions";
 import { useTranslation } from "react-i18next";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormControl from "@mui/material/FormControl";
+import FormLabel from "@mui/material/FormLabel";
 
 export default function NewDose(props) {
   const { vaccineVialId, warehouseId, productId, batchNumber } = props;
   const { t, i18n } = useTranslation();
+
+  const [selectedValue, setSelectedValue] = React.useState("a");
+
+  const handleChange = (event) => {
+    setSelectedValue(event.target.value);
+  };
 
   const {
     control,
@@ -81,6 +92,29 @@ export default function NewDose(props) {
                 />
               )}
             />
+            <div className="radio-btn-group">
+              <div className="radio-btn-card">
+                <Radio
+                  checked={selectedValue === "a"}
+                  onChange={handleChange}
+                  value="a"
+                  name="radio-buttons"
+                  inputProps={{ "aria-label": "A" }}
+                />
+                <p className="mi-body f-500">Years</p>
+              </div>
+              <p className="mi-note f-400">/</p>
+              <div className="radio-btn-card">
+                <Radio
+                  checked={selectedValue === "b"}
+                  onChange={handleChange}
+                  value="b"
+                  name="radio-buttons"
+                  inputProps={{ "aria-label": "B" }}
+                />
+                <p className="mi-body f-500">Months</p>
+              </div>
+            </div>
           </div>
           <div className="Beneficiary--action">
             <button type="submit" className="vl-btn vl-btn-md vl-btn-primary">

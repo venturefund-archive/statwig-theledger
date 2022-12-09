@@ -623,5 +623,6 @@
   "import_pharmacy": "Importar farmacias",
   "add_pharmacy": "AD Formasya",
   "no_access_receiveshipment":"Sin acceso para recibir el envío",
-  "please_try_again":"Inténtalo de nuevo"
+  "please_try_again":"Inténtalo de nuevo",
+  "save_complete":"Guardar y completar"
 }

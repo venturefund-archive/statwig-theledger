@@ -601,5 +601,6 @@
   "add_pharmacy": "Add Pharamcy",
   "no_access_receiveshipment":"No Access to Receive the shipment",
   "please_try_again":"Please Try Again",
-  "check_expiryDate":"Check expiryDate"
+  "check_expiryDate":"Check expiryDate",
+  "save_complete":"Save & Complete"
 }

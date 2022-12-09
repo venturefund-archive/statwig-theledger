@@ -43,6 +43,11 @@ export default function UnitUsedTable({ unitsUtilized, t }) {
                     <p className="vl-body f-500 vl-blue">{t("date")}</p>
                   </div>
                 </TableCell>
+                <TableCell align="center">
+                  <div className="vl-table-column">
+                    <p className="vl-body f-500 vl-blue">{t("status")}</p>
+                  </div>
+                </TableCell>
               </TableRow>
             </TableHead>
 

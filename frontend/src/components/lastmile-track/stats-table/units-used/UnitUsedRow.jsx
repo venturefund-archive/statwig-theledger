@@ -27,6 +27,18 @@ export default function UnitUsedRow({ vial, index }) {
           </p>
         </div>
       </TableCell>
+      <TableCell component="th" scope="row" align="center">
+        <div className="vl-table-body-column">
+          <div className="mi_status_label status_bg_add">
+            <i class="fa-solid fa-plus"></i>
+            <p className="vl-body f-500">Add</p>
+          </div>
+          {/* <div className="mi_status_label status_bg_completed">
+            <i class="fa-solid fa-circle-check"></i>
+            <p className="vl-body f-500">Completed</p>
+          </div> */}
+        </div>
+      </TableCell>
     </TableRow>
   );
 }
