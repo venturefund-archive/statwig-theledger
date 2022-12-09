@@ -7,6 +7,11 @@ export default function CenteralTotalRow({ data }) {
     <TableRow className="vl-mui-custom-tr">
       <TableCell component="th" scope="row" align="center">
         <div className="vl-table-body-column">
+          <p className="vl-body f-500 ">{formatDate(data.date)}</p>
+        </div>
+      </TableCell>
+      <TableCell component="th" scope="row" align="center">
+        <div className="vl-table-body-column">
           <p className="vl-body f-500 ">#{data.batchNumber}</p>
         </div>
       </TableCell>
@@ -17,7 +22,7 @@ export default function CenteralTotalRow({ data }) {
       </TableCell>
       <TableCell component="th" scope="row" align="center">
         <div className="vl-table-body-column">
-          <p className="vl-body f-500 ">{data.location}</p>
+          <p className="vl-body f-500 ">{data.age}</p>
         </div>
       </TableCell>
       <TableCell component="th" scope="row" align="center">
@@ -27,12 +32,12 @@ export default function CenteralTotalRow({ data }) {
       </TableCell>
       <TableCell component="th" scope="row" align="center">
         <div className="vl-table-body-column">
-          <p className="vl-body f-500 ">{data.age}</p>
+          <p className="vl-body f-500 ">state</p>
         </div>
       </TableCell>
       <TableCell component="th" scope="row" align="center">
         <div className="vl-table-body-column">
-          <p className="vl-body f-500 ">{formatDate(data.date)}</p>
+          <p className="vl-body f-500 ">{data.location}</p>
         </div>
       </TableCell>
     </TableRow>
