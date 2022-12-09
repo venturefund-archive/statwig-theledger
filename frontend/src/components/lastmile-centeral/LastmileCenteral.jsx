@@ -73,7 +73,7 @@ export default function LastmileCenteral(props) {
 			const downloadUrl = window.URL.createObjectURL(new Blob([result.data]));
 			const link = document.createElement("a");
 			link.href = downloadUrl;
-			link.setAttribute("download", `vaccinationReport.${type === "excel" ? "xlsx" : "pdf"}`);
+			link.setAttribute("download", `VaccinationReport.${type === "excel" ? "xlsx" : "pdf"}`);
 			document.body.appendChild(link);
 			link.click();
 			link.remove();

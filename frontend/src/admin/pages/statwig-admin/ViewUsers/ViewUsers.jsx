@@ -99,7 +99,7 @@ export default function ViewUsers(props) {
                   orgDetails={orgDetails}
                   warehouseDetails={warehouseDetails}
                 />
-                <TileCard t={t} layout="user" />
+                <TileCard t={t} layout="user" warehouseDetails={warehouseDetails} />
               </div>
             </div>
 

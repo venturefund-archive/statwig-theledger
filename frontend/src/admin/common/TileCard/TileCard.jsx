@@ -1,12 +1,23 @@
 import React from "react";
-import { useSelector } from "react-redux";
 import "./TileCard.css";
 
-export default function TileCard({ layout, t }) {
-  const { addresses } = useSelector((state) => state.organisationReducer);
-  const total = addresses.length;
-  const active = addresses.filter((item) => item.status === "ACTIVE").length;
-  const inactive = total - active;
+export default function TileCard({ layout, t, orgDetails, warehouseDetails }) {
+  let active = 0;
+  let inactive = 0;
+  let total = 0;
+
+  if(layout === "location") {
+    active = orgDetails?.warehouseCount?.activeWarehouseCount || 0;
+    inactive = orgDetails?.warehouseCount?.activeWarehouseCount || 0;
+    total = active + inactive;
+  } else {
+    warehouseDetails?.employees?.forEach((employee) => {
+      if(employee.accountStatus === "ACTIVE") ++active;
+      else ++inactive;
+      ++total;
+    })
+  }
+
   return (
     <>
       {layout === "location" && (
@@ -42,18 +53,18 @@ export default function TileCard({ layout, t }) {
             <h1 className="vl-subheading f-500">
               {t("total")} {t("users")}
             </h1>
-            <div className="number-label">16</div>
+            <div className="number-label">{total}</div>
           </div>
           <div className="admin-location-body">
             <div className="tile-grid">
               <div className="tile-card">
-                <h1 className={`vl-heading f-700 vl-accept`}>12</h1>
+                <h1 className={`vl-heading f-700 vl-accept`}>{active}</h1>
                 <p className={`vl-body f-500  vl-blue`}>
                   {t("active")} {t("users")}
                 </p>
               </div>
               <div className="tile-card">
-                <h1 className={`vl-heading f-700 vl-reject`}>04</h1>
+                <h1 className={`vl-heading f-700 vl-reject`}>{inactive}</h1>
                 <p className={`vl-body f-500 vl-blue`}>
                   {t("active")} {t("users")}
                 </p>

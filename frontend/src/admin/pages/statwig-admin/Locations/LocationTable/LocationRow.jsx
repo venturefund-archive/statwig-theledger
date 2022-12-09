@@ -21,7 +21,7 @@ export default function LocationRow({ warehouse, orgDetails }) {
 				</TableCell>
 				<TableCell align="center">
 					<p className="vl-body f-400 vl-grey-md">
-						{warehouse.country?.countryName || warehouse.country}
+						{warehouse.warehouseAddress.city}
 					</p>
 				</TableCell>
 				<TableCell align="center">
