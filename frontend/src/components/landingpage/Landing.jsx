@@ -35,13 +35,19 @@ let useClickOutside = (handler) => {
 };
 
 const Alert = React.forwardRef(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />;
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
 export default function Landing() {
   const [open, setOpen] = React.useState(false);
   const [fullWidth] = React.useState(true);
   const [maxWidth] = React.useState("sm");
+  const [state, setState] = React.useState({
+    vertical: "top",
+    horizontal: "right",
+  });
+
+  const { vertical, horizontal } = state;
 
   const [openAlert, setOpenAlert] = React.useState(false);
   const [alertDetails, setAlertDetails] = React.useState({});
@@ -133,9 +139,11 @@ export default function Landing() {
       </Dialog>
 
       <Snackbar
+        anchorOrigin={{ vertical, horizontal }}
         open={openAlert}
         autoHideDuration={6000}
         onClose={handleAlertClose}
+        key={vertical + horizontal}
       >
         <Alert
           onClose={handleAlertClose}
