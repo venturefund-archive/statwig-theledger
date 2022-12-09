@@ -4405,7 +4405,7 @@ exports.exportInboundShipments = [
         if (req.query.type === "pdf") {
           res = buildPdfReport(req, res, data, "Inbound");
         } else {
-          res = buildExcelReport(req, res, data);
+          res = buildExcelReport(req, res, data, "Inbound");
           // return apiResponse.successResponseWithData(res, "Inbound Shipment Records");
         }
       } catch (err) {
@@ -4576,7 +4576,7 @@ exports.exportOutboundShipments = [
               if (req.query.type == "pdf") {
                 res = buildPdfReport(req, res, data, "Outbound");
               } else {
-                res = buildExcelReport(req, res, data);
+                res = buildExcelReport(req, res, data, "Outbound");
                 return apiResponse.successResponseWithMultipleData(
                   res,
                   "Outbound Shipment Records"
@@ -4593,7 +4593,7 @@ exports.exportOutboundShipments = [
   },
 ];
 
-function buildExcelReport(req, res, dataForExcel) {
+function buildExcelReport(req, res, dataForExcel, type) {
   const styles = {
     headerDark: {
       fill: {
@@ -4738,7 +4738,7 @@ function buildExcelReport(req, res, dataForExcel) {
 
   const report = excel.buildExport([
     {
-      name: "Report Shipment",
+      name: `${req.t(type)} Shipments`,
       specification: specification,
       data: dataForExcel,
     },

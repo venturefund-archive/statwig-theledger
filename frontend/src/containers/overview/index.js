@@ -24,10 +24,10 @@ const OverviewContainer = (props) => {
   });
 
   useEffect(() => {
-    if(props.demoLogin) return;
+    if (props.demoLogin) return;
     dispatch(getShipments());
     dispatch(getInventories());
-  }, [dispatch]);
+  }, [dispatch, props.demoLogin]);
 
   return (
     <div className='container-fluid p-0'>
