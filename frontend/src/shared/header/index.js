@@ -83,7 +83,6 @@ const Header = (props) => {
   const [image, setImage] = useState("");
   const [activeWarehouses, setActiveWarehouses] = useState([]);
   const [options, setOptions] = useState([]);
-  const [count, setCount] = useState(0);
   const [icount, setIcount] = useState(0);
   const [visible, setVisible] = useState("one");
   const [limit, setLimit] = useState(10);
@@ -269,7 +268,6 @@ const Header = (props) => {
       if (response.data?.data?.totalUnRead)
         setNewNotifs(response.data?.data?.totalUnRead);
       else setNewNotifs(response.data?.data?.new);
-      setCount(response.data.data?.totalRecords);
       setIcount(response.data.data?.data?.length);
       const warehouses = await getActiveWareHouses();
       const active = warehouses
@@ -356,13 +354,13 @@ const Header = (props) => {
   const [allowSearch, setAllowSearch] = useState(false);
 
   useEffect(() => {
-    if(searchPermissions) {
+    if (searchPermissions) {
       for (const property in searchPermissions) {
-				if (searchPermissions[property]) {
-					setAllowSearch(true);
-					break;
-				}
-			}
+        if (searchPermissions[property]) {
+          setAllowSearch(true);
+          break;
+        }
+      }
     }
   }, [searchPermissions]);
 

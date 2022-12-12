@@ -32,7 +32,6 @@ const VerifyInventory = (props) => {
   };
   const onAssign = async () => {
     dispatch(turnOn());
-
     const postData = reviewInventories.map((inventory) => {
       return {
         productId: inventory.productId,
@@ -44,7 +43,6 @@ const VerifyInventory = (props) => {
         unitOfMeasure: inventory?.unitofMeasure?.name,
       };
     });
-
     const result = await addProductsToInventory({
       products: postData,
     });
@@ -134,29 +132,29 @@ const VerifyInventory = (props) => {
               </span>
             </div>
             {reviewInventories.map((reviewInventory) => {
-              var expiryMonth;
-              var manufMonth;
-              if (typeof reviewInventory.expiryDate == "object") {
-                manufMonth = `${new Date(reviewInventory.manufacturingDate).getMonth() + 1
-                  }`;
-                expiryMonth = `${new Date(reviewInventory.expiryDate).getMonth() + 1
-                  }`;
-              } else if (reviewInventory.expiryDate.length === 24) {
-                manufMonth = `${new Date(
-                  Date.parse(reviewInventory.manufacturingDate)
-                ).getMonth() + 1
-                  }`;
-                expiryMonth = `${new Date(Date.parse(reviewInventory.expiryDate)).getMonth() +
-                  1
-                  }`;
-              } else {
-                manufMonth = `${new Date(
-                  Date.parse(reviewInventory.manufacturingDate)
-                ).getDate()}`;
-                expiryMonth = `${new Date(
-                  Date.parse(reviewInventory.expiryDate)
-                ).getDate()}`;
-              }
+              // var expiryMonth;
+              // var manufMonth;
+              // if (typeof reviewInventory.expiryDate == "object") {
+              //   manufMonth = `${new Date(reviewInventory.manufacturingDate).getMonth() + 1
+              //     }`;
+              //   expiryMonth = `${new Date(reviewInventory.expiryDate).getMonth() + 1
+              //     }`;
+              // } else if (reviewInventory.expiryDate.length === 24) {
+              //   manufMonth = `${new Date(
+              //     Date.parse(reviewInventory.manufacturingDate)
+              //   ).getMonth() + 1
+              //     }`;
+              //   expiryMonth = `${new Date(Date.parse(reviewInventory.expiryDate)).getMonth() +
+              //     1
+              //     }`;
+              // } else {
+              //   manufMonth = `${new Date(
+              //     Date.parse(reviewInventory.manufacturingDate)
+              //   ).getDate()}`;
+              //   expiryMonth = `${new Date(
+              //     Date.parse(reviewInventory.expiryDate)
+              //   ).getDate()}`;
+              // }
               return (
                 <div className='row p-1 mt-4' key={reviewInventory.productId}>
                   <span className='col-3' style={{ flex: "0 0 20%" }}>

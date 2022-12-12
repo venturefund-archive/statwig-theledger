@@ -13,6 +13,7 @@ const excel = require("node-excel-export");
 const PdfPrinter = require("pdfmake");
 const { resolve } = require("path");
 const fs = require("fs");
+const CountryModel = require("../models/CountryModel");
 
 const fontDescriptors = {
 	Roboto: {
@@ -585,12 +586,13 @@ const generateVaccinationsList = async (filters) => {
 				}
 				for (let k = 0; k < doses.length; ++k) {
 					const data = {
+						date: createdAt,
 						batchNumber: vaccineVials[j].batchNumber,
 						organisationName: vaccineVials[j]?.product?.manufacturer,
-						location: warehouses[i].warehouseAddress.city,
-						gender: doses[k].gender,
 						age: doses[k].age,
-						date: createdAt,
+						gender: doses[k].gender,
+						state: warehouses[i].warehouseAddress.state,
+						city: warehouses[i].warehouseAddress.city,
 					};
 					vaccinationDetails.push(data);
 
@@ -777,11 +779,53 @@ exports.getVaccinationsList = [
 	},
 ];
 
+exports.getCitiesAndOrgsForFilters = [
+	auth,
+	async (req, res) => {
+		try {
+			const country = await CountryModel.aggregate([
+				{ $match: { name: "Costa Rica" } },
+				{
+					$lookup: {
+						from: "cities",
+						localField: "id",
+						foreignField: "country_id",
+						as: "cities",
+					},
+				},
+			]);
+			if (!country || !country.length) {
+				throw new Error("Something went wrong!");
+			}
+
+			let cities = country[0].cities.map((city) => city.name);
+
+			let orgs = await OrganisationModel.find({ type: { $in: ["PHARMACY", "Hospital"] } });
+			orgs = orgs.map((org) => org.name);
+
+			const result = {
+				cities: cities,
+				organisations: orgs,
+			};
+
+			return apiResponse.successResponseWithData(res, "Cities and orgs for filters", result);
+		} catch (err) {
+			console.log(err);
+			return apiResponse.ErrorResponse(res, err.message);
+		}
+	},
+];
+
 /**
+ * =======================================================================================
+ * 																							DO NOT DELETE
+ * 										---------------------------------------------------------------
+ * 											Required for general VL, the new API is Costa Rica Specific
+ *
  * Returns list of pharmacies in case of governing body &
  * Returns list of cities the pharmacies are located in
  */
-exports.getCitiesAndOrgsForFilters = [
+exports.getCitiesAndOrgsForFiltersOld = [
 	auth,
 	async (req, res) => {
 		try {
@@ -839,6 +883,7 @@ exports.getCitiesAndOrgsForFilters = [
 		}
 	},
 ];
+// =======================================================================================
 
 function buildExcelReport(req, res, dataForExcel) {
 	const styles = {
@@ -867,6 +912,12 @@ function buildExcelReport(req, res, dataForExcel) {
 	};
 
 	const specification = {
+		date: {
+			displayName: "Date",
+			headerStyle: styles.headerDark,
+			cellStyle: styles.cellGreen,
+			width: 120,
+		},
 		batchNumber: {
 			displayName: "Batch Number",
 			headerStyle: styles.headerDark,
@@ -874,22 +925,10 @@ function buildExcelReport(req, res, dataForExcel) {
 			width: 120,
 		},
 		organisationName: {
-			displayName: "Organisation Name",
+			displayName: "Manufacturer Name",
 			headerStyle: styles.headerDark,
 			cellStyle: styles.cellGreen,
 			width: 220,
-		},
-		location: {
-			displayName: "Location",
-			headerStyle: styles.headerDark,
-			cellStyle: styles.cellGreen,
-			width: 220,
-		},
-		gender: {
-			displayName: "Gender",
-			headerStyle: styles.headerDark,
-			cellStyle: styles.cellGreen,
-			width: 120,
 		},
 		age: {
 			displayName: "Age",
@@ -897,51 +936,74 @@ function buildExcelReport(req, res, dataForExcel) {
 			cellStyle: styles.cellGreen,
 			width: 60,
 		},
+		gender: {
+			displayName: "Gender",
+			headerStyle: styles.headerDark,
+			cellStyle: styles.cellGreen,
+			width: 120,
+		},
+		state: {
+			displayName: "State",
+			headerStyle: styles.headerDark,
+			cellStyle: styles.cellGreen,
+			width: 220,
+		},
+		city: {
+			displayName: "City",
+			headerStyle: styles.headerDark,
+			cellStyle: styles.cellGreen,
+			width: 220,
+		},
 	};
 
 	const report = excel.buildExport([
 		{
-			name: "Report Shipment",
+			name: "Vaccination Report",
 			specification: specification,
 			data: dataForExcel,
 		},
 	]);
 
-	res.attachment("report.xlsx");
+	res.attachment("VaccinationReport.xlsx");
 	return res.send(report);
 }
 
 function buildPdfReport(req, res, data, orderType) {
 	var rows = [];
 	rows.push([
+		{ text: "Date", bold: true },
 		{ text: "Batch Number", bold: true },
-		{ text: "Organisation Name", bold: true },
-		{ text: "Location", bold: true },
-		{ text: "Gender", bold: true },
+		{ text: "Manufacturer Name", bold: true },
 		{ text: "Age", bold: true },
+		{ text: "Gender", bold: true },
+		{ text: "State", bold: true },
+		{ text: "City", bold: true },
 	]);
 	for (var i = 0; i < data.length; i++) {
+		const date = data[i].date ? new Date(data[i].date).toLocaleDateString() : "N/A";
 		rows.push([
+			date,
 			data[i].batchNumber || "N/A",
 			data[i].organisationName || "N/A",
-			data[i].location || "N/A",
-			data[i].gender || "N/A",
 			data[i].age || "N/A",
+			data[i].gender || "N/A",
+			data[i].state || "N/A",
+			data[i].city || "N/A",
 		]);
 	}
 
 	var docDefinition = {
 		pageSize: "A4",
-		pageOrientation: "portrait",
+		pageOrientation: "landscape",
 		pageMargins: [30, 30, 2, 2],
 		content: [
-			{ text: "Vaccinations List", fontSize: 34, style: "header" },
+			{ text: "Vaccinations List", fontSize: 32, style: "header" },
 			{
 				table: {
 					margin: [1, 1, 1, 1],
 					headerRows: 1,
 					headerStyle: "header",
-					widths: [100, 200, 100, 60, 30],
+					widths: [80, 100, 150, 50, 80, 120, 120],
 					body: rows,
 				},
 			},
@@ -957,7 +1019,7 @@ function buildPdfReport(req, res, data, orderType) {
 	var options = { fontLayoutCache: true };
 	var pdfDoc = printer.createPdfKitDocument(docDefinition, options);
 	var temp123;
-	var pdfFile = pdfDoc.pipe((temp123 = fs.createWriteStream("./report.pdf")));
+	var pdfFile = pdfDoc.pipe((temp123 = fs.createWriteStream("./VaccinationReport.pdf")));
 	var path = pdfFile.path;
 	pdfDoc.end();
 	temp123.on("finish", async function () {

@@ -16,7 +16,9 @@ export default function CenteralTodayTable({ vaccinationList, t }) {
       <TableContainer className="vl-mui-custom-tablecontainer">
         <div className="Beneficiary--header">
           <h1 className="vl-subtitle f-700 vl-black">{t("today_vaccine")}</h1>
-          <h1 className="vl-body f-500 vl-grey-sm">12/12/22</h1>
+          <h1 className="vl-body f-500 vl-grey-sm">
+            {new Date().toLocaleDateString()}
+          </h1>
         </div>
         {vaccinationList && vaccinationList?.length ? (
           <Table sx={{ minWidth: 650 }} className="vl-mui-custom-table">
@@ -36,7 +38,7 @@ export default function CenteralTodayTable({ vaccinationList, t }) {
                 </TableCell>
                 <TableCell align="center">
                   <div className="vl-table-column">
-                    <p className="vl-body f-500 vl-blue">{t("location")}</p>
+                    <p className="vl-body f-500 vl-blue">{t("age")}</p>
                   </div>
                 </TableCell>
                 <TableCell align="center">
@@ -44,9 +46,15 @@ export default function CenteralTodayTable({ vaccinationList, t }) {
                     <p className="vl-body f-500 vl-blue">{t("gender")}</p>
                   </div>
                 </TableCell>
+
                 <TableCell align="center">
                   <div className="vl-table-column">
-                    <p className="vl-body f-500 vl-blue">{t("age")}</p>
+                    <p className="vl-body f-500 vl-blue">{t("state")}</p>
+                  </div>
+                </TableCell>
+                <TableCell align="center">
+                  <div className="vl-table-column">
+                    <p className="vl-body f-500 vl-blue">{t("city")}</p>
                   </div>
                 </TableCell>
               </TableRow>

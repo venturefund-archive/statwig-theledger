@@ -24,6 +24,7 @@ export default function LastmileTrack(props) {
   const [totalVaccinations, setTotalVaccinations] = useState();
   const [todaysVaccinations, setTodaysVaccinations] = useState();
   const [batchDetails, setBatchDetails] = useState();
+  const [flag, toggleFlag] = useState(false);
 
   const { t, i18n } = useTranslation();
 
@@ -44,15 +45,11 @@ export default function LastmileTrack(props) {
       setTotalVaccinations(vaccinationsList.data.data.vaccinationsList);
       setTodaysVaccinations(vaccinationsList.data.data.todaysVaccinationsList);
     }
-  }, []);
+  }, [flag]);
 
   const completeVaccination = async () => {
     setSteps(1);
-    console.log("helllo i am running");
-    const result = await fetchAnalytics();
-    if (result?.data?.success) {
-      setAnalytics(result.data.data);
-    }
+    toggleFlag(!flag);
   };
 
   const handleAnalyticsClicked = (tableType) => {

@@ -23,6 +23,11 @@ export default function CenteralTotalTable({ vaccinationList, t }) {
               <TableRow className="vl-mui-custom-tr">
                 <TableCell align="center">
                   <div className="vl-table-column">
+                    <p className="vl-body f-500 vl-blue">{t("date")}</p>
+                  </div>
+                </TableCell>
+                <TableCell align="center">
+                  <div className="vl-table-column">
                     <p className="vl-body f-500 vl-blue">{t("batch_no")}</p>
                   </div>
                 </TableCell>
@@ -35,7 +40,7 @@ export default function CenteralTotalTable({ vaccinationList, t }) {
                 </TableCell>
                 <TableCell align="center">
                   <div className="vl-table-column">
-                    <p className="vl-body f-500 vl-blue">{t("location")}</p>
+                    <p className="vl-body f-500 vl-blue">{t("age")}</p>
                   </div>
                 </TableCell>
                 <TableCell align="center">
@@ -43,14 +48,15 @@ export default function CenteralTotalTable({ vaccinationList, t }) {
                     <p className="vl-body f-500 vl-blue">{t("gender")}</p>
                   </div>
                 </TableCell>
+
                 <TableCell align="center">
                   <div className="vl-table-column">
-                    <p className="vl-body f-500 vl-blue">{t("age")}</p>
+                    <p className="vl-body f-500 vl-blue">{t("state")}</p>
                   </div>
                 </TableCell>
                 <TableCell align="center">
                   <div className="vl-table-column">
-                    <p className="vl-body f-500 vl-blue">{t("date")}</p>
+                    <p className="vl-body f-500 vl-blue">{t("city")}</p>
                   </div>
                 </TableCell>
               </TableRow>

@@ -624,5 +624,9 @@
   "add_pharmacy": "AD Formasya",
   "no_access_receiveshipment":"Sin acceso para recibir el envío",
   "please_try_again":"Inténtalo de nuevo",
+  "your_request_is_received":"¡Tu solicitud ha sido recibida!",
+  "is_required":"es requerido",
+  "is_invalid":"es invalido",
+  "duplicate":"Duplicado",
   "save_complete":"Guardar Continuar"
 }
