@@ -142,7 +142,7 @@ export default function Beneficiary(props) {
                         className="vl-btn vl-btn-sm vl-btn-alert"
                         onClick={props.completeVaccination}
                       >
-                        {t("save_complete")}
+                        {t("save_continue")}
                       </button>
                       <button
                         className="vl-btn vl-btn-sm vl-btn-primary"
