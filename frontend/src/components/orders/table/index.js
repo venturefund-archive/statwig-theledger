@@ -7,12 +7,12 @@ import "./style.scss";
 import AdvanceTableFilter from "../../../shared/advanceTableFilter";
 
 function Table(props) {
-  const { visible, outboundRecords, inboundRecords, t } = props;
+	const handlePageChange = (event, value) => {
+		props.onPageChange(value);
+	};
+	const { visible, outboundRecords, inboundRecords, t } = props;
   const orders = visible === "one" ? outboundRecords : inboundRecords;
 
-  const handlePageChange = (event, value) => {
-    props.onPageChange(value);
-  };
   orders.sort(function (a, b) {
     if (a.id > b.id) {
       return -1;
