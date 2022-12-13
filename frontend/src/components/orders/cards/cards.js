@@ -8,13 +8,13 @@ import "../style.scss";
 import "./cards.scss";
 
 function Cards(props) {
-  const { t } = props;
   const [orderAnalytics, setOrderAnalytics] = useState({
     outboundPO: 0,
     inboundPO: 0,
     pendingOrders: 0,
     rejectedOrders: 0,
-  });
+  }); 
+  const { t } = props;
   useEffect(() => {
     async function fetchData() {
       const result = await getOrderAnalytics();
