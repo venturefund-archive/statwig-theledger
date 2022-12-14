@@ -69,12 +69,8 @@ const NewShipment = (props) => {
   const [productsList, setProductsList] = useState([]);
   const ref1 = useRef(null);
   const ref2 = useRef(null);
-  const formRef = useRef();
 
   const customStyles = {
-    // placeholder: (provided, state) => ({
-    //   color: state.isDisabled ? "black" : "grey",
-    // }),
     option: (provided, state) => ({
       ...provided,
       borderBottom: "1px solid #d6d6d6",
@@ -247,12 +243,10 @@ const NewShipment = (props) => {
 
   const onAssign = async (values) => {
     let error = false;
-    // dates.forEach(date => { if (!error) dateValidation(date) });
     const {
       toOrg,
       airWayBillNo,
       reset,
-      labelCode,
       shipmentDate,
       estimateDeliveryDate,
       toOrgLoc,
@@ -480,9 +474,10 @@ const NewShipment = (props) => {
           if (!values.toOrgLoc) {
             errors.toOrgLoc = "Required";
           }
-          if (!values.airWayBillNo) {
-            errors.airWayBillNo = "Required";
-          }
+          // Commented out To disable required validation
+          // if (!values.airWayBillNo) {
+          //   errors.airWayBillNo = "Required";
+          // }
           // if (!values.labelCode) {
           //   errors.labelCode = "Required";
           // }

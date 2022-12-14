@@ -576,7 +576,7 @@ exports.createShipment = [
         );
       }
       const address = orgData.postalAddress;
-      const confId = orgData.configuration_id;
+      const confId = orgData.configuration_id || "CONF000";
       const confData = await ConfigurationModel.findOne({ id: confId });
       if (confData == null) {
         return apiResponse.ErrorResponse(
@@ -601,6 +601,7 @@ exports.createShipment = [
         id: req.body.receiver.id,
       });
       if (receiverOrgData == null) {
+        console.log("Receiver not defined");
         return apiResponse.ErrorResponse(
           res,
           responses(req.user.preferredLanguage).receiver_not_defined
@@ -666,56 +667,48 @@ exports.createShipment = [
 
         if (quantityMismatch) {
           if (po.poStatus === "CREATED" || po.poStatus === "ACCEPTED") {
-            try {
-              let date = new Date(po.createdAt);
-              let milliseconds = date.getTime();
-              let d = new Date();
-              let currentTime = d.getTime();
-              let orderProcessingTime = currentTime - milliseconds;
-              let prevOrderCount = await OrganisationModel.find({
-                id: req.user.organisationId,
-              });
-              prevOrderCount = prevOrderCount.totalProcessingTime
-                ? prevOrderCount.totalProcessingTime
-                : 0;
-              OrganisationModel.updateOne(
-                { id: req.user.organisationId },
-                {
-                  $set: {
-                    totalProcessingTime: prevOrderCount + orderProcessingTime,
-                  },
-                }
-              );
-            } catch (err) {
-              console.log(err);
-            }
+            let date = new Date(po.createdAt);
+            let milliseconds = date.getTime();
+            let d = new Date();
+            let currentTime = d.getTime();
+            let orderProcessingTime = currentTime - milliseconds;
+            let prevOrderCount = await OrganisationModel.find({
+              id: req.user.organisationId,
+            });
+            prevOrderCount = prevOrderCount.totalProcessingTime
+              ? prevOrderCount.totalProcessingTime
+              : 0;
+            OrganisationModel.updateOne(
+              { id: req.user.organisationId },
+              {
+                $set: {
+                  totalProcessingTime: prevOrderCount + orderProcessingTime,
+                },
+              }
+            );
           }
           po.poStatus = "TRANSIT&PARTIALLYFULFILLED";
         } else {
           if (po.poStatus === "CREATED" || po.poStatus === "ACCEPTED") {
-            try {
-              let date = new Date(po.createdAt);
-              let milliseconds = date.getTime();
-              let d = new Date();
-              let currentTime = d.getTime();
-              let orderProcessingTime = currentTime - milliseconds;
-              let prevOrderCount = await OrganisationModel.find({
-                id: req.user.organisationId,
-              });
-              prevOrderCount = prevOrderCount.totalProcessingTime
-                ? prevOrderCount.totalProcessingTime
-                : 0;
-              OrganisationModel.updateOne(
-                { id: req.user.organisationId },
-                {
-                  $set: {
-                    totalProcessingTime: prevOrderCount + orderProcessingTime,
-                  },
-                }
-              );
-            } catch (err) {
-              console.log(err);
-            }
+            let date = new Date(po.createdAt);
+            let milliseconds = date.getTime();
+            let d = new Date();
+            let currentTime = d.getTime();
+            let orderProcessingTime = currentTime - milliseconds;
+            let prevOrderCount = await OrganisationModel.find({
+              id: req.user.organisationId,
+            });
+            prevOrderCount = prevOrderCount.totalProcessingTime
+              ? prevOrderCount.totalProcessingTime
+              : 0;
+            OrganisationModel.updateOne(
+              { id: req.user.organisationId },
+              {
+                $set: {
+                  totalProcessingTime: prevOrderCount + orderProcessingTime,
+                },
+              }
+            );
           }
           po.poStatus = "TRANSIT&FULLYFULFILLED";
         }
