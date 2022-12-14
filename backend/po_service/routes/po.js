@@ -38,11 +38,11 @@ router.get("/getOpenOrderIds", POController.getOpenOrderIds);
 router.get(
   "/fetchInboundPurchaseOrders",
   POController.fetchInboundPurchaseOrders
-); // /fetchInboundPurchaseOrders => Takes organisationId from req.user header and filter based on the query params {date,productName,from}
+); // /fetchInboundPurchaseOrders => Takes organizationId from req.user header and filter based on the query params {date,productName,from}
 router.get(
   "/fetchOutboundPurchaseOrders",
   POController.fetchOutboundPurchaseOrders
-); // /fetchOutboundPurchaseOrders => Takes organisationId from req.user header and filter based on the query params (to, orderId, productName, deliveryLocation, date)
+); // /fetchOutboundPurchaseOrders => Takes organizationId from req.user header and filter based on the query params (to, orderId, productName, deliveryLocation, date)
 router.get(
   "/fetchProductIdsCustomerLocationsOrganisations",
   POController.fetchProductIdsCustomerLocationsOrganisations
@@ -50,10 +50,10 @@ router.get(
 router.get(
   "/exportInboundPurchaseOrders",
   POController.exportInboundPurchaseOrders
-); // /fetchInboundPurchaseOrders => Takes organisationId from req.user header and filter based on the query params {date,productName,from}
+); // /fetchInboundPurchaseOrders => Takes organizationId from req.user header and filter based on the query params {date,productName,from}
 router.get(
   "/exportOutboundPurchaseOrders",
   POController.exportOutboundPurchaseOrders
-); // /fetchOutboundPurchaseOrders => Takes organisationId from req.user header and filter based on the query params (to, orderId, productName, deliveryLocation, date)
+); // /fetchOutboundPurchaseOrders => Takes organizationId from req.user header and filter based on the query params (to, orderId, productName, deliveryLocation, date)
 
 module.exports = router;

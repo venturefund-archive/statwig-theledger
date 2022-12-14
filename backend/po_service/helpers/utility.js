@@ -16,15 +16,11 @@ exports.asyncForEach = async (array, callback) => {
 
 exports.compareArrays = function (array1, array2) {
   if (!array1 || !array2) return false;
-
   if (array1.length !== array2.length) return false;
-
   array1.sort();
   array2.sort();
-
   for (let i = 0; i < array1.length; ++i) {
     if (array1[i].trim() !== array2[i].trim()) return false;
   }
-
   return true;
 }
