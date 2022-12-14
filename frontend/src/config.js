@@ -91,7 +91,6 @@ export function config() {
       bacthcNearExpiryUrl: `${LOCAL_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getBatchNearExpiration`,
       batchExpiredUrl: `${LOCAL_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getBatchExpired`,
       batchWarehouseUrl: `${LOCAL_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getBatchWarehouse`,
-      addPOsFromExcelUrl: `${LOCAL_SERVER_URL_PO}/pomanagement/api/po/addPOsFromExcel`,
       changePOStatus: `${LOCAL_SERVER_URL_SHIPMENT}/pomanagement/api/po/changePOStatus`,
       fetchAllPurchaseOrderUrl: `${LOCAL_SERVER_URL_SHIPMENT}/shipmentmanagement/api/shipping/fetchpurchaseOrder?key=`,
       getPOsUrl: `${LOCAL_SERVER_URL_PO}/pomanagement/api/po/purchaseOrderStatistics`,
