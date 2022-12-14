@@ -671,7 +671,7 @@ exports.getAnalytics = [
 
 			let totalVaccinations = 0;
 			let todaysVaccinations = 0;
-			let now = new Date();
+			let now = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Costa_Rica"}));
 			now.setHours(0, 0, 0, 0);
 
 			for (let i = 0; i < analytics.length; ++i) {
