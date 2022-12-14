@@ -445,7 +445,6 @@ exports.addPOsFromExcel = [
   auth,
   async (req, res) => {
     try {
-      const formatType = (req.query.formatType === "UNICEF" ? true : false)
       const createdBy = req.user.id;
       const workbook = XLSX.readFile(req.file.path);
       const sheet_name_list = workbook.SheetNames;
@@ -456,131 +455,41 @@ exports.addPOsFromExcel = [
         { dateNF: "dd/mm/yyyy;@", cellDates: true, raw: false }
       );
       let poDataArray = [];
-      if (formatType) {
-        const expectedColNames =
-          req.user.preferredLanguage === "EN"
-            ? [
-              "UNICEf PO Number",
-              "PO Item#",
-              "Vendor",
-              "Vendor Name",
-              "Document Date",
-              "Your Reference",
-              "Incoterms",
-              "Incoterms (Part 2)",
-              "Material",
-              "Material Description",
-              "Plant",
-              "Country Name",
-              "Region Name",
-              "Order Quantity",
-              "Order Unit",
-              "Unit Id",
-              "IP Code",
-              "IP Name",
-            ]
-            : [
-              "UNICEf PO Número",
-              "PO Articulo#",
-              "Vendedor",
-              "Nombre Del Vendedor",
-              "Fecha Del Documento",
-              "Tu Referencia",
-              "Incoterms",
-              "Incoterms (Part 2)",
-              "Material",
-              "Material Descripción",
-              "Planta",
-              "Nombre Del País",
-              "Nombre De La Región",
-              "Ordene La Cantidad",
-              "Unidad De Pedido",
-              "Unidad Id",
-              "IP Código",
-              "IP Nombre",
-            ];
-
-        if (!compareArrays(expectedColNames, Object.keys(data[0]))) {         // Check for Invalid Excel format
-          return apiResponse.validationErrorWithData(
-            res,
-            responses(req.user.preferredLanguage).invalid_excel,
-            Object.keys(data[0])
-          );
-        }
-        poDataArray = data.map((po) => {
-          return {
-            id: po.id || 0,
-            externalId: po["UNICEf PO Number"],
-            creationDate: new Date().toISOString(),
-            lastUpdatedOn: new Date().toISOString(),
-            poStatus: req.user.id == po["Vendor"] ? "APPROVED" : "CREATED",
-            supplier: {
-              supplierOrganisation: po["Vendor"],
-              name: po["Vendor Name"],
+      for (const po of data) {
+        poDataArray.push({
+          id: po.id || 0,
+          creationDate: new Date().toISOString(),
+          lastUpdatedOn: new Date().toISOString(),
+          poStatus: null,
+          supplier: {
+            name: po["ORDER FROM ORGANIZATION NAME"],
+            shippingAddress: {
+              shippingAddressId: po["FROM LOCATION"] || null,
             },
-            customer: {
-              customerOrganisation: po["IP Code"],
-              name: po["IP Name"],
-              country: po["Country Name"],
-              region: po["Region Name"],
-              address: "NA",
-              shippingAddress: {
-                shippingAddressId: po["Plant"],
-                shipmentReceiverId: po["Shipment Receiver Id"] || "NA",
+          },
+          customer: {
+            name: po["ORDER TO ORGANIZATION NAME"],
+            country: po["ORDER TO COUNTRY"],
+            region: po["ORDER TO REGION"],
+            address: po["ORDER TO DELIVERY LOCATION"] || po["DELIVERY LOCATION"],
+            shippingAddress: {
+              shippingAddressId: po["DELIVERY LOCATION"] || null,
+              shipmentReceiverId: po["RECEIVER ID"] || null,
+            },
+          },
+          products: [
+            {
+              name: po["PRODUCT NAME"],
+              productQuantity: parseInt(po["QUANTITY"]),
+              quantity: parseInt(po["QUANTITY"]),
+              unitofMeasure: {
+                name: po["UNITS"],
               },
             },
-            products: [
-              {
-                name: po["Material"],
-                productQuantity: parseInt(po["Order Quantity"]),
-                quantity: parseInt(po["Order Quantity"]),
-                unitofMeasure: {
-                  id: po["Unit Id"],
-                  name: po["Order Unit"],
-                },
-              },
-            ],
-            createdBy: createdBy,
-            lastUpdatedBy: createdBy,
-          };
-        });
-      } else {
-        for (const po of data) {
-          poDataArray.push({
-            id: po.id || 0,
-            creationDate: new Date().toISOString(),
-            lastUpdatedOn: new Date().toISOString(),
-            poStatus: null,
-            supplier: {
-              name: po["ORDER FROM ORGANIZATION NAME"],
-              shippingAddress: {
-                shippingAddressId: po["FROM LOCATION"] || null,
-              },
-            },
-            customer: {
-              name: po["ORDER TO ORGANIZATION NAME"],
-              country: po["ORDER TO COUNTRY"],
-              region: po["ORDER TO REGION"],
-              address: po["ORDER TO DELIVERY LOCATION"] || po["DELIVERY LOCATION"],
-              shippingAddress: {
-                shippingAddressId: po["DELIVERY LOCATION"] || null,
-                shipmentReceiverId: po["RECEIVER ID"] || null,
-              },
-            },
-            products: [
-              {
-                name: po["PRODUCT NAME"],
-                productQuantity: parseInt(po["QUANTITY"]),
-                quantity: parseInt(po["QUANTITY"]),
-                unitofMeasure: {
-                  name: po["UNITS"],
-                },
-              },
-            ],
-            createdBy: createdBy,
-            lastUpdatedBy: createdBy,
-          })
-        }
+          ],
+          createdBy: createdBy,
+          lastUpdatedBy: createdBy,
+        })
       }
       await CounterModel.updateOne(
         {
