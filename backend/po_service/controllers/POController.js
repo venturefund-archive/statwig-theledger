@@ -1544,7 +1544,10 @@ exports.fetchOutboundPurchaseOrders = [
             };
           }
           const outboundPOsCount = await RecordModel.count(whereQuery);
-          const outboundPOList = await RecordModel.find(whereQuery).skip(parseInt(skip)).limit(parseInt(limit)).sort({ createdAt: -1 })
+          const outboundPOList = await RecordModel.find(whereQuery)
+            .skip(parseInt(skip))
+            .limit(parseInt(limit))
+            .sort({ createdAt: -1 })
           let outboundPORes = [];
           let findOutboundPOData = outboundPOList?.map(
             async (outboundPO) => {
