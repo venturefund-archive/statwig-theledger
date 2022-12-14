@@ -125,12 +125,12 @@ const Orders = (props) => {
 		async function fetchData() {
 			const updatedFilter = Boolean(
 				dateFilter ||
-					productNameFilter ||
-					toFilter ||
-					fromFilter ||
-					orderIdFilter ||
-					statusFilter ||
-					locationFilter,
+				productNameFilter ||
+				toFilter ||
+				fromFilter ||
+				orderIdFilter ||
+				statusFilter ||
+				locationFilter,
 			);
 			if (visible === "one" && alerts === false && !updatedFilter) {
 				setDateFilter("");
@@ -207,23 +207,10 @@ const Orders = (props) => {
 			setPoOrganisationsList(productsLocationsOrganisationsRes.organisations);
 			setSkip(0);
 		}
-		if(props.demoLogin) return;
+		if (props.demoLogin) return;
 		fetchData();
-	}, [
-		limit,
-		visible,
-		alerts,
-		dispatch,
-		toFilter,
-		orderIdFilter,
-		productNameFilter,
-		locationFilter,
-		dateFilter,
-		fromFilterDate,
-		toFilterDate,
-		fromFilter,
-	]);
-	console.log("outboundRecords ", outboundRecords);
+	}, [limit, visible, alerts, dispatch, toFilter, orderIdFilter, productNameFilter, locationFilter, dateFilter, fromFilterDate, toFilterDate, fromFilter, props.demoLogin, statusFilter]);
+	console.log("outboundRecords =>", outboundRecords);
 
 	const onPageChange = async (pageNum) => {
 		const recordSkip = (pageNum - 1) * limit;
@@ -572,14 +559,12 @@ const Orders = (props) => {
 		setShowExportFilter(false);
 		let url = "";
 		if (visible === "one") {
-			url = `${
-				config().getExportFileForOutboundPurchaseOrdersUrl
-			}?type=${value.toLowerCase()}&to=${fromFilter}&orderId=${orderIdFilter}&productName=${productNameFilter}&dateFilter=${dateFilter}&deliveryLocation=${locationFilter}&poStatus=${statusFilter}&fromDate=${fromFilterDate}&toDate=${toFilterDate}`;
+			url = `${config().getExportFileForOutboundPurchaseOrdersUrl
+				}?type=${value.toLowerCase()}&to=${fromFilter}&orderId=${orderIdFilter}&productName=${productNameFilter}&dateFilter=${dateFilter}&deliveryLocation=${locationFilter}&poStatus=${statusFilter}&fromDate=${fromFilterDate}&toDate=${toFilterDate}`;
 		}
 		if (visible === "two") {
-			url = `${
-				config().getExportFileForInboundPurchaseOrdersUrl
-			}?type=${value.toLowerCase()}&from=${fromFilter}&orderId=${orderIdFilter}&productName=${productNameFilter}&dateFilter=${dateFilter}&deliveryLocation=${locationFilter}&poStatus=${statusFilter}&fromDate=${fromFilterDate}&toDate=${toFilterDate}`;
+			url = `${config().getExportFileForInboundPurchaseOrdersUrl
+				}?type=${value.toLowerCase()}&from=${fromFilter}&orderId=${orderIdFilter}&productName=${productNameFilter}&dateFilter=${dateFilter}&deliveryLocation=${locationFilter}&poStatus=${statusFilter}&fromDate=${fromFilterDate}&toDate=${toFilterDate}`;
 		}
 
 		var today = new Date();
