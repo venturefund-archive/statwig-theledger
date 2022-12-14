@@ -12,9 +12,7 @@ const DoseSchema = new mongoose.Schema(
 		},
 		age: {
 			required: true,
-			type: Number,
-			min: 0,
-			max: 140,
+			type: Number
 		},
 		gender: {
 			required: true,
