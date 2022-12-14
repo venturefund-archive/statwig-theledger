@@ -1148,11 +1148,11 @@ const NewShipment = (props) => {
                 <div className='row'>
                   <div className='col-md-6 com-sm-12 mt-2'>
                     <label className='name' htmlFor='organizationName'>
-                      {t("transit_no")}*
+                      {t("transit_no")}
                     </label>
                     <input
                       className={`input refship ${errors.airWayBillNo && touched.airWayBillNo
-                        ? "border-danger"
+                        ? ""
                         : ""
                         }`}
                       type='text'
