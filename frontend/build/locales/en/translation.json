@@ -505,7 +505,8 @@
   "batch_number_required": "Batch number is required!",
   "age": "Age",
   "gender": "Gender",
-  "register_vaccination_details": "Register you, Vaccination Details",
+  "review_order": "Review Order",
+  "register_vaccination_details": "Register Your Vaccination Details",
   "add_beneficiary_details": "Add Beneficiary Detail",
   "manufacturer_name": "Manufacturer Name",
   "vaccinated_list_empty_click_add": "Vaccinated List is Empty, Please Click Add button to Add the Details",
@@ -600,5 +601,10 @@
   "import_pharmacy": "Import Pharmacies",
   "add_pharmacy": "Add Pharamcy",
   "no_access_receiveshipment":"No Access to Receive the shipment",
-  "please_try_again":"Please Try Again"
+  "please_try_again":"Please Try Again",
+  "check_expiryDate":"Check expiryDate",
+  "your_request_is_received":"Your request is received!",
+  "is_required":"is required",
+  "is_invalid":"is Invalid",
+  "duplicate":"Duplicate"
 }
