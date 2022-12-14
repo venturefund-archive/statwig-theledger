@@ -38,7 +38,7 @@ const ShipmentAnalytic = (props) => {
   const [shipmentIdList, setShipmentIdList] = useState([]);
   const [idFilter, setIdFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState(null);
+  const [statusFilter, setStatusFilter] = useState("");
   const [toFilter, setToFilter] = useState("");
   const [fromFilter, setFromFilter] = useState("");
   const [count, setCount] = useState(0);
@@ -140,6 +140,7 @@ const ShipmentAnalytic = (props) => {
         setCount(inboundRes.data.count);
         dispatch(turnOff());
       } else {
+        if(statusFilter == null) setStatusFilter("");
         dispatch(turnOn());
         const outboundRes = await getOutboundShipments(
           idFilter,
