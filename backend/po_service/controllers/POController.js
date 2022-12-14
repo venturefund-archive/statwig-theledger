@@ -545,27 +545,26 @@ exports.addPOsFromExcel = [
           };
         });
       } else {
-        poDataArray = data.map(async (po) => {
-          const orgId =
-            await OrganisationModel.findOne({
-              name: new RegExp("^" + po["ORDER FROM ORGANIZATION NAME"] + "$", "i"),
-            });
-          return {
+        for (const po of data) {
+          poDataArray.push({
             id: po.id || 0,
             creationDate: new Date().toISOString(),
             lastUpdatedOn: new Date().toISOString(),
-            poStatus: req.user.organisationId == orgId ? "APPROVED" : "CREATED",
+            poStatus: null,
             supplier: {
               name: po["ORDER FROM ORGANIZATION NAME"],
+              shippingAddress: {
+                shippingAddressId: po["FROM LOCATION"] || null,
+              },
             },
             customer: {
               name: po["ORDER TO ORGANIZATION NAME"],
               country: po["ORDER TO COUNTRY"],
               region: po["ORDER TO REGION"],
-              address: po["ORDER TO DELIVERY LOCATION"],
+              address: po["ORDER TO DELIVERY LOCATION"] || po["DELIVERY LOCATION"],
               shippingAddress: {
-                shippingAddressId: po["Plant"] || "NA",
-                shipmentReceiverId: po["Shipment Receiver Id"] || "NA",
+                shippingAddressId: po["DELIVERY LOCATION"] || null,
+                shipmentReceiverId: po["RECEIVER ID"] || null,
               },
             },
             products: [
@@ -580,8 +579,8 @@ exports.addPOsFromExcel = [
             ],
             createdBy: createdBy,
             lastUpdatedBy: createdBy,
-          };
-        });
+          })
+        }
       }
       await CounterModel.updateOne(
         {
@@ -597,7 +596,6 @@ exports.addPOsFromExcel = [
         { "counters.name": "poId" },
         { "counters.$": 1 }
       );
-
       for (let i in poDataArray) {
         const duplicate = await RecordModel.findOne({
           externalId: poDataArray[i].externalId,
@@ -611,7 +609,6 @@ exports.addPOsFromExcel = [
           // Assign POId
           poDataArray[i].id =
             poCounter.counters[0].format + poCounter.counters[0].value++;
-
           const productDetails = await ProductModel.findOne({
             name: poDataArray[i].products[0].name,
           });
@@ -641,8 +638,11 @@ exports.addPOsFromExcel = [
               externalId: new RegExp("^" + poDataArray[i].customer?.customerOrganisation + "$", "i"),
             });
           if (customerOrganisation) {
+            poDataArray[i].customer.customerOrganisation = customerOrganisation.id;
             poDataArray[i].customer.name = customerOrganisation.name;
             poDataArray[i].customer.customerType = customerOrganisation.type;
+            poDataArray[i].customer.shippingAddress.shippingAddressId = poDataArray[i].customer.shippingAddress.shippingAddressId ?? customerOrganisation.warehouses?.[0];
+            poDataArray[i].customer.shippingAddress.shipmentReceiverId = poDataArray[i].customer.shippingAddress.shipmentReceiverId ?? customerOrganisation.primaryContactId;
           } else if (customerOrganisationExternal) {
             poDataArray[i].customer.name = customerOrganisationExternal.name;
             poDataArray[i].customer.customerType =
@@ -747,7 +747,6 @@ exports.addPOsFromExcel = [
               externalId: poDataArray[i].customer.customerOrganisation,
             });
             await org.save();
-            poDataArray[i].customer.customerOrganisation = organisationId;
             await CounterModel.updateOne(
               {
                 "counters.name": "inventoryId",
@@ -790,9 +789,12 @@ exports.addPOsFromExcel = [
               },
             });
             await warehouse.save();
+            poDataArray[i].customer.customerOrganisation = org.id;
+            poDataArray[i].customer.name = org.name;
+            poDataArray[i].customer.customerType = org.type;
             poDataArray[i].customer.shippingAddress = {
-              shippingAddressId: warehouseId,
-              shipmentReceiverId: "NA",
+              shippingAddressId: warehouse.id,
+              shipmentReceiverId: org.primaryContactId
             };
           }
           /////////Supplier ORG DETAILS////////////
@@ -807,13 +809,14 @@ exports.addPOsFromExcel = [
               ),
             });
           if (supplierOrganisation) {
+            poDataArray[i].poStatus = req.user.organisationId == supplierOrganisation.id ? "APPROVED" : "CREATED",
+              poDataArray[i].supplier.supplierOrganisation = supplierOrganisation.id;
             poDataArray[i].supplier.name = supplierOrganisation.name;
             poDataArray[i].supplier.supplierType = supplierOrganisation.type;
-            poDataArray[i].supplier.shippingAddress = {
-              shippingAddressId: "NA",
-              shipmentReceiverId: "NA",
-            };
-          } else if (supplierOrganisationExternal) {
+            poDataArray[i].supplier.supplierIncharge = supplierOrganisation.primaryContactId;
+            poDataArray[i].supplier.shippingAddress.shippingAddressId = supplierOrganisation.warehouses?.[0];
+          }
+          else if (supplierOrganisationExternal) {
             poDataArray[i].supplier.name = supplierOrganisationExternal.name;
             poDataArray[i].supplier.supplierType =
               supplierOrganisationExternal.type;
@@ -913,7 +916,6 @@ exports.addPOsFromExcel = [
               externalId: poDataArray[i].supplier.supplierOrganisation,
             });
             await org.save();
-            poDataArray[i].supplier.supplierOrganisation = organisationId;
             await CounterModel.updateOne(
               {
                 "counters.name": "inventoryId",
@@ -956,11 +958,12 @@ exports.addPOsFromExcel = [
               },
             });
             await warehouse.save();
-            poDataArray[i].supplier.supplierType = "CUSTOMER_SUPPLIER";
-            poDataArray[i].supplier.shippingAddress = {
-              shippingAddressId: warehouseId,
-              shipmentReceiverId: "NA",
-            };
+            poDataArray[i].poStatus = "CREATED";
+            poDataArray[i].supplier.supplierOrganisation = org.id;
+            poDataArray[i].supplier.name = org.name;
+            poDataArray[i].supplier.supplierType = org.type;
+            poDataArray[i].supplier.supplierIncharge = org.primaryContactId;
+            poDataArray[i].supplier.shippingAddress.shippingAddressId = warehouse.id
           }
           await RecordModel.create(poDataArray[i]);
         }
