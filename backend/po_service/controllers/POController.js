@@ -665,7 +665,7 @@ exports.addPOsFromExcel = [
             const address = poDataArray[i].customer?.address
               ? poDataArray[i].customer?.address
               : "";
-             await CounterModel.updateOne(
+            await CounterModel.updateOne(
               {
                 "counters.name": "orgId",
               },
@@ -681,7 +681,7 @@ exports.addPOsFromExcel = [
             );
             const organisationId =
               orgCounter.counters[0].format + orgCounter.counters[0].value;
-             await CounterModel.updateOne(
+            await CounterModel.updateOne(
               {
                 "counters.name": "warehouseId",
               },
@@ -691,7 +691,7 @@ exports.addPOsFromExcel = [
                 },
               }
             );
-             await CounterModel.updateOne(
+            await CounterModel.updateOne(
               {
                 "counters.name": "employeeId",
               },
@@ -802,7 +802,7 @@ exports.addPOsFromExcel = [
           const supplierOrganisationExternal =
             await OrganisationModel.findOne({
               externalId: new RegExp(
-                "^" +  poDataArray[i].supplier?.supplierOrganisation + "$",
+                "^" + poDataArray[i].supplier?.supplierOrganisation + "$",
                 "i"
               ),
             });
@@ -857,7 +857,7 @@ exports.addPOsFromExcel = [
                 },
               }
             );
-           await CounterModel.updateOne(
+            await CounterModel.updateOne(
               {
                 "counters.name": "employeeId",
               },
@@ -912,7 +912,7 @@ exports.addPOsFromExcel = [
               authority: req.body?.authority,
               externalId: poDataArray[i].supplier.supplierOrganisation,
             });
-             await org.save();
+            await org.save();
             poDataArray[i].supplier.supplierOrganisation = organisationId;
             await CounterModel.updateOne(
               {
@@ -1079,7 +1079,7 @@ exports.createOrder = [
       const receiverName = receiverOrgData.name;
       const receiverAddress = receiverOrgData.postalAddress;
       const updates = {
-        updatedOn:new Date().toISOString(),
+        updatedOn: new Date().toISOString(),
         status: "CREATED",
       };
       purchaseOrder.poUpdates = updates;
@@ -1544,12 +1544,9 @@ exports.fetchOutboundPurchaseOrders = [
             };
           }
           const outboundPOsCount = await RecordModel.count(whereQuery);
-          const outboundPOList = await RecordModel.count(whereQuery)
-            .skip(parseInt(skip))
-            .limit(parseInt(limit))
-            .sort({ createdAt: -1 })
+          const outboundPOList = await RecordModel.find(whereQuery).skip(parseInt(skip)).limit(parseInt(limit)).sort({ createdAt: -1 })
           let outboundPORes = [];
-          let findOutboundPOData = outboundPOList.map(
+          let findOutboundPOData = outboundPOList?.map(
             async (outboundPO) => {
               let outboundPOData = JSON.parse(JSON.stringify(outboundPO));
               outboundPOData[`productDetails`] = [];
@@ -1941,8 +1938,8 @@ exports.exportOutboundPurchaseOrders = [
       RecordModel.find(whereQuery)
         .sort({ createdAt: -1 })
         .then((outboundPOList) => {
-          let outboundPORes = [];
-          let findOutboundPOData = outboundPOList.map(async (outboundPO) => {
+          const outboundPORes = [];
+          const findOutboundPOData = outboundPOList?.map(async (outboundPO) => {
             let outboundPOData = JSON.parse(JSON.stringify(outboundPO));
             outboundPOData[`productDetails`] = [];
             let outboundProductsArray = outboundPOData.products;
