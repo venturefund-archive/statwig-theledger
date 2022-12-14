@@ -179,8 +179,7 @@
   cursor: pointer;
 }
 .inp-grp input,
-.inp-grp input:focus,
-input:disabled {
+.inp-grp input:focus {
   border: none;
   text-align: center;
   background-color: white !important;
