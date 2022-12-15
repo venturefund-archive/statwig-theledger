@@ -939,16 +939,16 @@ exports.deleteDose = [
 	}
 ]
 
-exports.completeVail = [
+exports.completeVial = [
 	auth,
 	async (req, res) => {
 		try {
 			const { vaccineVialId } = req.body;
-			const updatedVail = await VaccineVialModel.findOneAndUpdate({ id: vaccineVialId }, { $set: { isComplete: true } }, { new: true })
-			if (updatedVail) {
-				return apiResponse.successResponseWithData(res, "Vail Completed", updatedVail);
+			const updatedVial = await VaccineVialModel.findOneAndUpdate({ id: vaccineVialId }, { $set: { isComplete: true } }, { new: true })
+			if (updatedVial) {
+				return apiResponse.successResponseWithData(res, "vial Completed", updatedVial);
 			} else {
-				return apiResponse.notFoundResponse(res, "Vail Not Found");
+				return apiResponse.notFoundResponse(res, "vial Not Found");
 			}
 		} catch (err) {
 			console.log(err);

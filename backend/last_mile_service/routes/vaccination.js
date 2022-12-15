@@ -14,5 +14,5 @@ router.get("/getCitiesAndOrgsForFilters", VaccinationController.getCitiesAndOrgs
 router.post("/exportVaccinationList", VaccinationController.exportVaccinationList);
 router.put("/updateDose", VaccinationController.updateDose);
 router.delete("/deleteDose", VaccinationController.deleteDose);
-router.post("/completeVail", VaccinationController.completeVail);
+router.post("/completeVial", VaccinationController.completeVial);
 module.exports = router;
