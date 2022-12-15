@@ -81,14 +81,15 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  max-width: 30rem;
+  max-width: 40rem;
 }
 
 .Add-form-space {
   padding: 1rem 0;
   display: grid;
-  grid-template-columns: 1fr 0.3fr;
-  gap: 1.5rem;
+  align-items: center;
+  grid-template-columns: 1fr 0.5fr 1fr;
+  gap: 2rem;
 }
 
 .Beneficiary--action > button {
@@ -124,14 +125,13 @@
   padding: 2rem 0;
 }
 .Result-single-card {
-  padding: 2.5rem 2.5rem 2.5rem 2.5rem;
+  padding: 1rem 1rem 1rem 1rem;
   border-radius: 0.6rem;
   display: flex;
   flex-direction: column;
   box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
   border: 1px solid #eee;
   position: relative;
-  cursor: pointer;
 }
 .more-action-btn {
   position: absolute;
@@ -143,6 +143,7 @@
   flex-direction: column;
   gap: 0.6rem;
   cursor: pointer;
+  padding: 0.6rem;
 }
 
 .result-variant-0 {
@@ -183,4 +184,52 @@
 }
 .result-variant-10 {
   background-color: #f8ffc7;
+}
+
+.radio-btn-card {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.radio-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.card_btn {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.card_btn > span > i {
+  font-size: 0.8rem;
+}
+
+.edit_delete_btn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1.25rem;
+  padding-top: 0.6rem;
+}
+
+.btn_delete {
+  color: #d80027;
+}
+
+.btn_edit {
+  color: #0053d8;
+}
+
+.complete_btn_groups {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
 }
