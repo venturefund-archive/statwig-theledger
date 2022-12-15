@@ -26,6 +26,8 @@ export default function LastmileTrack(props) {
   const [batchDetails, setBatchDetails] = useState();
   const [flag, toggleFlag] = useState(false);
 
+  console.log(batchDetails);
+
   const { t, i18n } = useTranslation();
 
   useEffect(async () => {
@@ -56,7 +58,15 @@ export default function LastmileTrack(props) {
     let table;
     switch (tableType) {
       case "unitsUtilized": {
-        table = <UnitUsedTable t={t} unitsUtilized={unitsUtilized} />;
+        table = (
+          <UnitUsedTable
+            t={t}
+            unitsUtilized={unitsUtilized}
+            setSteps={setSteps}
+            setTableView={setTableView}
+            setBatchDetails={setBatchDetails}
+          />
+        );
         break;
       }
       case "totalVaccinations": {

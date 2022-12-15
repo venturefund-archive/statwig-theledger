@@ -10,7 +10,13 @@ import React from "react";
 import UnitUsedRow from "./UnitUsedRow";
 import EmptyIcon from "../../../../assets/files/designs/empty-table.jpg";
 
-export default function UnitUsedTable({ unitsUtilized, t }) {
+export default function UnitUsedTable({
+  unitsUtilized,
+  t,
+  setSteps,
+  setTableView,
+  setBatchDetails,
+}) {
   return (
     <>
       <TableContainer className="vl-mui-custom-tablecontainer">
@@ -55,7 +61,13 @@ export default function UnitUsedTable({ unitsUtilized, t }) {
               {unitsUtilized &&
                 unitsUtilized.length &&
                 unitsUtilized.map((vial, i) => (
-                  <UnitUsedRow vial={vial} index={i} />
+                  <UnitUsedRow
+                    vial={vial}
+                    index={i}
+                    setSteps={setSteps}
+                    setTableView={setTableView}
+                    setBatchDetails={setBatchDetails}
+                  />
                 ))}
             </TableBody>
           </Table>

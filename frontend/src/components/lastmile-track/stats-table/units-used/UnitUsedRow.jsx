@@ -2,7 +2,14 @@ import { TableCell, TableRow } from "@mui/material";
 import { format } from "date-fns";
 import React from "react";
 
-export default function UnitUsedRow({ vial, index }) {
+export default function UnitUsedRow({
+  vial,
+  index,
+  setSteps,
+  setTableView,
+  setBatchDetails,
+}) {
+  console.log(vial);
   return (
     <TableRow className="vl-mui-custom-tr">
       <TableCell component="th" scope="row" align="center">
@@ -29,7 +36,14 @@ export default function UnitUsedRow({ vial, index }) {
       </TableCell>
       <TableCell component="th" scope="row" align="center">
         <div className="vl-table-body-column">
-          <div className="mi_status_label status_bg_add">
+          <div
+            className="mi_status_label status_bg_add"
+            onClick={() => {
+              setTableView(false);
+              setBatchDetails(vial);
+              setSteps(2);
+            }}
+          >
             <i class="fa-solid fa-plus"></i>
             <p className="vl-body f-500">Add</p>
           </div>
