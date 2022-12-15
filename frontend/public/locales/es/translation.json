@@ -627,5 +627,7 @@
   "your_request_is_received":"¡Tu solicitud ha sido recibida!",
   "is_required":"es requerido",
   "is_invalid":"es invalido",
-  "duplicate":"Duplicado"
+  "duplicate":"Duplicado",
+  "individual_age":"Individuo edad",
+  "range_group":"Grupo de rango"
 }
