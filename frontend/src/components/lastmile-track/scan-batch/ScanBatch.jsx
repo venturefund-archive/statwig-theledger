@@ -11,7 +11,7 @@ export default function ScanBatch(props) {
   const { setBatchDetails, setSteps } = props;
   const [openAlert, setOpenAlert] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   const userLocation = useSelector((store) => store.userLocation);
 
@@ -37,13 +37,15 @@ export default function ScanBatch(props) {
       };
       const result = await fetchBatch(data);
       if (result?.data?.success === true) {
-        console.log(result.data.data[0]);
-        console.log(result.data.data[0].atom);
-        console.log(result.data.data[0].atom.batchNumbers);
-        let dIndex = result.data.data[0].atom.batchNumbers.findIndex(element => {
-          return element.toLowerCase() === values.batchNumber.toLowerCase();
-        });
-        const bNo = result.data.data[0].atom.batchNumbers[dIndex > -1 ? dIndex : values.batchNumber];
+        let dIndex = result.data.data[0].atom.batchNumbers.findIndex(
+          (element) => {
+            return element.toLowerCase() === values.batchNumber.toLowerCase();
+          },
+        );
+        const bNo =
+          result.data.data[0].atom.batchNumbers[
+            dIndex > -1 ? dIndex : values.batchNumber
+          ];
         setBatchDetails({
           ...result.data.data[0],
           batchNumber: bNo,
@@ -73,51 +75,60 @@ export default function ScanBatch(props) {
   };
 
   return (
-		<div className="ScanBatch--container">
-			<form onSubmit={handleSubmit(getBatchDetails)}>
-				<div className="ScanBatch--inner-wrapper">
-					<div className="ScanBatch--Image-space">
-						<img src={ScanImage} alt="ScanImage" />
-					</div>
-					<div className="ScanBatch--Batch-form">
-						<h1 className="vl-subheading f-500 vl-black">{t("enter_batch_no")}</h1>
-						<Controller
-							name="batchNumber"
-							control={control}
-							rules={{ required: true }}
-							render={({ field }) => (
-								<TextField
-									fullWidth
-									variant="outlined"
-									placeholder="XXXX XXXX XXXX"
-									{...field}
-									error={Boolean(errors.batchNumber)}
-									helperText={
-										errors.batchNumber?.type === "required"
-											? t("batch_number_required")
-											: errors.batchNumber?.message
-									}
-								/>
-							)}
-						/>
-						<div className="ScanBatch--action">
-							<button type="submit" className="vl-btn vl-btn-md vl-btn-full vl-btn-primary">
-								{t("continue")}
-							</button>
-						</div>
-					</div>
-				</div>
-			</form>
-			<Snackbar
-				anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-				open={openAlert}
-				autoHideDuration={6000}
-				onClose={handleAlertClose}
-			>
-				<Alert onClose={handleAlertClose} severity="error" sx={{ width: "100%" }}>
-					{errorMessage}
-				</Alert>
-			</Snackbar>
-		</div>
-	);
+    <div className='ScanBatch--container'>
+      <form onSubmit={handleSubmit(getBatchDetails)}>
+        <div className='ScanBatch--inner-wrapper'>
+          <div className='ScanBatch--Image-space'>
+            <img src={ScanImage} alt='ScanImage' />
+          </div>
+          <div className='ScanBatch--Batch-form'>
+            <h1 className='vl-subheading f-500 vl-black'>
+              {t("enter_batch_no")}
+            </h1>
+            <Controller
+              name='batchNumber'
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <TextField
+                  fullWidth
+                  variant='outlined'
+                  placeholder='XXXX XXXX XXXX'
+                  {...field}
+                  error={Boolean(errors.batchNumber)}
+                  helperText={
+                    errors.batchNumber?.type === "required"
+                      ? t("batch_number_required")
+                      : errors.batchNumber?.message
+                  }
+                />
+              )}
+            />
+            <div className='ScanBatch--action'>
+              <button
+                type='submit'
+                className='vl-btn vl-btn-md vl-btn-full vl-btn-primary'
+              >
+                {t("continue")}
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        open={openAlert}
+        autoHideDuration={6000}
+        onClose={handleAlertClose}
+      >
+        <Alert
+          onClose={handleAlertClose}
+          severity='error'
+          sx={{ width: "100%" }}
+        >
+          {errorMessage}
+        </Alert>
+      </Snackbar>
+    </div>
+  );
 }
