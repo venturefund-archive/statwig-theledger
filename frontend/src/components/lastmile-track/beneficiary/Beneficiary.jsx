@@ -7,6 +7,7 @@ import NewDose from "./NewDose";
 import {
   getVaccinationDetailsByVial,
   deleteVaccinationIndividual,
+  completeVaccinationVial,
 } from "../../../actions/lastMileActions";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
@@ -60,7 +61,7 @@ function ResultCard({ doseDetails, variant, update, deleteDose }) {
 }
 
 export default function Beneficiary(props) {
-  const { batchDetails, vialId, setVialId } = props;
+  const { batchDetails, vialId, setVialId, saveVaccination } = props;
   const { t } = useTranslation();
   const [LayoutType, setLayoutType] = useState(1);
   const [doses, setDoses] = useState([]);
@@ -72,7 +73,11 @@ export default function Beneficiary(props) {
       if (LayoutType === 1 && vialId) {
         const result = await getVaccinationDetailsByVial(vialId);
         if (result?.data?.success) {
-          setDoses(result.data.data[0].doses);
+          if (result?.data.data.isComplete) {
+            setLayoutType(2);
+          } else {
+            setDoses(result.data.data[0].doses);
+          }
         } else {
           console.log("Error in fetching dose list - ", result.data.message);
         }
@@ -101,6 +106,11 @@ export default function Beneficiary(props) {
   const deleteVaccination = async (doseId) => {
     setDoses(doses.filter((dose) => dose.id !== doseId));
     await deleteVaccinationIndividual(doseId);
+  };
+
+  const completeVaccination = async () => {
+    await completeVaccinationVial({ vaccineVialId: vialId });
+    saveVaccination();
   };
 
   return (
@@ -175,13 +185,13 @@ export default function Beneficiary(props) {
                     <div className='complete_btn_groups'>
                       <button
                         className='vl-btn vl-btn-sm vl-btn-alert'
-                        onClick={props.completeVaccination}
+                        onClick={saveVaccination}
                       >
                         {t("save_continue")}
                       </button>
                       <button
                         className='vl-btn vl-btn-sm vl-btn-primary'
-                        onClick={props.completeVaccination}
+                        onClick={completeVaccination}
                       >
                         {t("complete")}
                       </button>

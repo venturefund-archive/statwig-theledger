@@ -46,6 +46,15 @@ export const deleteVaccinationIndividual = async (data) => {
 	}
 }
 
+export const completeVaccinationVial = async (data) => {
+	try {
+		const result = await axios.post(`${config().completeVaccinationVial}`, data);
+		return result;
+	} catch (err) {
+		throw err;
+	}
+};
+
 export const fetchAnalytics = async () => {
 	try {
 		const result = await axios.get(`${config().getVaccineAnalytics}`);
