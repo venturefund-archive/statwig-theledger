@@ -88,3 +88,25 @@
   width: 30rem;
   object-fit: contain;
 }
+
+.mi_status_label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.35rem 1rem;
+  border-radius: 1rem;
+}
+
+.status_bg_completed {
+  background-color: #fbe4c2;
+  color: #333;
+  cursor: default;
+}
+.status_bg_completed > i {
+  color: rgb(54, 198, 1);
+}
+.status_bg_add {
+  background-color: #44bfd1;
+  color: #fff;
+  cursor: pointer;
+}

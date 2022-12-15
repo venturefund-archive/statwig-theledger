@@ -1,12 +1,27 @@
 import React from "react";
-import { Select, MenuItem, TextField, Autocomplete } from "@mui/material";
+import { TextField, Autocomplete } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
-import { vaccinateIndividual } from "../../../actions/lastMileActions";
+import {
+  vaccinateIndividual,
+  updateVaccinationIndividual,
+} from "../../../actions/lastMileActions";
 import { useTranslation } from "react-i18next";
+import Radio from "@mui/material/Radio";
 
 export default function NewDose(props) {
-  const { vaccineVialId, warehouseId, productId, batchNumber } = props;
+  const { vaccineVialId, warehouseId, productId, batchNumber, defaultValues } =
+    props;
   const { t, i18n } = useTranslation();
+  const ageInMonths = defaultValues?.ageMonths > 0;
+  const [selectedValue, setSelectedValue] = React.useState(
+    ageInMonths || false,
+  );
+
+  const handleChange = (event) => {
+    console.log(selectedValue, event.target.value);
+    setSelectedValue(event.target.value === "true" ? true : false);
+    console.log(selectedValue);
+  };
 
   const {
     control,
@@ -14,8 +29,11 @@ export default function NewDose(props) {
     handleSubmit,
   } = useForm({
     defaultValues: {
-      gender: null,
-      age: null,
+      gender: defaultValues?.gender || "",
+      age:
+        defaultValues?.ageMonths > 0
+          ? defaultValues.ageMonths
+          : defaultValues?.age || "",
     },
   });
 
@@ -26,15 +44,28 @@ export default function NewDose(props) {
         warehouseId: warehouseId,
         productId: productId,
         batchNumber: batchNumber,
-        ...values,
+        gender: values.gender,
+        age: selectedValue ? 0 : parseInt(values.age),
+        ageMonths: selectedValue ? parseInt(values.age) : 0,
       };
-
       // Call vaccinate api
-      const result = await vaccinateIndividual(data);
-      if (result.data.success) {
-        props.newVaccination(result.data.data);
+      if (defaultValues.update) {
+        const result = await updateVaccinationIndividual({
+          doseId: defaultValues.doseId,
+          update: data,
+        });
+        if (result.data.success) {
+          props.newVaccination(result.data.data);
+        } else {
+          throw new Error(result.data.message);
+        }
       } else {
-        throw new Error(result.data.message);
+        const result = await vaccinateIndividual(data);
+        if (result.data.success) {
+          props.newVaccination(result.data.data);
+        } else {
+          throw new Error(result.data.message);
+        }
       }
     } catch (err) {
       console.log(err);
@@ -44,13 +75,13 @@ export default function NewDose(props) {
   const options = ["MALE", "FEMALE", "OTHERS"];
 
   return (
-    <section className="Beneficiary--Add-wrapper">
+    <section className='Beneficiary--Add-wrapper'>
       <form onSubmit={handleSubmit(newDose)}>
-        <div className="Beneficiary--Add-inner-wrapper">
-          <h1 className="vl-subheading f-700 vl-grey-md">Personal Details</h1>
-          <div className="Add-form-space">
+        <div className='Beneficiary--Add-inner-wrapper'>
+          <h1 className='vl-subheading f-700 vl-grey-md'>Personal Details</h1>
+          <div className='Add-form-space'>
             <Controller
-              name="gender"
+              name='gender'
               control={control}
               rules={{ required: true }}
               render={({ field }) => (
@@ -69,21 +100,44 @@ export default function NewDose(props) {
               )}
             />
             <Controller
-              name="age"
+              name='age'
               control={control}
               rules={{ required: true }}
               render={({ field }) => (
                 <TextField
                   fullWidth
-                  variant="outlined"
+                  variant='outlined'
                   label={t("age")}
                   {...field}
                 />
               )}
             />
+            <div className='radio-btn-group'>
+              <div className='radio-btn-card'>
+                <Radio
+                  checked={selectedValue === false}
+                  onChange={handleChange}
+                  value={false}
+                  name='radio-buttons'
+                  inputProps={{ "aria-label": "A" }}
+                />
+                <p className='mi-body f-500'>Years</p>
+              </div>
+              <p className='mi-note f-400'>/</p>
+              <div className='radio-btn-card'>
+                <Radio
+                  checked={selectedValue === true}
+                  onChange={handleChange}
+                  value={true}
+                  name='radio-buttons'
+                  inputProps={{ "aria-label": "B" }}
+                />
+                <p className='mi-body f-500'>Months</p>
+              </div>
+            </div>
           </div>
-          <div className="Beneficiary--action">
-            <button type="submit" className="vl-btn vl-btn-md vl-btn-primary">
+          <div className='Beneficiary--action'>
+            <button type='submit' className='vl-btn vl-btn-md vl-btn-primary'>
               {t("save")}
             </button>
           </div>
