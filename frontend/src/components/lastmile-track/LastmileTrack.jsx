@@ -49,6 +49,7 @@ export default function LastmileTrack(props) {
   }, [Steps]);
 
   const saveVaccination = async () => {
+    setVialId(null);
     setSteps(1);
   };
 
