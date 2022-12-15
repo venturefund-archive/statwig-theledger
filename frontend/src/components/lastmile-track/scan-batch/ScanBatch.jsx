@@ -37,9 +37,16 @@ export default function ScanBatch(props) {
       };
       const result = await fetchBatch(data);
       if (result?.data?.success === true) {
+        console.log(result.data.data[0]);
+        console.log(result.data.data[0].atom);
+        console.log(result.data.data[0].atom.batchNumbers);
+        let dIndex = result.data.data[0].atom.batchNumbers.findIndex(element => {
+          return element.toLowerCase() === values.batchNumber.toLowerCase();
+        });
+        const bNo = result.data.data[0].atom.batchNumbers[dIndex > -1 ? dIndex : values.batchNumber];
         setBatchDetails({
           ...result.data.data[0],
-          batchNumber: values.batchNumber,
+          batchNumber: bNo,
         });
         setSteps(2);
       } else {

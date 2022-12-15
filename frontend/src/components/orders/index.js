@@ -41,7 +41,6 @@ const Orders = (props) => {
 	const [locationFilter, setLocationFilter] = useState("");
 	const [poOrderIdList, setPoOrderIdList] = useState([]);
 	const [poDeliveryLocationsList, setPoDeliveryLocationsList] = useState([]);
-	const [poProductsList, setPoProductsList] = useState([]);
 	const [poOrganisationsList, setPoOrganisationsList] = useState([]);
 	const [count, setCount] = useState(0);
 	const [exportFilterData, setExportFilterData] = useState([]);
@@ -55,18 +54,7 @@ const Orders = (props) => {
 	const [fromFilter, setFromFilter] = useState("");
 	const [orderIdFilter, setOrderIdFilter] = useState("");
 	const [toFilterDate, setToFilterDate] = useState("");
-	if (!isAuthenticated("viewInboundOrders") && !isAuthenticated("viewOutboundOrders"))
-		props.history.push(`/profile`);
-
-	// const sendData = () => {
-	//   let rtnArr = visible === "one" ? outboundRecords : inboundRecords;
-	//   const status = visible === "one" ? "REJECTED" :  "CREATED";
-	//   if (alerts) {
-	//     rtnArr = rtnArr.filter((row) => row.poStatus === status);
-	//     setStatusFilterOnSelect(status);
-	//   }
-	//   return rtnArr ? rtnArr : [];
-	// };
+	const [poProductsList, setPoProductsList] = useState([]);
 
 	const setStatusFilterOnSelect = async (statusFilterSelected) => {
 		setStatusFilter(statusFilterSelected);
@@ -120,16 +108,29 @@ const Orders = (props) => {
 		}
 	};
 
+	if (!isAuthenticated("viewInboundOrders") && !isAuthenticated("viewOutboundOrders"))
+		props.history.push(`/profile`);
+
+	// const sendData = () => {
+	//   let rtnArr = visible === "one" ? outboundRecords : inboundRecords;
+	//   const status = visible === "one" ? "REJECTED" :  "CREATED";
+	//   if (alerts) {
+	//     rtnArr = rtnArr.filter((row) => row.poStatus === status);
+	//     setStatusFilterOnSelect(status);
+	//   }
+	//   return rtnArr ? rtnArr : [];
+	// };
+
 	useEffect(() => {
 		async function fetchData() {
 			const updatedFilter = Boolean(
 				dateFilter ||
-					productNameFilter ||
-					toFilter ||
-					fromFilter ||
-					orderIdFilter ||
-					statusFilter ||
-					locationFilter,
+				productNameFilter ||
+				toFilter ||
+				fromFilter ||
+				orderIdFilter ||
+				statusFilter ||
+				locationFilter,
 			);
 			if (visible === "one" && alerts === false && !updatedFilter) {
 				setDateFilter("");
@@ -206,23 +207,10 @@ const Orders = (props) => {
 			setPoOrganisationsList(productsLocationsOrganisationsRes.organisations);
 			setSkip(0);
 		}
-		if(props.demoLogin) return;
+		if (props.demoLogin) return;
 		fetchData();
-	}, [
-		limit,
-		visible,
-		alerts,
-		dispatch,
-		toFilter,
-		orderIdFilter,
-		productNameFilter,
-		locationFilter,
-		dateFilter,
-		fromFilterDate,
-		toFilterDate,
-		fromFilter,
-	]);
-	console.log("outboundRecords ", outboundRecords);
+	}, [limit, visible, alerts, dispatch, toFilter, orderIdFilter, productNameFilter, locationFilter, dateFilter, fromFilterDate, toFilterDate, fromFilter, props.demoLogin, statusFilter]);
+	console.log("outboundRecords =>", outboundRecords);
 
 	const onPageChange = async (pageNum) => {
 		const recordSkip = (pageNum - 1) * limit;
@@ -261,28 +249,6 @@ const Orders = (props) => {
 		setData(visible);
 	};
 
-	const headers = {
-		coloumn1: visible === "one" ? "Order Sent To" : "Order CreatedBy",
-		coloumn2: "Order Date",
-		coloumn3: "Order ID",
-		coloumn4: "Product",
-		coloumn5: "Delivery Location",
-		coloumn6: "Status",
-
-		displayColoumn1: visible === "one" ? t("order_sent_to") : t("order_created_by"),
-		displayColoumn2: t("order_date"),
-		displayColoumn3: t("order_id"),
-		displayColoumn4: t("product"),
-		displayColoumn5: t("delivery_location"),
-		displayColoumn6: t("status"),
-
-		img1: <img src={mon} width="16" height="16" alt="" />,
-		img2: <img src={calender} width="16" height="16" alt="" />,
-		img3: <img src={Order} width="18" height="16" alt="" />,
-		img4: <img src={Package} width="16" height="16" alt="" />,
-		img5: <img src={Totalshipments} width="18" height="18" alt="" />,
-		img6: <img src={Status} width="16" height="16" alt="" />,
-	};
 
 	const closeExcelModal = () => {
 		setOpenExcel(false);
@@ -333,9 +299,27 @@ const Orders = (props) => {
 	//   setOpenCreatedOrder(false);
 	// };
 
-	const setData = (v, a = false) => {
-		setvisible(v);
-		setAlerts(a);
+	const headers = {
+		coloumn1: visible === "one" ? "Order Sent To" : "Order CreatedBy",
+		coloumn2: "Order Date",
+		coloumn3: "Order ID",
+		coloumn4: "Product",
+		coloumn5: "Delivery Location",
+		coloumn6: "Status",
+
+		displayColoumn1: visible === "one" ? t("order_sent_to") : t("order_created_by"),
+		displayColoumn2: t("order_date"),
+		displayColoumn3: t("order_id"),
+		displayColoumn4: t("product"),
+		displayColoumn5: t("delivery_location"),
+		displayColoumn6: t("status"),
+
+		img1: <img src={mon} width="16" height="16" alt="" />,
+		img2: <img src={calender} width="16" height="16" alt="" />,
+		img3: <img src={Order} width="18" height="16" alt="" />,
+		img4: <img src={Package} width="16" height="16" alt="" />,
+		img5: <img src={Totalshipments} width="18" height="18" alt="" />,
+		img6: <img src={Status} width="16" height="16" alt="" />,
 	};
 
 	const setLocationFilterOnSelect = async (locationFilterSelected) => {
@@ -389,6 +373,11 @@ const Orders = (props) => {
 			setInboundRecords(inboundRes.data.inboundPOs);
 			setCount(inboundRes.data.count);
 		}
+	};
+
+	const setData = (v, a = false) => {
+		setvisible(v);
+		setAlerts(a);
 	};
 
 	const setProductNameFilterOnSelect = async (productNameFilterSelected) => {
@@ -570,14 +559,12 @@ const Orders = (props) => {
 		setShowExportFilter(false);
 		let url = "";
 		if (visible === "one") {
-			url = `${
-				config().getExportFileForOutboundPurchaseOrdersUrl
-			}?type=${value.toLowerCase()}&to=${fromFilter}&orderId=${orderIdFilter}&productName=${productNameFilter}&dateFilter=${dateFilter}&deliveryLocation=${locationFilter}&poStatus=${statusFilter}&fromDate=${fromFilterDate}&toDate=${toFilterDate}`;
+			url = `${config().getExportFileForOutboundPurchaseOrdersUrl
+				}?type=${value.toLowerCase()}&to=${fromFilter}&orderId=${orderIdFilter}&productName=${productNameFilter}&dateFilter=${dateFilter}&deliveryLocation=${locationFilter}&poStatus=${statusFilter}&fromDate=${fromFilterDate}&toDate=${toFilterDate}`;
 		}
 		if (visible === "two") {
-			url = `${
-				config().getExportFileForInboundPurchaseOrdersUrl
-			}?type=${value.toLowerCase()}&from=${fromFilter}&orderId=${orderIdFilter}&productName=${productNameFilter}&dateFilter=${dateFilter}&deliveryLocation=${locationFilter}&poStatus=${statusFilter}&fromDate=${fromFilterDate}&toDate=${toFilterDate}`;
+			url = `${config().getExportFileForInboundPurchaseOrdersUrl
+				}?type=${value.toLowerCase()}&from=${fromFilter}&orderId=${orderIdFilter}&productName=${productNameFilter}&dateFilter=${dateFilter}&deliveryLocation=${locationFilter}&poStatus=${statusFilter}&fromDate=${fromFilterDate}&toDate=${toFilterDate}`;
 		}
 
 		var today = new Date();

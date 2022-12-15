@@ -223,7 +223,7 @@ export const AddLocationCard = (props) => {
                         <Autocomplete
                           value={region}
                           labelId='demo-simple-select-label'
-                          disabled={true}
+                          disabled
                           id='demo-simple-select controllable-states-demo'
                           // placeholder={
                           //   <div className='select-placeholder-text'>
@@ -272,7 +272,7 @@ export const AddLocationCard = (props) => {
                           //   </div>
                           // }
                           value={country}
-                          disabled={true}
+                          disabled
                           onClick={(e) => {e.preventDefault(); return}}
                           onChange={(event, newValue) => {
                             let v = search(newValue, allCountries);

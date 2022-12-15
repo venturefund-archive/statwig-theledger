@@ -3,7 +3,7 @@ exports.responses = (language) => {
         EN: {
             po_status: "PO Status",
             success: "Success",
-            not_authorized: "You are not authorised to change the status",
+            not_authorized: "You are not authorized to change the status",
             no_permission: "User does not have enough Permissions",
             upload_result: "Upload Result",
             inserted_ex_duplicates: "Inserted excluding Duplicate Values",
