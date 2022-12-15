@@ -946,9 +946,9 @@ exports.completeVial = [
 			const { vaccineVialId } = req.body;
 			const updatedVial = await VaccineVialModel.findOneAndUpdate({ id: vaccineVialId }, { $set: { isComplete: true } }, { new: true })
 			if (updatedVial) {
-				return apiResponse.successResponseWithData(res, "vial Completed", updatedVial);
+				return apiResponse.successResponseWithData(res, "Vial Completed", updatedVial);
 			} else {
-				return apiResponse.notFoundResponse(res, "vial Not Found");
+				return apiResponse.notFoundResponse(res, "Vial Not Found");
 			}
 		} catch (err) {
 			console.log(err);
