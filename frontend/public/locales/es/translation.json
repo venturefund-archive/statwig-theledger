@@ -628,5 +628,6 @@
   "is_required":"es requerido",
   "is_invalid":"es invalido",
   "duplicate":"Duplicado",
-  "save_complete":"Guardar Continuar"
+  "save_complete":"Guardar Continuar",
+  "add_loc":"Añade una ubicación"
 }

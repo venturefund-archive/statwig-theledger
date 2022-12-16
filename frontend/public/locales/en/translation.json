@@ -607,5 +607,6 @@
   "is_required":"is required",
   "is_invalid":"is Invalid",
   "duplicate":"Duplicate",
-  "save_continue":"Save & Continue"
+  "save_continue":"Save & Continue",
+  "add_loc":"Add Location"
 }
