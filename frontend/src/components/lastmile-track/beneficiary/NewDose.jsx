@@ -9,9 +9,15 @@ import { useTranslation } from "react-i18next";
 import Radio from "@mui/material/Radio";
 
 export default function NewDose(props) {
-  const { vaccineVialId, warehouseId, productId, batchNumber, defaultValues } =
-    props;
-  const { t, i18n } = useTranslation();
+  const {
+    vaccineVialId,
+    warehouseId,
+    productId,
+    batchNumber,
+    defaultValues,
+    setDefaultValues,
+  } = props;
+  const { t } = useTranslation();
   const ageInMonths = defaultValues?.ageMonths > 0;
   const [selectedValue, setSelectedValue] = React.useState(
     ageInMonths || false,
@@ -54,6 +60,7 @@ export default function NewDose(props) {
           doseId: defaultValues.doseId,
           update: data,
         });
+        setDefaultValues({});
         if (result.data.success) {
           props.newVaccination(result.data.data);
         } else {

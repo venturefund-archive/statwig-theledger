@@ -940,7 +940,7 @@ exports.deleteDose = [
 			const { doseId } = req.query;
 			const deleteDose = await DoseModel.findOneAndDelete({ id: doseId })
 			if (deleteDose) {
-				await VaccineVialModel.updateOne({ id: deleteDose.vaccineVialId }, { $inc: { numberOfDoses: 1 } })
+				await VaccineVialModel.updateOne({ id: deleteDose.vaccineVialId }, { $inc: { numberOfDoses: -1 } })
 				return apiResponse.successResponse(res, "Dose Deleted Successfully")
 			} else {
 				return apiResponse.notFoundResponse(res, "Dose not found");
