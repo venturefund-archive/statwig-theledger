@@ -24,10 +24,8 @@ export default function LastmileTrack(props) {
   const [totalVaccinations, setTotalVaccinations] = useState();
   const [todaysVaccinations, setTodaysVaccinations] = useState();
   const [batchDetails, setBatchDetails] = useState();
-  const [flag, toggleFlag] = useState(false);
 
   const { t } = useTranslation();
-  console.log("BATCH", batchDetails);
 
   useEffect(() => {
     (async () => {
@@ -38,7 +36,6 @@ export default function LastmileTrack(props) {
       }
       const unitsUtilized = await getVialsUtilised();
       if (unitsUtilized?.data?.success) {
-        console.log("UTILS", unitsUtilized);
         setUnitsUtilized(unitsUtilized.data.data);
       }
       const vaccinationsList = await getVaccinationsList();
@@ -49,11 +46,11 @@ export default function LastmileTrack(props) {
         );
       }
     })();
-  }, [flag]);
+  }, [Steps]);
 
-  const completeVaccination = async () => {
+  const saveVaccination = async () => {
+    setVialId(null);
     setSteps(1);
-    toggleFlag(!flag);
   };
 
   const handleAnalyticsClicked = (tableType) => {
@@ -129,7 +126,7 @@ export default function LastmileTrack(props) {
                   vialId={vialId}
                   setVialId={setVialId}
                   batchDetails={batchDetails}
-                  completeVaccination={completeVaccination}
+                  saveVaccination={saveVaccination}
                   {...props}
                 />
               )}
