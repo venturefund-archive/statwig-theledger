@@ -764,7 +764,7 @@ exports.addProductsToInventory = [
               if (batchDup) {
                 await AtomModel.updateOne(
                   { id: batchDup.id },
-                  { quantity: batchDup.quantity + atomsArray[i].quantity },
+                  { quantity: batchDup.quantity + atomsArray[i].quantity, status: "HEALTHY" },
                 );
               } else {
                 insertAtomsArray.push(atomsArray[i]);
