@@ -78,7 +78,7 @@ export default function NewDose(props) {
       console.log(err);
     }
   };
-
+  
   const options = ["MALE", "FEMALE", "OTHERS"];
 
   return (
@@ -116,6 +116,7 @@ export default function NewDose(props) {
                   variant='outlined'
                   label={t("age")}
                   {...field}
+                  inputProps={{ maxLength: 3, pattern: "[0-9]*"}}
                 />
               )}
             />
