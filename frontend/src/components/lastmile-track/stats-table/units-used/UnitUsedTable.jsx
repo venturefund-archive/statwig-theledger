@@ -6,25 +6,36 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import UnitUsedRow from "./UnitUsedRow";
 import EmptyIcon from "../../../../assets/files/designs/empty-table.jpg";
+import { getVialsUtilised } from "../../../../actions/lastMileActions";
 
 export default function UnitUsedTable({
-  unitsUtilized,
   t,
   setSteps,
   setTableView,
   setBatchDetails,
   setVialId,
 }) {
+  const [data, setData] = useState(null);
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await getVialsUtilised();
+      if (response?.data?.success) {
+        setData(response.data.data);
+      } else console.log(response.data);
+    };
+    fetchData();
+  }, []);
+
   return (
     <>
       <TableContainer className='vl-mui-custom-tablecontainer'>
         <div className='Beneficiary--header'>
           <h1 className='vl-subtitle f-700 vl-black'>{t("total_util")}</h1>
         </div>
-        {unitsUtilized && unitsUtilized.length ? (
+        {data && data.length ? (
           <Table sx={{ minWidth: 650 }} className='vl-mui-custom-table'>
             <TableHead className='vl-mui-custom-tablehead'>
               <TableRow className='vl-mui-custom-tr'>
@@ -59,9 +70,9 @@ export default function UnitUsedTable({
             </TableHead>
 
             <TableBody className='vl-mui-custom-tablebody'>
-              {unitsUtilized &&
-                unitsUtilized.length &&
-                unitsUtilized.map((vial, i) => (
+              {data &&
+                data.length &&
+                data.map((vial, i) => (
                   <UnitUsedRow
                     vial={vial}
                     index={i}

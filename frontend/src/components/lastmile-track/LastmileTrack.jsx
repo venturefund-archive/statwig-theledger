@@ -20,11 +20,10 @@ export default function LastmileTrack(props) {
   const [tableComp, setTableComp] = useState(null);
   const [vialId, setVialId] = useState(null);
   const [analytics, setAnalytics] = useState();
-  const [unitsUtilized, setUnitsUtilized] = useState();
   const [totalVaccinations, setTotalVaccinations] = useState();
   const [todaysVaccinations, setTodaysVaccinations] = useState();
   const [batchDetails, setBatchDetails] = useState();
-
+  const [save, setSave] = useState(false);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -34,10 +33,6 @@ export default function LastmileTrack(props) {
       if (analytics?.data?.success) {
         setAnalytics(analytics.data.data);
       }
-      const unitsUtilized = await getVialsUtilised();
-      if (unitsUtilized?.data?.success) {
-        setUnitsUtilized(unitsUtilized.data.data);
-      }
       const vaccinationsList = await getVaccinationsList();
       if (vaccinationsList?.data?.success) {
         setTotalVaccinations(vaccinationsList.data.data.vaccinationsList);
@@ -46,11 +41,12 @@ export default function LastmileTrack(props) {
         );
       }
     })();
-  }, [Steps]);
+  }, [Steps, save]);
 
   const saveVaccination = async () => {
     setVialId(null);
-    setSteps(1);
+    setSave(!save);
+    handleAnalyticsClicked("unitsUtilized");
   };
 
   const handleAnalyticsClicked = (tableType) => {
@@ -60,7 +56,6 @@ export default function LastmileTrack(props) {
         table = (
           <UnitUsedTable
             t={t}
-            unitsUtilized={unitsUtilized}
             setSteps={setSteps}
             setTableView={setTableView}
             setBatchDetails={setBatchDetails}
