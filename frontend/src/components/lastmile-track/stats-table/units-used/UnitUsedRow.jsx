@@ -1,7 +1,7 @@
 import React from "react";
 import { TableCell, TableRow } from "@mui/material";
 import { format } from "date-fns";
-import { fetchBatch } from "../../../../actions/lastMileActions";
+import { fetchBatchByIdWithoutCondition } from "../../../../actions/lastMileActions";
 export default function UnitUsedRow({
   vial,
   index,
@@ -11,7 +11,7 @@ export default function UnitUsedRow({
   setVialId,
 }) {
   const getBatchDetails = async (vialId, batchNumber, warehouseId) => {
-    const result = await fetchBatch({
+    const result = await fetchBatchByIdWithoutCondition({
       batchNumber,
       warehouseId,
     });

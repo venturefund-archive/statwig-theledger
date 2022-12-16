@@ -277,6 +277,70 @@ exports.fetchBatchById = [
 	},
 ];
 
+exports.fetchBatchByIdWithoutCondition = [
+	auth,
+	async (req, res) => {
+		try {
+			const userId = req.user.id;
+			const batchNumber = req.body.batchNumber;
+			const warehouseId = req.body.warehouseId;
+
+			const user = await EmployeeModel.findOne({ id: userId });
+
+			if (!user.warehouseId.includes(warehouseId)) {
+				throw new Error("User does not have access to this warehouse!");
+			}
+
+			const warehouse = await WarehouseModel.findOne({ id: warehouseId });
+
+			const productDetails = await EmployeeModel.aggregate(
+				[
+					{ $match: { id: userId } },
+					{
+						$lookup: {
+							from: "atoms",
+							let: {
+								inventoryId: warehouse.warehouseInventory,
+								batchNumber: batchNumber,
+							},
+							pipeline: [
+								{
+									$match: {
+										$expr: {
+											$and: [
+												{ $eq: ["$currentInventory", "$$inventoryId"] },
+												// { $eq: ["$status", "HEALTHY"] },
+												{ $in: ["$$batchNumber", "$batchNumbers"] },
+											],
+										},
+									},
+								},
+							],
+							as: "atom",
+						},
+					},
+					{ $unwind: "$atom" },
+					{
+						$lookup: {
+							from: "products",
+							localField: "atom.productId",
+							foreignField: "id",
+							as: "product",
+						},
+					},
+					{ $unwind: "$product" },
+					{ $project: { atom: 1, product: 1 } },
+				],
+				{ collation: { locale: "en", strength: 2 } },
+			);
+			return apiResponse.successResponseWithData(res, "Product Details", productDetails);
+		} catch (err) {
+			console.log(err);
+			return apiResponse.ErrorResponse(res, err.message);
+		}
+	},
+];
+
 exports.vaccinateIndividual = [
 	auth,
 	async (req, res) => {

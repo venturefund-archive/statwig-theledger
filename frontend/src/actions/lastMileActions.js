@@ -10,6 +10,15 @@ export const fetchBatch = async (data) => {
 	}
 };
 
+export const fetchBatchByIdWithoutCondition = async (data) => {
+	try {
+		const result = await axios.post(`${config().fetchBatchByIdWithoutCondition}`, data);
+		return result;
+	} catch (err) {
+		return err.response;
+	}
+};
+
 export const getAllVaccinationDetails = async (data) => {
 	try {
 		const result = await axios.post(`${config().getAllVaccinationDetails}`, data);
