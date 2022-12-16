@@ -29,7 +29,7 @@ mongoose
     console.error("App starting error:", err.message);
     process.exit(1);
   });
-var db = mongoose.connection;
+
 //don't show the log when it is test
 if (process.env.NODE_ENV !== "test") {
   app.use(logger("dev"));

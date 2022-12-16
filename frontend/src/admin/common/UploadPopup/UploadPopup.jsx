@@ -33,6 +33,7 @@ export default function UploadPopup({
       setOpenSuccessPopup(false);
     }
     setOpenFailurePopup(false);
+    handleImportClose();
   };
   const uploadExcel = async () => {
     try {

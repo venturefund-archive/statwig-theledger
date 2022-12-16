@@ -28,6 +28,24 @@ export const vaccinateIndividual = async (data) => {
 	}
 };
 
+export const updateVaccinationIndividual = async (data) => {
+	try {
+		const result = await axios.put(`${config().updateVaccinationIndividual}`, data);
+		return result;
+	} catch (err) {
+		throw err;
+	}
+}
+
+export const deleteVaccinationIndividual = async (data) => {
+	try {
+		const result = await axios.delete(`${config().deleteVaccinationIndividual}`, { params: { doseId: data } });
+		return result;
+	} catch (err) {
+		throw err;
+	}
+}
+
 export const fetchAnalytics = async () => {
 	try {
 		const result = await axios.get(`${config().getVaccineAnalytics}`);

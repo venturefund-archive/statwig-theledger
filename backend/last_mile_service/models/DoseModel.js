@@ -1,22 +1,26 @@
 const mongoose = require("mongoose");
-
 const DoseSchema = new mongoose.Schema(
 	{
 		id: {
-			required: true,
 			type: String,
+			required: true,
 		},
 		vaccineVialId: {
-			required: true,
 			type: String,
+			required: true,
 		},
 		age: {
-			required: true,
-			type: Number
+			type: Number,
+			default: 0,
 		},
+		ageMonths: {
+			type: Number,
+			default: 0
+		},
+		dob: Date,
 		gender: {
-			required: true,
 			type: String,
+			required: true,
 			enum: ["MALE", "FEMALE", "OTHERS"],
 		},
 	},
