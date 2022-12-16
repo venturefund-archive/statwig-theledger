@@ -330,6 +330,12 @@ exports.vaccinateIndividual = [
 						$inc: { quantity: -1 },
 					}
 				);
+				await AtomModel.updateMany(
+					{
+						quantity: 0
+					},
+					{ $set: { status: "CONSUMED" } }
+				);
 				// Reduce inventory in InventoryModel 
 				await InventoryModel.updateOne(
 					{ id: warehouse.warehouseInventory, "inventoryDetails.productId": productId },
@@ -465,6 +471,13 @@ exports.vaccinateMultiple = [
 					{
 						$inc: { quantity: -1 },
 					}
+				);
+
+				await AtomModel.updateMany(
+					{
+						quantity: 0
+					},
+					{ $set: { status: "CONSUMED" } }
 				);
 
 				await InventoryModel.updateOne(
