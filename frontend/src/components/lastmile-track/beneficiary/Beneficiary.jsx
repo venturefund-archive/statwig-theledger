@@ -216,6 +216,7 @@ export default function Beneficiary(props) {
           {LayoutType === 2 && (
             <NewDose
               defaultValues={defaultValues}
+              setDefaultValues={setDefaultValues}
               vaccineVialId={vialId}
               warehouseId={
                 userLocation?.id ? userLocation.id : props.user.warehouseId[0]

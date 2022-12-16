@@ -1,33 +1,41 @@
 import { TableCell, TableRow } from "@mui/material";
-import { format } from 'date-fns';
+// import { format } from "date-fns";
 import React from "react";
 
-export default function TotalVaccinatedRow({dose, index}) {
+export default function TotalVaccinatedRow({ dose, index }) {
   return (
-    <TableRow className="vl-mui-custom-tr">
-      <TableCell component="th" scope="row" align="center">
-        <div className="vl-table-body-column">
-          <p className="vl-body f-500 ">{index + 1}</p>
+    <TableRow className='vl-mui-custom-tr'>
+      <TableCell component='th' scope='row' align='center'>
+        <div className='vl-table-body-column'>
+          <p className='vl-body f-500 '>{index + 1}</p>
         </div>
       </TableCell>
-      <TableCell component="th" scope="row" align="center">
-        <div className="vl-table-body-column">
-          <p className="vl-body f-500 ">{dose.batchNumber}</p>
+      <TableCell component='th' scope='row' align='center'>
+        <div className='vl-table-body-column'>
+          <p className='vl-body f-500 '>{dose.batchNumber}</p>
         </div>
       </TableCell>
-      <TableCell component="th" scope="row" align="center">
-        <div className="vl-table-body-column">
-          <p className="vl-body f-500 ">{dose.gender}</p>
+      <TableCell component='th' scope='row' align='center'>
+        <div className='vl-table-body-column'>
+          <p className='vl-body f-500 '>{dose.gender}</p>
         </div>
       </TableCell>
-      <TableCell component="th" scope="row" align="center">
-        <div className="vl-table-body-column">
-          <p className="vl-body f-500 ">{dose.age}</p>
+      <TableCell component='th' scope='row' align='center'>
+        <div className='vl-table-body-column'>
+          <p className='vl-body f-500 '>
+            {dose?.ageMonths > 0
+              ? `${dose.ageMonths} months`
+              : `${dose.age} years`}
+          </p>
         </div>
       </TableCell>
-      <TableCell component="th" scope="row" align="center">
-        <div className="vl-table-body-column">
-          <p className="vl-body f-500 ">{new Date(dose.createdAt).toLocaleDateString()}</p>
+      <TableCell component='th' scope='row' align='center'>
+        <div className='vl-table-body-column'>
+          <p className='vl-body f-500 '>
+            {/* {format(dose.createdAt, "dd/MM/yyyy")}
+             */}
+            {new Date(dose.createdAt).toLocaleDateString()}
+          </p>
         </div>
       </TableCell>
     </TableRow>
