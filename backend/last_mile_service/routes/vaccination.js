@@ -3,6 +3,7 @@ const router = express.Router();
 const VaccinationController = require("../controllers/VaccinationController");
 
 router.post("/fetchBatchById", VaccinationController.fetchBatchById);
+router.post("/fetchBatchByIdWithoutCondition", VaccinationController.fetchBatchByIdWithoutCondition);
 router.post("/vaccinateIndividual", VaccinationController.vaccinateIndividual);
 router.post("/vaccinateMultiple", VaccinationController.vaccinateMultiple);
 router.post("/getAllVaccinationDetails", VaccinationController.getAllVaccinationDetails);
