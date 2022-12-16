@@ -628,5 +628,7 @@
   "is_required":"es requerido",
   "is_invalid":"es invalido",
   "duplicate":"Duplicado",
+  "individual_age":"Individuo edad",
+  "range_group":"Grupo de rango",
   "save_complete":"Guardar Continuar"
 }
