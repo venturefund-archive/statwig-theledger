@@ -16,7 +16,7 @@ export default function CenteralTodayRow({ data }) {
       </TableCell>
       <TableCell component="th" scope="row" align="center">
         <div className="vl-table-body-column">
-          <p className="vl-body f-500 ">{data.age}</p>
+          <p className="vl-body f-500 ">{`${data.age}y ${data.ageMonths || 0}m`}</p>
         </div>
       </TableCell>
       <TableCell component="th" scope="row" align="center">
