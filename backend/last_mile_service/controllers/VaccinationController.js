@@ -176,6 +176,7 @@ const generateVaccinationsList = async (filters) => {
 					batchNumber: vaccineVials[j].batchNumber,
 					organisationName: vaccineVials[j]?.product?.manufacturer,
 					age: doses[k].age,
+					ageMonths: doses[k].ageMonths,
 					gender: doses[k].gender,
 					state: warehouses[i].warehouseAddress.state,
 					city: warehouses[i].warehouseAddress.city,
