@@ -15,7 +15,7 @@ function valuetext(value) {
 }
 
 export default function Filterbar(props) {
-	const { tableType, setFilters, t } = props;
+	const { tableType, filters, setFilters, t } = props;
 
 	const [cities, setCities] = useState([""]);
 	const [organisations, setOrgnisations] = useState([""]);
@@ -47,6 +47,15 @@ export default function Filterbar(props) {
 
 		setFilters(data);
 	}, [gender, ageRange, city, organisation]);
+
+	useEffect(async () => {
+		if(tableType === "units") {
+			if (filters.gender) {
+				const { gender, ...newFilters } = filters;
+				setFilters(newFilters);
+			}
+		}
+	}, [tableType])
 
 	useEffect(async () => {
 		try {

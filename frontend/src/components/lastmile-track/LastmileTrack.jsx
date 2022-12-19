@@ -93,11 +93,17 @@ export default function LastmileTrack(props) {
           >
             {t("lastmile")}
           </h1>
-          {tableView && (
+          {(tableView || Steps != 1) && (
             <div className='back-link-button-space'>
               <button
                 className='back-action-btn'
-                onClick={() => setTableView(false)}
+                onClick={() => {
+                  if(tableView) {
+                    setTableView(false)
+                  } else {
+                    setSteps(1);
+                  }
+                }}
               >
                 <i className='fa-solid fa-arrow-left'></i>
                 <span>{t("back_to_batch_details")}</span>

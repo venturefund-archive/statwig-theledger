@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
 import {
   exportVaccinationList,
   getAllVaccinationDetails,
@@ -11,6 +12,7 @@ import "./LastmileCenteral.css";
 import CenteralTodayTable from "./stats-table/central-today/CenteralTodayTable";
 import CenteralTotalTable from "./stats-table/central-total/CenteralTotalTable";
 import CenteralUnitsTable from "./stats-table/central-units/CenteralUnitsTable";
+import { turnOn, turnOff } from "../../actions/spinnerActions";
 
 let useClickOutside = (handler) => {
   let domNode = useRef();
@@ -33,6 +35,8 @@ let useClickOutside = (handler) => {
 };
 
 export default function LastmileCenteral(props) {
+  const dispatch = useDispatch();
+
   const [analytics, setAnalytics] = useState();
   const [TableSwitch, setTableSwitch] = useState("today");
   const [filters, setFilters] = useState({});
@@ -49,19 +53,21 @@ export default function LastmileCenteral(props) {
 
   useEffect(() => {
     (async () => {
-      const unitsUtilized = await getVialsUtilised(filters);
-      if (unitsUtilized?.data?.success) {
-        setUnitsUtilized(unitsUtilized.data.data);
-      }
+			dispatch(turnOn());
+			const unitsUtilized = await getVialsUtilised(filters);
+			if (unitsUtilized?.data?.success) {
+				setUnitsUtilized(unitsUtilized.data.data);
+			}
 
-      const result = await getAllVaccinationDetails(filters);
-      if (result?.data?.success) {
-        setVaccinationList(result.data.data.vaccinationDetails);
-        setTodaysVaccinationList(result.data.data.todaysVaccinationDetails);
-        setAnalytics(result.data.data.analytics);
-      }
-    })();
-  }, [filters]);
+			const result = await getAllVaccinationDetails(filters);
+			if (result?.data?.success) {
+				setVaccinationList(result.data.data.vaccinationDetails);
+				setTodaysVaccinationList(result.data.data.todaysVaccinationDetails);
+				setAnalytics(result.data.data.analytics);
+			}
+			dispatch(turnOff());
+		})();
+  }, [filters, TableSwitch]);
 
   const exportVaccinationReport = async (type) => {
     let data = filters;
@@ -168,6 +174,7 @@ export default function LastmileCenteral(props) {
         <Filterbar
           t={t}
           tableType={TableSwitch}
+          filters={filters}
           setFilters={setFilters}
           {...props}
         />
