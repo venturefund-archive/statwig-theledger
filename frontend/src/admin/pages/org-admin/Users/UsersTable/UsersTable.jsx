@@ -20,6 +20,20 @@ export default function UsersTable(props) {
   // }, [dispatch]);
   const { users } = useSelector((state) => state.organisationReducer);
 
+  const uniqueIds = new Set();
+
+  const uniqueUsers = users.filter(element => {
+    const isDuplicate = uniqueIds.has(element.id);
+
+    uniqueIds.add(element.id);
+
+    if (!isDuplicate) {
+      return true;
+    }
+
+    return false;
+  });
+
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   useEffect(() => {
@@ -67,7 +81,7 @@ export default function UsersTable(props) {
           </TableRow>
         </TableHead>
         <TableBody className="organization-tbody">
-          {users.map((rows, index) => (
+          {uniqueUsers.map((rows, index) => (
             <UsersRow
               t={t}
               key={rows.id}
