@@ -171,12 +171,13 @@ const generateVaccinationsList = async (filters) => {
 				}
 			}
 			for (let k = 0; k < doses.length; ++k) {
+				let age = `${doses[k].ageMonths ? doses[k].ageMonths : doses[k].age} ${doses[k].ageMonths ? "months" : "years"}`;
+
 				const data = {
 					date: createdAt,
 					batchNumber: vaccineVials[j].batchNumber,
 					organisationName: vaccineVials[j]?.product?.manufacturer,
-					age: doses[k].age,
-					ageMonths: doses[k].ageMonths,
+					age: age,
 					gender: doses[k].gender,
 					state: warehouses[i].warehouseAddress.state,
 					city: warehouses[i].warehouseAddress.city,
