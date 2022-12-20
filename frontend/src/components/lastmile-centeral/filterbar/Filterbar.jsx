@@ -137,9 +137,9 @@ export default function Filterbar(props) {
 									/>
 									<FormControlLabel
 										name="gender"
-										checked={gender === "GENERAL"}
-										value="GENERAL"
-										id="general"
+										checked={gender === "OTHERS"}
+										value="OTHERS"
+										id="others"
 										control={<Radio />}
 										label={t("others")}
 									/>

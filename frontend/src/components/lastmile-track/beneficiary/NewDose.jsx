@@ -82,75 +82,86 @@ export default function NewDose(props) {
   const options = ["MALE", "FEMALE", "OTHERS"];
 
   return (
-    <section className='Beneficiary--Add-wrapper'>
-      <form onSubmit={handleSubmit(newDose)}>
-        <div className='Beneficiary--Add-inner-wrapper'>
-          <h1 className='vl-subheading f-700 vl-grey-md'>Personal Details</h1>
-          <div className='Add-form-space'>
-            <Controller
-              name='gender'
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Autocomplete
-                  fullWidth
-                  options={options}
-                  getOptionLabel={(option) => option || ""}
-                  renderInput={(params) => (
-                    <TextField {...params} label={t("gender")} />
-                  )}
-                  {...field}
-                  onChange={(event, value) => {
-                    field.onChange(value);
+		<section className="Beneficiary--Add-wrapper">
+			<form onSubmit={handleSubmit(newDose)}>
+				<div className="Beneficiary--Add-inner-wrapper">
+					<h1 className="vl-subheading f-700 vl-grey-md">Personal Details</h1>
+					<div className="Add-form-space">
+						<Controller
+							name="gender"
+							control={control}
+							rules={{ required: true }}
+							render={({ field }) => (
+								<Autocomplete
+									fullWidth
+									options={options}
+									getOptionLabel={(option) => option || ""}
+									renderInput={(params) => <TextField {...params} label={t("gender")} />}
+									{...field}
+									onChange={(event, value) => {
+										field.onChange(value);
+									}}
+                  required={true}
+								/>
+							)}
+						/>
+						<Controller
+							name="age"
+							control={control}
+							rules={{ required: true }}
+							render={({ field }) => (
+								<TextField
+									type="number"
+									fullWidth
+									variant="outlined"
+									label={t("age")}
+									{...field}
+									inputProps={{
+                    inputMode: "numeric",
+										min: selectedValue ? "6" : "1",
+										max: selectedValue ? "12" : "150",
                   }}
-                />
-              )}
-            />
-            <Controller
-              name='age'
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <TextField
-                  fullWidth
-                  variant='outlined'
-                  label={t("age")}
-                  {...field}
-                  inputProps={{ maxLength: 3, pattern: "[0-9]*"}}
-                />
-              )}
-            />
-            <div className='radio-btn-group'>
-              <div className='radio-btn-card'>
-                <Radio
-                  checked={selectedValue === false}
-                  onChange={handleChange}
-                  value={false}
-                  name='radio-buttons'
-                  inputProps={{ "aria-label": "A" }}
-                />
-                <p className='mi-body f-500'>Years</p>
-              </div>
-              <p className='mi-note f-400'>/</p>
-              <div className='radio-btn-card'>
-                <Radio
-                  checked={selectedValue === true}
-                  onChange={handleChange}
-                  value={true}
-                  name='radio-buttons'
-                  inputProps={{ "aria-label": "B" }}
-                />
-                <p className='mi-body f-500'>Months</p>
-              </div>
-            </div>
-          </div>
-          <div className='Beneficiary--action'>
-            <button type='submit' className='vl-btn vl-btn-md vl-btn-primary'>
-              {t("save")}
-            </button>
-          </div>
-        </div>
-      </form>
-    </section>
-  );
+                  required={true}
+									// InputProps={{
+									// 	inputProps: {
+									// 		min: selectedValue ? 6 : 1,
+									// 		max: selectedValue ? 12 : 150,
+									// 	},
+									// }}
+								/>
+							)}
+						/>
+						<div className="radio-btn-group">
+							<div className="radio-btn-card">
+								<Radio
+									checked={selectedValue === false}
+									onChange={handleChange}
+									value={false}
+									name="radio-buttons"
+									inputProps={{ "aria-label": "A" }}
+								/>
+								<p className="mi-body f-500">Years</p>
+							</div>
+							<p className="mi-note f-400">/</p>
+							<div className="radio-btn-card">
+								<Radio
+									checked={selectedValue === true}
+									onChange={handleChange}
+									value={true}
+									name="radio-buttons"
+									inputProps={{ "aria-label": "B" }}
+								/>
+								<p className="mi-body f-500">Months</p>
+							</div>
+						</div>
+					</div>
+					<div className="Beneficiary--action">
+						<button type="submit" className="vl-btn vl-btn-md vl-btn-primary">
+							{t("save")}
+						</button>
+					</div>
+				</div>
+			</form>
+		</section>
+	);
 }

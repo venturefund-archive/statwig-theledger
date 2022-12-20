@@ -22,7 +22,7 @@ export default function CenteralTotalRow({ data }) {
 			</TableCell>
 			<TableCell component="th" scope="row" align="center">
 				<div className="vl-table-body-column">
-					<p className="vl-body f-500 ">{`${data.age}y ${data.ageMonths || 0}m`}</p>
+					<p className="vl-body f-500 ">{data.age}</p>
 				</div>
 			</TableCell>
 			<TableCell component="th" scope="row" align="center">
