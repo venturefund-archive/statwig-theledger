@@ -139,6 +139,9 @@ const generateVaccinationsList = async (filters) => {
 				as: "vaccinations",
 			},
 		},
+		{
+			$sort: { "vaccinations.createdAt": -1 },
+		},
 	]);
 	if (!warehouses) {
 		return apiResponse.validationErrorWithData(res, "VaccineVialId invalid!", {
@@ -1039,25 +1042,10 @@ exports.completeVial = [
 function buildExcelReport(req, res, dataForExcel) {
 	const styles = {
 		headerDark: {
-			fill: {
-				fgColor: {
-					rgb: "FF000000",
-				},
-			},
 			font: {
-				color: {
-					rgb: "FFFFFFFF",
-				},
 				sz: 14,
 				bold: true,
 				underline: true,
-			},
-		},
-		cellGreen: {
-			fill: {
-				fgColor: {
-					rgb: "FF00FF00",
-				},
 			},
 		},
 	};
