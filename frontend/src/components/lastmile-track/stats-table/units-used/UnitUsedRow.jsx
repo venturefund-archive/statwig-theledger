@@ -5,6 +5,7 @@ import { fetchBatchByIdWithoutCondition } from "../../../../actions/lastMileActi
 export default function UnitUsedRow({
   vial,
   index,
+  page,
   setSteps,
   setTableView,
   setBatchDetails,
@@ -40,7 +41,7 @@ export default function UnitUsedRow({
     <TableRow className='vl-mui-custom-tr'>
       <TableCell component='th' scope='row' align='center'>
         <div className='vl-table-body-column'>
-          <p className='vl-body f-500 '>{index + 1}</p>
+          <p className='vl-body f-500 '>{index + page * 10 - 9}</p>
         </div>
       </TableCell>
       <TableCell component='th' scope='row' align='center'>
