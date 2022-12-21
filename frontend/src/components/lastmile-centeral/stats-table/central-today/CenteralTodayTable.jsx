@@ -9,8 +9,13 @@ import {
 import React from "react";
 import EmptyIcon from "../../../../assets/files/designs/empty-table.jpg";
 import CenteralTodayRow from "./CenteralTodayRow";
+import Pagination from "@mui/material/Pagination";
 
 export default function CenteralTodayTable({ vaccinationList, t }) {
+  const [page, setPage] = React.useState(1);
+  const handleChange = (event, value) => {
+    setPage(value);
+  };
   return (
     <>
       <TableContainer className="vl-mui-custom-tablecontainer">
@@ -21,49 +26,54 @@ export default function CenteralTodayTable({ vaccinationList, t }) {
           </h1>
         </div>
         {vaccinationList && vaccinationList?.length ? (
-          <Table sx={{ minWidth: 650 }} className="vl-mui-custom-table">
-            <TableHead className="vl-mui-custom-tablehead">
-              <TableRow className="vl-mui-custom-tr">
-                <TableCell align="center">
-                  <div className="vl-table-column">
-                    <p className="vl-body f-500 vl-blue">{t("batch_no")}</p>
-                  </div>
-                </TableCell>
-                <TableCell align="center">
-                  <div className="vl-table-column">
-                    <p className="vl-body f-500 vl-blue">
-                      {t("manufacturer_name")}
-                    </p>
-                  </div>
-                </TableCell>
-                <TableCell align="center">
-                  <div className="vl-table-column">
-                    <p className="vl-body f-500 vl-blue">{t("age")}</p>
-                  </div>
-                </TableCell>
-                <TableCell align="center">
-                  <div className="vl-table-column">
-                    <p className="vl-body f-500 vl-blue">{t("gender")}</p>
-                  </div>
-                </TableCell>
+          <>
+            <Table sx={{ minWidth: 650 }} className="vl-mui-custom-table">
+              <TableHead className="vl-mui-custom-tablehead">
+                <TableRow className="vl-mui-custom-tr">
+                  <TableCell align="center">
+                    <div className="vl-table-column">
+                      <p className="vl-body f-500 vl-blue">{t("batch_no")}</p>
+                    </div>
+                  </TableCell>
+                  <TableCell align="center">
+                    <div className="vl-table-column">
+                      <p className="vl-body f-500 vl-blue">
+                        {t("manufacturer_name")}
+                      </p>
+                    </div>
+                  </TableCell>
+                  <TableCell align="center">
+                    <div className="vl-table-column">
+                      <p className="vl-body f-500 vl-blue">{t("age")}</p>
+                    </div>
+                  </TableCell>
+                  <TableCell align="center">
+                    <div className="vl-table-column">
+                      <p className="vl-body f-500 vl-blue">{t("gender")}</p>
+                    </div>
+                  </TableCell>
 
-                <TableCell align="center">
-                  <div className="vl-table-column">
-                    <p className="vl-body f-500 vl-blue">{t("state")}</p>
-                  </div>
-                </TableCell>
-                <TableCell align="center">
-                  <div className="vl-table-column">
-                    <p className="vl-body f-500 vl-blue">{t("city")}</p>
-                  </div>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody className="vl-mui-custom-tablebody">
-              {vaccinationList &&
-                vaccinationList.map((row) => <CenteralTodayRow data={row} />)}
-            </TableBody>
-          </Table>
+                  <TableCell align="center">
+                    <div className="vl-table-column">
+                      <p className="vl-body f-500 vl-blue">{t("state")}</p>
+                    </div>
+                  </TableCell>
+                  <TableCell align="center">
+                    <div className="vl-table-column">
+                      <p className="vl-body f-500 vl-blue">{t("city")}</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody className="vl-mui-custom-tablebody">
+                {vaccinationList &&
+                  vaccinationList.map((row) => <CenteralTodayRow data={row} />)}
+              </TableBody>
+            </Table>
+            <div className="mi_custom_pagination_wrapper">
+              <Pagination count={10} page={page} onChange={handleChange} />
+            </div>
+          </>
         ) : (
           <div className="Table--Empty-container-alt">
             <div className="Table--empty-illustartion">
