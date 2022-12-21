@@ -43,9 +43,6 @@ export default function LastmileCenteral(props) {
   const [filters, setFilters] = useState({});
   const { t } = useTranslation();
 
-  const [vaccinationList, setVaccinationList] = useState([]);
-  const [todaysVaccinationList, setTodaysVaccinationList] = useState([]);
-  const [unitsUtilized, setUnitsUtilized] = useState([]);
   const [ButtonOpen, setButtonOpen] = useState(false);
 
   let domNode = useClickOutside(() => {
@@ -53,32 +50,13 @@ export default function LastmileCenteral(props) {
   });
 
   useEffect(async () => {
-    dispatch(turnOn());
-    // Fetch analytics
-    const analyticsResponse = await getAnalyticsWithFilters(filters);
-    setAnalytics(analyticsResponse.data.data);
+		dispatch(turnOn());
+		// Fetch analytics
+		const analyticsResponse = await getAnalyticsWithFilters(filters);
+		setAnalytics(analyticsResponse.data.data);
 
-    if (TableSwitch === "today") {
-			let payload = filters;
-			payload.today = true;
-			const result = await getAllVaccinationDetails(payload);
-			if (result?.data?.success) {
-				setTodaysVaccinationList(result.data.data);
-			}
-		} else if (TableSwitch === "total") {
-			const result = await getAllVaccinationDetails(filters);
-			if (result?.data?.success) {
-				setVaccinationList(result.data.data);
-			}
-		} else if (TableSwitch === "units") {
-			const result = await getVialsUtilised(filters);
-			if (result?.data?.success) {
-				setUnitsUtilized(result.data.data);
-			}
-		}
-
-    dispatch(turnOff());
-  }, [filters, TableSwitch]);
+		dispatch(turnOff());
+	}, [filters, TableSwitch]);
 
   // useEffect(() => {
   //   (async () => {
@@ -101,6 +79,7 @@ export default function LastmileCenteral(props) {
   const exportVaccinationReport = async (type) => {
     let data = filters;
     data.reportType = type ? type : "excel";
+    data.today = TableSwitch === "today" ? true : false;
 
     const result = await exportVaccinationList(data);
     if (result?.data && result?.status === 200) {
@@ -190,13 +169,13 @@ export default function LastmileCenteral(props) {
           />
         </div>
         {TableSwitch === "today" && (
-          <CenteralTodayTable t={t} vaccinationList={todaysVaccinationList} />
+          <CenteralTodayTable t={t} filters={filters} />
         )}
         {TableSwitch === "total" && (
-          <CenteralTotalTable t={t} vaccinationList={vaccinationList} />
+          <CenteralTotalTable t={t} filters={filters} />
         )}
         {TableSwitch === "units" && (
-          <CenteralUnitsTable t={t} unitsUtilized={unitsUtilized} />
+          <CenteralUnitsTable t={t} filters={filters} />
         )}
       </div>
       <div className='LastmileCenteral--filter-wrapper'>

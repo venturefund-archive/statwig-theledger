@@ -6,16 +6,34 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import EmptyIcon from "../../../../assets/files/designs/empty-table.jpg";
 import CenteralUnitsRow from "./CenteralUnitsRow";
 import Pagination from "@mui/material/Pagination";
+import { getVialsUtilised } from "../../../../actions/lastMileActions";
 
-export default function CenteralUnitsTable({ unitsUtilized, t }) {
-  const [page, setPage] = React.useState(1);
+export default function CenteralUnitsTable({ filters, t }) {
+  const [page, setPage] = useState(1);
+	const [unitsUtilized, setUnitsUtilized] = useState([]);
+  const [totalCount, setTotalCount] = useState();
+
   const handleChange = (event, value) => {
     setPage(value);
   };
+
+	useEffect(async () => {
+		let payload = filters;
+		payload.today = false;
+		payload.skip = (page - 1) * 10;
+		payload.limit = 10;
+
+    const result = await getVialsUtilised(payload);
+		if (result?.data?.success) {
+			setUnitsUtilized(result.data.data.vialsUtilized);
+      setTotalCount(result.data.data.totalCount);
+		}
+	}, [filters, page]);
+
   return (
     <>
       <TableContainer className="vl-mui-custom-tablecontainer">
@@ -60,7 +78,7 @@ export default function CenteralUnitsTable({ unitsUtilized, t }) {
               </TableBody>
             </Table>
             <div className="mi_custom_pagination_wrapper">
-              <Pagination count={10} page={page} onChange={handleChange} />
+              <Pagination count={Math.ceil(totalCount/10)} page={page} onChange={handleChange} />
             </div>
           </>
         ) : (

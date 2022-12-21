@@ -6,16 +6,34 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import EmptyIcon from "../../../../assets/files/designs/empty-table.jpg";
 import CenteralTodayRow from "./CenteralTodayRow";
 import Pagination from "@mui/material/Pagination";
+import { getAllVaccinationDetails } from "../../../../actions/lastMileActions";
 
-export default function CenteralTodayTable({ vaccinationList, t }) {
-  const [page, setPage] = React.useState(1);
+export default function CenteralTodayTable({ filters, t }) {
+  const [page, setPage] = useState(1);
+  const [vaccinationsList, setVaccinationsList] = useState([]);
+  const [totalCount, setTotalCount] = useState();
+
   const handleChange = (event, value) => {
     setPage(value);
   };
+
+  useEffect(async () => {
+		let payload = filters;
+		payload.today = true;
+		payload.skip = (page - 1) * 10;
+    payload.limit = 10;
+    
+    const result = await getAllVaccinationDetails(payload);
+    if(result?.data?.success) {
+      setVaccinationsList(result.data.data.result);
+      setTotalCount(result.data.data.totalCount);
+    }
+	}, [filters, page]);
+
   return (
     <>
       <TableContainer className="vl-mui-custom-tablecontainer">
@@ -25,7 +43,7 @@ export default function CenteralTodayTable({ vaccinationList, t }) {
             {new Date().toLocaleDateString()}
           </h1>
         </div>
-        {vaccinationList && vaccinationList?.length ? (
+        {vaccinationsList && vaccinationsList?.length ? (
           <>
             <Table sx={{ minWidth: 650 }} className="vl-mui-custom-table">
               <TableHead className="vl-mui-custom-tablehead">
@@ -66,12 +84,12 @@ export default function CenteralTodayTable({ vaccinationList, t }) {
                 </TableRow>
               </TableHead>
               <TableBody className="vl-mui-custom-tablebody">
-                {vaccinationList &&
-                  vaccinationList.map((row) => <CenteralTodayRow data={row} />)}
+                {vaccinationsList &&
+                  vaccinationsList.map((row) => <CenteralTodayRow data={row} />)}
               </TableBody>
             </Table>
             <div className="mi_custom_pagination_wrapper">
-              <Pagination count={10} page={page} onChange={handleChange} />
+              <Pagination count={Math.ceil(totalCount/10)} page={page} onChange={handleChange} />
             </div>
           </>
         ) : (

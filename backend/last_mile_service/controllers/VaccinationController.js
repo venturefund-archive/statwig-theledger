@@ -17,10 +17,10 @@ const CountryModel = require("../models/CountryModel");
 
 const fontDescriptors = {
 	Roboto: {
-		normal: resolve("../fonts/Roboto-Regular.ttf"),
-		bold: resolve("../fonts/Roboto-Medium.ttf"),
-		italics: resolve("../fonts/Roboto-Italic.ttf"),
-		bolditalics: resolve("../fonts/Roboto-MediumItalic.ttf"),
+		normal: resolve("./fonts/Roboto-Regular.ttf"),
+		bold: resolve("./fonts/Roboto-Medium.ttf"),
+		italics: resolve("./fonts/Roboto-Italic.ttf"),
+		bolditalics: resolve("./fonts/Roboto-MediumItalic.ttf"),
 	},
 };
 const printer = new PdfPrinter(fontDescriptors);
@@ -106,9 +106,16 @@ const buildDoseQuery = async (gender, minAge, maxAge, vaccineVialIds, today) => 
 	return doseQuery;
 };
 
-const generateVaccinationsList = async (doseQuery, skip = 0, limit = 10) => {
+const generateVaccinationsList = async (doseQuery, skip=0, limit) => {
 	try {
-		const doses = await DoseModel.aggregate([
+		const pagniationQuery = [];
+		if(skip) {
+			pagniationQuery.push({$skip: skip})
+		}
+		if(limit) {
+			pagniationQuery.push({$limit: limit});
+		}
+		const dosesResult = await DoseModel.aggregate([
 			{ $match: doseQuery },
 			{
 				$lookup: {
@@ -138,9 +145,17 @@ const generateVaccinationsList = async (doseQuery, skip = 0, limit = 10) => {
 			},
 			{ $unwind: "$warehouse" },
 			{ $sort: { createdAt: -1 } },
-			// { $skip: skip },
-			// { $limit: limit },
+			{
+				$facet: {
+					paginatedResults: pagniationQuery,
+					totalCount: [{ $count: "count" }],
+				},
+			},
+			{ $unwind: "$totalCount" },
+			{ $project: { paginatedResults: 1, totalCount: "$totalCount.count" } },
 		]);
+
+		const doses = dosesResult[0].paginatedResults;
 
 		const result = [];
 		for (let i = 0; i < doses.length; ++i) {
@@ -160,11 +175,15 @@ const generateVaccinationsList = async (doseQuery, skip = 0, limit = 10) => {
 			result.push(data);
 		}
 
-		return result;
+		return {
+			totalCount: dosesResult[0].totalCount,
+			result: result,
+		};
 	} catch (err) {
 		throw err;
 	}
 };
+
 exports.fetchBatchById = [
 	auth,
 	async (req, res) => {
@@ -807,12 +826,27 @@ exports.getVialsUtilised = [
 	async (req, res) => {
 		try {
 			const user = req.user;
-			const { city, organisation } = req.body;
+			const { city, organisation, skip, limit } = req.body;
 			const warehouseQuery = await buildWarehouseQuery(user, city, organisation);
 			const warehouses = await WarehouseModel.find(warehouseQuery);
 			const warehouseIds = warehouses.map((warehouse) => warehouse.id);
-			const vialsUtilized = await VaccineVialModel.find({ warehouseId: { $in: warehouseIds } });
-			return apiResponse.successResponseWithData(res, "Vaccine Vial Details", vialsUtilized);
+			const vialsUtilized = await VaccineVialModel.aggregate([
+				{ $match: { warehouseId: { $in: warehouseIds } } },
+				{
+					$facet: {
+						paginatedResults: [{ $skip: skip }, { $limit: limit }],
+						totalCount: [{ $count: "count" }],
+					},
+				},
+				{ $unwind: "$totalCount" },
+				{ $project: { paginatedResults: 1, totalCount: "$totalCount.count" } },
+			]);
+
+			const result = {
+				vialsUtilized: vialsUtilized[0].paginatedResults,
+				totalCount: vialsUtilized[0].totalCount,
+			};
+			return apiResponse.successResponseWithData(res, "Vaccine Vial Details", result);
 		} catch (err) {
 			console.log(err);
 			return apiResponse.ErrorResponse(res, err.message);
@@ -988,22 +1022,37 @@ exports.exportVaccinationList = [
 	auth,
 	async (req, res) => {
 		try {
-			const { gender, city, organisation, minAge, maxAge, reportType } = req.body;
+			const { reportType, gender, city, organisation, minAge, maxAge, today } = req.body;
 			const user = req.user;
 
-			const filters = {
-				user: user,
-				gender: gender,
-				city: city,
-				organisation: organisation,
-				minAge: minAge,
-				maxAge: maxAge,
-			};
+			const warehouseQuery = await buildWarehouseQuery(user, city, organisation);
+			const warehouses = await WarehouseModel.aggregate([
+				{ $match: warehouseQuery },
+				{
+					$lookup: {
+						from: "vaccinevials",
+						localField: "id",
+						foreignField: "warehouseId",
+						as: "vaccinations",
+					},
+				},
+			]);
 
-			const result = await generateVaccinationsList(filters);
+			let vaccineVialIds = warehouses.map((warehouse) => {
+				let currVaccines = warehouse?.vaccinations?.map((vaccination) => vaccination.id);
+				if (currVaccines && currVaccines.length) {
+					return currVaccines;
+				} else {
+					return [];
+				}
+			});
+			vaccineVialIds = vaccineVialIds.flat();
 
-			if (reportType === "excel") res = buildExcelReport(req, res, result.vaccinationDetails);
-			else res = buildPdfReport(req, res, result.vaccinationDetails, "Vaccinations");
+			const doseQuery = await buildDoseQuery(gender, minAge, maxAge, vaccineVialIds, today);
+			const result = await generateVaccinationsList(doseQuery);
+
+			if (reportType === "excel") res = buildExcelReport(req, res, result.result, today);
+			else res = buildPdfReport(req, res, result.result, "Vaccinations");
 		} catch (err) {
 			console.log(err);
 			return apiResponse.ErrorResponse(res, err.message);
@@ -1068,7 +1117,7 @@ exports.completeVial = [
 	}
 ]
 
-function buildExcelReport(req, res, dataForExcel) {
+function buildExcelReport(req, res, dataForExcel, today) {
 	const styles = {
 		headerDark: {
 			font: {
@@ -1083,50 +1132,43 @@ function buildExcelReport(req, res, dataForExcel) {
 		date: {
 			displayName: "Date",
 			headerStyle: styles.headerDark,
-			cellStyle: styles.cellGreen,
 			width: 120,
 		},
 		batchNumber: {
 			displayName: "Batch Number",
 			headerStyle: styles.headerDark,
-			cellStyle: styles.cellGreen,
 			width: 120,
 		},
 		organisationName: {
 			displayName: "Manufacturer Name",
 			headerStyle: styles.headerDark,
-			cellStyle: styles.cellGreen,
 			width: 220,
 		},
 		age: {
 			displayName: "Age",
 			headerStyle: styles.headerDark,
-			cellStyle: styles.cellGreen,
 			width: 60,
 		},
 		gender: {
 			displayName: "Gender",
 			headerStyle: styles.headerDark,
-			cellStyle: styles.cellGreen,
 			width: 120,
 		},
 		state: {
 			displayName: "State",
 			headerStyle: styles.headerDark,
-			cellStyle: styles.cellGreen,
 			width: 220,
 		},
 		city: {
 			displayName: "City",
 			headerStyle: styles.headerDark,
-			cellStyle: styles.cellGreen,
 			width: 220,
 		},
 	};
 
 	const report = excel.buildExport([
 		{
-			name: "Vaccination Report",
+			name: today ? "Today's Vaccination Report" : "Vaccination Report",
 			specification: specification,
 			data: dataForExcel,
 		},
