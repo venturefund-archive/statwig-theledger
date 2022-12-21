@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import {
   exportVaccinationList,
   getAllVaccinationDetails,
+  getAnalyticsWithFilters,
   getVialsUtilised,
 } from "../../actions/lastMileActions";
 import AnalyticTiles from "../../shared/stats-tile/AnalyticTiles";
@@ -51,23 +52,51 @@ export default function LastmileCenteral(props) {
     setButtonOpen(false);
   });
 
-  useEffect(() => {
-    (async () => {
-			dispatch(turnOn());
-			const unitsUtilized = await getVialsUtilised(filters);
-			if (unitsUtilized?.data?.success) {
-				setUnitsUtilized(unitsUtilized.data.data);
-			}
+  useEffect(async () => {
+    dispatch(turnOn());
+    // Fetch analytics
+    const analyticsResponse = await getAnalyticsWithFilters(filters);
+    setAnalytics(analyticsResponse.data.data);
 
+    if (TableSwitch === "today") {
+			let payload = filters;
+			payload.today = true;
+			const result = await getAllVaccinationDetails(payload);
+			if (result?.data?.success) {
+				setTodaysVaccinationList(result.data.data);
+			}
+		} else if (TableSwitch === "total") {
 			const result = await getAllVaccinationDetails(filters);
 			if (result?.data?.success) {
-				setVaccinationList(result.data.data.vaccinationDetails);
-				setTodaysVaccinationList(result.data.data.todaysVaccinationDetails);
-				setAnalytics(result.data.data.analytics);
+				setVaccinationList(result.data.data);
 			}
-			dispatch(turnOff());
-		})();
+		} else if (TableSwitch === "units") {
+			const result = await getVialsUtilised(filters);
+			if (result?.data?.success) {
+				setUnitsUtilized(result.data.data);
+			}
+		}
+
+    dispatch(turnOff());
   }, [filters, TableSwitch]);
+
+  // useEffect(() => {
+  //   (async () => {
+	// 		dispatch(turnOn());
+	// 		const unitsUtilized = await getVialsUtilised(filters);
+	// 		if (unitsUtilized?.data?.success) {
+	// 			setUnitsUtilized(unitsUtilized.data.data);
+	// 		}
+
+	// 		const result = await getAllVaccinationDetails(filters);
+	// 		if (result?.data?.success) {
+	// 			setVaccinationList(result.data.data.vaccinationDetails);
+	// 			setTodaysVaccinationList(result.data.data.todaysVaccinationDetails);
+	// 			setAnalytics(result.data.data.analytics);
+	// 		}
+	// 		dispatch(turnOff());
+	// 	})();
+  // }, [filters, TableSwitch]);
 
   const exportVaccinationReport = async (type) => {
     let data = filters;
