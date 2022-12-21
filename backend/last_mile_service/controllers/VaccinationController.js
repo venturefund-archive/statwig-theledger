@@ -829,7 +829,7 @@ exports.getVialsUtilised = [
 				{ $match: { warehouseId: { $in: warehouseIds } } },
 				{
 					$facet: {
-						paginatedResults: [{ $skip: skip || 0 }, { $limit: limit || 20 }], // default pagination limit values
+						paginatedResults: [{ $sort: { _id: -1 } }, { $skip: skip || 0 }, { $limit: limit || 20 }], // default pagination limit values
 						totalCount: [{ $count: "count" }],
 					},
 				},
@@ -871,7 +871,7 @@ exports.getVaccinationsList = [
 				query = { warehouseId: { $in: warehouseIds } };
 			}
 
-			const vialsUtilized = await VaccineVialModel.find(query);
+			const vialsUtilized = await VaccineVialModel.find(query).sort({ _id: -1 });
 
 			const vaccinationsList = [];
 			const todaysVaccinationsList = [];
