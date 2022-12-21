@@ -4,7 +4,7 @@ import {
   GoogleMap,
   InfoWindow,
   Marker,
-  useLoadScript
+  useLoadScript,
 } from "@react-google-maps/api";
 import "./NetworkMap.scss";
 import BlueMap from "./data/BlueMap";
@@ -37,12 +37,11 @@ export default function NetworkMap({
 }) {
   const { user } = useSelector((state) => state);
   const [MapSelected, setMapSelected] = useState(null);
-
   const [oms, setOms] = useState(null);
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [selectedMarker, setSelectedMarker] = useState(null);
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: "AIzaSyBLwFrIrQx_0UUAIaUwt6wfItNMIIvXJ78"
+    googleMapsApiKey: "AIzaSyBLwFrIrQx_0UUAIaUwt6wfItNMIIvXJ78",
   });
 
   // const { isLoaded } = useJsApiLoader({
@@ -50,20 +49,16 @@ export default function NetworkMap({
   //   googleMapsApiKey: "AIzaSyBLwFrIrQx_0UUAIaUwt6wfItNMIIvXJ78",
   // });
 
-  React.useEffect(() => {
-    console.log(selectedPlace, selectedMarker);
-  }, [selectedPlace, selectedMarker]);
-
-
   useEffect(() => {
     if (MapSelected) setReportWarehouse(MapSelected.warehouseId);
   }, [MapSelected]);
+
   const onLoad = (map) => {
-    const oms = require(`npm-overlapping-marker-spiderfier/lib/oms.min`)
-    var newOms = new oms.OverlappingMarkerSpiderfier(map, {
+    const oms = require(`npm-overlapping-marker-spiderfier/lib/oms.min`);
+    const newOms = new oms.OverlappingMarkerSpiderfier(map, {
       markersWontMove: true, // we promise not to move any markers, allowing optimizations
       markersWontHide: true, // we promise not to change visibility of any markers, allowing optimizations
-      basicFormatEvents: true // allow the library to skip calculating advanced formatting information
+      basicFormatEvents: true, // allow the library to skip calculating advanced formatting information
     });
     setOms(newOms);
   };
@@ -91,12 +86,12 @@ export default function NetworkMap({
                 lat: parseFloat(
                   Array.isArray(park?.location?.coordinates)
                     ? park?.location?.coordinates[0]
-                    : park?.location?.latitude
+                    : park?.location?.latitude,
                 ),
                 lng: parseFloat(
                   Array.isArray(park?.location?.coordinates)
                     ? park?.location?.coordinates[1]
-                    : park?.location?.longitude
+                    : park?.location?.longitude,
                 ),
               }}
               onLoad={(marker) => {
@@ -106,7 +101,7 @@ export default function NetworkMap({
                   "spider_click",
                   (e) => {
                     markerClickHandler(e, park, marker);
-                  }
+                  },
                 );
               }}
               // onClick={() => {
@@ -131,22 +126,22 @@ export default function NetworkMap({
                 lat: parseFloat(
                   Array.isArray(park?.location?.coordinates)
                     ? park?.location?.coordinates[0]
-                    : park?.location?.latitude
+                    : park?.location?.latitude,
                 ),
                 lng: parseFloat(
                   Array.isArray(park?.location?.coordinates)
                     ? park?.location?.coordinates[1]
-                    : park?.location?.longitude
+                    : park?.location?.longitude,
                 ),
               }}
               onLoad={(marker) => {
-                oms.addMarker(marker);
+                oms?.addMarker(marker);
                 window.google.maps.event.addListener(
                   marker,
                   "spider_click",
                   (e) => {
                     markerClickHandler(e, park, marker);
-                  }
+                  },
                 );
               }}
               // onClick={() => {
@@ -164,7 +159,7 @@ export default function NetworkMap({
                 anchor: new window.google.maps.Point(15, 15),
               }}
             />
-          )
+          ),
         )}
 
         {MapSelected ? (
@@ -202,7 +197,5 @@ export default function NetworkMap({
         ) : null}
       </>
     </GoogleMap>
-  ) : (
-    <></>
-  );
+  ) : null;
 }

@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import {
   exportVaccinationList,
   getAllVaccinationDetails,
+  getAnalyticsWithFilters,
   getVialsUtilised,
 } from "../../actions/lastMileActions";
 import AnalyticTiles from "../../shared/stats-tile/AnalyticTiles";
@@ -42,36 +43,43 @@ export default function LastmileCenteral(props) {
   const [filters, setFilters] = useState({});
   const { t } = useTranslation();
 
-  const [vaccinationList, setVaccinationList] = useState([]);
-  const [todaysVaccinationList, setTodaysVaccinationList] = useState([]);
-  const [unitsUtilized, setUnitsUtilized] = useState([]);
   const [ButtonOpen, setButtonOpen] = useState(false);
 
   let domNode = useClickOutside(() => {
     setButtonOpen(false);
   });
 
-  useEffect(() => {
-    (async () => {
-			dispatch(turnOn());
-			const unitsUtilized = await getVialsUtilised(filters);
-			if (unitsUtilized?.data?.success) {
-				setUnitsUtilized(unitsUtilized.data.data);
-			}
+  useEffect(async () => {
+		dispatch(turnOn());
+		// Fetch analytics
+		const analyticsResponse = await getAnalyticsWithFilters(filters);
+		setAnalytics(analyticsResponse.data.data);
 
-			const result = await getAllVaccinationDetails(filters);
-			if (result?.data?.success) {
-				setVaccinationList(result.data.data.vaccinationDetails);
-				setTodaysVaccinationList(result.data.data.todaysVaccinationDetails);
-				setAnalytics(result.data.data.analytics);
-			}
-			dispatch(turnOff());
-		})();
-  }, [filters, TableSwitch]);
+		dispatch(turnOff());
+	}, [filters, TableSwitch]);
+
+  // useEffect(() => {
+  //   (async () => {
+	// 		dispatch(turnOn());
+	// 		const unitsUtilized = await getVialsUtilised(filters);
+	// 		if (unitsUtilized?.data?.success) {
+	// 			setUnitsUtilized(unitsUtilized.data.data);
+	// 		}
+
+	// 		const result = await getAllVaccinationDetails(filters);
+	// 		if (result?.data?.success) {
+	// 			setVaccinationList(result.data.data.vaccinationDetails);
+	// 			setTodaysVaccinationList(result.data.data.todaysVaccinationDetails);
+	// 			setAnalytics(result.data.data.analytics);
+	// 		}
+	// 		dispatch(turnOff());
+	// 	})();
+  // }, [filters, TableSwitch]);
 
   const exportVaccinationReport = async (type) => {
     let data = filters;
     data.reportType = type ? type : "excel";
+    data.today = TableSwitch === "today" ? true : false;
 
     const result = await exportVaccinationList(data);
     if (result?.data && result?.status === 200) {
@@ -161,13 +169,13 @@ export default function LastmileCenteral(props) {
           />
         </div>
         {TableSwitch === "today" && (
-          <CenteralTodayTable t={t} vaccinationList={todaysVaccinationList} />
+          <CenteralTodayTable t={t} filters={filters} />
         )}
         {TableSwitch === "total" && (
-          <CenteralTotalTable t={t} vaccinationList={vaccinationList} />
+          <CenteralTotalTable t={t} filters={filters} />
         )}
         {TableSwitch === "units" && (
-          <CenteralUnitsTable t={t} unitsUtilized={unitsUtilized} />
+          <CenteralUnitsTable t={t} filters={filters} />
         )}
       </div>
       <div className='LastmileCenteral--filter-wrapper'>

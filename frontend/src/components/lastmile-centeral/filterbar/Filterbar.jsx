@@ -21,7 +21,7 @@ export default function Filterbar(props) {
 	const [organisations, setOrgnisations] = useState([""]);
 	const [ageType, setAgeType] = useState("range");
 
-	const [ageRange, setAgeRange] = useState([0, 100]);
+	const [ageRange, setAgeRange] = useState([0, 150]);
 	const [gender, setGender] = useState();
 	const [city, setCity] = useState();
 	const [organisation, setOrganisation] = useState();
@@ -236,6 +236,8 @@ export default function Filterbar(props) {
 										onChange={handleChange}
 										valueLabelDisplay="auto"
 										getAriaValueText={valuetext}
+										min={1}
+										max={150}
 									/>
 								</div>
 							) : (
@@ -248,7 +250,7 @@ export default function Filterbar(props) {
 											setAgeRange([temp, temp]);
 										}}
 										InputProps={{
-											inputProps: { min: 0, max: 120 },
+											inputProps: { min: 1, max: 150 },
 										}}
 									/>
 								</div>

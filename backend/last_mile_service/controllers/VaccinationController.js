@@ -17,10 +17,10 @@ const CountryModel = require("../models/CountryModel");
 
 const fontDescriptors = {
 	Roboto: {
-		normal: resolve("../fonts/Roboto-Regular.ttf"),
-		bold: resolve("../fonts/Roboto-Medium.ttf"),
-		italics: resolve("../fonts/Roboto-Italic.ttf"),
-		bolditalics: resolve("../fonts/Roboto-MediumItalic.ttf"),
+		normal: resolve("./fonts/Roboto-Regular.ttf"),
+		bold: resolve("./fonts/Roboto-Medium.ttf"),
+		italics: resolve("./fonts/Roboto-Italic.ttf"),
+		bolditalics: resolve("./fonts/Roboto-MediumItalic.ttf"),
 	},
 };
 const printer = new PdfPrinter(fontDescriptors);
@@ -75,9 +75,9 @@ const buildWarehouseQuery = async (user, city, organisationName) => {
 	return warehouseQuery;
 };
 
-const buildDoseQuery = async (gender, minAge, maxAge) => {
+const buildDoseQuery = async (gender, minAge, maxAge, vaccineVialIds, today) => {
 	let doseQuery = {};
-	let queryExprs = [{ $eq: ["$vaccineVialId", "$$vaccineVialId"] }];
+	let queryExprs = [{ $in: ["$vaccineVialId", vaccineVialIds] }];
 
 	// Modify the if once a new Role is added
 	if (gender) {
@@ -88,6 +88,11 @@ const buildDoseQuery = async (gender, minAge, maxAge) => {
 	}
 	if (maxAge) {
 		queryExprs.push({ $lte: ["$age", parseInt(maxAge)] });
+	}
+	if (today) {
+		let now = new Date();
+		now.setHours(0, 0, 0, 0);
+		queryExprs.push({ $gte: ["$createdAt", now] });
 	}
 
 	if (queryExprs.length) {
@@ -101,107 +106,82 @@ const buildDoseQuery = async (gender, minAge, maxAge) => {
 	return doseQuery;
 };
 
-const generateVaccinationsList = async (filters) => {
-	const { user, city, organisation, gender, minAge, maxAge } = filters;
-	const warehouseQuery = await buildWarehouseQuery(user, city, organisation);
-	const doseQuery = await buildDoseQuery(gender, minAge, maxAge);
-
-	const warehouses = await WarehouseModel.aggregate([
-		{ $match: warehouseQuery },
-		{
-			$lookup: {
-				from: "vaccinevials",
-				let: { warehouseId: "$id" },
-				pipeline: [
-					{ $match: { $expr: { $eq: ["$warehouseId", "$$warehouseId"] } } },
-					{
-						$lookup: {
-							from: "products",
-							localField: "productId",
-							foreignField: "id",
-							as: "product",
-						},
-					},
-					{ $unwind: "$product" },
-					{
-						$lookup: {
-							from: "doses",
-							let: { vaccineVialId: "$id" },
-							pipeline: [
-								{
-									$match: doseQuery,
-								},
-							],
-							as: "doses",
-						},
-					},
-				],
-				as: "vaccinations",
-			},
-		},
-	]);
-	if (!warehouses) {
-		return apiResponse.validationErrorWithData(res, "VaccineVialId invalid!", {
-			vaccineVialId: vaccineVialId,
-		});
-	}
-
-	let totalVaccinations = 0;
-	let todaysVaccinations = 0;
-	let vialsUtilized = 0;
-	let now = new Date();
-	now.setHours(0, 0, 0, 0);
-
-	const vaccinationDetails = [];
-	const todaysVaccinationDetails = [];
-	for (let i = 0; i < warehouses.length; ++i) {
-		const vaccineVials = warehouses[i].vaccinations;
-		for (let j = 0; j < vaccineVials.length; ++j) {
-			let createdAt = new Date(vaccineVials[j].createdAt);
-			createdAt.setHours(0, 0, 0, 0);
-
-			const doses = vaccineVials[j].doses;
-
-			if (doses.length) {
-				vialsUtilized++;
-				totalVaccinations += doses.length;
-
-				if (now.toDateString() === createdAt.toDateString()) {
-					todaysVaccinations += doses.length;
-				}
-			}
-			for (let k = 0; k < doses.length; ++k) {
-				let age = `${doses[k].ageMonths ? doses[k].ageMonths : doses[k].age} ${doses[k].ageMonths ? "months" : "years"}`;
-
-				const data = {
-					date: createdAt,
-					batchNumber: vaccineVials[j].batchNumber,
-					organisationName: vaccineVials[j]?.product?.manufacturer,
-					age: age,
-					gender: doses[k].gender,
-					state: warehouses[i].warehouseAddress.state,
-					city: warehouses[i].warehouseAddress.city,
-				};
-				vaccinationDetails.push(data);
-
-				if (now.toDateString() === createdAt.toDateString()) {
-					todaysVaccinationDetails.push(data);
-				}
-			}
+const generateVaccinationsList = async (doseQuery, skip=0, limit) => {
+	try {
+		const pagniationQuery = [];
+		if(skip) {
+			pagniationQuery.push({$skip: skip})
 		}
+		if(limit) {
+			pagniationQuery.push({$limit: limit});
+		}
+		const dosesResult = await DoseModel.aggregate([
+			{ $match: doseQuery },
+			{
+				$lookup: {
+					from: "vaccinevials",
+					localField: "vaccineVialId",
+					foreignField: "id",
+					as: "vaccineVial",
+				},
+			},
+			{ $unwind: "$vaccineVial" },
+			{
+				$lookup: {
+					from: "products",
+					localField: "vaccineVial.productId",
+					foreignField: "id",
+					as: "product",
+				},
+			},
+			{ $unwind: "$product" },
+			{
+				$lookup: {
+					from: "warehouses",
+					localField: "vaccineVial.warehouseId",
+					foreignField: "id",
+					as: "warehouse",
+				},
+			},
+			{ $unwind: "$warehouse" },
+			{ $sort: { createdAt: -1 } },
+			{
+				$facet: {
+					paginatedResults: pagniationQuery,
+					totalCount: [{ $count: "count" }],
+				},
+			},
+			{ $unwind: "$totalCount" },
+			{ $project: { paginatedResults: 1, totalCount: "$totalCount.count" } },
+		]);
+
+		const doses = dosesResult[0].paginatedResults;
+
+		const result = [];
+		for (let i = 0; i < doses.length; ++i) {
+			let age = `${doses[i].ageMonths ? doses[i].ageMonths : doses[i].age} ${
+				doses[i].ageMonths ? "months" : "years"
+			}`;
+			const data = {
+				date: doses[i].createdAt,
+				batchNumber: doses[i].vaccineVial.batchNumber,
+				organisationName: doses[i].product?.manufacturer,
+				age: age,
+				gender: doses[i].gender,
+				state: doses[i].warehouse.warehouseAddress.state,
+				city: doses[i].warehouse.warehouseAddress.city,
+			};
+
+			result.push(data);
+		}
+
+		return {
+			totalCount: dosesResult[0].totalCount,
+			result: result,
+		};
+	} catch (err) {
+		throw err;
 	}
-
-	const result = {
-		analytics: {
-			todaysVaccinations: todaysVaccinations,
-			totalVaccinations: totalVaccinations,
-			unitsUtilized: vialsUtilized,
-		},
-		vaccinationDetails: vaccinationDetails,
-		todaysVaccinationDetails: todaysVaccinationDetails,
-	};
-
-	return result;
 };
 
 exports.fetchBatchById = [
@@ -694,21 +674,91 @@ exports.getAllVaccinationDetails = [
 	auth,
 	async (req, res) => {
 		try {
-			const { gender, city, organisation, minAge, maxAge } = req.body;
+			const { gender, city, organisation, minAge, maxAge, today, skip, limit } = req.body;
 			const user = req.user;
 
-			const filters = {
-				user: user,
-				gender: gender,
-				city: city,
-				organisation: organisation,
-				minAge: minAge,
-				maxAge: maxAge,
+			const warehouseQuery = await buildWarehouseQuery(user, city, organisation);
+			const warehouses = await WarehouseModel.aggregate([
+				{ $match: warehouseQuery },
+				{
+					$lookup: {
+						from: "vaccinevials",
+						localField: "id",
+						foreignField: "warehouseId",
+						as: "vaccinations",
+					},
+				},
+			]);
+
+			let vaccineVialIds = warehouses.map((warehouse) => {
+				let currVaccines = warehouse?.vaccinations?.map((vaccination) => vaccination.id);
+				if (currVaccines && currVaccines.length) {
+					return currVaccines;
+				} else {
+					return [];
+				}
+			});
+			vaccineVialIds = vaccineVialIds.flat();
+
+			const doseQuery = await buildDoseQuery(gender, minAge, maxAge, vaccineVialIds, today);
+			const result = await generateVaccinationsList(doseQuery, skip, limit);
+
+			return apiResponse.successResponseWithData(res, "Vaccinations list fetched!", result);
+		} catch (err) {
+			console.log(err);
+			return apiResponse.ErrorResponse(res, err.message);
+		}
+	},
+];
+// For GoverningBody
+exports.getAnalyticsWithFilters = [
+	auth,
+	async (req, res) => {
+		try {
+			const user = req.user;
+			const { city, organisation, gender, minAge, maxAge } = req.body;
+			const warehouseQuery = await buildWarehouseQuery(user, city, organisation);
+
+			const warehouses = await WarehouseModel.aggregate([
+				{ $match: warehouseQuery },
+				{
+					$lookup: {
+						from: "vaccinevials",
+						localField: "id",
+						foreignField: "warehouseId",
+						as: "vaccinations",
+					},
+				},
+			]);
+
+			let totalVaccinations = 0;
+			let todaysVaccinations = 0;
+			let vialsUtilized = 0;
+			let now = new Date();
+			now.setHours(0, 0, 0, 0);
+
+			for (let i = 0; i < warehouses.length; ++i) {
+				let currVaccinations = warehouses[i]?.vaccinations || [];
+				for (let j = 0; j < currVaccinations.length; ++j) {
+					let createdAt = new Date(currVaccinations[j].createdAt);
+					createdAt.setHours(0, 0, 0, 0);
+					if (currVaccinations[j].isComplete && currVaccinations[j].numberOfDoses > 0) {
+						++vialsUtilized;
+						totalVaccinations += currVaccinations[j].numberOfDoses;
+						if (now.toDateString() === createdAt.toDateString()) {
+							todaysVaccinations += currVaccinations[j].numberOfDoses;
+						}
+					}
+				}
+			}
+
+			const result = {
+				todaysVaccinations: todaysVaccinations,
+				totalVaccinations: totalVaccinations,
+				unitsUtilized: vialsUtilized,
 			};
 
-			const result = await generateVaccinationsList(filters);
-
-			return apiResponse.successResponseWithData(res, "Fetched doses successfully!", result);
+			return apiResponse.successResponseWithData(res, "Fetched Analytcs With Filters!", result);
 		} catch (err) {
 			console.log(err);
 			return apiResponse.ErrorResponse(res, err.message);
@@ -716,6 +766,7 @@ exports.getAllVaccinationDetails = [
 	},
 ];
 
+// For pharmacies
 exports.getAnalytics = [
 	auth,
 	async (req, res) => {
@@ -775,12 +826,27 @@ exports.getVialsUtilised = [
 	async (req, res) => {
 		try {
 			const user = req.user;
-			const { city, organisation } = req.body;
+			const { city, organisation, skip, limit } = req.body;
 			const warehouseQuery = await buildWarehouseQuery(user, city, organisation);
 			const warehouses = await WarehouseModel.find(warehouseQuery);
 			const warehouseIds = warehouses.map((warehouse) => warehouse.id);
-			const vialsUtilized = await VaccineVialModel.find({ warehouseId: { $in: warehouseIds } });
-			return apiResponse.successResponseWithData(res, "Vaccine Vial Details", vialsUtilized);
+			const vialsUtilized = await VaccineVialModel.aggregate([
+				{ $match: { warehouseId: { $in: warehouseIds } } },
+				{
+					$facet: {
+						paginatedResults: [{ $skip: skip }, { $limit: limit }],
+						totalCount: [{ $count: "count" }],
+					},
+				},
+				{ $unwind: "$totalCount" },
+				{ $project: { paginatedResults: 1, totalCount: "$totalCount.count" } },
+			]);
+
+			const result = {
+				vialsUtilized: vialsUtilized[0].paginatedResults,
+				totalCount: vialsUtilized[0].totalCount,
+			};
+			return apiResponse.successResponseWithData(res, "Vaccine Vial Details", result);
 		} catch (err) {
 			console.log(err);
 			return apiResponse.ErrorResponse(res, err.message);
@@ -956,22 +1022,37 @@ exports.exportVaccinationList = [
 	auth,
 	async (req, res) => {
 		try {
-			const { gender, city, organisation, minAge, maxAge, reportType } = req.body;
+			const { reportType, gender, city, organisation, minAge, maxAge, today } = req.body;
 			const user = req.user;
 
-			const filters = {
-				user: user,
-				gender: gender,
-				city: city,
-				organisation: organisation,
-				minAge: minAge,
-				maxAge: maxAge,
-			};
+			const warehouseQuery = await buildWarehouseQuery(user, city, organisation);
+			const warehouses = await WarehouseModel.aggregate([
+				{ $match: warehouseQuery },
+				{
+					$lookup: {
+						from: "vaccinevials",
+						localField: "id",
+						foreignField: "warehouseId",
+						as: "vaccinations",
+					},
+				},
+			]);
 
-			const result = await generateVaccinationsList(filters);
+			let vaccineVialIds = warehouses.map((warehouse) => {
+				let currVaccines = warehouse?.vaccinations?.map((vaccination) => vaccination.id);
+				if (currVaccines && currVaccines.length) {
+					return currVaccines;
+				} else {
+					return [];
+				}
+			});
+			vaccineVialIds = vaccineVialIds.flat();
 
-			if (reportType === "excel") res = buildExcelReport(req, res, result.vaccinationDetails);
-			else res = buildPdfReport(req, res, result.vaccinationDetails, "Vaccinations");
+			const doseQuery = await buildDoseQuery(gender, minAge, maxAge, vaccineVialIds, today);
+			const result = await generateVaccinationsList(doseQuery);
+
+			if (reportType === "excel") res = buildExcelReport(req, res, result.result, today);
+			else res = buildPdfReport(req, res, result.result, "Vaccinations");
 		} catch (err) {
 			console.log(err);
 			return apiResponse.ErrorResponse(res, err.message);
@@ -1036,28 +1117,13 @@ exports.completeVial = [
 	}
 ]
 
-function buildExcelReport(req, res, dataForExcel) {
+function buildExcelReport(req, res, dataForExcel, today) {
 	const styles = {
 		headerDark: {
-			fill: {
-				fgColor: {
-					rgb: "FF000000",
-				},
-			},
 			font: {
-				color: {
-					rgb: "FFFFFFFF",
-				},
 				sz: 14,
 				bold: true,
 				underline: true,
-			},
-		},
-		cellGreen: {
-			fill: {
-				fgColor: {
-					rgb: "FF00FF00",
-				},
 			},
 		},
 	};
@@ -1066,50 +1132,43 @@ function buildExcelReport(req, res, dataForExcel) {
 		date: {
 			displayName: "Date",
 			headerStyle: styles.headerDark,
-			cellStyle: styles.cellGreen,
 			width: 120,
 		},
 		batchNumber: {
 			displayName: "Batch Number",
 			headerStyle: styles.headerDark,
-			cellStyle: styles.cellGreen,
 			width: 120,
 		},
 		organisationName: {
 			displayName: "Manufacturer Name",
 			headerStyle: styles.headerDark,
-			cellStyle: styles.cellGreen,
 			width: 220,
 		},
 		age: {
 			displayName: "Age",
 			headerStyle: styles.headerDark,
-			cellStyle: styles.cellGreen,
 			width: 60,
 		},
 		gender: {
 			displayName: "Gender",
 			headerStyle: styles.headerDark,
-			cellStyle: styles.cellGreen,
 			width: 120,
 		},
 		state: {
 			displayName: "State",
 			headerStyle: styles.headerDark,
-			cellStyle: styles.cellGreen,
 			width: 220,
 		},
 		city: {
 			displayName: "City",
 			headerStyle: styles.headerDark,
-			cellStyle: styles.cellGreen,
 			width: 220,
 		},
 	};
 
 	const report = excel.buildExport([
 		{
-			name: "Vaccination Report",
+			name: today ? "Today's Vaccination Report" : "Vaccination Report",
 			specification: specification,
 			data: dataForExcel,
 		},

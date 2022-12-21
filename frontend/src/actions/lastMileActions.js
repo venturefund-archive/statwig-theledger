@@ -93,6 +93,15 @@ export const getVialsUtilised = async (data) => {
 	}
 };
 
+export const getAnalyticsWithFilters = async (data) => {
+	try {
+		const result = await axios.post(`${config().getAnalyticsWithFilters}`, data);
+		return result;
+	} catch(err) {
+		return err.response;
+	}
+}
+
 export const getVaccinationsList = async () => {
 	try {
 		const result = await axios.get(`${config().getVaccinationsList}`);
