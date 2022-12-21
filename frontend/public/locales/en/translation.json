@@ -608,5 +608,6 @@
   "is_invalid":"is Invalid",
   "duplicate":"Duplicate",
   "save_continue":"Save & Continue",
-  "add_loc":"Add Location"
+  "add_loc":"Add Location",
+  "shipment_details_notfound":"No shipments details are found, Please Try again"
 }
