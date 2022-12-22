@@ -96,12 +96,18 @@ export default function NewDose(props) {
 									fullWidth
 									options={options}
 									getOptionLabel={(option) => option || ""}
-									renderInput={(params) => <TextField {...params} label={t("gender")} />}
+									renderInput={(params) => (
+										<TextField
+											{...params}
+											label={t("gender")}
+											error={Boolean(errors.gender)}
+											helperText={Boolean(errors.gender) && "Gender is reqiured!"}
+										/>
+									)}
 									{...field}
 									onChange={(event, value) => {
 										field.onChange(value);
 									}}
-                  required={true}
 								/>
 							)}
 						/>
@@ -117,11 +123,12 @@ export default function NewDose(props) {
 									label={t("age")}
 									{...field}
 									inputProps={{
-                    inputMode: "numeric",
+										inputMode: "numeric",
 										min: selectedValue ? "6" : "1",
 										max: selectedValue ? "12" : "150",
-                  }}
-                  required={true}
+									}}
+									error={Boolean(errors.age)}
+									helperText={Boolean(errors.age) && "Age is required!"}
 									// InputProps={{
 									// 	inputProps: {
 									// 		min: selectedValue ? 6 : 1,
