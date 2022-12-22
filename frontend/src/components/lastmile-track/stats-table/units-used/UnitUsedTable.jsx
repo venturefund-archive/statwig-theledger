@@ -23,7 +23,7 @@ export default function UnitUsedTable({
     const fetchData = async () => {
       const response = await getVialsUtilised();
       if (response?.data?.success) {
-        setData(response.data.data);
+        setData(response.data.data.vialsUtilized);
       } else console.log(response.data);
     };
     fetchData();

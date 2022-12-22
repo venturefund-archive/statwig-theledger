@@ -830,11 +830,18 @@ exports.getVialsUtilised = [
 			const warehouseQuery = await buildWarehouseQuery(user, city, organisation);
 			const warehouses = await WarehouseModel.find(warehouseQuery);
 			const warehouseIds = warehouses.map((warehouse) => warehouse.id);
+			const pagniationQuery = [];
+			if(skip) {
+				pagniationQuery.push({$skip: skip})
+			}
+			if(limit) {
+				pagniationQuery.push({$limit: limit});
+			}	
 			const vialsUtilized = await VaccineVialModel.aggregate([
 				{ $match: { warehouseId: { $in: warehouseIds } } },
 				{
 					$facet: {
-						paginatedResults: [{ $skip: skip }, { $limit: limit }],
+						paginatedResults: pagniationQuery,
 						totalCount: [{ $count: "count" }],
 					},
 				},
