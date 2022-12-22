@@ -129,13 +129,14 @@ const EditRow = (props) => {
       updateQuantity();
     }
   }
-
+  
   async function changeBatch(batch, index) {
     handleBatchChange(batch.bnp, index, [batch]);
     handleQuantityChange(batch.quant, index);
     // closeModal()
   }
   async function fetchBatches(prod, index) {
+    const today = new Date();
     setSelectedIndex(index);
     setModelProduct(prod);
     let res = await axios.get(
@@ -149,7 +150,7 @@ const EditRow = (props) => {
       element.editable = false;
       element.immutableQuantity = element.quantity;
       console.log(element.attributeSet.expDate);
-      if (isBefore(new Date(element.attributeSet.expDate), new Date())) {
+      if (isBefore(new Date(element.attributeSet.expDate), today.getDate()+1)) {
         object.splice(index, 1);
         setExpired(expired + 1);
       }
