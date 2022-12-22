@@ -106,82 +106,77 @@ const buildDoseQuery = async (gender, minAge, maxAge, vaccineVialIds, today) => 
 	return doseQuery;
 };
 
-const generateVaccinationsList = async (doseQuery, skip=0, limit) => {
-	try {
-		const pagniationQuery = [];
-		if(skip) {
-			pagniationQuery.push({$skip: skip})
-		}
-		if(limit) {
-			pagniationQuery.push({$limit: limit});
-		}
-		const dosesResult = await DoseModel.aggregate([
-			{ $match: doseQuery },
-			{
-				$lookup: {
-					from: "vaccinevials",
-					localField: "vaccineVialId",
-					foreignField: "id",
-					as: "vaccineVial",
-				},
-			},
-			{ $unwind: "$vaccineVial" },
-			{
-				$lookup: {
-					from: "products",
-					localField: "vaccineVial.productId",
-					foreignField: "id",
-					as: "product",
-				},
-			},
-			{ $unwind: "$product" },
-			{
-				$lookup: {
-					from: "warehouses",
-					localField: "vaccineVial.warehouseId",
-					foreignField: "id",
-					as: "warehouse",
-				},
-			},
-			{ $unwind: "$warehouse" },
-			{ $sort: { createdAt: -1 } },
-			{
-				$facet: {
-					paginatedResults: pagniationQuery,
-					totalCount: [{ $count: "count" }],
-				},
-			},
-			{ $unwind: "$totalCount" },
-			{ $project: { paginatedResults: 1, totalCount: "$totalCount.count" } },
-		]);
-
-		const doses = dosesResult[0].paginatedResults;
-
-		const result = [];
-		for (let i = 0; i < doses.length; ++i) {
-			let age = `${doses[i].ageMonths ? doses[i].ageMonths : doses[i].age} ${
-				doses[i].ageMonths ? "months" : "years"
-			}`;
-			const data = {
-				date: doses[i].createdAt,
-				batchNumber: doses[i].vaccineVial.batchNumber,
-				organisationName: doses[i].product?.manufacturer,
-				age: age,
-				gender: doses[i].gender,
-				state: doses[i].warehouse.warehouseAddress.state,
-				city: doses[i].warehouse.warehouseAddress.city,
-			};
-
-			result.push(data);
-		}
-
-		return {
-			totalCount: dosesResult[0].totalCount,
-			result: result,
-		};
-	} catch (err) {
-		throw err;
+const generateVaccinationsList = async (doseQuery, skip = 0, limit) => {
+	const pagniationQuery = [];
+	if (skip) {
+		pagniationQuery.push({ $skip: skip })
 	}
+	if (limit) {
+		pagniationQuery.push({ $limit: limit });
+	}
+	const dosesResult = await DoseModel.aggregate([
+		{ $match: doseQuery },
+		{
+			$lookup: {
+				from: "vaccinevials",
+				localField: "vaccineVialId",
+				foreignField: "id",
+				as: "vaccineVial",
+			},
+		},
+		{ $unwind: "$vaccineVial" },
+		{
+			$lookup: {
+				from: "products",
+				localField: "vaccineVial.productId",
+				foreignField: "id",
+				as: "product",
+			},
+		},
+		{ $unwind: "$product" },
+		{
+			$lookup: {
+				from: "warehouses",
+				localField: "vaccineVial.warehouseId",
+				foreignField: "id",
+				as: "warehouse",
+			},
+		},
+		{ $unwind: "$warehouse" },
+		{ $sort: { createdAt: -1 } },
+		{
+			$facet: {
+				paginatedResults: pagniationQuery,
+				totalCount: [{ $count: "count" }],
+			},
+		},
+		{ $unwind: "$totalCount" },
+		{ $project: { paginatedResults: 1, totalCount: "$totalCount.count" } },
+	]);
+
+	const doses = dosesResult[0].paginatedResults;
+
+	const result = [];
+	for (let i = 0; i < doses.length; ++i) {
+		let age = `${doses[i].ageMonths ? doses[i].ageMonths : doses[i].age} ${doses[i].ageMonths ? "months" : "years"
+			}`;
+		const data = {
+			date: doses[i].createdAt,
+			batchNumber: doses[i].vaccineVial.batchNumber,
+			organisationName: doses[i].product?.manufacturer,
+			age: age,
+			gender: doses[i].gender,
+			state: doses[i].warehouse.warehouseAddress.state,
+			city: doses[i].warehouse.warehouseAddress.city,
+		};
+
+		result.push(data);
+	}
+
+	return {
+		totalCount: dosesResult[0].totalCount,
+		result: result,
+	};
 };
 
 exports.fetchBatchById = [
@@ -830,11 +825,18 @@ exports.getVialsUtilised = [
 			const warehouseQuery = await buildWarehouseQuery(user, city, organisation);
 			const warehouses = await WarehouseModel.find(warehouseQuery);
 			const warehouseIds = warehouses.map((warehouse) => warehouse.id);
+			const pagniationQuery = [];
+			if(skip) {
+				pagniationQuery.push({$skip: skip})
+			}
+			if(limit) {
+				pagniationQuery.push({$limit: limit});
+			}	
 			const vialsUtilized = await VaccineVialModel.aggregate([
 				{ $match: { warehouseId: { $in: warehouseIds } } },
 				{
 					$facet: {
-						paginatedResults: [{ $skip: skip }, { $limit: limit }],
+						paginatedResults: pagniationQuery,
 						totalCount: [{ $count: "count" }],
 					},
 				},
@@ -876,7 +878,7 @@ exports.getVaccinationsList = [
 				query = { warehouseId: { $in: warehouseIds } };
 			}
 
-			const vialsUtilized = await VaccineVialModel.find(query);
+			const vialsUtilized = await VaccineVialModel.find(query).sort({ _id: -1 });
 
 			const vaccinationsList = [];
 			const todaysVaccinationsList = [];
