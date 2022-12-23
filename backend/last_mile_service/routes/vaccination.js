@@ -14,6 +14,7 @@ router.get("/getAnalytics", VaccinationController.getAnalytics);
 router.get("/getVaccinationsList", VaccinationController.getVaccinationsList);
 router.get("/getCitiesAndOrgsForFilters", VaccinationController.getCitiesAndOrgsForFilters);
 router.post("/exportVaccinationList", VaccinationController.exportVaccinationList);
+router.post("/exportVialsUtilised", VaccinationController.exportVialsUtilised);
 router.put("/updateDose", VaccinationController.updateDose);
 router.delete("/deleteDose", VaccinationController.deleteDose);
 router.post("/completeVial", VaccinationController.completeVial);

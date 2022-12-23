@@ -130,3 +130,14 @@ export const exportVaccinationList = async (data) => {
 		throw err;
 	}
 };
+
+export const exportVialsUtilised = async (data) => {
+	try {
+		const result = await axios.post(`${config().exportVialsUtilised}`, data, {
+			responseType: "blob",
+		});
+		return result;
+	} catch (err) {
+		throw err;
+	}
+};

@@ -125,7 +125,7 @@ export default function NewDose(props) {
 									inputProps={{
 										inputMode: "numeric",
 										min: selectedValue ? "6" : "1",
-										max: selectedValue ? "12" : "150",
+										max: selectedValue ? "11" : "150",
 									}}
 									error={Boolean(errors.age)}
 									helperText={Boolean(errors.age) && "Age is required!"}
