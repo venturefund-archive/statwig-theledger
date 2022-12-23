@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-
 const VaccineVialSchema = new mongoose.Schema(
 	{
 		id: {
@@ -17,6 +16,10 @@ const VaccineVialSchema = new mongoose.Schema(
 		batchNumber: {
 			required: true,
 			type: String,
+		},
+		isComplete: {
+			type: Boolean,
+			default: false,
 		},
 		numberOfDoses: {
 			required: true,

@@ -7,6 +7,7 @@ import LinearProgress, {
   linearProgressClasses,
 } from "@mui/material/LinearProgress";
 import Switch from "@mui/material/Switch";
+import { startCase } from "lodash";
 
 const label = { inputProps: { "aria-label": "Switch demo" } };
 
@@ -68,10 +69,10 @@ export default function Roles({
   const [permission, setPermission] = useState({});
 
   useEffect(() => {
-		let temp = permissions;
-		setPermission(temp);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [permissions]);
+    let temp = permissions;
+    setPermission(temp);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [permissions]);
 
   const handleChange = (panel) => (event, newExpanded) => {
     setExpanded(newExpanded ? panel : false);
@@ -107,24 +108,25 @@ export default function Roles({
         {Object.keys(permission).map((key, index) => (
           <AccordionDetails key={key + permission[`${key}`]}>
             <div className="permission-role-body">
+              {console.log(permission)}
               <div className="roles-card">
-                <p className="vl-body vl-grey-md f-500">{key}</p>
+                <p className="vl-body vl-grey-md f-500">{startCase(key)}</p>
                 <Switch
                   {...label}
                   onChange={() => {
                     let obj = permission;
                     obj[`${key}`] = !obj[`${key}`];
-										setPermission(obj);
-										updatePermissions(permissionType, obj);
-										refresh(!flag);
-									}}
-									checked={permission[`${key}`] ? true : false}
-								/>
-							</div>
-						</div>
-					</AccordionDetails>
-				))}
-			</Accordion>
-		</div>
-	);
+                    setPermission(obj);
+                    updatePermissions(permissionType, obj);
+                    refresh(!flag);
+                  }}
+                  checked={permission[`${key}`] ? true : false}
+                />
+              </div>
+            </div>
+          </AccordionDetails>
+        ))}
+      </Accordion>
+    </div>
+  );
 }

@@ -27,6 +27,7 @@
     "i18next-http-backend": "^2.0.1",
     "jwt-decode": "^3.1.2",
     "leaflet": "^1.9.2",
+    "lodash": "^4.17.21",
     "mapbox-gl": "^2.10.0",
     "moment": "^2.29.4",
     "npm-overlapping-marker-spiderfier": "^1.0.3",
@@ -73,18 +74,11 @@
       "react-app/jest"
     ]
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not op_mini all"
+  ],
   "devDependencies": {
     "sass": "^1.56.1"
   }

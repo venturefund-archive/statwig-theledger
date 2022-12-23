@@ -10,6 +10,15 @@ export const fetchBatch = async (data) => {
 	}
 };
 
+export const fetchBatchByIdWithoutCondition = async (data) => {
+	try {
+		const result = await axios.post(`${config().fetchBatchByIdWithoutCondition}`, data);
+		return result;
+	} catch (err) {
+		return err.response;
+	}
+};
+
 export const getAllVaccinationDetails = async (data) => {
 	try {
 		const result = await axios.post(`${config().getAllVaccinationDetails}`, data);
@@ -22,6 +31,33 @@ export const getAllVaccinationDetails = async (data) => {
 export const vaccinateIndividual = async (data) => {
 	try {
 		const result = await axios.post(`${config().vaccinateIndividual}`, data);
+		return result;
+	} catch (err) {
+		throw err;
+	}
+};
+
+export const updateVaccinationIndividual = async (data) => {
+	try {
+		const result = await axios.put(`${config().updateVaccinationIndividual}`, data);
+		return result;
+	} catch (err) {
+		throw err;
+	}
+}
+
+export const deleteVaccinationIndividual = async (data) => {
+	try {
+		const result = await axios.delete(`${config().deleteVaccinationIndividual}`, { params: { doseId: data } });
+		return result;
+	} catch (err) {
+		throw err;
+	}
+}
+
+export const completeVaccinationVial = async (data) => {
+	try {
+		const result = await axios.post(`${config().completeVaccinationVial}`, data);
 		return result;
 	} catch (err) {
 		throw err;
@@ -56,6 +92,15 @@ export const getVialsUtilised = async (data) => {
 		throw err;
 	}
 };
+
+export const getAnalyticsWithFilters = async (data) => {
+	try {
+		const result = await axios.post(`${config().getAnalyticsWithFilters}`, data);
+		return result;
+	} catch(err) {
+		return err.response;
+	}
+}
 
 export const getVaccinationsList = async () => {
 	try {

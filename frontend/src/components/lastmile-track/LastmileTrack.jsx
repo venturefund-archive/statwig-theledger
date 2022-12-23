@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import {
   fetchAnalytics,
   getVaccinationsList,
-  getVialsUtilised,
 } from "../../actions/lastMileActions";
 import AnalyticTiles from "../../shared/stats-tile/AnalyticTiles";
 import Beneficiary from "./beneficiary/Beneficiary";
@@ -18,45 +17,50 @@ export default function LastmileTrack(props) {
   const [Steps, setSteps] = useState(1);
   const [tableView, setTableView] = useState(false);
   const [tableComp, setTableComp] = useState(null);
-
+  const [vialId, setVialId] = useState(null);
   const [analytics, setAnalytics] = useState();
-  const [unitsUtilized, setUnitsUtilized] = useState();
   const [totalVaccinations, setTotalVaccinations] = useState();
   const [todaysVaccinations, setTodaysVaccinations] = useState();
   const [batchDetails, setBatchDetails] = useState();
-  const [flag, toggleFlag] = useState(false);
+  const [save, setSave] = useState(false);
+  const { t } = useTranslation();
 
-  const { t, i18n } = useTranslation();
+  useEffect(() => {
+    (async () => {
+      // Fetch analytics
+      const analytics = await fetchAnalytics();
+      if (analytics?.data?.success) {
+        setAnalytics(analytics.data.data);
+      }
+      const vaccinationsList = await getVaccinationsList();
+      if (vaccinationsList?.data?.success) {
+        setTotalVaccinations(vaccinationsList.data.data.vaccinationsList);
+        setTodaysVaccinations(
+          vaccinationsList.data.data.todaysVaccinationsList,
+        );
+      }
+    })();
+  }, [Steps, save]);
 
-  useEffect(async () => {
-    // Fetch analytics
-    const analytics = await fetchAnalytics();
-    if (analytics?.data?.success) {
-      setAnalytics(analytics.data.data);
-    }
-
-    const unitsUtilized = await getVialsUtilised();
-    if (unitsUtilized?.data?.success) {
-      setUnitsUtilized(unitsUtilized.data.data);
-    }
-
-    const vaccinationsList = await getVaccinationsList();
-    if (vaccinationsList?.data?.success) {
-      setTotalVaccinations(vaccinationsList.data.data.vaccinationsList);
-      setTodaysVaccinations(vaccinationsList.data.data.todaysVaccinationsList);
-    }
-  }, [flag]);
-
-  const completeVaccination = async () => {
-    setSteps(1);
-    toggleFlag(!flag);
+  const saveVaccination = async () => {
+    setVialId(null);
+    setSave(!save);
+    handleAnalyticsClicked("unitsUtilized");
   };
 
   const handleAnalyticsClicked = (tableType) => {
     let table;
     switch (tableType) {
       case "unitsUtilized": {
-        table = <UnitUsedTable t={t} unitsUtilized={unitsUtilized} />;
+        table = (
+          <UnitUsedTable
+            t={t}
+            setSteps={setSteps}
+            setTableView={setTableView}
+            setBatchDetails={setBatchDetails}
+            setVialId={setVialId}
+          />
+        );
         break;
       }
       case "totalVaccinations": {
@@ -71,39 +75,47 @@ export default function LastmileTrack(props) {
         );
         break;
       }
+      default:
+        table = null;
     }
-
     setTableComp(table);
     setTableView(true);
   };
 
   return (
     <>
-      <div className="Lastmile--mainPage-layout">
-        <div className="Lastmile--pageHeader">
+      <div className='Lastmile--mainPage-layout'>
+        <div className='Lastmile--pageHeader'>
           <h1
             style={{ paddingBottom: "10px" }}
-            className="vl-heading-bdr black f-700 mi-reset"
+            className='vl-heading-bdr black f-700 mi-reset'
           >
             {t("lastmile")}
           </h1>
-          {tableView && (
-            <div className="back-link-button-space">
+          {(tableView || Steps != 1) && (
+            <div className='back-link-button-space'>
               <button
-                className="back-action-btn"
-                onClick={() => setTableView(false)}
+                className='back-action-btn'
+                onClick={() => {
+                  if (tableView) {
+                    setTableView(false);
+                    setSteps(1);
+                  } else {
+                    setSteps(1);
+                  }
+                }}
               >
-                <i className="fa-solid fa-arrow-left"></i>
+                <i className='fa-solid fa-arrow-left'></i>
                 <span>{t("back_to_batch_details")}</span>
               </button>
             </div>
           )}
         </div>
-        <div className="Lastmile--gridLayout-wrapper">
+        <div className='Lastmile--gridLayout-wrapper'>
           {tableView ? (
-            <div className="Lastmile--Interaction-space">{tableComp}</div>
+            <div className='Lastmile--Interaction-space'>{tableComp}</div>
           ) : (
-            <div className="Lastmile--Interaction-space">
+            <div className='Lastmile--Interaction-space'>
               {Steps === 1 ? (
                 <ScanBatch
                   setBatchDetails={setBatchDetails}
@@ -112,40 +124,42 @@ export default function LastmileTrack(props) {
                 />
               ) : (
                 <Beneficiary
+                  vialId={vialId}
+                  setVialId={setVialId}
                   batchDetails={batchDetails}
-                  completeVaccination={completeVaccination}
+                  saveVaccination={saveVaccination}
                   {...props}
                 />
               )}
             </div>
           )}
-          <div className="Lastmile--Analytics-space">
+          <div className='Lastmile--Analytics-space'>
             <AnalyticTiles
-              layout="1"
-              variant="1"
+              layout='1'
+              variant='1'
               title={t("total_units_utilized")}
               stat={analytics?.unitsUtilized ? analytics.unitsUtilized : 0}
-              name="unitsUtilized"
+              name='unitsUtilized'
               onClick={handleAnalyticsClicked}
             />
             <AnalyticTiles
-              layout="1"
-              variant="2"
+              layout='1'
+              variant='2'
               title={t("no_beneficiaries_vaccinated_so_far")}
               stat={
                 analytics?.totalVaccinations ? analytics.totalVaccinations : 0
               }
-              name="totalVaccinations"
+              name='totalVaccinations'
               onClick={handleAnalyticsClicked}
             />
             <AnalyticTiles
-              layout="1"
-              variant="3"
+              layout='1'
+              variant='3'
               title={t("no_beneficiaries_vaccinated_today")}
               stat={
                 analytics?.todaysVaccinations ? analytics.todaysVaccinations : 0
               }
-              name="todaysVaccinations"
+              name='todaysVaccinations'
               onClick={handleAnalyticsClicked}
             />
           </div>

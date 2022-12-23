@@ -90,7 +90,7 @@ export default function OrgHeader() {
                     location.pathname === "/org/dashboard" && "active"
                   }`}
                 >
-                  <p className="vl-note">{t("dashboard")}</p>
+                  <p className='vl-note'>{t("dashboard")}</p>
                 </Link>
               </li>
               <li className='admin-nav-item'>
@@ -100,7 +100,7 @@ export default function OrgHeader() {
                     location.pathname === "/org/manage-users" && "active"
                   }`}
                 >
-                  <p className="vl-note">{t("manage_user")}</p>
+                  <p className='vl-note'>{t("manage_user")}</p>
                 </Link>
               </li>
               <li className='admin-nav-item'>
@@ -110,17 +110,17 @@ export default function OrgHeader() {
                     location.pathname === "/org/product-list" && "active"
                   }`}
                 >
-                  <p className="vl-note">{t("prod_list")}</p>
+                  <p className='vl-note'>{t("prod_list")}</p>
                 </Link>
               </li>
             </ul>
           </article>
-          <article className="admin-nav-right">
-            <ul className="admin-nav-list switch-button-container">
-              <li className="admin-nav-item configure-link">
-                <div className="switch-button">
-                  <p className="vl-note">{t("admin")}</p>
-                  <i class="fa-solid fa-caret-down"></i>
+          <article className='admin-nav-right'>
+            <ul className='admin-nav-list switch-button-container'>
+              <li className='admin-nav-item configure-link'>
+                <div className='switch-button'>
+                  <p className='vl-note'>{t("admin")}</p>
+                  <i className='fa-solid fa-caret-down'></i>
                 </div>
                 <div className={`configure-list active `}>
                   <button
@@ -139,9 +139,9 @@ export default function OrgHeader() {
                 </Link>
               </li> */}
             </ul>
-            <div className="admin-mini-profile" ref={domNode}>
+            <div className='admin-mini-profile' ref={domNode}>
               <div
-                className="admin-profile-card vl-flex-md"
+                className='admin-profile-card vl-flex-md'
                 onClick={() => setProfileClickBtn(!ProfileClickBtn)}
               >
                 {image && (
@@ -149,9 +149,9 @@ export default function OrgHeader() {
                     <img src={image} alt='profile' />
                   </figure>
                 )}
-                <hgroup className="profile-name-card">
-                  <h1 className="vl-note vl-light f-700">{name}</h1>
-                  <h2 className="vl-small vl-light f-400">{orgName}</h2>
+                <hgroup className='profile-name-card'>
+                  <h1 className='vl-note vl-light f-700'>{name}</h1>
+                  <h2 className='vl-small vl-light f-400'>{orgName}</h2>
                 </hgroup>
               </div>
               <div
@@ -159,21 +159,21 @@ export default function OrgHeader() {
                   ProfileClickBtn && "active"
                 }`}
               >
-                <div className="header__profile_top">
-                  <div className="header__inner_profile_icon">
-                    <div className="green__active"></div>
-                    <img src={image} alt="image" />
+                <div className='header__profile_top'>
+                  <div className='header__inner_profile_icon'>
+                    <div className='green__active'></div>
+                    <img src={image} alt='active_image' />
                   </div>
-                  <div className="header__inner_profile_content">
-                    <h1 className="vl-name-header f-500 profile__black">
+                  <div className='header__inner_profile_content'>
+                    <h1 className='vl-name-header f-500 profile__black'>
                       {name}
                     </h1>
-                    <p className="vl-note f-400 vl-grey-sm"> {orgName}</p>
+                    <p className='vl-note f-400 vl-grey-sm'> {orgName}</p>
                   </div>
                 </div>
-                <div className="header__profile_middle">
+                <div className='header__profile_middle'>
                   <div
-                    className="header__link__card"
+                    className='header__link__card'
                     onClick={() => {
                       if (LangOption === "en") {
                         changeLanguage("es");
@@ -182,28 +182,29 @@ export default function OrgHeader() {
                       }
                     }}
                   >
-                    <i class="fa-solid fa-earth-americas"></i>
-                    <div className="langugae__option">
-                      <p className="vl-body f-400">{t("switch_lang")}</p>
-                      <div className="lang__logo">
-                        <p className="vl-small f-400">
+                    <i className='fa-solid fa-earth-americas'></i>
+                    <div className='langugae__option'>
+                      <p className='vl-body f-400'>{t("switch_lang")}</p>
+                      <div className='lang__logo'>
+                        <p className='vl-small f-400'>
                           {LangOption === "en" ? "SPA" : "ENG"}
                         </p>
                         <img
                           src={LangOption === "en" ? SpanishFlag : EnglishFlag}
-                          className="lang__flag"
+                          className='lang__flag'
+                          alt='flags'
                         />
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="header__profile_bottom">
+                <div className='header__profile_bottom'>
                   <div
-                    className="header__link__card"
+                    className='header__link__card'
                     onClick={() => dispatch(logoutUser())}
                   >
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                    <p className="vl-body f-400">{t("sign_out")}</p>
+                    <i className='fa-solid fa-arrow-right-from-bracket'></i>
+                    <p className='vl-body f-400'>{t("sign_out")}</p>
                   </div>
                 </div>
               </div>

@@ -62,6 +62,8 @@ const VerifyInventory = (props) => {
 
   const schemaClass = "ml-1 text-muted text-review-column";
 
+  console.log(reviewInventories)
+
   return (
     <div className='verifyinventory'>
       <div className='d-flex flex-row justify-content-between'>
@@ -187,7 +189,7 @@ const VerifyInventory = (props) => {
                     className='col-1'
                     style={{ flex: "0 0 11.333333%", maxWidth: "11.333333%" }}
                   >
-                    {formatDate(new Date(reviewInventory?.manufacturingDate))}
+                    {reviewInventory?.manufacturingDate ? formatDate(new Date(reviewInventory?.manufacturingDate)) : "NA"}
                     {/* {reviewInventory?.manufacturingDate
                       ? `0${manufMonth}`.slice(-2) +
                       "/" +
@@ -200,7 +202,7 @@ const VerifyInventory = (props) => {
                     className='col-1'
                     style={{ flex: "0 0 11.333333%", maxWidth: "11.333333%" }}
                   >
-                    {formatDate(new Date(reviewInventory?.expiryDate))}
+                    {reviewInventory?.expiryDate ? formatDate(new Date(reviewInventory?.expiryDate)) : "NA"}
                     {/* {reviewInventory?.expiryDate
                       ? `0${new Date(expiryMonth).getMonth() + 1}`.slice(-2) +
                       "/" +
@@ -216,12 +218,12 @@ const VerifyInventory = (props) => {
                     className='col-2'
                     style={{
                       position: "relative",
-                      left: "64px",
+                      left:"-20px",
                       flex: "0 0 13.666667%",
                       maxWidth: "15.666667%",
                     }}
                   >
-                    {reviewInventory?.serialNumber}
+                    {reviewInventory?.serialNumber ? reviewInventory?.serialNumber : "NA"}
                   </span>
                 </div>
               );
