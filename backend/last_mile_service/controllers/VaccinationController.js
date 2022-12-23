@@ -156,7 +156,12 @@ const generateVaccinationsList = async (doseQuery, skip = 0, limit) => {
 		{ $project: { paginatedResults: 1, totalCount: "$totalCount.count" } },
 	]);
 
-	const doses = dosesResult[0].paginatedResults;
+	let doses = [];
+	let totalCount = 0;
+	if(dosesResult && dosesResult?.length) {
+		doses = dosesResult[0].paginatedResults;
+		totalCount = dosesResult[0].totalCount;
+	}
 
 	const result = [];
 	for (let i = 0; i < doses.length; ++i) {
@@ -176,7 +181,7 @@ const generateVaccinationsList = async (doseQuery, skip = 0, limit) => {
 	}
 
 	return {
-		totalCount: dosesResult[0].totalCount,
+		totalCount: totalCount,
 		result: result,
 	};
 };
