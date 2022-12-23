@@ -15,7 +15,7 @@ function valuetext(value) {
 }
 
 export default function Filterbar(props) {
-	const { tableType, filters, setFilters, t } = props;
+	const { tableType, filters, setFilters, t, resetFilters } = props;
 
 	const [cities, setCities] = useState([""]);
 	const [organisations, setOrgnisations] = useState([""]);
@@ -49,13 +49,13 @@ export default function Filterbar(props) {
 	}, [gender, ageRange, city, organisation]);
 
 	useEffect(async () => {
-		if(tableType === "units") {
+		if (tableType === "units") {
 			if (filters.gender) {
 				const { gender, ...newFilters } = filters;
 				setFilters(newFilters);
 			}
 		}
-	}, [tableType])
+	}, [tableType]);
 
 	useEffect(async () => {
 		try {
@@ -68,6 +68,14 @@ export default function Filterbar(props) {
 			console.log(err);
 		}
 	}, []);
+
+	useEffect(() => {
+		// Reset filter values
+			handleClear("city");
+			handleClear("organisation");
+			handleClear("gender");
+			handleClear("age");
+	}, [resetFilters]);
 
 	const handleClear = (name) => {
 		switch (name) {
@@ -85,7 +93,7 @@ export default function Filterbar(props) {
 			}
 			case "age": {
 				setAgeType("range");
-				setAgeRange([0, 100]);
+				setAgeRange([0, 150]);
 				break;
 			}
 		}
@@ -152,9 +160,9 @@ export default function Filterbar(props) {
 					<div className="filterCard-header">
 						<div className="filterCard-inner-header">
 							<p className="vl-body f-500 vl-grey-md">{t("city")}</p>
-							{/* <button onClick={() => handleClear("city")} className="filter-clear-btn">
+							<button onClick={() => handleClear("city")} className="filter-clear-btn">
 								Clear
-							</button> */}
+							</button>
 						</div>
 						<p className="vl-note f-400 vl-grey-xs">{t("city_msg")}</p>
 					</div>
@@ -163,8 +171,8 @@ export default function Filterbar(props) {
 							disablePortal
 							fullWidth
 							options={cities}
+							value={typeof city === "string" ? cities.find((cty) => cty === city) : city || null}
 							onChange={(event, value) => setCity(value)}
-							value={city}
 							renderInput={(params) => <TextField {...params} label="City" />}
 						/>
 					</div>
@@ -175,9 +183,9 @@ export default function Filterbar(props) {
 						<div className="filterCard-header">
 							<div className="filterCard-inner-header">
 								<p className="vl-body f-500 vl-grey-md">{t("organisation")}</p>
-								{/* <button onClick={() => handleClear("organisation")} className="filter-clear-btn">
+								<button onClick={() => handleClear("organisation")} className="filter-clear-btn">
 									Clear
-								</button> */}
+								</button>
 							</div>
 							<p className="vl-note f-400 vl-grey-xs">{t("org_msg")}</p>
 						</div>
@@ -186,7 +194,11 @@ export default function Filterbar(props) {
 								disablePortal
 								fullWidth
 								options={organisations}
-								value={organisation}
+								value={
+									typeof organisation === "string"
+										? organisations.find((org) => org === organisation)
+										: organisation || null
+								}
 								onChange={(event, value) => setOrganisation(value)}
 								renderInput={(params) => <TextField {...params} label="Organization" />}
 							/>

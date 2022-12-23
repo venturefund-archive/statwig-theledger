@@ -77,7 +77,9 @@ const buildWarehouseQuery = async (user, city, organisationName) => {
 
 const buildDoseQuery = async (gender, minAge, maxAge, vaccineVialIds, today) => {
 	let doseQuery = {};
-	let queryExprs = [{ $in: ["$vaccineVialId", vaccineVialIds] }];
+	let queryExprs = vaccineVialIds
+		? [{ $in: ["$vaccineVialId", vaccineVialIds] }]
+		: [{ $eq: ["$vaccineVialId", "$$vaccineVialId"] }];
 
 	// Modify the if once a new Role is added
 	if (gender) {
@@ -712,15 +714,40 @@ exports.getAnalyticsWithFilters = [
 		try {
 			const user = req.user;
 			const { city, organisation, gender, minAge, maxAge } = req.body;
+
 			const warehouseQuery = await buildWarehouseQuery(user, city, organisation);
+			const doseQuery = await buildDoseQuery(gender, minAge, maxAge);
 
 			const warehouses = await WarehouseModel.aggregate([
 				{ $match: warehouseQuery },
 				{
 					$lookup: {
 						from: "vaccinevials",
-						localField: "id",
-						foreignField: "warehouseId",
+						let: { warehouseId: "$id" },
+						pipeline: [
+							{ $match: { $expr: { $eq: ["$warehouseId", "$$warehouseId"] } } },
+							{
+								$lookup: {
+									from: "products",
+									localField: "productId",
+									foreignField: "id",
+									as: "product",
+								},
+							},
+							{ $unwind: "$product" },
+							{
+								$lookup: {
+									from: "doses",
+									let: { vaccineVialId: "$id" },
+									pipeline: [
+										{
+											$match: doseQuery,
+										},
+									],
+									as: "doses",
+								},
+							},
+						],
 						as: "vaccinations",
 					},
 				},
@@ -733,15 +760,19 @@ exports.getAnalyticsWithFilters = [
 			now.setHours(0, 0, 0, 0);
 
 			for (let i = 0; i < warehouses.length; ++i) {
-				let currVaccinations = warehouses[i]?.vaccinations || [];
-				for (let j = 0; j < currVaccinations.length; ++j) {
-					let createdAt = new Date(currVaccinations[j].createdAt);
+				const vaccineVials = warehouses[i].vaccinations;
+				for (let j = 0; j < vaccineVials.length; ++j) {
+					let createdAt = new Date(vaccineVials[j].createdAt);
 					createdAt.setHours(0, 0, 0, 0);
-					if (currVaccinations[j].isComplete && currVaccinations[j].numberOfDoses > 0) {
-						++vialsUtilized;
-						totalVaccinations += currVaccinations[j].numberOfDoses;
+
+					const doses = vaccineVials[j].doses;
+
+					if (doses.length) {
+						vialsUtilized++;
+						totalVaccinations += doses.length;
+
 						if (now.toDateString() === createdAt.toDateString()) {
-							todaysVaccinations += currVaccinations[j].numberOfDoses;
+							todaysVaccinations += doses.length;
 						}
 					}
 				}
