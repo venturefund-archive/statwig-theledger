@@ -242,6 +242,15 @@ exports.fetchBatchById = [
 				if (productDetails.length) {
 					if (!productDetails[0]?.atom?.quantity) {
 						throw new Error("Batch exhausted!");
+					} else {
+						let expDate = new Date(productDetails[0].atom.attributeSet.expDate);
+						expDate.setHours(0, 0, 0, 0);
+						let today = new Date();
+						today.setHours(0, 0, 0, 0);
+
+						if(expDate.toDateString() < today.toDateString()) {
+							throw new Error("Batch expired!");
+						}
 					}
 				} else {
 					throw new Error("Batch not found!");
@@ -707,6 +716,7 @@ exports.getAllVaccinationDetails = [
 		}
 	},
 ];
+
 // For GoverningBody
 exports.getAnalyticsWithFilters = [
 	auth,
