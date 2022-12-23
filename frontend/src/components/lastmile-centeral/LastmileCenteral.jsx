@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
 import {
   exportVaccinationList,
+  exportVialsUtilised,
   getAllVaccinationDetails,
   getAnalyticsWithFilters,
   getVialsUtilised,
@@ -95,15 +96,22 @@ export default function LastmileCenteral(props) {
     data.reportType = type ? type : "excel";
     data.today = TableSwitch === "today" ? true : false;
 
-    const result = await exportVaccinationList(data);
+    let result;
+    if(TableSwitch === "units") {
+      result = await exportVialsUtilised(data);
+    } else {
+      result = await exportVaccinationList(data);      
+    }
     if (result?.data && result?.status === 200) {
       const downloadUrl = window.URL.createObjectURL(new Blob([result.data]));
       const link = document.createElement("a");
       link.href = downloadUrl;
       link.setAttribute(
-        "download",
-        `VaccinationReport.${type === "excel" ? "xlsx" : "pdf"}`,
-      );
+				"download",
+				`${TableSwitch === "units" ? "VialsUtilizedReport" : "VaccinationReport"}.${
+					type === "excel" ? "xlsx" : "pdf"
+				}`,
+			);
       document.body.appendChild(link);
       link.click();
       link.remove();
