@@ -42,6 +42,7 @@ export default function LastmileCenteral(props) {
   const [TableSwitch, setTableSwitch] = useState("today");
   const [filters, setFilters] = useState({});
   const { t } = useTranslation();
+  const [resetFilters, toggleResetFilters] = useState(false);
 
   const [ButtonOpen, setButtonOpen] = useState(false);
 
@@ -56,7 +57,20 @@ export default function LastmileCenteral(props) {
 		setAnalytics(analyticsResponse.data.data);
 
 		dispatch(turnOff());
-	}, [filters, TableSwitch]);
+	}, [filters]);
+
+  useEffect(async () => {
+    dispatch(turnOn());
+    // Reset filters
+    setFilters({});
+    toggleResetFilters(!resetFilters);
+
+    // Fetch analytics
+		const analyticsResponse = await getAnalyticsWithFilters({});
+		setAnalytics(analyticsResponse.data.data);
+
+		dispatch(turnOff());
+	}, [TableSwitch]);
 
   // useEffect(() => {
   //   (async () => {
@@ -184,6 +198,7 @@ export default function LastmileCenteral(props) {
           tableType={TableSwitch}
           filters={filters}
           setFilters={setFilters}
+          resetFilters={resetFilters}
           {...props}
         />
       </div>

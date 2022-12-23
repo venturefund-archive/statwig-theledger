@@ -99,6 +99,7 @@ export default function LastmileTrack(props) {
                 onClick={() => {
                   if (tableView) {
                     setTableView(false);
+                    setSteps(1);
                   } else {
                     setSteps(1);
                   }
