@@ -881,7 +881,7 @@ exports.getVialsUtilised = [
 			if(limit) {
 				pagniationQuery.push({$limit: limit});
 			}	
-			const vialsUtilized = await VaccineVialModel.aggregate([
+			const vialsResult = await VaccineVialModel.aggregate([
 				{ $match: { warehouseId: { $in: warehouseIds } } },
 				{ $sort: { createdAt: -1 } },
 				{
@@ -894,9 +894,16 @@ exports.getVialsUtilised = [
 				{ $project: { paginatedResults: 1, totalCount: "$totalCount.count" } },
 			]);
 
+			let vialsUtilized = [];
+			let totalCount = 0;
+			if(vialsResult && vialsResult?.length) {
+				vialsUtilized = vialsResult[0].paginatedResults;
+				totalCount = vialsResult[0].totalCount;
+			}
+		
 			const result = {
-				vialsUtilized: vialsUtilized[0].paginatedResults,
-				totalCount: vialsUtilized[0].totalCount,
+				vialsUtilized: vialsUtilized,
+				totalCount: totalCount,
 			};
 			return apiResponse.successResponseWithData(res, "Vaccine Vial Details", result);
 		} catch (err) {
@@ -907,6 +914,109 @@ exports.getVialsUtilised = [
 ];
 
 exports.getVaccinationsList = [
+	auth,
+	async (req, res) => {
+		try {
+			const user = req.user;
+			const { today, skip, limit } = req.body;
+
+			const userDetails = await EmployeeModel.findOne({ id: user.id });
+			let warehouseIds = userDetails.warehouseId;
+
+			let query = {};
+			if (userDetails.role === "admin") {
+				let warehouses = await WarehouseModel.find({
+					organisationId: userDetails.organisationId,
+					status: "ACTIVE",
+				});
+				warehouseIds = warehouses.map((warehouse) => warehouse.id);
+			}
+			const organisation = await OrganisationModel.findOne({
+				id: userDetails.organisationId,
+			});
+			if (organisation.type !== "GoverningBody") {
+				query = { warehouseId: { $in: warehouseIds } };
+			}
+
+			const vialsUtilized = await VaccineVialModel.find(query).sort({ _id: -1 });
+			const vialsList = vialsUtilized.map((vial) => vial.id);
+
+			let queryExprs = [{ $in: ["$vaccineVialId", vialsList] }];
+			if (today) {
+				let now = new Date();
+				now.setHours(0, 0, 0, 0);
+				queryExprs.push({ $gte: ["$createdAt", now] });
+			}
+
+			const pagniationQuery = [];
+			if (skip) {
+				pagniationQuery.push({ $skip: skip });
+			}
+			if (limit) {
+				pagniationQuery.push({ $limit: limit });
+			}
+			const dosesResult = await DoseModel.aggregate([
+				{
+					$match: {
+						$expr: {
+							$and: queryExprs,
+						},
+					},
+				},
+				{
+					$lookup: {
+						from: "vaccinevials",
+						localField: "vaccineVialId",
+						foreignField: "id",
+						as: "vaccineVial",
+					},
+				},
+				{ $unwind: "$vaccineVial" },
+				{ $sort: { createdAt: -1 } },
+				{
+					$facet: {
+						paginatedResults: pagniationQuery,
+						totalCount: [{ $count: "count" }],
+					},
+				},
+				{ $unwind: "$totalCount" },
+				{ $project: { paginatedResults: 1, totalCount: "$totalCount.count" } },
+			]);
+
+			let doses = [];
+			let totalCount = 0;
+			if (dosesResult && dosesResult?.length) {
+				doses = dosesResult[0].paginatedResults;
+				totalCount = dosesResult[0].totalCount;
+			}
+
+			const result = [];
+			for (let i = 0; i < doses.length; ++i) {
+				let age = `${doses[i].ageMonths ? doses[i].ageMonths : doses[i].age} ${
+					doses[i].ageMonths ? "months" : "years"
+				}`;
+				const data = {
+					date: doses[i].createdAt,
+					batchNumber: doses[i].vaccineVial.batchNumber,
+					age: age,
+					gender: doses[i].gender,
+				};
+
+				result.push(data);
+			}
+
+			return apiResponse.successResponseWithData(res, "Vaccination list!", {
+				totalCount: totalCount,
+				vaccinationsList: result,
+			});
+		} catch(err) {
+			console.log(err);
+			return apiResponse.ErrorResponse(res, err.message);
+		}
+	}
+]
+
+exports.getVaccinationsListOld = [
 	auth,
 	async (req, res) => {
 		try {
@@ -1255,7 +1365,7 @@ function buildExcelReportDoses(req, res, dataForExcel, today) {
 
 	const report = excel.buildExport([
 		{
-			name: today ? "Today's Vaccination Report" : "Vaccination Report",
+			name: today ? "Today's Vaccinations" : "Vaccinated So Far",
 			specification: specification,
 			data: dataForExcel,
 		},

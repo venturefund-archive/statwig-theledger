@@ -38,3 +38,17 @@ exports.Count = (data) => {
   }
   return sum;
 };
+
+exports.formatDate = (date, format) => {
+  if (date === "" || date == null) {
+    return "N/A";
+  }
+  let d = new Date(date),
+    month = "" + (d.getMonth() + 1),
+    day = "" + d.getDate(),
+    year = d.getFullYear();
+  if (month.length < 2) month = "0" + month;
+  if (day.length < 2) day = "0" + day;
+  if (format === "mmyyyy") return [month, year].join("/");
+  return [day, month, year].join("/");
+};
