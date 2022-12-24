@@ -250,11 +250,16 @@ exports.fetchBatchById = [
 					if (!productDetails[0]?.atom?.quantity) {
 						throw new Error("Batch exhausted!");
 					} else {
+						console.log(productDetails[0].atom.attributeSet.expDate);
 						let expDate = new Date(productDetails[0].atom.attributeSet.expDate);
+						console.log(expDate);
 						expDate.setHours(0, 0, 0, 0);
+						console.log(expDate);
 						let today = new Date();
+						console.log(today);
 						today.setHours(0, 0, 0, 0);
-
+						console.log(today);
+						console.log(expDate.toDateString(), today.toDateString());
 						if(expDate.toDateString() < today.toDateString()) {
 							throw new Error("Batch expired!");
 						}
