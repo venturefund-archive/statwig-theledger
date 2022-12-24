@@ -260,7 +260,7 @@ exports.fetchBatchById = [
 						today.setHours(0, 0, 0, 0);
 						console.log(today);
 						console.log(expDate.toDateString(), today.toDateString());
-						if(expDate.toDateString() < today.toDateString()) {
+						if(expDate < today) {
 							throw new Error("Batch expired!");
 						}
 					}
