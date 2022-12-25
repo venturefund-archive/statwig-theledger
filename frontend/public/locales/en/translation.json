@@ -608,5 +608,7 @@
   "is_invalid":"is Invalid",
   "duplicate":"Duplicate",
   "save_continue":"Save & Continue",
-  "add_loc":"Add Location"
+  "add_loc":"Add Location",
+  "vialsutilized_report":"VialsUtilizedReport",
+  "vaccination_report":"VaccinationReport"
 }

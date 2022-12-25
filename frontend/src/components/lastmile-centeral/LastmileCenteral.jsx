@@ -108,7 +108,7 @@ export default function LastmileCenteral(props) {
       link.href = downloadUrl;
       link.setAttribute(
 				"download",
-				`${TableSwitch === "units" ? "VialsUtilizedReport" : "VaccinationReport"}.${
+				`${TableSwitch === "units" ? t("vialsutilized_report") : t("vaccination_report")}.${
 					type === "excel" ? "xlsx" : "pdf"
 				}`,
 			);
