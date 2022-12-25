@@ -246,6 +246,7 @@ exports.fetchBatchById = [
 			);
 
 			if (productDetails) {
+				console.log("here");
 				if (productDetails.length) {
 					if (!productDetails[0]?.atom?.quantity) {
 						throw new Error("Batch exhausted!");
@@ -265,7 +266,14 @@ exports.fetchBatchById = [
 						}
 					}
 				} else {
-					throw new Error("Batch not found!");
+					const existingAtom = await AtomModel.findOne({
+						currentInventory: warehouse.warehouseInventory,
+						batchNumbers: batchNumber,
+					});
+					if(existingAtom)
+						throw new Error("Batch expired!");
+					else
+						throw new Error("Batch not found!");
 				}
 			}
 

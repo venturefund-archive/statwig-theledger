@@ -629,5 +629,7 @@
   "is_invalid":"es invalido",
   "duplicate":"Duplicado",
   "save_complete":"Guardar Continuar",
-  "add_loc":"Añade una ubicación"
+  "add_loc":"Añade una ubicación",
+  "vialsutilized_report":"Informedevialesutilizados",
+  "vaccination_report":"Informedevacunación"
 }
