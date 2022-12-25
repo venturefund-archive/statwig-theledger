@@ -23,6 +23,8 @@ export default function NewDose(props) {
     ageInMonths || false,
   );
 
+  const [isDisabled, setIsDisabled] = React.useState(false);
+
   const handleChange = (event) => {
     console.log(selectedValue, event.target.value);
     setSelectedValue(event.target.value === "true" ? true : false);
@@ -44,6 +46,7 @@ export default function NewDose(props) {
   });
 
   const newDose = async (values) => {
+    setIsDisabled(true);
     try {
       const data = {
         vaccineVialId: vaccineVialId,
@@ -125,7 +128,7 @@ export default function NewDose(props) {
 									inputProps={{
 										inputMode: "numeric",
 										min: selectedValue ? "6" : "1",
-										max: selectedValue ? "12" : "150",
+										max: selectedValue ? "11" : "150",
 									}}
 									error={Boolean(errors.age)}
 									helperText={Boolean(errors.age) && "Age is required!"}
@@ -163,7 +166,7 @@ export default function NewDose(props) {
 						</div>
 					</div>
 					<div className="Beneficiary--action">
-						<button type="submit" className="vl-btn vl-btn-md vl-btn-primary">
+						<button type="submit" disabled={isDisabled} className="vl-btn vl-btn-md vl-btn-primary">
 							{t("save")}
 						</button>
 					</div>

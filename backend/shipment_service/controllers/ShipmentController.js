@@ -1595,7 +1595,8 @@ exports.receiveShipment = [
               {
                 batchNumbers: products[count].batchNumber,
                 currentInventory: recvInventoryId,
-                quantity: products[count].productQuantity,
+                // quantity: products[count].productQuantity,
+                quantity:{ $gt: 0 },
               },
               {
                 $addToSet: {

@@ -102,9 +102,9 @@ export const getAnalyticsWithFilters = async (data) => {
 	}
 }
 
-export const getVaccinationsList = async () => {
+export const getVaccinationsList = async (data) => {
 	try {
-		const result = await axios.get(`${config().getVaccinationsList}`);
+		const result = await axios.post(`${config().getVaccinationsList}`, data);
 		return result;
 	} catch (err) {
 		throw err;
@@ -123,6 +123,17 @@ export const getCitiesAndOrgsForFilters = async () => {
 export const exportVaccinationList = async (data) => {
 	try {
 		const result = await axios.post(`${config().exportVaccinationList}`, data, {
+			responseType: "blob",
+		});
+		return result;
+	} catch (err) {
+		throw err;
+	}
+};
+
+export const exportVialsUtilised = async (data) => {
+	try {
+		const result = await axios.post(`${config().exportVialsUtilised}`, data, {
 			responseType: "blob",
 		});
 		return result;

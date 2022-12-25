@@ -16,9 +16,11 @@ export default function CenteralTotalTable({ filters, t }) {
   const [page, setPage] = useState(1);
   const [vaccinationsList, setVaccinationsList] = useState([]);
   const [totalCount, setTotalCount] = useState();
+  const [oldFilter, setOldFilter] = useState();
 
   const handleChange = (event, value) => {
     setPage(value);
+    setOldFilter(filters);
   };
 
   useEffect(() => {
@@ -27,7 +29,10 @@ export default function CenteralTotalTable({ filters, t }) {
       payload.today = false;
       payload.skip = (page - 1) * 10;
       payload.limit = 10;
-
+      if(oldFilter != filters){
+        payload.skip = 0;
+        setPage(1);
+      }
       const result = await getAllVaccinationDetails(payload);
       if (result?.data?.success) {
         setVaccinationsList(result.data.data.result);
