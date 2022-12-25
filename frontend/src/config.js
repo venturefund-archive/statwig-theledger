@@ -395,7 +395,7 @@ export function config() {
       getManufacturerFilterOptions: `${SERVER_URL}/inventorymanagement/api/inventory/getManufacturerFilterOptions`,
       getmanufacturerInStockFilterOptions: `${SERVER_URL}/analyticsmanagement/api/network/inStockFilterOptions`,
       getmanufacturerOutStockFilterOptions: `${SERVER_URL}/analyticsmanagement/api/network/outStockFilterOptions`,
-      fetchBatchDetails: `${LOCAL_SERVER_URL_LASTMILE}/lastmilemanagement/api/vaccination/fetchBatchById`,
+      fetchBatchDetails: `${SERVER_URL}/lastmilemanagement/api/vaccination/fetchBatchById`,
       fetchBatchByIdWithoutCondition: `${SERVER_URL}/lastmilemanagement/api/vaccination/fetchBatchByIdWithoutCondition`,
       vaccinateIndividual: `${SERVER_URL}/lastmilemanagement/api/vaccination/vaccinateIndividual`,
       updateVaccinationIndividual: `${SERVER_URL}/lastmilemanagement/api/vaccination/updateDose`,
