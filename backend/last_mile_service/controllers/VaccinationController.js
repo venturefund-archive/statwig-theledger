@@ -271,7 +271,7 @@ exports.fetchBatchById = [
 						batchNumbers: batchNumber,
 					});
 					if(existingAtom)
-						throw new Error("Batch expired!");
+						throw new Error("Batch exhausted!");
 					else
 						throw new Error("Batch not found!");
 				}
