@@ -12,7 +12,7 @@ import CenteralTodayRow from "./CenteralTodayRow";
 import Pagination from "@mui/material/Pagination";
 import { getAllVaccinationDetails } from "../../../../actions/lastMileActions";
 
-export default function CenteralTodayTable({ filters, t }) {
+export default function CenteralTodayTable({ filters, t, i18n }) {
   const [page, setPage] = useState(1);
   const [vaccinationsList, setVaccinationsList] = useState([]);
   const [totalCount, setTotalCount] = useState();
@@ -33,7 +33,7 @@ export default function CenteralTodayTable({ filters, t }) {
       setPage(1);
     }
     
-    const result = await getAllVaccinationDetails(payload);
+    const result = await getAllVaccinationDetails(payload, i18n.language);
     if(result?.data?.success) {
       setVaccinationsList(result.data.data.result);
       setTotalCount(result.data.data.totalCount);
