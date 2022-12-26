@@ -11,16 +11,17 @@ import EmptyIcon from "../../../../assets/files/designs/empty-table.jpg";
 import CenteralTotalRow from "./CenteralTotalRow";
 import Pagination from "@mui/material/Pagination";
 import { getAllVaccinationDetails } from "../../../../actions/lastMileActions";
+import _ from "lodash";
 
 export default function CenteralTotalTable({ filters, t }) {
   const [page, setPage] = useState(1);
   const [vaccinationsList, setVaccinationsList] = useState([]);
   const [totalCount, setTotalCount] = useState();
-  const [oldFilter, setOldFilter] = useState();
+  const [oldFilters, setoldFilters] = useState();
 
   const handleChange = (event, value) => {
     setPage(value);
-    setOldFilter(filters);
+    setoldFilters(filters);
   };
 
   useEffect(() => {
@@ -29,10 +30,10 @@ export default function CenteralTotalTable({ filters, t }) {
       payload.today = false;
       payload.skip = (page - 1) * 10;
       payload.limit = 10;
-      if(oldFilter != filters){
-        payload.skip = 0;
-        setPage(1);
-      }
+      if (_.isEqual(filters, oldFilters) !== true) {
+				payload.skip = 0;
+				setPage(1);
+			}
       const result = await getAllVaccinationDetails(payload);
       if (result?.data?.success) {
         setVaccinationsList(result.data.data.result);
