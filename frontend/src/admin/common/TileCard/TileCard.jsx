@@ -6,16 +6,16 @@ export default function TileCard({ layout, t, orgDetails, warehouseDetails }) {
   let inactive = 0;
   let total = 0;
 
-  if(layout === "location") {
+  if (layout === "location") {
     active = orgDetails?.warehouseCount?.activeWarehouseCount || 0;
     inactive = orgDetails?.warehouseCount?.activeWarehouseCount || 0;
     total = active + inactive;
   } else {
     warehouseDetails?.employees?.forEach((employee) => {
-      if(employee.accountStatus === "ACTIVE") ++active;
+      if (employee.accountStatus === "ACTIVE") ++active;
       else ++inactive;
       ++total;
-    })
+    });
   }
 
   return (
@@ -66,7 +66,7 @@ export default function TileCard({ layout, t, orgDetails, warehouseDetails }) {
               <div className="tile-card">
                 <h1 className={`vl-heading f-700 vl-reject`}>{inactive}</h1>
                 <p className={`vl-body f-500 vl-blue`}>
-                  {t("active")} {t("users")}
+                  {t("inactive")} {t("users")}
                 </p>
               </div>
             </div>
