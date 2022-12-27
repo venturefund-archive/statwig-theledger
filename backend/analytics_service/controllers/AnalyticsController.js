@@ -808,7 +808,7 @@ exports.getInventoryAnalytics = [
               $gte: today.toISOString(),
               $lt: nextMonth.toISOString(),
             },
-            currentInventory: warehouse.warehouseInventory,
+            currentInventory: warehouse?.warehouseInventory,
             batchNumbers: { $ne: "" },
             "attributeSet.mfgDate": { $ne: "" },
           },
@@ -828,7 +828,7 @@ exports.getInventoryAnalytics = [
               $lt: today.toISOString(),
             },
 
-            currentInventory: warehouse.warehouseInventory,
+            currentInventory: warehouse?.warehouseInventory,
             batchNumbers: { $ne: "" },
             "attributeSet.mfgDate": { $ne: "" },
           },
