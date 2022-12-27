@@ -759,6 +759,7 @@ exports.verifyOtp = [
 								phoneNumber: user.phoneNumber,
 								org: user.msp,
 								userName: user.emailId,
+								photoId: user.photoId,
 								preferredLanguage: user.preferredLanguage,
 								isCustom: user.isCustom,
 								type: org.type
@@ -774,6 +775,7 @@ exports.verifyOtp = [
 								phoneNumber: user.phoneNumber,
 								org: user.msp,
 								userName: user.emailId,
+								photoId: user.photoId,
 								preferredLanguage: user.preferredLanguage,
 								isCustom: user.isCustom,
 								type: org.type
