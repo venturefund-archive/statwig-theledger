@@ -1590,24 +1590,67 @@ exports.receiveShipment = [
                 req.user
               );
             }
-            await AtomModel.updateOne(
-              {
-                batchNumbers: products[count].batchNumber,
+
+            if (shipmentRejectionRate > 0) { // partial Receive Shipment
+              const lostAtom = await AtomModel.findOneAndUpdate(
+                {
+                  batchNumbers: products[count].batchNumber,
+                  currentInventory: recvInventoryId,
+                  currentShipment: shipmentID,
+                  status: "TRANSIT"
+                },
+                {
+                  $inc: {
+                    quantity: -parseInt(products[count].productQuantity),
+                  },
+                },
+                {
+                  new: true
+                }
+              );
+
+              const newAtom = new AtomModel({
+                id: cuid(),
+                label: {
+                  labelId: "QR_2D",
+                  labelType: "3232",
+                },
+                quantity: parseInt(products[count].productQuantity),
+                productId: lostAtom?.productId,
+                inventoryIds: lostAtom?.inventoryIds,
                 currentInventory: recvInventoryId,
-                quantity: products[count].productQuantity,
-                currentShipment: shipmentID,
-                status: "TRANSIT"
-              },
-              {
-                $addToSet: {
-                  inventoryIds: recvInventoryId,
+                poIds: lostAtom?.poIds || [],
+                shipmentIds: lostAtom?.shipmentIds || [],
+                currentShipment: null,
+                batchNumbers: lostAtom?.batchNumbers,
+                txIds: lostAtom?.txIds,
+                status: "HEALTHY",
+                attributeSet: lostAtom?.attributeSet,
+                eolInfo: lostAtom?.eolInfo,
+                comments: lostAtom?.comments,
+              });
+              await newAtom.save();
+            }
+            else {  // Complete receive shipment
+              await AtomModel.updateOne(
+                {
+                  batchNumbers: products[count].batchNumber,
+                  currentInventory: recvInventoryId,
+                  quantity: products[count].productQuantity,
+                  currentShipment: shipmentID,
+                  status: "TRANSIT"
                 },
-                $set: {
-                  status: "HEALTHY",
-                  currentShipment: null,
-                },
-              }
-            );
+                {
+                  $addToSet: {
+                    inventoryIds: recvInventoryId,
+                  },
+                  $set: {
+                    status: "HEALTHY",
+                    currentShipment: null,
+                  },
+                }
+              );
+            }
           }
           let Upload = null;
           if (req.file) {
