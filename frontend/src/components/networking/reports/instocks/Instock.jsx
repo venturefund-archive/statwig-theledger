@@ -8,6 +8,7 @@ import TableHead from "@mui/material/TableHead";
 import InstockRow from "./InstockRow";
 import { useSelector } from "react-redux";
 import Filter from "../Filter/Filter";
+import EmptyIcon from "../../../../assets/files/designs/empty-table.jpg";
 
 export default function Instock({
   inStock,
@@ -19,8 +20,10 @@ export default function Instock({
 }) {
   const { user } = useSelector((state) => state);
   const Distributor = user.type === "DISTRIBUTORS" || user.type === "DROGUERIA" ? true : false;
+  console.log(inStock)
   return (
     <>
+    { inStock?.length > 0 ?(
       <TableContainer>
         <Table
           sx={{ minWidth: 665 }}
@@ -73,17 +76,30 @@ export default function Instock({
             </TableRow>
           </TableHead>
           <TableBody>
-            {inStock?.map((product, idx) => (
+            {(inStock?.map((product, idx) => (
               <InstockRow
                 t={t}
                 product={product}
                 reportWarehouse={reportWarehouse}
                 key={idx}
-              />
-            ))}
+               />
+            )))}
+              
           </TableBody>
         </Table>
       </TableContainer>
-    </>
-  );
-}
+    ):(
+              <div className="Table--Empty-container table-background">
+						<div className="Table--empty-illustartion">
+							<img src={EmptyIcon} alt="EmptyIcon" />
+							<h1 className="vl-subheading f-500 vl-black">{t("no_rec")}</h1>
+						</div>
+					</div>
+           )
+       
+      
+    }
+    </> 
+    )
+  }  
+  

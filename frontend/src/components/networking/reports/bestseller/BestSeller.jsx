@@ -7,12 +7,15 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import BestSellerRow from "./BestSellerRow";
 import { useSelector } from "react-redux";
+import EmptyIcon from "../../../../assets/files/designs/empty-table.jpg";
 
 export default function BestSeller({ bestseller, t }) {
   const {user} = useSelector((state) => state);
   const Distributor = user.type === "DISTRIBUTORS" || user.type === "DROGUERIA" ? true : false;
   return (
     <>
+    {
+      bestseller?.length > 0 ? (
       <TableContainer>
         <Table
           sx={{ minWidth: 665 }}
@@ -44,7 +47,15 @@ export default function BestSeller({ bestseller, t }) {
             ))}
           </TableBody>
         </Table>
-      </TableContainer>
+      </TableContainer>):(
+         <div className="Table--Empty-container table-background">
+         <div className="Table--empty-illustartion">
+           <img src={EmptyIcon} alt="EmptyIcon" />
+           <h1 className="vl-subheading f-500 vl-black">{t("no_rec")}</h1>
+         </div>
+       </div>
+      )
+}
     </>
   );
 }
