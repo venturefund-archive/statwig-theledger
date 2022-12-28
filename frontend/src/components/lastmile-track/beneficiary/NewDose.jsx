@@ -53,7 +53,7 @@ export default function NewDose(props) {
         warehouseId: warehouseId,
         productId: productId,
         batchNumber: batchNumber,
-        gender: values.gender,
+        gender: values.gender.value,
         age: selectedValue ? 0 : parseInt(values.age),
         ageMonths: selectedValue ? parseInt(values.age) : 0,
       };
@@ -81,8 +81,12 @@ export default function NewDose(props) {
       console.log(err);
     }
   };
-  
-  const options = ["MALE", "FEMALE", "OTHERS"];
+	
+	const genderOptions = [
+		{ value: "MALE", display: t("male").toUpperCase() },
+		{ value: "FEMALE", display: t("female").toUpperCase() },
+		{ value: "OTHERS", display: t("others").toUpperCase() },
+	];
 
   return (
 		<section className="Beneficiary--Add-wrapper">
@@ -97,8 +101,8 @@ export default function NewDose(props) {
 							render={({ field }) => (
 								<Autocomplete
 									fullWidth
-									options={options}
-									getOptionLabel={(option) => option || ""}
+									options={genderOptions}
+									getOptionLabel={(option) => option.display || ""}
 									renderInput={(params) => (
 										<TextField
 											{...params}

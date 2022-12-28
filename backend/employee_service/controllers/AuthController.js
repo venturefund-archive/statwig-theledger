@@ -141,6 +141,7 @@ async function createWarehouse(warehouseExists, wareId, payload, employeeId) {
 		}
 	);
 }
+
 function getUserCondition(query, orgId) {
 	let matchCondition = {};
 	matchCondition.organisationId = orgId;
@@ -2479,58 +2480,48 @@ exports.activateUser = [
 				.then((employee) => {
 					if (employee) {
 						if (employee.isConfirmed && employee.accountStatus == "ACTIVE") {
-							return apiResponse.successResponseWithData(
-								res,
-								" User is already Active",
-								employee
-							);
+							return apiResponse.successResponseWithData(res, " User is already Active", employee);
 						} else {
-							axios
-								.get(`${blockchain_service_url}/createUserAddress`)
-								.then((response) => {
-									const walletAddress = response.data.items;
-									const userData = {
-										walletAddress,
-									};
-									axios
-										.post(`${blockchain_service_url}/grantPermission`, userData)
-										.then(() => console.log("posted"));
-									EmployeeModel.findOneAndUpdate(
-										{ id: id },
-										{
-											$set: {
-												accountStatus: "ACTIVE",
-												isConfirmed: true,
-												walletAddress,
-												role,
-											},
+							axios.get(`${blockchain_service_url}/createUserAddress`).then((response) => {
+								const walletAddress = response.data.items;
+								const userData = {
+									walletAddress,
+								};
+								axios
+									.post(`${blockchain_service_url}/grantPermission`, userData)
+									.then(() => console.log("posted"));
+								EmployeeModel.findOneAndUpdate(
+									{ id: id },
+									{
+										$set: {
+											accountStatus: "ACTIVE",
+											isConfirmed: true,
+											walletAddress,
+											role,
 										},
-										{ new: true }
-									)
-										.exec()
-										.then((emp) => {
-											let emailBody = RequestApproved({
-												name: emp.firstName,
-												organisation: organisationName,
-											});
-											// Send confirmation email
-											try {
-												mailer.send(
-													constants.appovalEmail.from,
-													emp.emailId,
-													constants.appovalEmail.subject,
-													emailBody
-												);
-											} catch (mailError) {
-												console.log(mailError);
-											}
-											return apiResponse.successResponseWithData(
-												res,
-												`User Activated`,
-												emp
-											);
+									},
+									{ new: true },
+								)
+									.exec()
+									.then((emp) => {
+										let emailBody = RequestApproved({
+											name: emp.firstName,
+											organisation: organisationName,
 										});
-								});
+										// Send confirmation email
+										try {
+											mailer.send(
+												constants.appovalEmail.from,
+												emp.emailId,
+												constants.appovalEmail.subject,
+												emailBody,
+											);
+										} catch (mailError) {
+											console.log(mailError);
+										}
+										return apiResponse.successResponseWithData(res, `User Activated`, emp);
+									});
+							});
 						}
 					} else {
 						return apiResponse.notFoundResponse(req, res, "User Not Found");
