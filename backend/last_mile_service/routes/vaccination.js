@@ -7,12 +7,14 @@ router.post("/fetchBatchByIdWithoutCondition", VaccinationController.fetchBatchB
 router.post("/vaccinateIndividual", VaccinationController.vaccinateIndividual);
 router.post("/vaccinateMultiple", VaccinationController.vaccinateMultiple);
 router.post("/getAllVaccinationDetails", VaccinationController.getAllVaccinationDetails);
+router.post("/getAnalyticsWithFilters", VaccinationController.getAnalyticsWithFilters);
 router.post("/getVialsUtilised", VaccinationController.getVialsUtilised);
 router.get("/getVaccinationDetailsByVial", VaccinationController.getVaccinationDetailsByVial);
 router.get("/getAnalytics", VaccinationController.getAnalytics);
-router.get("/getVaccinationsList", VaccinationController.getVaccinationsList);
+router.post("/getVaccinationsList", VaccinationController.getVaccinationsList);
 router.get("/getCitiesAndOrgsForFilters", VaccinationController.getCitiesAndOrgsForFilters);
 router.post("/exportVaccinationList", VaccinationController.exportVaccinationList);
+router.post("/exportVialsUtilised", VaccinationController.exportVialsUtilised);
 router.put("/updateDose", VaccinationController.updateDose);
 router.delete("/deleteDose", VaccinationController.deleteDose);
 router.post("/completeVial", VaccinationController.completeVial);

@@ -19,9 +19,16 @@ export const fetchBatchByIdWithoutCondition = async (data) => {
 	}
 };
 
-export const getAllVaccinationDetails = async (data) => {
+export const getAllVaccinationDetails = async (data, language) => {
 	try {
-		const result = await axios.post(`${config().getAllVaccinationDetails}`, data);
+		if (language === undefined || language === "en-US") {
+			language = "en";
+		}
+		const result = await axios.post(`${config().getAllVaccinationDetails}`, data, {
+			headers: {
+				"Accept-Language": language,
+			},
+		});
 		return result;
 	} catch (err) {
 		throw err;
@@ -93,9 +100,18 @@ export const getVialsUtilised = async (data) => {
 	}
 };
 
-export const getVaccinationsList = async () => {
+export const getAnalyticsWithFilters = async (data) => {
 	try {
-		const result = await axios.get(`${config().getVaccinationsList}`);
+		const result = await axios.post(`${config().getAnalyticsWithFilters}`, data);
+		return result;
+	} catch(err) {
+		return err.response;
+	}
+}
+
+export const getVaccinationsList = async (data) => {
+	try {
+		const result = await axios.post(`${config().getVaccinationsList}`, data);
 		return result;
 	} catch (err) {
 		throw err;
@@ -111,10 +127,33 @@ export const getCitiesAndOrgsForFilters = async () => {
 	}
 };
 
-export const exportVaccinationList = async (data) => {
+export const exportVaccinationList = async (data, language) => {
 	try {
+    if (language === undefined || language === "en-US") {
+      language = "en";
+    }
 		const result = await axios.post(`${config().exportVaccinationList}`, data, {
 			responseType: "blob",
+			headers: {
+				"Accept-Language": language,
+			},
+		});
+		return result;
+	} catch (err) {
+		throw err;
+	}
+};
+
+export const exportVialsUtilised = async (data, language) => {
+	try {
+    if (language === undefined || language === "en-US") {
+      language = "en";
+    }
+		const result = await axios.post(`${config().exportVialsUtilised}`, data, {
+			responseType: "blob",
+			headers: {
+				"Accept-Language": language,
+			},
 		});
 		return result;
 	} catch (err) {

@@ -646,7 +646,17 @@ exports.updateOrg = [
 					{ $set: { status: "ACTIVE" } },
 					{ new: true },
 				);
-				console.log(warehouse);
+				await EmployeeModel.findOneAndUpdate(
+					{ id: org.primaryContactId },
+					{
+						$push: {
+							warehouseId: org.warehouses[0],
+						},
+						$pull: {
+							pendingWarehouseId: org.warehouses[0],
+						},
+					},
+				);	
 			}
 			await EmployeeModel.findOneAndUpdate(
 				{ id: org.primaryContactId },

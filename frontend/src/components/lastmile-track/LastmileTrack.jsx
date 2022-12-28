@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import {
   fetchAnalytics,
   getVaccinationsList,
-  getVialsUtilised,
 } from "../../actions/lastMileActions";
 import AnalyticTiles from "../../shared/stats-tile/AnalyticTiles";
 import Beneficiary from "./beneficiary/Beneficiary";
@@ -98,8 +97,9 @@ export default function LastmileTrack(props) {
               <button
                 className='back-action-btn'
                 onClick={() => {
-                  if(tableView) {
-                    setTableView(false)
+                  if (tableView) {
+                    setTableView(false);
+                    setSteps(1);
                   } else {
                     setSteps(1);
                   }
