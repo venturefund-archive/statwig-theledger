@@ -798,15 +798,17 @@ exports.getInventoryAnalytics = [
         : 0;
 
       var today = new Date();
+      today.setHours(0, 0, 0, 0);
       var nextMonth = new Date();
       nextMonth.setDate(today.getDate() + 30);
+      nextMonth.setHours(0, 0, 0, 0);
 
       const batchNearExpiration = await AtomModel.aggregate([
         {
           $match: {
             "attributeSet.expDate": {
-              $gte: today.toISOString(),
-              $lt: nextMonth.toISOString(),
+              $gte: today,
+              $lt: nextMonth,
             },
             currentInventory: warehouse?.warehouseInventory,
             batchNumbers: { $ne: "" },
@@ -825,7 +827,7 @@ exports.getInventoryAnalytics = [
         {
           $match: {
             "attributeSet.expDate": {
-              $lt: today.toISOString(),
+              $lt: today,
             },
 
             currentInventory: warehouse?.warehouseInventory,
