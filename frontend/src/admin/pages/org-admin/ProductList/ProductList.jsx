@@ -9,7 +9,7 @@ import Modal from "../../../../shared/modal";
 import SuccessPopup from "../../../shared/Popup/SuccessPopup";
 import { useSelector, useDispatch } from "react-redux";
 import { getOrgAnalytics } from "../../../actions/organisationActions";
-import { addNewProduct, getManufacturers, getProducts } from "../../../../actions/poActions";
+import { addNewProduct, getManufacturers, getProducts, validateProductName } from "../../../../actions/poActions";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { createFilterOptions } from "@material-ui/lab";
@@ -35,6 +35,7 @@ export default function AdminProductList(props) {
 		control,
 		reset,
 		watch,
+		setError,
 		formState: { errors },
 		handleSubmit,
 	} = useForm({
@@ -67,31 +68,39 @@ export default function AdminProductList(props) {
 
 	async function addProduct(values) {
 		try {
-			const formData = new FormData();
-			formData.append("name", values.productName);
-			formData.append("shortName", values.productName);
-			formData.append("type", values.productCategory);
-			formData.append("externalId", Math.random().toString(36).substr(2, 7));
-			formData.append(
-				"unitofMeasure",
-				JSON.stringify({
-					id: values.unitOfMeasure,
-					name: values.unitOfMeasure,
-				}),
-			);
-			formData.append("manufacturer", values.manufacturer);
-			const res = await addNewProduct(formData);
-			if (res.success) {
-				setOpenSuccessPopup(true);
-				console.log("Calling reset!");
-				reset({
-					productCategory: "",
-					productName: "",
-					manufacturer: "",
-					unitOfMeasure: "",
+			const productExists = await validateProductName(values.productName);
+			if(productExists) {
+				setError("productName", {
+					type: "custom",
+					message: "Duplicate product name!",
 				});
-				console.log("watch - ", watch());
-			} else setOpenFailurePopup(true);
+			} else {
+				const formData = new FormData();
+				formData.append("name", values.productName);
+				formData.append("shortName", values.productName);
+				formData.append("type", values.productCategory);
+				formData.append("externalId", Math.random().toString(36).substr(2, 7));
+				formData.append(
+					"unitofMeasure",
+					JSON.stringify({
+						id: values.unitOfMeasure,
+						name: values.unitOfMeasure,
+					}),
+				);
+				formData.append("manufacturer", values.manufacturer);
+				const res = await addNewProduct(formData);
+				if (res.success) {
+					setOpenSuccessPopup(true);
+					console.log("Calling reset!");
+					reset({
+						productCategory: "",
+						productName: "",
+						manufacturer: "",
+						unitOfMeasure: "",
+					});
+					console.log("watch - ", watch());
+				} else setOpenFailurePopup(true);
+			}
 		} catch (Err) {
 			setOpenFailurePopup(true);
 			console.log(Err);
@@ -187,11 +196,14 @@ export default function AdminProductList(props) {
 													fullWidth
 													variant="outlined"
 													label={t("product_name")}
-													multiline
 													{...field}
 													value={field.value ? field.value : ""}
 													error={Boolean(errors.productName)}
-													helperText={errors.productName && "Product Name is required!"}
+													helperText={
+														errors.productName?.type === "required"
+															? "Product Name is required!"
+															: errors.productName?.message
+													}
 												/>
 											)}
 										/>
@@ -242,7 +254,6 @@ export default function AdminProductList(props) {
 													fullWidth
 													variant="outlined"
 													label={t("unit_of_measure")}
-													multiline
 													{...field}
 													value={field.value ? field.value : ""}
 													error={Boolean(errors.unitOfMeasure)}

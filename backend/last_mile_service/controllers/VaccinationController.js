@@ -14,6 +14,7 @@ const PdfPrinter = require("pdfmake");
 const { resolve } = require("path");
 const fs = require("fs");
 const CountryModel = require("../models/CountryModel");
+const { formatDate } = require("../helpers/dateHelper");
 
 const fontDescriptors = {
 	Roboto: {
@@ -1096,20 +1097,26 @@ exports.getCitiesAndOrgsForFilters = [
 				{
 					$lookup: {
 						from: "cities",
-						localField: "id",
-						foreignField: "country_id",
+						let: { country_id: "$id" },
+						pipeline: [
+							{ $match: { $expr: { $eq: ["$country_id", "$$country_id"] } } },
+							{ $group: { _id: null, uniqueCities: { $addToSet: "$name" } } },
+						],
 						as: "cities",
 					},
 				},
+				{ $unwind: "$cities" },
 			]);
 			if (!country || !country.length) {
 				throw new Error("Something went wrong!");
 			}
 
-			let cities = country[0].cities.map((city) => city.name);
+			let cities = country[0]?.cities?.uniqueCities ? country[0].cities.uniqueCities : [];
 
-			let orgs = await OrganisationModel.find({ type: { $in: ["PHARMACY", "Hospital"] } });
-			orgs = orgs.map((org) => org.name);
+			let orgs = await OrganisationModel.distinct("name", {
+				type: { $in: ["PHARMACY", "Hospital"] },
+			});
+			orgs = orgs?.length ? orgs : [];
 
 			const result = {
 				cities: cities,
@@ -1227,7 +1234,7 @@ exports.exportVaccinationList = [
 			const result = await generateVaccinationsList(doseQuery, req);
 
 			if (reportType === "excel") res = buildExcelReportDoses(req, res, result.result, today);
-			else res = buildPdfReportDoses(req, res, result.result, "Vaccinations");
+			else res = buildPdfReportDoses(req, res, result.result, today);
 		} catch (err) {
 			console.log(err);
 			return apiResponse.ErrorResponse(res, err.message);
@@ -1388,7 +1395,8 @@ function buildExcelReportDoses(req, res, dataForExcel, today) {
 	return res.send(report);
 }
 
-function buildPdfReportDoses(req, res, data, orderType) {
+function buildPdfReportDoses(req, res, data, today) {
+	const todaysDate = new Date();
 	const rows = [];
 	rows.push([
 		{ text: req.t("date"), bold: true },
@@ -1400,9 +1408,9 @@ function buildPdfReportDoses(req, res, data, orderType) {
 		{ text: req.t("city"), bold: true },
 	]);
 	for (let i = 0; i < data.length; i++) {
-		const date = data[i].date ? new Date(data[i].date).toLocaleDateString() : "N/A";
+		const date = data[i].date ? new Date(data[i].date) : "";
 		rows.push([
-			date,
+			formatDate(date),
 			data[i].batchNumber || "N/A",
 			data[i].organisationName || "N/A",
 			data[i].age || "N/A",
@@ -1417,7 +1425,11 @@ function buildPdfReportDoses(req, res, data, orderType) {
 		pageOrientation: "landscape",
 		pageMargins: [30, 30, 2, 2],
 		content: [
-			{ text: `${orderType} Report`, fontSize: 32, style: "header" },
+			{
+				text: today ? req.t("todays_vaccinations") + `(${formatDate(todaysDate)})` : req.t("vaccinated_so_far"),
+				fontSize: 32,
+				style: "header",
+			},
 			{
 				table: {
 					margin: [1, 1, 1, 1],
@@ -1501,10 +1513,10 @@ function buildPdfReportVials(req, res, data) {
 		{ text: req.t("number_of_doses"), bold: true },
 	]);
 	for (let i = 0; i < data.length; i++) {
-		const date = data[i].date ? new Date(data[i].date).toLocaleDateString() : "N/A";
+		const date = data[i].date ? new Date(data[i].date) : "";
 		rows.push([
 			data[i].index,
-			date,
+			formatDate(date),
 			data[i].batchNumber || "N/A",
 			data[i].numberOfDoses || "N/A",
 		]);

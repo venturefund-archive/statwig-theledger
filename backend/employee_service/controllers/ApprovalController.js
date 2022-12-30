@@ -126,28 +126,26 @@ exports.getApprovals = [
     try {
       const { organisationId } = req.user;
       const employees = await EmployeeModel.aggregate([
-        {
-          $match: {
-            $and: [
-              { accountStatus: "NOTAPPROVED" },
-              { organisationId: organisationId },
-            ],
-          },
-        },
-        {
-          $lookup: {
-            from: "organisations",
-            localField: "organisationId",
-            foreignField: "id",
-            as: "orgDetails",
-          },
-        },
-        {
-          $unwind: {
-            path: "$orgDetails"
-          }
-        }
-      ])
+				{
+					$match: {
+						$and: [{ accountStatus: "NOTAPPROVED" }, { organisationId: organisationId }],
+					},
+				},
+				{
+					$lookup: {
+						from: "organisations",
+						localField: "organisationId",
+						foreignField: "id",
+						as: "orgDetails",
+					},
+				},
+				{
+					$unwind: {
+						path: "$orgDetails",
+					},
+				},
+				{ $sort: { createdAt: -1 } },
+			]);
       return apiResponse.successResponseWithData(
         req,
         res,
@@ -385,55 +383,42 @@ exports.activateUser = [
   auth,
   async (req, res) => {
     try {
-      const { organisationName } = req.user;
-      const { id, role } = req.query;
-      const employee = await EmployeeModel.findOne({ id: id })
-      if (employee) {
-        if (
-          employee.isConfirmed &&
-          employee.accountStatus == "ACTIVE"
-        ) {
-          return apiResponse.successResponseWithData(
-            req,
-            res,
-            " User is already Active",
-            employee
-          );
-        } else {
-          const emp = await EmployeeModel.findOneAndUpdate(
-            { id: id },
-            {
-              $set: {
-                accountStatus: "ACTIVE",
-                isConfirmed: true,
-                role,
-              },
-            },
-            { new: true }
-          )
-          const emailBody = RequestApproved({
-            name: emp.firstName,
-            organisation: organisationName,
-          });
-          await mailer.send(
-            constants.appovalEmail.from,
-            emp.emailId,
-            constants.appovalEmail.subject,
-            emailBody
-          );
-          return apiResponse.successResponseWithData(
-            req,
-            res,
-            `User Activated`,
-            emp
-          );
-        }
-      } else {
-        return apiResponse.notFoundResponse(req, res, "User Not Found");
-      }
-    } catch (err) {
-      return apiResponse.ErrorResponse(req, res, err);
-    }
+			const { organisationName } = req.user;
+			const { id, role } = req.query;
+			const employee = await EmployeeModel.findOne({ id: id });
+			if (employee) {
+				if (employee.isConfirmed && employee.accountStatus == "ACTIVE") {
+					return apiResponse.successResponseWithData(req, res, " User is already Active", employee);
+				} else {
+					const emp = await EmployeeModel.findOneAndUpdate(
+						{ id: id },
+						{
+							$set: {
+								accountStatus: "ACTIVE",
+								isConfirmed: true,
+								role,
+							},
+						},
+						{ new: true },
+					);
+					const emailBody = RequestApproved({
+						name: emp.firstName,
+						organisation: organisationName,
+					});
+					await mailer.send(
+						constants.appovalEmail.from,
+						emp.emailId,
+						constants.appovalEmail.subject,
+						emailBody,
+					);
+					return apiResponse.successResponseWithData(req, res, `User Activated`, emp);
+				}
+			} else {
+				return apiResponse.notFoundResponse(req, res, "User Not Found");
+			}
+		} catch (err) {
+			return apiResponse.ErrorResponse(req, res, err);
+		}
   },
 ];
 
