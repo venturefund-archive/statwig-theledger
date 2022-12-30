@@ -189,7 +189,8 @@ export default function Filterbar(props) {
 							options={cities}
 							value={typeof city === "string" ? cities.find((cty) => cty === city) : city || null}
 							onChange={(event, value) => setCity(value)}
-							renderInput={(params) => <TextField {...params} label="City" />}
+							value={city}
+							renderInput={(params) => <TextField {...params} label={t("city")} />}
 						/>
 					</div>
 				</div>
@@ -231,7 +232,7 @@ export default function Filterbar(props) {
 									{t("clear")}
 								</button>
 							</div>
-							<p className="vl-note f-400 vl-grey-xs">Search the results by Organization Name</p>
+							<p className="vl-note f-400 vl-grey-xs">{t("org_msg")}</p>
 						</div>
 						<div className="filterCard-body side-space">
 							<FormControl>
@@ -246,13 +247,13 @@ export default function Filterbar(props) {
 										checked={ageType === "months"}
 										value="months"
 										control={<Radio />}
-										label="Months"
+										label={t("individual_age")}
 									/>
 									<FormControlLabel
 										checked={ageType === "years"}
 										value="years"
 										control={<Radio />}
-										label="Years"
+										label={t("range_group")}
 									/>
 								</RadioGroup>
 							</FormControl>

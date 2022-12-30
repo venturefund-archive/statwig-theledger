@@ -607,6 +607,8 @@
   "is_required":"is required",
   "is_invalid":"is Invalid",
   "duplicate":"Duplicate",
+  "individual_age":"Individual Age",
+  "range_group":"Range Group",
   "save_continue":"Save & Continue",
   "add_loc":"Add Location",
   "vialsutilized_report":"VialsUtilizedReport",
