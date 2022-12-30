@@ -600,5 +600,10 @@
   "import_pharmacy": "Import Pharmacies",
   "add_pharmacy": "Add Pharamcy",
   "no_access_receiveshipment":"No Access to Receive the shipment",
-  "please_try_again":"Please Try Again"
+  "please_try_again":"Please Try Again",
+  "org_type_required":"Organization type is required!",
+  "org_name_required":"Organization Name is required!",
+  "email_or_phone_required":"Email or Phone is required!",
+  "first_name_required":"First Name is required!",
+  "Last_name_required":"Last Name is required!"
 }
