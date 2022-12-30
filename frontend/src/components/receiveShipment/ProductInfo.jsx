@@ -16,6 +16,7 @@ function GridRow({ heading, context }) {
 export default function ProductInfo(props) {
   const { t } = props;
   const [deliveredProduct, setDeliveredProduct] = useState("");
+  let intermediateProduct = "";
   const [isVisible, setIsVisible] = useState(true);
   const closeModalFail = () => {
     setError(false);
@@ -43,6 +44,17 @@ export default function ProductInfo(props) {
                       type="button"
                       style={{ width: "3vw", height: "4vh", fontSize: "12px" }}
                       onClick={() => {
+                        setDeliveredProduct(intermediateProduct);
+                        if (intermediateProduct <= product.productQuantity) {
+                          setError(false);
+                          props.onQuantityChange(index, intermediateProduct);
+                          deliveredProductList[index] = intermediateProduct;
+                        } else {
+                          intermediateProduct = "";
+                          setDeliveredProduct("");
+                          props.onQuantityChange(index, intermediateProduct);
+                          setError(true);
+                        }
                         deliveredProductList.push(deliveredProduct);
                         props.setDelivered(deliveredProductList);
                         props.setIndex(index);
@@ -88,6 +100,7 @@ export default function ProductInfo(props) {
                       value={deliveredProductList[index]}
                       placeholder={t("enter_qunatity")}
                       onChange={(e) => {
+                        intermediateProduct = e.target.value;
                         setDeliveredProduct(e.target.value);
                         if (e.target.value <= product.productQuantity) {
                           setError(false);
@@ -95,7 +108,7 @@ export default function ProductInfo(props) {
                           deliveredProductList[index] = e.target.value;
                         } else {
                           e.target.value = "";
-                          setDeliveredProduct();
+                          setDeliveredProduct("");
                           props.onQuantityChange(index, e.target.value);
                           setError(true);
                         }
