@@ -1,17 +1,18 @@
 import React from "react";
 import { TableCell, TableRow } from "@mui/material";
 import { format } from "date-fns";
-import { fetchBatch } from "../../../../actions/lastMileActions";
+import { fetchBatchByIdWithoutCondition } from "../../../../actions/lastMileActions";
 export default function UnitUsedRow({
   vial,
   index,
+  page,
   setSteps,
   setTableView,
   setBatchDetails,
   setVialId,
 }) {
   const getBatchDetails = async (vialId, batchNumber, warehouseId) => {
-    const result = await fetchBatch({
+    const result = await fetchBatchByIdWithoutCondition({
       batchNumber,
       warehouseId,
     });
@@ -40,7 +41,7 @@ export default function UnitUsedRow({
     <TableRow className='vl-mui-custom-tr'>
       <TableCell component='th' scope='row' align='center'>
         <div className='vl-table-body-column'>
-          <p className='vl-body f-500 '>{index + 1}</p>
+          <p className='vl-body f-500 '>{index + page * 10 - 9}</p>
         </div>
       </TableCell>
       <TableCell component='th' scope='row' align='center'>

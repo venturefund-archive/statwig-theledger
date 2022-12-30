@@ -112,6 +112,39 @@ exports.getProductInfo = [
   },
 ];
 
+exports.validateProductName = [
+	auth,
+	async (req, res) => {
+		try {
+			const permission_request = {
+				role: req.user.role,
+				permissionRequired: ["addNewProduct"],
+			};
+			checkPermissions(permission_request, async (permissionResult) => {
+				if (permissionResult.success) {
+          let result = false;
+          const product = await ProductModel.findOne({
+						$or: [
+							{ name: { $regex: new RegExp("^" + req.query.productName + "$", "i") } },
+							{ shortName: { $regex: new RegExp("^" + req.query.productName + "$", "i") } },
+						],
+					});
+          if(product?.id) result = true;
+					return apiResponse.successResponseWithData(res, "Product Exists", result);
+				} else {
+					return apiResponse.forbiddenResponse(
+						res,
+						responses(req.user.preferredLanguage).no_permission,
+					);
+				}
+			});
+		} catch (err) {
+			console.error(err);
+			return apiResponse.ErrorResponse(res, err.message);
+		}
+	},
+];
+
 exports.addMultipleProducts = [
   auth,
   async (req, res) => {

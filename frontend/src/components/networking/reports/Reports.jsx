@@ -8,6 +8,7 @@ import MenuItem from "@mui/material/MenuItem";
 import "./Report.scss";
 import Tab from "./tabs/Tab";
 import { getReports } from "../../../actions/networkActions";
+import { formatDate } from "../../../utils/dateHelper";
 export default function Reports(props) {
   const {
     bestseller,
@@ -44,11 +45,9 @@ export default function Reports(props) {
       const link = document.createElement("a");
       link.href = downloadUrl;
       link.setAttribute(
-        "download",
-        `${MainTab}-${startDate.toISOString().split("T")[0]}.${
-          type.toLowerCase() === "excel" ? "xlsx" : "pdf"
-        }`
-      ); //any other extension
+				"download",
+				`${MainTab}-${formatDate(startDate)}.${type.toLowerCase() === "excel" ? "xlsx" : "pdf"}`,
+			); //any other extension
       document.body.appendChild(link);
       link.click();
       link.remove();

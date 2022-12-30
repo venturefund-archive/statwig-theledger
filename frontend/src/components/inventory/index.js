@@ -16,7 +16,7 @@ import { isAuthenticated } from "../../utils/commonHelper";
 import Cards from "./cards/cards";
 
 const Inventory = (props) => {
-  const { t } = props;
+  const { t, ProdDetails } = props;
   const headers = {
     coloumn1: "Product Name",
     coloumn2: "Product Category",
@@ -369,7 +369,19 @@ const Inventory = (props) => {
                 >
                   <div className='row'>
                     {productsList?.map((product, index) => (
-                      <div className='col-sm-6' key={index}>
+                    
+                      <div className='col-sm-6 mi-link' key={index}  onClick={() =>
+                        
+
+                        {
+                          const inv = ProdDetails.filter(prod => {
+                            return prod.inventoryDetails.productId === product.productId;
+                          });
+                          console.log(inv);
+                          props.history.push(`/viewproduct`, { data: [inv[0]] })
+                        }
+                      }>
+                          {console.log(product)}
                         <div
                           className='d-flex card flex-column align-items-center'
                           style={{ backgroundColor: colors[index] }}

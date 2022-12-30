@@ -15,22 +15,33 @@ function valuetext(value) {
 }
 
 export default function Filterbar(props) {
-	const { tableType, setFilters, t } = props;
+	const { tableType, filters, setFilters, t, resetFilters } = props;
 
 	const [cities, setCities] = useState([""]);
 	const [organisations, setOrgnisations] = useState([""]);
-	const [ageType, setAgeType] = useState("range");
+	const [ageType, setAgeType] = useState("");
 
-	const [ageRange, setAgeRange] = useState([0, 100]);
+	const [yearRange, setYearRange] = useState([1, 150]);
+	const [monthRange, setMonthRange] = useState([6, 11]);
 	const [gender, setGender] = useState();
 	const [city, setCity] = useState();
 	const [organisation, setOrganisation] = useState();
 
 	useEffect(() => {
 		let data = {};
-		if (ageRange && ageRange.length) {
-			data.minAge = ageRange[0];
-			data.maxAge = ageRange[1];
+		if (ageType) {
+			data.ageType = ageType;
+			if (ageType === "months") {
+				if (monthRange && monthRange.length) {
+					data.minAge = monthRange[0];
+					data.maxAge = monthRange[1];
+				}
+			} else {
+				if (yearRange && yearRange.length) {
+					data.minAge = yearRange[0];
+					data.maxAge = yearRange[1];
+				}
+			}
 		}
 
 		if (gender) {
@@ -46,7 +57,16 @@ export default function Filterbar(props) {
 		}
 
 		setFilters(data);
-	}, [gender, ageRange, city, organisation]);
+	}, [gender, monthRange, yearRange, city, organisation, ageType]);
+
+	useEffect(async () => {
+		if (tableType === "units") {
+			if (filters.gender) {
+				const { gender, minAge, maxAge, ...newFilters } = filters;
+				setFilters(newFilters);
+			}
+		}
+	}, [tableType]);
 
 	useEffect(async () => {
 		try {
@@ -59,6 +79,14 @@ export default function Filterbar(props) {
 			console.log(err);
 		}
 	}, []);
+
+	useEffect(() => {
+		// Reset filter values
+		handleClear("city");
+		handleClear("organisation");
+		handleClear("gender");
+		handleClear("age");
+	}, [resetFilters]);
 
 	const handleClear = (name) => {
 		switch (name) {
@@ -75,15 +103,20 @@ export default function Filterbar(props) {
 				break;
 			}
 			case "age": {
-				setAgeType("range");
-				setAgeRange([0, 100]);
+				setAgeType("");
+				setMonthRange([6, 11]);
+				setYearRange([1, 150]);
 				break;
 			}
 		}
 	};
 
-	const handleChange = (event, newValue) => {
-		setAgeRange(newValue);
+	const handleMonthChange = (event, newValue) => {
+		setMonthRange(newValue);
+	};
+
+	const handleYearChange = (event, newValue) => {
+		setYearRange(newValue);
 	};
 
 	return (
@@ -128,9 +161,9 @@ export default function Filterbar(props) {
 									/>
 									<FormControlLabel
 										name="gender"
-										checked={gender === "GENERAL"}
-										value="GENERAL"
-										id="general"
+										checked={gender === "OTHERS"}
+										value="OTHERS"
+										id="others"
 										control={<Radio />}
 										label={t("others")}
 									/>
@@ -143,9 +176,9 @@ export default function Filterbar(props) {
 					<div className="filterCard-header">
 						<div className="filterCard-inner-header">
 							<p className="vl-body f-500 vl-grey-md">{t("city")}</p>
-							{/* <button onClick={() => handleClear("city")} className="filter-clear-btn">
+							<button onClick={() => handleClear("city")} className="filter-clear-btn">
 								Clear
-							</button> */}
+							</button>
 						</div>
 						<p className="vl-note f-400 vl-grey-xs">{t("city_msg")}</p>
 					</div>
@@ -154,6 +187,7 @@ export default function Filterbar(props) {
 							disablePortal
 							fullWidth
 							options={cities}
+							value={typeof city === "string" ? cities.find((cty) => cty === city) : city || null}
 							onChange={(event, value) => setCity(value)}
 							value={city}
 							renderInput={(params) => <TextField {...params} label={t("city")} />}
@@ -166,9 +200,9 @@ export default function Filterbar(props) {
 						<div className="filterCard-header">
 							<div className="filterCard-inner-header">
 								<p className="vl-body f-500 vl-grey-md">{t("organisation")}</p>
-								{/* <button onClick={() => handleClear("organisation")} className="filter-clear-btn">
+								<button onClick={() => handleClear("organisation")} className="filter-clear-btn">
 									Clear
-								</button> */}
+								</button>
 							</div>
 							<p className="vl-note f-400 vl-grey-xs">{t("org_msg")}</p>
 						</div>
@@ -177,7 +211,11 @@ export default function Filterbar(props) {
 								disablePortal
 								fullWidth
 								options={organisations}
-								value={organisation}
+								value={
+									typeof organisation === "string"
+										? organisations.find((org) => org === organisation)
+										: organisation || null
+								}
 								onChange={(event, value) => setOrganisation(value)}
 								renderInput={(params) => <TextField {...params} label="Organization" />}
 							/>
@@ -206,41 +244,41 @@ export default function Filterbar(props) {
 									onClick={(event) => setAgeType(event.target.value)}
 								>
 									<FormControlLabel
-										checked={ageType === "single"}
-										value="single"
+										checked={ageType === "months"}
+										value="months"
 										control={<Radio />}
 										label={t("individual_age")}
 									/>
 									<FormControlLabel
-										checked={ageType === "range"}
-										value="range"
+										checked={ageType === "years"}
+										value="years"
 										control={<Radio />}
 										label={t("range_group")}
 									/>
 								</RadioGroup>
 							</FormControl>
-							{ageType === "range" ? (
+							{ageType === "months" ? (
 								<div className="slider-select">
 									<Slider
 										getAriaLabel={() => "Temperature range"}
-										value={ageRange}
-										onChange={handleChange}
+										value={monthRange}
+										onChange={handleMonthChange}
 										valueLabelDisplay="auto"
 										getAriaValueText={valuetext}
+										min={6}
+										max={11}
 									/>
 								</div>
 							) : (
-								<div className="filterCard-body border-btm">
-									<TextField
-										type="number"
-										value={ageRange[0]}
-										onChange={(event) => {
-											let temp = event.target.value;
-											setAgeRange([temp, temp]);
-										}}
-										InputProps={{
-											inputProps: { min: 0, max: 120 },
-										}}
+								<div className="slider-select">
+									<Slider
+										getAriaLabel={() => "Temperature range"}
+										value={yearRange}
+										onChange={handleYearChange}
+										valueLabelDisplay="auto"
+										getAriaValueText={valuetext}
+										min={1}
+										max={150}
 									/>
 								</div>
 							)}

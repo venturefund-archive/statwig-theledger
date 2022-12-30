@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
 import {
   exportVaccinationList,
-  getAllVaccinationDetails,
-  getVialsUtilised,
+  exportVialsUtilised,
+  getAnalyticsWithFilters,
 } from "../../actions/lastMileActions";
 import AnalyticTiles from "../../shared/stats-tile/AnalyticTiles";
 import Filterbar from "./filterbar/Filterbar";
@@ -11,6 +12,7 @@ import "./LastmileCenteral.css";
 import CenteralTodayTable from "./stats-table/central-today/CenteralTodayTable";
 import CenteralTotalTable from "./stats-table/central-total/CenteralTotalTable";
 import CenteralUnitsTable from "./stats-table/central-units/CenteralUnitsTable";
+import { turnOn, turnOff } from "../../actions/spinnerActions";
 
 let useClickOutside = (handler) => {
   let domNode = useRef();
@@ -33,52 +35,73 @@ let useClickOutside = (handler) => {
 };
 
 export default function LastmileCenteral(props) {
+  const dispatch = useDispatch();
+
   const [analytics, setAnalytics] = useState();
   const [TableSwitch, setTableSwitch] = useState("today");
   const [filters, setFilters] = useState({});
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [resetFilters, toggleResetFilters] = useState(false);
 
-  const [vaccinationList, setVaccinationList] = useState([]);
-  const [todaysVaccinationList, setTodaysVaccinationList] = useState([]);
-  const [unitsUtilized, setUnitsUtilized] = useState([]);
   const [ButtonOpen, setButtonOpen] = useState(false);
 
   let domNode = useClickOutside(() => {
     setButtonOpen(false);
   });
 
-  useEffect(() => {
-    (async () => {
-      const unitsUtilized = await getVialsUtilised(filters);
-      if (unitsUtilized?.data?.success) {
-        setUnitsUtilized(unitsUtilized.data.data);
-      }
+  useEffect(async () => {
+		dispatch(turnOn());
+		// Fetch analytics
+		const analyticsResponse = await getAnalyticsWithFilters(filters);
+		setAnalytics(analyticsResponse.data.data);
 
-      const result = await getAllVaccinationDetails(filters);
-      if (result?.data?.success) {
-        setVaccinationList(result.data.data.vaccinationDetails);
-        setTodaysVaccinationList(result.data.data.todaysVaccinationDetails);
-        setAnalytics(result.data.data.analytics);
-      }
-    })();
-  }, [filters]);
+		dispatch(turnOff());
+	}, [filters]);
+
+  useEffect(async () => {
+    dispatch(turnOn());
+    // Reset filters
+    setFilters({});
+    toggleResetFilters(!resetFilters);
+
+    // Fetch analytics
+		const analyticsResponse = await getAnalyticsWithFilters({});
+		setAnalytics(analyticsResponse.data.data);
+
+		dispatch(turnOff());
+	}, [TableSwitch]);
 
   const exportVaccinationReport = async (type) => {
-    let data = filters;
-    data.reportType = type ? type : "excel";
-
-    const result = await exportVaccinationList(data);
-    if (result?.data && result?.status === 200) {
-      const downloadUrl = window.URL.createObjectURL(new Blob([result.data]));
-      const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.setAttribute(
-        "download",
-        `VaccinationReport.${type === "excel" ? "xlsx" : "pdf"}`,
-      );
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+    try {
+      dispatch(turnOn());
+      let data = filters;
+      data.reportType = type ? type : "excel";
+      data.today = TableSwitch === "today" ? true : false;
+  
+      let result;
+      if(TableSwitch === "units") {
+        result = await exportVialsUtilised(data, i18n.language);
+      } else {
+        result = await exportVaccinationList(data, i18n.language);
+      }
+      if (result?.data && result?.status === 200) {
+        const downloadUrl = window.URL.createObjectURL(new Blob([result.data]));
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.setAttribute(
+          "download",
+          `${TableSwitch === "units" ? t("vialsutilized_report") : t("vaccination_report")}.${
+            type === "excel" ? "xlsx" : "pdf"
+          }`,
+        );
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
+      dispatch(turnOff());
+    } catch(err) {
+      dispatch(turnOff());
+      console.log(err);
     }
   };
 
@@ -155,20 +178,22 @@ export default function LastmileCenteral(props) {
           />
         </div>
         {TableSwitch === "today" && (
-          <CenteralTodayTable t={t} vaccinationList={todaysVaccinationList} />
+          <CenteralTodayTable t={t} i18n={i18n} filters={filters} />
         )}
         {TableSwitch === "total" && (
-          <CenteralTotalTable t={t} vaccinationList={vaccinationList} />
+          <CenteralTotalTable t={t} i18n={i18n} filters={filters} />
         )}
         {TableSwitch === "units" && (
-          <CenteralUnitsTable t={t} unitsUtilized={unitsUtilized} />
+          <CenteralUnitsTable t={t} i18n={i18n} filters={filters} />
         )}
       </div>
       <div className='LastmileCenteral--filter-wrapper'>
         <Filterbar
           t={t}
           tableType={TableSwitch}
+          filters={filters}
           setFilters={setFilters}
+          resetFilters={resetFilters}
           {...props}
         />
       </div>

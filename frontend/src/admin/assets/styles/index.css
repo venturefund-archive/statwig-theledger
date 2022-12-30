@@ -10,6 +10,3 @@
 @import url("./guide/typography.css");
 @import url("./guide/colors.css");
 @import url("./guide/icon.css");
-
-/* Util Classes */
-@import url("./utils/scrollbar.css");

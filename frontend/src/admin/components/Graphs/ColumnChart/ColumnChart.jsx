@@ -27,25 +27,51 @@ export default function ColumnChart({ color }) {
     },
   };
 
-  const labels = ["January", "February", "March", "April", "May", "June"];
+  const labels = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
   const data1 = {
     labels,
     datasets: [
       {
         label: "Dataset 1",
-        data: ["30", "40", "26", "22", "18", "50"],
+        data: ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "20", "26"],
         backgroundColor: "#1975E3",
       },
     ],
   };
 
-  const labels2 = ["January", "February", "March", "April", "May", "June"];
+  const labels2 = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
   const data2 = {
     labels2,
     datasets: [
       {
         label: "Dataset 1",
-        data: ["30", "40", "26", "22", "18", "50"],
+        data: ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "20", "26"],
         backgroundColor: "#1975E3",
       },
     ],

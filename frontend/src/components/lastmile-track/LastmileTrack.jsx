@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import {
   fetchAnalytics,
   getVaccinationsList,
-  getVialsUtilised,
 } from "../../actions/lastMileActions";
 import AnalyticTiles from "../../shared/stats-tile/AnalyticTiles";
 import Beneficiary from "./beneficiary/Beneficiary";
@@ -20,14 +19,11 @@ export default function LastmileTrack(props) {
   const [tableComp, setTableComp] = useState(null);
   const [vialId, setVialId] = useState(null);
   const [analytics, setAnalytics] = useState();
-  const [unitsUtilized, setUnitsUtilized] = useState();
   const [totalVaccinations, setTotalVaccinations] = useState();
   const [todaysVaccinations, setTodaysVaccinations] = useState();
   const [batchDetails, setBatchDetails] = useState();
-  const [flag, toggleFlag] = useState(false);
-
+  const [save, setSave] = useState(false);
   const { t } = useTranslation();
-  console.log("BATCH", batchDetails);
 
   useEffect(() => {
     (async () => {
@@ -35,11 +31,6 @@ export default function LastmileTrack(props) {
       const analytics = await fetchAnalytics();
       if (analytics?.data?.success) {
         setAnalytics(analytics.data.data);
-      }
-      const unitsUtilized = await getVialsUtilised();
-      if (unitsUtilized?.data?.success) {
-        console.log("UTILS", unitsUtilized);
-        setUnitsUtilized(unitsUtilized.data.data);
       }
       const vaccinationsList = await getVaccinationsList();
       if (vaccinationsList?.data?.success) {
@@ -49,11 +40,12 @@ export default function LastmileTrack(props) {
         );
       }
     })();
-  }, [flag]);
+  }, [Steps, save]);
 
-  const completeVaccination = async () => {
-    setSteps(1);
-    toggleFlag(!flag);
+  const saveVaccination = async () => {
+    setVialId(null);
+    setSave(!save);
+    handleAnalyticsClicked("unitsUtilized");
   };
 
   const handleAnalyticsClicked = (tableType) => {
@@ -63,7 +55,6 @@ export default function LastmileTrack(props) {
         table = (
           <UnitUsedTable
             t={t}
-            unitsUtilized={unitsUtilized}
             setSteps={setSteps}
             setTableView={setTableView}
             setBatchDetails={setBatchDetails}
@@ -101,11 +92,18 @@ export default function LastmileTrack(props) {
           >
             {t("lastmile")}
           </h1>
-          {tableView && (
+          {(tableView || Steps != 1) && (
             <div className='back-link-button-space'>
               <button
                 className='back-action-btn'
-                onClick={() => setTableView(false)}
+                onClick={() => {
+                  if (tableView) {
+                    setTableView(false);
+                    setSteps(1);
+                  } else {
+                    setSteps(1);
+                  }
+                }}
               >
                 <i className='fa-solid fa-arrow-left'></i>
                 <span>{t("back_to_batch_details")}</span>
@@ -129,7 +127,7 @@ export default function LastmileTrack(props) {
                   vialId={vialId}
                   setVialId={setVialId}
                   batchDetails={batchDetails}
-                  completeVaccination={completeVaccination}
+                  saveVaccination={saveVaccination}
                   {...props}
                 />
               )}

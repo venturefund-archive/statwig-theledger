@@ -630,5 +630,8 @@
   "duplicate":"Duplicado",
   "individual_age":"Individuo edad",
   "range_group":"Grupo de rango",
-  "save_complete":"Guardar Continuar"
+  "save_complete":"Guardar Continuar",
+  "add_loc":"Añade una ubicación",
+  "vialsutilized_report":"Informedevialesutilizados",
+  "vaccination_report":"Informedevacunación"
 }

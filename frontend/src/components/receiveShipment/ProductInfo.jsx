@@ -106,7 +106,7 @@ export default function ProductInfo(props) {
               </div>
               <GridRow
                 heading={t("batch_no")}
-                context={props.shipments.products[0].batchNumber}
+                context={product.batchNumber}
               />
               <GridRow
                 heading={t("label_code")}

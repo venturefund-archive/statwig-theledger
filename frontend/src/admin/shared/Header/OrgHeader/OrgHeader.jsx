@@ -52,7 +52,7 @@ export default function OrgHeader() {
     let userName = user?.firstName;
     let org = user?.organisation?.split("/")[0];
     if (user?.photoId) {
-      getImage(profile?.photoId).then((result) => {
+      getImage(user?.photoId).then((result) => {
         setImage(result?.data);
       });
     }
