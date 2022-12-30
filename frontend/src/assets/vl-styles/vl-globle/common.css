@@ -56,6 +56,11 @@ html {
   justify-content: center;
   text-align: center;
 }
+
+/* ::-webkit-scrollbar-track {
+  background-color: #fff;
+} */
+
 @media screen and (max-width: 586px) {
   .section-space {
     padding: 2rem 0;
