@@ -6,6 +6,7 @@ import TrackIllustration from "../../../assets/images/track.webp";
 
 export default function ChainofCustody({ trackingData, t }) {
   const poDetails = trackingData?.poDetails;
+  console.log(trackingData)
 
   return trackingData ? (
     <div className="chain-of-custody-container">
@@ -18,7 +19,10 @@ export default function ChainofCustody({ trackingData, t }) {
           <PoCard t={t} poDetails={poDetails} />
         </div>
       )}
-      {trackingData?.trackedShipment?.map((element, index) => (
+
+     {trackingData?.trackedShipment?.length>0 ? (
+      <>
+       { trackingData?.trackedShipment?.map((element, index) => (
         <div
           key={index}
           className="chain-level-1"
@@ -27,7 +31,13 @@ export default function ChainofCustody({ trackingData, t }) {
           <div className="null-space"></div>
           <ChainGroup t={t} shipmentData={element} />
         </div>
-      ))}
+       ))}
+          </>
+      ) : ( <div className="tracking-illustation">
+      <img src={TrackIllustration} alt="tracking" />
+      <p className="mi-body-md f-500 grey mi-reset">{t("shipment_details_notfound")}</p>
+    </div>
+       )}
     </div>
   ) : (
     <div className="tracking-illustation">

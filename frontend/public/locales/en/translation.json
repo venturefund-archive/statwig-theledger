@@ -611,6 +611,7 @@
   "range_group":"Range Group",
   "save_continue":"Save & Continue",
   "add_loc":"Add Location",
+  "shipment_details_notfound":"No shipments details are found, Please Try again",
   "vialsutilized_report":"VialsUtilizedReport",
   "vaccination_report":"VaccinationReport"
 }

@@ -632,6 +632,7 @@
   "range_group":"Grupo de rango",
   "save_complete":"Guardar Continuar",
   "add_loc":"Añade una ubicación",
+  "shipment_details_notfound":"No se encuentran los detalles de los envíos, inténtelo de nuevo",
   "vialsutilized_report":"Informedevialesutilizados",
   "vaccination_report":"Informedevacunación"
 }
