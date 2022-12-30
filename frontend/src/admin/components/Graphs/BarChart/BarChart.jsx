@@ -1,13 +1,5 @@
 import React from "react";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
+
 import { Bar } from "react-chartjs-2";
 
 export default function BarChart() {
@@ -35,23 +27,35 @@ export default function BarChart() {
     },
   };
 
-  const labels = ["January", "February", "March", "April", "May", "June"];
+  const labels = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
   const data = {
     labels,
     datasets: [
       {
         label: "Dataset 1",
-        data: ["30", "40", "26", "22", "18", "50"],
+        data: ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "20", "26"],
         backgroundColor: "#F07217",
       },
       {
         label: "Dataset 2",
-        data: ["20", "28", "34", "36", "16", "44"],
+        data: ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "20", "36"],
         backgroundColor: "#0070E1",
       },
     ],
   };
-
 
   return <Bar options={options} data={data} />;
 }

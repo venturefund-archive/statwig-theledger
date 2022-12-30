@@ -38,7 +38,7 @@ export default function Analytics({ t, analytics }) {
           color="1"
         />
       </div>
-      <div className="analytics-full-column-layout">
+      {/* <div className="analytics-full-column-layout">
         <Graphs
           t={t}
           role="statwig"
@@ -46,7 +46,7 @@ export default function Analytics({ t, analytics }) {
           title={t("org_receive_graph")}
           color="2"
         />
-      </div>
+      </div> */}
     </section>
   );
 }
