@@ -110,7 +110,7 @@ const AdvanceTableFilter = (props) => {
                   style={{
                     padding: "10px",
                     height: "40px",
-                    width: "180px",
+                    width: "200px",
                     borderRadius: "10px",
                   }}
                   className='btn btn-outline-success btn-sm font-weight-bold'
@@ -125,7 +125,7 @@ const AdvanceTableFilter = (props) => {
                   style={{
                     padding: "10px",
                     height: "40px",
-                    width: "180px",
+                    width: "200px",
                     borderRadius: "10px",
                   }}
                   className='btn btn-outline-primary btn-sm font-weight-bold'
@@ -140,7 +140,7 @@ const AdvanceTableFilter = (props) => {
                 <button
                   style={{
                     padding: "10px",
-                    height: "60px",
+                    height: "40px",
                     width: "200px",
                     borderRadius: "10px",
                     whiteSpace: "initial",
@@ -159,7 +159,7 @@ const AdvanceTableFilter = (props) => {
                   style={{
                     padding: "10px",
                     height: "40px",
-                    width: "180px",
+                    width: "200px",
                     borderRadius: "10px",
                   }}
                   className='btn btn-outline-info btn-sm font-weight-bold'
@@ -177,7 +177,7 @@ const AdvanceTableFilter = (props) => {
                   style={{
                     padding: "10px",
                     height: "40px",
-                    width: "180px",
+                    width: "200px",
                     borderRadius: "10px",
                   }}
                   className='btn btn-outline-info btn-sm font-weight-bold'
@@ -193,7 +193,7 @@ const AdvanceTableFilter = (props) => {
                   style={{
                     padding: "10px",
                     height: "40px",
-                    width: "180px",
+                    width: "200px",
                     borderRadius: "10px",
                   }}
                   className='btn btn-outline-info btn-sm font-weight-bold'
@@ -208,7 +208,7 @@ const AdvanceTableFilter = (props) => {
                   style={{
                     padding: "10px",
                     height: "40px",
-                    width: "180px",
+                    width: "200px",
                     borderRadius: "10px",
                   }}
                   className='btn btn-outline-secondary btn-sm font-weight-bold'
@@ -223,7 +223,7 @@ const AdvanceTableFilter = (props) => {
                   style={{
                     padding: "10px",
                     height: "40px",
-                    width: "180px",
+                    width: "200px",
                     borderRadius: "10px",
                   }}
                   className='btn btn-outline-primary btn-sm font-weight-bold'
