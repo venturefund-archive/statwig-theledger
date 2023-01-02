@@ -4,11 +4,11 @@ import FailPopup from "./failPopup";
 
 function GridRow({ heading, context }) {
   return (
-    <div className="ShipmentInfo--grid-column-alt">
-      <p className="info-text-width info-content-text text-secondary">
+    <div className='ShipmentInfo--grid-column-alt'>
+      <p className='info-text-width info-content-text text-secondary'>
         {heading}
       </p>
-      <p className="info-content-text">{context}</p>
+      <p className='info-content-text'>{context}</p>
     </div>
   );
 }
@@ -24,24 +24,23 @@ export default function ProductInfo(props) {
   const [error, setError] = useState(false);
   let deliveredProductList = [];
   return Object.keys(props.shipments).length === 0 ? (
-    <div className="col-sm-4">
-      {" "}
-      <div className="row panel justify-content-between">N/A</div>
+    <div className='col-sm-4'>
+      <div className='row panel justify-content-between'>N/A</div>
     </div>
   ) : (
-    <div className="col-sm-4">
+    <div className='col-sm-4'>
       {props.shipments.products.map((product, index) => (
-        <div className="ShipmentInfo--main-container-alt">
-          <div className="ShipmentInfo--info-wrapper">
-            <div className="ShipmentInfo--content-space-2">
-              <div className="ShipmentInfo--grid-column-alt">
-                <p className="info-text-width productheading">
+        <div className='ShipmentInfo--main-container-alt'>
+          <div className='ShipmentInfo--info-wrapper'>
+            <div className='ShipmentInfo--content-space-2'>
+              <div className='ShipmentInfo--grid-column-alt'>
+                <p className='info-text-width productheading'>
                   {product.productName}
                 </p>
-                <div className="edit-action-div">
+                <div className='edit-action-div'>
                   {isVisible ? (
                     <button
-                      type="button"
+                      type='button'
                       style={{ width: "3vw", height: "4vh", fontSize: "12px" }}
                       onClick={() => {
                         setDeliveredProduct(intermediateProduct);
@@ -60,7 +59,7 @@ export default function ProductInfo(props) {
                         props.setIndex(index);
                         // if (deliveredProduct) setIsVisible(false);
                       }}
-                      className="btn btn-outline-warning mt-2 mr-1 p-1"
+                      className='btn btn-outline-warning mt-2 mr-1 p-1'
                     >
                       {deliveredProduct ? t("save") : t("edit")}
                     </button>
@@ -85,18 +84,18 @@ export default function ProductInfo(props) {
                     : ""
                 }`}
               />
-              <div className="ShipmentInfo--grid-column-alt">
-                <p className="info-text-width info-content-text text-secondary">
+              <div className='ShipmentInfo--grid-column-alt'>
+                <p className='info-text-width info-content-text text-secondary'>
                   {t("quantity") + " " + t("received")}
                 </p>
-                <div className="editing-options">
+                <div className='editing-options'>
                   {!product["productQuantity"] ? (
-                    <p className="info-content-text">
+                    <p className='info-content-text'>
                       {product["productQuantityDelivered"]}
                     </p>
                   ) : (
                     <input
-                      className="form-control quantity-received"
+                      className='form-control quantity-received'
                       value={deliveredProductList[index]}
                       placeholder={t("enter_qunatity")}
                       onChange={(e) => {
@@ -117,10 +116,7 @@ export default function ProductInfo(props) {
                   )}
                 </div>
               </div>
-              <GridRow
-                heading={t("batch_no")}
-                context={product.batchNumber}
-              />
+              <GridRow heading={t("batch_no")} context={product.batchNumber} />
               <GridRow
                 heading={t("label_code")}
                 context={props.shipments.label.labelId}
@@ -130,9 +126,9 @@ export default function ProductInfo(props) {
         </div>
       ))}
       {error && (
-        <Modal close={() => closeModalFail()} size="modal-sm">
+        <Modal close={() => closeModalFail()} size='modal-sm'>
           <FailPopup
-            message="Quantity cannot be greater than sent"
+            message='Quantity cannot be greater than sent'
             onHide={closeModalFail} //FailurePopUp
             t={t}
           />

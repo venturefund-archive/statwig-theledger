@@ -120,7 +120,7 @@ const ReceiveShipment = (props) => {
     setreceiveShipmentModal(false);
     props.history.push("/viewshipment/" + id);
   };
-  
+
   const closeModal = () => {
     setOpenUpdatedStatus(false);
     props.history.push("/viewshipment/" + id);
@@ -209,12 +209,14 @@ const ReceiveShipment = (props) => {
       <div className='row'>
         <div className='col-sm-4'>
           <h6 className='heading mt-3 mb-3 ml-3'>{t("shipment_details")}</h6>
-          <ShipmentInfo shipments={tracking}
+          <ShipmentInfo
+            shipments={tracking}
             setMenuShip={setMenuShip}
             menuShip={menuShip}
             highLight={highLight}
             setHighLight={setHighLight}
-            t={t} />
+            t={t}
+          />
         </div>
         <div className='col-sm-4'>
           <h6 className='heading mt-3 mb-3 ml-3'>{t("comment")}</h6>
@@ -383,7 +385,8 @@ const ReceiveShipment = (props) => {
         </div>
       </div>
       <div className='row'>
-        <ProductInfo shipments={tracking}
+        <ProductInfo
+          shipments={tracking}
           productHighLight={productHighLight}
           setProductHighLight={setProductHighLight}
           menuProduct={menuProduct}
@@ -391,7 +394,8 @@ const ReceiveShipment = (props) => {
           setDelivered={setDelivered}
           setIndex={setIndex}
           onQuantityChange={(index, value) => qtyChange(index, value)}
-          t={t}/>
+          t={t}
+        />
       </div>
       {receiveShipmentModal && (
         <Modal close={() => closeModalShipment()} size='modal-sm'>

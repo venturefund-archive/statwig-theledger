@@ -2748,10 +2748,10 @@ exports.fetchBatchesOfInventory = [
       const inventoryId = warehouse.warehouseInventory;
       const batches = await AtomModel.find({
         productId: productId,
-        batchNumbers: { $nin: ["", "null", null] },
         status: "HEALTHY",
         currentInventory: inventoryId,
-        quantity: { $nin: [0] },
+        quantity: { $gt: 0 },
+        "attributeSet.expDate": { $gt: new Date() }
       }).sort({ "attributeSet.expDate": 1 });
       return apiResponse.successResponseWithData(
         res,
