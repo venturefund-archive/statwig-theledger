@@ -1412,50 +1412,39 @@ exports.receiveShipment = [
           typeof data.products == "object"
             ? data.products
             : JSON.parse(data.products);
-        let supplierName = "";
-        let supplierAddress = "";
-        let receiverName = "";
-        let receiverAddress = "";
-        if (supplierID) {
-          const supplierOrgData = await OrganisationModel.findOne({
-            id: supplierID,
-          });
-          supplierName = supplierOrgData.name;
-          supplierAddress = supplierOrgData.postalAddress;
-        }
 
-        if (receiverId) {
-          const receiverOrgData = await OrganisationModel.findOne({
-            id: receiverId,
-          });
-          receiverName = receiverOrgData.name;
-          receiverAddress = receiverOrgData.postalAddress;
-        }
+        const supplierOrgData = await OrganisationModel.findOne({
+          id: supplierID
+        });
 
-        var actuallyShippedQuantity = 0;
-        var productNumber = -1;
+        const receiverOrgData = await OrganisationModel.findOne({
+          id: receiverId,
+        });
+
+        let actuallyShippedQuantity = 0;
+        let productNumber = -1;
         if (shipmentInfo != null) {
-          var shipmentProducts = shipmentInfo[0].products;
-          shipmentProducts.forEach((product) => {
+          const shipmentProducts = shipmentInfo[0].products;
+          for (const product of shipmentProducts) {
             productNumber = productNumber + 1;
-            receivedProducts.forEach((reqProduct) => {
-              if (product.productID === reqProduct.productID && (product?.batchNumber == reqProduct?.batchNumber || !product?.batchNumber)) {
+            for (const receivedProduct of receivedProducts) {
+              if (product.productID === receivedProduct.productID && (product?.batchNumber == receivedProduct?.batchNumber || !product?.batchNumber)) {
                 actuallyShippedQuantity = product.productQuantity;
-                var receivedQuantity = reqProduct.productQuantity;
+                const receivedQuantity = receivedProduct.productQuantity;
 
                 if (receivedQuantity > actuallyShippedQuantity)
                   throw new Error(
                     responses(req.user.preferredLanguage).rec_quantity_error
                   );
 
-                var quantityDifference =
+                const quantityDifference =
                   actuallyShippedQuantity - receivedQuantity;
-                var rejectionRate =
+                const rejectionRate =
                   (quantityDifference / actuallyShippedQuantity) * 100;
                 shipmentProducts[productNumber].quantityDelivered =
                   receivedQuantity;
                 shipmentProducts[productNumber].rejectionRate = rejectionRate;
-                ShipmentModel.updateOne(
+                await ShipmentModel.updateOne(
                   {
                     id: shipmentID,
                     "products.productID": product.productID,
@@ -1466,15 +1455,9 @@ exports.receiveShipment = [
                     },
                   }
                 )
-                  .then((e) => {
-                    console.log(e);
-                  })
-                  .catch((err) => {
-                    console.log(err);
-                  });
               }
-            });
-          });
+            }
+          }
         }
         var flag = "Y";
         // if (data.poId == "null") {
@@ -1725,7 +1708,6 @@ exports.receiveShipment = [
             .catch((error) => {
               console.log(error);
             });
-          console.log(data.id, "data.id");
           data.products = JSON.parse(data.products);
           data.supplier = JSON.parse(data.supplier);
           data.receiver = JSON.parse(data.receiver);
@@ -1765,12 +1747,12 @@ exports.receiveShipment = [
           };
           if (orgId === supplierID) {
             event_data.stackholders.secondorg.id = receiverId || null;
-            event_data.stackholders.secondorg.name = receiverName || null;
-            event_data.stackholders.secondorg.address = receiverAddress || null;
+            event_data.stackholders.secondorg.name = receiverOrgData?.name || null;
+            event_data.stackholders.secondorg.address = receiverOrgData?.postalAddress || null;
           } else {
             event_data.stackholders.secondorg.id = supplierID || null;
-            event_data.stackholders.secondorg.name = supplierName || null;
-            event_data.stackholders.secondorg.address = supplierAddress || null;
+            event_data.stackholders.secondorg.name = supplierOrgData?.name || null;
+            event_data.stackholders.secondorg.address = supplierOrgData?.postalAddress || null;
           }
           await logEvent(event_data);
 
