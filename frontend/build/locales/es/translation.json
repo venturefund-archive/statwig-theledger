@@ -623,5 +623,9 @@
   "import_pharmacy": "Importar farmacias",
   "add_pharmacy": "AD Formasya",
   "no_access_receiveshipment":"Sin acceso para recibir el envío",
-  "please_try_again":"Inténtalo de nuevo"
+  "please_try_again":"Inténtalo de nuevo",
+  "state_required" :"¡Se requiere province!",
+  "city_required":"la Canton es requerida",
+  "pincode_required":"Se requiere código PIN",
+  "address_required":"¡La dirección es necesaria!"
 }

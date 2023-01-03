@@ -605,5 +605,9 @@
   "org_name_required":"Organization Name is required!",
   "email_or_phone_required":"Email or Phone is required!",
   "first_name_required":"First Name is required!",
-  "Last_name_required":"Last Name is required!"
+  "Last_name_required":"Last Name is required!",
+  "state_required":"State is required!",
+  "city_required":"City is required!",
+  "pincode_required":"Pincode is required",
+  "address_required":"Address is required!"
 }
