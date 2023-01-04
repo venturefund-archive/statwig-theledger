@@ -193,7 +193,9 @@ export default function Organization(props) {
                         {...params}
                         label={t("state")}
                         error={Boolean(errors.state)}
-                        helperText={errors.state && "State is required!"}
+                        helperText={
+                          errors.state && `${t("state")} ${t("is_required")}!`
+                        }
                       />
                     )}
                   />
@@ -218,7 +220,9 @@ export default function Organization(props) {
                         {...params}
                         label={t("city")}
                         error={Boolean(errors.city)}
-                        helperText={errors.city && "City is required!"}
+                        helperText={
+                          errors.city && `${t("city")} ${t("is_required")}!`
+                        }
                       />
                     )}
                   />
@@ -238,7 +242,9 @@ export default function Organization(props) {
                     label={t("pincode")}
                     {...field}
                     error={Boolean(errors.pincode)}
-                    helperText={errors.pincode && "Pincode is required!"}
+                    helperText={
+                      errors.pincode && `${t("pincode")} ${t("is_required")}!`
+                    }
                   />
                 )}
               />
@@ -256,7 +262,9 @@ export default function Organization(props) {
                     multiline
                     {...field}
                     error={Boolean(errors.address)}
-                    helperText={errors.address && "Address is required!"}
+                    helperText={
+                      errors.address && `${t("address")} ${t("is_required")}!`
+                    }
                   />
                 )}
               />
