@@ -150,8 +150,8 @@ export default function Organization(props) {
                 fullWidth
                 variant="outlined"
                 label={t("region")}
-                error={Boolean(errors.firstName)}
-                helperText={errors.firstName && "First Name is required!"}
+                error={Boolean(errors.region)}
+                helperText={errors.region && `${t("region")} ${t("is_required")}!`}
                 // disabled
                 InputProps={{
                   readOnly: true,
@@ -163,8 +163,8 @@ export default function Organization(props) {
                 fullWidth
                 variant="outlined"
                 label={t("country")}
-                error={Boolean(errors.lastName)}
-                helperText={errors.lastName && "Last Name is required!"}
+                error={Boolean(errors.country)}
+                helperText={errors.country && `${t("country")} ${t("is_required")}!`}
                 InputProps={{
                   readOnly: true,
                 }}
