@@ -11,7 +11,7 @@ function PendingCard({ organisation, updateOrgStatus, t }) {
         <div className="pc-name-space">
           <p className="vl-subheading f-500 vl-blue">{organisation.name}</p>
           <p className="vl-small f-400 vl-grey-xs">
-            {new Date(organisation.createdAt).toLocaleDateString()}
+            {new Date(organisation.createdAt).toLocaleDateString("en-GB")}
           </p>
         </div>
         {/* <div className="organization-name">
