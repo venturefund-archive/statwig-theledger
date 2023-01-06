@@ -43,7 +43,7 @@ const AtomSchema = new mongoose.Schema(
     status: {
       type: String,
       required: true,
-      enum: ["HEALTHY", "TRANSIT", "EXPIRED", "ALERT", "CONSUMED", "LOST"],
+      enum: ["HEALTHY", "TRANSIT", "EXPIRED", "ALERT", "CONSUMED", "LOST", "MERGED"],
       default: "HEALTHY",
     },
     attributeSet: {

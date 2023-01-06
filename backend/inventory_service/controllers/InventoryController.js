@@ -2319,22 +2319,23 @@ exports.getBatchWarehouse = [
       const inventoryId = req.query.inventory_id;
       const productId = req.query.product_id;
       const result = await AtomModel.aggregate([
-        {
-          $match: {
-            productId: productId,
-            currentInventory: inventoryId,
-          },
-        },
-        {
-          $lookup: {
-            from: "products",
-            localField: "productId",
-            foreignField: "id",
-            as: "products",
-          },
-        },
-        { $unwind: "$products" },
-      ]);
+				{
+					$match: {
+						productId: productId,
+						currentInventory: inventoryId,
+						status: { $ne: "MERGED" },
+					},
+				},
+				{
+					$lookup: {
+						from: "products",
+						localField: "productId",
+						foreignField: "id",
+						as: "products",
+					},
+				},
+				{ $unwind: "$products" },
+			]);
       return apiResponse.successResponseWithData(
         res,
         "Warehouse Batch Details",
@@ -2780,6 +2781,10 @@ exports.reduceBatch = [
       const orgData = await OrganisationModel.findOne({ id: orgId });
       const address = orgData.postalAddress;
       const { batchNumber, quantity } = req.query;
+      const batchExists = await AtomModel.findOne({ batchNumbers: { $in: [batchNumber] } });
+      if(batchExists.quantity < Math.abs(quantity)) {
+        return apiResponse.validationErrorWithData(res, "Insufficient quantity in batch!", {});
+      }
       const batch = await AtomModel.findOneAndUpdate(
         {
           batchNumbers: { $in: [batchNumber] },
