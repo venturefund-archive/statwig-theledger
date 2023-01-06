@@ -609,6 +609,8 @@
   "duplicate":"Duplicate",
   "individual_age":"Individual Age",
   "range_group":"Range Group",
+  "year_range": "Year Range",
+  "month_range": "Month Range",
   "save_continue":"Save & Continue",
   "add_loc":"Add Location",
   "shipment_details_notfound":"No shipments details are found, Please Try again",

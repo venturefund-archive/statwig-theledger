@@ -630,6 +630,8 @@
   "duplicate":"Duplicado",
   "individual_age":"Individuo edad",
   "range_group":"Grupo de rango",
+  "year_range": "Rango de años",
+  "month_range": "Rango de meses",
   "save_complete":"Guardar Continuar",
   "add_loc":"Añade una ubicación",
   "shipment_details_notfound":"No se encuentran los detalles de los envíos, inténtelo de nuevo",

@@ -1,5 +1,6 @@
 import { TableCell, TableRow } from "@mui/material";
 // import { format } from "date-fns";
+import { formatDate } from "../../../../utils/dateHelper";
 import React from "react";
 
 export default function TotalVaccinatedRow({ dose, index }) {
@@ -28,9 +29,7 @@ export default function TotalVaccinatedRow({ dose, index }) {
 			<TableCell component="th" scope="row" align="center">
 				<div className="vl-table-body-column">
 					<p className="vl-body f-500 ">
-						{/* {format(dose.createdAt, "dd/MM/yyyy")}
-						 */}
-						{new Date(dose.date).toLocaleDateString()}
+						{formatDate(dose.createdAt)}						
 					</p>
 				</div>
 			</TableCell>
