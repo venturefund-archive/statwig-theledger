@@ -247,13 +247,13 @@ export default function Filterbar(props) {
 										checked={ageType === "months"}
 										value="months"
 										control={<Radio />}
-										label={t("individual_age")}
+										label={t("month_range")}
 									/>
 									<FormControlLabel
 										checked={ageType === "years"}
 										value="years"
 										control={<Radio />}
-										label={t("range_group")}
+										label={t("year_range")}
 									/>
 								</RadioGroup>
 							</FormControl>

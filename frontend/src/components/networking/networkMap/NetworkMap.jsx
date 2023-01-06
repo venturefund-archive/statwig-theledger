@@ -108,7 +108,7 @@ export default function NetworkMap({
                 ),
               }}
               onLoad={(marker) => {
-                oms.addMarker(marker);
+                oms?.addMarker(marker);
                 window.google.maps.event.addListener(
                   marker,
                   "spider_click",

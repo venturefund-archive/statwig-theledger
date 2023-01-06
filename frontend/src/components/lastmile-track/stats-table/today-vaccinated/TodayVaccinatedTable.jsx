@@ -11,6 +11,7 @@ import React, { useState, useEffect } from "react";
 import TodayVaccinatedRow from "./TodayVaccinatedRow";
 import EmptyIcon from "../../../../assets/files/designs/empty-table.jpg";
 import { getVaccinationsList } from "../../../../actions/lastMileActions";
+import { formatDate } from "../../../../utils/dateHelper";
 
 export default function TodayVaccinatedTable({ t }) {
   let today = new Date();
@@ -41,7 +42,7 @@ export default function TodayVaccinatedTable({ t }) {
       <TableContainer className="vl-mui-custom-tablecontainer">
         <div className="Beneficiary--header">
           <h1 className="vl-subtitle f-700 vl-black">{t("today_vaccine")}</h1>
-          <h1 className="vl-body f-500 vl-grey-sm">{today.toDateString()}</h1>
+          <h1 className="vl-body f-500 vl-grey-sm">{formatDate(today)}</h1>
         </div>
         {vaccinationsList && vaccinationsList.length ? (
           <>
