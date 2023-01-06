@@ -214,7 +214,7 @@ export default function AddOrganization({ resetFlag, handleClose, t }) {
 										label={t("first_name")}
 										{...field}
 										error={Boolean(errors.firstName)}
-										helperText={errors.firstName && "First Name is required!"}
+										helperText={errors.firstName && `${t("first_name")} ${t("is_required")}!`}
 									/>
 								)}
 							/>
@@ -229,7 +229,7 @@ export default function AddOrganization({ resetFlag, handleClose, t }) {
 										label={t("last_name")}
 										{...field}
 										error={Boolean(errors.lastName)}
-										helperText={errors.lastName && "Last Name is required!"}
+										helperText={errors.lastName && `${t("last_name")} ${t("is_required")}!`}
 									/>
 								)}
 							/>
@@ -294,7 +294,7 @@ export default function AddOrganization({ resetFlag, handleClose, t }) {
 												{...params}
 												label={t("organization_type")}
 												error={Boolean(errors.organizationType)}
-												helperText={errors.organizationType && "Organization type is required!"}
+												helperText={errors.organizationType && `${t("organisation_type")} ${t("is_required")}!`}
 											/>
 										)}
 										{...field}
@@ -317,7 +317,7 @@ export default function AddOrganization({ resetFlag, handleClose, t }) {
 										error={Boolean(errors.organizationName)}
 										helperText={
 											errors.organizationName?.type === "required"
-												? "Organization Name is required!"
+												? `${t("organisation_name")} ${t("is_required")}!`
 												: errors.organizationName?.message
 										}
 									/>
@@ -429,7 +429,7 @@ export default function AddOrganization({ resetFlag, handleClose, t }) {
 												{...params}
 												label={t("state")}
 												error={Boolean(errors.state)}
-												helperText={errors.state && "State is required!"}
+												helperText={errors.state && `${t("state")} ${t("is_required")}!`}
 											/>
 										)}
 									/>
@@ -454,7 +454,7 @@ export default function AddOrganization({ resetFlag, handleClose, t }) {
 												{...params}
 												label={t("city")}
 												error={Boolean(errors.city)}
-												helperText={errors.city && "City is required!"}
+												helperText={errors.city && `${t("city")} ${t("is_required")}!`}
 											/>
 										)}
 									/>
@@ -474,7 +474,7 @@ export default function AddOrganization({ resetFlag, handleClose, t }) {
 										label={t("pincode")}
 										{...field}
 										error={Boolean(errors.pincode)}
-										helperText={errors.pincode && "Pincode is required!"}
+										helperText={errors.pincode && `${t("pincode")} ${t("is_required")}!`}
 									/>
 								)}
 							/>
@@ -493,7 +493,7 @@ export default function AddOrganization({ resetFlag, handleClose, t }) {
 										multiline
 										{...field}
 										error={Boolean(errors.address)}
-										helperText={errors.address && "Address is required!"}
+										helperText={errors.address && `${t("address")} ${t("is_required")}!`}
 									/>
 								)}
 							/>

@@ -193,7 +193,7 @@ export default function AddUsers(props) {
 										label={t("first_name")}
 										{...field}
 										error={Boolean(errors.firstName)}
-										helperText={errors.firstName && "First Name is required!"}
+										helperText={errors.firstName && `${t("first_name")} ${t("is_required")}!`}
 									/>
 								)}
 							/>
@@ -208,7 +208,7 @@ export default function AddUsers(props) {
 										label={t("last_name")}
 										{...field}
 										error={Boolean(errors.lastName)}
-										helperText={errors.lastName && "Last Name is required!"}
+										helperText={errors.lastName && `${t("last_name")} ${t("is_required")}!`}
 									/>
 								)}
 							/>
@@ -228,7 +228,7 @@ export default function AddUsers(props) {
 										error={Boolean(errors.emailId)}
 										helperText={
 											errors.emailId?.type === "required"
-												? "Email or Phone is required!"
+												? t("email_or_phone_required")
 												: errors.emailId?.message
 										}
 									/>
@@ -243,11 +243,12 @@ export default function AddUsers(props) {
 										international
 										countryCallingCodeEditable={false}
 										defaultCountry={COUNTRY_CODE}
-										className="vl-custom-phone-input-2"
+										className="vl-custom-phone-input PhoneInput"
 										{...field}
 										maxLength={15}
 										style={{
 											borderColor: Boolean(errors.phone) ? "#da323c" : "",
+											
 										}}
 									/>
 								)}
@@ -309,7 +310,7 @@ export default function AddUsers(props) {
 														{...params}
 														label={t("assign_role")}
 														error={Boolean(errors.role)}
-														helperText={errors.role && "Role is required!"}
+														helperText={errors.role && `${t("role")} ${t("is_required")}!`}
 													/>
 												)}
 												{...field}
@@ -334,7 +335,7 @@ export default function AddUsers(props) {
 														{...params}
 														label={t("assign_warehouse")}
 														error={Boolean(errors.warehouse)}
-														helperText={errors.warehouse && "Warehouse is required!"}
+														helperText={errors.warehouse && `${t("warehouse")} ${t("is_required")}!`}
 													/>
 												)}
 												{...field}
@@ -364,7 +365,7 @@ export default function AddUsers(props) {
 														{...params}
 														label={t("assign_role")}
 														error={Boolean(errors.role)}
-														helperText={errors.role && "Role is required!"}
+														helperText={errors.role && `${t("role")} ${t("is_required")}!`}
 													/>
 												)}
 												{...field}
@@ -385,7 +386,7 @@ export default function AddUsers(props) {
 												label={t("warehouse_title")}
 												{...field}
 												error={Boolean(errors.warehouseTitle)}
-												helperText={errors.warehouseTitle && "Warehouse Title is required!"}
+												helperText={errors.warehouseTitle && `${t("warehouse")} ${t("is_required")}!`}
 											/>
 										)}
 									/>
@@ -494,7 +495,7 @@ export default function AddUsers(props) {
 														{...params}
 														label={t("state")}
 														error={Boolean(errors.state)}
-														helperText={errors.state && "State is required!"}
+														helperText={errors.state && `${t("state")} ${t("is_required")}!`}
 													/>
 												)}
 											/>
@@ -519,7 +520,7 @@ export default function AddUsers(props) {
 														{...params}
 														label={t("city")}
 														error={Boolean(errors.city)}
-														helperText={errors.city && "City is required!"}
+														helperText={errors.city && `${t("city")} ${t("is_required")}!`}
 													/>
 												)}
 											/>
@@ -539,7 +540,7 @@ export default function AddUsers(props) {
 												label={t("pincode")}
 												{...field}
 												error={Boolean(errors.pincode)}
-												helperText={errors.pincode && "Pincode is required!"}
+												helperText={errors.pincode && `${t("pincode")} ${t("is_required")}!`}
 											/>
 										)}
 									/>
@@ -555,7 +556,7 @@ export default function AddUsers(props) {
 												multiline
 												{...field}
 												error={Boolean(errors.address)}
-												helperText={errors.address && "Address is required!"}
+												helperText={errors.address && `${t("address")} ${t("is_required")}!`}
 											/>
 										)}
 									/>
