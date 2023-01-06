@@ -52,9 +52,7 @@ export default function OrganizationRow({ rows, modifyOrg }) {
           />
         </TableCell> */}
         <TableCell
-          onClick={() =>
-            history.push("/statwig/view-locations/" + rows.id)
-          }
+          onClick={() => history.push("/statwig/view-locations/" + rows.id)}
         >
           <p
             className={`vl-body ${
@@ -65,9 +63,7 @@ export default function OrganizationRow({ rows, modifyOrg }) {
           </p>
         </TableCell>
         <TableCell
-          onClick={() =>
-            history.push("/statwig/view-locations/" + rows.id)
-          }
+          onClick={() => history.push("/statwig/view-locations/" + rows.id)}
         >
           <p
             className={`vl-body ${
@@ -78,9 +74,7 @@ export default function OrganizationRow({ rows, modifyOrg }) {
           </p>
         </TableCell>
         <TableCell
-          onClick={() =>
-            history.push("/statwig/view-locations/" + rows.id)
-          }
+          onClick={() => history.push("/statwig/view-locations/" + rows.id)}
         >
           <p
             className={`vl-body ${
@@ -91,9 +85,7 @@ export default function OrganizationRow({ rows, modifyOrg }) {
           </p>
         </TableCell>
         <TableCell
-          onClick={() =>
-            history.push("/statwig/view-locations/" + rows.id)
-          }
+          onClick={() => history.push("/statwig/view-locations/" + rows.id)}
         >
           <p
             className={`vl-body ${
@@ -104,9 +96,7 @@ export default function OrganizationRow({ rows, modifyOrg }) {
           </p>
         </TableCell>
         <TableCell
-          onClick={() =>
-            history.push("/statwig/view-locations/" + rows.id)
-          }
+          onClick={() => history.push("/statwig/view-locations/" + rows.id)}
         >
           <p
             className={`vl-body ${
@@ -142,15 +132,13 @@ export default function OrganizationRow({ rows, modifyOrg }) {
           </div>
         </TableCell>
         <TableCell
-          onClick={() =>
-            history.push("/statwig/view-locations/" + rows.id)
-          }
+          onClick={() => history.push("/statwig/view-locations/" + rows.id)}
         >
           <div className="created-date">
             <p
               className={`vl-note f-400 ${checked ? "vl-black" : "vl-grey-sm"}`}
             >
-              {new Date(rows.createdAt).toLocaleDateString()}
+              {new Date(rows.createdAt).toLocaleDateString("en-GB")}
             </p>
             <p
               className={`vl-small f-400 ${
