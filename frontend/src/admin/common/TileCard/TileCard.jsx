@@ -1,10 +1,27 @@
 import React from "react";
 import "./TileCard.css";
 
-export default function TileCard({ layout, t, orgDetails, warehouseDetails }) {
+export default function TileCard({
+  layout,
+  t,
+  orgDetails,
+  warehouseDetails,
+  addresses,
+}) {
   let active = 0;
   let inactive = 0;
   let total = 0;
+
+  console.log(addresses?.length);
+
+  const ActiveLocations = addresses?.filter((addr) => {
+    return addr?.status === "ACTIVE";
+  });
+
+  const InactiveLocations = addresses?.length - ActiveLocations?.length;
+
+  console.log(ActiveLocations?.length);
+  console.log(InactiveLocations);
 
   if (layout === "location") {
     active = orgDetails?.warehouseCount?.activeWarehouseCount || 0;
@@ -26,18 +43,22 @@ export default function TileCard({ layout, t, orgDetails, warehouseDetails }) {
             <h1 className="vl-subheading f-500">
               {t("total")} {t("location")}
             </h1>
-            <div className="number-label">{total}</div>
+            <div className="number-label">{addresses?.length}</div>
           </div>
           <div className="admin-location-body">
             <div className="tile-grid">
               <div className="tile-card">
-                <h1 className={`vl-heading f-700 vl-accept`}>{active}</h1>
+                <h1 className={`vl-heading f-700 vl-accept`}>
+                  {ActiveLocations?.length}
+                </h1>
                 <p className={`vl-body f-500  vl-blue`}>
                   {t("active")} {t("location")}
                 </p>
               </div>
               <div className="tile-card">
-                <h1 className={`vl-heading f-700 vl-reject`}>{inactive}</h1>
+                <h1 className={`vl-heading f-700 vl-reject`}>
+                  {InactiveLocations}
+                </h1>
                 <p className={`vl-body f-500 vl-blue`}>
                   {t("inactive")} {t("location")}
                 </p>

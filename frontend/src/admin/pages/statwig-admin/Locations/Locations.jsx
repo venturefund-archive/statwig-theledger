@@ -93,7 +93,12 @@ export default function Locations(props) {
               </div>
               <div className="location-details-grid">
                 <LocationCard t={t} layout="location" orgDetails={orgDetails} />
-                <TileCard t={t} layout="location" orgDetails={orgDetails} />
+                <TileCard
+                  t={t}
+                  layout="location"
+                  orgDetails={orgDetails}
+                  addresses={addresses}
+                />
               </div>
 
               <div className="map-view-button" onClick={() => setMap(!Map)}>
