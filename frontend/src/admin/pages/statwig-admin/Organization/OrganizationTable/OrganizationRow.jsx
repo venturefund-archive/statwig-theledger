@@ -137,7 +137,7 @@ export default function OrganizationRow({ rows, modifyOrg }) {
             <p
               className={`vl-note f-400 ${checked ? "vl-black" : "vl-grey-sm"}`}
             >
-              {new Date(rows.createdAt).toLocaleDateString()}
+              {new Date(rows.createdAt).toLocaleDateString("en-GB")}
             </p>
             <p
               className={`vl-small f-400 ${
