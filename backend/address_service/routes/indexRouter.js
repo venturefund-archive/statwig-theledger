@@ -38,14 +38,12 @@ router.post("/modifyLocation", modifyLocation);
 router.get("/getCountries", getCountries);
 router.get("/getStatesByCountry", getStatesByCountry);
 router.get("/getCitiesByState", getCitiesByState);
-router.get("/", function (req, res) {
-  res.json({ status: "OK" });
-});
-
 router.post(
   "/addAddressesFromExcel",
   upload.single("excel"),
   addAddressesFromExcel
 );
-
+router.get("/", function (req, res) {
+  res.json({ status: "OK" });
+});
 module.exports = router;
