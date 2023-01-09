@@ -12,7 +12,6 @@ const RejectedApproval = require("../components/RejectedApproval");
 const AddUserEmail = require("../components/AddUser");
 const apiResponse = require("../helpers/apiResponse");
 const fs = require("fs");
-const moveFile = require("move-file");
 const { getLatLongByCity } = require("../helpers/getLatLong");
 const XLSX = require("xlsx");
 
@@ -126,26 +125,26 @@ exports.getApprovals = [
     try {
       const { organisationId } = req.user;
       const employees = await EmployeeModel.aggregate([
-				{
-					$match: {
-						$and: [{ accountStatus: "NOTAPPROVED" }, { organisationId: organisationId }],
-					},
-				},
-				{
-					$lookup: {
-						from: "organisations",
-						localField: "organisationId",
-						foreignField: "id",
-						as: "orgDetails",
-					},
-				},
-				{
-					$unwind: {
-						path: "$orgDetails",
-					},
-				},
-				{ $sort: { createdAt: -1 } },
-			]);
+        {
+          $match: {
+            $and: [{ accountStatus: "NOTAPPROVED" }, { organisationId: organisationId }],
+          },
+        },
+        {
+          $lookup: {
+            from: "organisations",
+            localField: "organisationId",
+            foreignField: "id",
+            as: "orgDetails",
+          },
+        },
+        {
+          $unwind: {
+            path: "$orgDetails",
+          },
+        },
+        { $sort: { createdAt: -1 } },
+      ]);
       return apiResponse.successResponseWithData(
         req,
         res,
@@ -383,42 +382,42 @@ exports.activateUser = [
   auth,
   async (req, res) => {
     try {
-			const { organisationName } = req.user;
-			const { id, role } = req.query;
-			const employee = await EmployeeModel.findOne({ id: id });
-			if (employee) {
-				if (employee.isConfirmed && employee.accountStatus == "ACTIVE") {
-					return apiResponse.successResponseWithData(req, res, " User is already Active", employee);
-				} else {
-					const emp = await EmployeeModel.findOneAndUpdate(
-						{ id: id },
-						{
-							$set: {
-								accountStatus: "ACTIVE",
-								isConfirmed: true,
-								role,
-							},
-						},
-						{ new: true },
-					);
-					const emailBody = RequestApproved({
-						name: emp.firstName,
-						organisation: organisationName,
-					});
-					await mailer.send(
-						constants.appovalEmail.from,
-						emp.emailId,
-						constants.appovalEmail.subject,
-						emailBody,
-					);
-					return apiResponse.successResponseWithData(req, res, `User Activated`, emp);
-				}
-			} else {
-				return apiResponse.notFoundResponse(req, res, "User Not Found");
-			}
-		} catch (err) {
-			return apiResponse.ErrorResponse(req, res, err);
-		}
+      const { organisationName } = req.user;
+      const { id, role } = req.query;
+      const employee = await EmployeeModel.findOne({ id: id });
+      if (employee) {
+        if (employee.isConfirmed && employee.accountStatus == "ACTIVE") {
+          return apiResponse.successResponseWithData(req, res, " User is already Active", employee);
+        } else {
+          const emp = await EmployeeModel.findOneAndUpdate(
+            { id: id },
+            {
+              $set: {
+                accountStatus: "ACTIVE",
+                isConfirmed: true,
+                role,
+              },
+            },
+            { new: true },
+          );
+          const emailBody = RequestApproved({
+            name: emp.firstName,
+            organisation: organisationName,
+          });
+          await mailer.send(
+            constants.appovalEmail.from,
+            emp.emailId,
+            constants.appovalEmail.subject,
+            emailBody,
+          );
+          return apiResponse.successResponseWithData(req, res, `User Activated`, emp);
+        }
+      } else {
+        return apiResponse.notFoundResponse(req, res, "User Not Found");
+      }
+    } catch (err) {
+      return apiResponse.ErrorResponse(req, res, err);
+    }
   },
 ];
 
@@ -476,8 +475,7 @@ exports.addUsersFromExcel = [
         const dir = `uploads`;
         if (!fs.existsSync(dir))
           fs.mkdirSync(dir);
-        await moveFile(req.file.path, `${dir}/${req.file.originalname}`);
-        const workbook = XLSX.readFile(`${dir}/${req.file.originalname}`);
+        const workbook = XLSX.readFile(req.file.path);
         const sheet_name_list = workbook.SheetNames;
         let data = XLSX.utils.sheet_to_json(
           workbook.Sheets[sheet_name_list[0]],

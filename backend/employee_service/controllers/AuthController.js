@@ -26,7 +26,6 @@ const fs = require("fs");
 const util = require("util");
 const unlinkFile = util.promisify(fs.unlink);
 const utils = require("ethereumjs-util");
-const moveFile = require("move-file");
 const XLSX = require("xlsx");
 const { constants } = require("../helpers/constants");
 const RequestApproved = require("../components/RequestApproved");
@@ -2352,8 +2351,7 @@ exports.addUsersFromExcel = [
 				const { organisationName } = req.user;
 				const dir = `uploads`;
 				if (!fs.existsSync(dir)) fs.mkdirSync(dir);
-				await moveFile(req.file.path, `${dir}/${req.file.originalname}`);
-				const workbook = XLSX.readFile(`${dir}/${req.file.originalname}`);
+				const workbook = XLSX.readFile(req.file.path);
 				const sheet_name_list = workbook.SheetNames;
 				let data = XLSX.utils.sheet_to_json(
 					workbook.Sheets[sheet_name_list[0]],
