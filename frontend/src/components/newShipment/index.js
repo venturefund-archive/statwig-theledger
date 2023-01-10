@@ -437,6 +437,7 @@ const NewShipment = (props) => {
       setValidShipmentID(value);
     });
   }
+
   return (
     <div className='NewShipment'>
       <h1 className='breadcrumb'>{t("create_shipment")}</h1>
@@ -1560,6 +1561,7 @@ const NewShipment = (props) => {
           </form>
         )}
       </Formik>
+      
       {openCreatedInventory && (
         <Modal
           close={() => closeModal()}
