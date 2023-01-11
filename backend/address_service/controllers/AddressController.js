@@ -7,8 +7,6 @@ const EmployeeModel = require("../models/EmployeeModel");
 const WarehouseModel = require("../models/warehouseModel");
 const ConfigurationModel = require("../models/ConfigurationModel");
 const auth = require("../middlewares/jwt");
-const { customAlphabet } = require("nanoid");
-const nanoid = customAlphabet("1234567890abcdef", 10);
 const XLSX = require("xlsx");
 const fs = require("fs");
 const moveFile = require("move-file");
@@ -47,34 +45,34 @@ exports.addressesOfOrgWarehouses = [
 ];
 
 exports.fetchWarehousesByOrgId = [
-	auth,
-	async (req, res) => {
-		try {
-			if (!req.query?.orgId) {
-				return apiResponse.validationErrorWithData(res, "Org Id not provided", { orgId: orgId });
-			}
+  auth,
+  async (req, res) => {
+    try {
+      if (!req.query?.orgId) {
+        return apiResponse.validationErrorWithData(res, "Org Id not provided", { orgId: orgId });
+      }
 
-			const warehouses = await Warehouse.aggregate([
-				{ $match: { $and: [{ organisationId: req.query.orgId }] } },
-				{
-					$lookup: {
-						from: "employees",
-						let: { warehouseId: "$id" },
-						pipeline: [
-							{ $match: { $expr: { $in: ["$$warehouseId", "$warehouseId"] } } },
-							{ $count: "total" },
-						],
-						as: "employeeCount",
-					},
-				},
-				{ $unwind: "$employeeCount" },
-			])
+      const warehouses = await Warehouse.aggregate([
+        { $match: { $and: [{ organisationId: req.query.orgId }] } },
+        {
+          $lookup: {
+            from: "employees",
+            let: { warehouseId: "$id" },
+            pipeline: [
+              { $match: { $expr: { $in: ["$$warehouseId", "$warehouseId"] } } },
+              { $count: "total" },
+            ],
+            as: "employeeCount",
+          },
+        },
+        { $unwind: "$employeeCount" },
+      ])
 
-			return apiResponse.successResponseWithData(res, "Warehouses Addresses", warehouses);
-		} catch (err) {
-			return apiResponse.ErrorResponse(res, err);
-		}
-	},
+      return apiResponse.successResponseWithData(res, "Warehouses Addresses", warehouses);
+    } catch (err) {
+      return apiResponse.ErrorResponse(res, err);
+    }
+  },
 ];
 
 function getConditionForLocationApprovals(type, id) {
@@ -188,9 +186,7 @@ exports.AddWarehouse = [
         { "counters.name": "inventoryId" },
         { "counters.$": 1 }
       );
-      const inventoryId =
-        invCounter.counters[0].format + invCounter.counters[0].value;
-      //const inventoryId = "inv-" + nanoid();
+      const inventoryId = invCounter.counters[0].format + invCounter.counters[0].value;
       const inventoryResult = new Inventory({ id: inventoryId });
       await inventoryResult.save();
       const {
@@ -222,7 +218,6 @@ exports.AddWarehouse = [
       const warehouseId =
         warehouseCounter.counters[0].format +
         warehouseCounter.counters[0].value;
-      //const warehouseId = "war-" + nanoid();
       let employee = [];
       if (employees != undefined && employees.length > 0) {
         employee = employees
@@ -236,7 +231,7 @@ exports.AddWarehouse = [
         }, {
           $push: { warehouseId: warehouseId }
         }, {
-          new: true
+          new: true,
         });
       });
       const warehouse = new Warehouse({
@@ -281,7 +276,23 @@ exports.AddOffice = [
         supervisors,
         employees,
       } = req.body;
-      const officeId = "office-" + nanoid();
+      const warehouseCounter = await CounterModel.findOneAndUpdate(
+        { "counters.name": "warehouseId" },
+        {
+          $inc: {
+            "counters.$.value": 1,
+          },
+        },
+        {
+          new: true,
+          projection: {
+            "counters.$": 1
+          }
+        }
+      );
+      const officeId =
+        warehouseCounter.counters[0].format +
+        warehouseCounter.counters[0].value;
       const office = new Warehouse({
         id: officeId,
         title,
