@@ -6,13 +6,11 @@ import { Dialog, DialogContent } from "@mui/material";
 import StatwigHeader from "../../../shared/Header/StatwigHeader/StatwigHeader";
 import { useDispatch, useSelector } from "react-redux";
 import { getOrgAnalytics } from "../../../actions/organisationActions";
-import { useHistory } from "react-router";
 import UploadPopup from "../../../common/UploadPopup/UploadPopup";
 import { useTranslation } from "react-i18next";
 
-let useClickOutside = (handler) => {
-  let domNode = useRef();
-
+const useClickOutside = (handler) => {
+  const domNode = useRef();
   useEffect(() => {
     let maybeHandler = (event) => {
       if (!domNode.current.contains(event.target)) {
@@ -31,11 +29,6 @@ let useClickOutside = (handler) => {
 };
 
 export default function AdminOrganization(props) {
-  const history = useHistory();
-  // if (props.user.type !== "CENTRAL_AUTHORITY") {
-  //   history.push("/overview");
-  // }
-
   const [ButtonOpen, setButtonOpen] = useState(false);
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -75,51 +68,51 @@ export default function AdminOrganization(props) {
   return (
     <>
       <StatwigHeader />
-      <section className="admin-page-layout">
-        <div className="admin-container">
-          <div className="admin-organization-container admin-section-space">
-            <div className="tiles-three-column-layout">
+      <section className='admin-page-layout'>
+        <div className='admin-container'>
+          <div className='admin-organization-container admin-section-space'>
+            <div className='tiles-three-column-layout'>
               <AnalyticsCard
-                layout="type4"
-                icon="fa-building"
+                layout='type4'
+                icon='fa-building'
                 value={totalCount}
                 valueTitle={t("to_no_of_org")}
-                bgColor="analytic-bg-1"
-                textColor="analytic-text-1"
+                bgColor='analytic-bg-1'
+                textColor='analytic-text-1'
               />
               <AnalyticsCard
-                layout="type4"
-                icon="fa-building"
+                layout='type4'
+                icon='fa-building'
                 value={activeCount}
                 valueTitle={t("active_org")}
-                bgColor="analytic-bg-2"
-                textColor="analytic-text-2"
+                bgColor='analytic-bg-2'
+                textColor='analytic-text-2'
               />
               <AnalyticsCard
-                layout="type4"
-                icon="fa-building"
+                layout='type4'
+                icon='fa-building'
                 value={inactiveCount}
                 valueTitle={t("inactive_org")}
-                bgColor="analytic-bg-3"
-                textColor="analytic-text-3"
+                bgColor='analytic-bg-3'
+                textColor='analytic-text-3'
               />
             </div>
-            <div className="organization-table-container">
-              <div className="organization-table-header-area">
-                <div className="table-search-bar">
-                  <i className="fa-solid fa-magnifying-glass"></i>
-                  <input type="text" placeholder={t("search")} />
+            <div className='organization-table-container'>
+              <div className='organization-table-header-area'>
+                <div className='table-search-bar'>
+                  <i className='fa-solid fa-magnifying-glass'></i>
+                  <input type='text' placeholder={t("search")} />
                 </div>
-                <div className="table-actions-area">
+                <div className='table-actions-area'>
                   {/* <div className="table-action-icon">
                     <i className={`fa-solid fa-power-off vl-disabled`}></i>
                   </div>
                   <div className="table-action-icon">
                     <i className={`fa-solid fa-trash-can vl-disabled`}></i>
                   </div> */}
-                  <div className="table-dropdown-button" ref={domNode}>
+                  <div className='table-dropdown-button' ref={domNode}>
                     <button
-                      className="vl-btn vl-btn-alt vl-btn-primary"
+                      className='vl-btn vl-btn-alt vl-btn-primary'
                       // onClick={() => setButtonOpen(!ButtonOpen)}
                       onClick={handleClickOpen}
                     >
@@ -130,18 +123,18 @@ export default function AdminOrganization(props) {
                       className={`button-dropdown ${ButtonOpen && "active"}`}
                     >
                       <div
-                        className="btn-dropdown-card"
+                        className='btn-dropdown-card'
                         onClick={handleImportClickOpen}
                       >
-                        <i className="fa-solid fa-upload"></i>
-                        <p className="vl-note f-500">{t("import_org")}</p>
+                        <i className='fa-solid fa-upload'></i>
+                        <p className='vl-note f-500'>{t("import_org")}</p>
                       </div>
                       <div
-                        className="btn-dropdown-card"
+                        className='btn-dropdown-card'
                         onClick={() => setOpen(true)}
                       >
-                        <i className="fa-solid fa-plus"></i>
-                        <p className="vl-note f-500">{t("add_org")}</p>
+                        <i className='fa-solid fa-plus'></i>
+                        <p className='vl-note f-500'>{t("add_org")}</p>
                       </div>
                     </div>
                   </div>
@@ -177,7 +170,7 @@ export default function AdminOrganization(props) {
           <DialogContent sx={{ padding: "0rem !important" }}>
             <UploadPopup
               t={t}
-              type="org"
+              type='org'
               orgUpload={true}
               resetFlag={() => {
                 setTableFlag(!tableFlag);
