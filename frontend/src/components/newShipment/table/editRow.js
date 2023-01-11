@@ -109,38 +109,55 @@ const EditRow = (props) => {
 	const updateQuantity = () => {
 		setQuantityChecker(0);
   };
-  
-	if (
-		check === "0" &&
-		quantityChecker === 1 &&
-		typeof prod !== "undefined" &&
-		typeof prod.name !== "undefined" &&
-		typeof productsList != "undefined"
-	) {
-		let qty;
-		for (var i = 0; i < productsList?.length; i++) {
-			if (prod.name === productsList[i]?.productName) {
-				qty = String(productsList[i].quantity);
-				break;
+
+  useEffect(() => {
+		if (
+			check === "0" &&
+			quantityChecker === 1 &&
+			typeof prod !== "undefined" &&
+			typeof prod.name !== "undefined" &&
+			typeof productsList != "undefined"
+		) {
+			let qty;
+			for (var i = 0; i < productsList?.length; i++) {
+				let deductQty = 0;
+				let existingProdsInShipment = props?.product?.filter((shipmentProduct) => {
+					if (shipmentProduct.name === prod.name) return true;
+					else return false;
+				});
+				if (existingProdsInShipment && existingProdsInShipment?.length) {
+					for (let j = 0; j < existingProdsInShipment.length; ++j) {
+						if (
+							existingProdsInShipment[j].productQuantity &&
+							existingProdsInShipment[j].productQuantity !== "NaN"
+						) {
+							deductQty += parseInt(existingProdsInShipment[j].productQuantity);
+						}
+					}
+				}
+				if (prod.name === productsList[i]?.productName) {
+					qty = String(parseInt(productsList[i].quantity - deductQty));
+					break;
+				}
+			}
+			if (i < productsList.length) {
+				prod.productQuantity = qty;
+				handleQuantityChange(prod.productQuantity, index);
+				updateQuantity();
 			}
 		}
-		if (i < productsList.length) {
-			prod.productQuantity = qty;
-			handleQuantityChange(prod.productQuantity, index);
-			updateQuantity();
-		}
-	}
-
-  function spliceRepeatedProds(prod) {
+	}, [quantityChecker, prod, productsList]);
+  
+  function existsInShipment(prod) {
 		if (props?.product?.length) {
       for(let i=0; i<props.product.length; ++i) {
         let currProd = props.product[i];
         if (prod.productId === currProd.id && prod.batchNumbers[0] === currProd.batchNumber) {
-          return false;
+          return { exists: true, quantity: currProd.productQuantity };
         }
       }
 		}
-		return true;
+		return { exists: false };
 	}
 
 	async function changeBatch(batch, index) {
@@ -163,15 +180,22 @@ const EditRow = (props) => {
 			element.selected = false;
 			element.editable = false;
 			element.immutableQuantity = element.quantity;
-			console.log(element.attributeSet.expDate);
-			if (isBefore(new Date(element.attributeSet.expDate), today.getDate() + 1)) {
+			if (
+				element.attributeSet?.expDate &&
+				isBefore(new Date(element.attributeSet.expDate), today.getDate() + 1)
+			) {
 				object.splice(index, 1);
 				setExpired(expired + 1);
 			}
-    });
-    let filteredBuffer = buffer.filter(spliceRepeatedProds);
-		setBatches(filteredBuffer);
-  }
+			element.disabled = false;
+			let batchExistsInShipment = existsInShipment(element);
+			if (batchExistsInShipment.exists) {
+				element.disabled = true;
+				element.quantity = parseInt(element.quantity) - batchExistsInShipment.quantity;
+			}
+		});
+		setBatches(buffer);
+	}
   
 	const numbersOnly = (e) => {
 		// Handle paste
@@ -316,7 +340,7 @@ const EditRow = (props) => {
 							onChange={(e) => {
 								if (
 									Object.keys(selectedBatch).length === 0 ||
-									selectedBatch.quant > e.target.value
+									selectedBatch.quant >= e.target.value
 								) {
 									handleQuantityChange(e.target.value, index);
 								}
@@ -389,7 +413,13 @@ const EditRow = (props) => {
 											batches.map((product, index) => (
 												<div className="rTable pt-1">
 													<div>
-														<div className="rTableRow mb-1">
+														<div
+															className="rTableRow mb-1"
+															style={{
+																background: product.disabled ? "rgb(190, 190, 190)" : "#fff",
+																pointerEvents: product.disabled ? "none" : "auto",
+															}}
+														>
 															<input
 																className="txt2 ml-3"
 																type="checkbox"
