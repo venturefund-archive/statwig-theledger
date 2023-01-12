@@ -12,12 +12,14 @@ import TodayVaccinatedRow from "./TodayVaccinatedRow";
 import EmptyIcon from "../../../../assets/files/designs/empty-table.jpg";
 import { getVaccinationsList } from "../../../../actions/lastMileActions";
 import { formatDate } from "../../../../utils/dateHelper";
+import { useTranslation } from "react-i18next";
 
-export default function TodayVaccinatedTable({ t }) {
+export default function TodayVaccinatedTable() {
   let today = new Date();
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState();
   const [vaccinationsList, setVaccinationsList] = useState([]);
+  const { t } = useTranslation();
 
   const handleChange = (event, value) => {
     setPage(value);

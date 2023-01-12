@@ -36,7 +36,7 @@ export default function LastmileTrack(props) {
       if (vaccinationsList?.data?.success) {
         setTotalVaccinations(vaccinationsList.data.data.vaccinationsList);
         setTodaysVaccinations(
-          vaccinationsList.data.data.todaysVaccinationsList,
+          vaccinationsList.data.data.todaysVaccinationsList
         );
       }
     })();
@@ -84,18 +84,18 @@ export default function LastmileTrack(props) {
 
   return (
     <>
-      <div className='Lastmile--mainPage-layout'>
-        <div className='Lastmile--pageHeader'>
+      <div className="Lastmile--mainPage-layout">
+        <div className="Lastmile--pageHeader">
           <h1
             style={{ paddingBottom: "10px" }}
-            className='vl-heading-bdr black f-700 mi-reset'
+            className="vl-heading-bdr black f-700 mi-reset"
           >
             {t("lastmile")}
           </h1>
           {(tableView || Steps != 1) && (
-            <div className='back-link-button-space'>
+            <div className="back-link-button-space">
               <button
-                className='back-action-btn'
+                className="back-action-btn"
                 onClick={() => {
                   if (tableView) {
                     setTableView(false);
@@ -105,17 +105,17 @@ export default function LastmileTrack(props) {
                   }
                 }}
               >
-                <i className='fa-solid fa-arrow-left'></i>
+                <i className="fa-solid fa-arrow-left"></i>
                 <span>{t("back_to_batch_details")}</span>
               </button>
             </div>
           )}
         </div>
-        <div className='Lastmile--gridLayout-wrapper'>
+        <div className="Lastmile--gridLayout-wrapper">
           {tableView ? (
-            <div className='Lastmile--Interaction-space'>{tableComp}</div>
+            <div className="Lastmile--Interaction-space">{tableComp}</div>
           ) : (
-            <div className='Lastmile--Interaction-space'>
+            <div className="Lastmile--Interaction-space">
               {Steps === 1 ? (
                 <ScanBatch
                   setBatchDetails={setBatchDetails}
@@ -133,33 +133,33 @@ export default function LastmileTrack(props) {
               )}
             </div>
           )}
-          <div className='Lastmile--Analytics-space'>
+          <div className="Lastmile--Analytics-space">
             <AnalyticTiles
-              layout='1'
-              variant='1'
+              layout="1"
+              variant="1"
               title={t("total_units_utilized")}
               stat={analytics?.unitsUtilized ? analytics.unitsUtilized : 0}
-              name='unitsUtilized'
+              name="unitsUtilized"
               onClick={handleAnalyticsClicked}
             />
             <AnalyticTiles
-              layout='1'
-              variant='2'
+              layout="1"
+              variant="2"
               title={t("no_beneficiaries_vaccinated_so_far")}
               stat={
                 analytics?.totalVaccinations ? analytics.totalVaccinations : 0
               }
-              name='totalVaccinations'
+              name="totalVaccinations"
               onClick={handleAnalyticsClicked}
             />
             <AnalyticTiles
-              layout='1'
-              variant='3'
+              layout="1"
+              variant="3"
               title={t("no_beneficiaries_vaccinated_today")}
               stat={
                 analytics?.todaysVaccinations ? analytics.todaysVaccinations : 0
               }
-              name='todaysVaccinations'
+              name="todaysVaccinations"
               onClick={handleAnalyticsClicked}
             />
           </div>
