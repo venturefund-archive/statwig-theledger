@@ -2466,6 +2466,7 @@ exports.viewShipment = [
 
             const batch = await AtomModel.findOne({
               batchNumbers: element.batchNumber,
+              $or: [{currentShipment: element.id}, {currentInventory: Shipment.receiver.warehouse.warehouseInventory, status: {$ne: 'CONSUMED'}}]
             });
             element.mfgDate = batch?.attributeSet.mfgDate;
             element.expDate = batch?.attributeSet.expDate;
