@@ -2747,13 +2747,22 @@ exports.fetchBatchesOfInventory = [
       const warehouseId = wareId ? wareId : req.user.warehouseId;
       const warehouse = await WarehouseModel.findOne({ id: warehouseId });
       const inventoryId = warehouse.warehouseInventory;
-      const batches = await AtomModel.find({
-        productId: productId,
-        status: "HEALTHY",
-        currentInventory: inventoryId,
-        quantity: { $gt: 0 },
-        "attributeSet.expDate": { $gt: new Date() }
-      }).sort({ "attributeSet.expDate": 1 });
+      const payload = {
+				$and: [
+					{ productId: productId },
+					{ status: "HEALTHY" },
+					{ quantity: { $gt: 0 } },
+					{ currentInventory: inventoryId },
+					{
+						$or: [
+							{ "attributeSet.expDate": { $exists: false } },
+							{ "attributeSet.expDate": { $in: [null, ""] } },
+							{ "attributeSet.expDate": { $gt: new Date() } },
+						],
+					},
+				],
+			};
+      const batches = await AtomModel.find(payload).sort({ "attributeSet.expDate": 1 });
       return apiResponse.successResponseWithData(
         res,
         "Batches of product",
