@@ -1573,34 +1573,22 @@ exports.receiveShipment = [
                 req.user
               );
             }
-
-            const atomExists = await AtomModel.findOne({
-              batchNumbers: products[count].batchNumber,
-              productId: products[count].productId,
-              currentInventory: recvInventoryId,
-              status: { $in: ["HEALTHY", "CONSUMED", "EXPIRED"] }
-            });
-
-            if (shipmentRejectionRate > 0) {
-              // partial Receive Shipment
+            if (shipmentRejectionRate > 0) { // partial Receive Shipment
               const lostAtom = await AtomModel.findOneAndUpdate(
                 {
                   batchNumbers: products[count].batchNumber,
                   currentInventory: recvInventoryId,
                   currentShipment: shipmentID,
-                  status: "TRANSIT",
+                  status: "TRANSIT"
                 },
                 {
                   $inc: {
                     quantity: -parseInt(products[count].productQuantity),
                   },
-                  $set: {
-                    status: "LOST",
-                  },
                 },
                 {
-                  new: true,
-                },
+                  new: true
+                }
               );
 
               const newAtom = new AtomModel({
@@ -1623,81 +1611,27 @@ exports.receiveShipment = [
                 eolInfo: lostAtom?.eolInfo,
                 comments: lostAtom?.comments,
               });
-
-              if (atomExists) {
-                newAtom.status = "MERGED";
-                const shipmentIds = newAtom?.shipmentIds || [];
-                await AtomModel.findOneAndUpdate(
-                  { id: atomExists.id },
-                  {
-                    $inc: {
-                      quantity: parseInt(products[count].productQuantity),
-                    },
-                    $set: {
-                      currentShipment: null,
-                      status: atomExists.status === "EXPIRED" ? "EXPIRED" : "HEALTHY",
-                    },
-                    $addToSet: {
-                      shipmentIds: { $each: shipmentIds },
-                    },
-                  },
-                );
-              }
-
               await newAtom.save();
-            } else {
-              // Complete receive shipment
-              if (atomExists) {
-                const newAtom = await AtomModel.updateOne(
-                  {
-                    batchNumbers: products[count].batchNumber,
-                    currentInventory: recvInventoryId,
-                    quantity: products[count].productQuantity,
-                    currentShipment: shipmentID,
-                    status: "TRANSIT",
+            }
+            else {  // Complete receive shipment
+              await AtomModel.updateOne(
+                {
+                  batchNumbers: products[count].batchNumber,
+                  currentInventory: recvInventoryId,
+                  quantity: products[count].productQuantity,
+                  currentShipment: shipmentID,
+                  status: "TRANSIT"
+                },
+                {
+                  $addToSet: {
+                    inventoryIds: recvInventoryId,
                   },
-                  {
-                    $set: {
-                      status: "MERGED",
-                    },
+                  $set: {
+                    status: "HEALTHY",
+                    currentShipment: null,
                   },
-                );
-                const shipmentIds = newAtom?.shipmentIds || [];
-                await AtomModel.findOneAndUpdate(
-                  { id: atomExists.id },
-                  {
-                    $inc: {
-                      quantity: parseInt(products[count].productQuantity),
-                    },
-                    $set: {
-                      currentShipment: null,
-                      status: atomExists.status === "EXPIRED" ? "EXPIRED" : "HEALTHY",
-                    },
-                    $addToSet: {
-                      shipmentIds: { $each: shipmentIds },
-                    },
-                  },
-                );
-              } else {
-                await AtomModel.updateOne(
-                  {
-                    batchNumbers: products[count].batchNumber,
-                    currentInventory: recvInventoryId,
-                    quantity: products[count].productQuantity,
-                    currentShipment: shipmentID,
-                    status: "TRANSIT",
-                  },
-                  {
-                    $addToSet: {
-                      inventoryIds: recvInventoryId,
-                    },
-                    $set: {
-                      status: "HEALTHY",
-                      currentShipment: null,
-                    },
-                  },
-                );
-              }
+                }
+              );
             }
           }
           let Upload = null;
