@@ -29,6 +29,7 @@ function Product(props) {
 								type="button"
 								style={{ width: "3vw", height: "4vh", fontSize: "12px" }}
 								onClick={() => {
+									let updatedList;
 									setDeliveredProduct(productQuantity);
 									if (productQuantity <= product.productQuantity) {
 										setError(false);
@@ -40,7 +41,7 @@ function Product(props) {
 										props.onQuantityChange(index, productQuantity);
 										setError(true);
                   }
-                  let updatedList = updateList(-1, deliveredProduct);
+                  updatedList = updateList(index, deliveredProduct);
 									props.setDelivered(updatedList);
 									props.setIndex(index);
 								}}

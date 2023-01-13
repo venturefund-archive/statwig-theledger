@@ -10,35 +10,44 @@ import { TablePagination } from "@mui/material";
 import UsersRow from "./UsersRow";
 import { getOrgUsers } from "../../../../actions/organisationActions";
 import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react";
 
 export default function UsersTable(props) {
   const dispatch = useDispatch();
-  const { defaultRoles, t } = props;
+  const { defaultRoles, t, refetch } = props;
 
-  // useEffect(() => {
-  //   dispatch(getOrgUsers());
-  // }, [dispatch]);
-  const { users } = useSelector((state) => state.organisationReducer);
+  const [users, setUsers] = useState([]);
+  const [uniqueUsers, setUniqueUsers] = useState([]);
+  // const { users } = useSelector((state) => state.organisationReducer);
 
   const uniqueIds = new Set();
 
-  const uniqueUsers = users.filter(element => {
-    const isDuplicate = uniqueIds.has(element.id);
+  useEffect(() => {
+    const filteredUsers = users?.filter(element => {
+      const isDuplicate = uniqueIds.has(element.id);
+  
+      uniqueIds.add(element.id);
+  
+      if (!isDuplicate) {
+        return true;
+      }
+  
+      return false;
+    });
+    if(filteredUsers?.length) setUniqueUsers([...filteredUsers]);
+    else setUniqueUsers([]);
+  }, [users])
 
-    uniqueIds.add(element.id);
-
-    if (!isDuplicate) {
-      return true;
-    }
-
-    return false;
-  });
 
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
-  useEffect(() => {
-    dispatch(getOrgUsers(`skip=${page * 10}&limit=${rowsPerPage}`));
-  }, [dispatch, page, rowsPerPage, props.tableFlag]);
+
+  useEffect(async () => {
+    console.log("Triggered!");
+    let res = await dispatch(getOrgUsers(`skip=${page * 10}&limit=${rowsPerPage}`));
+    setUsers(res);    
+  }, [dispatch, page, rowsPerPage, props.tableFlag, refetch]);
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };

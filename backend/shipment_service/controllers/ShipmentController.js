@@ -802,20 +802,22 @@ exports.createShipment = [
             });
             if (currentAtom.quantity == products[count].productQuantity) {
               await AtomModel.updateOne(
-                {
-                  batchNumbers: products[count].batchNumber,
-                  currentInventory: suppInventoryId,
-                },
-                {
-                  $set: {
-                    currentInventory: recvInventoryId,
-                    status: "TRANSIT",
-                    poIds: [...currentAtom.poIds, data?.poId],
-                    shipmentIds: [...currentAtom.shipmentIds, shipmentId],
-                    currentShipment: shipmentId,
-                  },
-                }
-              );
+								{
+									batchNumbers: products[count].batchNumber,
+									currentInventory: suppInventoryId,
+								},
+								{
+									$set: {
+										currentInventory: recvInventoryId,
+										status: "TRANSIT",
+										poIds: [...currentAtom.poIds, data?.poId],
+										currentShipment: shipmentId,
+									},
+									$addToSet: {
+										shipmentIds: shipmentId,
+									},
+								},
+							);
             } else {
               await AtomModel.updateOne(
                 {
@@ -4630,11 +4632,6 @@ exports.exportOutboundShipments = [
 function buildExcelReport(req, res, dataForExcel, type) {
   const styles = {
     headerDark: {
-      fill: {
-        fgColor: {
-          rgb: "FF000000",
-        },
-      },
       font: {
         color: {
           rgb: "FFFFFFFF",
@@ -4644,128 +4641,102 @@ function buildExcelReport(req, res, dataForExcel, type) {
         underline: true,
       },
     },
-    cellGreen: {
-      fill: {
-        fgColor: {
-          rgb: "FF00FF00",
-        },
-      },
-    },
   };
 
   const specification = {
     id: {
       displayName: req.t("Shipment_ID"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 120,
     },
     poId: {
       displayName: req.t("Reference_Order_ID"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: "10",
     },
     productCategory: {
       displayName: req.t("Product_Category"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     productName: {
       displayName: req.t("Product_Name"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     productID: {
       displayName: req.t("Product_ID"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     productQuantity: {
       displayName: req.t("Quantity"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     batchNumber: {
       displayName: req.t("Batch_Number"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     expiryDate: {
       displayName: req.t("Expiry_Date"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     manufacturer: {
       displayName: req.t("Manufacturer"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     supplierOrgName: {
       displayName: req.t("From_Organization_Name"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     supplierOrgId: {
       displayName: req.t("From_Organization_ID"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     supplierOrgLocation: {
       displayName: req.t("From_Organization_Location_Details"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     recieverOrgName: {
       displayName: req.t("Delivery_Organization_Name"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     recieverOrgId: {
       displayName: req.t("Delivery_Organization_ID"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     recieverOrgLocation: {
       displayName: req.t("Delivery_Organization_Location_Details"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     airWayBillNo: {
       displayName: req.t("Transit_Number"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     label: {
       displayName: req.t("Label_Code"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     shippingDate: {
       displayName: req.t("Shipment_Date"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     expectedDeliveryDate: {
       displayName: req.t("Shipment_Estimate_Date"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
   };

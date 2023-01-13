@@ -13,7 +13,6 @@ import { useSelector } from "react-redux";
 export default function ProductTable(props) {
   const { user } = useSelector((state) => state);
   const { t } = props;
-  console.log(user.organisationId);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [products, setProducts] = useState([]);
@@ -25,7 +24,6 @@ export default function ProductTable(props) {
           // ||user.organisationId
         }&skip=${page * 10}&limit=${rowsPerPage}`
       );
-      console.log("Products : ", products);
       setProducts(products);
     }
     fetchProducts();
