@@ -1389,7 +1389,7 @@ exports.receiveShipment = [
       if ((permission && locationMatch) == true) {
         const data = req.body;
         const shipmentID = data.id;
-        const shipmentInfo = await ShipmentModel.find({ id: shipmentID });
+        const shipmentInfo = await ShipmentModel.findOne({ id: shipmentID });
         const email = req.user.emailId;
         const user_id = req.user.id;
         const empData = await EmployeeModel.findOne({
@@ -1423,15 +1423,16 @@ exports.receiveShipment = [
 
         let actuallyShippedQuantity = 0;
         let productNumber = -1;
-        if (shipmentInfo != null) {
-          const shipmentProducts = shipmentInfo[0].products;
+        if (shipmentInfo) {
+          const shipmentProducts = shipmentInfo.products;
           for (const product of shipmentProducts) {
+            const combinedShipmentProduct = shipmentProducts.filter(ele => ele.productID === product.productID && (ele?.batchNumber == product?.batchNumber))
             productNumber = productNumber + 1;
             for (const receivedProduct of receivedProducts) {
               if (product.productID === receivedProduct.productID && (product?.batchNumber == receivedProduct?.batchNumber || !product?.batchNumber)) {
-                actuallyShippedQuantity = product.productQuantity;
-                const receivedQuantity = receivedProduct.productQuantity;
-
+                const combinedReceivedProduct = receivedProducts.filter(ele => ele.productID === product.productID && (ele?.batchNumber == product?.batchNumber))
+                actuallyShippedQuantity = combinedShipmentProduct.reduce((a, curr) => a + curr["productQuantity"], 0);
+                const receivedQuantity = combinedReceivedProduct.reduce((a, curr) => a + curr["productQuantity"], 0);
                 if (receivedQuantity > actuallyShippedQuantity)
                   throw new Error(
                     responses(req.user.preferredLanguage).rec_quantity_error
@@ -1543,7 +1544,7 @@ exports.receiveShipment = [
           var totalReturns = 0;
           var shipmentRejectionRate = 0;
           for (count = 0; count < products.length; count++) {
-            var shipmentProducts = shipmentInfo[0].products;
+            var shipmentProducts = shipmentInfo.products;
             totalProducts =
               totalProducts + shipmentProducts[count].productQuantity;
             totalReturns = totalReturns + products[count].productQuantity;
@@ -1578,127 +1579,127 @@ exports.receiveShipment = [
               batchNumbers: products[count].batchNumber,
               productId: products[count].productId,
               currentInventory: recvInventoryId,
-              status: {$in: ["HEALTHY", "CONSUMED", "EXPIRED"]}
+              status: { $in: ["HEALTHY", "CONSUMED", "EXPIRED"] }
             });
 
             if (shipmentRejectionRate > 0) {
-							// partial Receive Shipment
-							const lostAtom = await AtomModel.findOneAndUpdate(
-								{
-									batchNumbers: products[count].batchNumber,
-									currentInventory: recvInventoryId,
-									currentShipment: shipmentID,
-									status: "TRANSIT",
-								},
-								{
-									$inc: {
-										quantity: -parseInt(products[count].productQuantity),
-									},
-									$set: {
-										status: "LOST",
-									},
-								},
-								{
-									new: true,
-								},
-							);
+              // partial Receive Shipment
+              const lostAtom = await AtomModel.findOneAndUpdate(
+                {
+                  batchNumbers: products[count].batchNumber,
+                  currentInventory: recvInventoryId,
+                  currentShipment: shipmentID,
+                  status: "TRANSIT",
+                },
+                {
+                  $inc: {
+                    quantity: -parseInt(products[count].productQuantity),
+                  },
+                  $set: {
+                    status: "LOST",
+                  },
+                },
+                {
+                  new: true,
+                },
+              );
 
-							const newAtom = new AtomModel({
-								id: cuid(),
-								label: {
-									labelId: "QR_2D",
-									labelType: "3232",
-								},
-								quantity: parseInt(products[count].productQuantity),
-								productId: lostAtom?.productId,
-								inventoryIds: lostAtom?.inventoryIds,
-								currentInventory: recvInventoryId,
-								poIds: lostAtom?.poIds || [],
-								shipmentIds: lostAtom?.shipmentIds || [],
-								currentShipment: null,
-								batchNumbers: lostAtom?.batchNumbers,
-								txIds: lostAtom?.txIds,
-								status: "HEALTHY",
-								attributeSet: lostAtom?.attributeSet,
-								eolInfo: lostAtom?.eolInfo,
-								comments: lostAtom?.comments,
-							});
+              const newAtom = new AtomModel({
+                id: cuid(),
+                label: {
+                  labelId: "QR_2D",
+                  labelType: "3232",
+                },
+                quantity: parseInt(products[count].productQuantity),
+                productId: lostAtom?.productId,
+                inventoryIds: lostAtom?.inventoryIds,
+                currentInventory: recvInventoryId,
+                poIds: lostAtom?.poIds || [],
+                shipmentIds: lostAtom?.shipmentIds || [],
+                currentShipment: null,
+                batchNumbers: lostAtom?.batchNumbers,
+                txIds: lostAtom?.txIds,
+                status: "HEALTHY",
+                attributeSet: lostAtom?.attributeSet,
+                eolInfo: lostAtom?.eolInfo,
+                comments: lostAtom?.comments,
+              });
 
-							if (atomExists) {
-								newAtom.status = "MERGED";
-								const shipmentIds = newAtom?.shipmentIds || [];
-								await AtomModel.findOneAndUpdate(
-									{ id: atomExists.id },
-									{
-										$inc: {
-											quantity: parseInt(products[count].productQuantity),
-										},
-										$set: {
-											currentShipment: null,
-											status: atomExists.status === "EXPIRED" ? "EXPIRED" : "HEALTHY",
-										},
-										$addToSet: {
-											shipmentIds: { $each: shipmentIds },
-										},
-									},
-								);
-							}
-
-							await newAtom.save();
-						} else {
-							// Complete receive shipment
-							if (atomExists) {
-								const newAtom = await AtomModel.updateOne(
-									{
-										batchNumbers: products[count].batchNumber,
-										currentInventory: recvInventoryId,
-										quantity: products[count].productQuantity,
-										currentShipment: shipmentID,
-										status: "TRANSIT",
-									},
-									{
-										$set: {
-											status: "MERGED",
-										},
-									},
-								);
+              if (atomExists) {
+                newAtom.status = "MERGED";
                 const shipmentIds = newAtom?.shipmentIds || [];
-								await AtomModel.findOneAndUpdate(
-									{ id: atomExists.id },
-									{
-										$inc: {
-											quantity: parseInt(products[count].productQuantity),
-										},
-										$set: {
-											currentShipment: null,
-											status: atomExists.status === "EXPIRED" ? "EXPIRED" : "HEALTHY",
-										},
-										$addToSet: {
-											shipmentIds: { $each: shipmentIds },
-										},
-									},
-								);
-							} else {
-								await AtomModel.updateOne(
-									{
-										batchNumbers: products[count].batchNumber,
-										currentInventory: recvInventoryId,
-										quantity: products[count].productQuantity,
-										currentShipment: shipmentID,
-										status: "TRANSIT",
-									},
-									{
-										$addToSet: {
-											inventoryIds: recvInventoryId,
-										},
-										$set: {
-											status: "HEALTHY",
-											currentShipment: null,
-										},
-									},
-								);
-							}
-						}
+                await AtomModel.findOneAndUpdate(
+                  { id: atomExists.id },
+                  {
+                    $inc: {
+                      quantity: parseInt(products[count].productQuantity),
+                    },
+                    $set: {
+                      currentShipment: null,
+                      status: atomExists.status === "EXPIRED" ? "EXPIRED" : "HEALTHY",
+                    },
+                    $addToSet: {
+                      shipmentIds: { $each: shipmentIds },
+                    },
+                  },
+                );
+              }
+
+              await newAtom.save();
+            } else {
+              // Complete receive shipment
+              if (atomExists) {
+                const newAtom = await AtomModel.updateOne(
+                  {
+                    batchNumbers: products[count].batchNumber,
+                    currentInventory: recvInventoryId,
+                    quantity: products[count].productQuantity,
+                    currentShipment: shipmentID,
+                    status: "TRANSIT",
+                  },
+                  {
+                    $set: {
+                      status: "MERGED",
+                    },
+                  },
+                );
+                const shipmentIds = newAtom?.shipmentIds || [];
+                await AtomModel.findOneAndUpdate(
+                  { id: atomExists.id },
+                  {
+                    $inc: {
+                      quantity: parseInt(products[count].productQuantity),
+                    },
+                    $set: {
+                      currentShipment: null,
+                      status: atomExists.status === "EXPIRED" ? "EXPIRED" : "HEALTHY",
+                    },
+                    $addToSet: {
+                      shipmentIds: { $each: shipmentIds },
+                    },
+                  },
+                );
+              } else {
+                await AtomModel.updateOne(
+                  {
+                    batchNumbers: products[count].batchNumber,
+                    currentInventory: recvInventoryId,
+                    quantity: products[count].productQuantity,
+                    currentShipment: shipmentID,
+                    status: "TRANSIT",
+                  },
+                  {
+                    $addToSet: {
+                      inventoryIds: recvInventoryId,
+                    },
+                    $set: {
+                      status: "HEALTHY",
+                      currentShipment: null,
+                    },
+                  },
+                );
+              }
+            }
           }
           let Upload = null;
           if (req.file) {
@@ -2500,7 +2501,7 @@ exports.viewShipment = [
 
             const batch = await AtomModel.findOne({
               batchNumbers: element.batchNumber,
-              $or: [{currentShipment: element.id}, {currentInventory: Shipment.receiver.warehouse.warehouseInventory, status: {$ne: 'CONSUMED'}}]
+              $or: [{ currentShipment: element.id }, { currentInventory: Shipment.receiver.warehouse.warehouseInventory, status: { $ne: 'CONSUMED' } }]
             });
             element.mfgDate = batch?.attributeSet.mfgDate;
             element.expDate = batch?.attributeSet.expDate;
@@ -4408,12 +4409,12 @@ exports.exportInboundShipments = [
         let rowData;
         for (const row of inboundShipmentsRes) {
           for (const product of row.products) {
-						let receiverAtom = await AtomModel.findOne({
-						  batchNumbers: product.batchNumber,
-						  currentInventory: row.receiver.warehouse.warehouseInventory,
-						  currentShipment: row.id,
-						  status: "TRANSIT",
-						});
+            const receiverAtom = await AtomModel.findOne({
+              batchNumbers: product.batchNumber,
+              currentInventory: row.receiver.warehouse.warehouseInventory,
+              currentShipment: row.id,
+              status: "TRANSIT",
+            });
             rowData = {
               id: row.id,
               poId: row.poId,
@@ -4433,7 +4434,7 @@ exports.exportInboundShipments = [
               label: row?.label?.labelId,
               shippingDate: new Date(row.shippingDate),
               expectedDeliveryDate: row.expectedDeliveryDate ? new Date(row.expectedDeliveryDate) : "N/A",
-							expiryDate: receiverAtom.attributeSet?.expDate,
+              expiryDate: receiverAtom.attributeSet?.expDate,
             };
             data.push(rowData);
           }
@@ -4548,74 +4549,74 @@ exports.exportOutboundShipments = [
       }
 
       try {
-				let outboundShipmentsCount = await ShipmentModel.count(whereQuery);
+        let outboundShipmentsCount = await ShipmentModel.count(whereQuery);
         let outboundShipmentsList = await ShipmentModel.find(whereQuery).sort({ createdAt: -1 });
 
-				let outboundShipmentsRes = [];
-				for (let i = 0; i < outboundShipmentsCount; ++i) {
-					// let outboundShipment = outboundShipmentsList[i];
+        let outboundShipmentsRes = [];
+        for (let i = 0; i < outboundShipmentsCount; ++i) {
+          // let outboundShipment = outboundShipmentsList[i];
           let outboundShipmentData = outboundShipmentsList[i];
-					let supplierOrganisation = await OrganisationModel.findOne({
-						id: outboundShipmentData.supplier.id,
-					});
-					let supplierWarehouse = await WarehouseModel.findOne({
-						id: outboundShipmentData.supplier.locationId,
-					});
-					let receiverOrganisation = await OrganisationModel.findOne({
-						id: outboundShipmentData.receiver.id,
-					});
-					let receiverWarehouse = await WarehouseModel.findOne({
-						id: outboundShipmentData.receiver.locationId,
-					});
-					outboundShipmentData.supplier[`org`] = supplierOrganisation;
-					outboundShipmentData.supplier[`warehouse`] = supplierWarehouse;
-					outboundShipmentData.receiver[`org`] = receiverOrganisation;
-					outboundShipmentData.receiver[`warehouse`] = receiverWarehouse;
-					outboundShipmentsRes.push(outboundShipmentData);
-				}
+          let supplierOrganisation = await OrganisationModel.findOne({
+            id: outboundShipmentData.supplier.id,
+          });
+          let supplierWarehouse = await WarehouseModel.findOne({
+            id: outboundShipmentData.supplier.locationId,
+          });
+          let receiverOrganisation = await OrganisationModel.findOne({
+            id: outboundShipmentData.receiver.id,
+          });
+          let receiverWarehouse = await WarehouseModel.findOne({
+            id: outboundShipmentData.receiver.locationId,
+          });
+          outboundShipmentData.supplier[`org`] = supplierOrganisation;
+          outboundShipmentData.supplier[`warehouse`] = supplierWarehouse;
+          outboundShipmentData.receiver[`org`] = receiverOrganisation;
+          outboundShipmentData.receiver[`warehouse`] = receiverWarehouse;
+          outboundShipmentsRes.push(outboundShipmentData);
+        }
 
-				let data = [];
-				let rowData;
-				for (const row of outboundShipmentsRes) {
-					for (const product of row.products) {
-						let receiverAtom = await AtomModel.findOne({
-						  batchNumbers: product.batchNumber,
-						  currentInventory: row.receiver.warehouse.warehouseInventory,
-						  currentShipment: row.id,
-						  status: "TRANSIT",
-						});
+        let data = [];
+        let rowData;
+        for (const row of outboundShipmentsRes) {
+          for (const product of row.products) {
+            let receiverAtom = await AtomModel.findOne({
+              batchNumbers: product.batchNumber,
+              currentInventory: row.receiver.warehouse.warehouseInventory,
+              currentShipment: row.id,
+              status: "TRANSIT",
+            });
 
-						rowData = {
-							id: row.id,
-							poId: row.poId,
-							productCategory: product.productCategory,
-							productName: product.productName,
-							productID: product.productID,
-							productQuantity: product.productQuantity + " " + product?.unitofMeasure?.name,
-							batchNumber: product.batchNumber,
-							manufacturer: product.manufacturer,
-							supplierOrgName: row?.supplier?.org?.name,
-							supplierOrgId: row?.supplier?.org?.id,
-							supplierOrgLocation: row?.supplier?.locationId,
-							recieverOrgName: row?.receiver?.org?.name,
-							recieverOrgId: row?.receiver?.org?.id,
-							recieverOrgLocation: row?.receiver?.locationId,
-							airWayBillNo: row.airWayBillNo,
-							label: row?.label?.labelId,
-							shippingDate: row.shippingDate,
-							expectedDeliveryDate: row.expectedDeliveryDate || "unknown",
-							expiryDate: receiverAtom.attributeSet?.expDate,
-						};
-						data.push(rowData);
-					}
-				}
-				if (req.query.type == "pdf") {
-					res = buildPdfReport(req, res, data, "Outbound");
-				} else {
-					res = buildExcelReport(req, res, data, "Outbound");
-					return apiResponse.successResponseWithMultipleData(res, "Outbound Shipment Records");
-				}
-			} catch (err) {
+            rowData = {
+              id: row.id,
+              poId: row.poId,
+              productCategory: product.productCategory,
+              productName: product.productName,
+              productID: product.productID,
+              productQuantity: product.productQuantity + " " + product?.unitofMeasure?.name,
+              batchNumber: product.batchNumber,
+              manufacturer: product.manufacturer,
+              supplierOrgName: row?.supplier?.org?.name,
+              supplierOrgId: row?.supplier?.org?.id,
+              supplierOrgLocation: row?.supplier?.locationId,
+              recieverOrgName: row?.receiver?.org?.name,
+              recieverOrgId: row?.receiver?.org?.id,
+              recieverOrgLocation: row?.receiver?.locationId,
+              airWayBillNo: row.airWayBillNo,
+              label: row?.label?.labelId,
+              shippingDate: row.shippingDate,
+              expectedDeliveryDate: row.expectedDeliveryDate || "unknown",
+              expiryDate: receiverAtom.attributeSet?.expDate,
+            };
+            data.push(rowData);
+          }
+        }
+        if (req.query.type == "pdf") {
+          res = buildPdfReport(req, res, data, "Outbound");
+        } else {
+          res = buildExcelReport(req, res, data, "Outbound");
+          return apiResponse.successResponseWithMultipleData(res, "Outbound Shipment Records");
+        }
+      } catch (err) {
         console.log(err);
         return apiResponse.ErrorResponse(res, err.message);
       }
