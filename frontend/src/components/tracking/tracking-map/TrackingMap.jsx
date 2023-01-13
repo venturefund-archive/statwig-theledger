@@ -238,7 +238,7 @@ export default function TrackingMap({ LocationTab, trackingData, t }) {
                         {product?.productName}
                       </p>
                       <p className="mi-body-sm f-500 mi-reset">
-                        {`${product?.productQuantity} ( ${product?.productInfo?.unitofMeasure?.name} )`}
+                        {`${product?.productQuantity || product?.productQuantityDelivered} ( ${product?.productInfo?.unitofMeasure?.name} )`}
                       </p>
                     </div>
                   ))}

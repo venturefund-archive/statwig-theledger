@@ -189,7 +189,6 @@ export default function Filterbar(props) {
 							options={cities}
 							value={typeof city === "string" ? cities.find((cty) => cty === city) : city || null}
 							onChange={(event, value) => setCity(value)}
-							value={city}
 							renderInput={(params) => <TextField {...params} label={t("city")} />}
 						/>
 					</div>

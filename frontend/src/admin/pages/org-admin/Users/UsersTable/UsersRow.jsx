@@ -18,8 +18,6 @@ export default function UsersRow({ rows, defaultRoles, t }) {
   const [userRole, setUserRole] = useState(rows.role);
   const [AccStatus, setAccStatus] = useState(rows.accountStatus);
 
-  console.log(rows);
-
   const handleRoleChange = (event, value) => {
     setUserRole(value);
   };

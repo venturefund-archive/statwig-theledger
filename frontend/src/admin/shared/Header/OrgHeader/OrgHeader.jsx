@@ -44,8 +44,6 @@ export default function OrgHeader() {
 
   const user = useSelector((state) => state.user);
 
-  console.log(user);
-
   const [name, setName] = useState("");
   const [orgName, setOrgName] = useState("");
   const [image, setImage] = useState("");

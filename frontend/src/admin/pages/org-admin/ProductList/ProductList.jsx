@@ -33,6 +33,8 @@ export default function AdminProductList(props) {
   const [openSuccessPopup, setOpenSuccessPopup] = useState(false);
   const [openFailurePopup, setOpenFailurePopup] = useState(false);
 
+  const [lastManufacturerValue, setLastManufacturerValue] = useState("");
+
   const { orgAnalytics } = useSelector((state) => state.organisationReducer);
   const { totalCount, activeCount, inactiveCount } = orgAnalytics;
 
@@ -118,206 +120,198 @@ export default function AdminProductList(props) {
   };
 
   return (
-    <>
-      <OrgHeader />
-      <section className="admin-page-layout">
-        <div className="admin-container">
-          <div className="admin-organization-container admin-section-space">
-            <div className="tiles-three-column-layout">
-              <AnalyticsCard
-                layout="type4"
-                icon="fa-building"
-                value={totalCount}
-                valueTitle={t("to_no_of_org")}
-                bgColor="analytic-bg-1"
-                textColor="analytic-text-1"
-              />
-              <AnalyticsCard
-                layout="type4"
-                icon="fa-building"
-                value={activeCount}
-                valueTitle={t("active_org")}
-                bgColor="analytic-bg-2"
-                textColor="analytic-text-2"
-              />
-              <AnalyticsCard
-                layout="type4"
-                icon="fa-building"
-                value={inactiveCount}
-                valueTitle={t("inactive_org")}
-                bgColor="analytic-bg-3"
-                textColor="analytic-text-3"
-              />
-            </div>
-            <div className="product-list-two-column">
-              <ProductTable t={t} productAdded={openSuccessPopup} />
-              <div className="add-product-container">
-                <form onSubmit={handleSubmit(addProduct)}>
-                  <div className="add-product-card">
-                    <Controller
-                      name="productCategory"
-                      control={control}
-                      rules={{ required: true }}
-                      render={({ field }) => (
-                        <Autocomplete
-                          fullWidth
-                          freeSolo={true}
-                          options={categories}
-                          {...field}
-                          value={
-                            typeof field.value === "string"
-                              ? categories.find((cat) => cat === field.value)
-                              : field.value || null
-                          }
-                          onChange={(event, value) => {
-                            field.onChange(value);
-                          }}
-                          filterOptions={(options, params) => {
-                            const filtered = filter(options, params);
-                            const { inputValue } = params;
-                            const isExisting = options.some(
-                              (option) => inputValue === option
-                            );
-                            if (inputValue !== "" || !isExisting) {
-                              filtered.push(inputValue);
-                            }
-                            return filtered;
-                          }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              label={t("product_category")}
-                              error={Boolean(errors.productCategory)}
-                              helperText={
-                                errors.productCategory &&
-                                `${t("product_category")} ${t("is_required")}!`
-                              }
-                            />
-                          )}
-                        />
-                      )}
-                    />
-                    <Controller
-                      name="productName"
-                      control={control}
-                      rules={{ required: true }}
-                      render={({ field }) => (
-                        <TextField
-                          fullWidth
-                          variant="outlined"
-                          label={t("product_name")}
-                          {...field}
-                          value={field.value ? field.value : ""}
-                          error={Boolean(errors.productName)}
-                          helperText={
-                            errors.productName?.type === "required"
-                              ? `${t("product_name")} ${t("is_required")}!`
-                              : errors.productName?.message
-                          }
-                        />
-                      )}
-                    />
-                    <Controller
-                      name="manufacturer"
-                      control={control}
-                      rules={{ required: true }}
-                      render={({ field }) => (
-                        <Autocomplete
-                          fullWidth
-                          freeSolo={true}
-                          options={manufacturers}
-                          {...field}
-                          value={
-                            typeof field.value === "string"
-                              ? manufacturers.find(
-                                  (manufacturer) => manufacturer === field.value
-                                )
-                              : field.value || null
-                          }
-                          onChange={(event, value) => {
-                            field.onChange(value);
-                          }}
-                          filterOptions={(options, params) => {
-                            const filtered = filter(options, params);
-                            const { inputValue } = params;
-                            const isExisting = options.some(
-                              (option) => inputValue === option
-                            );
-                            if (inputValue !== "" || !isExisting) {
-                              filtered.push(inputValue);
-                            }
-                            return filtered;
-                          }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              label={t("manufacturer")}
-                              error={Boolean(errors.manufacturer)}
-                              helperText={
-                                errors.manufacturer &&
-                                `${t("manufacturer")} ${t("is_required")}!`
-                              }
-                            />
-                          )}
-                        />
-                      )}
-                    />
-                    <Controller
-                      name="unitOfMeasure"
-                      control={control}
-                      rules={{ required: true }}
-                      render={({ field }) => (
-                        <TextField
-                          fullWidth
-                          variant="outlined"
-                          label={t("unit_of_measure")}
-                          {...field}
-                          value={field.value ? field.value : ""}
-                          error={Boolean(errors.unitOfMeasure)}
-                          helperText={
-                            errors.unitOfMeasure &&
-                            `${t("unit_of_measure")} ${t("is_required")}!`
-                          }
-                        />
-                      )}
-                    />
-                    <button
-                      type="submit"
-                      className="vl-btn vl-btn-md vl-btn-full vl-btn-primary"
-                    >
-                      {t("add_new_product")}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      {openSuccessPopup && (
-        <Modal
-          close={() => closeModal()}
-          size="modal-sm" //for other size's use `modal-lg, modal-md, modal-sm`
-        >
-          <SuccessPopup
-            onHide={closeModal}
-            successMessage="Product added succesfully"
-            // errorMessage="Put the Error Message Here"
-          />
-        </Modal>
-      )}
-      {openFailurePopup && (
-        <Modal
-          close={() => closeModal()}
-          size="modal-sm" //for other size's use `modal-lg, modal-md, modal-sm`
-        >
-          <SuccessPopup
-            onHide={closeModal}
-            // successMessage="Product added succesfully"
-            errorMessage="Unable to Add product, please try again"
-          />
-        </Modal>
-      )}
-    </>
-  );
+		<>
+			<OrgHeader />
+			<section className="admin-page-layout">
+				<div className="admin-container">
+					<div className="admin-organization-container admin-section-space">
+						<div className="tiles-three-column-layout">
+							<AnalyticsCard
+								layout="type4"
+								icon="fa-building"
+								value={totalCount}
+								valueTitle={t("to_no_of_org")}
+								bgColor="analytic-bg-1"
+								textColor="analytic-text-1"
+							/>
+							<AnalyticsCard
+								layout="type4"
+								icon="fa-building"
+								value={activeCount}
+								valueTitle={t("active_org")}
+								bgColor="analytic-bg-2"
+								textColor="analytic-text-2"
+							/>
+							<AnalyticsCard
+								layout="type4"
+								icon="fa-building"
+								value={inactiveCount}
+								valueTitle={t("inactive_org")}
+								bgColor="analytic-bg-3"
+								textColor="analytic-text-3"
+							/>
+						</div>
+						<div className="product-list-two-column">
+							<ProductTable t={t} productAdded={openSuccessPopup} />
+							<div className="add-product-container">
+								<form onSubmit={handleSubmit(addProduct)}>
+									<div className="add-product-card">
+										<Controller
+											name="productCategory"
+											control={control}
+											rules={{ required: true }}
+											render={({ field }) => (
+												<Autocomplete
+													fullWidth
+													freeSolo={true}
+													options={categories}
+													{...field}
+													value={
+														typeof field.value === "string"
+															? categories.find((cat) => cat === field.value)
+															: field.value || null
+													}
+													onChange={(event, value) => {
+														field.onChange(value);
+													}}
+													filterOptions={(options, params) => {
+														const filtered = filter(options, params);
+														const { inputValue } = params;
+														const isExisting = options.some((option) => inputValue === option);
+														if (inputValue !== "" || !isExisting) {
+															filtered.push(inputValue);
+														}
+														return filtered;
+													}}
+													renderInput={(params) => (
+														<TextField
+															{...params}
+															label={t("product_category")}
+															error={Boolean(errors.productCategory)}
+															helperText={
+																errors.productCategory &&
+																`${t("product_category")} ${t("is_required")}!`
+															}
+														/>
+													)}
+												/>
+											)}
+										/>
+										<Controller
+											name="productName"
+											control={control}
+											rules={{ required: true }}
+											render={({ field }) => (
+												<TextField
+													fullWidth
+													variant="outlined"
+													label={t("product_name")}
+													{...field}
+													value={field.value ? field.value : ""}
+													error={Boolean(errors.productName)}
+													helperText={
+														errors.productName?.type === "required"
+															? `${t("product_name")} ${t("is_required")}!`
+															: errors.productName?.message
+													}
+												/>
+											)}
+										/>
+										<Controller
+											name="manufacturer"
+											control={control}
+											rules={{ required: true }}
+											render={({ field }) => (
+												<Autocomplete
+													fullWidth
+													freeSolo={true}
+													options={manufacturers}
+													{...field}
+													value={
+														typeof field.value === "string"
+															? field.value === lastManufacturerValue
+																? field.value
+																: manufacturers.find((manufacturer) => manufacturer === field.value)
+															: field.value || null
+													}
+													onChange={(event, value) => {
+														field.onChange(value);
+														setLastManufacturerValue(value);
+													}}
+													filterOptions={(options, params) => {
+														const filtered = filter(options, params);
+														const { inputValue } = params;
+														const isExisting = options.some((option) => inputValue === option);
+														if (inputValue !== "" || !isExisting) {
+															filtered.push(inputValue);
+														}
+														return filtered;
+													}}
+													renderInput={(params) => (
+														<TextField
+															{...params}
+															label={t("manufacturer")}
+															error={Boolean(errors.manufacturer)}
+															helperText={
+																errors.manufacturer && `${t("manufacturer")} ${t("is_required")}!`
+															}
+														/>
+													)}
+												/>
+											)}
+										/>
+										<Controller
+											name="unitOfMeasure"
+											control={control}
+											rules={{ required: true }}
+											render={({ field }) => (
+												<TextField
+													fullWidth
+													variant="outlined"
+													label={t("unit_of_measure")}
+													{...field}
+													value={field.value ? field.value : ""}
+													error={Boolean(errors.unitOfMeasure)}
+													helperText={
+														errors.unitOfMeasure && `${t("unit_of_measure")} ${t("is_required")}!`
+													}
+												/>
+											)}
+										/>
+										<button type="submit" className="vl-btn vl-btn-md vl-btn-full vl-btn-primary">
+											{t("add_new_product")}
+										</button>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			{openSuccessPopup && (
+				<Modal
+					close={() => closeModal()}
+					size="modal-sm" //for other size's use `modal-lg, modal-md, modal-sm`
+				>
+					<SuccessPopup
+						onHide={closeModal}
+						successMessage="Product added succesfully"
+						// errorMessage="Put the Error Message Here"
+					/>
+				</Modal>
+			)}
+			{openFailurePopup && (
+				<Modal
+					close={() => closeModal()}
+					size="modal-sm" //for other size's use `modal-lg, modal-md, modal-sm`
+				>
+					<SuccessPopup
+						onHide={closeModal}
+						// successMessage="Product added succesfully"
+						errorMessage="Unable to Add product, please try again"
+					/>
+				</Modal>
+			)}
+		</>
+	);
 }
