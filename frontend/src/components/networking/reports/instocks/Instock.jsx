@@ -24,7 +24,7 @@ export default function Instock({
   return (
     <>
       {inStock && inStock?.length > 0 ? (
-        <TableContainer>
+        <TableContainer sx={{ minHeight: 560 }}>
           <Table
             sx={{ minWidth: 665 }}
             className="mi-custom-table"
