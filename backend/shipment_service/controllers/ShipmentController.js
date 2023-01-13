@@ -1389,7 +1389,7 @@ exports.receiveShipment = [
       if ((permission && locationMatch) == true) {
         const data = req.body;
         const shipmentID = data.id;
-        const shipmentInfo = await ShipmentModel.find({ id: shipmentID });
+        const shipmentInfo = await ShipmentModel.findOne({ id: shipmentID });
         const email = req.user.emailId;
         const user_id = req.user.id;
         const empData = await EmployeeModel.findOne({
@@ -1423,20 +1423,26 @@ exports.receiveShipment = [
 
         let actuallyShippedQuantity = 0;
         let productNumber = -1;
-        if (shipmentInfo != null) {
-          const shipmentProducts = shipmentInfo[0].products;
+        if (shipmentInfo) {
+          const shipmentProducts = shipmentInfo.products;
           for (const product of shipmentProducts) {
+            const mergedShipmentProduct = shipmentProducts.filter(ele => ele.productID === product.productID && (ele?.batchNumber == product?.batchNumber))
+            console.log("Shipment Merged", mergedShipmentProduct)
             productNumber = productNumber + 1;
             for (const receivedProduct of receivedProducts) {
               if (product.productID === receivedProduct.productID && (product?.batchNumber == receivedProduct?.batchNumber || !product?.batchNumber)) {
-                actuallyShippedQuantity = product.productQuantity;
-                const receivedQuantity = receivedProduct.productQuantity;
-
+                const mergedReceivedProduct = receivedProducts.filter(ele => ele.productID === product.productID && (ele?.batchNumber == product?.batchNumber))
+                console.log("Received Merged", mergedReceivedProduct)
+                console.log("Received", receivedProduct)
+                // actuallyShippedQuantity = product.productQuantity;
+                // const receivedQuantity = receivedProduct.productQuantity;
+                actuallyShippedQuantity = mergedShipmentProduct.reduce((a, curr) => a + curr["productQuantity"], 0);
+                const receivedQuantity = mergedReceivedProduct.reduce((a, curr) => a + curr["productQuantity"], 0);
+                console.log(receivedQuantity, actuallyShippedQuantity)
                 if (receivedQuantity > actuallyShippedQuantity)
                   throw new Error(
                     responses(req.user.preferredLanguage).rec_quantity_error
                   );
-
                 const quantityDifference =
                   actuallyShippedQuantity - receivedQuantity;
                 const rejectionRate =
@@ -1543,7 +1549,7 @@ exports.receiveShipment = [
           var totalReturns = 0;
           var shipmentRejectionRate = 0;
           for (count = 0; count < products.length; count++) {
-            var shipmentProducts = shipmentInfo[0].products;
+            var shipmentProducts = shipmentInfo.products;
             totalProducts =
               totalProducts + shipmentProducts[count].productQuantity;
             totalReturns = totalReturns + products[count].productQuantity;
