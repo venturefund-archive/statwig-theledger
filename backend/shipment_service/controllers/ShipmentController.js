@@ -1426,18 +1426,18 @@ exports.receiveShipment = [
         if (shipmentInfo) {
           const shipmentProducts = shipmentInfo.products;
           for (const product of shipmentProducts) {
-            const mergedShipmentProduct = shipmentProducts.filter(ele => ele.productID === product.productID && (ele?.batchNumber == product?.batchNumber))
-            console.log("Shipment Merged", mergedShipmentProduct)
+            const combinedShipmentProduct = shipmentProducts.filter(ele => ele.productID === product.productID && (ele?.batchNumber == product?.batchNumber))
+            console.log("combined Shipment", combinedShipmentProduct)
             productNumber = productNumber + 1;
             for (const receivedProduct of receivedProducts) {
               if (product.productID === receivedProduct.productID && (product?.batchNumber == receivedProduct?.batchNumber || !product?.batchNumber)) {
-                const mergedReceivedProduct = receivedProducts.filter(ele => ele.productID === product.productID && (ele?.batchNumber == product?.batchNumber))
-                console.log("Received Merged", mergedReceivedProduct)
+                const combinedReceivedProduct = receivedProducts.filter(ele => ele.productID === product.productID && (ele?.batchNumber == product?.batchNumber))
+                console.log("combined Received", combinedReceivedProduct)
                 console.log("Received", receivedProduct)
                 // actuallyShippedQuantity = product.productQuantity;
                 // const receivedQuantity = receivedProduct.productQuantity;
-                actuallyShippedQuantity = mergedShipmentProduct.reduce((a, curr) => a + curr["productQuantity"], 0);
-                const receivedQuantity = mergedReceivedProduct.reduce((a, curr) => a + curr["productQuantity"], 0);
+                actuallyShippedQuantity = combinedShipmentProduct.reduce((a, curr) => a + curr["productQuantity"], 0);
+                const receivedQuantity = combinedReceivedProduct.reduce((a, curr) => a + curr["productQuantity"], 0);
                 console.log(receivedQuantity, actuallyShippedQuantity)
                 if (receivedQuantity > actuallyShippedQuantity)
                   throw new Error(
