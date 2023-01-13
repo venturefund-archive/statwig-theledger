@@ -234,11 +234,15 @@ export default function TrackingMap({ LocationTab, trackingData, t }) {
                 <div className="product-details-list">
                   {currentLocationData[locationClicked]?.map((product) => (
                     <div className="product-list-card map-card-design">
+                      {console.log(product)}
                       <p className="mi-body-sm f-500 mi-reset ">
                         {product?.productName}
                       </p>
                       <p className="mi-body-sm f-500 mi-reset">
-                        {`${product?.productQuantity || product?.productQuantityDelivered} ( ${product?.productInfo?.unitofMeasure?.name} )`}
+                        {/* {`${product?.productQuantity} ( ${product?.productInfo?.unitofMeasure?.name} )`} */}
+                        {product?.productQuantity
+                          ? `${product?.productQuantity} (${product?.productInfo?.unitofMeasure?.name})`
+                          : `${product?.productQuantityDelivered} (${product?.productInfo?.unitofMeasure?.name})`}
                       </p>
                     </div>
                   ))}
