@@ -112,7 +112,7 @@ export default function Reports(props) {
           <Tab layout="main" MainTab={MainTab} setMainTab={setMainTab} t={t} />
         </div>
 
-        <div className="report-table-container mi-height-added">
+        <div className="report-table-container">
           {MainTab === "INSTOCK" && (
             <Instock
               inStock={inStock}
