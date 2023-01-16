@@ -1,7 +1,6 @@
 import React from "react";
 import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
-import { Checkbox } from "@mui/material";
 import { useState } from "react";
 import { useHistory } from "react-router";
 import Switch from "@mui/material/Switch";
@@ -52,9 +51,7 @@ export default function OrganizationRow({ rows, modifyOrg }) {
           />
         </TableCell> */}
         <TableCell
-          onClick={() =>
-            history.push("/statwig/view-locations/" + rows.id)
-          }
+          onClick={() => history.push("/statwig/view-locations/" + rows.id)}
         >
           <p
             className={`vl-body ${
@@ -65,9 +62,7 @@ export default function OrganizationRow({ rows, modifyOrg }) {
           </p>
         </TableCell>
         <TableCell
-          onClick={() =>
-            history.push("/statwig/view-locations/" + rows.id)
-          }
+          onClick={() => history.push("/statwig/view-locations/" + rows.id)}
         >
           <p
             className={`vl-body ${
@@ -78,9 +73,7 @@ export default function OrganizationRow({ rows, modifyOrg }) {
           </p>
         </TableCell>
         <TableCell
-          onClick={() =>
-            history.push("/statwig/view-locations/" + rows.id)
-          }
+          onClick={() => history.push("/statwig/view-locations/" + rows.id)}
         >
           <p
             className={`vl-body ${
@@ -91,9 +84,7 @@ export default function OrganizationRow({ rows, modifyOrg }) {
           </p>
         </TableCell>
         <TableCell
-          onClick={() =>
-            history.push("/statwig/view-locations/" + rows.id)
-          }
+          onClick={() => history.push("/statwig/view-locations/" + rows.id)}
         >
           <p
             className={`vl-body ${
@@ -104,9 +95,7 @@ export default function OrganizationRow({ rows, modifyOrg }) {
           </p>
         </TableCell>
         <TableCell
-          onClick={() =>
-            history.push("/statwig/view-locations/" + rows.id)
-          }
+          onClick={() => history.push("/statwig/view-locations/" + rows.id)}
         >
           <p
             className={`vl-body ${
@@ -117,40 +106,38 @@ export default function OrganizationRow({ rows, modifyOrg }) {
           </p>
         </TableCell>
         <TableCell>
-          <div className="status-switch-button">
+          <div className='status-switch-button'>
             <Switch
-              color="warning"
+              color='warning'
               checked={AccStatus === "ACTIVE"}
               onChange={(e) => {
                 e.preventDefault();
                 changeBtnStatus(
-                  AccStatus !== "ACTIVE" ? "DEACTIVATED" : "ACTIVE"
+                  AccStatus !== "ACTIVE" ? "DEACTIVATED" : "ACTIVE",
                 );
               }}
             />
             {AccStatus === "ACTIVE" ? (
-              <div className="label-status-btn status-accept-bg">
-                <div className="status-dot status-accept-dot"></div>
-                <p className="vl-small f-400 vl-black">Active</p>
+              <div className='label-status-btn status-accept-bg'>
+                <div className='status-dot status-accept-dot'></div>
+                <p className='vl-small f-400 vl-black'>Active</p>
               </div>
             ) : (
-              <div className="label-status-btn status-reject-bg">
-                <div className="status-dot status-reject-dot"></div>
-                <p className="vl-small f-400 vl-black">InActive</p>
+              <div className='label-status-btn status-reject-bg'>
+                <div className='status-dot status-reject-dot'></div>
+                <p className='vl-small f-400 vl-black'>InActive</p>
               </div>
             )}
           </div>
         </TableCell>
         <TableCell
-          onClick={() =>
-            history.push("/statwig/view-locations/" + rows.id)
-          }
+          onClick={() => history.push("/statwig/view-locations/" + rows.id)}
         >
-          <div className="created-date">
+          <div className='created-date'>
             <p
               className={`vl-note f-400 ${checked ? "vl-black" : "vl-grey-sm"}`}
             >
-              {new Date(rows.createdAt).toLocaleDateString()}
+              {new Date(rows.createdAt).toLocaleDateString("en-GB")}
             </p>
             <p
               className={`vl-small f-400 ${

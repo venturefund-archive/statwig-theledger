@@ -244,7 +244,7 @@ export default function Account(props) {
 										label={t("first_name")}
 										{...field}
 										error={Boolean(errors.firstName)}
-										helperText={errors.firstName && "First Name is required!"}
+										helperText={errors.firstName && t("first_name_required")}
 									/>
 								)}
 							/>
@@ -259,7 +259,7 @@ export default function Account(props) {
 										label={t("last_name")}
 										{...field}
 										error={Boolean(errors.lastName)}
-										helperText={errors.lastName && "Last Name is required!"}
+										helperText={errors.lastName && t("Last_name_required")}
 									/>
 								)}
 							/>
@@ -278,7 +278,7 @@ export default function Account(props) {
 										error={Boolean(errors.email)}
 										helperText={
 											errors.email?.type === "required"
-												? "Email or Phone is required!"
+												? t("email_or_phone_required")
 												: errors.email?.message
 										}
 									/>
@@ -350,7 +350,7 @@ export default function Account(props) {
 													{...params}
 													label={t("organization_type")}
 													error={Boolean(errors.organizationType)}
-													helperText={errors.organizationType && "Organization type is required!"}
+													helperText={errors.organizationType && t("org_type_required")}
 												/>
 											)}
 											{...field}
@@ -374,7 +374,7 @@ export default function Account(props) {
 													{...params}
 													label={t("organization_name")}
 													error={Boolean(errors.organization)}
-													helperText={errors.organization && "Organization Name is required!"}
+													helperText={errors.organization && t("org_name_required")}
 												/>
 											)}
 											{...field}

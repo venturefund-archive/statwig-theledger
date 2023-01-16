@@ -12,11 +12,10 @@ const cuid = require("cuid");
 const axios = require("axios");
 const hf_blockchain_url = process.env.HF_BLOCKCHAIN_URL || "http://3.110.249.128:8080";
 const fs = require("fs");
-const moveFile = require("move-file");
 const XLSX = require("xlsx");
 
 const EmployeeIdMap = new Map();
-async function createWarehouse(address, warehouseId, organisationId, region, country){
+async function createWarehouse(address, warehouseId, organisationId, region, country) {
 	console.log(warehouseId)
 	const invCounter = await CounterModel.findOneAndUpdate(
 		{ "counters.name": "inventoryId" },
@@ -78,26 +77,26 @@ async function createOrg({
 		name: new RegExp("^" + organisationName?.trim() + "$", "i"),
 	});
 	let parentOrg;
-	if(!parentOrgId)
+	if (!parentOrgId)
 		parentOrg = await OrganisationModel.findOne({
 			name: new RegExp("^" + parentOrgName?.trim() + "$", "i"),
 		});
 	if (organisationExists) {
-		const warehouseExists = await WarehouseModel.findOne({postalAddress: address.line1}) 
+		const warehouseExists = await WarehouseModel.findOne({ postalAddress: address.line1 })
 		warehouseId = warehouseExists?.id;
-		if(warehouseExists){
+		if (warehouseExists) {
 			console.log(warehouseExists)
 			return `Organisation ${organisationName?.trim()} and Warehouse ${address.line1} already exists`;
 		}
 		const warehouseCounter = await CounterModel.findOneAndUpdate(
-				{ "counters.name": "warehouseId" },
-				{
-					$inc: {
-						"counters.$.value": 1,
-					},
+			{ "counters.name": "warehouseId" },
+			{
+				$inc: {
+					"counters.$.value": 1,
 				},
-				{ new: true },
-			);
+			},
+			{ new: true },
+		);
 		warehouseId = warehouseCounter.counters[3].format + warehouseCounter.counters[3].value;
 		await createWarehouse(address, warehouseId, organisationExists.id, region, country);
 		return `Organization ${organisationName?.trim()} already exists!, warehouse ${address.line1} created`;
@@ -145,7 +144,7 @@ async function createOrg({
 		region: region,
 		country: country,
 		configuration_id: "CONF000",
-		parentOrgId: parentOrgId ? parentOrgId :  parentOrg?.id,
+		parentOrgId: parentOrgId ? parentOrgId : parentOrg?.id,
 	});
 	await organisation.save();
 	const warehouseCounter = await CounterModel.findOneAndUpdate(
@@ -164,30 +163,30 @@ async function createOrg({
 	if (phoneNumber) {
 		phoneNumber = phoneNumber.startsWith("+") ? phoneNumber : `+${phoneNumber}`;
 	}
-	if(!organisationExists){
-	const user = new EmployeeModel({
-		firstName: firstName || emailId.split('@')[0],
-		lastName: lastName || emailId.split('@')[0],
-		emailId: emailId,
-		phoneNumber: phoneNumber,
-		organisationId: organisationId,
-		id: employeeId,
-		postalAddress: addr,
-		accountStatus: "ACTIVE",
-		warehouseId: warehouseId == "NA" ? [] : [warehouseId],
-		role: "admin",
-	});
-	await user.save();
+	if (!organisationExists) {
+		const user = new EmployeeModel({
+			firstName: firstName || emailId.split('@')[0],
+			lastName: lastName || emailId.split('@')[0],
+			emailId: emailId,
+			phoneNumber: phoneNumber,
+			organisationId: organisationId,
+			id: employeeId,
+			postalAddress: addr,
+			accountStatus: "ACTIVE",
+			warehouseId: warehouseId == "NA" ? [] : [warehouseId],
+			role: "admin",
+		});
+		await user.save();
 
-	const bc_data = {
-		username: emailId ? emailId : phoneNumber,
-		password: "",
-		orgName: "org1MSP",
-		role: "",
-		email: emailId ? emailId : phoneNumber,
-	};
+		const bc_data = {
+			username: emailId ? emailId : phoneNumber,
+			password: "",
+			orgName: "org1MSP",
+			role: "",
+			email: emailId ? emailId : phoneNumber,
+		};
 
-	axios.post(`${hf_blockchain_url}/api/v1/register`, bc_data);
+		axios.post(`${hf_blockchain_url}/api/v1/register`, bc_data);
 	}
 	const event_data = {
 		eventID: cuid(),
@@ -326,6 +325,7 @@ exports.getOrgs = [
 						createdAt: -1,
 					},
 				},
+				{ $setWindowFields: { output: { totalCount: { $count: {} } } } },
 				{ $skip: parseInt(req.query.skip) || 0 },
 				{ $limit: parseInt(req.query.limit) || 10 },
 			]);
@@ -333,19 +333,15 @@ exports.getOrgs = [
 				if (EmployeeIdMap.has(users[c].primaryContactId)) {
 					users[c].primaryContactId = EmployeeIdMap.get(users[c].primaryContactId);
 				} else {
-					try {
-						const employeeEmail = await EmployeeModel.findOne({
-							id: users[c].primaryContactId,
-						}).select("emailId phoneNumber");
-						if (employeeEmail.emailId != null) {
-							EmployeeIdMap.set(users[c].primaryContactId, employeeEmail.emailId);
-							users[c].primaryContactId = employeeEmail.emailId;
-						} else {
-							EmployeeIdMap.set(users[c].primaryContactId, employeeEmail.phoneNumber);
-							users[c].primaryContactId = employeeEmail.phoneNumber;
-						}
-					} catch (err) {
-						console.log(err);
+					const employeeEmail = await EmployeeModel.findOne({
+						id: users[c].primaryContactId,
+					}).select("emailId phoneNumber");
+					if (employeeEmail.emailId != null) {
+						EmployeeIdMap.set(users[c].primaryContactId, employeeEmail.emailId);
+						users[c].primaryContactId = employeeEmail.emailId;
+					} else {
+						EmployeeIdMap.set(users[c].primaryContactId, employeeEmail.phoneNumber);
+						users[c].primaryContactId = employeeEmail.phoneNumber;
 					}
 				}
 			}
@@ -656,7 +652,7 @@ exports.updateOrg = [
 							pendingWarehouseId: org.warehouses[0],
 						},
 					},
-				);	
+				);
 			}
 			await EmployeeModel.findOneAndUpdate(
 				{ id: org.primaryContactId },
@@ -898,8 +894,7 @@ exports.addOrgsFromExcel = [
 		try {
 			const dir = `uploads`;
 			if (!fs.existsSync(dir)) fs.mkdirSync(dir);
-			await moveFile(req.file.path, `${dir}/${req.file.originalname}`);
-			const workbook = XLSX.readFile(`${dir}/${req.file.originalname}`);
+			const workbook = XLSX.readFile(req.file.path);
 			const sheet_name_list = workbook.SheetNames;
 			const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]], {
 				dateNF: "dd/mm/yyyy;@",
@@ -925,7 +920,7 @@ exports.addOrgsFromExcel = [
 					state: user["STATE"]?.trim(),
 					province: user["PROVINCE"]?.trim() || user["Province"]?.trim()
 				}
-				
+
 				formatedData[index] = {
 					firstName,
 					lastName,

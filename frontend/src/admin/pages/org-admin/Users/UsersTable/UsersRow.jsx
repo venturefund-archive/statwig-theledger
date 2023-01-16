@@ -18,8 +18,6 @@ export default function UsersRow({ rows, defaultRoles, t }) {
   const [userRole, setUserRole] = useState(rows.role);
   const [AccStatus, setAccStatus] = useState(rows.accountStatus);
 
-  console.log(rows);
-
   const handleRoleChange = (event, value) => {
     setUserRole(value);
   };
@@ -46,7 +44,7 @@ export default function UsersRow({ rows, defaultRoles, t }) {
       console.log(err);
     }
   };
-  
+
   return (
     <>
       <TableRow
@@ -63,19 +61,19 @@ export default function UsersRow({ rows, defaultRoles, t }) {
           </p>
         </TableCell>
         <TableCell>
-          <div className='table-actions-space col-width-md'>
+          <div className="table-actions-space col-width-md">
             {Edit ? (
               <Autocomplete
                 fullWidth
                 disabled={Edit ? false : true}
-                size='small'
-                id='combo-box-demo'
+                size="small"
+                id="combo-box-demo"
                 className={`${Edit ? "vl-edit-true" : "vl-edit-false"}`}
                 options={defaultRoles}
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    className='vl-edit-input'
+                    className="vl-edit-input"
                     placeholder={rows.role}
                   />
                 )}
@@ -91,11 +89,11 @@ export default function UsersRow({ rows, defaultRoles, t }) {
               </p>
             )}
 
-            <div className='vl-table-icon' onClick={handleEditRole}>
+            <div className="vl-table-icon" onClick={handleEditRole}>
               {!Edit ? (
-                <i className='fa-solid fa-pen'></i>
+                <i className="fa-solid fa-pen"></i>
               ) : (
-                <i className='fa-solid fa-check'></i>
+                <i className="fa-solid fa-check"></i>
               )}
             </div>
           </div>
@@ -119,7 +117,7 @@ export default function UsersRow({ rows, defaultRoles, t }) {
           </p>
         </TableCell>
         <TableCell>
-          <div className='table-actions-space col-width-xl'>
+          <div className="table-actions-space col-width-xl">
             <p
               className={`vl-note ${
                 checked ? "f-400 vl-black" : "f-400 vl-grey-sm"
@@ -127,11 +125,11 @@ export default function UsersRow({ rows, defaultRoles, t }) {
             >
               {`${rows.location}, ${rows.city}, ${rows.country}, ${rows.region}`}
             </p>
-            <div className='vl-table-icon' onClick={() => setOpen(!open)}>
+            <div className="vl-table-icon" onClick={() => setOpen(!open)}>
               {open ? (
-                <i className='fa-solid fa-caret-up'></i>
+                <i className="fa-solid fa-caret-up"></i>
               ) : (
-                <i className='fa-solid fa-caret-down'></i>
+                <i className="fa-solid fa-caret-down"></i>
               )}
             </div>
           </div>
@@ -148,9 +146,9 @@ export default function UsersRow({ rows, defaultRoles, t }) {
               <p className="vl-small f-400 vl-black">InActive</p>
             </div>
           )} */}
-          <div className='status-switch-button'>
+          <div className="status-switch-button">
             <Switch
-              color='warning'
+              color="warning"
               checked={AccStatus === "ACTIVE"}
               onChange={(e) => {
                 if (AccStatus === "ACTIVE") {
@@ -181,11 +179,11 @@ export default function UsersRow({ rows, defaultRoles, t }) {
           </div>
         </TableCell>
         <TableCell>
-          <div className='created-date'>
+          <div className="created-date">
             <p
               className={`vl-note f-400 ${checked ? "vl-black" : "vl-grey-sm"}`}
             >
-              {new Date(rows.createdAt).toLocaleDateString()}
+              {new Date(rows.createdAt).toLocaleDateString("en-GB")}
             </p>
             <p
               className={`vl-small f-400 ${

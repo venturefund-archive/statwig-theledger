@@ -437,6 +437,7 @@ const NewShipment = (props) => {
       setValidShipmentID(value);
     });
   }
+
   return (
     <div className='NewShipment'>
       <h1 className='breadcrumb'>{t("create_shipment")}</h1>
@@ -1311,6 +1312,24 @@ const NewShipment = (props) => {
                   }}
                   handleBatchChange={(v, i) => {
                     handleBatchChange(v, i);
+                    let newArr = [...addProducts];
+                    newArr[i].batchNumber = v;
+                    if(newArr.length > 0)
+                    setFieldValue(
+                      "products",
+                      newArr.map((row) => ({
+                        productCategory: row.type,
+                        productID: row.id,
+                        productQuantity: row.productQuantity,
+                        batchNumber: row.batchNumber,
+                        productName: row.name,
+                        manufacturer: row.manufacturer,
+                        quantity: row.quantity,
+                        unitofMeasure: row.unitofMeasure
+                      }))
+                    );
+                    else setFieldValue("products", []);
+                    setAddProducts((prod) => [...newArr]);
                   }}
                   enableDelete={false}
                   onRemoveRow={(index) => {
@@ -1433,17 +1452,17 @@ const NewShipment = (props) => {
                     }}
                     enableDelete={true}
                     onRemoveRow={(index) => {
-                      const prodIndex = products.findIndex(
-                        (p) => p.id === addProducts[index].id
-                      );
+                      // const prodIndex = products.findIndex(
+                      //   (p) => p.id === addProducts[index].id
+                      // );
                       let newArray = [...products];
-                      newArray[prodIndex] = {
-                        ...newArray[prodIndex],
+                      newArray[index] = {
+                        ...newArray[index],
                         isSelected: false,
                       };
+                      addProducts.splice(index, 1);
                       setProducts((prod) => [...newArray]);
 
-                      addProducts.splice(index, 1);
                       let newArr = [...addProducts];
                       if (newArr.length > 0)
                         setFieldValue(
@@ -1560,6 +1579,7 @@ const NewShipment = (props) => {
           </form>
         )}
       </Formik>
+      
       {openCreatedInventory && (
         <Modal
           close={() => closeModal()}

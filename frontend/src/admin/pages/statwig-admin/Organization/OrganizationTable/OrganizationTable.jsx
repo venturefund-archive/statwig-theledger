@@ -5,7 +5,6 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import Checkbox from "@mui/material/Checkbox";
 import OrganizationRow from "./OrganizationRow";
 import { TablePagination } from "@mui/material";
 import { getOrgs, updateOrg } from "../../../../actions/organisationActions";
@@ -24,14 +23,8 @@ export default function OrganizationTable({ tableFlag, t }) {
 
   const modifyOrg = async (data) => {
     const result = await updateOrg(data.org ? data.org : data);
-    if (result.status === 200) {
-      console.log(
-        "This organisation " + data.org
-          ? data.status
-          : data.status.toLowerCase() + "!"
-      );
-    } else {
-      console.log(result.data.data.message);
+    if (result.status !== 200) {
+      alert(result.data.data.message);
     }
   };
 
@@ -48,51 +41,39 @@ export default function OrganizationTable({ tableFlag, t }) {
     <TableContainer>
       <Table
         sx={{ minWidth: 992 }}
-        aria-label="simple table"
-        className="organization-table"
+        aria-label='simple table'
+        className='organization-table'
       >
-        <TableHead className="organization-thead">
-          <TableRow className="organization-tr">
-            {/* <TableCell>
-              <Checkbox
-                className="vl-checkbox"
-                name="allCheck"
-                sx={{
-                  color: "#7e858f",
-                  "&.Mui-checked": {
-                    color: "#221ecc",
-                  },
-                }}
-              />
-            </TableCell> */}
+        <TableHead className='organization-thead'>
+          <TableRow className='organization-tr'>
             <TableCell>
-              <h1 className="vl-note f-500 vl-blue">
+              <h1 className='vl-note f-500 vl-blue'>
                 {t("organization_name")}
               </h1>
             </TableCell>
             <TableCell>
-              <h1 className="vl-note f-500 vl-blue">
+              <h1 className='vl-note f-500 vl-blue'>
                 {t("organization_type")}
               </h1>
             </TableCell>
             <TableCell>
-              <h1 className="vl-note f-500 vl-blue">{t("total_user")}</h1>
+              <h1 className='vl-note f-500 vl-blue'>{t("total_user")}</h1>
             </TableCell>
             <TableCell>
-              <h1 className="vl-note f-500 vl-blue">{t("all_loc")}</h1>
+              <h1 className='vl-note f-500 vl-blue'>{t("all_loc")}</h1>
             </TableCell>
             <TableCell>
-              <h1 className="vl-note f-500 vl-blue">{t("country")}</h1>
+              <h1 className='vl-note f-500 vl-blue'>{t("country")}</h1>
             </TableCell>
             <TableCell>
-              <h1 className="vl-note f-500 vl-blue">{t("status")}</h1>
+              <h1 className='vl-note f-500 vl-blue'>{t("status")}</h1>
             </TableCell>
             <TableCell>
-              <h1 className="vl-note f-500 vl-blue">{t("created_on")}</h1>
+              <h1 className='vl-note f-500 vl-blue'>{t("created_on")}</h1>
             </TableCell>
           </TableRow>
         </TableHead>
-        <TableBody className="organization-tbody">
+        <TableBody className='organization-tbody'>
           {list.map((rows, index) => (
             <OrganizationRow
               modifyOrg={modifyOrg}
@@ -104,8 +85,8 @@ export default function OrganizationTable({ tableFlag, t }) {
         </TableBody>
       </Table>
       <TablePagination
-        component="div"
-        count={1000}
+        component='div'
+        count={list?.[0]?.totalCount || 0}
         page={page}
         onPageChange={handleChangePage}
         rowsPerPage={rowsPerPage}

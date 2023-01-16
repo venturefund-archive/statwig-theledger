@@ -196,7 +196,7 @@ const ProductInventory = (props) => {
           </Link>
         </div>
       </div>
-      {enable && categoryArrayNew.length > 5 ? scrollingCategory() : nonScrollingCategory()}
+      {enable ? (categoryArrayNew.length > 5 ? scrollingCategory() : nonScrollingCategory()):<div></div>}
       <div className='row'>
         <div className='p-2 mt-3 rounded full-width-ribbon'>
           <div className='row filter'>

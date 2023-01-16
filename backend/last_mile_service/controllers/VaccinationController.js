@@ -14,6 +14,7 @@ const PdfPrinter = require("pdfmake");
 const { resolve } = require("path");
 const fs = require("fs");
 const CountryModel = require("../models/CountryModel");
+const { formatDate } = require("../helpers/dateHelper");
 
 const fontDescriptors = {
 	Roboto: {
@@ -110,7 +111,7 @@ const buildDoseQuery = async (gender, minAge, maxAge, ageType, vaccineVialIds, t
 	return doseQuery;
 };
 
-const generateVaccinationsList = async (doseQuery, skip = 0, limit) => {
+const generateVaccinationsList = async (doseQuery, req, skip = 0, limit) => {
 	const pagniationQuery = [];
 	if (skip) {
 		pagniationQuery.push({ $skip: skip })
@@ -183,7 +184,7 @@ const generateVaccinationsList = async (doseQuery, skip = 0, limit) => {
 			batchNumber: element.vaccineVial.batchNumber,
 			organisationName: element.product?.manufacturer,
 			age: age,
-			gender: element.gender,
+			gender: req.t(element.gender),
 			state: element.warehouse.warehouseAddress.state,
 			city: element.warehouse.warehouseAddress.city,
 			vaccinatedOrganisationName: element.organisation.name,
@@ -737,7 +738,7 @@ exports.getAllVaccinationDetails = [
 			vaccineVialIds = vaccineVialIds.flat();
 
 			const doseQuery = await buildDoseQuery(gender, minAge, maxAge, ageType, vaccineVialIds, today);
-			const result = await generateVaccinationsList(doseQuery, skip, limit);
+			const result = await generateVaccinationsList(doseQuery, req, skip, limit);
 
 			return apiResponse.successResponseWithData(res, "Vaccinations list fetched!", result);
 		} catch (err) {
@@ -1105,20 +1106,26 @@ exports.getCitiesAndOrgsForFilters = [
 				{
 					$lookup: {
 						from: "cities",
-						localField: "id",
-						foreignField: "country_id",
+						let: { country_id: "$id" },
+						pipeline: [
+							{ $match: { $expr: { $eq: ["$country_id", "$$country_id"] } } },
+							{ $group: { _id: null, uniqueCities: { $addToSet: "$name" } } },
+						],
 						as: "cities",
 					},
 				},
+				{ $unwind: "$cities" },
 			]);
 			if (!country || !country.length) {
 				throw new Error("Something went wrong!");
 			}
 
-			let cities = country[0].cities.map((city) => city.name);
+			let cities = country[0]?.cities?.uniqueCities ? country[0].cities.uniqueCities : [];
 
-			let orgs = await OrganisationModel.find({ type: { $in: ["PHARMACY", "Hospital"] } });
-			orgs = orgs.map((org) => org.name);
+			let orgs = await OrganisationModel.distinct("name", {
+				type: { $in: ["PHARMACY", "Hospital"] },
+			});
+			orgs = orgs?.length ? orgs : [];
 
 			const result = {
 				cities: cities,
@@ -1223,10 +1230,10 @@ exports.exportVaccinationList = [
 			vaccineVialIds = vaccineVialIds.flat();
 
 			const doseQuery = await buildDoseQuery(gender, minAge, maxAge, ageType, vaccineVialIds, today);
-			const result = await generateVaccinationsList(doseQuery);
+			const result = await generateVaccinationsList(doseQuery, req);
 
 			if (reportType === "excel") res = buildExcelReportDoses(req, res, result.result, today);
-			else res = buildPdfReportDoses(req, res, result.result, "Vaccinations");
+			else res = buildPdfReportDoses(req, res, result.result, today);
 		} catch (err) {
 			console.log(err);
 			return apiResponse.ErrorResponse(res, err.message);
@@ -1339,37 +1346,37 @@ function buildExcelReportDoses(req, res, dataForExcel, today) {
 
 	const specification = {
 		date: {
-			displayName: "Date",
+			displayName: req.t("date"),
 			headerStyle: styles.headerDark,
 			width: 120,
 		},
 		batchNumber: {
-			displayName: "Batch Number",
+			displayName: req.t("batch_number"),
 			headerStyle: styles.headerDark,
 			width: 120,
 		},
 		organisationName: {
-			displayName: "Manufacturer",
+			displayName: req.t("manufacturer"),
 			headerStyle: styles.headerDark,
 			width: 220,
 		},
 		age: {
-			displayName: "Age",
+			displayName: req.t("age"),
 			headerStyle: styles.headerDark,
 			width: 60,
 		},
 		gender: {
-			displayName: "Gender",
+			displayName: req.t("gender"),
 			headerStyle: styles.headerDark,
 			width: 120,
 		},
 		state: {
-			displayName: "State",
+			displayName: req.t("state"),
 			headerStyle: styles.headerDark,
 			width: 220,
 		},
 		city: {
-			displayName: "City",
+			displayName: req.t("city"),
 			headerStyle: styles.headerDark,
 			width: 220,
 		},
@@ -1382,7 +1389,7 @@ function buildExcelReportDoses(req, res, dataForExcel, today) {
 
 	const report = excel.buildExport([
 		{
-			name: today ? "Today's Vaccinations" : "Vaccinated So Far",
+			name: today ? req.t("todays_vaccinations") : req.t("vaccinated_so_far"),
 			specification: specification,
 			data: dataForExcel,
 		},
@@ -1392,22 +1399,23 @@ function buildExcelReportDoses(req, res, dataForExcel, today) {
 	return res.send(report);
 }
 
-function buildPdfReportDoses(req, res, data, orderType) {
+function buildPdfReportDoses(req, res, data, today) {
+	const todaysDate = new Date();
 	const rows = [];
 	rows.push([
-		{ text: "Date", bold: true },
-		{ text: "Batch Number", bold: true },
-		{ text: "Manufacturer", bold: true },
-		{ text: "Age", bold: true },
-		{ text: "Gender", bold: true },
-		{ text: "State", bold: true },
-		{ text: "City", bold: true },
-		{ text: "Organization", bold: true },
+		{ text: req.t("date"), bold: true },
+		{ text: req.t("batch_number"), bold: true },
+		{ text: req.t("manufacturer"), bold: true },
+		{ text: req.t("age"), bold: true },
+		{ text: req.t("gender"), bold: true },
+		{ text: req.t("state"), bold: true },
+		{ text: req.t("city"), bold: true },
+		{ text: req.t("organization"), bold: true },
 	]);
 	for (const element of data) {
 		const date = element.date ? new Date(element.date).toLocaleDateString() : "N/A";
 		rows.push([
-			date,
+			formatDate(date),
 			element.batchNumber || "N/A",
 			element.organisationName || "N/A",
 			element.age || "N/A",
@@ -1423,7 +1431,11 @@ function buildPdfReportDoses(req, res, data, orderType) {
 		pageOrientation: "landscape",
 		pageMargins: [30, 30, 2, 2],
 		content: [
-			{ text: `${orderType} Report`, fontSize: 32, style: "header" },
+			{
+				text: today ? req.t("todays_vaccinations") + `(${formatDate(todaysDate)})` : req.t("vaccinated_so_far"),
+				fontSize: 32,
+				style: "header",
+			},
 			{
 				table: {
 					margin: [1, 1, 1, 1],
@@ -1465,22 +1477,22 @@ function buildExcelReportVials(req, res, dataForExcel) {
 
 	const specification = {
 		index: {
-			displayName: "Sr. No.",
+			displayName: req.t("sr_no"),
 			headerStyle: styles.headerDark,
 			width: 60,
 		},
 		date: {
-			displayName: "Date",
+			displayName: req.t("date"),
 			headerStyle: styles.headerDark,
 			width: 120,
 		},
 		batchNumber: {
-			displayName: "Batch Number",
+			displayName: req.t("batch_number"),
 			headerStyle: styles.headerDark,
 			width: 120,
 		},
 		numberOfDoses: {
-			displayName: "Number of Doses",
+			displayName: req.t("number_of_doses"),
 			headerStyle: styles.headerDark,
 			width: 120,
 		}
@@ -1488,7 +1500,7 @@ function buildExcelReportVials(req, res, dataForExcel) {
 
 	const report = excel.buildExport([
 		{
-			name: "Vials Utilized Report",
+			name: req.t("vials_utilized_report"),
 			specification: specification,
 			data: dataForExcel,
 		},
@@ -1501,16 +1513,16 @@ function buildExcelReportVials(req, res, dataForExcel) {
 function buildPdfReportVials(req, res, data) {
 	const rows = [];
 	rows.push([
-		{ text: "Sr. No.", bold: true },
-		{ text: "Date", bold: true },
-		{ text: "Batch Number", bold: true },
-		{ text: "Number Of Doses", bold: true },
+		{ text: req.t("sr_no"), bold: true },
+		{ text: req.t("date"), bold: true },
+		{ text: req.t("batch_number"), bold: true },
+		{ text: req.t("number_of_doses"), bold: true },
 	]);
 	for (let i = 0; i < data.length; i++) {
-		const date = data[i].date ? new Date(data[i].date).toLocaleDateString() : "N/A";
+		const date = data[i].date ? new Date(data[i].date) : "";
 		rows.push([
 			data[i].index,
-			date,
+			formatDate(date),
 			data[i].batchNumber || "N/A",
 			data[i].numberOfDoses || "N/A",
 		]);
@@ -1521,7 +1533,7 @@ function buildPdfReportVials(req, res, data) {
 		pageOrientation: "landscape",
 		pageMargins: [30, 30, 2, 2],
 		content: [
-			{ text: `Vials Utilized Report`, fontSize: 32, style: "header" },
+			{ text: req.t("vials_utilized_report"), fontSize: 32, style: "header" },
 			{
 				table: {
 					margin: [1, 1, 1, 1],

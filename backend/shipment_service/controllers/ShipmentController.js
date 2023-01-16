@@ -811,10 +811,12 @@ exports.createShipment = [
                     currentInventory: recvInventoryId,
                     status: "TRANSIT",
                     poIds: [...currentAtom.poIds, data?.poId],
-                    shipmentIds: [...currentAtom.shipmentIds, shipmentId],
                     currentShipment: shipmentId,
                   },
-                }
+                  $addToSet: {
+                    shipmentIds: shipmentId,
+                  },
+                },
               );
             } else {
               await AtomModel.updateOne(
@@ -1427,22 +1429,17 @@ exports.receiveShipment = [
           const shipmentProducts = shipmentInfo.products;
           for (const product of shipmentProducts) {
             const combinedShipmentProduct = shipmentProducts.filter(ele => ele.productID === product.productID && (ele?.batchNumber == product?.batchNumber))
-            console.log("combined Shipment", combinedShipmentProduct)
             productNumber = productNumber + 1;
             for (const receivedProduct of receivedProducts) {
               if (product.productID === receivedProduct.productID && (product?.batchNumber == receivedProduct?.batchNumber || !product?.batchNumber)) {
                 const combinedReceivedProduct = receivedProducts.filter(ele => ele.productID === product.productID && (ele?.batchNumber == product?.batchNumber))
-                console.log("combined Received", combinedReceivedProduct)
-                console.log("Received", receivedProduct)
-                // actuallyShippedQuantity = product.productQuantity;
-                // const receivedQuantity = receivedProduct.productQuantity;
                 actuallyShippedQuantity = combinedShipmentProduct.reduce((a, curr) => a + curr["productQuantity"], 0);
                 const receivedQuantity = combinedReceivedProduct.reduce((a, curr) => a + curr["productQuantity"], 0);
-                console.log(receivedQuantity, actuallyShippedQuantity)
                 if (receivedQuantity > actuallyShippedQuantity)
                   throw new Error(
                     responses(req.user.preferredLanguage).rec_quantity_error
                   );
+
                 const quantityDifference =
                   actuallyShippedQuantity - receivedQuantity;
                 const rejectionRate =
@@ -1570,75 +1567,92 @@ exports.receiveShipment = [
               data.id,
               "RECEIVED"
             );
-            if (flag == "Y" && data.poId != null) {
-              await poUpdate(
-                products[count].productId,
-                products[count].productQuantity,
-                data.poId,
-                "RECEIVED",
-                req.user
-              );
+            try {
+              if (flag == "Y" && data.poId != null) {
+                await poUpdate(
+                  products[count].productId,
+                  products[count].productQuantity,
+                  data.poId,
+                  "RECEIVED",
+                  req.user
+                );
+              }
+            } catch (err) {
+              console.log("Error updating Purchase Order");
             }
-            if (shipmentRejectionRate > 0) { // partial Receive Shipment
-              const lostAtom = await AtomModel.findOneAndUpdate(
-                {
-                  batchNumbers: products[count].batchNumber,
-                  currentInventory: recvInventoryId,
-                  currentShipment: shipmentID,
-                  status: "TRANSIT"
-                },
-                {
-                  $inc: {
-                    quantity: -parseInt(products[count].productQuantity),
-                  },
-                },
-                {
-                  new: true
-                }
-              );
-
-              const newAtom = new AtomModel({
-                id: cuid(),
-                label: {
-                  labelId: "QR_2D",
-                  labelType: "3232",
-                },
-                quantity: parseInt(products[count].productQuantity),
-                productId: lostAtom?.productId,
-                inventoryIds: lostAtom?.inventoryIds,
+            await AtomModel.updateOne(
+              {
+                batchNumbers: products[count].batchNumber,
                 currentInventory: recvInventoryId,
-                poIds: lostAtom?.poIds || [],
-                shipmentIds: lostAtom?.shipmentIds || [],
-                currentShipment: null,
-                batchNumbers: lostAtom?.batchNumbers,
-                txIds: lostAtom?.txIds,
-                status: "HEALTHY",
-                attributeSet: lostAtom?.attributeSet,
-                eolInfo: lostAtom?.eolInfo,
-                comments: lostAtom?.comments,
-              });
-              await newAtom.save();
-            }
-            else {  // Complete receive shipment
-              await AtomModel.updateOne(
-                {
-                  batchNumbers: products[count].batchNumber,
-                  currentInventory: recvInventoryId,
-                  quantity: products[count].productQuantity,
-                  currentShipment: shipmentID,
-                  status: "TRANSIT"
+                // quantity: products[count].productQuantity,
+                quantity: { $gt: 0 },
+              },
+              {
+                $addToSet: {
+                  inventoryIds: recvInventoryId,
                 },
-                {
-                  $addToSet: {
-                    inventoryIds: recvInventoryId,
-                  },
-                  $set: {
-                    status: "HEALTHY",
-                    currentShipment: null,
-                  },
-                }
-              );
-            }
+                $set: {
+                  status: "HEALTHY",
+                },
+              }
+            );
+
+            // if (products[count].batchNumber != null) {
+            // const checkBatch = await AtomModel.find({
+            //   $and: [
+            //     { currentInventory: recvInventoryId },
+            //     { batchNumbers: products[count].batchNumber },
+            //   ],
+            // });
+
+            //   if (checkBatch.length > 0) {
+            //     await AtomModel.updateOne(
+            //       {
+            //         batchNumbers: products[count].batchNumber,
+            //         currentInventory: recvInventoryId,
+            //       },
+            //       {
+            //         $inc: {
+            //           quantity: parseInt(products[count].productQuantity),
+            //         },
+            //         $addToSet: {
+            //           inventoryIds: recvInventoryId,
+            //         },
+            //         $set: {
+            //           status: "HEALTHY",
+            //         },
+            //       }
+            //     );
+            //   } else {
+            //     const atom = new AtomModel({
+            //       id: "batch-" + cuid(),
+            //       label: {
+            //         labelId: "QR_2D",
+            //         labelType: "3232", // ?? What is this ??
+            //       },
+            //       quantity: products[count].productQuantity,
+            //       productId: products[count].productID,
+            //       inventoryIds: recvInventoryId,
+            //       currentInventory: recvInventoryId,
+            //       poIds: [],
+            //       shipmentIds: [],
+            //       txIds: [],
+            //       batchNumbers: products[count].batchNumber,
+            //       status: "HEALTHY",
+            //       attributeSet: {
+            //         mfgDate: products[count].mfgDate,
+            //         expDate: products[count].batchNumber.expDate,
+            //       },
+            //       eolInfo: {
+            //         eolId: "IDN29402-23423-23423",
+            //         eolDate: "2021-03-31T18:30:00.000Z",
+            //         eolBy: req.user.id,
+            //         eolUserInfo: "",
+            //       },
+            //     });
+            //     await atom.save();
+            //   }
+            // }
           }
           let Upload = null;
           if (req.file) {
@@ -4569,11 +4583,6 @@ exports.exportOutboundShipments = [
 function buildExcelReport(req, res, dataForExcel, type) {
   const styles = {
     headerDark: {
-      fill: {
-        fgColor: {
-          rgb: "FF000000",
-        },
-      },
       font: {
         color: {
           rgb: "FFFFFFFF",
@@ -4583,128 +4592,102 @@ function buildExcelReport(req, res, dataForExcel, type) {
         underline: true,
       },
     },
-    cellGreen: {
-      fill: {
-        fgColor: {
-          rgb: "FF00FF00",
-        },
-      },
-    },
   };
 
   const specification = {
     id: {
       displayName: req.t("Shipment_ID"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 120,
     },
     poId: {
       displayName: req.t("Reference_Order_ID"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: "10",
     },
     productCategory: {
       displayName: req.t("Product_Category"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     productName: {
       displayName: req.t("Product_Name"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     productID: {
       displayName: req.t("Product_ID"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     productQuantity: {
       displayName: req.t("Quantity"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     batchNumber: {
       displayName: req.t("Batch_Number"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     expiryDate: {
       displayName: req.t("Expiry_Date"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     manufacturer: {
       displayName: req.t("Manufacturer"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     supplierOrgName: {
       displayName: req.t("From_Organization_Name"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     supplierOrgId: {
       displayName: req.t("From_Organization_ID"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     supplierOrgLocation: {
       displayName: req.t("From_Organization_Location_Details"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     recieverOrgName: {
       displayName: req.t("Delivery_Organization_Name"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     recieverOrgId: {
       displayName: req.t("Delivery_Organization_ID"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     recieverOrgLocation: {
       displayName: req.t("Delivery_Organization_Location_Details"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     airWayBillNo: {
       displayName: req.t("Transit_Number"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     label: {
       displayName: req.t("Label_Code"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     shippingDate: {
       displayName: req.t("Shipment_Date"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     expectedDeliveryDate: {
       displayName: req.t("Shipment_Estimate_Date"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
   };

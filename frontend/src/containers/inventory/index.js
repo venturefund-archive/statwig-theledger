@@ -8,6 +8,7 @@ import {
   resetInventories,
   getTransactionFilterList,
 } from "../../actions/inventoryActions";
+import { getInventory } from "../../actions/inventoryActions";
 import { getProducts } from "../../actions/poActions";
 import { useTranslation } from "react-i18next";
 
@@ -20,6 +21,11 @@ const InventoryContainer = (props) => {
   const inventories = useSelector((state) => {
     return state.inventories;
   });
+
+  const ProductDetails = useSelector((state) => {
+    return state.inventoryDetails;
+  });
+
 
   const inventoriesCount = useSelector((state) => {
     return state.inventoriesCount;
@@ -41,6 +47,7 @@ const InventoryContainer = (props) => {
             };
           })
       );
+      dispatch(getInventory(0, 10000));
     }
     fetchData();
     dispatch(resetInventories());
@@ -59,6 +66,7 @@ const InventoryContainer = (props) => {
             inventoryDetails={inventories}
             inventoryFilterData={inventoryFilterData}
             productCategories={categories}
+            ProdDetails={ProductDetails}
             t={t}
             {...props}
           />

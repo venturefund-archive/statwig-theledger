@@ -49,13 +49,26 @@ export default function NetworkMap({
   //   googleMapsApiKey: "AIzaSyBLwFrIrQx_0UUAIaUwt6wfItNMIIvXJ78",
   // });
 
+  // useEffect(() => {
+  //   if (MapSelected && MapSelected.warehouseId !== reportWarehouse)
+	// 		setReportWarehouse(MapSelected.warehouseId);
+  // }, [MapSelected]);
+
   useEffect(() => {
-    if (MapSelected) setReportWarehouse(MapSelected.warehouseId);
-  }, [MapSelected]);
+		if (reportWarehouse !== MapSelected?.warehouseId) {
+			const currPlace = manufacturer?.warehouses?.filter(
+				(warehouse) => warehouse.warehouseId === reportWarehouse,
+      );
+      if (currPlace && currPlace?.length) {
+        console.log(currPlace[0]);
+        setMapSelected(currPlace[0]);
+      }
+		}
+	}, [reportWarehouse, manufacturer]);
 
   const onLoad = (map) => {
-    const oms = require(`npm-overlapping-marker-spiderfier/lib/oms.min`);
-    const newOms = new oms.OverlappingMarkerSpiderfier(map, {
+    const tempOms = require(`npm-overlapping-marker-spiderfier/lib/oms.min`);
+    const newOms = new tempOms.OverlappingMarkerSpiderfier(map, {
       markersWontMove: true, // we promise not to move any markers, allowing optimizations
       markersWontHide: true, // we promise not to change visibility of any markers, allowing optimizations
       basicFormatEvents: true, // allow the library to skip calculating advanced formatting information
@@ -95,7 +108,7 @@ export default function NetworkMap({
                 ),
               }}
               onLoad={(marker) => {
-                oms.addMarker(marker);
+                oms?.addMarker(marker);
                 window.google.maps.event.addListener(
                   marker,
                   "spider_click",

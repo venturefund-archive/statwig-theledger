@@ -690,6 +690,7 @@ exports.addProductsToInventory = [
                   currentInventory: inventory.id,
                   poIds: [],
                   shipmentIds: [],
+                  currentShipment: null,
                   txIds: [],
                   batchNumbers: [product.batchNumber],
                   status: "HEALTHY",
@@ -718,6 +719,7 @@ exports.addProductsToInventory = [
                 currentInventory: inventory.id,
                 poIds: [],
                 shipmentIds: [],
+                currentShipment: null,
                 txIds: [],
                 batchNumbers: [product.batchNumber],
                 status: "HEALTHY",
@@ -2199,41 +2201,42 @@ exports.getBatchNearExpiration = [
         : (warehouseId = req.user.warehouseId);
 
       const today = new Date();
+      today.setHours(0, 0, 0, 0);
       const nextMonth = new Date();
-      nextMonth.setDate(today.getDate() + 30);
+      nextMonth.setDate(today.getDate() + 31);
 
       const warehouse = await WarehouseModel.findOne({ id: warehouseId });
       if (warehouse) {
         const result = await AtomModel.aggregate([
-          {
-            $match: {
-              $and: [
-                {
-                  "attributeSet.expDate": {
-                    $gte: today.toISOString(),
-                    $lt: nextMonth.toISOString(),
-                  },
-                },
-                {
-                  $expr: {
-                    $in: [warehouse.warehouseInventory, "$inventoryIds"],
-                  },
-                },
-                { "attributeSet.mfgDate": { $ne: "" } },
-                { "attributeSet.expDate": { $ne: "" } },
-              ],
-            },
-          },
-          {
-            $lookup: {
-              from: "products",
-              localField: "productId",
-              foreignField: "id",
-              as: "products",
-            },
-          },
-          { $unwind: "$products" },
-        ]);
+					{
+						$match: {
+							$and: [
+								{
+									$and: [
+										{ "attributeSet.expDate": { $gte: today.toISOString() } },
+										{ "attributeSet.expDate": { $lt: nextMonth.toISOString() } },
+									],
+								},
+								{
+									$expr: {
+										$in: [warehouse.warehouseInventory, "$inventoryIds"],
+									},
+								},
+								{ "attributeSet.mfgDate": { $ne: "" } },
+								{ "attributeSet.expDate": { $ne: "" } },
+							],
+						},
+					},
+					{
+						$lookup: {
+							from: "products",
+							localField: "productId",
+							foreignField: "id",
+							as: "products",
+						},
+					},
+					{ $unwind: "$products" },
+				]);
         return apiResponse.successResponseWithData(
           res,
           "Near expiring batch Details",
@@ -2262,36 +2265,36 @@ exports.getBatchExpired = [
         : (warehouseId = req.user.warehouseId);
       const warehouse = await WarehouseModel.findOne({ id: warehouseId });
       if (warehouse) {
+        console.log(new Date(), warehouse.warehouseInventory)
+        let today = new Date();
+        today.setHours(0, 0, 0, 0);
         const result = await AtomModel.aggregate([
-          {
-            $match: {
-              $and: [
-                {
-                  "attributeSet.expDate": {
-                    $lt: new Date().toISOString(),
-                  },
-                },
-                {
-                  $expr: {
-                    $in: [warehouse.warehouseInventory, "$inventoryIds"],
-                  },
-                },
-                { batchNumbers: { $ne: "" } },
-                { "attributeSet.mfgDate": { $ne: "" } },
-                { "attributeSet.expDate": { $ne: "" } },
-              ],
-            },
-          },
-          {
-            $lookup: {
-              from: "products",
-              localField: "productId",
-              foreignField: "id",
-              as: "products",
-            },
-          },
-          { $unwind: "$products" },
+					{
+						$match: {
+							$and: [
+								{
+									"attributeSet.expDate": {
+										$lt: today,
+									},
+								},
+								{ currentInventory: warehouse.warehouseInventory },
+								{ batchNumbers: { $ne: "" } },
+								{ "attributeSet.mfgDate": { $ne: "" } },
+								{ "attributeSet.expDate": { $ne: "" } },
+							],
+						},
+					},
+					{
+						$lookup: {
+							from: "products",
+							localField: "productId",
+							foreignField: "id",
+							as: "products",
+						},
+					},
+					{ $unwind: "$products" },
         ]);
+        console.log(result);
         return apiResponse.successResponseWithData(
           res,
           "Expired Batch Details",
@@ -2317,22 +2320,23 @@ exports.getBatchWarehouse = [
       const inventoryId = req.query.inventory_id;
       const productId = req.query.product_id;
       const result = await AtomModel.aggregate([
-        {
-          $match: {
-            productId: productId,
-            currentInventory: inventoryId,
-          },
-        },
-        {
-          $lookup: {
-            from: "products",
-            localField: "productId",
-            foreignField: "id",
-            as: "products",
-          },
-        },
-        { $unwind: "$products" },
-      ]);
+				{
+					$match: {
+						productId: productId,
+						currentInventory: inventoryId,
+						status: { $ne: "MERGED" },
+					},
+				},
+				{
+					$lookup: {
+						from: "products",
+						localField: "productId",
+						foreignField: "id",
+						as: "products",
+					},
+				},
+				{ $unwind: "$products" },
+			]);
       return apiResponse.successResponseWithData(
         res,
         "Warehouse Batch Details",
@@ -2744,13 +2748,24 @@ exports.fetchBatchesOfInventory = [
       const warehouseId = wareId ? wareId : req.user.warehouseId;
       const warehouse = await WarehouseModel.findOne({ id: warehouseId });
       const inventoryId = warehouse.warehouseInventory;
-      const batches = await AtomModel.find({
-        productId: productId,
-        batchNumbers: { $nin: ["", "null", null] },
-        status: "HEALTHY",
-        currentInventory: inventoryId,
-        quantity: { $nin: [0] },
-      }).sort({ "attributeSet.expDate": 1 });
+      let today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const payload = {
+				$and: [
+					{ productId: productId },
+					{ status: "HEALTHY" },
+					{ quantity: { $gt: 0 } },
+					{ currentInventory: inventoryId },
+					{
+						$or: [
+							{ "attributeSet.expDate": { $exists: false } },
+							{ "attributeSet.expDate": { $in: [null, ""] } },
+							{ "attributeSet.expDate": { $gte: today } },
+						],
+					},
+				],
+      };
+      const batches = await AtomModel.find(payload).sort({ "attributeSet.expDate": 1 });
       return apiResponse.successResponseWithData(
         res,
         "Batches of product",
@@ -2778,6 +2793,10 @@ exports.reduceBatch = [
       const orgData = await OrganisationModel.findOne({ id: orgId });
       const address = orgData.postalAddress;
       const { batchNumber, quantity } = req.query;
+      const batchExists = await AtomModel.findOne({ batchNumbers: { $in: [batchNumber] } });
+      if(batchExists.quantity < Math.abs(quantity)) {
+        return apiResponse.validationErrorWithData(res, "Insufficient quantity in batch!", {});
+      }
       const batch = await AtomModel.findOneAndUpdate(
         {
           batchNumbers: { $in: [batchNumber] },
