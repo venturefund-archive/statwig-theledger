@@ -1429,7 +1429,7 @@ function buildPdfReportDoses(req, res, data, orderType) {
 					margin: [1, 1, 1, 1],
 					headerRows: 1,
 					headerStyle: "header",
-					widths: [80, 100, 150, 50, 80, 100, 100, 120],
+					widths: [80, 80, 80, 50, 80, 110, 100, 120],
 					body: rows,
 				},
 			},
