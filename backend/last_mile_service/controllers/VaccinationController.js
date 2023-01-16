@@ -1381,7 +1381,7 @@ function buildExcelReportDoses(req, res, dataForExcel, today) {
 			width: 220,
 		},
 		vaccinatedOrganisationName: {
-			displayName: "Organization",
+			displayName: req.t("organization"),
 			headerStyle: styles.headerDark,
 			width: 220,
 		}
@@ -1415,7 +1415,7 @@ function buildPdfReportDoses(req, res, data, today) {
 	for (const element of data) {
 		const date = element.date ? new Date(element.date).toLocaleDateString() : "N/A";
 		rows.push([
-			formatDate(date),
+			date,
 			element.batchNumber || "N/A",
 			element.organisationName || "N/A",
 			element.age || "N/A",
