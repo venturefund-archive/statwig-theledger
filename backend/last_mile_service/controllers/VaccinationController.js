@@ -1376,7 +1376,6 @@ function buildExcelReportDoses(req, res, dataForExcel, today) {
 		vaccinatedOrganisationName: {
 			displayName: "Organization",
 			headerStyle: styles.headerDark,
-			width: 220,
 		}
 	};
 
