@@ -1376,6 +1376,7 @@ function buildExcelReportDoses(req, res, dataForExcel, today) {
 		vaccinatedOrganisationName: {
 			displayName: "Organization",
 			headerStyle: styles.headerDark,
+			width: 220,
 		}
 	};
 
@@ -1428,7 +1429,7 @@ function buildPdfReportDoses(req, res, data, orderType) {
 					margin: [1, 1, 1, 1],
 					headerRows: 1,
 					headerStyle: "header",
-					widths: [80, 100, 150, 50, 80, 120, 120],
+					widths: [80, 100, 150, 50, 80, 100, 100, 120],
 					body: rows,
 				},
 			},
