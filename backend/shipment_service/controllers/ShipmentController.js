@@ -802,22 +802,22 @@ exports.createShipment = [
             });
             if (currentAtom.quantity == products[count].productQuantity) {
               await AtomModel.updateOne(
-								{
-									batchNumbers: products[count].batchNumber,
-									currentInventory: suppInventoryId,
-								},
-								{
-									$set: {
-										currentInventory: recvInventoryId,
-										status: "TRANSIT",
-										poIds: [...currentAtom.poIds, data?.poId],
-										currentShipment: shipmentId,
-									},
-									$addToSet: {
-										shipmentIds: shipmentId,
-									},
-								},
-							);
+                {
+                  batchNumbers: products[count].batchNumber,
+                  currentInventory: suppInventoryId,
+                },
+                {
+                  $set: {
+                    currentInventory: recvInventoryId,
+                    status: "TRANSIT",
+                    poIds: [...currentAtom.poIds, data?.poId],
+                    currentShipment: shipmentId,
+                  },
+                  $addToSet: {
+                    shipmentIds: shipmentId,
+                  },
+                },
+              );
             } else {
               await AtomModel.updateOne(
                 {
