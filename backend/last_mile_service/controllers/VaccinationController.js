@@ -147,6 +147,15 @@ const generateVaccinationsList = async (doseQuery, skip = 0, limit) => {
 			},
 		},
 		{ $unwind: "$warehouse" },
+		{
+			$lookup: {
+				from: "organisations",
+				localField: "warehouse.organisationId",
+				foreignField: "id",
+				as: "organisation",
+			},
+		},
+		{ $unwind: "$organisation" },
 		{ $sort: { createdAt: -1 } },
 		{
 			$facet: {
@@ -160,23 +169,24 @@ const generateVaccinationsList = async (doseQuery, skip = 0, limit) => {
 
 	let doses = [];
 	let totalCount = 0;
-	if(dosesResult && dosesResult?.length) {
+	if (dosesResult && dosesResult?.length) {
 		doses = dosesResult[0].paginatedResults;
 		totalCount = dosesResult[0].totalCount;
 	}
 
 	const result = [];
-	for (let i = 0; i < doses.length; ++i) {
-		let age = `${doses[i].ageMonths ? doses[i].ageMonths : doses[i].age} ${doses[i].ageMonths ? "months" : "years"
+	for (const element of doses) {
+		let age = `${element.ageMonths ? element.ageMonths : element.age} ${element.ageMonths ? "months" : "years"
 			}`;
 		const data = {
-			date: doses[i].createdAt,
-			batchNumber: doses[i].vaccineVial.batchNumber,
-			organisationName: doses[i].product?.manufacturer,
+			date: element.createdAt,
+			batchNumber: element.vaccineVial.batchNumber,
+			organisationName: element.product?.manufacturer,
 			age: age,
-			gender: doses[i].gender,
-			state: doses[i].warehouse.warehouseAddress.state,
-			city: doses[i].warehouse.warehouseAddress.city,
+			gender: element.gender,
+			state: element.warehouse.warehouseAddress.state,
+			city: element.warehouse.warehouseAddress.city,
+			vaccinatedOrganisationName: element.organisation.name,
 		};
 
 		result.push(data);
@@ -261,7 +271,7 @@ exports.fetchBatchById = [
 						today.setHours(0, 0, 0, 0);
 						console.log(today);
 						console.log(expDate.toDateString(), today.toDateString());
-						if(expDate < today) {
+						if (expDate < today) {
 							throw new Error("Batch expired!");
 						}
 					}
@@ -270,7 +280,7 @@ exports.fetchBatchById = [
 						currentInventory: warehouse.warehouseInventory,
 						batchNumbers: batchNumber,
 					});
-					if(existingAtom)
+					if (existingAtom)
 						throw new Error("Batch exhausted!");
 					else
 						throw new Error("Batch not found!");
@@ -888,12 +898,12 @@ exports.getVialsUtilised = [
 			const warehouses = await WarehouseModel.find(warehouseQuery);
 			const warehouseIds = warehouses.map((warehouse) => warehouse.id);
 			const pagniationQuery = [];
-			if(skip) {
-				pagniationQuery.push({$skip: skip})
+			if (skip) {
+				pagniationQuery.push({ $skip: skip })
 			}
-			if(limit) {
-				pagniationQuery.push({$limit: limit});
-			}	
+			if (limit) {
+				pagniationQuery.push({ $limit: limit });
+			}
 			const vialsResult = await VaccineVialModel.aggregate([
 				{ $match: { warehouseId: { $in: warehouseIds } } },
 				{ $sort: { createdAt: -1 } },
@@ -909,11 +919,11 @@ exports.getVialsUtilised = [
 
 			let vialsUtilized = [];
 			let totalCount = 0;
-			if(vialsResult && vialsResult?.length) {
+			if (vialsResult && vialsResult?.length) {
 				vialsUtilized = vialsResult[0].paginatedResults;
 				totalCount = vialsResult[0].totalCount;
 			}
-		
+
 			const result = {
 				vialsUtilized: vialsUtilized,
 				totalCount: totalCount,
@@ -1005,9 +1015,8 @@ exports.getVaccinationsList = [
 
 			const result = [];
 			for (let i = 0; i < doses.length; ++i) {
-				let age = `${doses[i].ageMonths ? doses[i].ageMonths : doses[i].age} ${
-					doses[i].ageMonths ? "months" : "years"
-				}`;
+				let age = `${doses[i].ageMonths ? doses[i].ageMonths : doses[i].age} ${doses[i].ageMonths ? "months" : "years"
+					}`;
 				const data = {
 					date: doses[i].createdAt,
 					batchNumber: doses[i].vaccineVial.batchNumber,
@@ -1022,7 +1031,7 @@ exports.getVaccinationsList = [
 				totalCount: totalCount,
 				vaccinationsList: result,
 			});
-		} catch(err) {
+		} catch (err) {
 			console.log(err);
 			return apiResponse.ErrorResponse(res, err.message);
 		}
@@ -1124,15 +1133,6 @@ exports.getCitiesAndOrgsForFilters = [
 	},
 ];
 
-/**
- * =======================================================================================
- * 																							DO NOT DELETE
- * 										---------------------------------------------------------------
- * 											Required for general VL, the new API is Costa Rica Specific
- *
- * Returns list of pharmacies in case of governing body &
- * Returns list of cities the pharmacies are located in
- */
 exports.getCitiesAndOrgsForFiltersOld = [
 	auth,
 	async (req, res) => {
@@ -1191,7 +1191,6 @@ exports.getCitiesAndOrgsForFiltersOld = [
 		}
 	},
 ];
-// =======================================================================================
 
 exports.exportVaccinationList = [
 	auth,
@@ -1350,7 +1349,7 @@ function buildExcelReportDoses(req, res, dataForExcel, today) {
 			width: 120,
 		},
 		organisationName: {
-			displayName: "Manufacturer Name",
+			displayName: "Manufacturer",
 			headerStyle: styles.headerDark,
 			width: 220,
 		},
@@ -1374,6 +1373,11 @@ function buildExcelReportDoses(req, res, dataForExcel, today) {
 			headerStyle: styles.headerDark,
 			width: 220,
 		},
+		vaccinatedOrganisationName: {
+			displayName: "Organization",
+			headerStyle: styles.headerDark,
+			width: 220,
+		}
 	};
 
 	const report = excel.buildExport([
@@ -1393,22 +1397,24 @@ function buildPdfReportDoses(req, res, data, orderType) {
 	rows.push([
 		{ text: "Date", bold: true },
 		{ text: "Batch Number", bold: true },
-		{ text: "Manufacturer Name", bold: true },
+		{ text: "Manufacturer", bold: true },
 		{ text: "Age", bold: true },
 		{ text: "Gender", bold: true },
 		{ text: "State", bold: true },
 		{ text: "City", bold: true },
+		{ text: "Organization", bold: true },
 	]);
-	for (let i = 0; i < data.length; i++) {
-		const date = data[i].date ? new Date(data[i].date).toLocaleDateString() : "N/A";
+	for (const element of data) {
+		const date = element.date ? new Date(element.date).toLocaleDateString() : "N/A";
 		rows.push([
 			date,
-			data[i].batchNumber || "N/A",
-			data[i].organisationName || "N/A",
-			data[i].age || "N/A",
-			data[i].gender || "N/A",
-			data[i].state || "N/A",
-			data[i].city || "N/A",
+			element.batchNumber || "N/A",
+			element.organisationName || "N/A",
+			element.age || "N/A",
+			element.gender || "N/A",
+			element.state || "N/A",
+			element.city || "N/A",
+			element.vaccinatedOrganisationName || "N/A",
 		]);
 	}
 
