@@ -25,6 +25,17 @@ export default function Filter({
     </div>
   ));
 
+  const CategoryWithoutDuplicate = filters?.reduce((finalArray, current) => {
+    let obj = finalArray.find(
+      (item) => item.productCategory === current.productCategory
+    );
+
+    if (obj) {
+      return finalArray;
+    }
+    return finalArray.concat([current]);
+  }, []);
+
   const CustomMenu = React.forwardRef(
     ({ children, style, className, "aria-labelledby": labeledBy }, ref) => {
       const [value, setValue] = useState("");
@@ -35,22 +46,22 @@ export default function Filter({
           className={className}
           aria-labelledby={labeledBy}
         >
-          <div className='form-space-area'>
+          <div className="form-space-area">
             <Form.Control
               autoFocus
-              placeholder='Type to filter...'
+              placeholder="Type to filter..."
               onChange={(e) => setValue(e.target.value)}
               value={value}
             />
           </div>
-          <ul className='list-unstyled mi-custom-list-height'>
+          <ul className="list-unstyled mi-custom-list-height">
             {React.Children.toArray(children).filter(
               (child) =>
                 !value || child.props.children.toLowerCase().startsWith(value)
             )}
           </ul>
-          <div className='filter-footer' onClick={() => setStockType("clear")}>
-            <button className='nt-btn nt-btn-xs nt-btn-blue-alt clear-btn-padding'>
+          <div className="filter-footer" onClick={() => setStockType("clear")}>
+            <button className="nt-btn nt-btn-xs nt-btn-blue-alt clear-btn-padding">
               <span>Clear</span>
             </button>
           </div>
@@ -61,32 +72,59 @@ export default function Filter({
 
   return (
     <Dropdown onSelect={(e) => setFilter(e)}>
-      <Dropdown.Toggle as={CustomToggle} id='dropdown-custom-components'>
-        <div className='table-header-with-filter'>
-          <p className='mi-body-sm mi-reset grey-400'>{title}</p>
-          <i className='fa-solid fa-sort'></i>
+      <Dropdown.Toggle as={CustomToggle} id="dropdown-custom-components">
+        <div className="table-header-with-filter">
+          <p className="mi-body-sm mi-reset grey-400">{title}</p>
+          <i className="fa-solid fa-sort"></i>
         </div>
       </Dropdown.Toggle>
 
-      <Dropdown.Menu as={CustomMenu} className='mi-custom-filter'>
-        {filters?.map((item) => {
-          return (
-            <Dropdown.Item
-              value={
-                filterKey === "productName"
-                  ? item.productId
-                  : item[`${filterKey}`]
-              }
-              eventKey={
-                filterKey === "productName"
-                  ? item.productId
-                  : item[`${filterKey}`]
-              }
-            >
-              {item[`${filterKey}`]}
-            </Dropdown.Item>
-          );
-        })}
+      <Dropdown.Menu as={CustomMenu} className="mi-custom-filter">
+        {filterKey === "productCategory" ? (
+          <>
+            {CategoryWithoutDuplicate?.map((item) => {
+              return (
+                <Dropdown.Item
+                  value={
+                    filterKey === "productName"
+                      ? item.productId
+                      : item[`${filterKey}`]
+                  }
+                  eventKey={
+                    filterKey === "productName"
+                      ? item.productId
+                      : item[`${filterKey}`]
+                  }
+                >
+                  {console.log(item.productCategory)}
+                  {item[`${filterKey}`]}
+                </Dropdown.Item>
+              );
+            })}
+          </>
+        ) : (
+          <>
+            {filters?.map((item) => {
+              return (
+                <Dropdown.Item
+                  value={
+                    filterKey === "productName"
+                      ? item.productId
+                      : item[`${filterKey}`]
+                  }
+                  eventKey={
+                    filterKey === "productName"
+                      ? item.productId
+                      : item[`${filterKey}`]
+                  }
+                >
+                  {console.log(item.productCategory)}
+                  {item[`${filterKey}`]}
+                </Dropdown.Item>
+              );
+            })}
+          </>
+        )}
       </Dropdown.Menu>
     </Dropdown>
   );
