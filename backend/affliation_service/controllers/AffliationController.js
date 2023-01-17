@@ -237,6 +237,7 @@ exports.affiliateOrg = [
         affiliations
       );
     } catch (err) {
+      console.log(err);
       return apiResponse.ErrorResponse(res, err);
     }
   },
@@ -246,39 +247,30 @@ exports.allAffiliateOrgs = [
   auth,
   async (req, res) => {
     try {
-      await EmployeeModel.find({ organisationId: req.user.organisationId })
+      const orgs = await EmployeeModel.find({ organisationId: req.user.organisationId })
         .select("affiliatedOrganisations")
-        .then((orgs) => {
-          var orgSet = new Set();
-          orgs.map((item) => {
-            item.affiliatedOrganisations.map((e) => {
-              orgSet.add(e);
-            });
-          });
-          if (orgSet.size > 0) {
-            var orgArray = [...orgSet];
-            Organisation.find({ id: { $in: orgArray } })
-              .then((Organizations) => {
-                return apiResponse.successResponseWithData(
-                  res,
-                  "All Affiliated Organizations Details",
-                  Organizations
-                );
-              })
-              .catch((err) => {
-                return apiResponse.ErrorResponse(res, err);
-              });
-          } else {
-            return apiResponse.notFoundResponse(
-              res,
-              " No Affiliated Organizations Found"
-            );
-          }
-        })
-        .catch((err) => {
-          return apiResponse.ErrorResponse(res, err);
+      const orgSet = new Set();
+      orgs.map((item) => {
+        item.affiliatedOrganisations.map((e) => {
+          orgSet.add(e);
         });
+      });
+      if (orgSet.size > 0) {
+        const orgArray = [...orgSet];
+        const organisationList = await Organisation.find({ id: { $in: orgArray } })
+        return apiResponse.successResponseWithData(
+          res,
+          "All Affiliated Organizations Details",
+          organisationList
+        );
+      } else {
+        return apiResponse.notFoundResponse(
+          res,
+          " No Affiliated Organizations Found"
+        );
+      }
     } catch (err) {
+      console.log(err);
       return apiResponse.ErrorResponse(res, err);
     }
   },
@@ -315,6 +307,7 @@ exports.acceptAffiliate = [
         resUpdate
       );
     } catch (err) {
+      console.log(err);
       return apiResponse.ErrorResponse(res, err);
     }
   },
@@ -351,6 +344,7 @@ exports.rejectAffiliate = [
         resUpdate
       );
     } catch (err) {
+      console.log(err);
       return apiResponse.ErrorResponse(res, err);
     }
   },
@@ -372,17 +366,12 @@ exports.unAffiliate = [
         },
         { multi: true }
       )
-        .then((employee) => {
-          return apiResponse.successResponseWithData(
-            res,
-            "UnAffiliated employee",
-            employee
-          );
-        })
-        .catch((err) => {
-          return apiResponse.ErrorResponse(res, err);
-        });
+      return apiResponse.successResponse(
+        res,
+        "UnAffiliated employee"
+      );
     } catch (err) {
+      console.log(err);
       return apiResponse.ErrorResponse(res, err);
     }
   },
