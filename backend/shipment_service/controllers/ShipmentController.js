@@ -4633,9 +4633,6 @@ function buildExcelReport(req, res, dataForExcel, type) {
   const styles = {
     headerDark: {
       font: {
-        color: {
-          rgb: "FFFFFFFF",
-        },
         sz: 14,
         bold: true,
         underline: true,
