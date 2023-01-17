@@ -437,6 +437,9 @@ const NewShipment = (props) => {
       setValidShipmentID(value);
     });
   }
+
+  console.log(addProducts);
+
   return (
     <div className='NewShipment'>
       <h1 className='breadcrumb'>{t("create_shipment")}</h1>
@@ -647,7 +650,7 @@ const NewShipment = (props) => {
                               }
                             if (result.poDetails[0].products.length > 0) {
                               setProducts((p) => []);
-                              setAddProducts((p) => []);
+                              setAddProducts([...products_temp]);
                               setFieldValue("products", products_temp);
                             } else setFieldValue("products", []);
                           }}
@@ -935,15 +938,17 @@ const NewShipment = (props) => {
                             setFieldValue("fromOrg", senderOrganisation[0]);
                             setFieldValue("fromOrgLoc", v.value);
                             setSenderOrgId(v.value);
-                            setAddProducts((prod) => []);
-                            let newArr = {
-                              productName: "",
-                              manufacturer: "",
-                              productQuantity: "",
-                              batchNumber: "",
-                              unitofMeasure: ""
-                            };
-                            setAddProducts((prod) => [...prod, newArr]);
+                            if(!OrderDetails?.products?.length) {
+                              setAddProducts((prod) => []);
+                              let newArr = {
+                                productName: "",
+                                manufacturer: "",
+                                productQuantity: "",
+                                batchNumber: "",
+                                unitofMeasure: ""
+                              };
+                              setAddProducts((prod) => [...prod, newArr]);
+                            }
                           }}
                           value={
                             values.fromOrgLoc === ""
@@ -1308,9 +1313,53 @@ const NewShipment = (props) => {
                   product={OrderDetails?.products}
                   handleQuantityChange={(v, i) => {
                     handleQuantityChange(v, i);
+                    const soDetailsClone = { ...OrderDetails };
+                    let qty;
+                    if(parseInt(v) > parseInt(soDetailsClone.products[i].orderedQuantity)) {
+                      qty = soDetailsClone.products[i].orderedQuantity
+                    } else {
+                      qty = v;
+                    }
+                    console.log(addProducts);
+                    let newArr = [...addProducts];
+                    newArr[i].productQuantity = qty;
+                    if(newArr.length > 0)
+                    setFieldValue(
+                      "products",
+                      newArr.map((row) => ({
+                        productCategory: row.type,
+                        productID: row.id,
+                        productQuantity: row.productQuantity,
+                        batchNumber: row.batchNumber,
+                        productName: row.name,
+                        manufacturer: row.manufacturer,
+                        quantity: row.quantity,
+                        unitofMeasure: row.unitofMeasure
+                      }))
+                    );
+                    else setFieldValue("products", []);
+                    setAddProducts((prod) => [...newArr]);
                   }}
                   handleBatchChange={(v, i) => {
                     handleBatchChange(v, i);
+                    let newArr = [...addProducts];
+                    newArr[i].batchNumber = v;
+                    if(newArr.length > 0)
+                    setFieldValue(
+                      "products",
+                      newArr.map((row) => ({
+                        productCategory: row.type,
+                        productID: row.id,
+                        productQuantity: row.productQuantity,
+                        batchNumber: row.batchNumber,
+                        productName: row.name,
+                        manufacturer: row.manufacturer,
+                        quantity: row.quantity,
+                        unitofMeasure: row.unitofMeasure
+                      }))
+                    );
+                    else setFieldValue("products", []);
+                    setAddProducts((prod) => [...newArr]);
                   }}
                   enableDelete={false}
                   onRemoveRow={(index) => {
@@ -1433,17 +1482,17 @@ const NewShipment = (props) => {
                     }}
                     enableDelete={true}
                     onRemoveRow={(index) => {
-                      const prodIndex = products.findIndex(
-                        (p) => p.id === addProducts[index].id
-                      );
+                      // const prodIndex = products.findIndex(
+                      //   (p) => p.id === addProducts[index].id
+                      // );
                       let newArray = [...products];
-                      newArray[prodIndex] = {
-                        ...newArray[prodIndex],
+                      newArray[index] = {
+                        ...newArray[index],
                         isSelected: false,
                       };
+                      addProducts.splice(index, 1);
                       setProducts((prod) => [...newArray]);
 
-                      addProducts.splice(index, 1);
                       let newArr = [...addProducts];
                       if (newArr.length > 0)
                         setFieldValue(
@@ -1560,6 +1609,7 @@ const NewShipment = (props) => {
           </form>
         )}
       </Formik>
+      
       {openCreatedInventory && (
         <Modal
           close={() => closeModal()}

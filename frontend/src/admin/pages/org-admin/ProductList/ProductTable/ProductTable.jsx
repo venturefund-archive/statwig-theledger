@@ -13,7 +13,6 @@ import { useSelector } from "react-redux";
 export default function ProductTable(props) {
   const { user } = useSelector((state) => state);
   const { t } = props;
-  console.log(user.organisationId);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [products, setProducts] = useState([]);
@@ -29,6 +28,20 @@ export default function ProductTable(props) {
     }
     fetchProducts();
   }, [page, rowsPerPage, user.organisationId, props.productAdded]);
+
+  const uniqueIds = new Set();
+
+  const uniqueProducts = products.filter(element => {
+    const isDuplicate = uniqueIds.has(element.name);
+
+    uniqueIds.add(element.name);
+
+    if (!isDuplicate) {
+      return true;
+    }
+
+    return false;
+  });
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -91,7 +104,7 @@ export default function ProductTable(props) {
           </TableRow>
         </TableHead>
         <TableBody className="organization-tbody">
-          {products.map((rows, index) => (
+          {uniqueProducts.map((rows, index) => (
             <ProductRow key={rows.id} rows={rows} index={index} />
           ))}
         </TableBody>

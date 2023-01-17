@@ -71,7 +71,7 @@ export default function InstockRow({ product, reportWarehouse, t }) {
     <>
       <TableRow
         sx={{ "& > *": { borderBottom: "unset !important" } }}
-        className="mi-custom-tableRow"
+        className="mi-custom-tableRow "
       >
         <TableCell className="mi-custom-cell mi-radius-first mi-first-cell-padding">
           <div className="mi-table-data">

@@ -1,10 +1,12 @@
-FROM node:16.18 as react_build 
+FROM node:16.15.1 as react_build 
 
 WORKDIR /app
 
 COPY package.json /app/
 
-RUN yarn install
+RUN npm cache clean --force
+
+RUN npm install --legacy-peer-deps
 
 COPY . /app/
 
@@ -22,7 +24,7 @@ ARG GOOGLE_CLIENT_ID
 
 ENV REACT_APP_GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
 
-RUN yarn run build 
+RUN npm run build 
 
 FROM nginx:stable-alpine
 

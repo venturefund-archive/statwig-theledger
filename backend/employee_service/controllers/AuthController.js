@@ -26,7 +26,6 @@ const fs = require("fs");
 const util = require("util");
 const unlinkFile = util.promisify(fs.unlink);
 const utils = require("ethereumjs-util");
-const moveFile = require("move-file");
 const XLSX = require("xlsx");
 const { constants } = require("../helpers/constants");
 const RequestApproved = require("../components/RequestApproved");
@@ -141,6 +140,7 @@ async function createWarehouse(warehouseExists, wareId, payload, employeeId) {
 		}
 	);
 }
+
 function getUserCondition(query, orgId) {
 	let matchCondition = {};
 	matchCondition.organisationId = orgId;
@@ -759,6 +759,7 @@ exports.verifyOtp = [
 								phoneNumber: user.phoneNumber,
 								org: user.msp,
 								userName: user.emailId,
+								photoId: user.photoId,
 								preferredLanguage: user.preferredLanguage,
 								isCustom: user.isCustom,
 								type: org.type
@@ -774,6 +775,7 @@ exports.verifyOtp = [
 								phoneNumber: user.phoneNumber,
 								org: user.msp,
 								userName: user.emailId,
+								photoId: user.photoId,
 								preferredLanguage: user.preferredLanguage,
 								isCustom: user.isCustom,
 								type: org.type
@@ -2349,8 +2351,7 @@ exports.addUsersFromExcel = [
 				const { organisationName } = req.user;
 				const dir = `uploads`;
 				if (!fs.existsSync(dir)) fs.mkdirSync(dir);
-				await moveFile(req.file.path, `${dir}/${req.file.originalname}`);
-				const workbook = XLSX.readFile(`${dir}/${req.file.originalname}`);
+				const workbook = XLSX.readFile(req.file.path);
 				const sheet_name_list = workbook.SheetNames;
 				let data = XLSX.utils.sheet_to_json(
 					workbook.Sheets[sheet_name_list[0]],
@@ -2477,58 +2478,48 @@ exports.activateUser = [
 				.then((employee) => {
 					if (employee) {
 						if (employee.isConfirmed && employee.accountStatus == "ACTIVE") {
-							return apiResponse.successResponseWithData(
-								res,
-								" User is already Active",
-								employee
-							);
+							return apiResponse.successResponseWithData(res, " User is already Active", employee);
 						} else {
-							axios
-								.get(`${blockchain_service_url}/createUserAddress`)
-								.then((response) => {
-									const walletAddress = response.data.items;
-									const userData = {
-										walletAddress,
-									};
-									axios
-										.post(`${blockchain_service_url}/grantPermission`, userData)
-										.then(() => console.log("posted"));
-									EmployeeModel.findOneAndUpdate(
-										{ id: id },
-										{
-											$set: {
-												accountStatus: "ACTIVE",
-												isConfirmed: true,
-												walletAddress,
-												role,
-											},
+							axios.get(`${blockchain_service_url}/createUserAddress`).then((response) => {
+								const walletAddress = response.data.items;
+								const userData = {
+									walletAddress,
+								};
+								axios
+									.post(`${blockchain_service_url}/grantPermission`, userData)
+									.then(() => console.log("posted"));
+								EmployeeModel.findOneAndUpdate(
+									{ id: id },
+									{
+										$set: {
+											accountStatus: "ACTIVE",
+											isConfirmed: true,
+											walletAddress,
+											role,
 										},
-										{ new: true }
-									)
-										.exec()
-										.then((emp) => {
-											let emailBody = RequestApproved({
-												name: emp.firstName,
-												organisation: organisationName,
-											});
-											// Send confirmation email
-											try {
-												mailer.send(
-													constants.appovalEmail.from,
-													emp.emailId,
-													constants.appovalEmail.subject,
-													emailBody
-												);
-											} catch (mailError) {
-												console.log(mailError);
-											}
-											return apiResponse.successResponseWithData(
-												res,
-												`User Activated`,
-												emp
-											);
+									},
+									{ new: true },
+								)
+									.exec()
+									.then((emp) => {
+										let emailBody = RequestApproved({
+											name: emp.firstName,
+											organisation: organisationName,
 										});
-								});
+										// Send confirmation email
+										try {
+											mailer.send(
+												constants.appovalEmail.from,
+												emp.emailId,
+												constants.appovalEmail.subject,
+												emailBody,
+											);
+										} catch (mailError) {
+											console.log(mailError);
+										}
+										return apiResponse.successResponseWithData(res, `User Activated`, emp);
+									});
+							});
 						}
 					} else {
 						return apiResponse.notFoundResponse(req, res, "User Not Found");

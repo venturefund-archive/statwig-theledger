@@ -17,6 +17,7 @@ const ViewInventory = (props) => {
   const [more, setMore] = useState([]);
   const dispatch = useDispatch();
 
+
   const toggleShowMore = async (inventory_id, product_id, index, enable) => {
     if (!enable) {
       dispatch(turnOn());
