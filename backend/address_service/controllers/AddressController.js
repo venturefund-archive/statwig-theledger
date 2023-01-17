@@ -182,13 +182,12 @@ exports.AddWarehouse = [
           },
         },
         {
-          new: true,
           projection:
             { "counters.$": 1 }
         }
       );
       const inventoryId =
-        invCounter.counters[0].format + invCounter.counters[0].value;
+        invCounter.counters[0].format + invCounter.counters[0].value++;
       const inventoryResult = new Inventory({ id: inventoryId });
       await inventoryResult.save();
       const {
@@ -285,7 +284,6 @@ exports.AddOffice = [
           },
         },
         {
-          new: true,
           projection: {
             "counters.$": 1
           }
@@ -293,7 +291,7 @@ exports.AddOffice = [
       );
       const officeId =
         warehouseCounter.counters[0].format +
-        warehouseCounter.counters[0].value;
+        warehouseCounter.counters[0].value++;
       const office = new Warehouse({
         id: officeId,
         title,
