@@ -2536,7 +2536,6 @@ exports.searchProduct = [
   auth,
   async (req, res) => {
     try {
-      let warehouseId;
       const permission_request = {
         role: req.user.role,
         permissionRequired: ["searchByProductName"],
@@ -2544,9 +2543,7 @@ exports.searchProduct = [
       checkPermissions(permission_request, async (permissionResult) => {
         if (permissionResult.success) {
           const { productName, productType } = req.query;
-          req.query.warehouseId
-            ? (warehouseId = req.query.warehouseId)
-            : (warehouseId = req.user.warehouseId);
+          const warehouseId = req.query?.warehouseId || req.user.warehouseId;
           const warehouse = await WarehouseModel.findOne({ id: warehouseId });
           if (warehouse) {
             let elementMatchQuery = {};
@@ -2558,6 +2555,11 @@ exports.searchProduct = [
               elementMatchQuery[`products.type`] = productType;
             }
             const inventory = await InventoryModel.aggregate([
+              {
+                $match: {
+                  id: warehouse.warehouseInventory
+                }
+              },
               { $unwind: "$inventoryDetails" },
               {
                 $lookup: {
