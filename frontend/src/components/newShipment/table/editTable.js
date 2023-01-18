@@ -1,7 +1,6 @@
 import React from "react";
 import EditRow from "./editRow";
 import "./style.scss";
-import { batch } from "react-redux";
 
 const EditTable = (props) => {
   const { t } = props;
@@ -25,7 +24,7 @@ const EditTable = (props) => {
         </div>
         <div>
           {props.product.map((product, index) => (
-            <EditRow prod={product} {...props} index={index} />
+            <EditRow prod={product} {...props} index={index} key={index} />
           ))}
         </div>
       </div>
@@ -35,6 +34,3 @@ const EditTable = (props) => {
 
 export default EditTable;
 
-/*<div className="input-group-append">
-<img src={downArrow} alt="downarrow" width="9" height="9" />
-</div>*/
