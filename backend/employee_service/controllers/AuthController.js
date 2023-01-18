@@ -100,9 +100,18 @@ async function createWarehouse(warehouseExists, wareId, payload, employeeId) {
 		sqft: 0,
 		supervisors,
 		employees,
-		warehouseAddress,
+		warehouseAddress: {
+			firstLine: warehouseAddress.line1,
+			secondLine: "",
+			region: warehouseAddress.region,
+			city: warehouseAddress.city,
+			state: warehouseAddress.state,
+			country: warehouseAddress.country,
+			landmark: "",
+			zipCode: warehouseAddress.pincode,
+		},
 		warehouseInventory: inventoryResult.id,
-		status: "NOTVERIFIED",
+		status: "ACTIVE",
 	});
 	await warehouse.save();
 
@@ -2643,6 +2652,14 @@ exports.getOrgUsers = [
 	auth,
 	async (req, res) => {
 		try {
+			const pagniationQuery = [];
+			if (req.query.skip) {
+				pagniationQuery.push({ $skip: parseInt(req.query.skip) })
+			}
+			if (req.query.limit) {
+				pagniationQuery.push({ $limit: parseInt(req.query.limit) });
+			}
+			console.log(getUserCondition(req.query, req.user.organisationId));
 			const users = await EmployeeModel.aggregate([
 				{
 					$match: getUserCondition(req.query, req.user.organisationId),
@@ -2663,7 +2680,7 @@ exports.getOrgUsers = [
 						as: "warehouses",
 					},
 				},
-				{ $unwind: "$warehouses" },
+				{ $unwind: { path: "$warehouses", preserveNullAndEmptyArrays: true } },
 				{
 					$project: {
 						_id: 0,
@@ -2684,15 +2701,23 @@ exports.getOrgUsers = [
 						country: "$warehouses.warehouseAddress.country",
 					},
 				},
-				{ $skip: parseInt(req.query.skip) || 0 },
-				{ $limit: parseInt(req.query.limit) || 0 },
+				{
+					$facet: {
+						paginatedResults: pagniationQuery,
+						totalCount: [{ $count: "count" }],
+					},
+				},
+				{ $unwind: "$totalCount" },
+				{ $project: { paginatedResults: 1, totalCount: "$totalCount.count" } },
 			]);
+
+			const result = users?.length ? users[0] : {};
 
 			return apiResponse.successResponseWithData(
 				req,
 				res,
 				"Organisation Users",
-				users
+				result
 			);
 		} catch (err) {
 			console.log(err);

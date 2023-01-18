@@ -6,7 +6,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Checkbox from "@mui/material/Checkbox";
-import { TablePagination } from "@mui/material";
+import { Pagination } from "@mui/material";
 import UsersRow from "./UsersRow";
 import { getOrgUsers } from "../../../../actions/organisationActions";
 import { useDispatch, useSelector } from "react-redux";
@@ -39,17 +39,19 @@ export default function UsersTable(props) {
   }, [users])
 
 
-  const [page, setPage] = React.useState(0);
+  const [page, setPage] = React.useState(1);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [totalCount, setTotalCount] = useState(0);
 
   useEffect(async () => {
-    console.log("Triggered!");
-    let res = await dispatch(getOrgUsers(`skip=${page * 10}&limit=${rowsPerPage}`));
-    setUsers(res);    
+    let res = await dispatch(getOrgUsers(`skip=${(page-1) * 10}&limit=${rowsPerPage}`));
+    setUsers(res.paginatedResults);
+    setTotalCount(res.totalCount);
   }, [dispatch, page, rowsPerPage, props.tableFlag, refetch]);
 
   const handleChangePage = (event, newPage) => {
-    setPage(newPage);
+    if (newPage > 1) setPage(newPage);
+		else setPage(1);
   };
 
   const handleChangeRowsPerPage = (event) => {
@@ -58,57 +60,47 @@ export default function UsersTable(props) {
   };
 
   return (
-    <TableContainer>
-      <Table
-        sx={{ minWidth: 992 }}
-        aria-label="simple table"
-        className="organization-table"
-      >
-        <TableHead className="organization-thead">
-          <TableRow className="organization-tr">
-            <TableCell>
-              <h1 className="vl-note f-500 vl-royal">{t("user_name")}</h1>
-            </TableCell>
-            <TableCell>
-              <h1 className="vl-note f-500 vl-royal">{t("role")}</h1>
-            </TableCell>
-            <TableCell>
-              <h1 className="vl-note f-500 vl-royal">{t("email")}</h1>
-            </TableCell>
-            <TableCell>
-              <h1 className="vl-note f-500 vl-royal">{t("phone_no")}</h1>
-            </TableCell>
-            <TableCell>
-              <h1 className="vl-note f-500 vl-royal">{t("location")}</h1>
-            </TableCell>
-            <TableCell>
-              <h1 className="vl-note f-500 vl-royal">{t("status")}</h1>
-            </TableCell>
-            <TableCell>
-              <h1 className="vl-note f-500 vl-royal">{t("created_on")}</h1>
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody className="organization-tbody">
-          {uniqueUsers.map((rows, index) => (
-            <UsersRow
-              t={t}
-              key={rows.id}
-              rows={rows}
-              index={index}
-              defaultRoles={defaultRoles}
-            />
-          ))}
-        </TableBody>
-      </Table>
-      <TablePagination
-        component="div"
-        count={1000}
-        page={page}
-        onPageChange={handleChangePage}
-        rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
-    </TableContainer>
-  );
+		<TableContainer>
+			<Table sx={{ minWidth: 992 }} aria-label="simple table" className="organization-table">
+				<TableHead className="organization-thead">
+					<TableRow className="organization-tr">
+						<TableCell>
+							<h1 className="vl-note f-500 vl-royal">{t("user_name")}</h1>
+						</TableCell>
+						<TableCell>
+							<h1 className="vl-note f-500 vl-royal">{t("role")}</h1>
+						</TableCell>
+						<TableCell>
+							<h1 className="vl-note f-500 vl-royal">{t("email")}</h1>
+						</TableCell>
+						<TableCell>
+							<h1 className="vl-note f-500 vl-royal">{t("phone_no")}</h1>
+						</TableCell>
+						<TableCell>
+							<h1 className="vl-note f-500 vl-royal">{t("location")}</h1>
+						</TableCell>
+						<TableCell>
+							<h1 className="vl-note f-500 vl-royal">{t("status")}</h1>
+						</TableCell>
+						<TableCell>
+							<h1 className="vl-note f-500 vl-royal">{t("created_on")}</h1>
+						</TableCell>
+					</TableRow>
+				</TableHead>
+				<TableBody className="organization-tbody">
+					{uniqueUsers.map((rows, index) => (
+						<UsersRow t={t} key={rows.id} rows={rows} index={index} defaultRoles={defaultRoles} />
+					))}
+				</TableBody>
+			</Table>
+			<div className="mi_custom_pagination_wrapper">
+				<Pagination
+					count={Math.ceil(totalCount / rowsPerPage)}
+					page={page}
+          onChange={handleChangePage}
+          shape="rounded"
+				/>
+			</div>
+		</TableContainer>
+	);
 }

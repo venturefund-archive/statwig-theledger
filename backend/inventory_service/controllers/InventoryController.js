@@ -759,10 +759,11 @@ exports.addProductsToInventory = [
             const insertAtomsArray = [];
             for (let i = 0; i < atomsArray.length; i++) {
               let batchDup = await AtomModel.findOne({
-                productId: atomsArray[i].productId,
-                batchNumbers: atomsArray[i].batchNumbers[0],
-                currentInventory: warehouse.warehouseInventory,
-              });
+								productId: atomsArray[i].productId,
+								batchNumbers: atomsArray[i].batchNumbers[0],
+								"attributeSet.expDate": product.expDate,
+								currentInventory: warehouse.warehouseInventory,
+							});
               if (batchDup) {
                 await AtomModel.updateOne(
                   { id: batchDup.id },

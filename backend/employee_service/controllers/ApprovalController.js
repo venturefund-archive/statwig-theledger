@@ -72,10 +72,19 @@ async function createWarehouse(warehouseExists, wareId, payload, employeeId) {
 				bottleCapacity: 0,
 				sqft: 0,
 				supervisors,
-				employees,
-				warehouseAddress,
+        employees,
+        warehouseAddress: {
+          firstLine: warehouseAddress.line1,
+          secondLine: "",
+          region: warehouseAddress.region,
+          city: warehouseAddress.city,
+          state: warehouseAddress.state,
+          country: warehouseAddress.country,
+          landmark: "",
+          zipCode: warehouseAddress.pincode,
+        },
 				warehouseInventory: inventoryResult.id,
-				status: "NOTVERIFIED",
+				status: "ACTIVE",
 			});
 			await warehouse.save();
 
@@ -108,10 +117,10 @@ async function createWarehouse(warehouseExists, wareId, payload, employeeId) {
 				},
 				{
 					$set: {
-						role: "powerUser",
+						role: "admin",
 					},
-					$push: {
-						pendingWarehouseId: warehouseId,
+					$addToSet: {
+						warehouseId: warehouseId,
 					},
 				},
 			);

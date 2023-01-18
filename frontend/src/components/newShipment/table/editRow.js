@@ -151,10 +151,13 @@ const EditRow = (props) => {
   function existsInShipment(prod) {
 		if (props?.product?.length) {
       for(let i=0; i<props.product.length; ++i) {
-        let currProd = props.product[i];
-        if (prod.productId === currProd.id && prod.batchNumbers[0] === currProd.batchNumber) {
-          return { exists: true, quantity: currProd.productQuantity };
-        }
+				let currProd = props.product[i];
+				if (
+					prod.productId === currProd.id &&
+					prod.id === currProd.atomId
+				) {
+					return { exists: true, quantity: currProd.productQuantity };
+				}
       }
 		}
 		return { exists: false };
@@ -428,6 +431,7 @@ const EditRow = (props) => {
 																	handleChange({
 																		quant: product.quantity,
 																		bnp: product.batchNumbers[0],
+																		atomId: product.id,
 																	});
 																	editBatchSelected(index, "selected", !batches[index].selected);
 																	editBatchSelected(index, "editable", false);
