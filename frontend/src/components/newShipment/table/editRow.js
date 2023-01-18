@@ -332,7 +332,7 @@ const EditRow = (props) => {
 					)}
 				</div>
 
-				<div className="col tcell text-center justify-content-center p-2">
+				<div className="col tcell text-center justify-content-center p-2" style={{ position: "relative"}}>
 					<div className="">
 						<input
 							className="form-control text-center"
@@ -350,10 +350,9 @@ const EditRow = (props) => {
 							}}
 						/>
 					</div>
-				</div>
-				<div
+					<div
 					className="title recived-text align-self-center"
-					style={{ position: "relative", right: "40px" }}
+					style={{ position: "absolute", right: "16px", top:"16px" }}
 				>
 					{prod.unitofMeasure && prod.unitofMeasure.name ? (
 						<div>{prod.unitofMeasure.name}</div>
@@ -361,6 +360,8 @@ const EditRow = (props) => {
 						<div className="placeholder_id">{t("unit")}</div>
 					)}
 				</div>
+				</div>
+				
 
 				<div className="col tcell text-center justify-content-center p-2">
 					<div className="">
