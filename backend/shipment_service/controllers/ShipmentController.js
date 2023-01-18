@@ -2437,11 +2437,19 @@ exports.viewShipment = [
               id: element.productID,
             });
             element.unitofMeasure = product.unitofMeasure;
-
+            const atomFindPayload = [];
+            if (Shipment.status == "CREATED") {
+              atomFindPayload.push({ productId: element.productID }, { batchNumbers: element.batchNumber }, { currentShipment: Shipment.id }, { currentInventory: Shipment.receiver.warehouse.warehouseInventory }, { status: "TRANSIT" }, { quantity: element.productQuantity });
+            } else {
+              atomFindPayload.push({ productId: element.productID }, { batchNumbers: element.batchNumber }, {
+                inventoryIds: Shipment.receiver.warehouse.warehouseInventory
+              })
+            }
             const batch = await AtomModel.findOne({
               batchNumbers: element.batchNumber,
-              $or: [{ currentShipment: element.id }, { currentInventory: Shipment.receiver.warehouse.warehouseInventory, status: { $ne: 'CONSUMED' } }]
-            });
+              $and: atomFindPayload
+            }).sort({ createdAt: -1 });
+            console.log(batch);
             element.mfgDate = batch?.attributeSet.mfgDate;
             element.expDate = batch?.attributeSet.expDate;
           });
