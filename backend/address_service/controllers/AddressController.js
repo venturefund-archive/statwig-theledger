@@ -7,8 +7,6 @@ const EmployeeModel = require("../models/EmployeeModel");
 const WarehouseModel = require("../models/warehouseModel");
 const ConfigurationModel = require("../models/ConfigurationModel");
 const auth = require("../middlewares/jwt");
-const { customAlphabet } = require("nanoid");
-const nanoid = customAlphabet("1234567890abcdef", 10);
 const XLSX = require("xlsx");
 const fs = require("fs");
 const axios = require("axios");
@@ -176,23 +174,20 @@ exports.AddWarehouse = [
   auth,
   async (req, res) => {
     try {
-      const incrementCounterInv = await CounterModel.update(
-        {
-          "counters.name": "inventoryId",
-        },
+      const invCounter = await CounterModel.findOneAndUpdate(
+        { "counters.name": "inventoryId" },
         {
           $inc: {
             "counters.$.value": 1,
           },
+        },
+        {
+          projection:
+            { "counters.$": 1 }
         }
       );
-
-      const invCounter = await CounterModel.findOne(
-        { "counters.name": "inventoryId" },
-        { "counters.$": 1 }
-      );
       const inventoryId =
-        invCounter.counters[0].format + invCounter.counters[0].value;
+        invCounter.counters[0].format + invCounter.counters[0].value++;
       const inventoryResult = new Inventory({ id: inventoryId });
       await inventoryResult.save();
       const {
@@ -237,7 +232,7 @@ exports.AddWarehouse = [
         }, {
           $push: { warehouseId: warehouseId }
         }, {
-          new: true
+          new: true,
         });
       });
       const warehouse = new Warehouse({
@@ -253,7 +248,6 @@ exports.AddWarehouse = [
         warehouseAddress,
         status: "ACTIVE",
         warehouseInventory: inventoryResult.id,
-        employees: req.body.employees || [req.user.id]
       });
       await warehouse.save();
       return apiResponse.successResponseWithData(
@@ -282,7 +276,22 @@ exports.AddOffice = [
         supervisors,
         employees,
       } = req.body;
-      const officeId = "office-" + nanoid();
+      const warehouseCounter = await CounterModel.findOneAndUpdate(
+        { "counters.name": "warehouseId" },
+        {
+          $inc: {
+            "counters.$.value": 1,
+          },
+        },
+        {
+          projection: {
+            "counters.$": 1
+          }
+        }
+      );
+      const officeId =
+        warehouseCounter.counters[0].format +
+        warehouseCounter.counters[0].value++;
       const office = new Warehouse({
         id: officeId,
         title,

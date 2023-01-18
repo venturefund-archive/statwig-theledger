@@ -93,7 +93,6 @@ exports.getAllEventsWithFilter = [
     try {
       const skip = Number(req.query.skip) || 0;
       const limit = Number(req.query.limit) || 20;
-      const organisationId = req.user.organisationId;
       let currentDate = new Date();
       let fromDateFilter = 0;
       let LocalField = "payloadData.data.products.productId";
