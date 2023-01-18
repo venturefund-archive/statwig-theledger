@@ -104,7 +104,7 @@ const ViewInventory = (props) => {
                         }
                         className="btn btn-outline-primary"
                       >
-                          {t('show')} {more[i] ? t('less') : t('more')}
+                        {t('show')} {more[i] ? t('less') : t('more')}
                       </button>
                     </div>
                   )}
@@ -196,8 +196,24 @@ const ViewInventory = (props) => {
                         <div className="col ml-4 txt1 ">
                           {exp.products.manufacturer}
                         </div>
-                        <div className="col ml-5 txt1 ">
-                          {exp?.quantity ? exp.quantity : 0}
+                        <div className="col ml-5 txt1 d-flex justify-content-start">
+                          <span className="mr-2">
+                            {exp?.quantity > 0 ? exp.quantity : 0}
+                          </span>
+                          {Date.parse(exp.attributeSet?.expDate) < Date.parse(new Date()) ? (
+                            <span
+                              className={`badge-danger text-white badge badge-pill status secondary-bg`}
+                            >
+                              <small>EXPIRED</small>
+                            </span>) : null
+                          }
+                          {exp?.quantity <= 0 ? (
+                            <span
+                              className={`badge-warning text-white badge badge-pill status secondary-bg`}
+                            >
+                              <small>CONSUMED</small>
+                            </span>) : null
+                          }
                         </div>
                         <div className="col ml-4 txt1 ">
                           {exp.batchNumbers[0]}

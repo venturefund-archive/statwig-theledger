@@ -16,7 +16,6 @@ const XLSX = require("xlsx");
 
 const EmployeeIdMap = new Map();
 async function createWarehouse(address, warehouseId, organisationId, region, country) {
-	console.log(warehouseId)
 	const invCounter = await CounterModel.findOneAndUpdate(
 		{ "counters.name": "inventoryId" },
 		{
@@ -59,6 +58,7 @@ async function createWarehouse(address, warehouseId, organisationId, region, cou
 	});
 	await warehouse.save();
 }
+
 async function createOrg({
 	firstName,
 	lastName,

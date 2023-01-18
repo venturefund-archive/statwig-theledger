@@ -139,7 +139,7 @@ const AddProduct = (props) => {
         {/* <div className="d-flex flex-column align-items-center"> */}
         <button
           className='btn-primary btn fontSize20 font-bold mt-1 ml-2'
-          // onClick={() => setMenu(!menu)}
+        // onClick={() => setMenu(!menu)}
         >
           <div className='d-flex align-items-center'>
             <img
@@ -240,9 +240,8 @@ const AddProduct = (props) => {
                   <label htmlFor='shipmentId'> {t("product_name")}</label>
                   <input
                     type='text'
-                    className={`form-control ${
-                      pdNameErr ? "border-danger" : ""
-                    }`}
+                    className={`form-control ${pdNameErr ? "border-danger" : ""
+                      }`}
                     name='product'
                     placeholder={t("enter") + " " + t("product_name")}
                     onChange={(e) => {
@@ -257,9 +256,8 @@ const AddProduct = (props) => {
                 <div className='form-group'>
                   <label htmlFor='shipmentId'>{t("manufacturer")}</label>
                   <div
-                    className={`w-100 ${
-                      manufacturerErr ? "border-danger" : ""
-                    }`}
+                    className={`w-100 ${manufacturerErr ? "border-danger" : ""
+                      }`}
                   >
                     <Autocomplete
                       {...defaultPropsManufacturer}
@@ -270,17 +268,12 @@ const AddProduct = (props) => {
                         setManufacturerErr(false);
                       }}
                       inputValue={manufacturer ? manufacturer : ""}
-                      onInputChange={(event, newInputValue) => {
-                        setManufacturer(newInputValue);
-                        setManufacturerErr(false);
-                      }}
                       autoComplete
                       renderInput={(params) => (
                         <TextField
                           {...params}
-                          className={`${
-                            manufacturerErr ? "border-danger" : ""
-                          }`}
+                          className={`${manufacturerErr ? "border-danger" : ""
+                            }`}
                           name='Manufacturer'
                           variant='outlined'
                           placeholder={t("enter_manufacturer")}
@@ -322,10 +315,6 @@ const AddProduct = (props) => {
                         setCategoryErr(false);
                       }}
                       inputValue={category ? category : ""}
-                      onInputChange={(event, newInputValue) => {
-                        setCategory(newInputValue);
-                        setCategoryErr(false);
-                      }}
                       autoComplete
                       renderInput={(params) => (
                         <TextField
@@ -385,7 +374,7 @@ const AddProduct = (props) => {
               <button
                 className='fontSize20 font-bold mr-4 addNewBtn'
                 onClick={() => props.history.push("/addNewCategory")}
-                // style={{position:"relative",top:"2.5rem",height:"2rem",right:"10rem"}}
+              // style={{position:"relative",top:"2.5rem",height:"2rem",right:"10rem"}}
               >
                 <img src={Add} width='10' height='10' className='mr-2' alt='' />
                 <span style={{ fontSize: "1vw" }}>{t("add_new_category")}</span>

@@ -418,13 +418,7 @@ const Header = (props) => {
                     onBlur={(e) =>
                       (e.target.placeholder = { search_placeholder })
                     }
-                    onInputChange={(event, newInputValue) => {
-                      console.log({ newInputValue });
-                      setSearch(newInputValue);
-                      onSearchChange(newInputValue);
-                    }}
                     onChange={(event, newValue) => {
-                      console.log("onchange ", newValue);
                       // onSearchChange(newValue);
                       setSearchString(newValue._id);
                       onSeach(newValue._id);

@@ -116,6 +116,7 @@ const ProductCategory = (props) => {
                       return isNull ? null : displayCount &&
                         j < prods.length ? (
                         <span
+                          key={j}
                           className="txt-line text-muted"
                           style={{ border: `2px solid ${colors[i]}` }}
                         >
@@ -123,6 +124,7 @@ const ProductCategory = (props) => {
                         </span>
                       ) : (
                         <span
+                          key={j}
                           className="txt-line text-muted category-string"
                           style={{ border: `2px solid ${colors[i]}` }}
                         >

@@ -759,10 +759,11 @@ exports.addProductsToInventory = [
             const insertAtomsArray = [];
             for (let i = 0; i < atomsArray.length; i++) {
               let batchDup = await AtomModel.findOne({
-                productId: atomsArray[i].productId,
-                batchNumbers: atomsArray[i].batchNumbers[0],
-                currentInventory: warehouse.warehouseInventory,
-              });
+								productId: atomsArray[i].productId,
+								batchNumbers: atomsArray[i].batchNumbers[0],
+								"attributeSet.expDate": product.expDate,
+								currentInventory: warehouse.warehouseInventory,
+							});
               if (batchDup) {
                 await AtomModel.updateOne(
                   { id: batchDup.id },
@@ -2324,7 +2325,7 @@ exports.getBatchWarehouse = [
 					$match: {
 						productId: productId,
 						currentInventory: inventoryId,
-						status: { $ne: "MERGED" },
+						status: { $in : ["HEALTHY", "EXPIRED", "CONSUMED"]},
 					},
 				},
 				{
@@ -2540,7 +2541,6 @@ exports.searchProduct = [
   auth,
   async (req, res) => {
     try {
-      let warehouseId;
       const permission_request = {
         role: req.user.role,
         permissionRequired: ["searchByProductName"],
@@ -2548,13 +2548,10 @@ exports.searchProduct = [
       checkPermissions(permission_request, async (permissionResult) => {
         if (permissionResult.success) {
           const { productName, productType } = req.query;
-          req.query.warehouseId
-            ? (warehouseId = req.query.warehouseId)
-            : (warehouseId = req.user.warehouseId);
+const warehouseId = req.query.warehouseId ||  req.user.warehouseId;
           const warehouse = await WarehouseModel.findOne({ id: warehouseId });
           if (warehouse) {
             let elementMatchQuery = {};
-            // elementMatchQuery["id"] = warehouse.warehouseInventory;
             if (productName) {
               elementMatchQuery[`products.name`] = productName;
             }
@@ -2562,6 +2559,8 @@ exports.searchProduct = [
               elementMatchQuery[`products.type`] = productType;
             }
             const inventory = await InventoryModel.aggregate([
+              { $match: {id: warehouse.warehouseInventory
+}},
               { $unwind: "$inventoryDetails" },
               {
                 $lookup: {
@@ -2573,10 +2572,6 @@ exports.searchProduct = [
               },
               { $unwind: "$products" },
               { $match: elementMatchQuery },
-              //   { $project:{
-              //     products:"",
-              //   }
-              // }
             ]).sort({ createdAt: -1 });
             return apiResponse.successResponseWithData(
               res,

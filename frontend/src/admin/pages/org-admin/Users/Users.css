@@ -301,3 +301,10 @@
   pointer-events: none !important;
   z-index: 100;
 } */
+
+.mi_custom_pagination_wrapper {
+  padding: 1.5rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
