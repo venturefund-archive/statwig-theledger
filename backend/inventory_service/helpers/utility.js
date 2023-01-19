@@ -15,11 +15,15 @@ exports.asyncForEach = async (array, callback) => {
 };
 
 exports.excludeExpireProduct = (data) => {
-  return data.filter((product) => {
-    if (Date.parse(product?.expiryDate) > Date.parse(new Date())) return true
-    return false
-  })
-}
+	let today = new Date();
+	today.setHours(23, 59, 59, 999);
+	return data.filter((product) => {
+		if (product?.expiryDate) {
+			if (product.expiryDate.valueOf() < today.valueOf()) return false;
+		}
+		return true;
+	});
+};
 
 exports.compareArrays = function (array1, array2) {
   if (!array1 || !array2) return false;

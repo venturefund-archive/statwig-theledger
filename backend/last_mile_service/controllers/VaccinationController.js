@@ -96,7 +96,7 @@ const buildDoseQuery = async (gender, minAge, maxAge, ageType, vaccineVialIds, t
 	}
 	if (today) {
 		let now = new Date();
-		now.setHours(0, 0, 0, 0);
+		now.setHours(23, 59, 59, 999);
 		queryExprs.push({ $gte: ["$createdAt", now] });
 	}
 
@@ -262,18 +262,16 @@ exports.fetchBatchById = [
 					if (!productDetails[0]?.atom?.quantity) {
 						throw new Error("Batch exhausted!");
 					} else {
-						console.log(productDetails[0].atom.attributeSet.expDate);
-						let expDate = new Date(productDetails[0].atom.attributeSet.expDate);
-						console.log(expDate);
-						expDate.setHours(0, 0, 0, 0);
-						console.log(expDate);
-						let today = new Date();
-						console.log(today);
-						today.setHours(0, 0, 0, 0);
-						console.log(today);
-						console.log(expDate.toDateString(), today.toDateString());
-						if (expDate < today) {
-							throw new Error("Batch expired!");
+						if(productDetails[0]?.atom?.attributeSet?.expDate) {
+							let expDate = new Date(productDetails[0].atom.attributeSet.expDate);
+							expDate.setHours(23, 59, 59, 999);
+							let today = new Date();
+							today.setHours(23, 59, 59, 999);
+							if (expDate.valueOf() < today.valueOf()) {
+								throw new Error("Batch expired!");
+							}
+						} else {
+							throw new Error("Batch does not have expiry date!");
 						}
 					}
 				} else {
@@ -798,13 +796,13 @@ exports.getAnalyticsWithFilters = [
 			let todaysVaccinations = 0;
 			let vialsUtilized = 0;
 			let now = new Date();
-			now.setHours(0, 0, 0, 0);
+			now.setHours(23, 59, 59, 999);
 
 			for (let i = 0; i < warehouses.length; ++i) {
 				const vaccineVials = warehouses[i].vaccinations;
 				for (let j = 0; j < vaccineVials.length; ++j) {
 					let createdAt = new Date(vaccineVials[j].createdAt);
-					createdAt.setHours(0, 0, 0, 0);
+					createdAt.setHours(23, 59, 59, 999);
 
 					const doses = vaccineVials[j].doses;
 
@@ -862,11 +860,11 @@ exports.getAnalytics = [
 			let totalVaccinations = 0;
 			let todaysVaccinations = 0;
 			let now = new Date();
-			now.setHours(0, 0, 0, 0);
+			now.setHours(23, 59, 59, 999);
 
 			for (let i = 0; i < analytics.length; ++i) {
 				let createdAt = new Date(analytics[i].createdAt);
-				createdAt.setHours(0, 0, 0, 0);
+				createdAt.setHours(23, 59, 59, 999);
 
 				totalVaccinations += analytics[i].numberOfDoses;
 
@@ -968,7 +966,7 @@ exports.getVaccinationsList = [
 			let queryExprs = [{ $in: ["$vaccineVialId", vialsList] }];
 			if (today) {
 				let now = new Date();
-				now.setHours(0, 0, 0, 0);
+				now.setHours(23, 59, 59, 999);
 				queryExprs.push({ $gte: ["$createdAt", now] });
 			}
 
@@ -1067,11 +1065,11 @@ exports.getVaccinationsListOld = [
 			const todaysVaccinationsList = [];
 
 			let now = new Date();
-			now.setHours(0, 0, 0, 0);
+			now.setHours(23, 59, 59, 999);
 
 			for (let i = 0; i < vialsUtilized.length; ++i) {
 				let createdAt = new Date(vialsUtilized[i].createdAt);
-				createdAt.setHours(0, 0, 0, 0);
+				createdAt.setHours(23, 59, 59, 999);
 
 				let currDoses = await DoseModel.aggregate([
 					{ $match: { vaccineVialId: vialsUtilized[i].id } },

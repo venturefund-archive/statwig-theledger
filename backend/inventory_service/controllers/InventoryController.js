@@ -664,10 +664,16 @@ exports.addProductsToInventory = [
             }
 
             const serialNumbers = product.serialNumbersRange?.split("-");
-            let mfgDate = new Date(product.mfgDate);
-            mfgDate.setHours(23, 59, 59, 999);
-            let expDate = new Date(product.expDate);
-            expDate.setHours(23, 59, 59, 999);
+            let mfgDate;
+            let expDate;
+            if(product?.mfgDate) {
+              mfgDate = new Date(product.mfgDate);
+              mfgDate.setHours(23, 59, 59, 999);
+            }
+            if(product?.expDate) {
+              expDate = new Date(product.expDate);
+              expDate.setHours(23, 59, 59, 999);
+            }
             let atomsArray = [];
             if (serialNumbers?.length > 1) {
               const serialNumbersFrom = parseInt(
@@ -880,37 +886,54 @@ exports.addInventoriesFromExcel = [
 
           const formatedData = new Array();
           for (const [index, prod] of data.entries()) {
+            console.log(prod);
             const productCategory = prod?.['PRODUCT CATEGORY'] || prod?.['CATEGORIA DE PRODUCTO']
             const productName = prod?.['PRODUCT NAME'] || prod?.['NOMBRE DEL PRODUCTO'];
             const batchNumber = prod?.['BATCH NO'] || prod?.['LOT NUMBER'];
             const manufacturerName = prod?.['MANUFACTURER'] || prod?.['FABRICANTE'];
             const quantity = prod?.['QUANTITY'] || prod?.['CANTIDAD'] || 1;
             const unitOfMeasure = prod?.['UNITS'] || prod?.['UNIDAD DE MEDIDA'];
-            const mfgDate = prod?.['MFG DATE'] || prod?.['FECHA DE FABRICACION'];
-            const expDate = prod?.['EXP DATE'] || prod?.['FECHA DE VENCIMIENTO'];
+            let mfgDate = prod?.['MFG DATE'] || prod?.['FECHA DE FABRICACION'];
+            let expDate = prod?.['EXP DATE'] || prod?.['FECHA DE VENCIMIENTO'];
             const product = await ProductModel.findOne({
               name: productName?.trim()
             });
             if (product) {
-              formatedData[index] = {
-                productId: product.id,
-                type: product.type,
-                categories: productCategory,
-                productName: productName,
-                batchNumber: batchNumber,
-                manufacturer: manufacturerName,
-                quantity: quantity,
-                unitofMeasure: { id: unitOfMeasure, name: unitOfMeasure },
-                manufacturingDate: parse(mfgDate, "dd/MM/yyyy", new Date()),
-                expiryDate: parse(expDate, "dd/MM/yy", new Date()),
+              if(mfgDate) {
+                let parsedMfg = mfgDate.split("/");
+                if(parsedMfg && parsedMfg?.length) {
+                  mfgDate = new Date(parsedMfg[2], parsedMfg[1] - 1, parsedMfg[0])
+                  mfgDate.setHours(23, 59, 59, 999);
+                } else {
+                  throw new Error("Invalid mfg date");
+                }
               }
-            } else {
-              return apiResponse.ErrorResponse(
-                res,
-                "Product Doesn't exist in the inventory"
-              );
-            }
+              if(expDate) {
+                let parsedExp = expDate.split("/");
+                if(parsedExp && parsedExp?.length) {
+                  expDate = new Date(parsedExp[2], parsedExp[1] - 1, parsedExp[0])
+                  expDate.setHours(23, 59, 59, 999);
+                } else {
+                  throw new Error("Invalid exp date");
+                }
+              }
+							formatedData[index] = {
+								productId: product.id,
+								type: product.type,
+								categories: productCategory,
+								productName: productName,
+								batchNumber: batchNumber,
+								manufacturer: manufacturerName,
+								quantity: quantity,
+								unitofMeasure: { id: unitOfMeasure, name: unitOfMeasure },
+								...(mfgDate ? { manufacturingDate: mfgDate } : {}),
+								...(expDate ? { expiryDate: expDate } : {}),
+							};
+						} else {
+							return apiResponse.ErrorResponse(res, "Product Doesn't exist in the inventory");
+						}
           }
+          console.log(formatedData);
           const result = utility.excludeExpireProduct(formatedData);
           return apiResponse.successResponseWithData(
             res,
@@ -2748,7 +2771,7 @@ exports.fetchBatchesOfInventory = [
       const warehouse = await WarehouseModel.findOne({ id: warehouseId });
       const inventoryId = warehouse.warehouseInventory;
       let today = new Date();
-      today.setHours(0, 0, 0, 0);
+      today.setHours(23, 59, 59, 999);
       const payload = {
 				$and: [
 					{ productId: productId },
@@ -2764,6 +2787,7 @@ exports.fetchBatchesOfInventory = [
 					},
 				],
       };
+      console.log(JSON.stringify(payload));
       const batches = await AtomModel.find(payload).sort({ "attributeSet.expDate": 1 });
       return apiResponse.successResponseWithData(
         res,
