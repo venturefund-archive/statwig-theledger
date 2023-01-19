@@ -629,7 +629,6 @@ exports.addProductsToInventory = [
             );
           }
           for (const product of products) {
-            console.log("Product", product)
             const inventoryId = warehouse.warehouseInventory;
             const checkProduct = await InventoryModel.find({
               $and: [
@@ -665,6 +664,10 @@ exports.addProductsToInventory = [
             }
 
             const serialNumbers = product.serialNumbersRange?.split("-");
+            let mfgDate = new Date(product.mfgDate);
+            mfgDate.setHours(23, 59, 59, 999);
+            let expDate = new Date(product.expDate);
+            expDate.setHours(23, 59, 59, 999);
             let atomsArray = [];
             if (serialNumbers?.length > 1) {
               const serialNumbersFrom = parseInt(
@@ -695,8 +698,8 @@ exports.addProductsToInventory = [
                   batchNumbers: [product.batchNumber],
                   status: "HEALTHY",
                   attributeSet: {
-                    mfgDate: product.mfgDate,
-                    expDate: product.expDate,
+                    mfgDate: mfgDate,
+                    expDate: expDate,
                   },
                   eolInfo: {
                     eolId: "IDN29402-23423-23423",
@@ -724,8 +727,8 @@ exports.addProductsToInventory = [
                 batchNumbers: [product.batchNumber],
                 status: "HEALTHY",
                 attributeSet: {
-                  mfgDate: product.mfgDate,
-                  expDate: product.expDate,
+                  mfgDate: mfgDate,
+                  expDate: expDate,
                 },
                 eolInfo: {
                   eolId: "IDN29402-23423-23423",
@@ -761,9 +764,10 @@ exports.addProductsToInventory = [
               let batchDup = await AtomModel.findOne({
 								productId: atomsArray[i].productId,
 								batchNumbers: atomsArray[i].batchNumbers[0],
-								"attributeSet.expDate": product.expDate,
+								"attributeSet.expDate": expDate,
 								currentInventory: warehouse.warehouseInventory,
-							});
+              });
+              
               if (batchDup) {
                 await AtomModel.updateOne(
                   { id: batchDup.id },
