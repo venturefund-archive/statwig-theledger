@@ -15,11 +15,12 @@ exports.asyncForEach = async (array, callback) => {
 };
 
 exports.excludeExpireProduct = (data) => {
-	let today = new Date();
-	today.setHours(23, 59, 59, 999);
+  let today = new Date();
+  let todayString = this.getDateStringForMongo(today);
 	return data.filter((product) => {
 		if (product?.expiryDate) {
-			if (product.expiryDate.valueOf() < today.valueOf()) return false;
+      let expDateString = this.getDateStringForMongo(product.expiryDate);
+			if (expDateString < todayString) return false;
 		}
 		return true;
 	});
@@ -39,3 +40,15 @@ exports.compareArrays = function (array1, array2) {
 
   return true;
 }
+
+exports.getDateStringForMongo = function (date) {
+	if (!date) return;
+
+	let currDate = new Date(date);
+	let year = currDate.getFullYear();
+	let month = currDate.getMonth() + 1;
+	let day = currDate.getDate();
+	let dateString = `${year}${month < 9 ? "0" + month : month}${day < 9 ? "0" + day : day}`;
+
+	return dateString;
+};
