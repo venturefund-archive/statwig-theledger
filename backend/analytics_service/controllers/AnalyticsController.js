@@ -11,6 +11,7 @@ const apiResponse = require("../helpers/apiResponse");
 const auth = require("../middlewares/jwt");
 const { startOfMonth, format } = require("date-fns");
 const { buildExcelReport, buildPdfReport } = require("../helpers/reports");
+const { getDateStringForMongo } = require("../helpers/utility");
 
 async function getDistributedProducts(matchQuery, warehouseId, fieldName) {
   const products = await WarehouseModel.aggregate([
@@ -394,69 +395,74 @@ exports.getAnalytics = [
 
       //  const totalProductsAddedToInventory = await InventoryModel.count();
       //  inventory.totalProductsAddedToInventory = totalProductsAddedToInventory;
+      let todayString = getDateStringForMongo(today);
 
       var nextWeek = new Date();
       nextWeek.setDate(today.getDate() + 7);
+      let nextWeekString = getDateStringForMongo(nextWeek);
 
       const expiringToday = await AtomModel.count({
-        "attributeSet.expDate": {
-          $eq: today.toISOString(),
-        },
-      });
+				"attributeSet.expDateString": { $eq: todayString },
+			});
       inventory.expiringToday = expiringToday;
 
       const expiringThisWeek = await AtomModel.count({
-        "attributeSet.expDate": {
-          $gte: today.toISOString(),
-          $lt: nextWeek.toISOString(),
+        "attributeSet.expDateString": {
+          $gte: todayString,
+          $lt: nextWeekString,
         },
       });
       inventory.expiringThisWeek = expiringThisWeek;
 
       var nextMonth = new Date();
       nextMonth.setDate(today.getDate() + 30);
+      let nextMonthString = getDateStringForMongo(nextMonth);
 
       const expiringThisMonth = await AtomModel.count({
-        "attributeSet.expDate": {
-          $gte: today.toISOString(),
-          $lt: nextMonth.toISOString(),
+        "attributeSet.expDateString": {
+          $gte: todayString,
+          $lt: nextMonthString,
         },
       });
       inventory.expiringThisMonth = expiringThisMonth;
 
       var nextYear = new Date();
       nextYear.setDate(today.getDate() + 365);
+      let nextyearString = getDateStringForMongo(nextYear);
 
       const expiringThisYear = await AtomModel.count({
-        "attributeSet.expDate": {
-          $gte: today.toISOString(),
-          $lt: nextYear.toISOString(),
+        "attributeSet.expDateString": {
+          $gte: todayString,
+          $lt: nextyearString,
         },
       });
       inventory.expiringThisYear = expiringThisYear;
 
       inventory.expiredToday = expiringToday;
 
+      let lastWeekString = getDateStringForMongo(lastWeek);
       const expiredThisWeek = await AtomModel.count({
-        "attributeSet.expDate": {
-          $lt: today.toISOString(),
-          $gte: lastWeek.toISOString(),
+        "attributeSet.expDateString": {
+          $lt: todayString,
+          $gte: lastWeekString,
         },
       });
       inventory.expiredThisWeek = expiredThisWeek;
 
+      let lastMonthString = getDateStringForMongo(lastMonth);
       const expiredThisMonth = await AtomModel.count({
-        "attributeSet.expDate": {
-          $lt: today.toISOString(),
-          $gte: lastMonth.toISOString(),
+        "attributeSet.expDateString": {
+          $lt: todayString,
+          $gte: lastMonthString,
         },
       });
       inventory.expiredThisMonth = expiredThisMonth;
 
+      let lastYearString = getDateStringForMongo(lastYear);
       const expiredThisYear = await AtomModel.count({
-        "attributeSet.expDate": {
-          $lt: today.toISOString(),
-          $gte: lastYear.toISOString(),
+        "attributeSet.expDateString": {
+          $lt: todayString,
+          $gte: lastYearString,
         },
       });
       inventory.expiredThisYear = expiredThisYear;
@@ -582,8 +588,8 @@ exports.getAnalytics = [
       data.stockOut = stockOut;
 
       const expiredProducts = await AtomModel.count({
-        "attributeSet.expDate": {
-          $lt: today.toISOString(),
+        "attributeSet.expDateString": {
+          $lt: todayString,
         },
       });
       data.expiredProducts = expiredProducts;
@@ -596,8 +602,8 @@ exports.getAnalytics = [
       const batchExpired = await AtomModel.aggregate([
         {
           $match: {
-            "attributeSet.expDate": {
-              $lt: today.toISOString(),
+            "attributeSet.expDateString": {
+              $lt: todayString,
             },
           },
         },
@@ -612,13 +618,14 @@ exports.getAnalytics = [
 
       var nearExpirationTime = new Date();
       nearExpirationTime.setDate(today.getDate() + 90);
+      let nearExpirationString = getDateStringForMongo(nearExpirationTime);
 
       const batchNearExpiration = await AtomModel.aggregate([
         {
           $match: {
-            "attributeSet.expDate": {
-              $gte: today.toISOString(),
-              $lt: nearExpirationTime.toISOString(),
+            "attributeSet.expDateString": {
+              $gte: todayString,
+              $lt: nearExpirationString,
             },
           },
         },
@@ -798,17 +805,17 @@ exports.getInventoryAnalytics = [
         : 0;
 
       var today = new Date();
-      today.setHours(0, 0, 0, 0);
+      let todayString = getDateStringForMongo(today);
       var nextMonth = new Date();
       nextMonth.setDate(today.getDate() + 30);
-      nextMonth.setHours(0, 0, 0, 0);
+      let nextMonthString = getDateStringForMongo(nextMonth);
 
       const batchNearExpiration = await AtomModel.aggregate([
 				{
 					$match: {
 						$and: [
-							{ "attributeSet.expDate": { $gte: today.toISOString() } },
-							{ "attributeSet.expDate": { $lt: nextMonth.toISOString() } },
+							{ "attributeSet.expDateString": { $gte: todayString } },
+							{ "attributeSet.expDateString": { $lt: nextMonthString } },
 							{ currentInventory: warehouse?.warehouseInventory },
 							{ batchNumbers: { $ne: "" } },
 							{ "attributeSet.mfgDate": { $ne: "" } },
@@ -828,8 +835,8 @@ exports.getInventoryAnalytics = [
 					$match: {
 						$and: [
 							{
-								"attributeSet.expDate": {
-									$lt: today,
+								"attributeSet.expDateString": {
+									$lt: todayString,
 								},
 							},
 							{ currentInventory: warehouse?.warehouseInventory },
@@ -2220,7 +2227,6 @@ async function getDataForReport(reportType, data) {
   }
   rowsPDF.push(head);
   for (let i = 0; i < data.length; i++) {
-    console.log(data[i]);
     const row = [
       data[i]._id || "N/A",
       data[i].productCategory || "N/A",

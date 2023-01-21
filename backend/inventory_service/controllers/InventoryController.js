@@ -665,15 +665,17 @@ exports.addProductsToInventory = [
 
             const serialNumbers = product.serialNumbersRange?.split("-");
             let mfgDate;
+            let mfgDateString;
             let expDate;
+            let expDateString;
             if(product?.mfgDate) {
               mfgDate = new Date(product.mfgDate);
-              mfgDate.setHours(23, 59, 59, 999);
+              mfgDateString = utility.getDateStringForMongo(mfgDate);
             }
             if(product?.expDate) {
-              expDate = new Date(product.expDate);
-              expDate.setHours(23, 59, 59, 999);
-            }
+							expDate = new Date(product.expDate);
+              expDateString = utility.getDateStringForMongo(expDate);
+						}
             let atomsArray = [];
             if (serialNumbers?.length > 1) {
               const serialNumbersFrom = parseInt(
@@ -705,7 +707,9 @@ exports.addProductsToInventory = [
                   status: "HEALTHY",
                   attributeSet: {
                     mfgDate: mfgDate,
+                    mfgDateString: mfgDateString,
                     expDate: expDate,
+                    expDateString: expDateString
                   },
                   eolInfo: {
                     eolId: "IDN29402-23423-23423",
@@ -734,8 +738,10 @@ exports.addProductsToInventory = [
                 status: "HEALTHY",
                 attributeSet: {
                   mfgDate: mfgDate,
+                  mfgDateString: mfgDateString,
                   expDate: expDate,
-                },
+                  expDateString: expDateString
+              },
                 eolInfo: {
                   eolId: "IDN29402-23423-23423",
                   eolDate: "2021-03-31T18:30:00.000Z",
@@ -770,7 +776,7 @@ exports.addProductsToInventory = [
               let batchDup = await AtomModel.findOne({
 								productId: atomsArray[i].productId,
 								batchNumbers: atomsArray[i].batchNumbers[0],
-								"attributeSet.expDate": expDate,
+								"attributeSet.expDateString": expDateString,
 								currentInventory: warehouse.warehouseInventory,
               });
               
@@ -902,25 +908,10 @@ exports.addInventoriesFromExcel = [
 							});
 							if (product) {
 								if (mfgDate) {
-									let parsedMfg = mfgDate.split("/");
-									if (parsedMfg && parsedMfg?.length) {
-										mfgDate = new Date(parsedMfg[2], parsedMfg[1] - 1, parsedMfg[0]);
-										mfgDate.setHours(23, 59, 59, 999);
-									} else {
-										throw new Error("Invalid mfg date");
-									}
+                  mfgDate = parse(mfgDate, "dd/MM/yyyy", new Date());
 								}
 								if (expDate) {
-									let parsedExp = expDate.split("/");
-									if (parsedExp && parsedExp?.length) {
-										expDate = new Date(parsedExp[2], parsedExp[1] - 1, parsedExp[0]);
-										expDate.setHours(23, 59, 59, 999);
-										if (mfgDate && mfgDate.valueOf() > expDate.valueOf()) {
-											throw new Error("Expiry date cannot be less than manufacturing date!");
-										}
-									} else {
-										throw new Error("Invalid exp date");
-									}
+                  expDate = parse(expDate, "dd/MM/yyyy", new Date());
 								}
 								formatedData[index] = {
 									productId: product.id,
@@ -938,7 +929,6 @@ exports.addInventoriesFromExcel = [
 								return apiResponse.ErrorResponse(res, "Product Doesn't exist in the inventory");
 							}
 						}
-						console.log(formatedData);
 						const result = utility.excludeExpireProduct(formatedData);
 						return apiResponse.successResponseWithData(
 							res,
@@ -2238,9 +2228,10 @@ exports.getBatchNearExpiration = [
         : (warehouseId = req.user.warehouseId);
 
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      let todayString = utility.getDateStringForMongo(today);
       const nextMonth = new Date();
       nextMonth.setDate(today.getDate() + 31);
+      let nextMonthString = utility.getDateStringForMongo(nextMonth);
 
       const warehouse = await WarehouseModel.findOne({ id: warehouseId });
       if (warehouse) {
@@ -2250,8 +2241,8 @@ exports.getBatchNearExpiration = [
 							$and: [
 								{
 									$and: [
-										{ "attributeSet.expDate": { $gte: today.toISOString() } },
-										{ "attributeSet.expDate": { $lt: nextMonth.toISOString() } },
+										{ "attributeSet.expDateString": { $gte: todayString } },
+										{ "attributeSet.expDateString": { $lt: nextMonthString } },
 									],
 								},
 								{
@@ -2264,6 +2255,7 @@ exports.getBatchNearExpiration = [
 							],
 						},
 					},
+					{ $sort: { "attributeSet.expDateString": 1 } },
 					{
 						$lookup: {
 							from: "products",
@@ -2304,14 +2296,14 @@ exports.getBatchExpired = [
       if (warehouse) {
         console.log(new Date(), warehouse.warehouseInventory)
         let today = new Date();
-        today.setHours(0, 0, 0, 0);
+        let todayString = utility.getDateStringForMongo(today);
         const result = await AtomModel.aggregate([
 					{
 						$match: {
 							$and: [
 								{
-									"attributeSet.expDate": {
-										$lt: today,
+									"attributeSet.expDateString": {
+										$lt: todayString,
 									},
 								},
 								{ currentInventory: warehouse.warehouseInventory },
@@ -2574,64 +2566,59 @@ exports.deleteProductsFromInventory = [
 ];
 
 exports.searchProduct = [
-  auth,
-  async (req, res) => {
-    try {
-      const permission_request = {
-        role: req.user.role,
-        permissionRequired: ["searchByProductName"],
-      };
-      checkPermissions(permission_request, async (permissionResult) => {
-        if (permissionResult.success) {
-          const { productName, productType } = req.query;
-const warehouseId = req.query.warehouseId ||  req.user.warehouseId;
-          const warehouse = await WarehouseModel.findOne({ id: warehouseId });
-          if (warehouse) {
-            let elementMatchQuery = {};
-            if (productName) {
-              elementMatchQuery[`products.name`] = productName;
-            }
-            if (productType) {
-              elementMatchQuery[`products.type`] = productType;
-            }
-            const inventory = await InventoryModel.aggregate([
-              { $match: {id: warehouse.warehouseInventory
-}},
-              { $unwind: "$inventoryDetails" },
-              {
-                $lookup: {
-                  from: "products",
-                  localField: "inventoryDetails.productId",
-                  foreignField: "id",
-                  as: "products",
-                },
-              },
-              { $unwind: "$products" },
-              { $match: elementMatchQuery },
-            ]).sort({ createdAt: -1 });
-            return apiResponse.successResponseWithData(
-              res,
-              "Inventory Details",
-              inventory
-            );
-          } else {
-            return apiResponse.ErrorResponse(
-              res,
-              responses(req.user.preferredLanguage).warehouse_not_found
-            );
-          }
-        } else {
-          return apiResponse.forbiddenResponse(
-            res,
-            responses(req.user.preferredLanguage).no_permission
-          );
-        }
-      });
-    } catch (err) {
-      console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
-    }
-  },
+	auth,
+	async (req, res) => {
+		try {
+			const permission_request = {
+				role: req.user.role,
+				permissionRequired: ["searchByProductName"],
+			};
+			checkPermissions(permission_request, async (permissionResult) => {
+				if (permissionResult.success) {
+					const { productName, productType } = req.query;
+					const warehouseId = req.query.warehouseId || req.user.warehouseId;
+					const warehouse = await WarehouseModel.findOne({ id: warehouseId });
+					if (warehouse) {
+						let elementMatchQuery = {};
+						if (productName) {
+							elementMatchQuery[`products.name`] = productName;
+						}
+						if (productType) {
+							elementMatchQuery[`products.type`] = productType;
+						}
+						const inventory = await InventoryModel.aggregate([
+							{ $match: { id: warehouse.warehouseInventory } },
+							{ $unwind: "$inventoryDetails" },
+							{
+								$lookup: {
+									from: "products",
+									localField: "inventoryDetails.productId",
+									foreignField: "id",
+									as: "products",
+								},
+							},
+							{ $unwind: "$products" },
+							{ $match: elementMatchQuery },
+						]).sort({ createdAt: -1 });
+						return apiResponse.successResponseWithData(res, "Inventory Details", inventory);
+					} else {
+						return apiResponse.ErrorResponse(
+							res,
+							responses(req.user.preferredLanguage).warehouse_not_found,
+						);
+					}
+				} else {
+					return apiResponse.forbiddenResponse(
+						res,
+						responses(req.user.preferredLanguage).no_permission,
+					);
+				}
+			});
+		} catch (err) {
+			console.log(err);
+			return apiResponse.ErrorResponse(res, err.message);
+		}
+	},
 ];
 
 exports.autoCompleteSuggestions = [
@@ -2780,7 +2767,6 @@ exports.fetchBatchesOfInventory = [
       const warehouse = await WarehouseModel.findOne({ id: warehouseId });
       const inventoryId = warehouse.warehouseInventory;
       let today = new Date();
-      today.setHours(23, 59, 59, 999);
       const payload = {
 				$and: [
 					{ productId: productId },
@@ -2791,7 +2777,7 @@ exports.fetchBatchesOfInventory = [
 						$or: [
 							{ "attributeSet.expDate": { $exists: false } },
 							{ "attributeSet.expDate": { $in: [null, ""] } },
-							{ "attributeSet.expDate": { $gte: today } },
+							{ "attributeSet.expDateString": { $gte: today } },
 						],
 					},
 				],
@@ -2918,3 +2904,40 @@ exports.reduceBatch = [
     }
   },
 ];
+
+
+exports.updateAtomDates = [
+  async (req, res) => {
+    try {
+      const allAtoms = await AtomModel.find();
+      let count = 0;
+      for(let i=0; i<allAtoms?.length; ++i) {
+				let currAtom = allAtoms[i];
+				let mfgDateString;
+				let expDateString;
+				if (currAtom?.attributeSet?.mfgDate) {
+					let mfgDate = new Date(currAtom.attributeSet.mfgDate);
+          mfgDateString = utility.getDateStringForMongo(mfgDate);
+				}
+				if (currAtom?.attributeSet?.expDate) {
+          let expDate = new Date(currAtom.attributeSet.expDate);
+          expDateString = utility.getDateStringForMongo(expDate);
+				}
+				if (mfgDateString || expDateString) {
+					let updatePayload = {
+						$set: {
+							...(mfgDateString ? { "attributeSet.mfgDateString": mfgDateString } : {}),
+							...(expDateString ? { "attributeSet.expDateString": expDateString } : {}),
+						},
+					};
+					await AtomModel.findOneAndUpdate({ id: currAtom.id }, updatePayload);
+					++count;
+				}
+			}
+      return apiResponse.successResponseWithData(res, "Atoms updated!", count);
+    } catch(err) {
+      console.log(err);
+      return apiResponse.ErrorResponse(res, err.message);
+    }
+  }
+]

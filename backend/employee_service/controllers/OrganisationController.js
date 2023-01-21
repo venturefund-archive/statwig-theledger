@@ -15,6 +15,7 @@ const fs = require("fs");
 const XLSX = require("xlsx");
 
 const EmployeeIdMap = new Map();
+
 async function createWarehouse(address, warehouseId, organisationId, region, country) {
 	const invCounter = await CounterModel.findOneAndUpdate(
 		{ "counters.name": "inventoryId" },
@@ -336,12 +337,12 @@ exports.getOrgs = [
 					const employeeEmail = await EmployeeModel.findOne({
 						id: users[c].primaryContactId,
 					}).select("emailId phoneNumber");
-					if (employeeEmail.emailId != null) {
+					if (employeeEmail?.emailId) {
 						EmployeeIdMap.set(users[c].primaryContactId, employeeEmail.emailId);
 						users[c].primaryContactId = employeeEmail.emailId;
 					} else {
-						EmployeeIdMap.set(users[c].primaryContactId, employeeEmail.phoneNumber);
-						users[c].primaryContactId = employeeEmail.phoneNumber;
+						EmployeeIdMap.set(users[c].primaryContactId, employeeEmail?.phoneNumber);
+						users[c].primaryContactId = employeeEmail?.phoneNumber;
 					}
 				}
 			}

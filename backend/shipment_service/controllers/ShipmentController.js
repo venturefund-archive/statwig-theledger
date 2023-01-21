@@ -36,7 +36,7 @@ const excel = require("node-excel-export");
 const { resolve } = require("path");
 const PdfPrinter = require("pdfmake");
 const { responses } = require("../helpers/responses");
-const { asyncForEach } = require("../helpers/utility");
+const { asyncForEach, getDateStringForMongo } = require("../helpers/utility");
 const { fromUnixTime, format, startOfMonth } = require("date-fns");
 const fontDescriptors = {
   Roboto: {
@@ -1612,14 +1612,19 @@ exports.receiveShipment = [
 							currentShipment: shipmentID,
 							status: "TRANSIT",
             });
-            
-            console.log("In transit - ", count, atomInTransit);
+
+            let atomInTransitDate = atomInTransit?.attributeSet?.expDate;
+            let atomInTransitDateString;
+
+            if(atomInTransitDate) {
+              atomInTransitDateString = getDateStringForMongo(atomInTransitDate);
+            }
 
             const atomExists = await AtomModel.findOne({
 							batchNumbers: products[count].batchNumber,
 							productId: products[count].productId,
 							currentInventory: recvInventoryId,
-							"attributeSet.expDate": atomInTransit?.attributeSet?.expDate,
+							"attributeSet.expDateString": atomInTransitDateString,
 							status: { $in: ["HEALTHY", "CONSUMED", "EXPIRED"] },
 						});
             

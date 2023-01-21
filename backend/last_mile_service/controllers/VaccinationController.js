@@ -15,6 +15,7 @@ const { resolve } = require("path");
 const fs = require("fs");
 const CountryModel = require("../models/CountryModel");
 const { formatDate } = require("../helpers/dateHelper");
+const { getDateStringForMongo } = require("../helpers/utility");
 
 const fontDescriptors = {
 	Roboto: {
@@ -96,7 +97,6 @@ const buildDoseQuery = async (gender, minAge, maxAge, ageType, vaccineVialIds, t
 	}
 	if (today) {
 		let now = new Date();
-		now.setHours(23, 59, 59, 999);
 		queryExprs.push({ $gte: ["$createdAt", now] });
 	}
 
@@ -256,23 +256,42 @@ exports.fetchBatchById = [
 				{ collation: { locale: "en", strength: 2 } },
 			);
 
+			let validBatches = [];
 			if (productDetails) {
-				console.log("here");
-				if (productDetails.length) {
-					if (!productDetails[0]?.atom?.quantity) {
-						throw new Error("Batch exhausted!");
-					} else {
-						if(productDetails[0]?.atom?.attributeSet?.expDate) {
+				if (productDetails?.length) {
+					let errors = [];
+					for (let i = 0; i < productDetails.length; ++i) {
+						let currProd = productDetails[i];
+						if (currProd?.atom?.attributeSet?.expDate) {
 							let expDate = new Date(productDetails[0].atom.attributeSet.expDate);
-							expDate.setHours(23, 59, 59, 999);
+							let expDateString = getDateStringForMongo(expDate);
 							let today = new Date();
-							today.setHours(23, 59, 59, 999);
-							if (expDate.valueOf() < today.valueOf()) {
-								throw new Error("Batch expired!");
+							let todayString = getDateStringForMongo(today);
+							if (expDateString < todayString) {
+								errors.push("expired_batch");
+								continue;
+							} else {
+								if (!currProd?.atom?.quantity) {
+									errors.push("batch_exhausted");
+									continue;
+								}
+								validBatches.push(currProd);
 							}
 						} else {
-							throw new Error("Batch does not have expiry date!");
+							errors.push("no_expiry_date");
 						}
+					}
+					let priorityError;
+					if(!validBatches.length) {
+						if (errors.includes("batch_exhausted")) {
+							priorityError = "Batch exhausted!";
+						} else if (errors.includes("expired_batch")) {
+							priorityError = "Batch expired!";
+						} else {
+							priorityError = "Batch has no expiry date!";
+						}
+
+						return apiResponse.validationErrorWithData(res, priorityError, batchNumber);
 					}
 				} else {
 					const existingAtom = await AtomModel.findOne({
@@ -286,7 +305,7 @@ exports.fetchBatchById = [
 				}
 			}
 
-			return apiResponse.successResponseWithData(res, "Product Details", productDetails);
+			return apiResponse.successResponseWithData(res, "Product Details", validBatches);
 		} catch (err) {
 			console.log(err);
 			return apiResponse.ErrorResponse(res, err.message);
@@ -796,13 +815,13 @@ exports.getAnalyticsWithFilters = [
 			let todaysVaccinations = 0;
 			let vialsUtilized = 0;
 			let now = new Date();
-			now.setHours(23, 59, 59, 999);
+			let nowString = getDateStringForMongo(now);
 
 			for (let i = 0; i < warehouses.length; ++i) {
 				const vaccineVials = warehouses[i].vaccinations;
 				for (let j = 0; j < vaccineVials.length; ++j) {
 					let createdAt = new Date(vaccineVials[j].createdAt);
-					createdAt.setHours(23, 59, 59, 999);
+					let createdAtString = getDateStringForMongo(createdAt); 
 
 					const doses = vaccineVials[j].doses;
 
@@ -811,7 +830,7 @@ exports.getAnalyticsWithFilters = [
 					if (doses.length) {
 						totalVaccinations += doses.length;
 
-						if (now.toDateString() === createdAt.toDateString()) {
+						if (nowString === createdAtString) {
 							todaysVaccinations += doses.length;
 						}
 					}
@@ -860,15 +879,15 @@ exports.getAnalytics = [
 			let totalVaccinations = 0;
 			let todaysVaccinations = 0;
 			let now = new Date();
-			now.setHours(23, 59, 59, 999);
+			let nowString = getDateStringForMongo(now);
 
 			for (let i = 0; i < analytics.length; ++i) {
 				let createdAt = new Date(analytics[i].createdAt);
-				createdAt.setHours(23, 59, 59, 999);
+				let createdAtString = getDateStringForMongo(createdAt);
 
 				totalVaccinations += analytics[i].numberOfDoses;
 
-				if (now.toDateString() === createdAt.toDateString()) {
+				if (nowString === createdAtString) {
 					todaysVaccinations += analytics[i].numberOfDoses;
 				}
 			}
@@ -966,7 +985,6 @@ exports.getVaccinationsList = [
 			let queryExprs = [{ $in: ["$vaccineVialId", vialsList] }];
 			if (today) {
 				let now = new Date();
-				now.setHours(23, 59, 59, 999);
 				queryExprs.push({ $gte: ["$createdAt", now] });
 			}
 
@@ -1065,11 +1083,11 @@ exports.getVaccinationsListOld = [
 			const todaysVaccinationsList = [];
 
 			let now = new Date();
-			now.setHours(23, 59, 59, 999);
+			let nowString = getDateStringForMongo(now);
 
 			for (let i = 0; i < vialsUtilized.length; ++i) {
 				let createdAt = new Date(vialsUtilized[i].createdAt);
-				createdAt.setHours(23, 59, 59, 999);
+				let createdAtString = getDateStringForMongo(createdAt);
 
 				let currDoses = await DoseModel.aggregate([
 					{ $match: { vaccineVialId: vialsUtilized[i].id } },
@@ -1077,7 +1095,7 @@ exports.getVaccinationsListOld = [
 				]);
 
 				vaccinationsList.push(...currDoses);
-				if (now.toDateString() === createdAt.toDateString()) {
+				if (nowString === createdAtString) {
 					todaysVaccinationsList.push(...currDoses);
 				}
 			}

@@ -477,6 +477,7 @@ exports.deactivateUser = [
   },
 ];
 
+// LOOKS DUPLICATE, use the one in AuthController
 exports.addUsersFromExcel = [
   auth,
   async (req, res) => {

@@ -62,6 +62,8 @@ const ShipmentSchema = new Schema(
 				attributeSet: {
 					mfgDate: { type: Date, default: null },
 					expDate: { type: Date, default: null },
+					mfgDateString: String,
+					expDateString: String,		
 				},
 				atomId: { type: String, default: "" },
 			},
