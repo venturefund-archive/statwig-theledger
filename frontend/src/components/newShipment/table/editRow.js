@@ -27,6 +27,8 @@ const EditRow = (props) => {
 		products,
 		check,
 		warehouseID,
+		FromLocationSelected,
+		setFromLocationCheck,
 		t,
 		FromLocationSelected
 	} = props;
@@ -381,12 +383,14 @@ const EditRow = (props) => {
 				<div className="d-flex">
 					<button
 						type="button"
-						className="btn btn-outline-primary mr-2 ml-2"
+						disabled={FromLocationSelected ? false : true}
+						className={`btn  mr-2 ml-2 ${FromLocationSelected ? "btn-outline-primary" : "fetchDisable"}`}
 						style={{ height: "30px", width: "70px" }}
 						disabled={!FromLocationSelected}
 						onClick={() => {
 							setShowModal(true);
 							fetchBatches(prod, index);
+							setFromLocationCheck("VALUE")
 						}}
 					>
 						<div style={{ position: "relative", fontSize: "12px", left: "-6px" }}>
