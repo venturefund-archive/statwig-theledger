@@ -75,35 +75,36 @@ const ReceiveShipment = (props) => {
   };
 
   const receiveShipment = async () => {
-    let data = tracking;
-    for (const [index, value] of qtyArr.entries()) {
-      data.products[index].productQuantity =
-        data.products[index].productQuantity <= parseInt(value)
-          ? data.products[index].productQuantity
-          : parseInt(value);
-      data.products[index].productId = data.products[index].productID;
-    }
-    const formData = new FormData();
-    if (photo) {
-      formData.append("photo", photo, photo.name);
-    }
-    formData.append("supplier", JSON.stringify(data.supplier));
-    formData.append("receiver", JSON.stringify(data.receiver));
-    formData.append("status", "RECEIVED");
-    formData.append("comment", comment);
-    formData.append("products", JSON.stringify(data.products));
-    formData.append("poId", data.poId);
+		let data = tracking;
+		for (const [index, value] of qtyArr.entries()) {
+			data.products[index].productQuantity =
+				data.products[index].productQuantity <= parseInt(value)
+					? data.products[index].productQuantity
+					: parseInt(value);
+			data.products[index].productId = data.products[index].productID;
+		}
+		const formData = new FormData();
+		if (photo) {
+			formData.append("photo", photo, photo.name);
+		}
+		formData.append("supplier", JSON.stringify(data.supplier));
+		formData.append("receiver", JSON.stringify(data.receiver));
+		formData.append("status", "RECEIVED");
+		formData.append("comment", comment);
+		formData.append("products", JSON.stringify(data.products));
+		formData.append("poId", data.poId);
     formData.append("id", data.id);
-    dispatch(turnOn());
-    const result = await receiveApi(formData);
-    if (result.status === 200) {
-      setreceiveShipmentModal(true);
-    } else {
-      setErrorMsg(result.data);
-      setFailPopUp(true);
-    }
-    dispatch(turnOff());
-  };
+    console.log(data.products);
+		dispatch(turnOn());
+		const result = await receiveApi(formData);
+		if (result.status === 200) {
+			setreceiveShipmentModal(true);
+		} else {
+			setErrorMsg(result.data);
+			setFailPopUp(true);
+		}
+		dispatch(turnOff());
+	};
 
   const uploadPhoto = async () => {
     const formData = new FormData();

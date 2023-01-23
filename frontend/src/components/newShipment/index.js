@@ -524,8 +524,8 @@ const NewShipment = (props) => {
 														}
 														setReceiverOrgLoc(
 															result.poDetails[0].customer.warehouse.title +
-															"/" +
-															result.poDetails[0].customer.warehouse.postalAddress,
+																"/" +
+																result.poDetails[0].customer.warehouse.postalAddress,
 														);
 														setReceiverOrgId(result.poDetails[0].customer.organisation.name);
 														setOrderDetails(result.poDetails[0]);
@@ -543,30 +543,30 @@ const NewShipment = (props) => {
 														setFieldValue(
 															"toOrg",
 															result.poDetails[0].customer.organisation.id +
-															"/" +
-															result.poDetails[0].customer.organisation.name,
+																"/" +
+																result.poDetails[0].customer.organisation.name,
 														);
 														// settoOrgLocLabel(result.poDetails[0].customer.organisation.id + "/"+result.poDetails[0].customer.organisation.name)
 														let wa = result.poDetails[0].customer.warehouse;
 														setFieldValue(
 															"toOrgLoc",
 															result.poDetails[0].customer.shippingAddress.shippingAddressId +
-															"/" +
-															(wa?.warehouseAddress
-																? wa?.title +
 																"/" +
-																wa?.warehouseAddress?.firstLine +
-																", " +
-																wa?.warehouseAddress?.city
-																: wa?.title + "/" + wa.postalAddress),
+																(wa?.warehouseAddress
+																	? wa?.title +
+																	  "/" +
+																	  wa?.warehouseAddress?.firstLine +
+																	  ", " +
+																	  wa?.warehouseAddress?.city
+																	: wa?.title + "/" + wa.postalAddress),
 														);
 														settoOrgLocLabel(
 															wa?.warehouseAddress
 																? wa?.title +
-																"/" +
-																wa?.warehouseAddress?.firstLine +
-																", " +
-																wa?.warehouseAddress?.city
+																		"/" +
+																		wa?.warehouseAddress?.firstLine +
+																		", " +
+																		wa?.warehouseAddress?.city
 																: wa?.title + "/" + wa.postalAddress,
 														);
 														setFieldValue("rtype", result.poDetails[0].customer.organisation.type);
@@ -717,7 +717,7 @@ const NewShipment = (props) => {
 																	}
 																	if (result.products.length > 0) {
 																		setProducts((p) => []);
-																		setAddProducts((p) => []);
+																		setAddProducts((p) => products_temp);
 																		setFieldValue("products", products_temp);
 																	} else setFieldValue("products", []);
 																}
@@ -805,7 +805,7 @@ const NewShipment = (props) => {
 													noOptionsMessage={() => t("no_options")}
 													styles={customStyles}
 													isDisabled={true}
-													onChange={(v) => { }}
+													onChange={(v) => {}}
 													placeholder={senderOrganisation[0]}
 													defaultInputValue={senderOrganisation[0]}
 													value={senderOrganisation[0]}
@@ -826,8 +826,9 @@ const NewShipment = (props) => {
 												{t("organisation_location")}*
 											</label>
 											<div
-												className={`line ${errors.fromOrgLoc && touched.fromOrgLoc ? "border-danger" : ""
-													}`}
+												className={`line ${
+													errors.fromOrgLoc && touched.fromOrgLoc ? "border-danger" : ""
+												}`}
 											>
 												{/* <DropdownButton
                           name={senderOrgLoc}
@@ -888,9 +889,9 @@ const NewShipment = (props) => {
 														values.fromOrgLoc === ""
 															? t("select") + " " + t("organisation_location")
 															: {
-																value: values.fromOrgLoc,
-																label: FromOrgLabel,
-															}
+																	value: values.fromOrgLoc,
+																	label: FromOrgLabel,
+															  }
 													}
 													options={senderWarehouses.filter(
 														(ele, ind) =>
@@ -1011,8 +1012,9 @@ const NewShipment = (props) => {
 												{t("delivery_location")}*
 											</label>
 											<div
-												className={`line ${errors.toOrgLoc && touched.toOrgLoc ? "border-danger" : ""
-													}`}
+												className={`line ${
+													errors.toOrgLoc && touched.toOrgLoc ? "border-danger" : ""
+												}`}
 											>
 												{/* <DropdownButton
                           name={receiverOrgLoc}
@@ -1077,8 +1079,9 @@ const NewShipment = (props) => {
 											{t("transit_no")}
 										</label>
 										<input
-											className={`input refship ${errors.airWayBillNo && touched.airWayBillNo ? "" : ""
-												}`}
+											className={`input refship ${
+												errors.airWayBillNo && touched.airWayBillNo ? "" : ""
+											}`}
 											type="text"
 											id="referenceShipmentId"
 											name="airWayBillNo"
@@ -1100,8 +1103,9 @@ const NewShipment = (props) => {
 												{t("shipment_date")}*
 											</label>
 											<div
-												className={`input refship ${errors.shipmentDate && touched.shipmentDate ? "border-danger" : ""
-													}`}
+												className={`input refship ${
+													errors.shipmentDate && touched.shipmentDate ? "border-danger" : ""
+												}`}
 											>
 												<DatePicker
 													dateFormat="dd/MM/yyyy"
@@ -1166,10 +1170,11 @@ const NewShipment = (props) => {
 												{t("estimated_delivery_date")}
 											</label>
 											<div
-												className={`input refship ${errors.estimateDeliveryDate && touched.estimateDeliveryDate
+												className={`input refship ${
+													errors.estimateDeliveryDate && touched.estimateDeliveryDate
 														? "border-danger"
 														: ""
-													}`}
+												}`}
 											>
 												<DatePicker
 													dateFormat="dd/MM/yyyy"
@@ -1306,6 +1311,7 @@ const NewShipment = (props) => {
 										setAddProducts((prod) => [...newArr]);
 									}}
 									handleLabelIdChange={handleLabelIdChange}
+									FromLocationSelected={FromLocationSelected}
 								/>
 							) : (
 								products?.length <= 0 && (
@@ -1459,6 +1465,7 @@ const NewShipment = (props) => {
 										}}
 										handleLabelIdChange={handleLabelIdChange}
 										handleCategoryChange={onCategoryChange}
+										FromLocationSelected={FromLocationSelected}
 									/>
 									<div className="d-flex justify-content-between">
 										<button

@@ -28,6 +28,7 @@ const EditRow = (props) => {
 		check,
 		warehouseID,
 		t,
+		FromLocationSelected
 	} = props;
 
 	const headers = {
@@ -382,6 +383,7 @@ const EditRow = (props) => {
 						type="button"
 						className="btn btn-outline-primary mr-2 ml-2"
 						style={{ height: "30px", width: "70px" }}
+						disabled={!FromLocationSelected}
 						onClick={() => {
 							setShowModal(true);
 							fetchBatches(prod, index);
