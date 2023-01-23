@@ -23,7 +23,7 @@ export default function Landingfooter({ contactRef, t }) {
                 </figure>
                 <figure className="mobile-app-stores">
                   <a
-                    href="https://apps.apple.com/us/app/vaccineledger-lite/id1565684295"
+                    href="https://apps.apple.com/us/app/vaccineledger/id1559086870"
                     target="_blank"
                   >
                     <img

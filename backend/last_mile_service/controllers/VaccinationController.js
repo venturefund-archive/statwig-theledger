@@ -267,6 +267,7 @@ exports.fetchBatchById = [
 							let expDateString = getDateStringForMongo(expDate);
 							let today = new Date();
 							let todayString = getDateStringForMongo(today);
+							console.log("Today - ", { todayTimeStamp: today, todayString: todayString });
 							if (expDateString < todayString) {
 								errors.push("expired_batch");
 								continue;

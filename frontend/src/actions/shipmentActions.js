@@ -401,12 +401,14 @@ export const receiveApi = async (formData) => {
   try {
     const configObject = config();
     const url = configObject.receiveApi;
+    for (let pair of formData.values()) console.log(pair[0], JSON.stringify(pair[1]));
     const result = await axios.post(url, formData, {
       headers: {
         "Content-Type": "multipart/form-data"
       },
     });
     return result;
+    return "";
   } catch (e) {
     return e.response;
   }
