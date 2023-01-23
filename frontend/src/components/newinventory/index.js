@@ -18,6 +18,7 @@ import { turnOn, turnOff } from "../../actions/spinnerActions";
 import { getProducts } from "../../actions/poActions";
 import { isAuthenticated } from "../../utils/commonHelper";
 import { isBefore } from "date-fns";
+import { getDateStringForMongo } from "../../utils/dateHelper";
 
 const NewInventory = (props) => {
   const { t } = props;
@@ -121,9 +122,10 @@ const NewInventory = (props) => {
 		let error = false;
 		inventoryState.forEach((inventory) => {
 			if (error) return;
-			let expDate = new Date(inventory.expiryDate).setHours(0, 0, 0, 0);
-			let today = new Date().setHours(0, 0, 0, 0);
-			if (isBefore(expDate, today)) {
+      let expDate = new Date(inventory.expiryDate);
+      let expDateString = getDateStringForMongo(expDate);
+			let todayString = getDateStringForMongo(new Date());
+			if (expDateString < todayString) {
 				setInventoryError("Check expiryDate");
 				setOpenFailInventory(true);
 				error = true;

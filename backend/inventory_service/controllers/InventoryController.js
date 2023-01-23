@@ -673,8 +673,12 @@ exports.addProductsToInventory = [
               mfgDateString = utility.getDateStringForMongo(mfgDate);
             }
             if(product?.expDate) {
-							expDate = new Date(product.expDate);
+              expDate = new Date(product.expDate);
               expDateString = utility.getDateStringForMongo(expDate);
+              console.log("Product exp - ", {
+								timestampReceived: expDate,
+								dateString: expDateString,
+							});
 						}
             let atomsArray = [];
             if (serialNumbers?.length > 1) {
@@ -811,14 +815,6 @@ exports.addProductsToInventory = [
               }
             );
           }
-          // if (duplicateBatch) {
-          //   return apiResponse.ErrorResponse(
-          //     res,
-          //     responses(req.user.preferredLanguage).batchExists(
-          //       duplicateBatchNo
-          //     )
-          //   );
-          // }
           const event_data = {
             eventID: cuid(),
             eventTime: new Date().toISOString(),
@@ -862,6 +858,7 @@ exports.addProductsToInventory = [
           res.json(responses(req.user.preferredLanguage).no_permission);
         }
       });
+    
     } catch (err) {
       console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
@@ -2250,8 +2247,12 @@ exports.getBatchNearExpiration = [
 										$in: [warehouse.warehouseInventory, "$inventoryIds"],
 									},
 								},
-								{ "attributeSet.mfgDate": { $ne: "" } },
-								{ "attributeSet.expDate": { $ne: "" } },
+								{
+									$or: [
+										{ "attributeSet.expDateString": { $exists: true } },
+										{ "attributeSet.expDateString": { $ne: "" } },
+									],
+								},
 							],
 						},
 					},
@@ -2294,7 +2295,6 @@ exports.getBatchExpired = [
         : (warehouseId = req.user.warehouseId);
       const warehouse = await WarehouseModel.findOne({ id: warehouseId });
       if (warehouse) {
-        console.log(new Date(), warehouse.warehouseInventory)
         let today = new Date();
         let todayString = utility.getDateStringForMongo(today);
         const result = await AtomModel.aggregate([
@@ -2308,8 +2308,12 @@ exports.getBatchExpired = [
 								},
 								{ currentInventory: warehouse.warehouseInventory },
 								{ batchNumbers: { $ne: "" } },
-								{ "attributeSet.mfgDate": { $ne: "" } },
-								{ "attributeSet.expDate": { $ne: "" } },
+								{
+									$or: [
+										{ "attributeSet.expDateString": { $exists: true } },
+										{ "attributeSet.expDateString": { $ne: "" } },
+									],
+								},
 							],
 						},
 					},
@@ -2322,8 +2326,7 @@ exports.getBatchExpired = [
 						},
 					},
 					{ $unwind: "$products" },
-        ]);
-        console.log(result);
+				]);
         return apiResponse.successResponseWithData(
           res,
           "Expired Batch Details",
@@ -2766,7 +2769,7 @@ exports.fetchBatchesOfInventory = [
       const warehouseId = wareId ? wareId : req.user.warehouseId;
       const warehouse = await WarehouseModel.findOne({ id: warehouseId });
       const inventoryId = warehouse.warehouseInventory;
-      let today = new Date();
+      let today = utility.getDateStringForMongo(new Date());
       const payload = {
 				$and: [
 					{ productId: productId },
