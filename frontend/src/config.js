@@ -269,7 +269,7 @@ export function config() {
       shipmentsUrl: `${SERVER_URL}/shipmentmanagement/api/shipment/fetchShipments`,
       viewShipmentUrl: `${SERVER_URL}/shipmentmanagement/api/shipment/viewShipment?shipmentId=`,
       chainOfCustody: `${SERVER_URL}/shipmentmanagement/api/shipment/chainOfCustody?shipmentId=`,
-      receiveApi: `${LOCAL_SERVER_URL_SHIPMENT}/shipmentmanagement/api/shipment/receiveShipment`,
+      receiveApi: `${SERVER_URL}/shipmentmanagement/api/shipment/receiveShipment`,
       getShipmentIdsUrl: `${SERVER_URL}/shipmentmanagement/api/shipment/fetchShipmentIds`,
       fetchImage: `${SERVER_URL}/shipmentmanagement/api/shipment/fetchImage?id=`,
       getImage: `${SERVER_URL}/shipmentmanagement/api/shipment/images`,
