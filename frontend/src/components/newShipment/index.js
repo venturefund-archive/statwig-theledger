@@ -35,6 +35,7 @@ const NewShipment = (props) => {
 	const [receiverWarehouses, setReceiverWarehouses] = useState([]);
 	const [disabled, setDisabled] = useState(false);
 	const [FromLocationSelected, setFromLocationSelected] = useState(false);
+	const [FromLocationCheck, setFromLocationCheck] = useState("");
 	const [products, setProducts] = useState([]);
 	const [addProducts, setAddProducts] = useState([]);
 	const [FromOrgLabel, setFromOrgLabel] = useState("Select Organisation Location");
@@ -639,6 +640,7 @@ const NewShipment = (props) => {
 											onClick={async () => {
 												// setpofetchdisabled(true);
 												setAddProducts((p) => []);
+												setFromLocationCheck("NO_VALUE")
 												setOrderIdSelected(true);
 												setProducts((p) => []);
 												dispatch(turnOn());
@@ -867,6 +869,7 @@ const NewShipment = (props) => {
 															return;
 														}
 														setFromOrgLabel(v.label);
+														setFromLocationCheck("VALUE");
 														setSelectedWarehouse(v.id);
 														setFromLocationSelected(true);
 														setFieldValue("fromOrg", senderOrganisation[0]);
@@ -1224,6 +1227,8 @@ const NewShipment = (props) => {
 								<EditTable
 									t={t}
 									check="1"
+									FromLocationSelected={FromLocationSelected}
+									setFromLocationCheck={setFromLocationCheck}
 									warehouseID={senderOrgId}
 									product={OrderDetails?.products}
 									handleQuantityChange={(v, i) => {
@@ -1335,6 +1340,8 @@ const NewShipment = (props) => {
 								<>
 									<EditTable
 										check="0"
+										FromLocationSelected={FromLocationSelected}
+										setFromLocationCheck={setFromLocationCheck}
 										warehouseID={senderOrgId}
 										product={addProducts}
 										t={t}
