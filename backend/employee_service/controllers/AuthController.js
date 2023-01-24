@@ -2376,7 +2376,7 @@ exports.addUsersFromExcel = [
 					const city = user?.["CITY"]
 					const zip = user?.["POSTAL CODE"];
 					const province = user?.["PROVINCE"];
-					const warehouseTitle = user?.["NAME OF LOCATION"];
+					const warehouseTitle = user?.["LOCATION NAME"];
 					const district = user?.["DISTRICT"];
 					const postalAddress = user?.["ADDRESS"];
 					const warehouseAddress = {
@@ -2389,9 +2389,15 @@ exports.addUsersFromExcel = [
 					}
 
 					const accountStatus = "ACTIVE";
-					const warehouseId =
-						user?.["WAREHOUSE"] || user?.["FECHA DE VENCIMIENTO"];
 					const { organisationId } = req.user;
+
+					const warehouseExists = await WarehouseModel.findOne({
+						organisationId: organisationId,
+						title: warehouseTitle,
+					});
+					let warehouseId;
+					if (warehouseExists) warehouseId = warehouseExists.id;
+
 					const payload = {
 						organisationId: organisationId,
 						postalAddress: postalAddress,

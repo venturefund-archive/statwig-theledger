@@ -33,11 +33,23 @@ const VerifyInventory = (props) => {
   const onAssign = async () => {
     dispatch(turnOn());
     const postData = reviewInventories.map((inventory) => {
+      let mfgDate;
+      let expDate;
+      if(inventory?.manufacturingDate) {
+        mfgDate = new Date(inventory.manufacturingDate);
+        mfgDate.setHours(12, 0, 0, 0)
+        console.log(mfgDate);
+      }
+      if(inventory?.expiryDate) {
+        expDate = new Date(inventory.expiryDate);
+        expDate.setHours(12, 0, 0, 0)
+        console.log(expDate);
+      }
       return {
         productId: inventory.productId,
         batchNumber: inventory.batchNumber,
-        mfgDate: inventory.manufacturingDate,
-        expDate: inventory.expiryDate,
+        mfgDate: mfgDate,
+        expDate: expDate,
         quantity: parseInt(inventory.quantity),
         serialNumbersRange: inventory.serialNumber,
         unitOfMeasure: inventory?.unitofMeasure?.name,

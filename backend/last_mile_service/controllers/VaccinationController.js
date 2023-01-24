@@ -96,8 +96,8 @@ const buildDoseQuery = async (gender, minAge, maxAge, ageType, vaccineVialIds, t
 		}
 	}
 	if (today) {
-		let now = new Date();
-		queryExprs.push({ $gte: ["$createdAt", now] });
+		let todayString = getDateStringForMongo(new Date());
+		queryExprs.push({ $gte: ["$createdDateString", todayString] });
 	}
 
 	if (queryExprs.length) {
@@ -484,6 +484,7 @@ exports.vaccinateIndividual = [
 				age: age || 0,
 				ageMonths: ageMonths || 0,
 				gender: gender === "GENERAL" ? "OTHERS" : gender.toUpperCase(),
+				createdDateString: getDateStringForMongo(new Date()),
 			});
 			await dose.save();
 			// Increment number of doses in VaccineVial model
@@ -622,6 +623,7 @@ exports.vaccinateMultiple = [
 						age: doses[i].age || 0,
 						ageMonths: doses[i].ageMonths || 0,
 						gender: doses[i].gender === "GENERAL" ? "OTHERS" : doses[i].gender.toUpperCase(),
+						createdDateString: getDateStringForMongo(new Date()),
 					});
 					await dose.save();
 				}
@@ -985,8 +987,8 @@ exports.getVaccinationsList = [
 
 			let queryExprs = [{ $in: ["$vaccineVialId", vialsList] }];
 			if (today) {
-				let now = new Date();
-				queryExprs.push({ $gte: ["$createdAt", now] });
+				let todayString = getDateStringForMongo(new Date());
+				queryExprs.push({ $gte: ["$createdDateString", todayString] });
 			}
 
 			const pagniationQuery = [];
@@ -1578,3 +1580,17 @@ function buildPdfReportVials(req, res, data) {
 	});
 	return;
 }
+
+exports.addDateStringToDoses = [
+	async (req, res) => {
+		const allDoses = await DoseModel.find();
+		let count = 0;
+		for(let i=0; i<allDoses.length; ++i) {
+			let currDose = allDoses[i];
+			let createdDateString = getDateStringForMongo(new Date(currDose.createdAt));
+			await DoseModel.updateOne({id: currDose.id}, {$set: {createdDateString: createdDateString}})
+			++count;
+		}
+		return apiResponse.successResponseWithData(res, "Done", count)
+	}
+]
