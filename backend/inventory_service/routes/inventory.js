@@ -161,6 +161,4 @@ router.post(
   InventoryController.addInventoriesFromExcel
 );
 
-router.get("/updateAtomDates", InventoryController.updateAtomDates)
-
 module.exports = router;

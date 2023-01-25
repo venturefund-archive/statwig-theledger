@@ -94,7 +94,6 @@ const ReceiveShipment = (props) => {
 		formData.append("products", JSON.stringify(data.products));
 		formData.append("poId", data.poId);
     formData.append("id", data.id);
-    console.log(data.products);
 		dispatch(turnOn());
 		const result = await receiveApi(formData);
 		if (result.status === 200) {

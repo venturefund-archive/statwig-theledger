@@ -15,7 +15,7 @@ const DoseSchema = new mongoose.Schema(
 		},
 		ageMonths: {
 			type: Number,
-			default: 0
+			default: 0,
 		},
 		dob: Date,
 		gender: {
@@ -23,6 +23,7 @@ const DoseSchema = new mongoose.Schema(
 			required: true,
 			enum: ["MALE", "FEMALE", "OTHERS"],
 		},
+		createdDateString: String,
 	},
 	{ timestamps: true },
 );

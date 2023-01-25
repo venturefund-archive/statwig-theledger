@@ -29,8 +29,7 @@ const EditRow = (props) => {
 		warehouseID,
 		FromLocationSelected,
 		setFromLocationCheck,
-		t,
-		FromLocationSelected
+		t
 	} = props;
 
 	const headers = {
