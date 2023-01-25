@@ -264,11 +264,8 @@ exports.fetchBatchById = [
 						let currProd = productDetails[i];
 						if (currProd?.atom?.attributeSet?.expDate) {
 							let expDate = new Date(productDetails[0].atom.attributeSet.expDate);
-							let expDateString = getDateStringForMongo(expDate);
 							let today = new Date();
-							let todayString = getDateStringForMongo(today);
-							console.log("Today - ", { todayTimeStamp: today, todayString: todayString });
-							if (expDateString < todayString) {
+							if (expDate.toLocaleDateString() < today.toLocaleDateString()) {
 								errors.push("expired_batch");
 								continue;
 							} else {

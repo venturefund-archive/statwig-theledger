@@ -665,20 +665,12 @@ exports.addProductsToInventory = [
 
             const serialNumbers = product.serialNumbersRange?.split("-");
             let mfgDate;
-            let mfgDateString;
             let expDate;
-            let expDateString;
             if(product?.mfgDate) {
               mfgDate = new Date(product.mfgDate);
-              mfgDateString = utility.getDateStringForMongo(mfgDate);
             }
             if(product?.expDate) {
               expDate = new Date(product.expDate);
-              expDateString = utility.getDateStringForMongo(expDate);
-              console.log("Product exp - ", {
-								timestampReceived: expDate,
-								dateString: expDateString,
-							});
 						}
             let atomsArray = [];
             if (serialNumbers?.length > 1) {
@@ -711,9 +703,7 @@ exports.addProductsToInventory = [
                   status: "HEALTHY",
                   attributeSet: {
                     mfgDate: mfgDate,
-                    mfgDateString: mfgDateString,
                     expDate: expDate,
-                    expDateString: expDateString
                   },
                   eolInfo: {
                     eolId: "IDN29402-23423-23423",
@@ -742,9 +732,7 @@ exports.addProductsToInventory = [
                 status: "HEALTHY",
                 attributeSet: {
                   mfgDate: mfgDate,
-                  mfgDateString: mfgDateString,
                   expDate: expDate,
-                  expDateString: expDateString
               },
                 eolInfo: {
                   eolId: "IDN29402-23423-23423",
@@ -780,7 +768,7 @@ exports.addProductsToInventory = [
               let batchDup = await AtomModel.findOne({
 								productId: atomsArray[i].productId,
 								batchNumbers: atomsArray[i].batchNumbers[0],
-								"attributeSet.expDateString": expDateString,
+								"attributeSet.expDate": expDate,
 								currentInventory: warehouse.warehouseInventory,
               });
               
@@ -2238,8 +2226,8 @@ exports.getBatchNearExpiration = [
 							$and: [
 								{
 									$and: [
-										{ "attributeSet.expDateString": { $gte: todayString } },
-										{ "attributeSet.expDateString": { $lt: nextMonthString } },
+										{ "attributeSet.expDate": { $gte: today } },
+										{ "attributeSet.expDate": { $lt: nextMonth } },
 									],
 								},
 								{
@@ -2249,14 +2237,14 @@ exports.getBatchNearExpiration = [
 								},
 								{
 									$or: [
-										{ "attributeSet.expDateString": { $exists: true } },
-										{ "attributeSet.expDateString": { $ne: "" } },
+										{ "attributeSet.expDate": { $exists: true } },
+										{ "attributeSet.expDate": { $ne: "" } },
 									],
 								},
 							],
 						},
 					},
-					{ $sort: { "attributeSet.expDateString": 1 } },
+					{ $sort: { "attributeSet.expDate": 1 } },
 					{
 						$lookup: {
 							from: "products",
@@ -2302,16 +2290,16 @@ exports.getBatchExpired = [
 						$match: {
 							$and: [
 								{
-									"attributeSet.expDateString": {
-										$lt: todayString,
+									"attributeSet.expDate": {
+										$lt: today,
 									},
 								},
 								{ currentInventory: warehouse.warehouseInventory },
 								{ batchNumbers: { $ne: "" } },
 								{
 									$or: [
-										{ "attributeSet.expDateString": { $exists: true } },
-										{ "attributeSet.expDateString": { $ne: "" } },
+										{ "attributeSet.expDate": { $exists: true } },
+										{ "attributeSet.expDate": { $ne: "" } },
 									],
 								},
 							],
@@ -2780,12 +2768,11 @@ exports.fetchBatchesOfInventory = [
 						$or: [
 							{ "attributeSet.expDate": { $exists: false } },
 							{ "attributeSet.expDate": { $in: [null, ""] } },
-							{ "attributeSet.expDateString": { $gte: today } },
+							{ "attributeSet.expDate": { $gte: today } },
 						],
 					},
 				],
       };
-      console.log(JSON.stringify(payload));
       const batches = await AtomModel.find(payload).sort({ "attributeSet.expDate": 1 });
       return apiResponse.successResponseWithData(
         res,
@@ -2908,39 +2895,3 @@ exports.reduceBatch = [
   },
 ];
 
-
-exports.updateAtomDates = [
-  async (req, res) => {
-    try {
-      const allAtoms = await AtomModel.find();
-      let count = 0;
-      for(let i=0; i<allAtoms?.length; ++i) {
-				let currAtom = allAtoms[i];
-				let mfgDateString;
-				let expDateString;
-				if (currAtom?.attributeSet?.mfgDate) {
-					let mfgDate = new Date(currAtom.attributeSet.mfgDate);
-          mfgDateString = utility.getDateStringForMongo(mfgDate);
-				}
-				if (currAtom?.attributeSet?.expDate) {
-          let expDate = new Date(currAtom.attributeSet.expDate);
-          expDateString = utility.getDateStringForMongo(expDate);
-				}
-				if (mfgDateString || expDateString) {
-					let updatePayload = {
-						$set: {
-							...(mfgDateString ? { "attributeSet.mfgDateString": mfgDateString } : {}),
-							...(expDateString ? { "attributeSet.expDateString": expDateString } : {}),
-						},
-					};
-					await AtomModel.findOneAndUpdate({ id: currAtom.id }, updatePayload);
-					++count;
-				}
-			}
-      return apiResponse.successResponseWithData(res, "Atoms updated!", count);
-    } catch(err) {
-      console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
-    }
-  }
-]

@@ -402,14 +402,14 @@ exports.getAnalytics = [
       let nextWeekString = getDateStringForMongo(nextWeek);
 
       const expiringToday = await AtomModel.count({
-				"attributeSet.expDateString": { $eq: todayString },
+				"attributeSet.expDate": { $eq: today },
 			});
       inventory.expiringToday = expiringToday;
 
       const expiringThisWeek = await AtomModel.count({
-        "attributeSet.expDateString": {
-          $gte: todayString,
-          $lt: nextWeekString,
+        "attributeSet.expDate": {
+          $gte: today,
+          $lt: nextWeek,
         },
       });
       inventory.expiringThisWeek = expiringThisWeek;
@@ -419,9 +419,9 @@ exports.getAnalytics = [
       let nextMonthString = getDateStringForMongo(nextMonth);
 
       const expiringThisMonth = await AtomModel.count({
-        "attributeSet.expDateString": {
-          $gte: todayString,
-          $lt: nextMonthString,
+        "attributeSet.expDate": {
+          $gte: today,
+          $lt: nextMonth,
         },
       });
       inventory.expiringThisMonth = expiringThisMonth;
@@ -431,9 +431,9 @@ exports.getAnalytics = [
       let nextyearString = getDateStringForMongo(nextYear);
 
       const expiringThisYear = await AtomModel.count({
-        "attributeSet.expDateString": {
-          $gte: todayString,
-          $lt: nextyearString,
+        "attributeSet.expDate": {
+          $gte: today,
+          $lt: nextyear,
         },
       });
       inventory.expiringThisYear = expiringThisYear;
@@ -442,27 +442,27 @@ exports.getAnalytics = [
 
       let lastWeekString = getDateStringForMongo(lastWeek);
       const expiredThisWeek = await AtomModel.count({
-        "attributeSet.expDateString": {
-          $lt: todayString,
-          $gte: lastWeekString,
+        "attributeSet.expDate": {
+          $lt: today,
+          $gte: lastWeek,
         },
       });
       inventory.expiredThisWeek = expiredThisWeek;
 
       let lastMonthString = getDateStringForMongo(lastMonth);
       const expiredThisMonth = await AtomModel.count({
-        "attributeSet.expDateString": {
-          $lt: todayString,
-          $gte: lastMonthString,
+        "attributeSet.expDate": {
+          $lt: today,
+          $gte: lastMonth,
         },
       });
       inventory.expiredThisMonth = expiredThisMonth;
 
       let lastYearString = getDateStringForMongo(lastYear);
       const expiredThisYear = await AtomModel.count({
-        "attributeSet.expDateString": {
-          $lt: todayString,
-          $gte: lastYearString,
+        "attributeSet.expDate": {
+          $lt: today,
+          $gte: lastYear,
         },
       });
       inventory.expiredThisYear = expiredThisYear;
@@ -588,8 +588,8 @@ exports.getAnalytics = [
       data.stockOut = stockOut;
 
       const expiredProducts = await AtomModel.count({
-        "attributeSet.expDateString": {
-          $lt: todayString,
+        "attributeSet.expDate": {
+          $lt: today,
         },
       });
       data.expiredProducts = expiredProducts;
@@ -602,8 +602,8 @@ exports.getAnalytics = [
       const batchExpired = await AtomModel.aggregate([
         {
           $match: {
-            "attributeSet.expDateString": {
-              $lt: todayString,
+            "attributeSet.expDate": {
+              $lt: today,
             },
           },
         },
@@ -623,9 +623,9 @@ exports.getAnalytics = [
       const batchNearExpiration = await AtomModel.aggregate([
         {
           $match: {
-            "attributeSet.expDateString": {
-              $gte: todayString,
-              $lt: nearExpirationString,
+            "attributeSet.expDate": {
+              $gte: today,
+              $lt: nearExpiration,
             },
           },
         },
@@ -814,8 +814,8 @@ exports.getInventoryAnalytics = [
 				{
 					$match: {
 						$and: [
-							{ "attributeSet.expDateString": { $gte: todayString } },
-							{ "attributeSet.expDateString": { $lt: nextMonthString } },
+							{ "attributeSet.expDate": { $gte: today } },
+							{ "attributeSet.expDate": { $lt: nextMonth } },
 							{ currentInventory: warehouse?.warehouseInventory },
 							{ batchNumbers: { $ne: "" } },
 							{ "attributeSet.mfgDate": { $ne: "" } },
@@ -835,8 +835,8 @@ exports.getInventoryAnalytics = [
 					$match: {
 						$and: [
 							{
-								"attributeSet.expDateString": {
-									$lt: todayString,
+								"attributeSet.expDate": {
+									$lt: today,
 								},
 							},
 							{ currentInventory: warehouse?.warehouseInventory },

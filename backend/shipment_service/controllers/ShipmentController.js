@@ -1428,61 +1428,67 @@ exports.receiveShipment = [
           id: receiverId,
         });
 
-        let actuallyShippedQuantity = 0;
-        let productNumber = -1;
         if (shipmentInfo) {
-          const shipmentProducts = shipmentInfo.products;
-          for (const product of shipmentProducts) {
-            const combinedShipmentProduct = shipmentProducts.filter(
-							(ele) =>
-								ele.productID === product.productID &&
-								ele?.batchNumber == product?.batchNumber &&
-								ele?.atomId === product?.atomId,
-						);
-            productNumber = productNumber + 1;
-            for (const receivedProduct of receivedProducts) {
-							if (
-								product.productID === receivedProduct.productID &&
-								(product?.batchNumber == receivedProduct?.batchNumber || !product?.batchNumber) &&
-								product?.atomId == receivedProduct?.atomId
-							) {
-								const combinedReceivedProduct = receivedProducts.filter(
-									(ele) =>
-										ele.productID === product.productID &&
-										ele?.batchNumber == product?.batchNumber &&
-										ele?.atomId === product?.atomId,
-								);
-								actuallyShippedQuantity = combinedShipmentProduct.reduce(
-									(a, curr) => a + curr["productQuantity"],
-									0,
-								);
-								const receivedQuantity = combinedReceivedProduct.reduce(
-									(a, curr) => a + curr["productQuantity"],
-									0,
-								);
-								if (receivedQuantity > actuallyShippedQuantity)
-									throw new Error(responses(req.user.preferredLanguage).rec_quantity_error);
+					const shipmentProducts = shipmentInfo.products;
 
-								const quantityDifference = actuallyShippedQuantity - receivedQuantity;
-								const rejectionRate = (quantityDifference / actuallyShippedQuantity) * 100;
-								shipmentProducts[productNumber].quantityDelivered = receivedQuantity;
-								shipmentProducts[productNumber].rejectionRate = rejectionRate;
-								await ShipmentModel.updateOne(
-									{
-										id: shipmentID,
-										"products.productID": product.productID,
-										"products.atomId": product.atomId,
-									},
-									{
-										$set: {
-											"products.$.rejectionRate": rejectionRate,
-										},
-									},
-								);
-							}
+					let shippedQuantity = 0;
+					let receivedQuantity = 0;
+
+					//Creating a map to store the productQuantity for each product
+					const shippedProductMap = new Map();
+					const receivedProductMap = new Map();
+
+					for (const product of shipmentProducts) {
+						//Storing productQuantity for each product
+						const key = product.productID + "-" + product.batchNumber + "-" + product.atomId;
+						if (shippedProductMap.has(key)) {
+							shippedProductMap.set(key, shippedProductMap.get(key) + product.productQuantity);
+						} else {
+							shippedProductMap.set(key, product.productQuantity);
 						}
-          }
-        }
+					}
+
+					for (const product of receivedProducts) {
+						//Storing productQuantity for each product
+						const key = product.productID + "-" + product.batchNumber + "-" + product.atomId;
+						if (receivedProductMap.has(key)) {
+							receivedProductMap.set(key, receivedProductMap.get(key) + product.productQuantity);
+						} else {
+							receivedProductMap.set(key, product.productQuantity);
+						}
+					}
+
+					for (const product of shipmentProducts) {
+						const key = product.productID + "-" + product.batchNumber + "-" + product.atomId;
+						if (shippedProductMap.has(key)) {
+							shippedQuantity = shippedProductMap.get(key);
+						}
+						if (receivedProductMap.has(key)) {
+							receivedQuantity = receivedProductMap.get(key);
+						}
+
+						if (receivedQuantity > shippedQuantity) {
+							throw new Error(responses(req.user.preferredLanguage).rec_quantity_error);
+						}
+						const quantityDifference = shippedQuantity - receivedQuantity;
+						const rejectionRate = (quantityDifference / shippedQuantity) * 100;
+						product.quantityDelivered = receivedQuantity;
+						product.rejectionRate = rejectionRate;
+						await ShipmentModel.updateOne(
+							{
+								id: shipmentID,
+								"products.productID": product.productID,
+								"products.batchNumber": product.batchNumber,
+								"products.atomId": product.atomId,
+							},
+							{
+								$set: {
+									"products.$.rejectionRate": rejectionRate,
+								},
+							},
+						);
+					}
+				}
         var flag = "Y";
         // if (data.poId == "null") {
         //   flag = "YS";
@@ -1515,9 +1521,9 @@ exports.receiveShipment = [
                 const po_product_quantity =
                   product.productQuantity || product.quantity;
                 let shipment_product_qty = 0;
-                if (product.productQuantityDelivered)
+                if (product.quantityDelivered)
                   shipment_product_qty =
-                    parseInt(product.productQuantityDelivered) +
+                    parseInt(product.quantityDelivered) +
                     parseInt(p.productQuantity);
                 else shipment_product_qty = p.productQuantity;
                 if (
@@ -1609,17 +1615,12 @@ exports.receiveShipment = [
 						});
 
 						let atomInTransitDate = atomInTransit?.attributeSet?.expDate;
-						let atomInTransitDateString;
-
-						if (atomInTransitDate) {
-							atomInTransitDateString = getDateStringForMongo(atomInTransitDate);
-						}
 
 						const atomExists = await AtomModel.findOne({
 							batchNumbers: products[count].batchNumber,
 							productId: products[count].productId,
 							currentInventory: recvInventoryId,
-							"attributeSet.expDateString": atomInTransitDateString,
+							"attributeSet.expDate": atomInTransitDate,
 							status: { $in: ["HEALTHY", "CONSUMED", "EXPIRED"] },
 						});
 

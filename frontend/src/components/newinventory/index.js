@@ -123,9 +123,8 @@ const NewInventory = (props) => {
 		inventoryState.forEach((inventory) => {
 			if (error) return;
       let expDate = new Date(inventory.expiryDate);
-      let expDateString = getDateStringForMongo(expDate);
-			let todayString = getDateStringForMongo(new Date());
-			if (expDateString < todayString) {
+      let today = new Date();
+			if (expDate.toLocaleDateString() < today.toLocaleDateString()) {
 				setInventoryError("Check expiryDate");
 				setOpenFailInventory(true);
 				error = true;

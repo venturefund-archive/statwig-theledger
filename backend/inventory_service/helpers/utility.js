@@ -14,6 +14,7 @@ exports.asyncForEach = async (array, callback) => {
   }
 };
 
+// NEED TO UPDATE THIS
 exports.excludeExpireProduct = (data) => {
   let today = new Date();
   let todayString = this.getDateStringForMongo(today);

@@ -135,7 +135,7 @@ const ViewInventory = (props) => {
 												<div className="col ml-4 txt1 ">{exp.products.manufacturer}</div>
 												<div className="col ml-5 txt1 d-flex justify-content-start">
 													<span className="mr-2">{exp?.quantity > 0 ? exp.quantity : 0}</span>
-													{exp.attributeSet?.expDateString < getDateStringForMongo(new Date()) ? (
+													{new Date(exp.attributeSet?.expDate) < new Date() ? (
 														<span
 															className={`badge-danger text-white badge badge-pill status secondary-bg`}
 														>
