@@ -872,14 +872,13 @@ exports.addInventoriesFromExcel = [
 						}
 						const workbook = XLSX.readFile(req.file.path);
 						const data = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {
-							dateNF: "dd/mm/yyyy;@",
+							dateNF: 'yyyy-mm-dd',
 							cellDates: true,
 							raw: false,
 						});
 
 						const formatedData = new Array();
 						for (const [index, prod] of data.entries()) {
-							console.log(prod);
 							const productCategory = prod?.["PRODUCT CATEGORY"] || prod?.["CATEGORIA DE PRODUCTO"];
 							const productName = prod?.["PRODUCT NAME"] || prod?.["NOMBRE DEL PRODUCTO"];
 							const batchNumber = prod?.["BATCH NO"] || prod?.["LOT NUMBER"];
@@ -893,10 +892,10 @@ exports.addInventoriesFromExcel = [
 							});
 							if (product) {
 								if (mfgDate) {
-                  mfgDate = parse(mfgDate, "dd/MM/yyyy", new Date());
+                  mfgDate = parse(mfgDate, "yyyy-mm-dd", new Date());
 								}
 								if (expDate) {
-                  expDate = parse(expDate, "dd/MM/yyyy", new Date());
+                  expDate = parse(expDate, "yyyy-mm-dd", new Date());
 								}
 								formatedData[index] = {
 									productId: product.id,
@@ -914,7 +913,13 @@ exports.addInventoriesFromExcel = [
 								return apiResponse.ErrorResponse(res, "Product Doesn't exist in the inventory");
 							}
 						}
-						const result = utility.excludeExpireProduct(formatedData);
+            const validRecords = utility.excludeExpireProduct(formatedData);
+            
+            const result = {
+							validRecords: validRecords,
+							invalidRecordsCount: formatedData.length - validRecords.length,
+						};
+
 						return apiResponse.successResponseWithData(
 							res,
 							responses(req.user.preferredLanguage).success,
@@ -2213,10 +2218,8 @@ exports.getBatchNearExpiration = [
         : (warehouseId = req.user.warehouseId);
 
       const today = new Date();
-      let todayString = utility.getDateStringForMongo(today);
       const nextMonth = new Date();
       nextMonth.setDate(today.getDate() + 31);
-      let nextMonthString = utility.getDateStringForMongo(nextMonth);
 
       const warehouse = await WarehouseModel.findOne({ id: warehouseId });
       if (warehouse) {
@@ -2284,7 +2287,6 @@ exports.getBatchExpired = [
       const warehouse = await WarehouseModel.findOne({ id: warehouseId });
       if (warehouse) {
         let today = new Date();
-        let todayString = utility.getDateStringForMongo(today);
         const result = await AtomModel.aggregate([
 					{
 						$match: {
@@ -2757,7 +2759,7 @@ exports.fetchBatchesOfInventory = [
       const warehouseId = wareId ? wareId : req.user.warehouseId;
       const warehouse = await WarehouseModel.findOne({ id: warehouseId });
       const inventoryId = warehouse.warehouseInventory;
-      let today = utility.getDateStringForMongo(new Date());
+      let today = new Date();
       const payload = {
 				$and: [
 					{ productId: productId },
@@ -2773,6 +2775,7 @@ exports.fetchBatchesOfInventory = [
 					},
 				],
       };
+      console.log(payload);
       const batches = await AtomModel.find(payload).sort({ "attributeSet.expDate": 1 });
       return apiResponse.successResponseWithData(
         res,
