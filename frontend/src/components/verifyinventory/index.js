@@ -45,12 +45,10 @@ const VerifyInventory = (props) => {
       if(inventory?.manufacturingDate) {
         mfgDate = new Date(inventory.manufacturingDate);
         mfgDate.setHours(23, 59, 59, 59);
-        console.log(mfgDate);
       }
       if(inventory?.expiryDate) {
         expDate = new Date(inventory.expiryDate);
         expDate.setHours(23, 59, 59, 59);
-        console.log(expDate);
       }
       return {
         productId: inventory.productId,
