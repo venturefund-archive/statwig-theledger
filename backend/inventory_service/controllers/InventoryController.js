@@ -891,11 +891,16 @@ exports.addInventoriesFromExcel = [
 								name: productName?.trim(),
 							});
 							if (product) {
+                let today = new Date();
+                today = new Date(
+									Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()),
+                );
+                today.setUTCHours(setUTCHours(23, 59, 59, 999));
 								if (mfgDate) {
-                  mfgDate = parse(mfgDate, "yyyy-mm-dd", new Date());
+                  mfgDate = parse(mfgDate, "yyyy-mm-dd", today);
 								}
 								if (expDate) {
-                  expDate = parse(expDate, "yyyy-mm-dd", new Date());
+                  expDate = parse(expDate, "yyyy-mm-dd", today);
 								}
 								formatedData[index] = {
 									productId: product.id,
