@@ -60,8 +60,6 @@ const ReviewOrder = (props) => {
             shipmentReceiverId: null,
           },
         },
-        lastUpdatedOn: new Date().toISOString(),
-        creationDate: new Date().toISOString(),
         poStatus: "CREATED",
         products: products,
       };

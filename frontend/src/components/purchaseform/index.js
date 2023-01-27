@@ -108,7 +108,6 @@ const PurchaseForm = (props) => {
   };
 
   const onProceed = async () => {
-    const isoDate = new Date().toISOString();
     const supplierOrg = organisations.find((org) => org.id === orgId);
     const customerOrg = organisations.find((org) => org.id === customerOrgId);
     const customerWarhouse = warehouses.find(
@@ -120,8 +119,6 @@ const PurchaseForm = (props) => {
     }));
     const data = {
       externalId: externalPoId,
-      creationDate: isoDate,
-      lastUpdatedOn: isoDate,
       supplier: {
         supplierOrganisation: orgId,
         supplierIncharge: supplierOrg.primaryContactId,
