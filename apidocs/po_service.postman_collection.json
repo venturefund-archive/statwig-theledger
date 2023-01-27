@@ -6,43 +6,6 @@
   },
   "item": [
     {
-      "name": "fetchPurchaseOrderById",
-      "request": {
-        "auth": {
-          "type": "bearer",
-          "bearer": [
-            {
-              "key": "token",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImVtcC0xanB2YWtyOGtuNzYydTBuIiwiZmlyc3ROYW1lIjoiU291cmF2IiwiZW1haWxJZCI6InNvdXJhdi5sa29AZ21haWwuY29tIiwicm9sZSI6InBvd2VyVXNlciIsIndhcmVob3VzZUlkIjoiQVAwMDIiLCJvcmdhbmlzYXRpb25JZCI6IkFQMTAwMSIsImlhdCI6MTYxOTc2MDY5NywiZXhwIjoxNjE5NzY3ODk3fQ.6dr74N9twMPi1Qsd5GTnRj1umQgR2YP_EZ4jfVAj03I",
-              "type": "string"
-            }
-          ]
-        },
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{url}}/pomanagement/api/po/fetchPurchaseOrders?skip=0&limit=5&poId=po-1jpv3yrikmbsu749",
-          "host": ["{{url}}"],
-          "path": ["pomanagement", "api", "po", "fetchPurchaseOrders"],
-          "query": [
-            {
-              "key": "skip",
-              "value": "0"
-            },
-            {
-              "key": "limit",
-              "value": "5"
-            },
-            {
-              "key": "poId",
-              "value": "po-1jpv3yrikmbsu749"
-            }
-          ]
-        }
-      },
-      "response": []
-    },
-    {
       "name": "CreatePurchaseOrder",
       "request": {
         "auth": {
