@@ -6,9 +6,9 @@ const EditTable = (props) => {
   const [visible, setVisible] = useState(false);
   const { setOpenFailInventory, setInventoryError } = props;
   return (
-    <div className=''>
-      <div className='d-flex flex-column'>
-        {/* <div className="d-flex txtColor flex-row pb-3">
+		<div className="">
+			<div className="d-flex flex-column">
+				{/* <div className="d-flex txtColor flex-row pb-3">
           <div className={visible ? `w-15` : `w-20`}> Product Name</div>
           <div className={visible ? `w-15` : `w-20`}>
             Manufacturer
@@ -30,20 +30,21 @@ const EditTable = (props) => {
            <span>&nbsp;</span>
          </div>
         </div> */}
-        {props?.inventories?.map((inventory, index) => (
-          <EditRow
-            key={index}
-            {...props}
-            {...inventory}
-            idx={index}
-            setVisible={setVisible}
-            setOpenFailInventory={setOpenFailInventory}
-            setInventoryError={setInventoryError}
-          />
-        ))}
-      </div>
-    </div>
-  );
+				{props?.inventories?.length &&
+					props?.inventories?.map((inventory, index) => (
+						<EditRow
+							key={index}
+							{...props}
+							{...inventory}
+							idx={index}
+							setVisible={setVisible}
+							setOpenFailInventory={setOpenFailInventory}
+							setInventoryError={setInventoryError}
+						/>
+					))}
+			</div>
+		</div>
+	);
 };
 
 export default EditTable;
