@@ -895,7 +895,7 @@ exports.addInventoriesFromExcel = [
                 today = new Date(
 									Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()),
                 );
-                today.setUTCHours(setUTCHours(23, 59, 59, 999));
+                today.setUTCHours(23, 59, 59, 999);
 								if (mfgDate) {
                   mfgDate = parse(mfgDate, "yyyy-mm-dd", today);
 								}
