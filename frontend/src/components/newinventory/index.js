@@ -23,7 +23,7 @@ import { getDateStringForMongo } from "../../utils/dateHelper";
 const NewInventory = (props) => {
   const { t } = props;
   const editInventories = useSelector((state) => {
-    return state.reviewInventory;
+    return state.reviewInventory.validRecords;
   });
   const [category, setCategory] = useState([]);
   const dispatch = useDispatch();
@@ -56,7 +56,7 @@ const NewInventory = (props) => {
           })
       );
       setBlankInventory({ ...blankInventory, products: productsArray });
-      if (editInventories.length === 0) {
+      if (!editInventories?.length) {
         setInventoryState([{ ...blankInventory, products: productsArray }]);
       } else {
         setInventoryState(editInventories);
