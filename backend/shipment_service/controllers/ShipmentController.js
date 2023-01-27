@@ -229,7 +229,6 @@ async function inventoryUpdate(
     const index = updatedInventory.inventoryDetails.findIndex((object) => {
       return object.productId === id;
     });
-    console.log(updatedInventory.inventoryDetails[index]);
     await InventoryAnalyticsModel.updateOne(
       {
         inventoryId: suppId,
@@ -403,16 +402,19 @@ async function poUpdate(id, quantity, poId, shipmentStatus, actor) {
 }
 
 const shipmentUpdate = async (id, quantity, shipmentId, atomId) => {
-	let shipmentUpdated = await ShipmentModel.updateOne(
+	let shipmentUpdated = await ShipmentModel.findOneAndUpdate(
 		{
-			$and: [{ id: shipmentId }, { "products.productID": id }, { "products.atomId": atomId }],
+			$and: [{ id: shipmentId }, { products: { $elemMatch: { productID: id, atomId: atomId } } }],
 		},
 		{
 			$inc: {
 				"products.$.productQuantityDelivered": quantity,
 			},
 		},
-  );
+		{
+			new: true,
+		},
+	);
   console.log(shipmentUpdated);
 };
 
@@ -528,7 +530,6 @@ exports.createShipment = [
         data.shippingDate = shippingDate;
       }
       data.shippingDate = new Date(data.shippingDate);
-      console.log("**** Create Shipment ==> ", data);
       const checkOverflow = await quantityOverflow(
         data.supplier.locationId,
         data.products
@@ -590,7 +591,6 @@ exports.createShipment = [
         id: req.body.supplier.id,
       });
       if (supplierOrgData == null) {
-        console.log("Supplier not defined");
         return apiResponse.ErrorResponse(
           res,
           responses(req.user.preferredLanguage).supplier_not_defined
@@ -601,7 +601,6 @@ exports.createShipment = [
         id: req.body.receiver.id,
       });
       if (receiverOrgData == null) {
-        console.log("Receiver not defined");
         return apiResponse.ErrorResponse(
           res,
           responses(req.user.preferredLanguage).receiver_not_defined
@@ -654,7 +653,6 @@ exports.createShipment = [
                 parseInt(po_product_quantity, 10)
               ) {
                 quantityMismatch = true;
-                console.log("quantityMismatch is ", quantityMismatch);
                 return false;
               } else if (
                 parseInt(shipment_product_qty) === parseInt(po_product_quantity)
@@ -1143,7 +1141,6 @@ exports.createShipmentForTpl = [
         id: req.body.supplier.id,
       });
       if (supplierOrgData == null) {
-        console.log("Supplier not defined");
         return apiResponse.ErrorResponse(
           res,
           responses(req.user.preferredLanguage).supplier_not_defined
@@ -1529,14 +1526,12 @@ exports.receiveShipment = [
                 if (
                   parseInt(shipment_product_qty) < parseInt(po_product_quantity)
                 ) {
-                  console.log("mismatch");
                   quantityMismatch = true;
                   return false;
                 } else if (
                   parseInt(shipment_product_qty) ===
                   parseInt(po_product_quantity)
                 ) {
-                  console.log("full now");
                   quantityMismatch = false;
                 }
               }
@@ -1577,8 +1572,8 @@ exports.receiveShipment = [
 						totalProducts = totalProducts + shipmentProducts[count].productQuantity;
 						totalReturns = totalReturns + products[count].productQuantity;
 						shipmentRejectionRate = ((totalProducts - totalReturns) / totalProducts) * 100;
-						products[count]["productId"] = products[count].productID;
-
+            products[count]["productId"] = products[count].productID;
+            
 						await inventoryUpdate(
 							products[count].productID,
 							products[count].productQuantity,
@@ -2168,7 +2163,6 @@ function getShipmentFilterCondition(filters, warehouseIds) {
       let endDateOfTheMonth = moment(startDateOfTheMonth)
         .endOf("month")
         .format(DATE_FORMAT);
-      console.log(startDateOfTheMonth, endDateOfTheMonth);
       matchCondition.createdAt = {
         $gte: new Date(`${startDateOfTheMonth}T00:00:00.0Z`),
         $lte: new Date(`${endDateOfTheMonth}T23:59:59.0Z`),
@@ -2183,7 +2177,6 @@ function getShipmentFilterCondition(filters, warehouseIds) {
         .quarter(filters.quarter)
         .endOf("quarter")
         .format(DATE_FORMAT);
-      console.log(startDateOfTheQuarter, endDateOfTheQuarter);
       matchCondition.createdAt = {
         $gte: new Date(`${startDateOfTheQuarter}T00:00:00.0Z`),
         $lte: new Date(`${endDateOfTheQuarter}T23:59:59.0Z`),
@@ -2202,7 +2195,6 @@ function getShipmentFilterCondition(filters, warehouseIds) {
       if (filters.year === currentYear) {
         endDateOfTheYear = currentDate;
       }
-      console.log(startDateOfTheYear, endDateOfTheYear);
       matchCondition.createdAt = {
         $gte: new Date(startDateOfTheYear),
         $lte: new Date(endDateOfTheYear),
@@ -4021,7 +4013,6 @@ exports.trackJourney = [
             );
           } catch (err) {
             console.log(err);
-            console.log("Error in calculating current location data");
           }
           outwardShipmentsArray = await ShipmentModel.aggregate([
             {
@@ -4235,7 +4226,6 @@ exports.trackJourney = [
           } catch (err) {
             console.log(err);
             allowedOrgs = [];
-            console.log("Error in calculating current location data");
           }
         }
         return apiResponse.successResponseWithData(res, "Shipments Table", {
