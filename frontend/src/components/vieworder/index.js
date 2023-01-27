@@ -62,7 +62,7 @@ const ViewOrder = (props) => {
         <h1 className="breadcrumb">{t("view_order")}</h1>
 
         {order?.supplier?.supplierOrganisation === user?.organisationId &&
-        order.poStatus === "CREATED" ? (
+          order.poStatus === "CREATED" ? (
           <div className="d-flex">
             {isEnabled && (
               <>
@@ -134,7 +134,7 @@ const ViewOrder = (props) => {
           <div className="col row">
             <span className="col-4">{t("order_date")}</span>
             <span className="col text-dark ">
-              {formatDate(order.creationDate)}
+              {formatDate(order.createdAt)}
             </span>
           </div>
           <div className="w-100"></div>
@@ -200,14 +200,14 @@ const ViewOrder = (props) => {
                   <span className="col-4">{t("delivery_location")}</span>
                   <span className=" col text-dark ">
                     {order &&
-                    order.customer &&
-                    order.customer.warehouse &&
-                    order.customer.warehouse.warehouseAddress
+                      order.customer &&
+                      order.customer.warehouse &&
+                      order.customer.warehouse.warehouseAddress
                       ? order.customer.warehouse.title +
-                        " / " +
-                        order.customer.warehouse.warehouseAddress.firstLine +
-                        " " +
-                        order.customer.warehouse.warehouseAddress.city
+                      " / " +
+                      order.customer.warehouse.warehouseAddress.firstLine +
+                      " " +
+                      order.customer.warehouse.warehouseAddress.city
                       : null}
                   </span>
                 </div>
@@ -228,7 +228,7 @@ const ViewOrder = (props) => {
                     {order && order.customer && order.customer.region}
                   </span>
                 </div>
-                
+
               </div>
             </div>
           </div>
@@ -250,9 +250,8 @@ const ViewOrder = (props) => {
                 : product.unitofMeasure;
               return (
                 <div
-                  className={`bg-white shadow padding-added ${
-                    index >= 0 ? "mb-5 mr-4" : ""
-                  } `}
+                  className={`bg-white shadow padding-added ${index >= 0 ? "mb-5 mr-4" : ""
+                    } `}
                   style={{ width: "27%" }}
                   key={index}
                 >

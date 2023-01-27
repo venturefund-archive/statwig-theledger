@@ -10,13 +10,13 @@ const PurchasePopUp = (props) => {
     <div className='PO'>
       <p className='date-alignment mr-5'>
         Date:
-        {props.shipments.poDetails[0].creationDate.split("T")[0].split("-")[2] +
+        {props.shipments.poDetails[0].createdAt.split("T")[0].split("-")[2] +
           "/" +
-          props.shipments.poDetails[0].creationDate
+          props.shipments.poDetails[0].createdAt
             .split("T")[0]
             .split("-")[1] +
           "/" +
-          props.shipments.poDetails[0].creationDate.split("T")[0].split("-")[0]}
+          props.shipments.poDetails[0].createdAt.split("T")[0].split("-")[0]}
       </p>
       <div className='row'>
         <div className='col'>
