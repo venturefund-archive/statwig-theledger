@@ -60,18 +60,6 @@ const Orders = (props) => {
 		setStatusFilter(statusFilterSelected);
 		setSkip(0);
 		if (visible === "one") {
-			console.log({
-				toFilter,
-				orderIdFilter,
-				productNameFilter,
-				locationFilter,
-				dateFilter,
-				statusFilterSelected,
-				skip: 0,
-				limit,
-				fromFilterDate,
-				toFilterDate,
-			});
 			dispatch(turnOn());
 			const outboundRes = await getSentPOs(
 				toFilter,
@@ -210,8 +198,6 @@ const Orders = (props) => {
 		if (props.demoLogin) return;
 		fetchData();
 	}, [limit, visible, alerts, dispatch, toFilter, orderIdFilter, productNameFilter, locationFilter, dateFilter, fromFilterDate, toFilterDate, fromFilter, props.demoLogin, statusFilter]);
-	console.log("outboundRecords =>", outboundRecords);
-
 	const onPageChange = async (pageNum) => {
 		const recordSkip = (pageNum - 1) * limit;
 		setSkip(recordSkip);
@@ -257,7 +243,6 @@ const Orders = (props) => {
 	const setDateFilterOnSelect = async (dateFilterSelected) => {
 		setDateFilter(dateFilterSelected);
 		setSkip(0);
-		console.log("hi");
 		if (visible === "one") {
 			dispatch(turnOn());
 			const outboundRes = await getSentPOs(
@@ -327,18 +312,6 @@ const Orders = (props) => {
 		setSkip(0);
 		if (visible === "one") {
 			dispatch(turnOn());
-			console.log({
-				toFilter,
-				orderIdFilter,
-				productNameFilter,
-				locationFilterSelected,
-				dateFilter,
-				statusFilter,
-				skip: 0,
-				limit,
-				fromFilterDate,
-				toFilterDate,
-			});
 			const outboundRes = await getSentPOs(
 				toFilter,
 				orderIdFilter,
@@ -352,7 +325,6 @@ const Orders = (props) => {
 				toFilterDate,
 			); //to, orderId, productName, deliveryLocation, date, skip, limit;
 			dispatch(turnOff());
-			console.log("data ", outboundRes.data.outboundPOs);
 			setOutboundRecords(outboundRes.data.outboundPOs);
 			setCount(outboundRes.data.count);
 		} else {

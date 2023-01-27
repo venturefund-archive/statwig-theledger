@@ -419,7 +419,7 @@ const EditRow = (props) => {
 											</div>
 										) : (
 											batches.map((product, index) => (
-												<div className="rTable pt-1">
+												<div className="rTable pt-1" key={index}>
 													<div>
 														<div
 															className="rTableRow mb-1"

@@ -107,7 +107,7 @@ function Table(props) {
 								</td>
 								<td>
 									<div className="user-info">
-										<h5 className="table-data black"> {formatDate(order.creationDate)}</h5>
+										<h5 className="table-data black"> {formatDate(order.createdAt)}</h5>
 									</div>
 								</td>
 								<td>

@@ -120,8 +120,8 @@ const Table = (props) => {
                   <span className="text-muted ">
                     {customer.warehouse && customer.warehouse.warehouseAddress
                       ? customer.warehouse.warehouseAddress.firstLine +
-                        " " +
-                        customer.warehouse.warehouseAddress.city
+                      " " +
+                      customer.warehouse.warehouseAddress.city
                       : null}
                   </span>
                 </div>
