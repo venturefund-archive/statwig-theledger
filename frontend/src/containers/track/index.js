@@ -41,7 +41,7 @@ const TrackContainer = (props) => {
               status: "RECEIVED",
               products: result.data.data.poDetails.products,
               updatedOn: moment(
-                result.data.data.poDetails.lastUpdatedOn
+                result.data.data.poDetails.updatedAt
               ).format("DD/MM/YYYY hh:mm"),
               isOrder: 1,
             },
