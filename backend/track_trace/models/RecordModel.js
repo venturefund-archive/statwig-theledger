@@ -1,11 +1,8 @@
-var mongoose = require('mongoose');
-var RecordSchema = new mongoose.Schema(
+const mongoose = require("mongoose");
+const RecordSchema = new mongoose.Schema(
     {
         id: { type: String, required: true, unique: true },
         externalId: {
-            type: String,
-        },
-        creationDate: {
             type: String,
         },
         createdBy: {
@@ -21,23 +18,18 @@ var RecordSchema = new mongoose.Schema(
             type: Array,
             default: [],
         },
-        poStatus: { type: String, default: 'CREATED' },
-        lastUpdatedBy: { type: String },
-        lastUpdatedOn: {
-            type: String,
-            required: false,
-        },
+        poStatus: { type: String, default: "CREATED" },
+        poUpdates: { type: Array, default: [] },
         shippingOrders: {
             type: Array,
-            required: false,
             default: [],
         },
         shipments: {
             type: Array,
-            required: false,
             default: [],
         },
+        lastUpdatedBy: { type: String },
     },
-    { timestamps: true },
+    { timestamps: true }
 );
-module.exports = mongoose.model('Record', RecordSchema);
+module.exports = mongoose.model("Record", RecordSchema);

@@ -2,8 +2,7 @@ const mongoose = require("mongoose");
 const RecordSchema = new mongoose.Schema(
   {
     id: { type: String, required: true, unique: true },
-    externalId: { type: "String" },
-    creationDate: {
+    externalId: {
       type: String,
     },
     createdBy: {
@@ -21,21 +20,15 @@ const RecordSchema = new mongoose.Schema(
     },
     poStatus: { type: String, default: "CREATED" },
     poUpdates: { type: Array, default: [] },
-    lastUpdatedBy: { type: String },
-    lastUpdatedOn: {
-      type: String,
-      required: false,
-    },
     shippingOrders: {
       type: Array,
-      required: false,
       default: [],
     },
     shipments: {
       type: Array,
-      required: false,
       default: [],
     },
+    lastUpdatedBy: { type: String },
   },
   { timestamps: true }
 );
