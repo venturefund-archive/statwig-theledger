@@ -415,7 +415,6 @@ const shipmentUpdate = async (id, quantity, shipmentId, atomId) => {
 			new: true,
 		},
 	);
-  console.log(shipmentUpdated);
 };
 
 async function userShipments(mode, warehouseId, skip, limit) {
