@@ -5,9 +5,6 @@ const RecordSchema = new mongoose.Schema(
     externalId: {
       type: String,
     },
-    creationDate: {
-      type: String,
-    },
     createdBy: {
       type: String,
     },
@@ -22,21 +19,16 @@ const RecordSchema = new mongoose.Schema(
       default: [],
     },
     poStatus: { type: String, default: "CREATED" },
-    lastUpdatedBy: { type: String },
-    lastUpdatedOn: {
-      type: String,
-      required: false,
-    },
+    poUpdates: { type: Array, default: [] },
     shippingOrders: {
       type: Array,
-      required: false,
       default: [],
     },
     shipments: {
       type: Array,
-      required: false,
       default: [],
     },
+    lastUpdatedBy: { type: String },
   },
   { timestamps: true }
 );

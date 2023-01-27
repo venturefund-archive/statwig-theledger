@@ -29,7 +29,6 @@ const checkPermissions =
   require("../middlewares/rbac_middleware").checkPermissions;
 const wrapper = require("../models/DBWrapper");
 const excel = require("node-excel-export");
-const { compareArrays } = require("../helpers/utility");
 const blockchain_service_url = process.env.URL;
 const hf_blockchain_url = process.env.HF_BLOCKCHAIN_URL;
 const po_stream_name = process.env.PO_STREAM;
@@ -397,14 +396,11 @@ exports.createPurchaseOrder = [
     try {
       let {
         externalId,
-        creationDate,
         supplier,
         customer,
         products,
-        lastUpdatedOn,
       } = req.body;
       const { createdBy, lastUpdatedBy } = req.user.id;
-      creationDate = new Date(creationDate);
       const poId = await CounterModel.findOneAndUpdate(
         {
           "counters.name": "productId",
@@ -421,11 +417,9 @@ exports.createPurchaseOrder = [
       const purchaseOrder = new RecordModel({
         id: poId.counters[5].format + poId.counters[5].value,
         externalId,
-        creationDate,
         supplier,
         customer,
         products,
-        lastUpdatedOn,
         createdBy,
         lastUpdatedBy,
       });
@@ -458,8 +452,6 @@ exports.addPOsFromExcel = [
       for (const po of data) {
         poDataArray.push({
           id: po.id || 0,
-          creationDate: new Date().toISOString(),
-          lastUpdatedOn: new Date().toISOString(),
           poStatus: null,
           supplier: {
             name: po["ORDER FROM ORGANIZATION NAME"],
@@ -930,10 +922,7 @@ exports.createOrder = [
         supplier,
         customer,
         products,
-        creationDate,
-        lastUpdatedOn,
       } = req.body;
-      creationDate = new Date(creationDate);
       products.forEach(async (element) => {
         var product = await ProductModel.findOne({ id: element.productId });
         element.type = product?.type;
@@ -943,11 +932,9 @@ exports.createOrder = [
       const purchaseOrder = new RecordModel({
         id: poId,
         externalId,
-        creationDate,
         supplier,
         customer,
         products,
-        lastUpdatedOn,
         createdBy,
         lastUpdatedBy: createdBy,
       });
@@ -997,7 +984,7 @@ exports.createOrder = [
         Postatus: req.body.poStatus,
         Poupdates: JSON.stringify(updates),
         Lastupdatedby: req.user.id,
-        Lastupdatedon: req.body.lastUpdatedOn,
+        Lastupdatedon: new Date().toISOString(),
         Country: "",
         Warehouses: "",
         Location: "",
@@ -1231,7 +1218,7 @@ exports.fetchInboundPurchaseOrders = [
           if (fromDate && toDate) {
             var firstDate = new Date(fromDate);
             var nextDate = new Date(toDate);
-            whereQuery[`creationDate`] = { $gte: firstDate, $lte: nextDate };
+            whereQuery[`createdAt`] = { $gte: firstDate, $lte: nextDate };
           }
 
           if (organisationId) {
@@ -1434,7 +1421,7 @@ exports.fetchOutboundPurchaseOrders = [
           if (fromDate && toDate) {
             var firstDate = new Date(fromDate);
             var nextDate = new Date(toDate);
-            whereQuery[`creationDate`] = { $gte: firstDate, $lte: nextDate };
+            whereQuery[`createdAt`] = { $gte: firstDate, $lte: nextDate };
           }
 
           if (productName) {
@@ -1614,7 +1601,7 @@ exports.exportInboundPurchaseOrders = [
       if (fromDate && toDate) {
         var firstDate = new Date(fromDate);
         var nextDate = new Date(toDate);
-        whereQuery[`creationDate`] = { $gte: firstDate, $lte: nextDate };
+        whereQuery[`createdAt`] = { $gte: firstDate, $lte: nextDate };
       }
 
       if (organisationId) {
@@ -1807,7 +1794,7 @@ exports.exportOutboundPurchaseOrders = [
       if (fromDate && toDate) {
         var firstDate = new Date(fromDate);
         var nextDate = new Date(toDate);
-        whereQuery[`creationDate`] = { $gte: firstDate, $lte: nextDate };
+        whereQuery[`createdAt`] = { $gte: firstDate, $lte: nextDate };
       }
 
       if (organisationId) {
@@ -1922,77 +1909,77 @@ function buildExcelReport(req, res, dataForExcel, orderType) {
     },
   };
   const specification = {
-		id: {
-			displayName: req.t("Order_ID"),
-			headerStyle: styles.headerDark,
-			width: 120,
-		},
-		createdBy: {
-			displayName: req.t("Order_Created_By"),
-			headerStyle: styles.headerDark,
-			width: "10",
-		},
-		supplierOrgId: {
-			displayName: req.t("ORG_ID_-_Creator"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		orderReceiveIncharge: {
-			displayName: req.t("Order_Receive_Incharge"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		orderReceiverOrg: {
-			displayName: req.t("ORG_ID_-_Receiver"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		productCategory: {
-			displayName: req.t("Product_Category"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		productName: {
-			displayName: req.t("Product_Name"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		productId: {
-			displayName: req.t("Product_ID"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		productQuantity: {
-			displayName: req.t("Quantity"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		manufacturer: {
-			displayName: req.t("Manufacturer"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		recieverOrgName: {
-			displayName: req.t("Delivery_Organization_Name"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		recieverOrgId: {
-			displayName: req.t("Delivery_Organization_ID"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		recieverOrgLocation: {
-			displayName: req.t("Delivery_Organization_Location_Details"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		status: {
-			displayName: req.t("Status"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-	};
+    id: {
+      displayName: req.t("Order_ID"),
+      headerStyle: styles.headerDark,
+      width: 120,
+    },
+    createdBy: {
+      displayName: req.t("Order_Created_By"),
+      headerStyle: styles.headerDark,
+      width: "10",
+    },
+    supplierOrgId: {
+      displayName: req.t("ORG_ID_-_Creator"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    orderReceiveIncharge: {
+      displayName: req.t("Order_Receive_Incharge"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    orderReceiverOrg: {
+      displayName: req.t("ORG_ID_-_Receiver"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    productCategory: {
+      displayName: req.t("Product_Category"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    productName: {
+      displayName: req.t("Product_Name"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    productId: {
+      displayName: req.t("Product_ID"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    productQuantity: {
+      displayName: req.t("Quantity"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    manufacturer: {
+      displayName: req.t("Manufacturer"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    recieverOrgName: {
+      displayName: req.t("Delivery_Organization_Name"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    recieverOrgId: {
+      displayName: req.t("Delivery_Organization_ID"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    recieverOrgLocation: {
+      displayName: req.t("Delivery_Organization_Location_Details"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    status: {
+      displayName: req.t("Status"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+  };
 
   const report = excel.buildExport([
     {

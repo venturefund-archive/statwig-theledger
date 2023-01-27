@@ -147,7 +147,7 @@ exports.track = [
                 id: user.id,
                 supplier: user.supplier,
                 customer: user.customer,
-                date: user.creationDate,
+                date: user.createdAt,
                 craetedBy: user.createdBy,
                 status: user.poStatus,
               };
@@ -274,7 +274,7 @@ exports.track = [
                   id: user[0].id,
                   supplier: user[0].supplier,
                   customer: user[0].customer,
-                  date: user[0].creationDate,
+                  date: user[0].createdAt,
                   createdBy: user[0].createdBy,
                   status: user[0].poStatus,
                 };
