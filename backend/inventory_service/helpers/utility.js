@@ -14,13 +14,16 @@ exports.asyncForEach = async (array, callback) => {
   }
 };
 
-// NEED TO UPDATE THIS
 exports.excludeExpireProduct = (data) => {
-  let today = new Date();
-  let todayString = this.getDateStringForMongo(today);
+	let today = new Date();
+	let todayString = this.getDateStringForMongo(today);
 	return data.filter((product) => {
 		if (product?.expiryDate) {
-      let expDateString = this.getDateStringForMongo(product.expiryDate);
+			let expDateString = this.getDateStringForMongo(product.expiryDate);
+			if (product?.manufacturingDate) {
+				let mfgDateString = this.getDateStringForMongo(product.manufacturingDate);
+				if (expDateString < mfgDateString) return false;
+			}
 			if (expDateString < todayString) return false;
 		}
 		return true;

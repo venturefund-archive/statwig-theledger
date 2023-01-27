@@ -30,7 +30,7 @@ const EditTable = (props) => {
            <span>&nbsp;</span>
          </div>
         </div> */}
-        {props.inventories.map((inventory, index) => (
+        {props?.inventories?.map((inventory, index) => (
           <EditRow
             key={index}
             {...props}

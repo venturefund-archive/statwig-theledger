@@ -173,7 +173,10 @@ const NewInventory = (props) => {
       return;
     }
 
-    dispatch(setReviewinventories(inventoryState));
+    const payload = {
+			validRecords: inventoryState,
+		};
+    dispatch(setReviewinventories(payload));
     props.history.push("/reviewinventory");
   };
 
