@@ -302,7 +302,7 @@ export function config() {
       getInventoryDetailsUrl: `${SERVER_URL}/inventorymanagement/api/inventory/getInventoryDetails`,
       getInventoryByBatchNumber: `${SERVER_URL}/inventorymanagement/api/inventory/getBatchDetailsByBatchNumber?skip=0&limit=100&batchNumber=`,
       addProductsToInventory: `${SERVER_URL}/inventorymanagement/api/inventory/addProductsToInventory`,
-      addInventoriesFromExcel: `${LOCAL_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/addInventoriesFromExcel`,
+      addInventoriesFromExcel: `${SERVER_URL}/inventorymanagement/api/inventory/addInventoriesFromExcel`,
       addInventoryUrl: `${SERVER_URL}/inventorymanagement/api/inventory/addNewInventory`,
       productListUrl: `${SERVER_URL}/inventorymanagement/api/inventory/getProductListCounts`,
       getProductDetailsByWarehouseIdUrl: `${SERVER_URL}/inventorymanagement/api/inventory/getProductDetailsByWarehouseId?warehouseId=`,

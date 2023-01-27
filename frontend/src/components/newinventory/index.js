@@ -124,8 +124,9 @@ const NewInventory = (props) => {
 			if (error) return;
       let expDate = new Date(inventory.expiryDate);
       let today = new Date();
-			if (expDate.toLocaleDateString() < today.toLocaleDateString()) {
-				setInventoryError("Check expiryDate");
+      today.setHours(0, 0, 0, 0);
+			if (expDate < today) {
+				setInventoryError("Check Expiry Date");
 				setOpenFailInventory(true);
 				error = true;
 			}
