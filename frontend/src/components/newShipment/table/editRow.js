@@ -463,7 +463,7 @@ const EditRow = (props) => {
 																className="col txt1"
 																style={{ position: "relative", left: "8%" }}
 															>
-																{product.attributeSet.mfgDate &&
+																{product?.attributeSet?.mfgDate &&
 																	product.attributeSet.mfgDate.length > 0
 																	? formatDate(product.attributeSet.mfgDate)
 																	: "-"}
@@ -472,7 +472,7 @@ const EditRow = (props) => {
 																className="col txt1"
 																style={{ position: "relative", left: "8%" }}
 															>
-																{product.attributeSet.expDate &&
+																{product?.attributeSet?.expDate &&
 																	product.attributeSet.expDate.length > 0
 																	? formatDate(product.attributeSet.expDate)
 																	: "-"}
