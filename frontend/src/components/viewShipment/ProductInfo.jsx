@@ -3,12 +3,12 @@ import { formatDate } from "../../utils/dateHelper";
 
 function GridRow({ heading, context }) {
   return (
-    <div className="ShipmentInfo--content-space-alt">
-      <div className="ShipmentInfo--grid-column">
-        <p className="info-text-width info-content-text text-secondary">
+    <div className='ShipmentInfo--content-space-alt'>
+      <div className='ShipmentInfo--grid-column'>
+        <p className='info-text-width info-content-text text-secondary'>
           {heading}
         </p>
-        <p className="info-content-text">{context}</p>
+        <p className='info-content-text'>{context}</p>
       </div>
     </div>
   );
@@ -18,12 +18,12 @@ export default function ProductInfo(props) {
   const { t } = props;
 
   return Object.keys(props.shipments).length === 0 ? (
-    <div className="row panel justify-content-between">N/A</div>
+    <div className='row panel justify-content-between'>N/A</div>
   ) : (
     <>
       {props.shipments?.products?.map((product, index) => (
-        <div className="ShipmentInfo--main-container">
-          <div className="ShipmentInfo--info-wrapper">
+        <div className='ShipmentInfo--main-container' key={index}>
+          <div className='ShipmentInfo--info-wrapper'>
             <GridRow
               heading={t("product_name")}
               context={product.productName}
