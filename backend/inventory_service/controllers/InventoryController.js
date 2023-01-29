@@ -870,12 +870,12 @@ exports.addInventoriesFromExcel = [
 						if (!fs.existsSync(dir)) {
 							fs.mkdirSync(dir);
 						}
-						const workbook = XLSX.readFile(req.file.path);
+            const workbook = XLSX.readFile(req.file.path);
 						const data = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {
 							dateNF: 'yyyy-mm-dd',
 							cellDates: true,
 							raw: false,
-						});
+            });
 
 						const formatedData = new Array();
 						for (const [index, prod] of data.entries()) {
@@ -895,12 +895,17 @@ exports.addInventoriesFromExcel = [
                 today = new Date(
 									Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()),
                 );
-                today.setUTCHours(23, 59, 59, 999);
 								if (mfgDate) {
-                  mfgDate = parse(mfgDate, "yyyy-mm-dd", today);
+                  mfgDate = new Date(mfgDate);
+                  // Set local date to end of day! Two sets on purpose
+                  mfgDate.setHours(0, 0, 0, 0);
+                  mfgDate.setHours(23, 59, 59, 999);
 								}
 								if (expDate) {
-                  expDate = parse(expDate, "yyyy-mm-dd", today);
+                  expDate = new Date(expDate);
+                  // Set local date to end of day! Two sets on purpose
+                  expDate.setHours(0, 0, 0, 0);
+                  expDate.setHours(23, 59, 59, 999);
 								}
 								formatedData[index] = {
 									productId: product.id,
@@ -917,7 +922,7 @@ exports.addInventoriesFromExcel = [
 							} else {
 								return apiResponse.ErrorResponse(res, "Product Doesn't exist in the inventory");
 							}
-						}
+            }
             const validRecords = utility.excludeExpireProduct(formatedData);
             
             const result = {
@@ -2743,7 +2748,6 @@ exports.autoCompleteSuggestions = [
           },
         },
       ]).sort({ createdAt: -1 });
-      // console.log( [...new Set([...suggestions1, ...suggestions2, ...suggestions3])])
       return apiResponse.successResponseWithData(
         res,
         "Autocorrect Suggestions",
@@ -2780,7 +2784,6 @@ exports.fetchBatchesOfInventory = [
 					},
 				],
       };
-      console.log(payload);
       const batches = await AtomModel.find(payload).sort({ "attributeSet.expDate": 1 });
       return apiResponse.successResponseWithData(
         res,
