@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import Delete from "../../assets/icons/Delete.png";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import isBefore from "date-fns/isBefore";
 import mon from "../../assets/icons/brand.svg";
 import Package from "../../assets/icons/package.svg";
 import qty from "../../assets/icons/TotalInventoryAdded_2.png";
@@ -11,6 +10,7 @@ import Batch from "../../assets/icons/batch.png";
 import Serial from "../../assets/icons/serial.png";
 import Select from "react-select";
 import "./style.scss";
+import { isAfter, isBefore } from "date-fns";
 
 const truncate = (str, n) => {
 	return str?.length > n ? str.substr(0, n - 1) + "..." : str;
@@ -301,6 +301,17 @@ const EditRow = (props) => {
 										dateFormat="dd/MM/yyyy"
 										className="form-control text-center manufacturingPlaceholder"
 										onChange={(date) => {
+											let today = new Date();
+											if(isAfter(date, today)) {
+												setInventoryError(t("mfg_greater_than_today"));
+												setOpenFailInventory(true);
+												return;
+											}
+											if(expiryDate && isAfter(date, new Date(expiryDate))) {
+												setInventoryError(t("mfg_greater_than_exp"));
+												setOpenFailInventory(true);
+												return;												
+											}
 											handleInventoryChange(idx, "manufacturingDate", date);
 										}}
 										selected={

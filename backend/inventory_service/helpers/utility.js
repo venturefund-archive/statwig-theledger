@@ -18,6 +18,9 @@ exports.excludeExpireProduct = (data) => {
 	let today = new Date();
 	today.setHours(0, 0, 0, 0);
 	return data.filter((product) => {
+    if (product?.manufacturingDate) {
+      if (today.valueOf() < product.manufacturingDate.valueOf()) return false;
+    }
 		if (product?.expiryDate) {
 			if (product?.manufacturingDate) {
 				if (product.expiryDate.valueOf() < product.manufacturingDate.valueOf()) return false;
