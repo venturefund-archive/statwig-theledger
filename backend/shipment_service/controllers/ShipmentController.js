@@ -1511,33 +1511,28 @@ exports.receiveShipment = [
             id: data.poId,
           });
           let quantityMismatch = false;
-          po?.products?.every((product) => {
-            receivedProducts.every((p) => {
-              if (product.id === p.productID) {
-                const po_product_quantity =
-                  product.productQuantity || product.quantity;
-                let shipment_product_qty = 0;
-                if (product.quantityDelivered)
-                  shipment_product_qty =
-                    parseInt(product.quantityDelivered) +
-                    parseInt(p.productQuantity);
-                else shipment_product_qty = p.productQuantity;
-                if (
-                  parseInt(shipment_product_qty) < parseInt(po_product_quantity)
-                ) {
-                  quantityMismatch = true;
-                  return false;
-                } else if (
-                  parseInt(shipment_product_qty) ===
-                  parseInt(po_product_quantity)
-                ) {
-                  quantityMismatch = false;
-                }
-              }
-            });
+          let missingProducts = false;
+          const receivedProductsMap = receivedProducts.reduce((map, p) => {
+            map[p.productID] = (map[p.productID] || 0) + p.productQuantity;
+            return map;
+          }, {});
+
+          po.products.forEach((product) => {
+            const poQuantity = product.productQuantity || product.quantity;
+            const shipmentQuantity = receivedProductsMap[product.id] + (product.quantityDelivered || 0) || 0;
+
+            if (!shipmentQuantity) {
+              missingProducts = true;
+              return false;
+            }
+
+            if (shipmentQuantity < poQuantity) {
+              quantityMismatch = true;
+              return false;
+            }
           });
           if (po) {
-            if (quantityMismatch) {
+            if (quantityMismatch || missingProducts) {
               po.poStatus = "PARTIALLYFULFILLED";
               await po.save();
             } else {

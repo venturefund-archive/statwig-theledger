@@ -615,5 +615,7 @@
   "add_loc":"Add Location",
   "shipment_details_notfound":"No shipments details are found, Please Try again",
   "vialsutilized_report":"VialsUtilizedReport",
-  "vaccination_report":"VaccinationReport"
+  "vaccination_report":"VaccinationReport",
+  "mfg_greater_than_today": "Manufacturing Date cannot be greater than today!",
+  "mfg_greater_than_exp": "Manufacturing Date cannot be greater than Expiry Date!"
 }

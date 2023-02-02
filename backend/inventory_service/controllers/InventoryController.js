@@ -32,6 +32,39 @@ const CENTRAL_AUTHORITY_ID = null;
 const CENTRAL_AUTHORITY_NAME = null;
 const CENTRAL_AUTHORITY_ADDRESS = null;
 
+async function getRealTimeInventory(inventoryId) {
+	try {
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		const atoms = await AtomModel.aggregate([
+			{
+				$match: {
+					$and: [
+						{ currentInventory: inventoryId },
+						{ status: "HEALTHY" },
+						{
+							$or: [
+								{ "attributeSet.expDate": { $exists: false } },
+								{ "attributeSet.expDate": { $gte: today } },
+							],
+						},
+					],
+				},
+			},
+			{
+				$group: {
+					_id: "$productId",
+					quantity: { $sum: "$quantity" },
+				},
+			},
+			{ $sort: { createdAt: -1 } },
+		]);
+		return atoms;
+	} catch (err) {
+		throw err;
+	}
+}
+
 exports.getTotalCount = [
   auth,
   async (req, res) => {
@@ -1318,6 +1351,7 @@ exports.getProductListCounts = [
       const val = InventoryId[0]?.warehouseInventory;
       const productList = await InventoryModel.find({ id: val });
       const list = productList[0]?.inventoryDetails;
+      const atoms = await getRealTimeInventory(val);
 
       if (!list || !list?.length) {
         return apiResponse.successResponseWithData(res, []);
@@ -1336,11 +1370,13 @@ exports.getProductListCounts = [
           product[0] &&
           product[0].name
         ) {
+          const atomExists = atoms.find((atom) => atom._id === productId);
+          const qty = atomExists?.quantity || 0;
           productObj = {
             productCategory: product && product[0] && product[0].type,
             productName: product && product[0] && product[0].name,
             productId: product && product[0] && product[0].id,
-            quantity: (list && list[0] && list[j].quantity) || 0,
+            quantity: qty,
             manufacturer: product && product[0] && product[0].manufacturer,
             unitofMeasure: product && product[0] && product[0].unitofMeasure,
           };
