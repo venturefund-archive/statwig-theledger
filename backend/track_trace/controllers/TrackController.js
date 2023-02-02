@@ -21,7 +21,7 @@ exports.fetchGoodsByID = [
           Manafacturer: "ABC Pharma Ltd",
           MfDate: "29/06/2019",
           ExpDate: "04/01/2023",
-          user: req.user.email,
+          user: req.user.emailId,
         },
         {
           Product: "Hib",
@@ -50,7 +50,7 @@ exports.fetchTracking = [
     try {
       const trackingObject = [
         {
-          user: req.user.email,
+          user: req.user.emailId,
           Location: "Hyderabad, India",
           Date: "01/02/2020",
           Info: "Added to inventory by the manufacturer",
