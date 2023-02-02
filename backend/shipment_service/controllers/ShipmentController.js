@@ -403,17 +403,16 @@ async function poUpdate(id, quantity, poId, shipmentStatus, actor) {
 }
 
 const shipmentUpdate = async (id, quantity, shipmentId, atomId) => {
-	let shipmentUpdated = await ShipmentModel.updateOne(
-		{
-			$and: [{ id: shipmentId }, { "products.productID": id }, { "products.atomId": atomId }],
-		},
-		{
-			$inc: {
-				"products.$.productQuantityDelivered": quantity,
-			},
-		},
+  await ShipmentModel.updateOne(
+    {
+      $and: [{ id: shipmentId }, { "products.productID": id }, { "products.atomId": atomId }],
+    },
+    {
+      $inc: {
+        "products.$.productQuantityDelivered": quantity,
+      },
+    },
   );
-  console.log(shipmentUpdated);
 };
 
 async function userShipments(mode, warehouseId, skip, limit) {
@@ -641,7 +640,7 @@ exports.createShipment = [
                 product.productQuantity || product.quantity;
               const alreadyShipped =
                 parseInt(product.productQuantityShipped || 0) +
-                parseInt(product.productQuantityDelivered || 0) || null;
+                parseInt(product.productQuantityDelivered || 0);
               let shipment_product_qty;
               if (alreadyShipped) {
                 shipment_product_qty =
@@ -1359,527 +1358,515 @@ exports.receiveShipment = [
       let locationMatch = false;
       let permission = false;
       const { role, warehouseId, organisationId, id } = req.user;
-      const receiver = await ShipmentModel.findOne({
-        id: req.body.id,
-      }).select("receiver");
-      if (
-        receiver.receiver.id == organisationId &&
-        receiver.receiver.locationId == warehouseId
-      ) {
-        locationMatch = true;
-      }
-      const permission_request = {
-        role: role,
-        permissionRequired: ["receiveShipment"],
-      };
-      permission = await checkPermissionAwait(permission_request)
-      if (locationMatch == false) {
-        const request = await RequestModel.findOne({
-          "from.id": id,
-          shipmentId: req.body.id,
-          type: { $in: ["LOCATION_MISMATCH", "ORGANISATION_MISMATCH"] },
-        });
-        if (request != null && request.status == "ACCEPTED") {
+      const shipmentInfo = await ShipmentModel.findOne({ id: req.body.id });
+      if (shipmentInfo) {
+        if (
+          shipmentInfo.receiver.id == organisationId &&
+          shipmentInfo.receiver.locationId == warehouseId
+        ) {
           locationMatch = true;
         }
-      }
-      if (permission == false) {
-        const request = await RequestModel.findOne({
-          "from.id": id,
-          shipmentId: req.body.id,
-          type: { $in: ["UNSUFFICIENT_ROLE"] },
-        });
-        if (request != null && request.status == "ACCEPTED") {
-          permission = true;
-        }
-      }
-      if ((permission && locationMatch) == true) {
-        const data = req.body;
-        const shipmentID = data.id;
-        const shipmentInfo = await ShipmentModel.findOne({ id: shipmentID });
-        const email = req.user.emailId;
-        const user_id = req.user.id;
-        const empData = await EmployeeModel.findOne({
-          emailId: req.user.emailId,
-          accountStatus: { $ne: "DELETED" },
-        });
-        const orgId = empData.organisationId;
-        const orgName = empData.name;
-        const orgData = await OrganisationModel.findOne({ id: orgId });
-        const address = orgData.postalAddress;
-        const supplierID =
-          typeof req.body.supplier == "object"
-            ? req.body.supplier.id
-            : JSON.parse(req.body.supplier).id;
-        const receiverId =
-          typeof req.body.receiver == "object"
-            ? req.body.receiver.id
-            : JSON.parse(req.body.receiver).id;
-        const receivedProducts =
-          typeof data.products == "object"
-            ? data.products
-            : JSON.parse(data.products);
-
-        const supplierOrgData = await OrganisationModel.findOne({
-          id: supplierID
-        });
-
-        const receiverOrgData = await OrganisationModel.findOne({
-          id: receiverId,
-        });
-
-        if (shipmentInfo) {
-					const shipmentProducts = shipmentInfo.products;
-
-					let shippedQuantity = 0;
-					let receivedQuantity = 0;
-
-					//Creating a map to store the productQuantity for each product
-					const shippedProductMap = new Map();
-					const receivedProductMap = new Map();
-
-					for (const product of shipmentProducts) {
-						//Storing productQuantity for each product
-						const key = product.productID + "-" + product.batchNumber + "-" + product.atomId;
-						if (shippedProductMap.has(key)) {
-							shippedProductMap.set(key, shippedProductMap.get(key) + product.productQuantity);
-						} else {
-							shippedProductMap.set(key, product.productQuantity);
-						}
-					}
-
-					for (const product of receivedProducts) {
-						//Storing productQuantity for each product
-						const key = product.productID + "-" + product.batchNumber + "-" + product.atomId;
-						if (receivedProductMap.has(key)) {
-							receivedProductMap.set(key, receivedProductMap.get(key) + product.productQuantity);
-						} else {
-							receivedProductMap.set(key, product.productQuantity);
-						}
-					}
-
-					for (const product of shipmentProducts) {
-						const key = product.productID + "-" + product.batchNumber + "-" + product.atomId;
-						if (shippedProductMap.has(key)) {
-							shippedQuantity = shippedProductMap.get(key);
-						}
-						if (receivedProductMap.has(key)) {
-							receivedQuantity = receivedProductMap.get(key);
-						}
-
-						if (receivedQuantity > shippedQuantity) {
-							throw new Error(responses(req.user.preferredLanguage).rec_quantity_error);
-						}
-						const quantityDifference = shippedQuantity - receivedQuantity;
-						const rejectionRate = (quantityDifference / shippedQuantity) * 100;
-						product.quantityDelivered = receivedQuantity;
-						product.rejectionRate = rejectionRate;
-						await ShipmentModel.updateOne(
-							{
-								id: shipmentID,
-								"products.productID": product.productID,
-								"products.batchNumber": product.batchNumber,
-								"products.atomId": product.atomId,
-							},
-							{
-								$set: {
-									"products.$.rejectionRate": rejectionRate,
-								},
-							},
-						);
-					}
-				}
-        var flag = "Y";
-        // if (data.poId == "null") {
-        //   flag = "YS";
-        // }
-
-        const confId = orgData.configuration_id;
-        const confData = await ConfigurationModel.findOne({ id: confId });
-        if (confData == null) {
-          return apiResponse.ErrorResponse(
-            res,
-            responses(req.user.preferredLanguage).config_not_found
-          );
-        }
-        const process = confData.process;
-        if (data.poId === null) {
-          if (process == true) {
-            flag = "YS";
-          } else {
-            flag = "N";
+        const permission_request = {
+          role: role,
+          permissionRequired: ["receiveShipment"],
+        };
+        permission = await checkPermissionAwait(permission_request)
+        if (locationMatch == false) {
+          const request = await RequestModel.findOne({
+            "from.id": id,
+            shipmentId: req.body.id,
+            type: { $in: ["LOCATION_MISMATCH", "ORGANISATION_MISMATCH"] },
+          });
+          if (request != null && request?.status == "ACCEPTED") {
+            locationMatch = true;
           }
         }
-        if (flag === "Y") {
-          const po = await RecordModel.findOne({
-            id: data.poId,
+        if (permission == false) {
+          const request = await RequestModel.findOne({
+            "from.id": id,
+            shipmentId: req.body.id,
+            type: { $in: ["UNSUFFICIENT_ROLE"] },
           });
-          let quantityMismatch = false;
-          po?.products?.every((product) => {
-            receivedProducts.every((p) => {
-              if (product.id === p.productID) {
-                const po_product_quantity =
-                  product.productQuantity || product.quantity;
-                let shipment_product_qty = 0;
-                if (product.quantityDelivered)
-                  shipment_product_qty =
-                    parseInt(product.quantityDelivered) +
-                    parseInt(p.productQuantity);
-                else shipment_product_qty = p.productQuantity;
-                if (
-                  parseInt(shipment_product_qty) < parseInt(po_product_quantity)
-                ) {
-                  console.log("mismatch");
-                  quantityMismatch = true;
-                  return false;
-                } else if (
-                  parseInt(shipment_product_qty) ===
-                  parseInt(po_product_quantity)
-                ) {
-                  console.log("full now");
-                  quantityMismatch = false;
+          if (request != null && request?.status == "ACCEPTED") {
+            permission = true;
+          }
+        }
+        if ((permission && locationMatch) == true) {
+          const data = req.body;
+          const shipmentID = data.id;
+          const empData = await EmployeeModel.findOne({
+            emailId: req.user.emailId,
+            accountStatus: "ACTIVE",
+          });
+          if (empData) {
+            const orgId = empData.organisationId;
+            const orgData = await OrganisationModel.findOne({ id: orgId });
+            const supplierID =
+              typeof req.body.supplier == "object"
+                ? req.body.supplier.id
+                : JSON.parse(req.body.supplier)?.id || null;
+            const receiverId =
+              typeof req.body.receiver == "object"
+                ? req.body.receiver.id
+                : JSON.parse(req.body.receiver)?.id || null;
+            const receivedProducts =
+              typeof data.products == "object"
+                ? data.products
+                : JSON.parse(data.products);
+            if (receivedProducts.length == 0) {
+              throw new Error("No products received");
+            }
+            const supplierOrgData = await OrganisationModel.findOne({
+              id: supplierID
+            });
+
+            const receiverOrgData = await OrganisationModel.findOne({
+              id: receiverId,
+            });
+            const shipmentProducts = shipmentInfo.products;
+            //Creating a map to store the productQuantity for each product
+            const shippedProductMap = new Map();
+            const receivedProductMap = new Map();
+
+            for (const product of shipmentProducts) {
+              //Storing productQuantity for each product
+              const key = product.productID + "-" + product.batchNumber + "-" + product.atomId;
+              if (shippedProductMap.has(key)) {
+                shippedProductMap.set(key, shippedProductMap.get(key) + product.productQuantity);
+              } else {
+                shippedProductMap.set(key, product.productQuantity);
+              }
+            }
+
+            for (const product of receivedProducts) {
+              //Storing productQuantity for each product
+              const key = product.productID + "-" + product.batchNumber + "-" + product.atomId;
+              if (receivedProductMap.has(key)) {
+                receivedProductMap.set(key, receivedProductMap.get(key) + product.productQuantity);
+              } else {
+                receivedProductMap.set(key, product.productQuantity);
+              }
+            }
+
+            for (const product of shipmentProducts) {
+              let shippedQuantity = 0;
+              let receivedQuantity = 0;
+              const key = product.productID + "-" + product.batchNumber + "-" + product.atomId;
+              if (shippedProductMap.has(key)) {
+                shippedQuantity = shippedProductMap.get(key);
+              }
+              if (receivedProductMap.has(key)) {
+                receivedQuantity = receivedProductMap.get(key);
+              }
+
+              if (receivedQuantity > shippedQuantity) {
+                throw new Error(responses(req.user.preferredLanguage).rec_quantity_error);
+              }
+              const quantityDifference = shippedQuantity - receivedQuantity;
+              const rejectionRate = (quantityDifference / shippedQuantity) * 100;
+              product.quantityDelivered = receivedQuantity;
+              product.rejectionRate = rejectionRate;
+              await ShipmentModel.updateOne(
+                {
+                  id: shipmentID,
+                  "products.productID": product.productID,
+                  "products.batchNumber": product.batchNumber,
+                  "products.atomId": product.atomId,
+                },
+                {
+                  $set: {
+                    "products.$.rejectionRate": rejectionRate,
+                  },
+                },
+              );
+            }
+            let flag = "Y";
+            const confId = orgData?.configuration_id || "CONF000"; // Default configuration of vaccineledger
+            const confData = await ConfigurationModel.findOne({ id: confId });
+            if (confData == null) {
+              throw new Error(responses(req.user.preferredLanguage).config_not_found);
+            }
+            const process = confData.process;
+            if (data.poId === null) {
+              if (process == true) {
+                flag = "YS";
+              } else {
+                flag = "N";
+              }
+            }
+            if (flag === "Y") {
+              const po = await RecordModel.findOne({
+                id: data.poId,
+              });
+              const quantityMatch = receivedProducts?.every((receivedProduct) => {
+                const combinedReceivedProduct = receivedProducts?.filter((ele) => ele.productId === receivedProduct.productId);
+                console.log("CRP", combinedReceivedProduct);
+                return po.products?.every((product) => {
+                  if (receivedProduct.productId === product.productId) {
+                    const combinedPoProduct = po.products?.filter((ele) => ele.productId === product.productId);
+                    const actualPoQuantity = combinedPoProduct.reduce(
+                      (a, curr) => a + curr["productQuantity"],
+                      0,
+                    );
+                    const existingQuantity = combinedPoProduct.reduce((a, curr) => a + (curr?.["productQuantityDelivered"] || 0), 0);
+                    const receivedQuantity = combinedReceivedProduct.reduce(
+                      (a, curr) => a + curr["productQuantity"],
+                      0,
+                    );
+                    console.log(actualPoQuantity, receivedQuantity, existingQuantity)
+                    return actualPoQuantity == (receivedQuantity + existingQuantity)
+                  }
+                });
+              });
+
+              // const quantityMismatch = po?.products?.every((product) => {
+              //   const combinedPoProduct = po.products.filter((ele) => ele.productId === product.productId);
+              //   console.log(combinedPoProduct);
+              //   receivedProducts.every((receivedProduct) => {
+              //     if (product.productId === receivedProduct.productId) {
+              //       const combinedReceivedProduct = receivedProducts.filter((ele) => ele.productId === product.productId);
+              //       const actuallyShippedQuantity = combinedPoProduct.reduce(
+              //         (a, curr) => a + curr["productQuantity"],
+              //         0,
+              //       );
+              //       const receivedQuantity = combinedReceivedProduct.reduce(
+              //         (a, curr) => a + curr["productQuantity"],
+              //         0,
+              //       );
+              //       console.log(receivedProduct, combinedReceivedProduct, actuallyShippedQuantity, receivedQuantity)
+              //       return receivedQuantity < actuallyShippedQuantity ? false : true;
+              //     }
+              //   });   
+              if (po) {
+                if (quantityMatch) {
+                  await RecordModel.updateOne({ id: data.poId }, { $set: { poStatus: "FULLYFULFILLED" } })
+                } else {
+                  await RecordModel.updateOne({ id: data.poId }, { $set: { poStatus: "PARTIALLYFULFILLED" } })
                 }
               }
-            });
-          });
-          if (po) {
-            if (quantityMismatch) {
-              po.poStatus = "PARTIALLYFULFILLED";
-              await po.save();
-            } else {
-              po.poStatus = "FULLYFULFILLED";
-              await po.save();
             }
-          }
-        }
-        if (flag != "N") {
-          const suppWarehouseDetails = await WarehouseModel.findOne({
-            id:
-              typeof data.supplier == "object"
-                ? data.supplier.locationId
-                : JSON.parse(data.supplier).locationId,
-          });
-          var suppInventoryId = suppWarehouseDetails.warehouseInventory;
-          const recvWarehouseDetails = await WarehouseModel.findOne({
-            id:
-              typeof data.receiver == "object"
-                ? data.receiver.locationId
-                : JSON.parse(data.receiver).locationId,
-          });
-          var recvInventoryId = recvWarehouseDetails.warehouseInventory;
-          var products = receivedProducts;
-          var count = 0;
-          var totalProducts = 0;
-          var totalReturns = 0;
-          var shipmentRejectionRate = 0;
-          for (count = 0; count < products.length; count++) {
-						var shipmentProducts = shipmentInfo.products;
-						totalProducts = totalProducts + shipmentProducts[count].productQuantity;
-						totalReturns = totalReturns + products[count].productQuantity;
-						shipmentRejectionRate = ((totalProducts - totalReturns) / totalProducts) * 100;
-						products[count]["productId"] = products[count].productID;
+            if (flag != "N") {
+              const suppWarehouseDetails = await WarehouseModel.findOne({
+                id:
+                  typeof data.supplier == "object"
+                    ? data.supplier.locationId
+                    : JSON.parse(data.supplier).locationId,
+              });
+              const suppInventoryId = suppWarehouseDetails.warehouseInventory;
+              const recvWarehouseDetails = await WarehouseModel.findOne({
+                id:
+                  typeof data.receiver == "object"
+                    ? data.receiver.locationId
+                    : JSON.parse(data.receiver).locationId,
+              });
+              const recvInventoryId = recvWarehouseDetails.warehouseInventory;
+              let products = receivedProducts;
+              let totalProducts = 0;
+              let totalReturns = 0;
+              let shipmentRejectionRate = 0;
+              for (let count = 0; count < products.length; count++) {
+                totalProducts = totalProducts + shipmentProducts[count].productQuantity;
+                totalReturns = totalReturns + products[count].productQuantity;
+                shipmentRejectionRate = ((totalProducts - totalReturns) / totalProducts) * 100;
+                products[count]["productId"] = products[count].productID;
 
-						await inventoryUpdate(
-							products[count].productID,
-							products[count].productQuantity,
-							suppInventoryId,
-							recvInventoryId,
-							data.poId,
-							"RECEIVED",
-						);
+                await inventoryUpdate(
+                  products[count].productID,
+                  products[count].productQuantity,
+                  suppInventoryId,
+                  recvInventoryId,
+                  data.poId,
+                  "RECEIVED",
+                );
 
-						shipmentUpdate(
-							products[count].productID,
-							products[count].productQuantity,
-							data.id,
-							products[count].atomId,
-							"RECEIVED",
-						);
+                await shipmentUpdate(
+                  products[count].productID,
+                  products[count].productQuantity,
+                  data.id,
+                  products[count].atomId,
+                  "RECEIVED",
+                );
 
-						if (flag == "Y" && data.poId != null) {
-							await poUpdate(
-								products[count].productId,
-								products[count].productQuantity,
-								data.poId,
-								"RECEIVED",
-								req.user,
-							);
-						}
+                if (flag == "Y" && data.poId != null) {
+                  await poUpdate(
+                    products[count].productId,
+                    products[count].productQuantity,
+                    data.poId,
+                    "RECEIVED",
+                    req.user,
+                  );
+                }
 
-						const atomInTransit = await AtomModel.findOne({
-							id: products[count].atomId,
-							batchNumbers: products[count].batchNumber,
-							currentInventory: recvInventoryId,
-							currentShipment: shipmentID,
-							status: "TRANSIT",
-						});
+                const atomInTransit = await AtomModel.findOne({
+                  id: products[count].atomId,
+                  batchNumbers: products[count].batchNumber,
+                  currentInventory: recvInventoryId,
+                  currentShipment: shipmentID,
+                  status: "TRANSIT",
+                });
 
-						let atomInTransitDate = atomInTransit?.attributeSet?.expDate;
+                let atomInTransitDate = atomInTransit?.attributeSet?.expDate;
 
-						const atomExists = await AtomModel.findOne({
-							batchNumbers: products[count].batchNumber,
-							productId: products[count].productId,
-							currentInventory: recvInventoryId,
-							"attributeSet.expDate": atomInTransitDate,
-							status: { $in: ["HEALTHY", "CONSUMED", "EXPIRED"] },
-						});
+                const atomExists = await AtomModel.findOne({
+                  batchNumbers: products[count].batchNumber,
+                  productId: products[count].productId,
+                  currentInventory: recvInventoryId,
+                  "attributeSet.expDate": atomInTransitDate,
+                  status: { $in: ["HEALTHY", "CONSUMED", "EXPIRED"] },
+                });
 
-						if (shipmentRejectionRate > 0) {
-							// partial Receive Shipment
-							const lostAtom = await AtomModel.findOneAndUpdate(
-								{
-									id: products[count].atomId,
-									batchNumbers: products[count].batchNumber,
-									currentInventory: recvInventoryId,
-									currentShipment: shipmentID,
-									status: "TRANSIT",
-								},
-								{
-									$inc: {
-										quantity: -parseInt(products[count].productQuantity),
-									},
-									$set: {
-										status: "LOST",
-									},
-								},
-								{
-									new: true,
-								},
-							);
+                if (shipmentRejectionRate > 0) {
+                  // partial Receive Shipment
+                  const lostAtom = await AtomModel.findOneAndUpdate(
+                    {
+                      id: products[count].atomId,
+                      batchNumbers: products[count].batchNumber,
+                      currentInventory: recvInventoryId,
+                      currentShipment: shipmentID,
+                      status: "TRANSIT",
+                    },
+                    {
+                      $inc: {
+                        quantity: -parseInt(products[count].productQuantity),
+                      },
+                      $set: {
+                        status: "LOST",
+                      },
+                    },
+                    {
+                      new: true,
+                    },
+                  );
 
-							const newAtom = new AtomModel({
-								id: cuid(),
-								label: {
-									labelId: "QR_2D",
-									labelType: "3232",
-								},
-								quantity: parseInt(products[count].productQuantity),
-								productId: lostAtom?.productId,
-								inventoryIds: lostAtom?.inventoryIds,
-								currentInventory: recvInventoryId,
-								poIds: lostAtom?.poIds || [],
-								shipmentIds: lostAtom?.shipmentIds || [],
-								currentShipment: null,
-								batchNumbers: lostAtom?.batchNumbers,
-								txIds: lostAtom?.txIds,
-								status: "HEALTHY",
-								attributeSet: lostAtom?.attributeSet,
-								eolInfo: lostAtom?.eolInfo,
-								comments: lostAtom?.comments,
-							});
+                  const newAtom = new AtomModel({
+                    id: cuid(),
+                    label: {
+                      labelId: "QR_2D",
+                      labelType: "3232",
+                    },
+                    quantity: parseInt(products[count].productQuantity),
+                    productId: lostAtom?.productId,
+                    inventoryIds: lostAtom?.inventoryIds,
+                    currentInventory: recvInventoryId,
+                    poIds: lostAtom?.poIds || [],
+                    shipmentIds: lostAtom?.shipmentIds || [],
+                    currentShipment: null,
+                    batchNumbers: lostAtom?.batchNumbers,
+                    txIds: lostAtom?.txIds,
+                    status: "HEALTHY",
+                    attributeSet: lostAtom?.attributeSet,
+                    eolInfo: lostAtom?.eolInfo,
+                    comments: lostAtom?.comments,
+                  });
 
-							if (atomExists) {
-								newAtom.status = "MERGED";
-								const shipmentIds = newAtom?.shipmentIds || [];
-								await AtomModel.findOneAndUpdate(
-									{ id: atomExists.id },
-									{
-										$inc: {
-											quantity: parseInt(products[count].productQuantity),
-										},
-										$set: {
-											currentShipment: null,
-											status: "HEALTHY",
-										},
-										$addToSet: {
-											shipmentIds: { $each: shipmentIds },
-										},
-									},
-								);
-							}
-
-							await newAtom.save();
-						} else {
-							// Complete receive shipment
-							if (atomExists) {
-								const newAtom = await AtomModel.updateOne(
-									{
-										id: products[count].atomId,
-										batchNumbers: products[count].batchNumber,
-										currentInventory: recvInventoryId,
-										quantity: products[count].productQuantity,
-										currentShipment: shipmentID,
-										status: "TRANSIT",
-									},
-									{
-										$set: {
-											status: "MERGED",
-										},
-									},
-								);
-								const shipmentIds = newAtom?.shipmentIds || [];
-								await AtomModel.findOneAndUpdate(
-									{ id: atomExists.id },
-									{
-										$inc: {
-											quantity: parseInt(products[count].productQuantity),
-										},
-										$set: {
-											currentShipment: null,
-											status: "HEALTHY",
-										},
-										$addToSet: {
-											shipmentIds: { $each: shipmentIds },
-										},
-									},
-								);
-							} else {
-								await AtomModel.updateOne(
-									{
-										id: products[count].atomId,
-										batchNumbers: products[count].batchNumber,
-										currentInventory: recvInventoryId,
-										quantity: products[count].productQuantity,
-										currentShipment: shipmentID,
-										status: "TRANSIT",
-									},
-									{
-										$addToSet: {
-											inventoryIds: recvInventoryId,
-										},
-										$set: {
-											status: "HEALTHY",
-											currentShipment: null,
-										},
-									},
-								);
-							}
-						}
-					}
-          let Upload = null;
-          if (req.file) {
-            Upload = await uploadFile(req.file);
-            await unlinkFile(req.file.path);
-          }
-          const updates = {
-            updatedOn: new Date().toISOString(),
-            imageId: Upload?.key || null,
-            updatedBy: req.user.id,
-            updateComment: data.comment,
-            status: "RECEIVED",
-            products: products,
-          };
-          const updateData = await ShipmentModel.findOneAndUpdate(
-            { id: req.body.id },
-            {
-              $push: { shipmentUpdates: updates },
-              $set: {
-                status: "RECEIVED",
-                rejectionRate: shipmentRejectionRate,
-              },
-            },
-            { new: true }
-          );
-
-          //await ShipmentModel.findOneAndUpdate({
-          //  id: data.id
-          //}, {
-          //  status: "RECEIVED"
-          //}, );
-          const shipmentData = await ShipmentModel.findOne({
-            id: req.body.id,
-          });
-
-          const bc_data = {
-            Id: shipmentData.id,
-            CreatedOn: "",
-            CreatedBy: "",
-            IsDelete: true,
-            ShippingOrderId: "",
-            PoId: "",
-            Label: JSON.stringify(shipmentData.label),
-            ExternalShipping: "",
-            Supplier: JSON.stringify(shipmentData.supplier),
-            Receiver: JSON.stringify(shipmentData.receiver),
-            ImageDetails: "",
-            TaggedShipments: "",
-            ShipmentUpdates: JSON.stringify(shipmentData.shipmentUpdates),
-            AirwayBillNo: shipmentData.airWayBillNo,
-            ShippingDate: shipmentData.shippingDate,
-            ExpectedDelDate: shipmentData.expectedDeliveryDate,
-            ActualDelDate: shipmentData.actualDeliveryDate,
-            Status: shipmentData.status,
-            TransactionIds: "",
-            RejectionRate: "",
-            Products: JSON.stringify(shipmentData.products),
-            Misc: "",
-          };
-          const token =
-            req.headers["x-access-token"] || req.headers["authorization"];
-          axios
-            .put(
-              `${hf_blockchain_url}/api/v1/transactionapi/shipment/update`,
-              bc_data,
-              {
-                headers: {
-                  Authorization: token,
-                },
+                  if (atomExists) {
+                    newAtom.status = "MERGED";
+                    const shipmentIds = newAtom?.shipmentIds || [];
+                    await AtomModel.findOneAndUpdate(
+                      { id: atomExists.id },
+                      {
+                        $inc: {
+                          quantity: parseInt(products[count].productQuantity),
+                        },
+                        $set: {
+                          currentShipment: null,
+                          status: "HEALTHY",
+                        },
+                        $addToSet: {
+                          shipmentIds: { $each: shipmentIds },
+                        },
+                      },
+                    );
+                  }
+                  await newAtom.save();
+                } else {
+                  // Complete receive shipment
+                  if (atomExists) {
+                    const newAtom = await AtomModel.updateOne(
+                      {
+                        id: products[count].atomId,
+                        batchNumbers: products[count].batchNumber,
+                        currentInventory: recvInventoryId,
+                        quantity: products[count].productQuantity,
+                        currentShipment: shipmentID,
+                        status: "TRANSIT",
+                      },
+                      {
+                        $set: {
+                          status: "MERGED",
+                        },
+                      },
+                    );
+                    const shipmentIds = newAtom?.shipmentIds || [];
+                    await AtomModel.findOneAndUpdate(
+                      { id: atomExists.id },
+                      {
+                        $inc: {
+                          quantity: parseInt(products[count].productQuantity),
+                        },
+                        $set: {
+                          currentShipment: null,
+                          status: "HEALTHY",
+                        },
+                        $addToSet: {
+                          shipmentIds: { $each: shipmentIds },
+                        },
+                      },
+                    );
+                  } else {
+                    await AtomModel.updateOne(
+                      {
+                        id: products[count].atomId,
+                        batchNumbers: products[count].batchNumber,
+                        currentInventory: recvInventoryId,
+                        quantity: products[count].productQuantity,
+                        currentShipment: shipmentID,
+                        status: "TRANSIT",
+                      },
+                      {
+                        $addToSet: {
+                          inventoryIds: recvInventoryId,
+                        },
+                        $set: {
+                          status: "HEALTHY",
+                          currentShipment: null,
+                        },
+                      },
+                    );
+                  }
+                }
               }
-            )
-            .catch((error) => {
-              console.log(error);
-            });
-          data.products = JSON.parse(data.products);
-          data.supplier = JSON.parse(data.supplier);
-          data.receiver = JSON.parse(data.receiver);
-          const event_data = {
-            eventID: cuid(),
-            eventTime: new Date().toISOString(),
-            eventType: {
-              primary: "RECEIVE",
-              description: "SHIPMENT",
-            },
-            transactionId: data.id.toString(),
-            actor: {
-              actorid: user_id || null,
-              actoruserid: email || null,
-            },
-            actorWarehouseId: req.user.warehouseId || null,
-            stackholders: {
-              ca: {
-                id: CENTRAL_AUTHORITY_ID || null,
-                name: CENTRAL_AUTHORITY_NAME || null,
-                address: CENTRAL_AUTHORITY_ADDRESS || null,
-              },
-              actororg: {
-                id: orgId || null,
-                name: orgName || null,
-                address: address || null,
-              },
-              secondorg: {
-                id: null,
-                name: null,
-                address: null,
-              },
-            },
-            payload: {
-              data: data,
-            },
-          };
-          if (orgId === supplierID) {
-            event_data.stackholders.secondorg.id = receiverId || null;
-            event_data.stackholders.secondorg.name = receiverOrgData?.name || null;
-            event_data.stackholders.secondorg.address = receiverOrgData?.postalAddress || null;
-          } else {
-            event_data.stackholders.secondorg.id = supplierID || null;
-            event_data.stackholders.secondorg.name = supplierOrgData?.name || null;
-            event_data.stackholders.secondorg.address = supplierOrgData?.postalAddress || null;
-          }
-          await logEvent(event_data);
+              let Upload = null;
+              if (req.file) {
+                Upload = await uploadFile(req.file);
+                await unlinkFile(req.file.path);
+              }
+              const updates = {
+                updatedOn: new Date().toISOString(),
+                imageId: Upload?.key || null,
+                updatedBy: req.user.id,
+                updateComment: data.comment,
+                status: "RECEIVED",
+                products: products,
+              };
+              const updateData = await ShipmentModel.findOneAndUpdate(
+                { id: req.body.id },
+                {
+                  $push: { shipmentUpdates: updates },
+                  $set: {
+                    status: "RECEIVED",
+                    rejectionRate: shipmentRejectionRate,
+                  },
+                },
+                { new: true }
+              );
 
-          return apiResponse.successResponseWithData(
-            res,
-            responses(req.user.preferredLanguage).shipment_received,
-            updateData
-          );
+              const bc_data = {
+                Id: updateData.id,
+                CreatedOn: "",
+                CreatedBy: "",
+                IsDelete: true,
+                ShippingOrderId: "",
+                PoId: "",
+                Label: JSON.stringify(updateData.label),
+                ExternalShipping: "",
+                Supplier: JSON.stringify(updateData.supplier),
+                Receiver: JSON.stringify(updateData.receiver),
+                ImageDetails: "",
+                TaggedShipments: "",
+                ShipmentUpdates: JSON.stringify(updateData.shipmentUpdates),
+                AirwayBillNo: updateData.airWayBillNo,
+                ShippingDate: updateData.shippingDate,
+                ExpectedDelDate: updateData.expectedDeliveryDate,
+                ActualDelDate: updateData.actualDeliveryDate,
+                Status: updateData.status,
+                TransactionIds: "",
+                RejectionRate: "",
+                Products: JSON.stringify(updateData.products),
+                Misc: "",
+              };
+              const token =
+                req.headers["x-access-token"] || req.headers["authorization"];
+              axios
+                .put(
+                  `${hf_blockchain_url}/api/v1/transactionapi/shipment/update`,
+                  bc_data,
+                  {
+                    headers: {
+                      Authorization: token,
+                    },
+                  }
+                )
+                .catch((error) => {
+                  console.log(error);
+                });
+              data.products = JSON.parse(data.products);
+              data.supplier = JSON.parse(data.supplier);
+              data.receiver = JSON.parse(data.receiver);
+              const event_data = {
+                eventID: cuid(),
+                eventTime: new Date().toISOString(),
+                eventType: {
+                  primary: "RECEIVE",
+                  description: "SHIPMENT",
+                },
+                transactionId: data.id.toString(),
+                actor: {
+                  actorid: req.user.id || null,
+                  actoruserid: req.user.emailId || null,
+                },
+                actorWarehouseId: req.user.warehouseId || null,
+                stackholders: {
+                  ca: {
+                    id: CENTRAL_AUTHORITY_ID || null,
+                    name: CENTRAL_AUTHORITY_NAME || null,
+                    address: CENTRAL_AUTHORITY_ADDRESS || null,
+                  },
+                  actororg: {
+                    id: orgId || null,
+                    name: orgData.name || null,
+                    address: orgData.postalAddress || null,
+                  },
+                  secondorg: {
+                    id: null,
+                    name: null,
+                    address: null,
+                  },
+                },
+                payload: {
+                  data: data,
+                },
+              };
+              if (orgId === supplierID) {
+                event_data.stackholders.secondorg.id = receiverId || null;
+                event_data.stackholders.secondorg.name = receiverOrgData?.name || null;
+                event_data.stackholders.secondorg.address = receiverOrgData?.postalAddress || null;
+              } else {
+                event_data.stackholders.secondorg.id = supplierID || null;
+                event_data.stackholders.secondorg.name = supplierOrgData?.name || null;
+                event_data.stackholders.secondorg.address = supplierOrgData?.postalAddress || null;
+              }
+              await logEvent(event_data);
+
+              return apiResponse.successResponseWithData(
+                res,
+                responses(req.user.preferredLanguage).shipment_received,
+                updateData
+              );
+            } else {
+              return apiResponse.successResponse(
+                res,
+                responses(req.user.preferredLanguage).shipment_cannot_receive
+              );
+            }
+          } else {
+            throw new Error("Employee does not exist");
+          }
         } else {
-          return apiResponse.successResponse(
-            res,
-            responses(req.user.preferredLanguage).shipment_cannot_receive
-          );
+          return apiResponse.forbiddenResponse(res, `Access denied - Permissions:${permission}, Location:${locationMatch})`);
         }
       } else {
-        return apiResponse.forbiddenResponse(res, `Access denied - Permissions:${permission}, Location:${locationMatch})`);
+        return apiResponse.notFoundResponse(res, "Shipment not found");
       }
     } catch (err) {
       console.log(err);
@@ -2545,15 +2532,15 @@ exports.viewShipment = [
             element.unitofMeasure = product.unitofMeasure;
 
             // const batch = await AtomModel.findOne({
-						// 	batchNumbers: element.batchNumber,
-						// 	$or: [
-						// 		{ currentShipment: element.id },
-						// 		{ shipmentIds: element.id },
-						// 		{
-						// 			currentInventory: Shipment.receiver.warehouse.warehouseInventory,
-						// 			status: { $ne: "CONSUMED" },
-						// 		},
-						// 	],
+            // 	batchNumbers: element.batchNumber,
+            // 	$or: [
+            // 		{ currentShipment: element.id },
+            // 		{ shipmentIds: element.id },
+            // 		{
+            // 			currentInventory: Shipment.receiver.warehouse.warehouseInventory,
+            // 			status: { $ne: "CONSUMED" },
+            // 		},
+            // 	],
             // });
             element.mfgDate = element?.attributeSet?.mfgDate;
             element.expDate = element?.attributeSet?.expDate;
