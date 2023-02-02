@@ -19,7 +19,7 @@ import Modal1 from "../../shared/modal";
 import moment from "moment";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
-const axios = require("axios");
+import axios from 'axios';
 
 class Profile extends React.Component {
 	constructor(props) {

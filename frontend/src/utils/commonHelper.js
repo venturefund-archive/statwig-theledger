@@ -30,9 +30,10 @@ function GetState(permission) {
     return state.user;
   });
   let permissionArr = [];
-  if (user)
-		permissionArr = user?.permissions?.permissions?.length ? user.permissions.permissions : [];
-	else permissionArr = localStorage.bkp.split(",");
+  if (user) {
+    permissionArr = user.accountStatus === 'NOTAPPROVED' ? [] : user?.permissions?.permissions?.length ? user.permissions.permissions : [];
+  }
+  else permissionArr = localStorage.bkp.split(",");
   return permissionArr.indexOf(permission) > -1 ? true : false;
 }
 

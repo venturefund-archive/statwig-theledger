@@ -45,11 +45,10 @@ const OtherLocations = ({ user, setReportWarehouse, t }) => {
           <input
             type="search"
             value={regExp}
-            placeholder={`${t("search_by")} ${
-              LocationTab === "ORGANIZATION"
-                ? `${t("organisation")}`
-                : `${t("country")}`
-            }`}
+            placeholder={`${t("search_by")} ${LocationTab === "ORGANIZATION"
+              ? `${t("organisation")}`
+              : `${t("country")}`
+              }`}
             className="searchOrganization"
             onChange={(e) => setRegExp(e.target.value)}
           />
