@@ -76,6 +76,7 @@
   padding: 1.5rem;
   border-radius: 0.4rem;
   box-shadow: var(--shadow);
+  cursor: pointer;
 }
 
 .type3-icon-space {

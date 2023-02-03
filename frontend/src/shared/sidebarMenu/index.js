@@ -17,6 +17,7 @@ const SideBar = (props) => {
 	const { url } = match;
 	const [enable, setEnable] = useState(true);
 	const intelEnabled = props.user?.type === "Third Party Logistics" ? true : false;
+
 	useEffect(() => {
 		if (intelEnabled) setEnable(false);
 	}, [intelEnabled, user]);

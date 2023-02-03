@@ -275,6 +275,7 @@ class Profile extends React.Component {
 								</div>
 								<input
 									id="profile"
+									value={selectedFile || ""}
 									onChange={(e) => {
 										this.setState({ selectedFile: e.target.files[0] });
 										if (!e.target.files[0].type.match("image.*")) {
