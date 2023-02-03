@@ -320,7 +320,7 @@ exports.getOrgs = [
 						as: "employeeCount",
 					},
 				},
-				{ $unwind: "$employeeCount" },
+				{ $unwind: { path: "$employeeCount", preserveNullAndEmptyArrays: true } },
 				{
 					$sort: {
 						createdAt: -1,
@@ -394,7 +394,7 @@ exports.getOrgDetails = [
 												$expr: {
 													$and: [
 														{ $eq: ["$organisationId", "$$organisationId"] },
-														{ $ne: ["$status", "ACTIVE"] },
+														{ $eq: ["$status", "DEACTIVATED"] },
 													],
 												},
 											},
@@ -584,15 +584,41 @@ exports.getOrgAnalytics = [
 								},
 							},
 						],
+						inactive: [
+							{ $match: { status: "DEACTIVATED" } },
+							{
+								$group: {
+									_id: null,
+									organisations: {
+										$addToSet: {
+											organisationId: "$id",
+											status: "$status",
+										},
+									},
+								},
+							},
+							{
+								$project: {
+									count: {
+										$cond: {
+											if: { $isArray: "$organisations" },
+											then: { $size: "$organisations" },
+											else: "NA",
+										},
+									},
+								},
+							},
+						]
 					},
 				},
 				{ $unwind: "$total" },
 				{ $unwind: "$active" },
+				{ $unwind: "$inactive" },
 			]);
 			const analyticsObject = {
 				totalCount: analytics[0].total.count,
 				activeCount: analytics[0].active.count,
-				inactiveCount: analytics[0].total.count - analytics[0].active.count,
+				inactiveCount: analytics[0].inactive.count,
 				orgInitials: analytics[0].total.orgInitials,
 			};
 			return apiResponse.successResponseWithData(req, res, "Organisation list", analyticsObject);
@@ -909,7 +935,7 @@ exports.addOrgsFromExcel = [
 				const lastName = user["LAST NAME"];
 				const emailId = user["EMAIL"] || user["Email of organization"];
 				const phoneNumber = user["PHONE"];
-				const organisationName = user["ORG NAME"] || user["Pharmacy"];
+				const organisationName = user["ORG NAME"] || user["PHARMACY"];
 				const type = user["ORG TYPE"];
 				const parentOrgName = user["PARENT ORG"];
 				const address = {

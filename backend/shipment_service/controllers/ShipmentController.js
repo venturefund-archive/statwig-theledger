@@ -1499,17 +1499,22 @@ exports.receiveShipment = [
           );
         }
         const process = confData.process;
-        if (data.poId === null) {
+
+        if (!data.poId || data.poId == "null") {
           if (process == true) {
             flag = "YS";
           } else {
             flag = "N";
           }
         }
+
         if (flag === "Y") {
           const po = await RecordModel.findOne({
             id: data.poId,
           });
+          if(!po) {
+            throw new Error("Purchase order does not exist!");
+          }
           let quantityMismatch = false;
           let missingProducts = false;
           const receivedProductsMap = receivedProducts.reduce((map, p) => {

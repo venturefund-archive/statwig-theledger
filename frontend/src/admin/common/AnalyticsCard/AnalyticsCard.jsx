@@ -13,6 +13,7 @@ export default function AnalyticsCard({
   valueTitle,
   name,
   analytics,
+  onClick
 }) {
   const history = useHistory();
 
@@ -117,7 +118,7 @@ export default function AnalyticsCard({
       )}
 
       {layout === "type4" && (
-        <div className="Analyticstype3-container">
+        <div className="Analyticstype3-container" onClick={onClick}>
           <div className="type4-body vl-flex-xl">
             <div className={`type3-icon-space ${bgColor}`}>
               <i className={`fa-solid ${icon} ${textColor}`}></i>
