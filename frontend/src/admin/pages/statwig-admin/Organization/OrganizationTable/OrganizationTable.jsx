@@ -10,7 +10,7 @@ import { TablePagination } from "@mui/material";
 import { getOrgs, updateOrg } from "../../../../actions/organisationActions";
 import { useDispatch, useSelector } from "react-redux";
 
-export default function OrganizationTable({ orgStatus, tableFlag, t }) {
+export default function OrganizationTable({ searchOrgByName,orgStatus, tableFlag, t }) {
   const dispatch = useDispatch();
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
@@ -18,13 +18,13 @@ export default function OrganizationTable({ orgStatus, tableFlag, t }) {
   const { list } = useSelector((state) => state.organisationReducer);
 
   useEffect(() => {
-    dispatch(getOrgs(`skip=${page * 10}&limit=${rowsPerPage}&status=${orgStatus}`));
+    dispatch(getOrgs(`skip=${page * 10}&limit=${rowsPerPage}&status=${orgStatus}&orgName=${searchOrgByName}`));
   }, [dispatch, page]);
 
   useEffect(() => {
     setPage(0);
-    dispatch(getOrgs(`skip=${0}&limit=${rowsPerPage}&status=${orgStatus}`));
-  }, [rowsPerPage, tableFlag, orgStatus]);
+    dispatch(getOrgs(`skip=${0}&limit=${rowsPerPage}&status=${orgStatus}&orgName=${searchOrgByName}`));
+  }, [rowsPerPage, tableFlag, orgStatus,searchOrgByName]);
 
   const modifyOrg = async (data) => {
     const result = await updateOrg(data.org ? data.org : data);

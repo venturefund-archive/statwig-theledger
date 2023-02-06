@@ -34,6 +34,8 @@ export default function AdminOrganization(props) {
   const { t } = useTranslation();
   const [tableFlag, setTableFlag] = useState(false);
   const [orgStatus, setOrgStatus] = useState("");
+  const [searchOrgByName, setSearchOrg] = useState("");
+
   useEffect(() => {
     dispatch(getOrgAnalytics());
   }, [dispatch]);
@@ -106,7 +108,12 @@ export default function AdminOrganization(props) {
 							<div className="organization-table-header-area">
 								<div className="table-search-bar">
 									<i className="fa-solid fa-magnifying-glass"></i>
-									<input type="text" placeholder={t("search")} />
+									<input type="text" placeholder={t("search")}  
+									onChange={(event) => {
+										console.log('event.target.value ',event.target.value)
+										// handleChange(event);
+										setSearchOrg(event.target.value);
+									  }} />
 								</div>
 								<div className="table-actions-area">
 									{/* <div className="table-action-icon">
@@ -137,7 +144,7 @@ export default function AdminOrganization(props) {
 									</div>
 								</div>
 							</div>
-							<OrganizationTable t={t} tableFlag={tableFlag} orgStatus={orgStatus} />
+							<OrganizationTable t={t} tableFlag={tableFlag} orgStatus={orgStatus}  searchOrgByName={searchOrgByName}/>
 						</div>
 					</div>
 				</div>

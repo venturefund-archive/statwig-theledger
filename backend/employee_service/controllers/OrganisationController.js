@@ -241,6 +241,9 @@ function getOrgCondition(query) {
 	if (query.region && query.region != "") {
 		matchCondition["region.name"] = query.region;
 	}
+	if(query.orgName && query.orgName != ""){
+		matchCondition.name= { $regex: query.orgName ? query.orgName : "", $options: "i" }
+	}
 	if (query.creationFilter && query.creationFilter == "true") {
 		let now = moment();
 		let oneDayAgo = moment().subtract(1, "day");

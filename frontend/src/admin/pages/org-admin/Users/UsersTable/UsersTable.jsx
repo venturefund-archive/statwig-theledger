@@ -14,12 +14,12 @@ import { useState } from "react";
 
 export default function UsersTable(props) {
   const dispatch = useDispatch();
-  const { defaultRoles, t, refetch } = props;
+  const { defaultRoles, t, refetch,userStatus,searchByName } = props;
 
   const [users, setUsers] = useState([]);
   const [uniqueUsers, setUniqueUsers] = useState([]);
   // const { users } = useSelector((state) => state.organisationReducer);
-
+ 
   const uniqueIds = new Set();
 
   useEffect(() => {
@@ -42,13 +42,12 @@ export default function UsersTable(props) {
   const [page, setPage] = React.useState(1);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [totalCount, setTotalCount] = useState(0);
-
   useEffect(async () => {
-    let res = await dispatch(getOrgUsers(`skip=${(page-1) * 10}&limit=${rowsPerPage}`));
-    setUsers(res.paginatedResults);
+	let res = await dispatch(getOrgUsers(`skip=${(page-1) * 10}&limit=${rowsPerPage}&status=${userStatus}&firstName=${searchByName}`));
+	setUsers(res.paginatedResults);
     setTotalCount(res.totalCount);
-  }, [dispatch, page, rowsPerPage, props.tableFlag, refetch]);
-
+  }, [dispatch, page,userStatus,searchByName, rowsPerPage, props.tableFlag, refetch]);
+  
   const handleChangePage = (event, newPage) => {
     if (newPage > 1) setPage(newPage);
 		else setPage(1);
