@@ -14,12 +14,13 @@ export default function OrganizationTable({ orgStatus, tableFlag, t }) {
   const dispatch = useDispatch();
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [refresh, toggleRefresh] = React.useState(false);
 
   const { list } = useSelector((state) => state.organisationReducer);
 
   useEffect(() => {
     dispatch(getOrgs(`skip=${page * 10}&limit=${rowsPerPage}&status=${orgStatus}`));
-  }, [dispatch, page]);
+  }, [dispatch, page, refresh]);
 
   useEffect(() => {
     setPage(0);
@@ -30,6 +31,8 @@ export default function OrganizationTable({ orgStatus, tableFlag, t }) {
     const result = await updateOrg(data.org ? data.org : data);
     if (result.status !== 200) {
       alert(result.data.data.message);
+    } else {
+      toggleRefresh(!refresh);
     }
   };
 

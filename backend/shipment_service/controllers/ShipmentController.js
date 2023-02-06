@@ -622,111 +622,109 @@ exports.createShipment = [
       }
 
       if (flag == "Y") {
-        const po = await RecordModel.findOne({
-          id: data.poId,
-        });
-        if (po == null) {
-          return apiResponse.ErrorResponse(
-            res,
-            responses(req.user.preferredLanguage).orderid_not_defined
-          );
-        }
-        let quantityMismatch = false;
-        po.products.every((product) => {
-          data.products.every((p) => {
-            if (product.id === p.productID) {
-              const po_product_quantity =
-                product.productQuantity || product.quantity;
-              const alreadyShipped =
-                parseInt(product.productQuantityShipped || 0) +
-                parseInt(product.productQuantityDelivered || 0) || null;
-              let shipment_product_qty;
-              if (alreadyShipped) {
-                shipment_product_qty =
-                  parseInt(p.productQuantity) + parseInt(alreadyShipped);
-              } else {
-                shipment_product_qty = p.productQuantity;
-              }
-              if (
-                parseInt(shipment_product_qty, 10) <
-                parseInt(po_product_quantity, 10)
-              ) {
-                quantityMismatch = true;
-                return false;
-              } else if (
-                parseInt(shipment_product_qty) === parseInt(po_product_quantity)
-              ) {
-                quantityMismatch = false;
-              }
-            }
-          });
-        });
+				const po = await RecordModel.findOne({
+					id: data.poId,
+				});
+				if (po == null) {
+					return apiResponse.ErrorResponse(
+						res,
+						responses(req.user.preferredLanguage).orderid_not_defined,
+					);
+				}
+				let quantityMismatch = false;
+				let missingProducts = false;
 
-        if (quantityMismatch) {
-          if (po.poStatus === "CREATED" || po.poStatus === "ACCEPTED") {
-            let date = new Date(po.createdAt);
-            let milliseconds = date.getTime();
-            let d = new Date();
-            let currentTime = d.getTime();
-            let orderProcessingTime = currentTime - milliseconds;
-            let prevOrderCount = await OrganisationModel.find({
-              id: req.user.organisationId,
-            });
-            prevOrderCount = prevOrderCount.totalProcessingTime
-              ? prevOrderCount.totalProcessingTime
-              : 0;
-            OrganisationModel.updateOne(
-              { id: req.user.organisationId },
-              {
-                $set: {
-                  totalProcessingTime: prevOrderCount + orderProcessingTime,
-                },
-              }
-            );
-          }
-          po.poStatus = "TRANSIT&PARTIALLYFULFILLED";
-        } else {
-          if (po.poStatus === "CREATED" || po.poStatus === "ACCEPTED") {
-            let date = new Date(po.createdAt);
-            let milliseconds = date.getTime();
-            let d = new Date();
-            let currentTime = d.getTime();
-            let orderProcessingTime = currentTime - milliseconds;
-            let prevOrderCount = await OrganisationModel.find({
-              id: req.user.organisationId,
-            });
-            prevOrderCount = prevOrderCount.totalProcessingTime
-              ? prevOrderCount.totalProcessingTime
-              : 0;
-            OrganisationModel.updateOne(
-              { id: req.user.organisationId },
-              {
-                $set: {
-                  totalProcessingTime: prevOrderCount + orderProcessingTime,
-                },
-              }
-            );
-          }
-          po.poStatus = "TRANSIT&FULLYFULFILLED";
-        }
-        await po.save();
-        const poidupdate = await RecordModel.findOneAndUpdate(
-          {
-            id: data.poId,
-          },
-          {
-            $push: {
-              shipments: data.id,
-            },
-          }
-        );
-        if (poidupdate == null) {
-          return apiResponse.ErrorResponse(
-            res,
-            responses(req.user.preferredLanguage).product_not_updated
-          );
-        }
-      }
+				const shippedProductsMap = data.products.reduce((map, p) => {
+					map[p.productID] = (map[p.productID] || 0) + p.productQuantity;
+					return map;
+				}, {});
+				po.products.every((product) => {
+					const poQuantity = product.productQuantity || product.quantity;
+
+					const alreadyShipped =
+						parseInt(product.productQuantityShipped || 0) +
+							parseInt(product.productQuantityDelivered || 0) || null;
+
+					const shippedQuantity = alreadyShipped
+						? parseInt(shippedProductsMap[product.id]) + parseInt(alreadyShipped)
+						: shippedProductsMap[product.id];
+
+					if (!shippedQuantity) {
+						missingProducts = true;
+						return false;
+					}
+
+					if (shippedQuantity < poQuantity) {
+						quantityMismatch = true;
+						return false;
+					}
+				});
+
+				if (quantityMismatch || missingProducts) {
+					if (po.poStatus === "CREATED" || po.poStatus === "ACCEPTED") {
+						let date = new Date(po.createdAt);
+						let milliseconds = date.getTime();
+						let d = new Date();
+						let currentTime = d.getTime();
+						let orderProcessingTime = currentTime - milliseconds;
+						let prevOrderCount = await OrganisationModel.find({
+							id: req.user.organisationId,
+						});
+						prevOrderCount = prevOrderCount.totalProcessingTime
+							? prevOrderCount.totalProcessingTime
+							: 0;
+						OrganisationModel.updateOne(
+							{ id: req.user.organisationId },
+							{
+								$set: {
+									totalProcessingTime: prevOrderCount + orderProcessingTime,
+								},
+							},
+						);
+					}
+					po.poStatus = "TRANSIT&PARTIALLYFULFILLED";
+				} else {
+					if (po.poStatus === "CREATED" || po.poStatus === "ACCEPTED") {
+						let date = new Date(po.createdAt);
+						let milliseconds = date.getTime();
+						let d = new Date();
+						let currentTime = d.getTime();
+						let orderProcessingTime = currentTime - milliseconds;
+						let prevOrderCount = await OrganisationModel.find({
+							id: req.user.organisationId,
+						});
+						prevOrderCount = prevOrderCount.totalProcessingTime
+							? prevOrderCount.totalProcessingTime
+							: 0;
+						OrganisationModel.updateOne(
+							{ id: req.user.organisationId },
+							{
+								$set: {
+									totalProcessingTime: prevOrderCount + orderProcessingTime,
+								},
+							},
+						);
+					}
+					po.poStatus = "TRANSIT&FULLYFULFILLED";
+				}
+				await po.save();
+				const poidupdate = await RecordModel.findOneAndUpdate(
+					{
+						id: data.poId,
+					},
+					{
+						$push: {
+							shipments: data.id,
+						},
+					},
+				);
+				if (poidupdate == null) {
+					return apiResponse.ErrorResponse(
+						res,
+						responses(req.user.preferredLanguage).product_not_updated,
+					);
+				}
+			}
       if (flag != "N") {
         const suppWarehouseDetails = await WarehouseModel.findOne({
           id: data.supplier.locationId,
