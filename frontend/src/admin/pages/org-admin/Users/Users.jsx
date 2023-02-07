@@ -62,7 +62,8 @@ export default function Users(props) {
 
   const [ButtonOpen, setButtonOpen] = useState(false);
   const [ButtonOpen2, setButtonOpen2] = useState(false);
-
+  const [userStatus, setUserStatus] = useState("");
+  const [searchByName, setSearchByName] = useState("");
   let domNode = useClickOutside(() => {
     setButtonOpen(false);
   });
@@ -188,6 +189,7 @@ export default function Users(props) {
 								valueTitle={t("to_no_of_user")}
 								bgColor="analytic-bg-1"
 								textColor="analytic-text-1"
+								onClick={() => setUserStatus("")}
 							/>
 							<AnalyticsCard
 								layout="type4"
@@ -196,6 +198,7 @@ export default function Users(props) {
 								valueTitle={`${t("active")} ${t("users")}`}
 								bgColor="analytic-bg-2"
 								textColor="analytic-text-2"
+								onClick={() => setUserStatus("ACTIVE")}
 							/>
 							<AnalyticsCard
 								layout="type4"
@@ -204,13 +207,19 @@ export default function Users(props) {
 								valueTitle={`${t("inactive")} ${t("users")}`}
 								bgColor="analytic-bg-3"
 								textColor="analytic-text-3"
+								onClick={() => setUserStatus("INACTIVE")}
 							/>
 						</div>
 						<div className="organization-table-container">
 							<div className="organization-table-header-area">
 								<div className="table-search-bar">
 									<i className="fa-solid fa-magnifying-glass"></i>
-									<input type="text" placeholder={t("search")} />
+									<input type="text" placeholder={t("search")}  
+									onChange={(event) => {
+										console.log('event.target.value ',event.target.value)
+										// handleChange(event);
+										setSearchByName(event.target.value);
+									  }} />
 								</div>
 								<div className="table-actions-area">
 									{(user.type === "DISTRIBUTORS" || user.type === "DROGUERIA") && (
@@ -257,7 +266,7 @@ export default function Users(props) {
 									</div>
 								</div>
 							</div>
-							<UsersTable t={t} defaultRoles={defaultRoles} tableFlag={tableFlag} refetch={refetch} />
+							<UsersTable t={t} defaultRoles={defaultRoles} tableFlag={tableFlag} refetch={refetch} userStatus={userStatus} searchByName={searchByName} />
 						</div>
 					</div>
 				</div>

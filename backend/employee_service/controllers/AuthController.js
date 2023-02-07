@@ -160,8 +160,15 @@ function getUserCondition(query, orgId) {
 	if (query.role && query.role != "") {
 		matchCondition.role = query.role;
 	}
+	if (query.firstName && query.firstName != "") {
+		matchCondition.firstName= { $regex: query.firstName ? query.firstName : "", $options: "i" }
+	}
 	if (query.status && query.status != "") {
-		matchCondition.accountStatus = query.status;
+		if(query.status==="INACTIVE"){
+            matchCondition.accountStatus = { "$ne" : 'ACTIVE'};
+        }else{
+			matchCondition.accountStatus = query.status;
+		}
 	}
 	if (query.creationFilter && query.creationFilter == "true") {
 		let now = moment();

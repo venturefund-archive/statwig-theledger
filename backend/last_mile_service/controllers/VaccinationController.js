@@ -265,7 +265,8 @@ exports.fetchBatchById = [
 						if (currProd?.atom?.attributeSet?.expDate) {
 							let expDate = new Date(productDetails[0].atom.attributeSet.expDate);
 							let today = new Date();
-							if (expDate.toLocaleDateString() < today.toLocaleDateString()) {
+							if (expDate <= today) {
+						    // if (expDate.toLocaleDateString() < today.toLocaleDateString()) {		
 								errors.push("expired_batch");
 								continue;
 							} else {
