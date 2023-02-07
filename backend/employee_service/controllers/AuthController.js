@@ -2399,14 +2399,8 @@ exports.addUsersFromExcel = [
 					const warehousePayload = {
 						organisationId: organisationId,
 						title: warehouseTitle,
-						region: {
-							regionId: "reg123",
-							regionName: "Americas",
-						},
-						country: {
-							countryId: "001",
-							countryName: "Costa Rica",
-						},
+						region: "Americas",
+						country: "Costa Rica",
 						warehouseAddress: warehouseAddress,
 						supervisors: [],
 					};
@@ -2710,8 +2704,8 @@ exports.getOrgUsers = [
 						createdAt: 1,
 						location: "$warehouses.warehouseAddress.firstLine",
 						city: "$warehouses.warehouseAddress.city",
-						country: "$warehouses.warehouseAddress.country.countryName",
-						region: "$warehouses.warehouseAddress.region.regionName",
+						country: "$warehouses.country.countryName",
+						region: "$warehouses.region.regionName",
 					},
 				},
 				{
@@ -2880,4 +2874,3 @@ exports.Image = [
 		}
 	},
 ];
-
