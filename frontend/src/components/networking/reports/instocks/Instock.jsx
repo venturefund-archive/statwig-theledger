@@ -52,10 +52,14 @@ export default function Instock({
                 </TableCell>
                 {Distributor && (
                   <TableCell className="mi-custom-tableHead">
-                    <Filter
+                    {/* <Filter
                       filters={inStockFilters}
-                      title="Product Manufacturer"
-                    />
+                      title={t("Product Manufacturer")}
+                      filterKey={"manufacturer"}
+                    /> */}
+                    <p className="mi-body-sm mi-reset grey-400">
+                      {t("product_manufacturer")}
+                    </p>
                   </TableCell>
                 )}
                 <TableCell className="mi-custom-tableHead">

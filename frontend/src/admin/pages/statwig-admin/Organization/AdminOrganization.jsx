@@ -110,8 +110,6 @@ export default function AdminOrganization(props) {
 									<i className="fa-solid fa-magnifying-glass"></i>
 									<input type="text" placeholder={t("search")}  
 									onChange={(event) => {
-										console.log('event.target.value ',event.target.value)
-										// handleChange(event);
 										setSearchOrg(event.target.value);
 									  }} />
 								</div>

@@ -255,7 +255,6 @@ exports.fetchBatchById = [
 				],
 				{ collation: { locale: "en", strength: 2 } },
 			);
-
 			let validBatches = [];
 			if (productDetails) {
 				if (productDetails?.length) {
@@ -265,7 +264,9 @@ exports.fetchBatchById = [
 						if (currProd?.atom?.attributeSet?.expDate) {
 							let expDate = new Date(productDetails[0].atom.attributeSet.expDate);
 							let today = new Date();
-							if (expDate <= today) {
+							today.setUTCHours(23,59,59,999);
+
+							if (expDate < today) {
 						    // if (expDate.toLocaleDateString() < today.toLocaleDateString()) {		
 								errors.push("expired_batch");
 								continue;

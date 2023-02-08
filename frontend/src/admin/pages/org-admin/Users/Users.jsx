@@ -138,6 +138,7 @@ export default function Users(props) {
 				});
         setOpenAlert(true);
 			}
+			dispatch(getOrgUserAnalytics(user.organisationId));
 		} catch (err) {
 			console.log("error - ", err);
       dispatch(turnOff());

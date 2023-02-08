@@ -74,12 +74,7 @@ const NetworkingContainer = (props) => {
     if (outStock) setReportWarehouse(outStock.data.warehouseId);
   };
   const getWarehouses = async (org) => {
-    const warehouses = await getManufacturerWarehouses(
-      "",
-      "",
-      partnerLocation,
-      MylocationFilter,
-    );
+    const warehouses = await getManufacturerWarehouses("", "", partnerLocation, MylocationFilter);
     setManufacturer(warehouses.data);
   };
   const getManFilters = async () => {

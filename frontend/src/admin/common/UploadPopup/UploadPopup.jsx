@@ -20,6 +20,7 @@ export default function UploadPopup({
   const dispatch = useDispatch();
   const [openSuccessPopup, setOpenSuccessPopup] = useState(false);
   const [openFailurePopup, setOpenFailurePopup] = useState(false);
+  const [message, setMessage] = useState("");
   // const setExcelFile = (evt) => {
   //   const extension = evt.target.files[0].name.split(".").pop()
   //   if(["xlsx","xls"].includes(extension)){
@@ -29,6 +30,7 @@ export default function UploadPopup({
   //   }
   // };
   const closeModal = () => {
+    setMessage("");
     if (openSuccessPopup) {
       setOpenSuccessPopup(false);
     }
@@ -44,9 +46,16 @@ export default function UploadPopup({
       if (orgUpload) result = await addOrgsFromExcel(formData);
       else result = await addUsersFromExcel(formData);
       dispatch(turnOff());
-      result.status === 200
-        ? setOpenSuccessPopup(true)
-        : setOpenFailurePopup(true);
+      if (result.status === 200) {
+				if (orgUpload) {
+					setMessage(`Organisations added: ${result.data.data.insertedRecords}`);
+				} else {
+					setMessage(`Users added successfully!`);
+				}
+				setOpenSuccessPopup(true);
+			} else {
+				setOpenFailurePopup(true);
+			}
       resetFlag();
     } catch (err) {
       console.log(err);
@@ -82,9 +91,7 @@ export default function UploadPopup({
         >
           <SuccessPopup
             onHide={closeModal}
-            successMessage={`${
-              orgUpload ? "Organisations" : "Users"
-            } added succesfully`}
+            successMessage={message}
             // errorMessage="Put the Error Message Here"
           />
         </Modal>

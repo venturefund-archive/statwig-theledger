@@ -937,12 +937,9 @@ exports.addInventoriesFromExcel = [
 								}
 								if (expDate) {
                   expDate = new Date(expDate);
-                  const expYear = new Date(expDate).getFullYear();
-                  const expMonth = new Date(expDate).getMonth()
-                  const expDateDay = new Date(expDate).getDate()
-                  expDate=  new Date(expYear,expMonth,expDateDay,23,59,59)
+
                   // Set local date to end of day! Two sets on purpose
-                  // expDate.setHours(0, 0, 0, 0);
+                  expDate.setHours(0, 0, 0, 0);
                   // expDate.setHours(23, 59, 59, 0);
 								}
 								formatedData[index] = {
@@ -2852,14 +2849,14 @@ exports.reduceBatch = [
       const orgName = empData.name;
       const orgData = await OrganisationModel.findOne({ id: orgId });
       const address = orgData.postalAddress;
-      const { batchNumber, quantity } = req.query;
-      const batchExists = await AtomModel.findOne({ batchNumbers: { $in: [batchNumber] } });
+      const { id, quantity, } = req.query;
+      const batchExists = await AtomModel.findOne({ id: { $in: [id] } });
       if(batchExists.quantity < Math.abs(quantity)) {
         return apiResponse.validationErrorWithData(res, "Insufficient quantity in batch!", {});
       }
       const batch = await AtomModel.findOneAndUpdate(
         {
-          batchNumbers: { $in: [batchNumber] },
+          id: { $in: [id] },
         },
         { $inc: { quantity: -Math.abs(quantity || 0) } },
         { new: true }
@@ -2875,14 +2872,13 @@ exports.reduceBatch = [
         },
         { $inc: { "inventoryDetails.$.quantity": -Math.abs(quantity || 0) } }
       );
-
       var datee = new Date();
       datee = datee.toISOString();
       var evid = Math.random().toString(36).slice(2);
       let event_data = {
         eventID: null,
         eventTime: null,
-        transactionId: batchNumber,
+        transactionId: id,
         eventType: {
           primary: "BUY",
           description: "INVENTORY",
@@ -2914,7 +2910,7 @@ exports.reduceBatch = [
             quantityPurchased: quantity,
             products: {
               productId: batch.productId,
-              batchNumber: batchNumber,
+              id: id,
             },
             sender: {
               id: req.user.organisationId,
@@ -2946,4 +2942,3 @@ exports.reduceBatch = [
     }
   },
 ];
-

@@ -27,7 +27,7 @@ const { uploadFile } = require("../helpers/s3");
 const util = require("util");
 const unlinkFile = util.promisify(fs.unlink);
 
-exports.getProducts = [
+exports.getProductsOld = [
   auth,
   async (req, res) => {
     try {
@@ -41,6 +41,54 @@ exports.getProducts = [
           if (req.query.orgId)
             matchQuery[`manufacturerId`] = req.query.orgId
           const products = await ProductModel.find(matchQuery).sort({ _id: -1 }).skip(parseInt(req.query.skip) || 0).limit(parseInt(req.query.limit) || 0);
+          return apiResponse.successResponseWithData(res, "Products", products);
+        } else {
+          return apiResponse.forbiddenResponse(
+            res,
+            responses(req.user.preferredLanguage).no_permission
+          );
+        }
+      });
+    } catch (err) {
+      console.error(err);
+      return apiResponse.ErrorResponse(res, err.message);
+    }
+  },
+];
+function getProductCondition(query) {
+	let matchCondition = {};
+	
+	if (query.status && query.status != "") {
+		matchCondition.status = query.status;
+	}
+	if (query.orgId && query.orgId != "") {
+		matchCondition.manufacturerId = query.orgId;
+	}
+	if(query.name && query.name != ""){
+		matchCondition.name= { $regex: query.name ? query.name : "", $options: "i" }
+	}
+
+	return matchCondition;
+}
+exports.getProducts = [
+  auth,
+  async (req, res) => {
+    try {
+      const permission_request = {
+        role: req.user.role,
+        permissionRequired: ["viewProductList"],
+      };
+      checkPermissions(permission_request, async (permissionResult) => {
+        if (permissionResult.success) {
+          const products = await ProductModel.aggregate([
+            {
+              $match: getProductCondition(req.query),
+            },
+            { $sort : {  _id: -1} },
+            { $setWindowFields: { output: { totalCount: { $count: {} } } } },
+            { $skip: parseInt(req.query.skip) || 0 },
+            { $limit: parseInt(req.query.limit) || 10 },
+          ]);
           return apiResponse.successResponseWithData(res, "Products", products);
         } else {
           return apiResponse.forbiddenResponse(

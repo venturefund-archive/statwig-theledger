@@ -41,6 +41,8 @@ const OrganizationList = ({ orgName, user, orgId, setReportWarehouse }) => {
               </button>
             </li>
           ))}
+           <br></br>
+
         </ul>
       )}
     </div>
