@@ -35,7 +35,16 @@ export default function Filter({
     }
     return finalArray.concat([current]);
   }, []);
+  const manufatcturesWithoutDuplicate = filters?.reduce((finalArray, current) => {
+    let obj = finalArray.find(
+      (item) => item.manufacturerId === current.manufacturerId
+    );
 
+    if (obj) {
+      return finalArray;
+    }
+    return finalArray.concat([current]);
+  }, []);
   const CustomMenu = React.forwardRef(
     ({ children, style, className, "aria-labelledby": labeledBy }, ref) => {
       const [value, setValue] = useState("");
@@ -97,6 +106,27 @@ export default function Filter({
                   }
                 >
                   {console.log(item.productCategory)}
+                  {item[`${filterKey}`]}
+                </Dropdown.Item>
+              );
+            })}
+          </>
+        ) :filterKey === "manufacturer" ? (
+          <>
+            {manufatcturesWithoutDuplicate?.map((item) => {
+              return (
+                <Dropdown.Item
+                  value={
+                    filterKey === "manufacturer"
+                      ? item.manufacturerId
+                      : item[`${filterKey}`]
+                  }
+                  eventKey={
+                    filterKey === "manufacturer"
+                      ? item.manufacturerId
+                      : item[`${filterKey}`]
+                  }
+                >
                   {item[`${filterKey}`]}
                 </Dropdown.Item>
               );
