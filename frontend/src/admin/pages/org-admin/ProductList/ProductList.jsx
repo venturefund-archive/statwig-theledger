@@ -124,8 +124,8 @@ export default function AdminProductList(props) {
 			<OrgHeader />
 			<section className="admin-page-layout">
 				<div className="admin-container">
-					<div className="admin-organization-container admin-section-space">
-						<div className="tiles-three-column-layout">
+					{/* <div className="admin-organization-container admin-section-space"> */}
+						{/* <div className="tiles-three-column-layout">
 							<AnalyticsCard
 								layout="type4"
 								icon="fa-building"
@@ -150,9 +150,9 @@ export default function AdminProductList(props) {
 								bgColor="analytic-bg-3"
 								textColor="analytic-text-3"
 							/>
-						</div>
+						</div> */}
 						<div className="product-list-two-column">
-							<ProductTable t={t} productAdded={openSuccessPopup} />
+							<ProductTable t={t} productAdded={openSuccessPopup}  />
 							<div className="add-product-container">
 								<form onSubmit={handleSubmit(addProduct)}>
 									<div className="add-product-card">
@@ -285,7 +285,7 @@ export default function AdminProductList(props) {
 								</form>
 							</div>
 						</div>
-					</div>
+					{/* </div> */}
 				</div>
 			</section>
 			{openSuccessPopup && (

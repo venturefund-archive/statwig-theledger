@@ -16,6 +16,8 @@ export default function ProductTable(props) {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [products, setProducts] = useState([]);
+  const [searchByProductName, setSearchByProductName] = useState("");
+
   useEffect(() => {
     async function fetchProducts() {
       const products = await getProducts(
@@ -28,6 +30,20 @@ export default function ProductTable(props) {
     }
     fetchProducts();
   }, [page, rowsPerPage, user.organisationId, props.productAdded]);
+
+  useEffect(() => {
+    setPage(0);
+    async function fetchProducts() {
+      const products = await getProducts(
+        `orgId=${
+          ""
+          // ||user.organisationId
+        }&skip=${page * 10}&limit=${rowsPerPage}&name=${searchByProductName}`
+      );
+      setProducts(products);
+    }
+    fetchProducts();
+  }, [searchByProductName]);
 
   const uniqueIds = new Set();
 
@@ -59,16 +75,19 @@ export default function ProductTable(props) {
       <div className="organization-table-header-area">
         <div className="table-search-bar">
           <i className="fa-solid fa-magnifying-glass"></i>
-          <input type="text" placeholder="Search" />
+          <input type="text" placeholder="Search" 
+          onChange={(event) => {
+            setSearchByProductName(event.target.value);
+            }}/>
         </div>
-        <div className="table-actions-area table-action-space">
+        {/* <div className="table-actions-area table-action-space">
           <div className="table-action-icon">
             <i className={`fa-solid fa-power-off vl-disabled`}></i>
           </div>
           <div className="table-action-icon">
             <i className={`fa-solid fa-trash-can vl-disabled`}></i>
           </div>
-        </div>
+        </div> */}
       </div>
       <Table
         sx={{ minWidth: 665 }}
@@ -111,7 +130,7 @@ export default function ProductTable(props) {
       </Table>
       <TablePagination
         component="div"
-        count={1000}
+        count={uniqueProducts?.[0]?.totalCount || 0}
         page={page}
         onPageChange={handleChangePage}
         rowsPerPage={rowsPerPage}

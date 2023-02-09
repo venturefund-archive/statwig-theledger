@@ -693,11 +693,11 @@ const NewShipment = (props) => {
 																		products_temp[i].manufacturer = result.products[i].manufacturer;
 																		products_temp[i].name = result.products[i].productName;
 																		if (result?.poDetails && result?.poDetails?.length) {
+																			const poProduct = result?.poDetails[0]?.products?.find(
+																				(elem) => elem.productId === result?.products[i]?.productID,
+																			);
 																			products_temp[i].productQuantity =
-																				parseInt(
-																					result?.poDetails[0]?.products[i]
-																						.productQuantityDelivered || 0,
-																				) -
+																				parseInt(poProduct.productQuantityDelivered || 0) -
 																				parseInt(
 																					result?.products[i].productQuantityTaggedSent || 0,
 																				);

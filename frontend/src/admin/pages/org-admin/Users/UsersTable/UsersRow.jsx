@@ -11,7 +11,7 @@ import {
 } from "../../../../actions/organisationActions";
 import Switch from "@mui/material/Switch";
 
-export default function UsersRow({ rows, defaultRoles, t }) {
+export default function UsersRow({ rows, defaultRoles, t, refetchOnEdit, toggleRefetchOnEdit }) {
   const [open, setOpen] = React.useState(false);
   const [Edit, setEdit] = React.useState(false);
   const [checked, setChecked] = useState(true);
@@ -23,27 +23,28 @@ export default function UsersRow({ rows, defaultRoles, t }) {
   };
 
   const handleEditRole = async () => {
-    try {
-      if (Edit) {
-        if (userRole !== rows.role) {
-          // Update user role
-          console.log(rows);
-          const result = await updateUserRole({
-            userId: rows.id,
-            role: userRole,
-          });
-          if (result.status === 200) {
-            console.log("Role change successful!");
-          } else {
-            console.log("Error in changing role!");
-          }
-        }
-      }
-      setEdit(!Edit);
-    } catch (err) {
-      console.log(err);
-    }
-  };
+		try {
+			if (Edit) {
+				if (userRole !== rows.role) {
+					// Update user role
+					console.log(rows);
+					const result = await updateUserRole({
+						userId: rows.id,
+						role: userRole,
+					});
+					if (result.status === 200) {
+						console.log("Role change successful!");
+					} else {
+						console.log("Error in changing role!");
+					}
+				}
+			}
+			setEdit(!Edit);
+			toggleRefetchOnEdit(!refetchOnEdit);
+		} catch (err) {
+			console.log(err);
+		}
+	};
 
   return (
     <>

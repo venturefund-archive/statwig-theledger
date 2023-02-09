@@ -56,7 +56,8 @@ export default function Users(props) {
   );
   const addresses = useSelector(
     (state) => state?.organisationReducer?.addresses
-  );
+	);
+	console.log(addresses);
   const { userAnalytics } = useSelector((state) => state.organisationReducer);
   const { totalCount, activeCount, inactiveCount } = userAnalytics;
 
@@ -108,7 +109,12 @@ export default function Users(props) {
       setDefaultRoles(roles);
     }
     getRoles();
-  }, []);
+	}, []);
+	
+	useEffect(() => {
+		dispatch(getWareHouses());
+    dispatch(getOrgUserAnalytics(user.organisationId));
+	}, [tableFlag])
 
   const onSuccess = async (data) => {
 		try {
@@ -132,6 +138,7 @@ export default function Users(props) {
 				});
         setOpenAlert(true);
 			}
+			dispatch(getOrgUserAnalytics(user.organisationId));
 		} catch (err) {
 			console.log("error - ", err);
       dispatch(turnOff());

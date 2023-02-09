@@ -102,7 +102,7 @@ export const getManufacturerWarehouses = async (
   }
 };
 
-export const getManufacturerFilterOptions = async (type, regExp) => {
+export const getManufacturerFilterOptions = async (type, regExp='') => {
   try {
     const url = config().getManufacturerFilterOptions;
     const result = await axios.get(url + `?type=${type}&regExp=${regExp}`);
