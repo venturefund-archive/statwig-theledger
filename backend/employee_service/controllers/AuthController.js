@@ -2378,7 +2378,7 @@ exports.addUsersFromExcel = [
 				);
 
 				const warehouseMap = new Map();
-				const formatedData = new Array();
+				const formattedData = new Array();
 				for (const [index, user] of data.entries()) {
 					const firstName = user?.["NAME"] || user?.["NOMBRE"];
 					const phoneNumber = user?.["PHONE"] || user?.["CEL NUMBER"];
@@ -2425,7 +2425,7 @@ exports.addUsersFromExcel = [
 						payload: warehousePayload,
 					};
 
-					formatedData[index] = userPayload;
+					formattedData[index] = userPayload;
 					if (warehouseMap.has(warehouseTitle)) {
 						let users = warehouseMap.get(warehouseTitle);
 						users.push(userPayload);
@@ -2480,7 +2480,7 @@ exports.addUsersFromExcel = [
 					req,
 					res,
 					"success",
-					formatedData
+					formattedData
 				);
 			} catch (err) {
 				console.log(err);

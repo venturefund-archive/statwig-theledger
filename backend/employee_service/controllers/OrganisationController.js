@@ -60,78 +60,52 @@ async function createWarehouse(address, warehouseId, organisationId, region, cou
 	await warehouse.save();
 }
 
-async function createOrg({
-	firstName,
-	lastName,
-	emailId,
-	phoneNumber,
-	organisationName,
-	type,
-	address,
-	parentOrgName,
-	parentOrgId,
-}) {
+async function createOrg(payload) {
 	try {
+		let {
+			firstName,
+			lastName,
+			emailId,
+			phoneNumber,
+			organisationName,
+			type,
+			address,
+			parentOrgName,
+			parentOrgId,
+		} = payload;
+
+		// Validate duplicate email/phone
 		if (emailId) emailId = emailId.toLowerCase().replace(" ", "");
 		if (phoneNumber) {
 			phoneNumber = phoneNumber.startsWith("+") ? phoneNumber : `+${phoneNumber}`;
 		}
 
 		let matchQuery = {};
-		if(emailId) matchQuery["emailId"] = emailId;
-		if(phoneNumber) matchQuery["phoneNumber"] = phoneNumber;
+		if (emailId) matchQuery["emailId"] = emailId;
+		if (phoneNumber) matchQuery["phoneNumber"] = phoneNumber;
 
 		let employeeExists = await EmployeeModel.findOne(matchQuery);
 		if (employeeExists) {
 			return {
 				inserted: false,
-				message: `Employee ${employeeExists.emailId || employeeExists.phoneNumber} already exists!`,
+				message: `Employee "${
+					employeeExists.emailId || employeeExists.phoneNumber
+				}" already exists!`,
 			};
 		}
 
-		let warehouseId;
-		const country = address?.country ? address?.country : "Costa Rica";
-		const region = address?.region ? address?.region : "Americas";
+		// Validate duplicate Organisation Name
 		const organisationExists = await OrganisationModel.findOne({
-			name: new RegExp("^" + organisationName?.trim() + "$", "i"),
+			name: new RegExp("^" + organisationName + "$", "i"),
 		});
-		let parentOrg;
-		if (!parentOrgId)
-			parentOrg = await OrganisationModel.findOne({
-				name: new RegExp("^" + parentOrgName?.trim() + "$", "i"),
-			});
 		if (organisationExists) {
-			const warehouseExists = await WarehouseModel.findOne({ postalAddress: address.line1 });
-			warehouseId = warehouseExists?.id;
-			if (warehouseExists) {
-				return {
-					inserted: false,
-					message: `Organisation ${organisationName?.trim()} and Warehouse ${
-						address.line1
-					} already exists`,
-				};
-			}
-			const warehouseCounter = await CounterModel.findOneAndUpdate(
-				{ "counters.name": "warehouseId" },
-				{
-					$inc: {
-						"counters.$.value": 1,
-					},
-				},
-				{ new: true },
-			);
-			warehouseId = warehouseCounter.counters[3].format + warehouseCounter.counters[3].value;
-			await createWarehouse(address, warehouseId, organisationExists.id, region, country);
 			return {
 				inserted: false,
-				message: `Organization ${organisationName?.trim()} already exists!, warehouse ${
-					address.line1
-				} created`,
+				message: `Organisation "${organisationName}" already exists!`,
 			};
 		}
 
-		const addr =
-			address?.line1 + ", " + address?.city + ", " + address?.state + ", " + address?.pincode;
+		// Create new Organisation, Warehouse & Employee
 		const empCounter = await CounterModel.findOneAndUpdate(
 			{
 				"counters.name": "employeeId",
@@ -145,6 +119,17 @@ async function createOrg({
 		);
 		const employeeId = empCounter.counters[4].format + empCounter.counters[4].value;
 
+		const warehouseCounter = await CounterModel.findOneAndUpdate(
+			{ "counters.name": "warehouseId" },
+			{
+				$inc: {
+					"counters.$.value": 1,
+				},
+			},
+			{ new: true },
+		);
+		const warehouseId = warehouseCounter.counters[3].format + warehouseCounter.counters[3].value;
+
 		const orgCounter = await CounterModel.findOneAndUpdate(
 			{ "counters.name": "orgId" },
 			{
@@ -155,6 +140,18 @@ async function createOrg({
 			{ new: true },
 		);
 		const organisationId = orgCounter.counters[2].format + orgCounter.counters[2].value;
+
+		let parentOrg;
+		if (!parentOrgId) {
+			parentOrg = await OrganisationModel.findOne({
+				name: new RegExp("^" + parentOrgName + "$", "i"),
+			});
+		}
+
+		const country = address?.country ? address?.country : "Costa Rica";
+		const region = address?.region ? address?.region : "Americas";
+		const addr =
+			address?.line1 + ", " + address?.city + ", " + address?.state + ", " + address?.pincode;
 
 		const organisation = new OrganisationModel({
 			primaryContactId: employeeId,
@@ -172,43 +169,32 @@ async function createOrg({
 			parentOrgId: parentOrgId ? parentOrgId : parentOrg?.id,
 		});
 		await organisation.save();
-		const warehouseCounter = await CounterModel.findOneAndUpdate(
-			{ "counters.name": "warehouseId" },
-			{
-				$inc: {
-					"counters.$.value": 1,
-				},
-			},
-			{ new: true },
-		);
-		warehouseId = warehouseCounter.counters[3].format + warehouseCounter.counters[3].value;
+
 		await createWarehouse(address, warehouseId, organisationId, region, country);
 
-		if (!organisationExists) {
-			const user = new EmployeeModel({
-				firstName: firstName || emailId.split("@")[0],
-				lastName: lastName || emailId.split("@")[0],
-				emailId: emailId,
-				phoneNumber: phoneNumber,
-				organisationId: organisationId,
-				id: employeeId,
-				postalAddress: addr,
-				accountStatus: "ACTIVE",
-				warehouseId: warehouseId == "NA" ? [] : [warehouseId],
-				role: "admin",
-			});
-			await user.save();
+		const user = new EmployeeModel({
+			firstName: firstName || emailId.split("@")[0],
+			lastName: lastName || emailId.split("@")[0],
+			emailId: emailId,
+			phoneNumber: phoneNumber,
+			organisationId: organisationId,
+			id: employeeId,
+			postalAddress: addr,
+			accountStatus: "ACTIVE",
+			warehouseId: warehouseId == "NA" ? [] : [warehouseId],
+			role: "admin",
+		});
+		await user.save();
 
-			const bc_data = {
-				username: emailId ? emailId : phoneNumber,
-				password: "",
-				orgName: "org1MSP",
-				role: "",
-				email: emailId ? emailId : phoneNumber,
-			};
+		const bc_data = {
+			username: emailId ? emailId : phoneNumber,
+			password: "",
+			orgName: "org1MSP",
+			role: "",
+			email: emailId ? emailId : phoneNumber,
+		};
+		axios.post(`${hf_blockchain_url}/api/v1/register`, bc_data);
 
-			axios.post(`${hf_blockchain_url}/api/v1/register`, bc_data);
-		}
 		const event_data = {
 			eventID: cuid(),
 			eventTime: new Date().toISOString(),
@@ -248,7 +234,7 @@ async function createOrg({
 			inserted: true,
 			message: "Success",
 		};
-	} catch (err) {
+	} catch(err) {
 		throw err;
 	}
 }
@@ -958,7 +944,11 @@ exports.addOrgsFromExcel = [
 				raw: false,
 			});
 			const parentOrgId = req.user.type === "DISTRIBUTORS" ? req.user.organisationId : null;
-			const formatedData = new Array();
+
+			const organisationMap = new Map();
+			const employeeMap = new Map();
+			const formattedData = new Array();
+			let duplicateRecords = 0;
 			for (const [index, user] of data.entries()) {
 				const firstName = user["FIRST NAME"];
 				const lastName = user["LAST NAME"];
@@ -978,7 +968,7 @@ exports.addOrgsFromExcel = [
 					province: user["PROVINCE"]?.trim() || user["Province"]?.trim(),
 				};
 
-				formatedData[index] = {
+				const payload = {
 					firstName,
 					lastName,
 					emailId,
@@ -989,17 +979,37 @@ exports.addOrgsFromExcel = [
 					parentOrgName,
 					parentOrgId,
 				};
+
+				let employeeKey;
+				if (emailId) employeeKey = emailId.toLowerCase().replace(" ", "");
+				else if (phoneNumber)
+					employeeKey = phoneNumber.startsWith("+") ? phoneNumber : `+${phoneNumber}`;
+				else continue;
+
+				let organisationKey;
+				if (organisationName && organisationName !== "")
+					organisationKey = organisationName.toLowerCase();
+				else continue;
+
+				if (!organisationMap.has(organisationKey) && !employeeMap.has(employeeKey)) {
+					formattedData[index] = payload;
+					organisationMap.set(organisationKey, payload);
+					employeeMap.set(employeeKey, payload);
+				} else {
+					++duplicateRecords;
+				}
 			}
-			const promises = [];
-			for (const orgData of formatedData) {
-				promises.push(createOrg(orgData));
+
+			const results = [];
+			for(const orgData of formattedData) {
+				const result = await createOrg(orgData);
+				results.push(result);
 			}
-			const results = await Promise.all(promises);
 			const insertedOrgs = results.filter((elem) => elem.inserted)?.length;
 
 			const response = {
 				insertedRecords: insertedOrgs,
-				invalidRecords: results?.length - insertedOrgs,
+				invalidRecords: results?.length - insertedOrgs + duplicateRecords,
 			};
 
 			return apiResponse.successResponseWithData(req, res, "success", response);
