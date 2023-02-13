@@ -85,7 +85,7 @@ export default function Users(props) {
   const [openAlert, setOpenAlert] = React.useState(false);
   const [alertDetails, setAlertDetails] = React.useState({});
 
-  const [refetch, togggleRefetch] = useState(false);
+	const [refetch, togggleRefetch] = useState(false);
 
   useEffect(() => {
     dispatch(getRequestsPending());
@@ -114,7 +114,7 @@ export default function Users(props) {
 	useEffect(() => {
 		dispatch(getWareHouses());
     dispatch(getOrgUserAnalytics(user.organisationId));
-	}, [tableFlag])
+	}, [tableFlag]);
 
   const onSuccess = async (data) => {
 		try {
@@ -221,12 +221,15 @@ export default function Users(props) {
 							<div className="organization-table-header-area">
 								<div className="table-search-bar">
 									<i className="fa-solid fa-magnifying-glass"></i>
-									<input type="text" placeholder={t("search")}  
-									onChange={(event) => {
-										console.log('event.target.value ',event.target.value)
-										// handleChange(event);
-										setSearchByName(event.target.value);
-									  }} />
+									<input
+										type="text"
+										placeholder={t("search")}
+										onChange={(event) => {
+											console.log("event.target.value ", event.target.value);
+											// handleChange(event);
+											setSearchByName(event.target.value);
+										}}
+									/>
 								</div>
 								<div className="table-actions-area">
 									{(user.type === "DISTRIBUTORS" || user.type === "DROGUERIA") && (
@@ -273,7 +276,14 @@ export default function Users(props) {
 									</div>
 								</div>
 							</div>
-							<UsersTable t={t} defaultRoles={defaultRoles} tableFlag={tableFlag} refetch={refetch} userStatus={userStatus} searchByName={searchByName} />
+							<UsersTable
+								t={t}
+								defaultRoles={defaultRoles}
+								tableFlag={tableFlag}
+								refetch={refetch}
+								userStatus={userStatus}
+								searchByName={searchByName}
+							/>
 						</div>
 					</div>
 				</div>

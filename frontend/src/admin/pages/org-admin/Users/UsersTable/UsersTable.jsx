@@ -14,7 +14,13 @@ import { useState } from "react";
 
 export default function UsersTable(props) {
 	const dispatch = useDispatch();
-	const { defaultRoles, t, refetch, userStatus, searchByName } = props;
+	const {
+		defaultRoles,
+		t,
+		refetch,
+		userStatus,
+		searchByName,
+	} = props;
 
 	const [users, setUsers] = useState([]);
 	const [uniqueUsers, setUniqueUsers] = useState([]);
