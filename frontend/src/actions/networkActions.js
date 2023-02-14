@@ -26,18 +26,21 @@ export const getBestSellerSummary = async (reportWarehouse) => {
   }
 };
 
-export const getmanufacturerInStockReport = async (reportWarehouse, date, type, pname) => {
-  try {
-    date = date ? format(startOfMonth(new Date(date)), "yyyy-MM-dd") : "";
-    const url = config().getmanufacturerInStockReportUrl;
-    const result = await axios.get(
-      url + `?warehouseId=${reportWarehouse}&date=${date}&type=${type ? type : ''}&id=${pname ? pname : ''}`
-    );
-    return result.data;
-  } catch (e) {
-    console.log(e);
-    return false;
-  }
+export const getmanufacturerInStockReport = async (reportWarehouse, date, type, productName) => {
+	try {
+		date = date ? format(startOfMonth(new Date(date)), "yyyy-MM-dd") : "";
+		const url = config().getmanufacturerInStockReportUrl;
+		const result = await axios.get(
+			url +
+				`?warehouseId=${reportWarehouse}&date=${date}&type=${type ? type : ""}&productName=${
+					productName ? productName : ""
+				}`,
+		);
+		return result.data;
+	} catch (e) {
+		console.log(e);
+		return false;
+	}
 };
 export const getInStockFilterOptions = async (reportWarehouse, date) => {
   try {
@@ -67,18 +70,21 @@ export const getOutStockFilterOptions = async (reportWarehouse, date) => {
   }
 };
 
-export const getmanufacturerOutStockReport = async (reportWarehouse, date, type, pname) => {
-  try {
-    date = date ? format(startOfMonth(new Date(date)), "yyyy-MM-dd") : "";
-    const url = config().getmanufacturerOutStockReportUrl;
-    const result = await axios.get(
-      url + `?warehouseId=${reportWarehouse}&date=${date}&type=${type ? type : ''}&id=${pname ? pname : ''}`
-    );
-    return result.data;
-  } catch (e) {
-    console.log(e);
-    return false;
-  }
+export const getmanufacturerOutStockReport = async (reportWarehouse, date, type, productName) => {
+	try {
+		date = date ? format(startOfMonth(new Date(date)), "yyyy-MM-dd") : "";
+		const url = config().getmanufacturerOutStockReportUrl;
+		const result = await axios.get(
+			url +
+				`?warehouseId=${reportWarehouse}&date=${date}&type=${type ? type : ""}&id=${
+					productName ? productName : ""
+				}`,
+		);
+		return result.data;
+	} catch (e) {
+		console.log(e);
+		return false;
+	}
 };
 
 export const getManufacturerWarehouses = async (

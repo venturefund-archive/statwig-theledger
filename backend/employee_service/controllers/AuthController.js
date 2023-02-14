@@ -2377,8 +2377,14 @@ exports.addUsersFromExcel = [
 					{ dateNF: "yyyy-mm-dd", cellDates: true, raw: false }
 				);
 
+				var roles = [];
+				const permissions = await RbacModel.find({orgId: "ORG100001"}, { _id: 0, role: 1 });
+				permissions.map((r) => {
+					roles.push(r.role);
+				});
+	
 				const warehouseMap = new Map();
-				const formatedData = new Array();
+				const formattedData = new Array();
 				for (const [index, user] of data.entries()) {
 					const firstName = user?.["NAME"] || user?.["NOMBRE"];
 					const phoneNumber = user?.["PHONE"] || user?.["CEL NUMBER"];
@@ -2425,7 +2431,14 @@ exports.addUsersFromExcel = [
 						payload: warehousePayload,
 					};
 
-					formatedData[index] = userPayload;
+					if (
+						!roles.includes(userPayload.role) ||
+						formattedData.find((elem) => elem.emailId === userPayload.emailId)
+					) {
+						continue;
+					}
+
+					formattedData[index] = userPayload;
 					if (warehouseMap.has(warehouseTitle)) {
 						let users = warehouseMap.get(warehouseTitle);
 						users.push(userPayload);
@@ -2480,7 +2493,7 @@ exports.addUsersFromExcel = [
 					req,
 					res,
 					"success",
-					formatedData
+					formattedData
 				);
 			} catch (err) {
 				console.log(err);

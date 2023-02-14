@@ -48,7 +48,9 @@ export default function UploadPopup({
       dispatch(turnOff());
       if (result.status === 200) {
 				if (orgUpload) {
-					setMessage(`Organisations added: ${result.data.data.insertedRecords}`);
+					setMessage(
+						`Organisations added: ${result.data.data.insertedRecords} (Invalid: ${result.data.data.invalidRecords})`,
+					);
 				} else {
 					setMessage(`Users added successfully!`);
 				}

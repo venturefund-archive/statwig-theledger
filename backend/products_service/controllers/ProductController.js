@@ -55,21 +55,23 @@ exports.getProductsOld = [
     }
   },
 ];
+
 function getProductCondition(query) {
 	let matchCondition = {};
-	
+
 	if (query.status && query.status != "") {
 		matchCondition.status = query.status;
 	}
 	if (query.orgId && query.orgId != "") {
 		matchCondition.manufacturerId = query.orgId;
 	}
-	if(query.name && query.name != ""){
-		matchCondition.name= { $regex: query.name ? query.name : "", $options: "i" }
+	if (query.name && query.name != "") {
+		matchCondition.name = { $regex: query.name ? query.name : "", $options: "i" };
 	}
 
 	return matchCondition;
 }
+
 exports.getProducts = [
   auth,
   async (req, res) => {

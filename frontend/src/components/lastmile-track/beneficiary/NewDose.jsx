@@ -29,12 +29,13 @@ export default function NewDose(props) {
     console.log(selectedValue, event.target.value);
     setSelectedValue(event.target.value === "true" ? true : false);
     console.log(selectedValue);
-  };
-
+	};
+	
   const {
     control,
     formState: { errors },
-    handleSubmit,
+		handleSubmit,
+		getValues
   } = useForm({
     defaultValues: {
       gender: defaultValues?.gender || "",
@@ -103,6 +104,7 @@ export default function NewDose(props) {
 									fullWidth
 									options={genderOptions}
 									getOptionLabel={(option) => option.display || ""}
+									defaultValue={genderOptions.find((elem) => elem.value === getValues().gender)}
 									renderInput={(params) => (
 										<TextField
 											{...params}

@@ -125,12 +125,12 @@ const Orders = (props) => {
 		async function fetchData() {
 			const updatedFilter = Boolean(
 				dateFilter ||
-				productNameFilter ||
-				toFilter ||
-				fromFilter ||
-				orderIdFilter ||
-				statusFilter ||
-				locationFilter,
+					productNameFilter ||
+					toFilter ||
+					fromFilter ||
+					orderIdFilter ||
+					statusFilter ||
+					locationFilter,
 			);
 			if (visible === "one" && alerts === false && !updatedFilter) {
 				setDateFilter("");
@@ -209,8 +209,22 @@ const Orders = (props) => {
 		}
 		if (props.demoLogin) return;
 		fetchData();
-	}, [limit, visible, alerts, dispatch, toFilter, orderIdFilter, productNameFilter, locationFilter, dateFilter, fromFilterDate, toFilterDate, fromFilter, props.demoLogin, statusFilter]);
-	console.log("outboundRecords =>", outboundRecords);
+	}, [
+		limit,
+		visible,
+		alerts,
+		dispatch,
+		toFilter,
+		orderIdFilter,
+		productNameFilter,
+		locationFilter,
+		dateFilter,
+		fromFilterDate,
+		toFilterDate,
+		fromFilter,
+		props.demoLogin,
+		statusFilter,
+	]);
 
 	const onPageChange = async (pageNum) => {
 		const recordSkip = (pageNum - 1) * limit;

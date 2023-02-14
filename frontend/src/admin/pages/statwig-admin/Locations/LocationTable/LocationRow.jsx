@@ -36,62 +36,54 @@ export default function LocationRow({ warehouse, orgDetails, refresh }) {
   };
 
   return (
-    <TableRow
-      sx={{ "& > *": { borderBottom: "unset !important" } }}
-      className='vl-custom-tableRow'
-    >
-      <React.Fragment
-        onClick={() =>
-          history.push(`/statwig/view-users/${warehouse.id}/${orgDetails.id}`, {
-            warehouse,
-            orgDetails,
-          })
-        }
-      >
-        <TableCell align='center'>
-          <p className='vl-body f-400 vl-grey-md'>{warehouse.title}</p>
-        </TableCell>
-        <TableCell align='center'>
-          <p className='vl-body f-400 vl-grey-md'>
-            {warehouse.warehouseAddress.city}
-          </p>
-        </TableCell>
-        <TableCell align='center'>
-          <p className='vl-body f-400 vl-grey-md'>
-            {warehouse.warehouseAddress.firstLine}
-          </p>
-        </TableCell>
-        <TableCell align='center'>
-          <p className='vl-body f-400 vl-grey-md'>
-            {warehouse?.employeeCount?.total
-              ? warehouse.employeeCount.total
-              : "N/A"}
-          </p>
-        </TableCell>
-      </React.Fragment>
-      <TableCell>
-        <div className='status-switch-button'>
-          <Switch
-            color='warning'
-            checked={buttonStatus}
-            onChange={(e) => {
-              e.preventDefault();
-              changeBtnStatus(!buttonStatus);
-            }}
-          />
-          {buttonStatus ? (
-            <div className='label-status-btn status-accept-bg'>
-              <div className='status-dot status-accept-dot'></div>
-              <p className='vl-small f-500 vl-black'>Active</p>
-            </div>
-          ) : (
-            <div className='label-status-btn status-reject-bg'>
-              <div className='status-dot status-reject-dot'></div>
-              <p className='vl-small f-500 vl-black'>InActive</p>
-            </div>
-          )}
-        </div>
-      </TableCell>
-    </TableRow>
-  );
+		<TableRow
+			sx={{ "& > *": { borderBottom: "unset !important" } }}
+			className="vl-custom-tableRow"
+			onClick={() =>
+				history.push(`/statwig/view-users/${warehouse.id}/${orgDetails.id}`, {
+					warehouse,
+					orgDetails,
+				})
+			}
+		>
+			<TableCell align="center">
+				<p className="vl-body f-400 vl-grey-md">{warehouse.title}</p>
+			</TableCell>
+			<TableCell align="center">
+				<p className="vl-body f-400 vl-grey-md">{warehouse.warehouseAddress.city}</p>
+			</TableCell>
+			<TableCell align="center">
+				<p className="vl-body f-400 vl-grey-md">{warehouse.warehouseAddress.firstLine}</p>
+			</TableCell>
+			<TableCell align="center">
+				<p className="vl-body f-400 vl-grey-md">
+					{warehouse?.employeeCount?.total ? warehouse.employeeCount.total : "N/A"}
+				</p>
+			</TableCell>
+			<TableCell onClick={(e) => e.stopPropagation()}>
+				<div className="status-switch-button">
+					<Switch
+						color="warning"
+						checked={buttonStatus}
+						onChange={(e) => {
+							e.stopPropagation();
+							e.preventDefault();
+							changeBtnStatus(!buttonStatus);
+						}}
+					/>
+					{buttonStatus ? (
+						<div className="label-status-btn status-accept-bg">
+							<div className="status-dot status-accept-dot"></div>
+							<p className="vl-small f-500 vl-black">Active</p>
+						</div>
+					) : (
+						<div className="label-status-btn status-reject-bg">
+							<div className="status-dot status-reject-dot"></div>
+							<p className="vl-small f-500 vl-black">InActive</p>
+						</div>
+					)}
+				</div>
+			</TableCell>
+		</TableRow>
+	);
 }

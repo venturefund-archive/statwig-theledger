@@ -1431,7 +1431,7 @@ function buildPdfReportDoses(req, res, data, today) {
 		{ text: req.t("organization"), bold: true },
 	]);
 	for (const element of data) {
-		const date = element.date ? new Date(element.date).toLocaleDateString() : "N/A";
+		const date = element.date ? formatDate(new Date(element.date)) : "N/A";
 		rows.push([
 			date,
 			element.batchNumber || "N/A",
