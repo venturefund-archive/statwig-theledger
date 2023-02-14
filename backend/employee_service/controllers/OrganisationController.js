@@ -320,7 +320,7 @@ exports.getPendingOrgs = [
 			const pendingOrgs = await OrganisationModel.find({
 				status: "NOTVERIFIED",
 				isRegistered: true,
-			});
+			}).sort({createdAt: -1});
 
 			return apiResponse.successResponseWithData(req, res, "Organisation list", pendingOrgs);
 		} catch (err) {

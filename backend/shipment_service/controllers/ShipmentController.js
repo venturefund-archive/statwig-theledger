@@ -4448,12 +4448,7 @@ exports.exportInboundShipments = [
         let rowData;
         for (const row of inboundShipmentsRes) {
           for (const product of row.products) {
-            const receiverAtom = await AtomModel.findOne({
-              batchNumbers: product.batchNumber,
-              currentInventory: row.receiver.warehouse.warehouseInventory,
-              currentShipment: row.id,
-              status: "TRANSIT",
-            });
+            let receiverAtom = await AtomModel.findOne({id: product.atomId});
             rowData = {
               id: row.id,
               poId: row.poId,
@@ -4473,7 +4468,7 @@ exports.exportInboundShipments = [
               label: row?.label?.labelId,
               shippingDate: new Date(row.shippingDate),
               expectedDeliveryDate: row.expectedDeliveryDate ? new Date(row.expectedDeliveryDate) : "N/A",
-              expiryDate: receiverAtom?.attributeSet?.expDate,
+              expiryDate: receiverAtom?.attributeSet?.expDate || "N/A",
             };
             data.push(rowData);
           }
@@ -4618,13 +4613,7 @@ exports.exportOutboundShipments = [
         let rowData;
         for (const row of outboundShipmentsRes) {
           for (const product of row.products) {
-            let receiverAtom = await AtomModel.findOne({
-              batchNumbers: product.batchNumber,
-              currentInventory: row.receiver.warehouse.warehouseInventory,
-              currentShipment: row.id,
-              status: "TRANSIT",
-            });
-
+            let receiverAtom = await AtomModel.findOne({id: product.atomId});
             rowData = {
               id: row.id,
               poId: row.poId,
@@ -4644,7 +4633,7 @@ exports.exportOutboundShipments = [
               label: row?.label?.labelId,
               shippingDate: row.shippingDate,
               expectedDeliveryDate: row.expectedDeliveryDate || "unknown",
-              expiryDate: receiverAtom?.attributeSet?.expDate,
+              expiryDate: receiverAtom?.attributeSet?.expDate || "N/A",
             };
             data.push(rowData);
           }
