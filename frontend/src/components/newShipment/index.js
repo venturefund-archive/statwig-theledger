@@ -575,11 +575,15 @@ const NewShipment = (props) => {
 														let products_temp = result.poDetails[0].products.filter(
 															(item) => item.productQuantity > 0,
 														);
-														if (result.poDetails[0].products && result.poDetails[0].products.length)
+														if (
+															result.poDetails[0].products &&
+															result.poDetails[0].products.length
+														) {
 															for (let i = 0; i < products_temp.length; i++) {
 																if (result.poDetails[0].products[i].productQuantity === 0) {
-																	products_temp.splice(i, 1);
+																	result.poDetails[0].products.splice(i, 1);
 																	i--;
+																	continue;
 																}
 																products_temp[i].manufacturer =
 																	result.poDetails[0]?.products[i]?.manufacturer;
@@ -597,6 +601,7 @@ const NewShipment = (props) => {
 																products_temp[i].productQuantityShipped =
 																	result.poDetails[0].products[i].productQuantityShipped;
 															}
+														}
 														if (result.poDetails[0].products.length > 0) {
 															setProducts((p) => []);
 															setAddProducts([...products_temp]);
