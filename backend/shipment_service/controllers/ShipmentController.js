@@ -646,9 +646,13 @@ exports.createShipment = [
 						parseInt(product?.productQuantityShipped || 0) +
 						parseInt(product?.productQuantityDelivered || 0);
 
+					if (poQuantity === alreadyShipped) {
+						return true;
+					}
+
 					const shippedQuantity = alreadyShipped
 						? parseInt(shippedProductsMap[product.id]) + parseInt(alreadyShipped)
-						: shippedProductsMap[product.id];
+						: shippedProductsMap[product.id] || 0;
 
 					if (!shippedQuantity) {
 						missingProducts = true;
@@ -658,9 +662,9 @@ exports.createShipment = [
 					if (shippedQuantity < poQuantity) {
 						quantityMismatch = true;
 						return false;
-          }
+					}
 
-          return true;
+					return true;
 				});
 
 				if (quantityMismatch || missingProducts) {
@@ -5669,4 +5673,82 @@ exports.sensorHistory = [
       return apiResponse.ErrorResponse(res, err.message);
     }
   },
+];
+
+
+/**
+ * API LINK
+ * http://localhost:3002/shipmentmanagement/api/shipment/syncAtoms
+ */
+exports.syncAtoms = [
+	async (req, res) => {
+		try {
+			const atomsWithExp = await AtomModel.aggregate([
+				{ $match: { status: "HEALTHY" } },
+				{ $sort: { createdAt: 1 } },
+				{ $unwind: { path: "$batchNumbers" } },
+				{
+					$group: {
+						_id: {
+							batch: "$batchNumbers",
+							productId: "$productId",
+							currentInventory: "$currentInventory",
+							expDate: "$attributeSet.expDate",
+						},
+						atoms: { $addToSet: "$$ROOT" },
+					},
+				},
+				{ $match: { $expr: { $gt: [{ $size: "$atoms" }, 1] } } },
+			]);
+
+			const atomsWithoutExp = await AtomModel.aggregate([
+				{ $match: { status: "HEALTHY", "attributeSet.expDate": { $exists: false } } },
+				{ $sort: { createdAt: 1 } },
+				{ $unwind: { path: "$batchNumbers" } },
+				{
+					$group: {
+						_id: {
+							batch: "$batchNumbers",
+							productId: "$productId",
+							currentInventory: "$currentInventory",
+						},
+						atoms: { $addToSet: "$$ROOT" },
+					},
+				},
+				{ $match: { $expr: { $gt: [{ $size: "$atoms" }, 1] } } },
+			]);
+
+			const allGroups = [...atomsWithExp, ...atomsWithoutExp];
+
+      const atomsToMerge = [];
+      
+			for (let i = 0; i < allGroups.length; ++i) {
+				let currAtoms = allGroups[i].atoms;
+				let atomToUpdate = currAtoms[0];
+				currAtoms.splice(0, 1);
+
+				currAtoms.forEach((atom) => {
+					atomToUpdate.quantity += atom.quantity;
+					atomToUpdate.shipmentIds.push(...atom.shipmentIds);
+					atomsToMerge.push(atom.id);
+				});
+
+				const updatedAtom = await AtomModel.findOneAndUpdate(
+					{ id: atomToUpdate.id },
+					{
+						$set: { quantity: atomToUpdate.quantity },
+						$addToSet: { shipmentIds: { $each: atomToUpdate.shipmentIds } },
+					},
+					{ new: true },
+				);
+			}
+
+      await AtomModel.updateMany({ id: { $in: atomsToMerge } }, { $set: { status: "MERGED" } });
+
+			return apiResponse.successResponse(res, "Success!");
+		} catch (err) {
+			console.log(err);
+			return apiResponse.ErrorResponse(res, err.message);
+		}
+	},
 ];

@@ -94,4 +94,6 @@ router.get(
 router.get("/sensorHistory", ShipmentController.sensorHistory);
 router.get("/driverHistory", ShipmentController.tripDetails);
 
+router.get("/syncAtoms", ShipmentController.syncAtoms);
+
 module.exports = router;

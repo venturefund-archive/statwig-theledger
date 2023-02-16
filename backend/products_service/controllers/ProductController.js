@@ -81,24 +81,25 @@ exports.getProducts = [
         permissionRequired: ["viewProductList"],
       };
       checkPermissions(permission_request, async (permissionResult) => {
-        if (permissionResult.success) {
-          const products = await ProductModel.aggregate([
-            {
-              $match: getProductCondition(req.query),
-            },
-            { $sort : {  _id: -1} },
-            { $setWindowFields: { output: { totalCount: { $count: {} } } } },
-            { $skip: parseInt(req.query.skip) || 0 },
-            { $limit: parseInt(req.query.limit) || 10 },
-          ]);
-          return apiResponse.successResponseWithData(res, "Products", products);
-        } else {
-          return apiResponse.forbiddenResponse(
-            res,
-            responses(req.user.preferredLanguage).no_permission
-          );
-        }
-      });
+				if (permissionResult.success) {
+					const stages = [
+						{ $match: getProductCondition(req.query) },
+						{ $sort: { _id: -1 } },
+						{ $setWindowFields: { output: { totalCount: { $count: {} } } } },
+					];
+					if (req.query?.skip !== undefined && req.query?.limit !== undefined) {
+						stages.push({ $skip: parseInt(req.query.skip) });
+						stages.push({ $limit: parseInt(req.query.limit) });
+					}
+					const products = await ProductModel.aggregate(stages);
+					return apiResponse.successResponseWithData(res, "Products", products);
+				} else {
+					return apiResponse.forbiddenResponse(
+						res,
+						responses(req.user.preferredLanguage).no_permission,
+					);
+				}
+			});
     } catch (err) {
       console.error(err);
       return apiResponse.ErrorResponse(res, err.message);
