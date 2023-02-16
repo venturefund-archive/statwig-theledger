@@ -1643,7 +1643,7 @@ exports.inStockReport = [
 				]);
 			}
 			if (reportType) {
-				const reportData = await getDataForReport("INSTOCK", inStockReport);
+        const reportData = await getDataForReport("INSTOCK", inStockReport);
 				if (reportType === "excel") {
 					await buildExcelReport(res, reportData.header, reportData.excelData, "INSTOCK", date);
 				} else {
@@ -1838,11 +1838,11 @@ exports.outOfStockReport = [
 				]);
 			}
 			if (reportType) {
-				const reportData = await getDataForReport("OUTOFSTOCK", outOfStockReport);
+        const reportData = await getDataForReport("OUTOFSTOCK", outOfStockReport);
 				if (reportType === "excel") {
-					await buildExcelReport(res, reportData.header, reportData.excelData, "OU", date);
+					await buildExcelReport(res, reportData.header, reportData.excelData, "OUTSTOCK", date);
 				} else {
-					await buildPdfReport(res, reportData.pdfData, "OU", date);
+					await buildPdfReport(res, reportData.pdfData, "OUTSTOCK", date);
 				}
 			} else {
 				return apiResponse.successResponseWithData(res, "Out of stock Report", {
@@ -1850,11 +1850,6 @@ exports.outOfStockReport = [
 					warehouseId: warehouse,
 				});
 			}
-
-			return apiResponse.successResponseWithData(res, "Out of stock Report", {
-				outOfStockReport,
-				warehouseId: warehouse,
-			});
 		} catch (err) {
 			console.log(err);
 			return apiResponse.ErrorResponse(res, err);

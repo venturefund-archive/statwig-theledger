@@ -637,13 +637,14 @@ exports.createShipment = [
 				const shippedProductsMap = data.products.reduce((map, p) => {
 					map[p.productID] = (map[p.productID] || 0) + p.productQuantity;
 					return map;
-				}, {});
+        }, {});
+
 				po.products.every((product) => {
 					const poQuantity = product.productQuantity || product.quantity;
 
 					const alreadyShipped =
-						parseInt(product.productQuantityShipped || 0) +
-							parseInt(product.productQuantityDelivered || 0) || null;
+						parseInt(product?.productQuantityShipped || 0) +
+						parseInt(product?.productQuantityDelivered || 0);
 
 					const shippedQuantity = alreadyShipped
 						? parseInt(shippedProductsMap[product.id]) + parseInt(alreadyShipped)
@@ -657,7 +658,9 @@ exports.createShipment = [
 					if (shippedQuantity < poQuantity) {
 						quantityMismatch = true;
 						return false;
-					}
+          }
+
+          return true;
 				});
 
 				if (quantityMismatch || missingProducts) {
