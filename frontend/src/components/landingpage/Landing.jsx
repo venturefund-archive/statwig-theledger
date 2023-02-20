@@ -44,7 +44,7 @@ export default function Landing() {
   const [maxWidth] = React.useState("sm");
   const [state, setState] = React.useState({
     vertical: "top",
-    horizontal: "right",
+    horizontal: "center",
   });
 
   const { vertical, horizontal } = state;

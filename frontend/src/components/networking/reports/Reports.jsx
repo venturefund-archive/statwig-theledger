@@ -8,6 +8,7 @@ import MenuItem from "@mui/material/MenuItem";
 import "./Report.scss";
 import Tab from "./tabs/Tab";
 import { getReports } from "../../../actions/networkActions";
+import { formatDate } from "../../../utils/dateHelper";
 export default function Reports(props) {
   const {
     bestseller,
@@ -45,7 +46,7 @@ export default function Reports(props) {
       link.href = downloadUrl;
       link.setAttribute(
         "download",
-        `${MainTab}-${startDate.toISOString().split("T")[0]}.${
+        `${MainTab}-${formatDate(startDate)}.${
           type.toLowerCase() === "excel" ? "xlsx" : "pdf"
         }`
       ); //any other extension
@@ -56,40 +57,40 @@ export default function Reports(props) {
     setAnchorEl(null);
   };
   return (
-    <div className='reports-main-container'>
-      <div className='reports-header'>
-        <div className='heading-text-holder' ref={myRef}>
-          <h1 className='mi-body-lg dark f-500 mi-reset'>{t("reports")}</h1>
+    <div className="reports-main-container">
+      <div className="reports-header">
+        <div className="heading-text-holder" ref={myRef}>
+          <h1 className="mi-body-lg dark f-500 mi-reset">{t("reports")}</h1>
         </div>
-        <div className='header-actions-group'>
+        <div className="header-actions-group">
           {/* <input
             type="month"
             value={month}
             onChange={(e) => setMonth(e.target.value)}
             className="input-calender-form"
           /> */}
-          <div className='date-picker'>
+          <div className="date-picker">
             <DatePicker
               selected={startDate}
               onChange={(date) => setStartDate(date)}
-              dateFormat='MM/yyyy'
+              dateFormat="MM/yyyy"
               showMonthYearPicker
-              className='date-input'
+              className="date-input"
               // className="input-calender-form"
             />
-            <i className='fa-solid fa-calendar-days cal-icon'></i>
+            <i className="fa-solid fa-calendar-days cal-icon"></i>
           </div>
           <button
-            className='nt-btn nt-btn-sm nt-btn-blue'
+            className="nt-btn nt-btn-sm nt-btn-blue"
             aria-controls={open ? "basic-menu" : undefined}
-            aria-haspopup='true'
+            aria-haspopup="true"
             aria-expanded={open ? "true" : undefined}
             onClick={handleClick}
           >
             {t("export")}
           </button>
           <Menu
-            id='basic-menu'
+            id="basic-menu"
             anchorEl={anchorEl}
             open={open}
             onClose={() => handleClose(null)}
@@ -97,8 +98,8 @@ export default function Reports(props) {
               "aria-labelledby": "basic-button",
             }}
           >
-            <div className='d-flex flex-column'>
-              <MenuItem onClick={() => handleClose("pdf")} className='mb-3'>
+            <div className="d-flex flex-column">
+              <MenuItem onClick={() => handleClose("pdf")} className="mb-3">
                 PDF
               </MenuItem>
               <MenuItem onClick={() => handleClose("excel")}>EXCEL</MenuItem>
@@ -106,17 +107,31 @@ export default function Reports(props) {
           </Menu>
         </div>
       </div>
-      <div className='reports-body'>
-        <div className='tab-area'>
-          <Tab layout='main' MainTab={MainTab} setMainTab={setMainTab} t={t}/>
+      <div className="reports-body">
+        <div className="tab-area">
+          <Tab layout="main" MainTab={MainTab} setMainTab={setMainTab} t={t} />
         </div>
 
-        <div className='report-table-container'>
+        <div className="report-table-container">
           {MainTab === "INSTOCK" && (
-            <Instock inStock={inStock} inStockFilters={inStockFilters} setInstockType={setInstockType} setInstockId={setInstockId} reportWarehouse={reportWarehouse} t={t} />
+            <Instock
+              inStock={inStock}
+              inStockFilters={inStockFilters}
+              setInstockType={setInstockType}
+              setInstockId={setInstockId}
+              reportWarehouse={reportWarehouse}
+              t={t}
+            />
           )}
           {MainTab === "OUTSTOCK" && (
-            <Outstock setOutstockType={setOutstockType} outStockFilters={outStockFilters} setOutstockId={setOutstockId} outStock={outStock} reportWarehouse={reportWarehouse} t={t} />
+            <Outstock
+              setOutstockType={setOutstockType}
+              outStockFilters={outStockFilters}
+              setOutstockId={setOutstockId}
+              outStock={outStock}
+              reportWarehouse={reportWarehouse}
+              t={t}
+            />
           )}
           {MainTab === "BESTSELLER" && (
             <BestSeller

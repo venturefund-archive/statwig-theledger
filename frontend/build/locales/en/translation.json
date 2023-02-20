@@ -559,7 +559,7 @@
   "to_no_of_org":"Total Number of Organization",
   "to_no_of_user":"Total Number of Users",
   "active_org":"Active Organization",
-  "inactive_org":"In Active Organization",
+  "inactive_org":"In-Active Organization",
   "total_user":"Total Users",
   "all_loc":"All Locations",
   "created_on":"Created On",
@@ -607,8 +607,15 @@
   "is_required":"is required",
   "is_invalid":"is Invalid",
   "duplicate":"Duplicate",
+  "individual_age":"Individual Age",
+  "range_group":"Range Group",
+  "year_range": "Year Range",
+  "month_range": "Month Range",
   "save_continue":"Save & Continue",
   "add_loc":"Add Location",
+  "shipment_details_notfound":"No shipments details are found, Please Try again",
   "vialsutilized_report":"VialsUtilizedReport",
-  "vaccination_report":"VaccinationReport"
+  "vaccination_report":"VaccinationReport",
+  "mfg_greater_than_today": "Manufacturing Date cannot be greater than today!",
+  "mfg_greater_than_exp": "Manufacturing Date cannot be greater than Expiry Date!"
 }

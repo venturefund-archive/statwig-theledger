@@ -7,7 +7,7 @@ import InventoryIcon from "../../assets/icons/Inventoryselected.png";
 import trackIcon from "../../assets/icons/Track_Traceselected.png";
 import NetworkIcon from "../../assets/icons/blockicon.png";
 import trackSelectedIcon from "../../assets/icons/Track_Traceselected.png";
-import OrderSelectedIcon from "../../assets/icons/OrderSelected.png";
+import OrderSelectedIcon from "../../assets/icons/orderSelected.png";
 import lastMileIcon from "../../assets/icons/lastMile.png";
 import { isAuthenticated } from "../../utils/commonHelper";
 import "./style.scss";
@@ -17,6 +17,7 @@ const SideBar = (props) => {
 	const { url } = match;
 	const [enable, setEnable] = useState(true);
 	const intelEnabled = props.user?.type === "Third Party Logistics" ? true : false;
+
 	useEffect(() => {
 		if (intelEnabled) setEnable(false);
 	}, [intelEnabled, user]);

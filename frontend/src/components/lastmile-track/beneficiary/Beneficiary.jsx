@@ -28,7 +28,7 @@ function ResultCard({ doseDetails, variant, update, deleteDose }) {
           </span>
         </h1>
         <h2 className='vl-subheading f-500 vl-black'>
-          {t("gender")} : {doseDetails.gender}
+          {t("gender")} : {t(doseDetails.gender.toLowerCase()).toUpperCase()}
         </h2>
       </div>
       <div className='edit_delete_btn'>

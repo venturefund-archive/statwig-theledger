@@ -36,7 +36,7 @@ const excel = require("node-excel-export");
 const { resolve } = require("path");
 const PdfPrinter = require("pdfmake");
 const { responses } = require("../helpers/responses");
-const { asyncForEach } = require("../helpers/utility");
+const { asyncForEach, getDateStringForMongo } = require("../helpers/utility");
 const { fromUnixTime, format, startOfMonth } = require("date-fns");
 const fontDescriptors = {
   Roboto: {
@@ -229,7 +229,6 @@ async function inventoryUpdate(
     const index = updatedInventory.inventoryDetails.findIndex((object) => {
       return object.productId === id;
     });
-    console.log(updatedInventory.inventoryDetails[index]);
     await InventoryAnalyticsModel.updateOne(
       {
         inventoryId: suppId,
@@ -412,6 +411,7 @@ const shipmentUpdate = async (id, quantity, shipmentId) => {
       $inc: {
         "products.$.productQuantityDelivered": quantity,
       },
+    },
     }
   );
 };
@@ -528,7 +528,6 @@ exports.createShipment = [
         data.shippingDate = shippingDate;
       }
       data.shippingDate = new Date(data.shippingDate);
-      console.log("**** Create Shipment ==> ", data);
       const checkOverflow = await quantityOverflow(
         data.supplier.locationId,
         data.products
@@ -590,7 +589,6 @@ exports.createShipment = [
         id: req.body.supplier.id,
       });
       if (supplierOrgData == null) {
-        console.log("Supplier not defined");
         return apiResponse.ErrorResponse(
           res,
           responses(req.user.preferredLanguage).supplier_not_defined
@@ -601,7 +599,6 @@ exports.createShipment = [
         id: req.body.receiver.id,
       });
       if (receiverOrgData == null) {
-        console.log("Receiver not defined");
         return apiResponse.ErrorResponse(
           res,
           responses(req.user.preferredLanguage).receiver_not_defined
@@ -797,30 +794,36 @@ exports.createShipment = [
             products[count].batchNumber != undefined
           ) {
             const currentAtom = await AtomModel.findOne({
-              batchNumbers: products[count].batchNumber,
-              currentInventory: suppInventoryId,
+              id: products[count].atomId,
+              // batchNumbers: products[count].batchNumber,
+              // currentInventory: suppInventoryId,
             });
+            data.products[count].attributeSet = currentAtom?.attributeSet;
             if (currentAtom.quantity == products[count].productQuantity) {
               await AtomModel.updateOne(
                 {
-                  batchNumbers: products[count].batchNumber,
-                  currentInventory: suppInventoryId,
+                  id: products[count].atomId,
+                  // batchNumbers: products[count].batchNumber,
+                  // currentInventory: suppInventoryId,
                 },
                 {
                   $set: {
                     currentInventory: recvInventoryId,
                     status: "TRANSIT",
                     poIds: [...currentAtom.poIds, data?.poId],
-                    shipmentIds: [...currentAtom.shipmentIds, shipmentId],
                     currentShipment: shipmentId,
                   },
-                }
+                  $addToSet: {
+                    shipmentIds: shipmentId,
+                  },
+                },
               );
             } else {
               await AtomModel.updateOne(
                 {
-                  batchNumbers: products[count].batchNumber,
-                  currentInventory: suppInventoryId,
+                  id: products[count].atomId,
+                  // batchNumbers: products[count].batchNumber,
+                  // currentInventory: suppInventoryId,
                 },
                 {
                   $inc: {
@@ -850,6 +853,7 @@ exports.createShipment = [
                 comments: currentAtom?.comments,
               });
               await newAtom.save();
+              data.products[count].atomId = newAtom.id;
             }
           }
           if (products[count].serialNumbersRange != null) {
@@ -1136,7 +1140,6 @@ exports.createShipmentForTpl = [
         id: req.body.supplier.id,
       });
       if (supplierOrgData == null) {
-        console.log("Supplier not defined");
         return apiResponse.ErrorResponse(
           res,
           responses(req.user.preferredLanguage).supplier_not_defined
@@ -1421,8 +1424,6 @@ exports.receiveShipment = [
           id: receiverId,
         });
 
-        let actuallyShippedQuantity = 0;
-        let productNumber = -1;
         if (shipmentInfo) {
           const shipmentProducts = shipmentInfo.products;
           for (const product of shipmentProducts) {
@@ -1479,47 +1480,42 @@ exports.receiveShipment = [
           );
         }
         const process = confData.process;
-        if (data.poId === null) {
+
+        if (!data.poId || data.poId == "null") {
           if (process == true) {
             flag = "YS";
           } else {
             flag = "N";
           }
         }
+
         if (flag === "Y") {
           const po = await RecordModel.findOne({
             id: data.poId,
           });
           let quantityMismatch = false;
-          po?.products?.every((product) => {
-            receivedProducts.every((p) => {
-              if (product.id === p.productID) {
-                const po_product_quantity =
-                  product.productQuantity || product.quantity;
-                let shipment_product_qty = 0;
-                if (product.productQuantityDelivered)
-                  shipment_product_qty =
-                    parseInt(product.productQuantityDelivered) +
-                    parseInt(p.productQuantity);
-                else shipment_product_qty = p.productQuantity;
-                if (
-                  parseInt(shipment_product_qty) < parseInt(po_product_quantity)
-                ) {
-                  console.log("mismatch");
-                  quantityMismatch = true;
-                  return false;
-                } else if (
-                  parseInt(shipment_product_qty) ===
-                  parseInt(po_product_quantity)
-                ) {
-                  console.log("full now");
-                  quantityMismatch = false;
-                }
-              }
-            });
+          let missingProducts = false;
+          const receivedProductsMap = receivedProducts.reduce((map, p) => {
+            map[p.productID] = (map[p.productID] || 0) + p.productQuantity;
+            return map;
+          }, {});
+
+          po.products.forEach((product) => {
+            const poQuantity = product.productQuantity || product.quantity;
+            const shipmentQuantity = receivedProductsMap[product.id] + (product.quantityDelivered || 0) || 0;
+
+            if (!shipmentQuantity) {
+              missingProducts = true;
+              return false;
+            }
+
+            if (shipmentQuantity < poQuantity) {
+              quantityMismatch = true;
+              return false;
+            }
           });
           if (po) {
-            if (quantityMismatch) {
+            if (quantityMismatch || missingProducts) {
               po.poStatus = "PARTIALLYFULFILLED";
               await po.save();
             } else {
@@ -2062,7 +2058,6 @@ function getShipmentFilterCondition(filters, warehouseIds) {
       let endDateOfTheMonth = moment(startDateOfTheMonth)
         .endOf("month")
         .format(DATE_FORMAT);
-      console.log(startDateOfTheMonth, endDateOfTheMonth);
       matchCondition.createdAt = {
         $gte: new Date(`${startDateOfTheMonth}T00:00:00.0Z`),
         $lte: new Date(`${endDateOfTheMonth}T23:59:59.0Z`),
@@ -2077,7 +2072,6 @@ function getShipmentFilterCondition(filters, warehouseIds) {
         .quarter(filters.quarter)
         .endOf("quarter")
         .format(DATE_FORMAT);
-      console.log(startDateOfTheQuarter, endDateOfTheQuarter);
       matchCondition.createdAt = {
         $gte: new Date(`${startDateOfTheQuarter}T00:00:00.0Z`),
         $lte: new Date(`${endDateOfTheQuarter}T23:59:59.0Z`),
@@ -2096,7 +2090,6 @@ function getShipmentFilterCondition(filters, warehouseIds) {
       if (filters.year === currentYear) {
         endDateOfTheYear = currentDate;
       }
-      console.log(startDateOfTheYear, endDateOfTheYear);
       matchCondition.createdAt = {
         $gte: new Date(startDateOfTheYear),
         $lte: new Date(endDateOfTheYear),
@@ -2437,38 +2430,37 @@ exports.viewShipment = [
               id: element.productID,
             });
             element.unitofMeasure = product.unitofMeasure;
-            const atomFindPayload = [];
-            if (Shipment.status == "CREATED") {
-              atomFindPayload.push({ productId: element.productID }, { batchNumbers: element.batchNumber }, { currentShipment: Shipment.id }, { currentInventory: Shipment.receiver.warehouse.warehouseInventory }, { status: "TRANSIT" }, { quantity: element.productQuantity });
-            } else {
-              atomFindPayload.push({ productId: element.productID }, { batchNumbers: element.batchNumber }, {
-                inventoryIds: Shipment.receiver.warehouse.warehouseInventory
-              })
-            }
-            const batch = await AtomModel.findOne({
-              batchNumbers: element.batchNumber,
-              $and: atomFindPayload
-            }).sort({ createdAt: -1 });
-            console.log(batch);
-            element.mfgDate = batch?.attributeSet.mfgDate;
-            element.expDate = batch?.attributeSet.expDate;
+            // const batch = await AtomModel.findOne({
+            // 	batchNumbers: element.batchNumber,
+            // 	$or: [
+            // 		{ currentShipment: element.id },
+            // 		{ shipmentIds: element.id },
+            // 		{
+            // 			currentInventory: Shipment.receiver.warehouse.warehouseInventory,
+            // 			status: { $ne: "CONSUMED" },
+            // 		},
+            // 	],
+            // });
+            element.mfgDate = element?.attributeSet?.mfgDate;
+            element.expDate = element?.attributeSet?.expDate;
           });
-          return apiResponse.successResponseWithData(
-            res,
-            "View Shipment",
-            Shipment
-          );
-        } else {
-          return apiResponse.forbiddenResponse(
-            res,
-            "User does not have enough Permissions"
-          );
-        }
-      });
-    } catch (err) {
-      console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+        });
+      return apiResponse.successResponseWithData(
+        res,
+        "View Shipment",
+        Shipment
+      );
+    } else {
+      return apiResponse.forbiddenResponse(
+        res,
+        "User does not have enough Permissions"
+      );
     }
+  });
+    } catch (err) {
+  console.log(err);
+  return apiResponse.ErrorResponse(res, err.message);
+}
   },
 ];
 
@@ -3916,7 +3908,6 @@ exports.trackJourney = [
             );
           } catch (err) {
             console.log(err);
-            console.log("Error in calculating current location data");
           }
           outwardShipmentsArray = await ShipmentModel.aggregate([
             {
@@ -4130,7 +4121,6 @@ exports.trackJourney = [
           } catch (err) {
             console.log(err);
             allowedOrgs = [];
-            console.log("Error in calculating current location data");
           }
         }
         return apiResponse.successResponseWithData(res, "Shipments Table", {
@@ -4381,7 +4371,7 @@ exports.exportInboundShipments = [
               label: row?.label?.labelId,
               shippingDate: new Date(row.shippingDate),
               expectedDeliveryDate: row.expectedDeliveryDate ? new Date(row.expectedDeliveryDate) : "N/A",
-              expiryDate: receiverAtom.attributeSet?.expDate,
+              expiryDate: receiverAtom?.attributeSet?.expDate || "N/A",
             };
             data.push(rowData);
           }
@@ -4552,7 +4542,7 @@ exports.exportOutboundShipments = [
               label: row?.label?.labelId,
               shippingDate: row.shippingDate,
               expectedDeliveryDate: row.expectedDeliveryDate || "unknown",
-              expiryDate: receiverAtom.attributeSet?.expDate,
+              expiryDate: receiverAtom?.attributeSet?.expDate || "N/A",
             };
             data.push(rowData);
           }
@@ -4577,25 +4567,10 @@ exports.exportOutboundShipments = [
 function buildExcelReport(req, res, dataForExcel, type) {
   const styles = {
     headerDark: {
-      fill: {
-        fgColor: {
-          rgb: "FF000000",
-        },
-      },
       font: {
-        color: {
-          rgb: "FFFFFFFF",
-        },
         sz: 14,
         bold: true,
         underline: true,
-      },
-    },
-    cellGreen: {
-      fill: {
-        fgColor: {
-          rgb: "FF00FF00",
-        },
       },
     },
   };
@@ -4604,115 +4579,96 @@ function buildExcelReport(req, res, dataForExcel, type) {
     id: {
       displayName: req.t("Shipment_ID"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 120,
     },
     poId: {
       displayName: req.t("Reference_Order_ID"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: "10",
     },
     productCategory: {
       displayName: req.t("Product_Category"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     productName: {
       displayName: req.t("Product_Name"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     productID: {
       displayName: req.t("Product_ID"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     productQuantity: {
       displayName: req.t("Quantity"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     batchNumber: {
       displayName: req.t("Batch_Number"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     expiryDate: {
       displayName: req.t("Expiry_Date"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     manufacturer: {
       displayName: req.t("Manufacturer"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     supplierOrgName: {
       displayName: req.t("From_Organization_Name"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     supplierOrgId: {
       displayName: req.t("From_Organization_ID"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     supplierOrgLocation: {
       displayName: req.t("From_Organization_Location_Details"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     recieverOrgName: {
       displayName: req.t("Delivery_Organization_Name"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     recieverOrgId: {
       displayName: req.t("Delivery_Organization_ID"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     recieverOrgLocation: {
       displayName: req.t("Delivery_Organization_Location_Details"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     airWayBillNo: {
       displayName: req.t("Transit_Number"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     label: {
       displayName: req.t("Label_Code"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     shippingDate: {
       displayName: req.t("Shipment_Date"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
     expectedDeliveryDate: {
       displayName: req.t("Shipment_Estimate_Date"),
       headerStyle: styles.headerDark,
-      cellStyle: styles.cellGreen,
       width: 220,
     },
   };

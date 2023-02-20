@@ -29,12 +29,13 @@ export default function NewDose(props) {
     console.log(selectedValue, event.target.value);
     setSelectedValue(event.target.value === "true" ? true : false);
     console.log(selectedValue);
-  };
-
+	};
+	
   const {
     control,
     formState: { errors },
-    handleSubmit,
+		handleSubmit,
+		getValues
   } = useForm({
     defaultValues: {
       gender: defaultValues?.gender || "",
@@ -53,7 +54,7 @@ export default function NewDose(props) {
         warehouseId: warehouseId,
         productId: productId,
         batchNumber: batchNumber,
-        gender: values.gender,
+        gender: values.gender.value,
         age: selectedValue ? 0 : parseInt(values.age),
         ageMonths: selectedValue ? parseInt(values.age) : 0,
       };
@@ -81,8 +82,12 @@ export default function NewDose(props) {
       console.log(err);
     }
   };
-  
-  const options = ["MALE", "FEMALE", "OTHERS"];
+	
+	const genderOptions = [
+		{ value: "MALE", display: t("male").toUpperCase() },
+		{ value: "FEMALE", display: t("female").toUpperCase() },
+		{ value: "OTHERS", display: t("others").toUpperCase() },
+	];
 
   return (
 		<section className="Beneficiary--Add-wrapper">
@@ -97,8 +102,9 @@ export default function NewDose(props) {
 							render={({ field }) => (
 								<Autocomplete
 									fullWidth
-									options={options}
-									getOptionLabel={(option) => option || ""}
+									options={genderOptions}
+									getOptionLabel={(option) => option.display || ""}
+									defaultValue={genderOptions.find((elem) => elem.value === getValues().gender)}
 									renderInput={(params) => (
 										<TextField
 											{...params}

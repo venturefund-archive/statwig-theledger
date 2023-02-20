@@ -14,6 +14,8 @@ const PdfPrinter = require("pdfmake");
 const { resolve } = require("path");
 const fs = require("fs");
 const CountryModel = require("../models/CountryModel");
+const { formatDate } = require("../helpers/dateHelper");
+const { getDateStringForMongo } = require("../helpers/utility");
 
 const fontDescriptors = {
 	Roboto: {
@@ -94,9 +96,8 @@ const buildDoseQuery = async (gender, minAge, maxAge, ageType, vaccineVialIds, t
 		}
 	}
 	if (today) {
-		let now = new Date();
-		now.setHours(0, 0, 0, 0);
-		queryExprs.push({ $gte: ["$createdAt", now] });
+		let todayString = getDateStringForMongo(new Date());
+		queryExprs.push({ $gte: ["$createdDateString", todayString] });
 	}
 
 	if (queryExprs.length) {
@@ -110,7 +111,7 @@ const buildDoseQuery = async (gender, minAge, maxAge, ageType, vaccineVialIds, t
 	return doseQuery;
 };
 
-const generateVaccinationsList = async (doseQuery, skip = 0, limit) => {
+const generateVaccinationsList = async (doseQuery, req, skip = 0, limit) => {
 	const pagniationQuery = [];
 	if (skip) {
 		pagniationQuery.push({ $skip: skip })
@@ -183,7 +184,7 @@ const generateVaccinationsList = async (doseQuery, skip = 0, limit) => {
 			batchNumber: element.vaccineVial.batchNumber,
 			organisationName: element.product?.manufacturer,
 			age: age,
-			gender: element.gender,
+			gender: req.t(element.gender),
 			state: element.warehouse.warehouseAddress.state,
 			city: element.warehouse.warehouseAddress.city,
 			vaccinatedOrganisationName: element.organisation.name,
@@ -254,26 +255,43 @@ exports.fetchBatchById = [
 				],
 				{ collation: { locale: "en", strength: 2 } },
 			);
-
+			let validBatches = [];
 			if (productDetails) {
-				console.log("here");
-				if (productDetails.length) {
-					if (!productDetails[0]?.atom?.quantity) {
-						throw new Error("Batch exhausted!");
-					} else {
-						console.log(productDetails[0].atom.attributeSet.expDate);
-						let expDate = new Date(productDetails[0].atom.attributeSet.expDate);
-						console.log(expDate);
-						expDate.setHours(0, 0, 0, 0);
-						console.log(expDate);
-						let today = new Date();
-						console.log(today);
-						today.setHours(0, 0, 0, 0);
-						console.log(today);
-						console.log(expDate.toDateString(), today.toDateString());
-						if (expDate < today) {
-							throw new Error("Batch expired!");
+				if (productDetails?.length) {
+					let errors = [];
+					for (let i = 0; i < productDetails.length; ++i) {
+						let currProd = productDetails[i];
+						if (currProd?.atom?.attributeSet?.expDate) {
+							let expDate = new Date(productDetails[0].atom.attributeSet.expDate);
+							let today = new Date();
+							today.setUTCHours(0, 0, 0, 0);
+
+							if (expDate < today) {
+						    // if (expDate.toLocaleDateString() < today.toLocaleDateString()) {		
+								errors.push("expired_batch");
+								continue;
+							} else {
+								if (!currProd?.atom?.quantity) {
+									errors.push("batch_exhausted");
+									continue;
+								}
+								validBatches.push(currProd);
+							}
+						} else {
+							errors.push("no_expiry_date");
 						}
+					}
+					let priorityError;
+					if(!validBatches.length) {
+						if (errors.includes("batch_exhausted")) {
+							priorityError = "Batch exhausted!";
+						} else if (errors.includes("expired_batch")) {
+							priorityError = "Batch expired!";
+						} else {
+							priorityError = "Batch has no expiry date!";
+						}
+
+						return apiResponse.validationErrorWithData(res, priorityError, batchNumber);
 					}
 				} else {
 					const existingAtom = await AtomModel.findOne({
@@ -287,7 +305,7 @@ exports.fetchBatchById = [
 				}
 			}
 
-			return apiResponse.successResponseWithData(res, "Product Details", productDetails);
+			return apiResponse.successResponseWithData(res, "Product Details", validBatches);
 		} catch (err) {
 			console.log(err);
 			return apiResponse.ErrorResponse(res, err.message);
@@ -465,6 +483,7 @@ exports.vaccinateIndividual = [
 				age: age || 0,
 				ageMonths: ageMonths || 0,
 				gender: gender === "GENERAL" ? "OTHERS" : gender.toUpperCase(),
+				createdDateString: getDateStringForMongo(new Date()),
 			});
 			await dose.save();
 			// Increment number of doses in VaccineVial model
@@ -603,6 +622,7 @@ exports.vaccinateMultiple = [
 						age: doses[i].age || 0,
 						ageMonths: doses[i].ageMonths || 0,
 						gender: doses[i].gender === "GENERAL" ? "OTHERS" : doses[i].gender.toUpperCase(),
+						createdDateString: getDateStringForMongo(new Date()),
 					});
 					await dose.save();
 				}
@@ -737,7 +757,7 @@ exports.getAllVaccinationDetails = [
 			vaccineVialIds = vaccineVialIds.flat();
 
 			const doseQuery = await buildDoseQuery(gender, minAge, maxAge, ageType, vaccineVialIds, today);
-			const result = await generateVaccinationsList(doseQuery, skip, limit);
+			const result = await generateVaccinationsList(doseQuery, req, skip, limit);
 
 			return apiResponse.successResponseWithData(res, "Vaccinations list fetched!", result);
 		} catch (err) {
@@ -797,13 +817,13 @@ exports.getAnalyticsWithFilters = [
 			let todaysVaccinations = 0;
 			let vialsUtilized = 0;
 			let now = new Date();
-			now.setHours(0, 0, 0, 0);
+			let nowString = getDateStringForMongo(now);
 
 			for (let i = 0; i < warehouses.length; ++i) {
 				const vaccineVials = warehouses[i].vaccinations;
 				for (let j = 0; j < vaccineVials.length; ++j) {
 					let createdAt = new Date(vaccineVials[j].createdAt);
-					createdAt.setHours(0, 0, 0, 0);
+					let createdAtString = getDateStringForMongo(createdAt); 
 
 					const doses = vaccineVials[j].doses;
 
@@ -812,7 +832,7 @@ exports.getAnalyticsWithFilters = [
 					if (doses.length) {
 						totalVaccinations += doses.length;
 
-						if (now.toDateString() === createdAt.toDateString()) {
+						if (nowString === createdAtString) {
 							todaysVaccinations += doses.length;
 						}
 					}
@@ -861,15 +881,15 @@ exports.getAnalytics = [
 			let totalVaccinations = 0;
 			let todaysVaccinations = 0;
 			let now = new Date();
-			now.setHours(0, 0, 0, 0);
+			let nowString = getDateStringForMongo(now);
 
 			for (let i = 0; i < analytics.length; ++i) {
 				let createdAt = new Date(analytics[i].createdAt);
-				createdAt.setHours(0, 0, 0, 0);
+				let createdAtString = getDateStringForMongo(createdAt);
 
 				totalVaccinations += analytics[i].numberOfDoses;
 
-				if (now.toDateString() === createdAt.toDateString()) {
+				if (nowString === createdAtString) {
 					todaysVaccinations += analytics[i].numberOfDoses;
 				}
 			}
@@ -966,9 +986,8 @@ exports.getVaccinationsList = [
 
 			let queryExprs = [{ $in: ["$vaccineVialId", vialsList] }];
 			if (today) {
-				let now = new Date();
-				now.setHours(0, 0, 0, 0);
-				queryExprs.push({ $gte: ["$createdAt", now] });
+				let todayString = getDateStringForMongo(new Date());
+				queryExprs.push({ $gte: ["$createdDateString", todayString] });
 			}
 
 			const pagniationQuery = [];
@@ -1066,11 +1085,11 @@ exports.getVaccinationsListOld = [
 			const todaysVaccinationsList = [];
 
 			let now = new Date();
-			now.setHours(0, 0, 0, 0);
+			let nowString = getDateStringForMongo(now);
 
 			for (let i = 0; i < vialsUtilized.length; ++i) {
 				let createdAt = new Date(vialsUtilized[i].createdAt);
-				createdAt.setHours(0, 0, 0, 0);
+				let createdAtString = getDateStringForMongo(createdAt);
 
 				let currDoses = await DoseModel.aggregate([
 					{ $match: { vaccineVialId: vialsUtilized[i].id } },
@@ -1078,7 +1097,7 @@ exports.getVaccinationsListOld = [
 				]);
 
 				vaccinationsList.push(...currDoses);
-				if (now.toDateString() === createdAt.toDateString()) {
+				if (nowString === createdAtString) {
 					todaysVaccinationsList.push(...currDoses);
 				}
 			}
@@ -1105,20 +1124,26 @@ exports.getCitiesAndOrgsForFilters = [
 				{
 					$lookup: {
 						from: "cities",
-						localField: "id",
-						foreignField: "country_id",
+						let: { country_id: "$id" },
+						pipeline: [
+							{ $match: { $expr: { $eq: ["$country_id", "$$country_id"] } } },
+							{ $group: { _id: null, uniqueCities: { $addToSet: "$name" } } },
+						],
 						as: "cities",
 					},
 				},
+				{ $unwind: "$cities" },
 			]);
 			if (!country || !country.length) {
 				throw new Error("Something went wrong!");
 			}
 
-			let cities = country[0].cities.map((city) => city.name);
+			let cities = country[0]?.cities?.uniqueCities ? country[0].cities.uniqueCities : [];
 
-			let orgs = await OrganisationModel.find({ type: { $in: ["PHARMACY", "Hospital"] } });
-			orgs = orgs.map((org) => org.name);
+			let orgs = await OrganisationModel.distinct("name", {
+				type: { $in: ["PHARMACY", "Hospital"] },
+			});
+			orgs = orgs?.length ? orgs : [];
 
 			const result = {
 				cities: cities,
@@ -1223,10 +1248,10 @@ exports.exportVaccinationList = [
 			vaccineVialIds = vaccineVialIds.flat();
 
 			const doseQuery = await buildDoseQuery(gender, minAge, maxAge, ageType, vaccineVialIds, today);
-			const result = await generateVaccinationsList(doseQuery);
+			const result = await generateVaccinationsList(doseQuery, req);
 
 			if (reportType === "excel") res = buildExcelReportDoses(req, res, result.result, today);
-			else res = buildPdfReportDoses(req, res, result.result, "Vaccinations");
+			else res = buildPdfReportDoses(req, res, result.result, today);
 		} catch (err) {
 			console.log(err);
 			return apiResponse.ErrorResponse(res, err.message);
@@ -1339,42 +1364,42 @@ function buildExcelReportDoses(req, res, dataForExcel, today) {
 
 	const specification = {
 		date: {
-			displayName: "Date",
+			displayName: req.t("date"),
 			headerStyle: styles.headerDark,
 			width: 120,
 		},
 		batchNumber: {
-			displayName: "Batch Number",
+			displayName: req.t("batch_number"),
 			headerStyle: styles.headerDark,
 			width: 120,
 		},
 		organisationName: {
-			displayName: "Manufacturer",
+			displayName: req.t("manufacturer"),
 			headerStyle: styles.headerDark,
 			width: 220,
 		},
 		age: {
-			displayName: "Age",
+			displayName: req.t("age"),
 			headerStyle: styles.headerDark,
 			width: 60,
 		},
 		gender: {
-			displayName: "Gender",
+			displayName: req.t("gender"),
 			headerStyle: styles.headerDark,
 			width: 120,
 		},
 		state: {
-			displayName: "State",
+			displayName: req.t("state"),
 			headerStyle: styles.headerDark,
 			width: 220,
 		},
 		city: {
-			displayName: "City",
+			displayName: req.t("city"),
 			headerStyle: styles.headerDark,
 			width: 220,
 		},
 		vaccinatedOrganisationName: {
-			displayName: "Organization",
+			displayName: req.t("organization"),
 			headerStyle: styles.headerDark,
 			width: 220,
 		}
@@ -1382,7 +1407,7 @@ function buildExcelReportDoses(req, res, dataForExcel, today) {
 
 	const report = excel.buildExport([
 		{
-			name: today ? "Today's Vaccinations" : "Vaccinated So Far",
+			name: today ? req.t("todays_vaccinations") : req.t("vaccinated_so_far"),
 			specification: specification,
 			data: dataForExcel,
 		},
@@ -1392,20 +1417,21 @@ function buildExcelReportDoses(req, res, dataForExcel, today) {
 	return res.send(report);
 }
 
-function buildPdfReportDoses(req, res, data, orderType) {
+function buildPdfReportDoses(req, res, data, today) {
+	const todaysDate = new Date();
 	const rows = [];
 	rows.push([
-		{ text: "Date", bold: true },
-		{ text: "Batch Number", bold: true },
-		{ text: "Manufacturer", bold: true },
-		{ text: "Age", bold: true },
-		{ text: "Gender", bold: true },
-		{ text: "State", bold: true },
-		{ text: "City", bold: true },
-		{ text: "Organization", bold: true },
+		{ text: req.t("date"), bold: true },
+		{ text: req.t("batch_number"), bold: true },
+		{ text: req.t("manufacturer"), bold: true },
+		{ text: req.t("age"), bold: true },
+		{ text: req.t("gender"), bold: true },
+		{ text: req.t("state"), bold: true },
+		{ text: req.t("city"), bold: true },
+		{ text: req.t("organization"), bold: true },
 	]);
 	for (const element of data) {
-		const date = element.date ? new Date(element.date).toLocaleDateString() : "N/A";
+		const date = element.date ? formatDate(new Date(element.date)) : "N/A";
 		rows.push([
 			date,
 			element.batchNumber || "N/A",
@@ -1423,7 +1449,11 @@ function buildPdfReportDoses(req, res, data, orderType) {
 		pageOrientation: "landscape",
 		pageMargins: [30, 30, 2, 2],
 		content: [
-			{ text: `${orderType} Report`, fontSize: 32, style: "header" },
+			{
+				text: today ? req.t("todays_vaccinations") + `(${formatDate(todaysDate)})` : req.t("vaccinated_so_far"),
+				fontSize: 32,
+				style: "header",
+			},
 			{
 				table: {
 					margin: [1, 1, 1, 1],
@@ -1465,22 +1495,22 @@ function buildExcelReportVials(req, res, dataForExcel) {
 
 	const specification = {
 		index: {
-			displayName: "Sr. No.",
+			displayName: req.t("sr_no"),
 			headerStyle: styles.headerDark,
 			width: 60,
 		},
 		date: {
-			displayName: "Date",
+			displayName: req.t("date"),
 			headerStyle: styles.headerDark,
 			width: 120,
 		},
 		batchNumber: {
-			displayName: "Batch Number",
+			displayName: req.t("batch_number"),
 			headerStyle: styles.headerDark,
 			width: 120,
 		},
 		numberOfDoses: {
-			displayName: "Number of Doses",
+			displayName: req.t("number_of_doses"),
 			headerStyle: styles.headerDark,
 			width: 120,
 		}
@@ -1488,7 +1518,7 @@ function buildExcelReportVials(req, res, dataForExcel) {
 
 	const report = excel.buildExport([
 		{
-			name: "Vials Utilized Report",
+			name: req.t("vials_utilized_report"),
 			specification: specification,
 			data: dataForExcel,
 		},
@@ -1501,16 +1531,16 @@ function buildExcelReportVials(req, res, dataForExcel) {
 function buildPdfReportVials(req, res, data) {
 	const rows = [];
 	rows.push([
-		{ text: "Sr. No.", bold: true },
-		{ text: "Date", bold: true },
-		{ text: "Batch Number", bold: true },
-		{ text: "Number Of Doses", bold: true },
+		{ text: req.t("sr_no"), bold: true },
+		{ text: req.t("date"), bold: true },
+		{ text: req.t("batch_number"), bold: true },
+		{ text: req.t("number_of_doses"), bold: true },
 	]);
 	for (let i = 0; i < data.length; i++) {
-		const date = data[i].date ? new Date(data[i].date).toLocaleDateString() : "N/A";
+		const date = data[i].date ? new Date(data[i].date) : "";
 		rows.push([
 			data[i].index,
-			date,
+			formatDate(date),
 			data[i].batchNumber || "N/A",
 			data[i].numberOfDoses || "N/A",
 		]);
@@ -1521,7 +1551,7 @@ function buildPdfReportVials(req, res, data) {
 		pageOrientation: "landscape",
 		pageMargins: [30, 30, 2, 2],
 		content: [
-			{ text: `Vials Utilized Report`, fontSize: 32, style: "header" },
+			{ text: req.t("vials_utilized_report"), fontSize: 32, style: "header" },
 			{
 				table: {
 					margin: [1, 1, 1, 1],
@@ -1549,3 +1579,17 @@ function buildPdfReportVials(req, res, data) {
 	});
 	return;
 }
+
+exports.addDateStringToDoses = [
+	async (req, res) => {
+		const allDoses = await DoseModel.find();
+		let count = 0;
+		for(let i=0; i<allDoses.length; ++i) {
+			let currDose = allDoses[i];
+			let createdDateString = getDateStringForMongo(new Date(currDose.createdAt));
+			await DoseModel.updateOne({id: currDose.id}, {$set: {createdDateString: createdDateString}})
+			++count;
+		}
+		return apiResponse.successResponseWithData(res, "Done", count)
+	}
+]

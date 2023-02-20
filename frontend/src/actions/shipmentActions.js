@@ -45,8 +45,7 @@ export const getInboundShipments = async (
 ) => {
   try {
     const result = await axios.get(
-      `${
-        config().fetchInboundShipmentsUrl
+      `${config().fetchInboundShipmentsUrl
       }?shipmentId=${shipmentId}&from=${from}&to=${to}&dateFilter=${dateFilter}&status=${status}&fromDate=${fromDate}&toDate=${toDate}&skip=${skip}&limit=${limit}`
     );
     return result.data;
@@ -68,8 +67,7 @@ export const getOutboundShipments = async (
 ) => {
   try {
     const result = await axios.get(
-      `${
-        config().fetchOutboundShipmentsUrl
+      `${config().fetchOutboundShipmentsUrl
       }?shipmentId=${shipmentId}&from=${from}&to=${to}&dateFilter=${dateFilter}&status=${status}&fromDate=${fromDate}&toDate=${toDate}&skip=${skip}&limit=${limit}`
     );
     return result.data;
@@ -130,12 +128,12 @@ export const fetchairwayBillNumber = async () => {
 };
 
 export const getJourneyTrack = async (id) => {
-	try {
-		const result = await axios.get(`${config().trackJourney + id}`);
-		return result;
-	} catch (e) {
-		throw new Error(e.response.data.message);
-	}
+  try {
+    const result = await axios.get(`${config().trackJourney + id}`);
+    return result;
+  } catch (e) {
+    throw new Error(e.response.data.message);
+  }
 };
 
 export const trackShipment = (shipmentId) => {
@@ -370,18 +368,12 @@ export const uploadImage = async (id, formData) => {
   try {
     const configObject = config();
     const url = configObject.uploadImage + id;
-    const result = await axios.post(url, formData);
+    const result = await axios.post(url, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data"
+      },
+    });
     return result;
-
-    //   const requestOptions = {
-    //     method: 'POST',
-    //     headers: new Headers({
-    //       'Authorization': 'bearer '+ localStorage.theLedgerToken ,
-    //       'Content-Type': 'application/x-www-form-urlencoded'
-    //     }),
-    //     body: formData,
-    // };
-    // const result = await fetch(url, requestOptions);
   } catch (e) {
     return e.reponse;
   }
@@ -409,8 +401,14 @@ export const receiveApi = async (formData) => {
   try {
     const configObject = config();
     const url = configObject.receiveApi;
-    const result = await axios.post(url, formData);
+    for (let pair of formData.values()) console.log(pair[0], JSON.stringify(pair[1]));
+    const result = await axios.post(url, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data"
+      },
+    });
     return result;
+    return "";
   } catch (e) {
     return e.response;
   }

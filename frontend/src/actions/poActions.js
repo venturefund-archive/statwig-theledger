@@ -106,6 +106,15 @@ export const getManufacturers = async () => {
   }
 };
 
+export const validateProductName = async (productName) => {
+	try {
+		const result = await axios.get(`${config().validateProductName}?productName=${productName}`);
+		return result.data.data;
+	} catch (e) {
+		return e.response;
+	}
+};
+
 export const addNewProduct = async (data) => {
   try {
     const result = await axios.post(config().addNewProduct, data, {

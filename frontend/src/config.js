@@ -1,6 +1,6 @@
 
 export const SERVER_URL =
-  process.env.REACT_APP_SERVER_URL || "https://vaccineledger.com";
+  process.env.REACT_APP_SERVER_URL || "https://test.vaccineledger.com";
 export const SERVER_URL_FOR_ROAMBEE = "https://integrations.vaccineledger.com";
 export const LOCAL_SERVER_URL_USER = "http://localhost:3001";
 export const LOCAL_SERVER_URL_SHIPPINGORDER = "http://localhost:3013";
@@ -101,6 +101,7 @@ export function config() {
       productDetailsByShipmentId: `${LOCAL_SERVER_URL_SHIPMENT}/shipmentmanagement/api/shipping/fetchProductdetailsByShipmentID?shipmentId=`,
       trackTemperature: `${LOCAL_SERVER_URL_TRACKANDTRACE}/tracktracemanagement/api/track/fetchTemp`,
       trackProduct: `${LOCAL_SERVER_URL_TRACKANDTRACE}/tracktracemanagement/api/track/track?trackingNumber=`,
+      validateProductName: `${LOCAL_SERVER_URL_PRODUCTS}/productmanagement/api/products/validateProductName`,
       addNewProduct: `${LOCAL_SERVER_URL_PRODUCTS}/productmanagement/api/products/addProduct`,
       getOrganisations: `${LOCAL_SERVER_URL_PRODUCTS}/productmanagement/api/organisation/getOrganisations`,
       getOrganisationsAtSignup: `${LOCAL_SERVER_URL_PRODUCTS}/productmanagement/api/organisation/getOrganisationsAtSignup`,
@@ -327,6 +328,7 @@ export function config() {
       getwarehouseByType: `${SERVER_URL}/usermanagement/api/auth/getwarehouseByType?id=`,
       getWarehouseByOrgId: `${SERVER_URL}/productmanagement/api/organisation/warehouses?id=`,
       getAllWarehouses: `${SERVER_URL}/productmanagement/api/organisation/allWarehouses`,
+      validateProductName: `${SERVER_URL}/productmanagement/api/products/validateProductName`,
       addNewProduct: `${SERVER_URL}/productmanagement/api/products/addProduct`,
       getProducts: `${SERVER_URL}/productmanagement/api/products/getProducts`,
       getProductsByCategoryUrl: `${SERVER_URL}/productmanagement/api/products/getProductsByCategory?type=`,

@@ -7,11 +7,8 @@ const EmployeeModel = require("../models/EmployeeModel");
 const WarehouseModel = require("../models/warehouseModel");
 const ConfigurationModel = require("../models/ConfigurationModel");
 const auth = require("../middlewares/jwt");
-const { customAlphabet } = require("nanoid");
-const nanoid = customAlphabet("1234567890abcdef", 10);
 const XLSX = require("xlsx");
 const fs = require("fs");
-const moveFile = require("move-file");
 const axios = require("axios");
 
 exports.addressOfOrg = [
@@ -25,6 +22,7 @@ exports.addressOfOrg = [
         org
       );
     } catch (err) {
+      console.log(err)
       return apiResponse.ErrorResponse(res, err);
     }
   },
@@ -41,40 +39,41 @@ exports.addressesOfOrgWarehouses = [
         warehouses
       );
     } catch (err) {
+      console.log(err)
       return apiResponse.ErrorResponse(res, err);
     }
   },
 ];
 
 exports.fetchWarehousesByOrgId = [
-	auth,
-	async (req, res) => {
-		try {
-			if (!req.query?.orgId) {
-				return apiResponse.validationErrorWithData(res, "Org Id not provided", { orgId: orgId });
-			}
+  auth,
+  async (req, res) => {
+    try {
+      if (!req.query?.orgId) {
+        return apiResponse.validationErrorWithData(res, "Org Id not provided", { orgId: req.query.orgId });
+      }
+      const warehouses = await Warehouse.aggregate([
+        { $match: { $and: [{ organisationId: req.query.orgId }] } },
+        {
+          $lookup: {
+            from: "employees",
+            let: { warehouseId: "$id" },
+            pipeline: [
+              { $match: { $expr: { $in: ["$$warehouseId", "$warehouseId"] } } },
+              { $count: "total" },
+            ],
+            as: "employeeCount",
+          },
+        },
+        { $unwind: "$employeeCount" },
+      ])
 
-			const warehouses = await Warehouse.aggregate([
-				{ $match: { $and: [{ organisationId: req.query.orgId }] } },
-				{
-					$lookup: {
-						from: "employees",
-						let: { warehouseId: "$id" },
-						pipeline: [
-							{ $match: { $expr: { $in: ["$$warehouseId", "$warehouseId"] } } },
-							{ $count: "total" },
-						],
-						as: "employeeCount",
-					},
-				},
-				{ $unwind: "$employeeCount" },
-			])
-
-			return apiResponse.successResponseWithData(res, "Warehouses Addresses", warehouses);
-		} catch (err) {
-			return apiResponse.ErrorResponse(res, err);
-		}
-	},
+      return apiResponse.successResponseWithData(res, "Warehouses Addresses", warehouses);
+    } catch (err) {
+      console.log(err)
+      return apiResponse.ErrorResponse(res, err);
+    }
+  },
 ];
 
 function getConditionForLocationApprovals(type, id) {
@@ -144,6 +143,7 @@ exports.updateAddressOrg = [
         org
       );
     } catch (err) {
+      console.log(err)
       return apiResponse.ErrorResponse(res, err);
     }
   },
@@ -164,6 +164,7 @@ exports.updateWarehouseAddress = [
         warehouse
       );
     } catch (err) {
+      console.log(err)
       return apiResponse.ErrorResponse(res, err);
     }
   },
@@ -173,24 +174,20 @@ exports.AddWarehouse = [
   auth,
   async (req, res) => {
     try {
-      const incrementCounterInv = await CounterModel.update(
-        {
-          "counters.name": "inventoryId",
-        },
+      const invCounter = await CounterModel.findOneAndUpdate(
+        { "counters.name": "inventoryId" },
         {
           $inc: {
             "counters.$.value": 1,
           },
+        },
+        {
+          projection:
+            { "counters.$": 1 }
         }
       );
-
-      const invCounter = await CounterModel.findOne(
-        { "counters.name": "inventoryId" },
-        { "counters.$": 1 }
-      );
       const inventoryId =
-        invCounter.counters[0].format + invCounter.counters[0].value;
-      //const inventoryId = "inv-" + nanoid();
+        invCounter.counters[0].format + invCounter.counters[0].value++;
       const inventoryResult = new Inventory({ id: inventoryId });
       await inventoryResult.save();
       const {
@@ -222,7 +219,6 @@ exports.AddWarehouse = [
       const warehouseId =
         warehouseCounter.counters[0].format +
         warehouseCounter.counters[0].value;
-      //const warehouseId = "war-" + nanoid();
       let employee = [];
       if (employees != undefined && employees.length > 0) {
         employee = employees
@@ -236,7 +232,7 @@ exports.AddWarehouse = [
         }, {
           $push: { warehouseId: warehouseId }
         }, {
-          new: true
+          new: true,
         });
       });
       const warehouse = new Warehouse({
@@ -252,7 +248,6 @@ exports.AddWarehouse = [
         warehouseAddress,
         status: "ACTIVE",
         warehouseInventory: inventoryResult.id,
-        employees: req.body.employees || [req.user.id]
       });
       await warehouse.save();
       return apiResponse.successResponseWithData(
@@ -281,7 +276,22 @@ exports.AddOffice = [
         supervisors,
         employees,
       } = req.body;
-      const officeId = "office-" + nanoid();
+      const warehouseCounter = await CounterModel.findOneAndUpdate(
+        { "counters.name": "warehouseId" },
+        {
+          $inc: {
+            "counters.$.value": 1,
+          },
+        },
+        {
+          projection: {
+            "counters.$": 1
+          }
+        }
+      );
+      const officeId =
+        warehouseCounter.counters[0].format +
+        warehouseCounter.counters[0].value++;
       const office = new Warehouse({
         id: officeId,
         title,
@@ -300,6 +310,7 @@ exports.AddOffice = [
         office
       );
     } catch (err) {
+      console.log(err)
       return apiResponse.ErrorResponse(res, err);
     }
   },
@@ -313,8 +324,7 @@ exports.addAddressesFromExcel = [
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir);
       }
-      await moveFile(req.file.path, `${dir}/${req.file.originalname}`);
-      const workbook = XLSX.readFile(`${dir}/${req.file.originalname}`);
+      const workbook = XLSX.readFile(req.file.path);
       const sheet_name_list = workbook.SheetNames;
       const data = XLSX.utils.sheet_to_json(
         workbook.Sheets[sheet_name_list[0]],
@@ -438,6 +448,7 @@ exports.addAddressesFromExcel = [
       );
       return apiResponse.successResponseWithData(res, "Success", data);
     } catch (e) {
+      console.log(e)
       return apiResponse.ErrorResponse(res, e);
     }
   },
@@ -447,61 +458,64 @@ exports.modifyLocation = [
   auth,
   async (req, res) => {
     try {
-      const { id, eid, type } = req.body;
-
-      await Warehouse.updateOne(
+      const { id, type } = req.body;
+      const updatedWarehouse = await Warehouse.findOneAndUpdate(
         { id: id },
-        { status: type === 1 ? "ACTIVE" : "REJECTED" }
+        { status: type === 1 ? "ACTIVE" : "REJECTED" },
+        { new: true }
       )
-      const conf = await ConfigurationModel.findOne({ id: "CONF000" })
-        .select("active_locations")
-      if (conf?.active_locations === 1 && type == 1) {
-        await EmployeeModel.updateOne(
-          {
-            id: eid,
-          },
-          {
-            $set: {
-              warehouseId: [id],
+      const eid = req.body?.eid || updatedWarehouse.employees?.[0];
+      if (eid) {
+        const conf = await ConfigurationModel.findOne({ id: "CONF000" })
+          .select("active_locations")
+        if (conf?.active_locations === 1 && type == 1) {
+          await EmployeeModel.updateOne(
+            {
+              id: eid,
             },
-            $pull: {
-              pendingWarehouseId: id
+            {
+              $set: {
+                warehouseId: [id],
+              },
+              $pull: {
+                pendingWarehouseId: id
+              }
             }
-          }
-        );
-      }
-      else if (type == 1) {
-        await EmployeeModel.updateOne(
-          {
-            id: eid,
-          },
-          {
-            $push: {
-              warehouseId: id
+          );
+        }
+        else if (type == 1) {
+          await EmployeeModel.updateOne(
+            {
+              id: eid,
             },
-            $pull: {
-              pendingWarehouseId: id
+            {
+              $push: {
+                warehouseId: id
+              },
+              $pull: {
+                pendingWarehouseId: id
+              }
             }
-          }
-        );
-      } else {
-        await EmployeeModel.updateOne(
-          {
-            id: eid,
-          },
-          {
-            $pull: {
-              pendingWarehouseId: id,
+          );
+        } else {
+          await EmployeeModel.updateOne(
+            {
+              id: eid,
             },
-          }
-        );
+            {
+              $pull: {
+                pendingWarehouseId: id,
+              },
+            }
+          );
+        }
       }
-      return apiResponse.successResponseWithData(
+      return apiResponse.successResponse(
         res,
-        "Location " + (type == 1 ? "approved" : "rejected"),
-        []
+        "Location " + (type == 1 ? "Approved" : "Rejected"),
       );
     } catch (err) {
+      console.log(err)
       return apiResponse.ErrorResponse(res, err);
     }
   },
@@ -525,6 +539,7 @@ exports.getCountries = [
         countries
       );
     } catch (err) {
+      console.log(err)
       return apiResponse.ErrorResponse(res, err.message);
     }
   },
@@ -548,6 +563,7 @@ exports.getStatesByCountry = [
         allStates
       );
     } catch (err) {
+      console.log(err)
       return apiResponse.ErrorResponse(res, err.message);
     }
   },
@@ -571,6 +587,7 @@ exports.getCitiesByState = [
         allCities
       );
     } catch (err) {
+      console.log(err)
       return apiResponse.ErrorResponse(res, err.message);
     }
   },

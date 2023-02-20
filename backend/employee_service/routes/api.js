@@ -17,15 +17,17 @@ const {
   getApprovals,
   acceptApproval,
   rejectApproval,
-  addUser
+	addUser,
+	activateUser,
+	deactivateUser
 } = require("../controllers/ApprovalController");
 const app = express();
 
 app.use("/auth/", authRouter);
 app.use("/userQuery/", userQueryRouter);
 app.use("/demoRequest/", demoRequestRouter);
-app.get("/activateUser", authController.activateUser); // /activateUser?id=123
-app.get("/deactivateUser", authController.deactivateUser); // /deactivateUser?id=123
+app.get("/activateUser", activateUser); // /activateUser?id=123
+app.get("/deactivateUser", deactivateUser); // /deactivateUser?id=123
 app.get("/updateUserRole", authController.updateUserRole);
 
 app.get("/getOrgs", getOrgs);

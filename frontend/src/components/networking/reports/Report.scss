@@ -19,7 +19,9 @@
 .report-table-container{
     width: 100%;
 }
-
+.report-table-container.mi-height-added{
+   min-height: 30.5rem;
+}
 .mi-custom-table{
     border-collapse: separate !important;
     border-spacing: 0 12px !important;
@@ -210,4 +212,10 @@
 
 .filter-footer > .clear-btn-padding{
     padding: 0.3rem 1.5rem !important;
+}
+
+.bg_white_added{
+    background-color: #fff;
+    border-radius: 0.6rem;
+    padding: 2rem 0;
 }

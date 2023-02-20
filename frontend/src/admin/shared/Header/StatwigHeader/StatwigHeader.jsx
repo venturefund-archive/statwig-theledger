@@ -41,13 +41,12 @@ export default function StatwigHeader() {
   });
 
   const user = useSelector((state) => state.user);
-
   const [name, setName] = useState("");
   const [orgName, setOrgName] = useState("");
   const [image, setImage] = useState("");
 
   useEffect(() => {
-    let userName = user?.firstName;
+    let userName = user?.firstName + " " + user?.lastName;
     let org = user?.organisation?.split("/")[0];
     if (user?.photoId) {
       getImage(user?.photoId).then((result) => {
@@ -73,27 +72,27 @@ export default function StatwigHeader() {
   };
 
   return (
-    <header className='admin-header'>
-      <div className='admin-container'>
-        <nav className='admin-nav'>
-          <article className='admin-nav-left'>
-            <figure className='admin-logo'>
-              <img src={vaccineledger} alt='vaccineledger' />
+    <header className="admin-header">
+      <div className="admin-container">
+        <nav className="admin-nav">
+          <article className="admin-nav-left">
+            <figure className="admin-logo">
+              <img src={vaccineledger} alt="vaccineledger" />
             </figure>
-            <ul className='admin-nav-list'>
-              <li className='admin-nav-item'>
+            <ul className="admin-nav-list">
+              <li className="admin-nav-item">
                 <Link
-                  to='/statwig/dashboard'
+                  to="/statwig/dashboard"
                   className={`admin-nav-link ${
                     location.pathname === "/statwig/dashboard" && "active"
                   }`}
                 >
-                  <p className='vl-note'>{t("dashboard")}</p>
+                  <p className="vl-note">{t("dashboard")}</p>
                 </Link>
               </li>
-              <li className='admin-nav-item'>
+              <li className="admin-nav-item">
                 <Link
-                  to='/statwig/manage-organization'
+                  to="/statwig/manage-organization"
                   className={`admin-nav-link ${
                     location.pathname === "/statwig/manage-organization" &&
                     "active"
@@ -105,32 +104,32 @@ export default function StatwigHeader() {
                     "active"
                   }`}
                 >
-                  <p className='vl-note'>{t("manage_org")}</p>
+                  <p className="vl-note">{t("manage_org")}</p>
                 </Link>
               </li>
-              <li className='admin-nav-item'>
+              <li className="admin-nav-item">
                 <Link
-                  to='/statwig/roles'
+                  to="/statwig/roles"
                   className={`admin-nav-link ${
                     location.pathname === "/statwig/roles" && "active"
                   }`}
                 >
-                  <p className='vl-note'>{t("configuration")}</p>
+                  <p className="vl-note">{t("configuration")}</p>
                 </Link>
               </li>
             </ul>
           </article>
-          <article className='admin-nav-right'>
-            <ul className='admin-nav-list switch-button-container'>
-              <li className='admin-nav-item configure-link'>
-                <div className='switch-button'>
-                  <p className='vl-note'>{t("admin")}</p>
-                  <i className='fa-solid fa-caret-down'></i>
+          <article className="admin-nav-right">
+            <ul className="admin-nav-list switch-button-container">
+              <li className="admin-nav-item configure-link">
+                <div className="switch-button">
+                  <p className="vl-note">{t("admin")}</p>
+                  <i className="fa-solid fa-caret-down"></i>
                 </div>
                 <div className={`configure-list active `}>
                   <button
                     onClick={handleUiSwitch}
-                    className='vl-btn vl-btn-sm vl-btn-full vl-btn-primary'
+                    className="vl-btn vl-btn-sm vl-btn-full vl-btn-primary"
                   >
                     {t("switch_to_user")}
                   </button>
@@ -144,19 +143,19 @@ export default function StatwigHeader() {
                 </Link>
               </li> */}
             </ul>
-            <div className='admin-mini-profile' ref={domNode}>
+            <div className="admin-mini-profile" ref={domNode}>
               <div
-                className='admin-profile-card vl-flex-md'
+                className="admin-profile-card vl-flex-md"
                 onClick={() => setProfileClickBtn(!ProfileClickBtn)}
               >
                 {image && (
-                  <figure className='profile-space'>
-                    <img src={image} alt='profile' />
+                  <figure className="profile-space">
+                    <img src={image} alt="profile" />
                   </figure>
                 )}
-                <hgroup className='profile-name-card'>
-                  <h1 className='vl-note vl-light f-700'>{name}</h1>
-                  <h2 className='vl-small vl-light f-400'>{orgName}</h2>
+                <hgroup className="profile-name-card">
+                  <h1 className="vl-note vl-light f-700">{name}</h1>
+                  <h2 className="vl-small vl-light f-400">{orgName}</h2>
                 </hgroup>
               </div>
               <div
@@ -164,21 +163,21 @@ export default function StatwigHeader() {
                   ProfileClickBtn && "active"
                 }`}
               >
-                <div className='header__profile_top'>
-                  <div className='header__inner_profile_icon'>
-                    <div className='green__active'></div>
-                    <img src={image} alt='active_image' />
+                <div className="header__profile_top">
+                  <div className="header__inner_profile_icon">
+                    <div className="green__active"></div>
+                    <img src={image} alt="active_image" />
                   </div>
-                  <div className='header__inner_profile_content'>
-                    <h1 className='vl-name-header f-500 profile__black'>
+                  <div className="header__inner_profile_content">
+                    <h1 className="vl-name-header f-500 profile__black">
                       {name}
                     </h1>
-                    <p className='vl-note f-400 vl-grey-sm'> {orgName}</p>
+                    <p className="vl-note f-400 vl-grey-sm"> {orgName}</p>
                   </div>
                 </div>
-                <div className='header__profile_middle'>
+                <div className="header__profile_middle">
                   <div
-                    className='header__link__card'
+                    className="header__link__card"
                     onClick={() => {
                       if (LangOption === "en") {
                         changeLanguage("es");
@@ -187,35 +186,35 @@ export default function StatwigHeader() {
                       }
                     }}
                   >
-                    <i className='fa-solid fa-earth-americas'></i>
-                    <div className='langugae__option'>
-                      <p className='vl-body f-400'>{t("switch_lang")}</p>
-                      <div className='lang__logo'>
-                        <p className='vl-small f-400'>
+                    <i className="fa-solid fa-earth-americas"></i>
+                    <div className="langugae__option">
+                      <p className="vl-body f-400">{t("switch_lang")}</p>
+                      <div className="lang__logo">
+                        <p className="vl-small f-400">
                           {LangOption === "en" ? "SPA" : "ENG"}
                         </p>
                         <img
                           src={LangOption === "en" ? SpanishFlag : EnglishFlag}
-                          className='lang__flag'
-                          alt='flag'
+                          className="lang__flag"
+                          alt="flag"
                         />
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className='header__profile_bottom'>
+                <div className="header__profile_bottom">
                   <div
-                    className='header__link__card'
+                    className="header__link__card"
                     onClick={() => dispatch(logoutUser())}
                   >
-                    <i className='fa-solid fa-arrow-right-from-bracket'></i>
-                    <p className='vl-body f-400'>{t("sign_out")}</p>
+                    <i className="fa-solid fa-arrow-right-from-bracket"></i>
+                    <p className="vl-body f-400">{t("sign_out")}</p>
                   </div>
                 </div>
               </div>
             </div>
-            <div className='mobile-menu-icon'>
-              <i className='fa-solid fa-bars vl-light'></i>
+            <div className="mobile-menu-icon">
+              <i className="fa-solid fa-bars vl-light"></i>
             </div>
           </article>
         </nav>

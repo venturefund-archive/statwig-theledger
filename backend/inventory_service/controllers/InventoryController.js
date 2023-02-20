@@ -32,6 +32,39 @@ const CENTRAL_AUTHORITY_ID = null;
 const CENTRAL_AUTHORITY_NAME = null;
 const CENTRAL_AUTHORITY_ADDRESS = null;
 
+async function getRealTimeInventory(inventoryId) {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const atoms = await AtomModel.aggregate([
+      {
+        $match: {
+          $and: [
+            { currentInventory: inventoryId },
+            { status: "HEALTHY" },
+            {
+              $or: [
+                { "attributeSet.expDate": { $exists: false } },
+                { "attributeSet.expDate": { $gte: today } },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        $group: {
+          _id: "$productId",
+          quantity: { $sum: "$quantity" },
+        },
+      },
+      { $sort: { createdAt: -1 } },
+    ]);
+    return atoms;
+  } catch (err) {
+    throw err;
+  }
+}
+
 exports.getTotalCount = [
   auth,
   async (req, res) => {
@@ -629,7 +662,6 @@ exports.addProductsToInventory = [
             );
           }
           for (const product of products) {
-            console.log("Product", product)
             const inventoryId = warehouse.warehouseInventory;
             const checkProduct = await InventoryModel.find({
               $and: [
@@ -665,6 +697,14 @@ exports.addProductsToInventory = [
             }
 
             const serialNumbers = product.serialNumbersRange?.split("-");
+            let mfgDate;
+            let expDate;
+            if (product?.mfgDate) {
+              mfgDate = new Date(product.mfgDate);
+            }
+            if (product?.expDate) {
+              expDate = new Date(product.expDate);
+            }
             let atomsArray = [];
             if (serialNumbers?.length > 1) {
               const serialNumbersFrom = parseInt(
@@ -690,12 +730,13 @@ exports.addProductsToInventory = [
                   currentInventory: inventory.id,
                   poIds: [],
                   shipmentIds: [],
+                  currentShipment: null,
                   txIds: [],
                   batchNumbers: [product.batchNumber],
                   status: "HEALTHY",
                   attributeSet: {
-                    mfgDate: product.mfgDate,
-                    expDate: product.expDate,
+                    mfgDate: mfgDate,
+                    expDate: expDate,
                   },
                   eolInfo: {
                     eolId: "IDN29402-23423-23423",
@@ -718,12 +759,13 @@ exports.addProductsToInventory = [
                 currentInventory: inventory.id,
                 poIds: [],
                 shipmentIds: [],
+                currentShipment: null,
                 txIds: [],
                 batchNumbers: [product.batchNumber],
                 status: "HEALTHY",
                 attributeSet: {
-                  mfgDate: product.mfgDate,
-                  expDate: product.expDate,
+                  mfgDate: mfgDate,
+                  expDate: expDate,
                 },
                 eolInfo: {
                   eolId: "IDN29402-23423-23423",
@@ -759,8 +801,10 @@ exports.addProductsToInventory = [
               let batchDup = await AtomModel.findOne({
                 productId: atomsArray[i].productId,
                 batchNumbers: atomsArray[i].batchNumbers[0],
+                "attributeSet.expDate": expDate,
                 currentInventory: warehouse.warehouseInventory,
               });
+
               if (batchDup) {
                 await AtomModel.updateOne(
                   { id: batchDup.id },
@@ -792,14 +836,6 @@ exports.addProductsToInventory = [
               }
             );
           }
-          // if (duplicateBatch) {
-          //   return apiResponse.ErrorResponse(
-          //     res,
-          //     responses(req.user.preferredLanguage).batchExists(
-          //       duplicateBatchNo
-          //     )
-          //   );
-          // }
           const event_data = {
             eventID: cuid(),
             eventTime: new Date().toISOString(),
@@ -843,6 +879,7 @@ exports.addProductsToInventory = [
           res.json(responses(req.user.preferredLanguage).no_permission);
         }
       });
+
     } catch (err) {
       console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
@@ -860,61 +897,70 @@ exports.addInventoriesFromExcel = [
         permissionRequired: ["addInventory"],
       };
       checkPermissions(permission_request, async (permissionResult) => {
-        if (permissionResult.success) {
-          const dir = `uploads`;
-          if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir);
-          }
-          const workbook = XLSX.readFile(req.file.path);
-          const data = XLSX.utils.sheet_to_json(
-            workbook.Sheets[workbook.SheetNames[0]],
-            { dateNF: "dd/mm/yyyy;@", cellDates: true, raw: false }
-          );
-
-          const formatedData = new Array();
-          for (const [index, prod] of data.entries()) {
-            const productCategory = prod?.['PRODUCT CATEGORY'] || prod?.['CATEGORIA DE PRODUCTO']
-            const productName = prod?.['PRODUCT NAME'] || prod?.['NOMBRE DEL PRODUCTO'];
-            const batchNumber = prod?.['BATCH NO'] || prod?.['LOT NUMBER'];
-            const manufacturerName = prod?.['MANUFACTURER'] || prod?.['FABRICANTE'];
-            const quantity = prod?.['QUANTITY'] || prod?.['CANTIDAD'] || 1;
-            const unitOfMeasure = prod?.['UNITS'] || prod?.['UNIDAD DE MEDIDA'];
-            const mfgDate = prod?.['MFG DATE'] || prod?.['FECHA DE FABRICACION'];
-            const expDate = prod?.['EXP DATE'] || prod?.['FECHA DE VENCIMIENTO'];
-            const product = await ProductModel.findOne({
-              name: productName?.trim()
-            });
-            if (product) {
-              formatedData[index] = {
-                productId: product.id,
-                type: product.type,
-                categories: productCategory,
-                productName: productName,
-                batchNumber: batchNumber,
-                manufacturer: manufacturerName,
-                quantity: quantity,
-                unitofMeasure: { id: unitOfMeasure, name: unitOfMeasure },
-                manufacturingDate: parse(mfgDate, "dd/MM/yyyy", new Date()),
-                expiryDate: parse(expDate, "dd/MM/yy", new Date()),
-              }
-            } else {
-              return apiResponse.ErrorResponse(
-                res,
-                "Product Doesn't exist in the inventory"
-              );
+        try {
+          if (permissionResult.success) {
+            const dir = `uploads`;
+            if (!fs.existsSync(dir)) {
+              fs.mkdirSync(dir);
             }
+            const workbook = XLSX.readFile(req.file.path);
+            const data = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {
+              dateNF: 'yyyy-mm-dd',
+              cellDates: true,
+              raw: false,
+            });
+
+            const formatedData = new Array();
+            for (const [index, prod] of data.entries()) {
+              const productCategory = prod?.["PRODUCT CATEGORY"] || prod?.["CATEGORIA DE PRODUCTO"];
+              const productName = prod?.["PRODUCT NAME"] || prod?.["NOMBRE DEL PRODUCTO"];
+              const batchNumber = prod?.["BATCH NO"] || prod?.["LOT NUMBER"];
+              const manufacturerName = prod?.["MANUFACTURER"] || prod?.["FABRICANTE"];
+              const quantity = prod?.["QUANTITY"] || prod?.["CANTIDAD"] || 1;
+              const unitOfMeasure = prod?.["UNITS"] || prod?.["UNIDAD DE MEDIDA"];
+              let mfgDate = prod?.["MFG DATE"] || prod?.["FECHA DE FABRICACION"];
+              let expDate = prod?.["EXP DATE"] || prod?.["FECHA DE VENCIMIENTO"];
+              const product = await ProductModel.findOne({
+                name: productName?.trim(),
+              });
+              if (product) {
+                formatedData[index] = {
+                  productId: product.id,
+                  type: product.type,
+                  categories: productCategory,
+                  productName: productName,
+                  batchNumber: batchNumber,
+                  manufacturer: manufacturerName,
+                  quantity: quantity,
+                  unitofMeasure: { id: unitOfMeasure, name: unitOfMeasure },
+                  ...(mfgDate ? { manufacturingDate: mfgDate } : {}),
+                  ...(expDate ? { expiryDate: expDate } : {}),
+                };
+              } else {
+                return apiResponse.ErrorResponse(res, "Product Doesn't exist in the inventory");
+              }
+            }
+            const validRecords = utility.excludeExpireProduct(formatedData);
+
+            const result = {
+              validRecords: validRecords,
+              invalidRecordsCount: formatedData.length - validRecords.length,
+            };
+
+            return apiResponse.successResponseWithData(
+              res,
+              responses(req.user.preferredLanguage).success,
+              result,
+            );
+          } else {
+            return apiResponse.ErrorResponse(
+              res,
+              responses(req.user.preferredLanguage).no_permission,
+            );
           }
-          const result = utility.excludeExpireProduct(formatedData);
-          return apiResponse.successResponseWithData(
-            res,
-            responses(req.user.preferredLanguage).success,
-            result
-          );
-        } else {
-          return apiResponse.ErrorResponse(
-            res,
-            responses(req.user.preferredLanguage).no_permission
-          );
+        } catch (err) {
+          console.log(err);
+          return apiResponse.ErrorResponse(res, err.message);
         }
       });
     } catch (err) {
@@ -1289,6 +1335,7 @@ exports.getProductListCounts = [
       const val = InventoryId[0]?.warehouseInventory;
       const productList = await InventoryModel.find({ id: val });
       const list = productList[0]?.inventoryDetails;
+      const atoms = await getRealTimeInventory(val);
 
       if (!list || !list?.length) {
         return apiResponse.successResponseWithData(res, []);
@@ -1307,11 +1354,13 @@ exports.getProductListCounts = [
           product[0] &&
           product[0].name
         ) {
+          const atomExists = atoms.find((atom) => atom._id === productId);
+          const qty = atomExists?.quantity || 0;
           productObj = {
             productCategory: product && product[0] && product[0].type,
             productName: product && product[0] && product[0].name,
             productId: product && product[0] && product[0].id,
-            quantity: (list && list[0] && list[j].quantity) || 0,
+            quantity: qty,
             manufacturer: product && product[0] && product[0].manufacturer,
             unitofMeasure: product && product[0] && product[0].unitofMeasure,
           };
@@ -2200,7 +2249,7 @@ exports.getBatchNearExpiration = [
 
       const today = new Date();
       const nextMonth = new Date();
-      nextMonth.setDate(today.getDate() + 30);
+      nextMonth.setDate(today.getDate() + 31);
 
       const warehouse = await WarehouseModel.findOne({ id: warehouseId });
       if (warehouse) {
@@ -2209,21 +2258,26 @@ exports.getBatchNearExpiration = [
             $match: {
               $and: [
                 {
-                  "attributeSet.expDate": {
-                    $gte: today.toISOString(),
-                    $lt: nextMonth.toISOString(),
-                  },
+                  $and: [
+                    { "attributeSet.expDate": { $gte: today } },
+                    { "attributeSet.expDate": { $lt: nextMonth } },
+                  ],
                 },
                 {
                   $expr: {
                     $in: [warehouse.warehouseInventory, "$inventoryIds"],
                   },
                 },
-                { "attributeSet.mfgDate": { $ne: "" } },
-                { "attributeSet.expDate": { $ne: "" } },
+                {
+                  $or: [
+                    { "attributeSet.expDate": { $exists: true } },
+                    { "attributeSet.expDate": { $ne: "" } },
+                  ],
+                },
               ],
             },
           },
+          { $sort: { "attributeSet.expDate": 1 } },
           {
             $lookup: {
               from: "products",
@@ -2262,23 +2316,24 @@ exports.getBatchExpired = [
         : (warehouseId = req.user.warehouseId);
       const warehouse = await WarehouseModel.findOne({ id: warehouseId });
       if (warehouse) {
+        let today = new Date();
         const result = await AtomModel.aggregate([
           {
             $match: {
               $and: [
                 {
                   "attributeSet.expDate": {
-                    $lt: new Date().toISOString(),
+                    $lt: today,
                   },
                 },
-                {
-                  $expr: {
-                    $in: [warehouse.warehouseInventory, "$inventoryIds"],
-                  },
-                },
+                { currentInventory: warehouse.warehouseInventory },
                 { batchNumbers: { $ne: "" } },
-                { "attributeSet.mfgDate": { $ne: "" } },
-                { "attributeSet.expDate": { $ne: "" } },
+                {
+                  $or: [
+                    { "attributeSet.expDate": { $exists: true } },
+                    { "attributeSet.expDate": { $ne: "" } },
+                  ],
+                },
               ],
             },
           },
@@ -2321,6 +2376,7 @@ exports.getBatchWarehouse = [
           $match: {
             productId: productId,
             currentInventory: inventoryId,
+            status: { $in: ["HEALTHY", "EXPIRED", "CONSUMED"] },
           },
         },
         {
@@ -2543,11 +2599,10 @@ exports.searchProduct = [
       checkPermissions(permission_request, async (permissionResult) => {
         if (permissionResult.success) {
           const { productName, productType } = req.query;
-          const warehouseId = req.query?.warehouseId || req.user.warehouseId;
+          const warehouseId = req.query.warehouseId || req.user.warehouseId;
           const warehouse = await WarehouseModel.findOne({ id: warehouseId });
           if (warehouse) {
             let elementMatchQuery = {};
-            // elementMatchQuery["id"] = warehouse.warehouseInventory;
             if (productName) {
               elementMatchQuery[`products.name`] = productName;
             }
@@ -2555,11 +2610,7 @@ exports.searchProduct = [
               elementMatchQuery[`products.type`] = productType;
             }
             const inventory = await InventoryModel.aggregate([
-              {
-                $match: {
-                  id: warehouse.warehouseInventory
-                }
-              },
+              { $match: { id: warehouse.warehouseInventory } },
               { $unwind: "$inventoryDetails" },
               {
                 $lookup: {
@@ -2571,26 +2622,18 @@ exports.searchProduct = [
               },
               { $unwind: "$products" },
               { $match: elementMatchQuery },
-              //   { $project:{
-              //     products:"",
-              //   }
-              // }
             ]).sort({ createdAt: -1 });
-            return apiResponse.successResponseWithData(
-              res,
-              "Inventory Details",
-              inventory
-            );
+            return apiResponse.successResponseWithData(res, "Inventory Details", inventory);
           } else {
             return apiResponse.ErrorResponse(
               res,
-              responses(req.user.preferredLanguage).warehouse_not_found
+              responses(req.user.preferredLanguage).warehouse_not_found,
             );
           }
         } else {
           return apiResponse.forbiddenResponse(
             res,
-            responses(req.user.preferredLanguage).no_permission
+            responses(req.user.preferredLanguage).no_permission,
           );
         }
       });
@@ -2725,7 +2768,6 @@ exports.autoCompleteSuggestions = [
           },
         },
       ]).sort({ createdAt: -1 });
-      // console.log( [...new Set([...suggestions1, ...suggestions2, ...suggestions3])])
       return apiResponse.successResponseWithData(
         res,
         "Autocorrect Suggestions",
@@ -2746,13 +2788,23 @@ exports.fetchBatchesOfInventory = [
       const warehouseId = wareId ? wareId : req.user.warehouseId;
       const warehouse = await WarehouseModel.findOne({ id: warehouseId });
       const inventoryId = warehouse.warehouseInventory;
-      const batches = await AtomModel.find({
-        productId: productId,
-        batchNumbers: { $nin: ["", "null", null] },
-        status: "HEALTHY",
-        currentInventory: inventoryId,
-        quantity: { $nin: [0] },
-      }).sort({ "attributeSet.expDate": 1 });
+      let today = new Date();
+      const payload = {
+        $and: [
+          { productId: productId },
+          { status: "HEALTHY" },
+          { quantity: { $gt: 0 } },
+          { currentInventory: inventoryId },
+          {
+            $or: [
+              { "attributeSet.expDate": { $exists: false } },
+              { "attributeSet.expDate": { $in: [null, ""] } },
+              { "attributeSet.expDate": { $gte: today } },
+            ],
+          },
+        ],
+      };
+      const batches = await AtomModel.find(payload).sort({ "attributeSet.expDate": 1 });
       return apiResponse.successResponseWithData(
         res,
         "Batches of product",
@@ -2779,10 +2831,14 @@ exports.reduceBatch = [
       const orgName = empData.name;
       const orgData = await OrganisationModel.findOne({ id: orgId });
       const address = orgData.postalAddress;
-      const { batchNumber, quantity } = req.query;
+      const { id, quantity, } = req.query;
+      const batchExists = await AtomModel.findOne({ id: { $in: [id] } });
+      if (batchExists.quantity < Math.abs(quantity)) {
+        return apiResponse.validationErrorWithData(res, "Insufficient quantity in batch!", {});
+      }
       const batch = await AtomModel.findOneAndUpdate(
         {
-          batchNumbers: { $in: [batchNumber] },
+          id: { $in: [id] },
         },
         { $inc: { quantity: -Math.abs(quantity || 0) } },
         { new: true }
@@ -2798,14 +2854,13 @@ exports.reduceBatch = [
         },
         { $inc: { "inventoryDetails.$.quantity": -Math.abs(quantity || 0) } }
       );
-
       var datee = new Date();
       datee = datee.toISOString();
       var evid = Math.random().toString(36).slice(2);
       let event_data = {
         eventID: null,
         eventTime: null,
-        transactionId: batchNumber,
+        transactionId: id,
         eventType: {
           primary: "BUY",
           description: "INVENTORY",
@@ -2837,7 +2892,7 @@ exports.reduceBatch = [
             quantityPurchased: quantity,
             products: {
               productId: batch.productId,
-              batchNumber: batchNumber,
+              id: id,
             },
             sender: {
               id: req.user.organisationId,

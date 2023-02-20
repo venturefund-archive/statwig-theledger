@@ -12,112 +12,122 @@ const RejectedApproval = require("../components/RejectedApproval");
 const AddUserEmail = require("../components/AddUser");
 const apiResponse = require("../helpers/apiResponse");
 const fs = require("fs");
-const moveFile = require("move-file");
 const { getLatLongByCity } = require("../helpers/getLatLong");
 const XLSX = require("xlsx");
 
 async function createWarehouse(warehouseExists, wareId, payload, employeeId) {
-  if (warehouseExists) {
-    await EmployeeModel.findOneAndUpdate(
-      { id: wareId },
-      { $push: { warehouseId: wareId } },
-    );
-  }
-  const invCounter = await CounterModel.findOneAndUpdate(
-    { "counters.name": "inventoryId" },
-    {
-      $inc: {
-        "counters.$.value": 1,
-      },
-    },
-    { new: true },
-  );
-  const inventoryId = invCounter.counters[7].format + invCounter.counters[7].value;
-  const inventoryResult = new InventoryModel({ id: inventoryId });
-  await inventoryResult.save();
-  const {
-    organisationId,
-    postalAddress,
-    title,
-    region,
-    country,
-    warehouseAddress,
-    supervisors,
-    employees,
-  } = payload;
-  const warehouseCounter = await CounterModel.findOneAndUpdate(
-    { "counters.name": "warehouseId" },
-    {
-      $inc: {
-        "counters.$.value": 1,
-      },
-    },
-    {
-      new: true,
-    },
-  );
-  const warehouseId = warehouseCounter.counters[3].format + warehouseCounter.counters[3].value;
+	try {
+		if (warehouseExists) {
+			await EmployeeModel.findOneAndUpdate({ id: wareId }, { $push: { warehouseId: wareId } });
+		} else {
+			const invCounter = await CounterModel.findOneAndUpdate(
+				{ "counters.name": "inventoryId" },
+				{
+					$inc: {
+						"counters.$.value": 1,
+					},
+				},
+				{ new: true },
+			);
+			const inventoryId = invCounter.counters[7].format + invCounter.counters[7].value;
+			const inventoryResult = new InventoryModel({ id: inventoryId });
+			await inventoryResult.save();
+			const {
+				organisationId,
+				postalAddress,
+				title,
+				region,
+				country,
+				warehouseAddress,
+				supervisors,
+				employees,
+			} = payload;
+			const warehouseCounter = await CounterModel.findOneAndUpdate(
+				{ "counters.name": "warehouseId" },
+				{
+					$inc: {
+						"counters.$.value": 1,
+					},
+				},
+				{
+					new: true,
+				},
+			);
+			const warehouseId = warehouseCounter.counters[3].format + warehouseCounter.counters[3].value;
 
-  const loc = await getLatLongByCity(warehouseAddress.city + "," + warehouseAddress.country);
-  const warehouse = new WarehouseModel({
-    id: warehouseId,
-    organisationId,
-    postalAddress,
-    title,
-    region: {
-      regionName: region,
-    },
-    country: {
-      countryId: "001",
-      countryName: country,
-    },
-    location: loc,
-    bottleCapacity: 0,
-    sqft: 0,
-    supervisors,
-    employees,
-    warehouseAddress,
-    warehouseInventory: inventoryResult.id,
-    status: "NOTVERIFIED",
-  });
-  await warehouse.save();
+			const loc = await getLatLongByCity(warehouseAddress.city + "," + warehouseAddress.country);
+			const warehouse = new WarehouseModel({
+				id: warehouseId,
+				organisationId,
+				postalAddress,
+				title,
+				region: {
+					regionName: region,
+				},
+				country: {
+					countryId: "001",
+					countryName: country,
+				},
+				location: loc,
+				bottleCapacity: 0,
+				sqft: 0,
+				supervisors,
+        employees,
+        warehouseAddress: {
+          firstLine: warehouseAddress.line1,
+          secondLine: "",
+          region: warehouseAddress.region,
+          city: warehouseAddress.city,
+          state: warehouseAddress.state,
+          country: warehouseAddress.country,
+          landmark: "",
+          zipCode: warehouseAddress.pincode,
+        },
+				warehouseInventory: inventoryResult.id,
+				status: "ACTIVE",
+			});
+			await warehouse.save();
 
-  const addr = `${warehouseAddress?.firstLine}, ${warehouseAddress?.city}, ${warehouseAddress?.state}, ${warehouseAddress?.zipCode}`;
-  const skipOrgRegistration = false;
-  await OrganisationModel.findOneAndUpdate(
-    {
-      id: organisationId,
-    },
-    {
-      $set: {
-        ...(skipOrgRegistration
-          ? {
-            postalAddress: addr,
-            country: warehouseAddress.country,
-            region: warehouseAddress.region,
-            status: "NOTVERIFIED",
-          }
-          : {}),
-      },
-      $push: {
-        warehouses: warehouseId,
-      },
-    },
-  );
+			const addr = `${warehouseAddress?.firstLine}, ${warehouseAddress?.city}, ${warehouseAddress?.state}, ${warehouseAddress?.zipCode}`;
+			const skipOrgRegistration = false;
+			await OrganisationModel.findOneAndUpdate(
+				{
+					id: organisationId,
+				},
+				{
+					$set: {
+						...(skipOrgRegistration
+							? {
+									postalAddress: addr,
+									country: warehouseAddress.country,
+									region: warehouseAddress.region,
+									status: "NOTVERIFIED",
+							  }
+							: {}),
+					},
+					$push: {
+						warehouses: warehouseId,
+					},
+				},
+			);
 
-  await EmployeeModel.findOneAndUpdate(
-    {
-      id: employeeId,
-    },
-    {
-      $set: {
-        role: "powerUser",
-      },
-      $push: {
-        pendingWarehouseId: warehouseId,
-      },
-    },
-  );
+			await EmployeeModel.findOneAndUpdate(
+				{
+					id: employeeId,
+				},
+				{
+					$set: {
+						role: "admin",
+					},
+					$addToSet: {
+						warehouseId: warehouseId,
+					},
+				},
+			);
+		}
+	} catch (err) {
+		throw err;
+	}
 }
 
 exports.getApprovals = [
@@ -128,10 +138,7 @@ exports.getApprovals = [
       const employees = await EmployeeModel.aggregate([
         {
           $match: {
-            $and: [
-              { accountStatus: "NOTAPPROVED" },
-              { organisationId: organisationId },
-            ],
+            $and: [{ accountStatus: "NOTAPPROVED" }, { organisationId: organisationId }],
           },
         },
         {
@@ -144,10 +151,11 @@ exports.getApprovals = [
         },
         {
           $unwind: {
-            path: "$orgDetails"
-          }
-        }
-      ])
+            path: "$orgDetails",
+          },
+        },
+        { $sort: { createdAt: -1 } },
+      ]);
       return apiResponse.successResponseWithData(
         req,
         res,
@@ -290,7 +298,7 @@ exports.addUser = [
         !req.body.emailId || req.body.emailId == "null"
           ? null
           : req.body.emailId;
-      const warehouse = req.body.warehouse;
+      const warehouse = req.body.warehouseId;
       const firstName = req.body.firstName;
       const lastName = req.body.lastName;
       // const firstName = email?.split("@")[0];
@@ -354,6 +362,7 @@ exports.addUser = [
         )
       return apiResponse.successResponse(req, res, "User Added");
     } catch (err) {
+      console.log(err);
       return apiResponse.ErrorResponse(req, res, err);
     }
   },
@@ -387,18 +396,10 @@ exports.activateUser = [
     try {
       const { organisationName } = req.user;
       const { id, role } = req.query;
-      const employee = await EmployeeModel.findOne({ id: id })
+      const employee = await EmployeeModel.findOne({ id: id });
       if (employee) {
-        if (
-          employee.isConfirmed &&
-          employee.accountStatus == "ACTIVE"
-        ) {
-          return apiResponse.successResponseWithData(
-            req,
-            res,
-            " User is already Active",
-            employee
-          );
+        if (employee.isConfirmed && employee.accountStatus == "ACTIVE") {
+          return apiResponse.successResponseWithData(req, res, " User is already Active", employee);
         } else {
           const emp = await EmployeeModel.findOneAndUpdate(
             { id: id },
@@ -409,8 +410,8 @@ exports.activateUser = [
                 role,
               },
             },
-            { new: true }
-          )
+            { new: true },
+          );
           const emailBody = RequestApproved({
             name: emp.firstName,
             organisation: organisationName,
@@ -419,14 +420,9 @@ exports.activateUser = [
             constants.appovalEmail.from,
             emp.emailId,
             constants.appovalEmail.subject,
-            emailBody
+            emailBody,
           );
-          return apiResponse.successResponseWithData(
-            req,
-            res,
-            `User Activated`,
-            emp
-          );
+          return apiResponse.successResponseWithData(req, res, `User Activated`, emp);
         }
       } else {
         return apiResponse.notFoundResponse(req, res, "User Not Found");
@@ -481,6 +477,7 @@ exports.deactivateUser = [
   },
 ];
 
+// LOOKS DUPLICATE, use the one in AuthController
 exports.addUsersFromExcel = [
   auth,
   async (req, res) => {
@@ -491,8 +488,7 @@ exports.addUsersFromExcel = [
         const dir = `uploads`;
         if (!fs.existsSync(dir))
           fs.mkdirSync(dir);
-        await moveFile(req.file.path, `${dir}/${req.file.originalname}`);
-        const workbook = XLSX.readFile(`${dir}/${req.file.originalname}`);
+        const workbook = XLSX.readFile(req.file.path);
         const sheet_name_list = workbook.SheetNames;
         let data = XLSX.utils.sheet_to_json(
           workbook.Sheets[sheet_name_list[0]],

@@ -4,9 +4,7 @@ import { useDispatch } from "react-redux";
 import {
   exportVaccinationList,
   exportVialsUtilised,
-  getAllVaccinationDetails,
   getAnalyticsWithFilters,
-  getVialsUtilised,
 } from "../../actions/lastMileActions";
 import AnalyticTiles from "../../shared/stats-tile/AnalyticTiles";
 import Filterbar from "./filterbar/Filterbar";
@@ -42,7 +40,7 @@ export default function LastmileCenteral(props) {
   const [analytics, setAnalytics] = useState();
   const [TableSwitch, setTableSwitch] = useState("today");
   const [filters, setFilters] = useState({});
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [resetFilters, toggleResetFilters] = useState(false);
 
   const [ButtonOpen, setButtonOpen] = useState(false);
@@ -73,48 +71,37 @@ export default function LastmileCenteral(props) {
 		dispatch(turnOff());
 	}, [TableSwitch]);
 
-  // useEffect(() => {
-  //   (async () => {
-	// 		dispatch(turnOn());
-	// 		const unitsUtilized = await getVialsUtilised(filters);
-	// 		if (unitsUtilized?.data?.success) {
-	// 			setUnitsUtilized(unitsUtilized.data.data);
-	// 		}
-
-	// 		const result = await getAllVaccinationDetails(filters);
-	// 		if (result?.data?.success) {
-	// 			setVaccinationList(result.data.data.vaccinationDetails);
-	// 			setTodaysVaccinationList(result.data.data.todaysVaccinationDetails);
-	// 			setAnalytics(result.data.data.analytics);
-	// 		}
-	// 		dispatch(turnOff());
-	// 	})();
-  // }, [filters, TableSwitch]);
-
   const exportVaccinationReport = async (type) => {
-    let data = filters;
-    data.reportType = type ? type : "excel";
-    data.today = TableSwitch === "today" ? true : false;
-
-    let result;
-    if(TableSwitch === "units") {
-      result = await exportVialsUtilised(data);
-    } else {
-      result = await exportVaccinationList(data);      
-    }
-    if (result?.data && result?.status === 200) {
-      const downloadUrl = window.URL.createObjectURL(new Blob([result.data]));
-      const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.setAttribute(
-				"download",
-				`${TableSwitch === "units" ? t("vialsutilized_report") : t("vaccination_report")}.${
-					type === "excel" ? "xlsx" : "pdf"
-				}`,
-			);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+    try {
+      dispatch(turnOn());
+      let data = filters;
+      data.reportType = type ? type : "excel";
+      data.today = TableSwitch === "today" ? true : false;
+  
+      let result;
+      if(TableSwitch === "units") {
+        result = await exportVialsUtilised(data, i18n.language);
+      } else {
+        result = await exportVaccinationList(data, i18n.language);
+      }
+      if (result?.data && result?.status === 200) {
+        const downloadUrl = window.URL.createObjectURL(new Blob([result.data]));
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.setAttribute(
+          "download",
+          `${TableSwitch === "units" ? t("vialsutilized_report") : t("vaccination_report")}.${
+            type === "excel" ? "xlsx" : "pdf"
+          }`,
+        );
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
+      dispatch(turnOff());
+    } catch(err) {
+      dispatch(turnOff());
+      console.log(err);
     }
   };
 
@@ -191,13 +178,13 @@ export default function LastmileCenteral(props) {
           />
         </div>
         {TableSwitch === "today" && (
-          <CenteralTodayTable t={t} filters={filters} />
+          <CenteralTodayTable t={t} i18n={i18n} filters={filters} />
         )}
         {TableSwitch === "total" && (
-          <CenteralTotalTable t={t} filters={filters} />
+          <CenteralTotalTable t={t} i18n={i18n} filters={filters} />
         )}
         {TableSwitch === "units" && (
-          <CenteralUnitsTable t={t} filters={filters} />
+          <CenteralUnitsTable t={t} i18n={i18n} filters={filters} />
         )}
       </div>
       <div className='LastmileCenteral--filter-wrapper'>

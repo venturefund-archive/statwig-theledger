@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
-const { customAlphabet } = require("nanoid");
-const nanoid = customAlphabet("1234567890", 10);
+const cuid = require("cuid");
 const RequestSchema = new mongoose.Schema(
   {
     from: {
@@ -33,7 +32,7 @@ const RequestSchema = new mongoose.Schema(
       enum: ["LOCATION_MISMATCH", "ORGANISATION_MISMATCH", "UNSUFFICIENT_ROLE"],
       required: true,
     },
-    id: { type: String, required: true, unique: true, default: () => nanoid() },
+    id: { type: String, required: true, unique: true, default: () => cuid() },
   },
   { timestamps: true }
 );

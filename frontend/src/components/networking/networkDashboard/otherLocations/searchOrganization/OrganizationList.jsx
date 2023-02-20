@@ -5,7 +5,8 @@ const OrganizationList = ({ orgName, user, orgId, setReportWarehouse }) => {
   useEffect(() => {
     (async () => {
       const warehouses = await getManufacturerWarehouses(orgId, "");
-      setWarehouses([...warehouses.data.warehouses]);
+      let warehouseArray = warehouses.data.warehouses;
+      setWarehouses(warehouseArray);
     })();
   }, []);
   const [toggleButton, setToggleButton] = useState(false);
@@ -40,6 +41,8 @@ const OrganizationList = ({ orgName, user, orgId, setReportWarehouse }) => {
               </button>
             </li>
           ))}
+           <br></br>
+
         </ul>
       )}
     </div>

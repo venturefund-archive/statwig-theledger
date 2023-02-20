@@ -44,6 +44,7 @@ import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "react-i18next";
 import EnglishFlag from "../../assets/files/images/flags/English.webp";
 import SpanishFlag from "../../assets/files/images/flags/Spanish.webp";
+import SearchIcon from '@mui/icons-material/Search';
 
 let useClickOutside = (handler) => {
   let domNode = useRef();
@@ -401,7 +402,7 @@ const Header = (props) => {
           <MenuOutlined className="hambergerMenu" />
 
           <ul className="navList">
-            {allowSearch && (
+          {allowSearch && (
               <li className="navItems">
                 <div
                   className="search-form"
@@ -411,28 +412,26 @@ const Header = (props) => {
                   <Autocomplete
                     {...defaultProps}
                     id="controlled-demo"
-                    value={searchString}
-                    disableClearable
-                    placeholder={search_placeholder}
-                    onFocus={(e) => (e.target.placeholder = "")}
-                    onBlur={(e) =>
-                      (e.target.placeholder = { search_placeholder })
-                    }
+                    // value={searchString}
+                    // disableClearable
+                    popupIcon={<SearchIcon />}
+                    // placeholder={search_placeholder}
+                    // onFocus={(e) => (e.target.placeholder = "")}
+                    // onBlur={(e) =>
+                    //   (e.target.placeholder = { search_placeholder })
+                    // }
                     onInputChange={(event, newInputValue) => {
-                      console.log({ newInputValue });
                       setSearch(newInputValue);
                       onSearchChange(newInputValue);
                     }}
                     onChange={(event, newValue) => {
-                      console.log("onchange ", newValue);
-                      // onSearchChange(newValue);
                       setSearchString(newValue._id);
                       onSeach(newValue._id);
                     }}
                     renderInput={(params) => (
                       <TextField
                         {...params}
-                        label={search_placeholder}
+                        placeholder={search_placeholder}
                         sx={{ width: "7rem" }}
                         margin="normal"
                         variant="outlined"

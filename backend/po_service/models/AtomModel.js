@@ -47,8 +47,10 @@ const AtomSchema = new mongoose.Schema(
       default: "HEALTHY",
     },
     attributeSet: {
-      mfgDate: { type: Date, default: Date.now },
-      expDate: Date,
+      mfgDate: Date,
+			mfgDateString: String,
+			expDate: Date,
+			expDateString: String,
     },
     eolInfo: {
       eolId: String,

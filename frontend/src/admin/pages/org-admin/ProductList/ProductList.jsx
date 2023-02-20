@@ -9,7 +9,12 @@ import Modal from "../../../../shared/modal";
 import SuccessPopup from "../../../shared/Popup/SuccessPopup";
 import { useSelector, useDispatch } from "react-redux";
 import { getOrgAnalytics } from "../../../actions/organisationActions";
-import { addNewProduct, getManufacturers, getProducts } from "../../../../actions/poActions";
+import {
+  addNewProduct,
+  getManufacturers,
+  getProducts,
+  validateProductName,
+} from "../../../../actions/poActions";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { createFilterOptions } from "@material-ui/lab";
@@ -17,99 +22,110 @@ import { createFilterOptions } from "@material-ui/lab";
 const filter = createFilterOptions();
 
 export default function AdminProductList(props) {
-	const { t } = useTranslation();
-	const dispatch = useDispatch();
-	const history = useHistory();
-	if (props.user.role !== "admin") {
-		history.push("/overview");
-	}
-	const [manufacturers, setManufacturers] = useState([]);
-	const [categories, setCategories] = useState([]);
-	const [openSuccessPopup, setOpenSuccessPopup] = useState(false);
-	const [openFailurePopup, setOpenFailurePopup] = useState(false);
+  const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const history = useHistory();
+  if (props.user.role !== "admin") {
+    history.push("/overview");
+  }
+  const [manufacturers, setManufacturers] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [openSuccessPopup, setOpenSuccessPopup] = useState(false);
+  const [openFailurePopup, setOpenFailurePopup] = useState(false);
 
-	const { orgAnalytics } = useSelector((state) => state.organisationReducer);
-	const { totalCount, activeCount, inactiveCount } = orgAnalytics;
+  const [lastManufacturerValue, setLastManufacturerValue] = useState("");
 
-	const {
-		control,
-		reset,
-		watch,
-		formState: { errors },
-		handleSubmit,
-	} = useForm({
-		productCategory: "",
-		productName: "",
-		manufacturer: "",
-		unitOfMeasure: "",
-	});
+  const { orgAnalytics } = useSelector((state) => state.organisationReducer);
+  const { totalCount, activeCount, inactiveCount } = orgAnalytics;
 
-	useEffect(() => {
-		dispatch(getOrgAnalytics());
-	}, [dispatch]);
+  const {
+    control,
+    reset,
+    watch,
+    setError,
+    formState: { errors },
+    handleSubmit,
+  } = useForm({
+    productCategory: "",
+    productName: "",
+    manufacturer: "",
+    unitOfMeasure: "",
+  });
 
-	useEffect(() => {
-		async function fetchData() {
-			const manufacturerResult = await getManufacturers();
-			setManufacturers(manufacturerResult);
-			const result = await getProducts();
-			const categoryArray = result.map((product) => product.type);
-			setCategories(
-				categoryArray
-					.filter((value, index, self) => self.indexOf(value) === index)
-					.map((item) => {
-						return item;
-					}),
-			);
-		}
-		fetchData();
-	}, []);
+  useEffect(() => {
+    dispatch(getOrgAnalytics());
+  }, [dispatch]);
 
-	async function addProduct(values) {
-		try {
-			const formData = new FormData();
-			formData.append("name", values.productName);
-			formData.append("shortName", values.productName);
-			formData.append("type", values.productCategory);
-			formData.append("externalId", Math.random().toString(36).substr(2, 7));
-			formData.append(
-				"unitofMeasure",
-				JSON.stringify({
-					id: values.unitOfMeasure,
-					name: values.unitOfMeasure,
-				}),
-			);
-			formData.append("manufacturer", values.manufacturer);
-			const res = await addNewProduct(formData);
-			if (res.success) {
-				setOpenSuccessPopup(true);
-				console.log("Calling reset!");
-				reset({
-					productCategory: "",
-					productName: "",
-					manufacturer: "",
-					unitOfMeasure: "",
-				});
-				console.log("watch - ", watch());
-			} else setOpenFailurePopup(true);
-		} catch (Err) {
-			setOpenFailurePopup(true);
-			console.log(Err);
-		}
-	}
+  useEffect(() => {
+    async function fetchData() {
+      const manufacturerResult = await getManufacturers();
+      setManufacturers(manufacturerResult);
+      const result = await getProducts();
+      const categoryArray = result.map((product) => product.type);
+      setCategories(
+        categoryArray
+          .filter((value, index, self) => self.indexOf(value) === index)
+          .map((item) => {
+            return item;
+          })
+      );
+    }
+    fetchData();
+  }, []);
 
-	const closeModal = () => {
-		setOpenSuccessPopup(false);
-		setOpenFailurePopup(false);
-	};
+  async function addProduct(values) {
+    try {
+      const productExists = await validateProductName(values.productName);
+      if (productExists) {
+        setError("productName", {
+          type: "custom",
+          message: "Duplicate product name!",
+        });
+      } else {
+        const formData = new FormData();
+        formData.append("name", values.productName);
+        formData.append("shortName", values.productName);
+        formData.append("type", values.productCategory);
+        formData.append("externalId", Math.random().toString(36).substr(2, 7));
+        formData.append(
+          "unitofMeasure",
+          JSON.stringify({
+            id: values.unitOfMeasure,
+            name: values.unitOfMeasure,
+          })
+        );
+        formData.append("manufacturer", values.manufacturer);
+        const res = await addNewProduct(formData);
+        if (res.success) {
+          setOpenSuccessPopup(true);
+          console.log("Calling reset!");
+          reset({
+            productCategory: "",
+            productName: "",
+            manufacturer: "",
+            unitOfMeasure: "",
+          });
+          console.log("watch - ", watch());
+        } else setOpenFailurePopup(true);
+      }
+    } catch (Err) {
+      setOpenFailurePopup(true);
+      console.log(Err);
+    }
+  }
 
-	return (
+  const closeModal = () => {
+    setOpenSuccessPopup(false);
+    setOpenFailurePopup(false);
+  };
+
+  return (
 		<>
 			<OrgHeader />
 			<section className="admin-page-layout">
 				<div className="admin-container">
-					<div className="admin-organization-container admin-section-space">
-						<div className="tiles-three-column-layout">
+					{/* <div className="admin-organization-container admin-section-space"> */}
+						{/* <div className="tiles-three-column-layout">
 							<AnalyticsCard
 								layout="type4"
 								icon="fa-building"
@@ -134,9 +150,9 @@ export default function AdminProductList(props) {
 								bgColor="analytic-bg-3"
 								textColor="analytic-text-3"
 							/>
-						</div>
+						</div> */}
 						<div className="product-list-two-column">
-							<ProductTable t={t} productAdded={openSuccessPopup} />
+							<ProductTable t={t} productAdded={openSuccessPopup}  />
 							<div className="add-product-container">
 								<form onSubmit={handleSubmit(addProduct)}>
 									<div className="add-product-card">
@@ -172,7 +188,10 @@ export default function AdminProductList(props) {
 															{...params}
 															label={t("product_category")}
 															error={Boolean(errors.productCategory)}
-															helperText={errors.productCategory && "Product Category is required!"}
+															helperText={
+																errors.productCategory &&
+																`${t("product_category")} ${t("is_required")}!`
+															}
 														/>
 													)}
 												/>
@@ -187,11 +206,14 @@ export default function AdminProductList(props) {
 													fullWidth
 													variant="outlined"
 													label={t("product_name")}
-													multiline
 													{...field}
 													value={field.value ? field.value : ""}
 													error={Boolean(errors.productName)}
-													helperText={errors.productName && "Product Name is required!"}
+													helperText={
+														errors.productName?.type === "required"
+															? `${t("product_name")} ${t("is_required")}!`
+															: errors.productName?.message
+													}
 												/>
 											)}
 										/>
@@ -207,11 +229,14 @@ export default function AdminProductList(props) {
 													{...field}
 													value={
 														typeof field.value === "string"
-															? manufacturers.find((manufacturer) => manufacturer === field.value)
+															? field.value === lastManufacturerValue
+																? field.value
+																: manufacturers.find((manufacturer) => manufacturer === field.value)
 															: field.value || null
 													}
 													onChange={(event, value) => {
 														field.onChange(value);
+														setLastManufacturerValue(value);
 													}}
 													filterOptions={(options, params) => {
 														const filtered = filter(options, params);
@@ -227,7 +252,9 @@ export default function AdminProductList(props) {
 															{...params}
 															label={t("manufacturer")}
 															error={Boolean(errors.manufacturer)}
-															helperText={errors.manufacturer && "Manufacturer is required!"}
+															helperText={
+																errors.manufacturer && `${t("manufacturer")} ${t("is_required")}!`
+															}
 														/>
 													)}
 												/>
@@ -242,11 +269,12 @@ export default function AdminProductList(props) {
 													fullWidth
 													variant="outlined"
 													label={t("unit_of_measure")}
-													multiline
 													{...field}
 													value={field.value ? field.value : ""}
 													error={Boolean(errors.unitOfMeasure)}
-													helperText={errors.unitOfMeasure && "Unit Of Measure is required!"}
+													helperText={
+														errors.unitOfMeasure && `${t("unit_of_measure")} ${t("is_required")}!`
+													}
 												/>
 											)}
 										/>
@@ -257,7 +285,7 @@ export default function AdminProductList(props) {
 								</form>
 							</div>
 						</div>
-					</div>
+					{/* </div> */}
 				</div>
 			</section>
 			{openSuccessPopup && (

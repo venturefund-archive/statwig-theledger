@@ -10,6 +10,3 @@
 @import url("./vl-guide/colors.css");
 @import url("./vl-guide/icon.css");
 @import url("./vl-guide/input.css");
-
-/* Util Classes */
-@import url("./vl-utils/scrollbar.css");

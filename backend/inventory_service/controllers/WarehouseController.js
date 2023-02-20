@@ -293,67 +293,66 @@ async function DistributorFilterList(organisationId, type, regExp) {
 }
 
 async function GoverningBodyMapLocations(myOrgId, warehouseOrg, countryName) {
-  let matchQuery = {};
-  let queryObj = {};
-  if (countryName && countryName !== "undefined" && countryName !== "") queryObj[`country.countryName`] = countryName;
-  if (warehouseOrg) matchQuery[`organisationId`] = warehouseOrg
-  const warehouses = await WarehouseModel.aggregate([
-    {
-      $match: {
-        ...matchQuery,
-        ...queryObj,
-        status: "ACTIVE"
-      }
-    },
-    {
-      $lookup: {
-        from: "organisations",
-        localField: "organisationId",
-        foreignField: "id",
-        as: "orgData",
-      },
-    },
-    {
-      $unwind: "$orgData",
-    },
-    {
-      $group: {
-        _id: null,
-        warehouses: {
-          $addToSet: {
-            warehouseId: "$id",
-            orgId: "$organisationId",
-            orgName: "$orgData.name",
-            city: "$warehouseAddress.city",
-            title: "$title",
-            location: "$location",
-            region: "$region",
-            country: "$country",
-          },
-        },
-      },
-    },
-    {
-      $facet: {
-        warehouses: [],
-        myLocations: [{
-          $match: {
-            organisationId: myOrgId,
-          },
-        }],
-        partnerLocations: [
-          {
-            $match: {
-              organisationId: {
-                $ne: myOrgId,
-              }
-            }
-          }
-        ]
-      }
-    }
-  ])
-  return warehouses;
+	let matchQuery = {};
+	let queryObj = {};
+	if (countryName && countryName !== "undefined" && countryName !== "")
+		queryObj[`country.countryName`] = countryName;
+  if (warehouseOrg) matchQuery[`organisationId`] = warehouseOrg;
+  
+	const warehouses = await WarehouseModel.aggregate([
+		{
+			$match: {
+				...matchQuery,
+				...queryObj,
+				status: "ACTIVE",
+			},
+		},
+		{
+			$lookup: {
+				from: "organisations",
+				localField: "organisationId",
+				foreignField: "id",
+				as: "orgData",
+			},
+		},
+		{
+			$unwind: "$orgData",
+		},
+		{
+			$project: {
+				warehouseId: "$id",
+				orgId: "$organisationId",
+				orgName: "$orgData.name",
+				city: "$warehouseAddress.city",
+				title: "$title",
+				location: "$location",
+				region: "$region",
+				country: "$country",
+			},
+		},
+		{
+			$facet: {
+				warehouses: [],
+				myLocations: [
+					{
+						$match: {
+							orgId: myOrgId,
+						},
+					},
+				],
+				partnerLocations: [
+					{
+						$match: {
+							orgId: {
+								$ne: myOrgId,
+							},
+						},
+					},
+				],
+			},
+		},
+	]);
+	return warehouses;
 }
 
 async function GoverningBodyFilterList(type, regExp) {
@@ -574,21 +573,21 @@ exports.getManufacturerWarehouses = [
           countryName
         );
         const response = {
-          partnerLocations: warehouses[0]?.partnerLocations[0]?.warehouses?.length,
-          myLocations: warehouses[0]?.myLocations[0]?.warehouses?.length,
+          partnerLocations: warehouses[0]?.partnerLocations?.length,
+          myLocations: warehouses[0]?.myLocations?.length,
         };
         if (partnerLocation) {
-          response.warehouses = warehouses[0]?.partnerLocations[0]?.warehouses;
+          response.warehouses = warehouses[0]?.partnerLocations;
         } else if (mylocationFilter) {
-          response.warehouses = warehouses[0]?.myLocations[0]?.warehouses;
+          response.warehouses = warehouses[0]?.myLocations;
         } else {
-          response.warehouses = warehouses[0]?.warehouses[0]?.warehouses;
+          response.warehouses = warehouses[0]?.warehouses;
         }
         return apiResponse.successResponseWithData(
-          res,
-          "List of warehouses - Governing Body View",
-          response
-        );
+					res,
+					"List of warehouses - Governing Body View",
+					response,
+				);
       } else {
         const isDist = organisation?.type === "DISTRIBUTORS" || organisation?.type === "DROGUERIA" ? true : false;
         if (isDist) {
