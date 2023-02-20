@@ -924,24 +924,6 @@ exports.addInventoriesFromExcel = [
 								name: productName?.trim(),
 							});
 							if (product) {
-                let today = new Date();
-                today = new Date(
-									Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()),
-                );
-								if (mfgDate) {
-                  mfgDate = new Date(mfgDate);
-                  // Set local date to end of day! Two sets on purpose
-                  mfgDate.setHours(0, 0, 0, 0);
-                  // mfgDate.setHours(23, 59, 59, 999);
-
-								}
-								if (expDate) {
-                  expDate = new Date(expDate);
-
-                  // Set local date to end of day! Two sets on purpose
-                  expDate.setHours(0, 0, 0, 0);
-                  // expDate.setHours(23, 59, 59, 0);
-								}
 								formatedData[index] = {
 									productId: product.id,
 									type: product.type,
