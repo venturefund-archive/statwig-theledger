@@ -401,18 +401,19 @@ async function poUpdate(id, quantity, poId, shipmentStatus, actor) {
   }
 }
 
-const shipmentUpdate = async (id, quantity, shipmentId) => {
-  await ShipmentModel.updateOne(
+const shipmentUpdate = async (id, quantity, shipmentId, atomId) => {
+  let shipmentUpdated = await ShipmentModel.findOneAndUpdate(
     {
-      id: shipmentId,
-      "products.productID": id,
+      $and: [{ id: shipmentId }, { products: { $elemMatch: { productID: id, atomId: atomId } } }],
     },
     {
       $inc: {
         "products.$.productQuantityDelivered": quantity,
       },
     },
-    }
+    {
+      new: true,
+    },
   );
 };
 
@@ -627,42 +628,46 @@ exports.createShipment = [
         if (po == null) {
           return apiResponse.ErrorResponse(
             res,
-            responses(req.user.preferredLanguage).orderid_not_defined
+            responses(req.user.preferredLanguage).orderid_not_defined,
           );
         }
         let quantityMismatch = false;
+        let missingProducts = false;
+
+        const shippedProductsMap = data.products.reduce((map, p) => {
+          map[p.productID] = (map[p.productID] || 0) + p.productQuantity;
+          return map;
+        }, {});
+
         po.products.every((product) => {
-          data.products.every((p) => {
-            if (product.id === p.productID) {
-              const po_product_quantity =
-                product.productQuantity || product.quantity;
-              const alreadyShipped =
-                parseInt(product.productQuantityShipped || 0) +
-                parseInt(product.productQuantityDelivered || 0) || null;
-              let shipment_product_qty;
-              if (alreadyShipped) {
-                shipment_product_qty =
-                  parseInt(p.productQuantity) + parseInt(alreadyShipped);
-              } else {
-                shipment_product_qty = p.productQuantity;
-              }
-              if (
-                parseInt(shipment_product_qty, 10) <
-                parseInt(po_product_quantity, 10)
-              ) {
-                quantityMismatch = true;
-                console.log("quantityMismatch is ", quantityMismatch);
-                return false;
-              } else if (
-                parseInt(shipment_product_qty) === parseInt(po_product_quantity)
-              ) {
-                quantityMismatch = false;
-              }
-            }
-          });
+          const poQuantity = product.productQuantity || product.quantity;
+
+          const alreadyShipped =
+            parseInt(product?.productQuantityShipped || 0) +
+            parseInt(product?.productQuantityDelivered || 0);
+
+          if (poQuantity === alreadyShipped) {
+            return true;
+          }
+
+          const shippedQuantity = alreadyShipped
+            ? parseInt(shippedProductsMap[product.id]) + parseInt(alreadyShipped)
+            : shippedProductsMap[product.id] || 0;
+
+          if (!shippedQuantity) {
+            missingProducts = true;
+            return false;
+          }
+
+          if (shippedQuantity < poQuantity) {
+            quantityMismatch = true;
+            return false;
+          }
+
+          return true;
         });
 
-        if (quantityMismatch) {
+        if (quantityMismatch || missingProducts) {
           if (po.poStatus === "CREATED" || po.poStatus === "ACCEPTED") {
             let date = new Date(po.createdAt);
             let milliseconds = date.getTime();
@@ -681,7 +686,7 @@ exports.createShipment = [
                 $set: {
                   totalProcessingTime: prevOrderCount + orderProcessingTime,
                 },
-              }
+              },
             );
           }
           po.poStatus = "TRANSIT&PARTIALLYFULFILLED";
@@ -704,7 +709,7 @@ exports.createShipment = [
                 $set: {
                   totalProcessingTime: prevOrderCount + orderProcessingTime,
                 },
-              }
+              },
             );
           }
           po.poStatus = "TRANSIT&FULLYFULFILLED";
@@ -718,12 +723,12 @@ exports.createShipment = [
             $push: {
               shipments: data.id,
             },
-          }
+          },
         );
         if (poidupdate == null) {
           return apiResponse.ErrorResponse(
             res,
-            responses(req.user.preferredLanguage).product_not_updated
+            responses(req.user.preferredLanguage).product_not_updated,
           );
         }
       }
@@ -1426,44 +1431,63 @@ exports.receiveShipment = [
 
         if (shipmentInfo) {
           const shipmentProducts = shipmentInfo.products;
+
+          let shippedQuantity = 0;
+          let receivedQuantity = 0;
+
+          //Creating a map to store the productQuantity for each product
+          const shippedProductMap = new Map();
+          const receivedProductMap = new Map();
+
           for (const product of shipmentProducts) {
-            const combinedShipmentProduct = shipmentProducts.filter(ele => ele.productID === product.productID && (ele?.batchNumber == product?.batchNumber))
-            console.log("combined Shipment", combinedShipmentProduct)
-            productNumber = productNumber + 1;
-            for (const receivedProduct of receivedProducts) {
-              if (product.productID === receivedProduct.productID && (product?.batchNumber == receivedProduct?.batchNumber || !product?.batchNumber)) {
-                const combinedReceivedProduct = receivedProducts.filter(ele => ele.productID === product.productID && (ele?.batchNumber == product?.batchNumber))
-                console.log("combined Received", combinedReceivedProduct)
-                console.log("Received", receivedProduct)
-                // actuallyShippedQuantity = product.productQuantity;
-                // const receivedQuantity = receivedProduct.productQuantity;
-                actuallyShippedQuantity = combinedShipmentProduct.reduce((a, curr) => a + curr["productQuantity"], 0);
-                const receivedQuantity = combinedReceivedProduct.reduce((a, curr) => a + curr["productQuantity"], 0);
-                console.log(receivedQuantity, actuallyShippedQuantity)
-                if (receivedQuantity > actuallyShippedQuantity)
-                  throw new Error(
-                    responses(req.user.preferredLanguage).rec_quantity_error
-                  );
-                const quantityDifference =
-                  actuallyShippedQuantity - receivedQuantity;
-                const rejectionRate =
-                  (quantityDifference / actuallyShippedQuantity) * 100;
-                shipmentProducts[productNumber].quantityDelivered =
-                  receivedQuantity;
-                shipmentProducts[productNumber].rejectionRate = rejectionRate;
-                await ShipmentModel.updateOne(
-                  {
-                    id: shipmentID,
-                    "products.productID": product.productID,
-                  },
-                  {
-                    $set: {
-                      "products.$.rejectionRate": rejectionRate,
-                    },
-                  }
-                )
-              }
+            //Storing productQuantity for each product
+            const key = product.productID + "-" + product.batchNumber + "-" + product.atomId;
+            if (shippedProductMap.has(key)) {
+              shippedProductMap.set(key, shippedProductMap.get(key) + product.productQuantity);
+            } else {
+              shippedProductMap.set(key, product.productQuantity);
             }
+          }
+
+          for (const product of receivedProducts) {
+            //Storing productQuantity for each product
+            const key = product.productID + "-" + product.batchNumber + "-" + product.atomId;
+            if (receivedProductMap.has(key)) {
+              receivedProductMap.set(key, receivedProductMap.get(key) + product.productQuantity);
+            } else {
+              receivedProductMap.set(key, product.productQuantity);
+            }
+          }
+
+          for (const product of shipmentProducts) {
+            const key = product.productID + "-" + product.batchNumber + "-" + product.atomId;
+            if (shippedProductMap.has(key)) {
+              shippedQuantity = shippedProductMap.get(key);
+            }
+            if (receivedProductMap.has(key)) {
+              receivedQuantity = receivedProductMap.get(key);
+            }
+
+            if (receivedQuantity > shippedQuantity) {
+              throw new Error(responses(req.user.preferredLanguage).rec_quantity_error);
+            }
+            const quantityDifference = shippedQuantity - receivedQuantity;
+            const rejectionRate = (quantityDifference / shippedQuantity) * 100;
+            product.quantityDelivered = receivedQuantity;
+            product.rejectionRate = rejectionRate;
+            await ShipmentModel.updateOne(
+              {
+                id: shipmentID,
+                "products.productID": product.productID,
+                "products.batchNumber": product.batchNumber,
+                "products.atomId": product.atomId,
+              },
+              {
+                $set: {
+                  "products.$.rejectionRate": rejectionRate,
+                },
+              },
+            );
           }
         }
         var flag = "Y";
@@ -1493,6 +1517,9 @@ exports.receiveShipment = [
           const po = await RecordModel.findOne({
             id: data.poId,
           });
+          if (!po) {
+            throw new Error("Purchase order does not exist!");
+          }
           let quantityMismatch = false;
           let missingProducts = false;
           const receivedProductsMap = receivedProducts.reduce((map, p) => {
@@ -1546,51 +1573,77 @@ exports.receiveShipment = [
           var shipmentRejectionRate = 0;
           for (count = 0; count < products.length; count++) {
             var shipmentProducts = shipmentInfo.products;
-            totalProducts =
-              totalProducts + shipmentProducts[count].productQuantity;
+            totalProducts = totalProducts + shipmentProducts[count].productQuantity;
             totalReturns = totalReturns + products[count].productQuantity;
-            shipmentRejectionRate =
-              ((totalProducts - totalReturns) / totalProducts) * 100;
+            shipmentRejectionRate = ((totalProducts - totalReturns) / totalProducts) * 100;
             products[count]["productId"] = products[count].productID;
+
             await inventoryUpdate(
               products[count].productID,
               products[count].productQuantity,
               suppInventoryId,
               recvInventoryId,
               data.poId,
-              "RECEIVED"
+              "RECEIVED",
             );
+
             shipmentUpdate(
               products[count].productID,
               products[count].productQuantity,
               data.id,
-              "RECEIVED"
+              products[count].atomId,
+              "RECEIVED",
             );
+
             if (flag == "Y" && data.poId != null) {
               await poUpdate(
                 products[count].productId,
                 products[count].productQuantity,
                 data.poId,
                 "RECEIVED",
-                req.user
+                req.user,
               );
             }
-            if (shipmentRejectionRate > 0) { // partial Receive Shipment
+
+            const atomInTransit = await AtomModel.findOne({
+              id: products[count].atomId,
+              batchNumbers: products[count].batchNumber,
+              currentInventory: recvInventoryId,
+              currentShipment: shipmentID,
+              status: "TRANSIT",
+            });
+
+            let atomInTransitDate = atomInTransit?.attributeSet?.expDate;
+
+            const atomExists = await AtomModel.findOne({
+              batchNumbers: products[count].batchNumber,
+              productId: products[count].productId,
+              currentInventory: recvInventoryId,
+              "attributeSet.expDate": atomInTransitDate,
+              status: { $in: ["HEALTHY", "CONSUMED", "EXPIRED"] },
+            });
+
+            if (shipmentRejectionRate > 0) {
+              // partial Receive Shipment
               const lostAtom = await AtomModel.findOneAndUpdate(
                 {
+                  id: products[count].atomId,
                   batchNumbers: products[count].batchNumber,
                   currentInventory: recvInventoryId,
                   currentShipment: shipmentID,
-                  status: "TRANSIT"
+                  status: "TRANSIT",
                 },
                 {
                   $inc: {
                     quantity: -parseInt(products[count].productQuantity),
                   },
+                  $set: {
+                    status: "LOST",
+                  },
                 },
                 {
-                  new: true
-                }
+                  new: true,
+                },
               );
 
               const newAtom = new AtomModel({
@@ -1613,27 +1666,83 @@ exports.receiveShipment = [
                 eolInfo: lostAtom?.eolInfo,
                 comments: lostAtom?.comments,
               });
+
+              if (atomExists) {
+                newAtom.status = "MERGED";
+                const shipmentIds = newAtom?.shipmentIds || [];
+                await AtomModel.findOneAndUpdate(
+                  { id: atomExists.id },
+                  {
+                    $inc: {
+                      quantity: parseInt(products[count].productQuantity),
+                    },
+                    $set: {
+                      currentShipment: null,
+                      status: "HEALTHY",
+                    },
+                    $addToSet: {
+                      shipmentIds: { $each: shipmentIds },
+                    },
+                  },
+                );
+              }
+
               await newAtom.save();
-            }
-            else {  // Complete receive shipment
-              await AtomModel.updateOne(
-                {
-                  batchNumbers: products[count].batchNumber,
-                  currentInventory: recvInventoryId,
-                  quantity: products[count].productQuantity,
-                  currentShipment: shipmentID,
-                  status: "TRANSIT"
-                },
-                {
-                  $addToSet: {
-                    inventoryIds: recvInventoryId,
+            } else {
+              // Complete receive shipment
+              if (atomExists) {
+                const newAtom = await AtomModel.updateOne(
+                  {
+                    id: products[count].atomId,
+                    batchNumbers: products[count].batchNumber,
+                    currentInventory: recvInventoryId,
+                    quantity: products[count].productQuantity,
+                    currentShipment: shipmentID,
+                    status: "TRANSIT",
                   },
-                  $set: {
-                    status: "HEALTHY",
-                    currentShipment: null,
+                  {
+                    $set: {
+                      status: "MERGED",
+                    },
                   },
-                }
-              );
+                );
+                const shipmentIds = newAtom?.shipmentIds || [];
+                await AtomModel.findOneAndUpdate(
+                  { id: atomExists.id },
+                  {
+                    $inc: {
+                      quantity: parseInt(products[count].productQuantity),
+                    },
+                    $set: {
+                      currentShipment: null,
+                      status: "HEALTHY",
+                    },
+                    $addToSet: {
+                      shipmentIds: { $each: shipmentIds },
+                    },
+                  },
+                );
+              } else {
+                await AtomModel.updateOne(
+                  {
+                    id: products[count].atomId,
+                    batchNumbers: products[count].batchNumber,
+                    currentInventory: recvInventoryId,
+                    quantity: products[count].productQuantity,
+                    currentShipment: shipmentID,
+                    status: "TRANSIT",
+                  },
+                  {
+                    $addToSet: {
+                      inventoryIds: recvInventoryId,
+                    },
+                    $set: {
+                      status: "HEALTHY",
+                      currentShipment: null,
+                    },
+                  },
+                );
+              }
             }
           }
           let Upload = null;
@@ -2430,6 +2539,7 @@ exports.viewShipment = [
               id: element.productID,
             });
             element.unitofMeasure = product.unitofMeasure;
+
             // const batch = await AtomModel.findOne({
             // 	batchNumbers: element.batchNumber,
             // 	$or: [
@@ -2444,23 +2554,22 @@ exports.viewShipment = [
             element.mfgDate = element?.attributeSet?.mfgDate;
             element.expDate = element?.attributeSet?.expDate;
           });
-        });
-      return apiResponse.successResponseWithData(
-        res,
-        "View Shipment",
-        Shipment
-      );
-    } else {
-      return apiResponse.forbiddenResponse(
-        res,
-        "User does not have enough Permissions"
-      );
-    }
-  });
+          return apiResponse.successResponseWithData(
+            res,
+            "View Shipment",
+            Shipment
+          );
+        } else {
+          return apiResponse.forbiddenResponse(
+            res,
+            "User does not have enough Permissions"
+          );
+        }
+      });
     } catch (err) {
-  console.log(err);
-  return apiResponse.ErrorResponse(res, err.message);
-}
+      console.log(err);
+      return apiResponse.ErrorResponse(res, err.message);
+    }
   },
 ];
 
@@ -4346,12 +4455,7 @@ exports.exportInboundShipments = [
         let rowData;
         for (const row of inboundShipmentsRes) {
           for (const product of row.products) {
-            const receiverAtom = await AtomModel.findOne({
-              batchNumbers: product.batchNumber,
-              currentInventory: row.receiver.warehouse.warehouseInventory,
-              currentShipment: row.id,
-              status: "TRANSIT",
-            });
+            let receiverAtom = await AtomModel.findOne({ id: product.atomId });
             rowData = {
               id: row.id,
               poId: row.poId,
@@ -4516,13 +4620,7 @@ exports.exportOutboundShipments = [
         let rowData;
         for (const row of outboundShipmentsRes) {
           for (const product of row.products) {
-            let receiverAtom = await AtomModel.findOne({
-              batchNumbers: product.batchNumber,
-              currentInventory: row.receiver.warehouse.warehouseInventory,
-              currentShipment: row.id,
-              status: "TRANSIT",
-            });
-
+            let receiverAtom = await AtomModel.findOne({ id: product.atomId });
             rowData = {
               id: row.id,
               poId: row.poId,
@@ -5570,6 +5668,84 @@ exports.sensorHistory = [
           avg,
         },
       });
+    } catch (err) {
+      console.log(err);
+      return apiResponse.ErrorResponse(res, err.message);
+    }
+  },
+];
+
+
+/**
+ * API LINK
+ * http://localhost:3002/shipmentmanagement/api/shipment/syncAtoms
+ */
+exports.syncAtoms = [
+  async (req, res) => {
+    try {
+      const atomsWithExp = await AtomModel.aggregate([
+        { $match: { status: "HEALTHY" } },
+        { $sort: { createdAt: 1 } },
+        { $unwind: { path: "$batchNumbers" } },
+        {
+          $group: {
+            _id: {
+              batch: "$batchNumbers",
+              productId: "$productId",
+              currentInventory: "$currentInventory",
+              expDate: "$attributeSet.expDate",
+            },
+            atoms: { $addToSet: "$$ROOT" },
+          },
+        },
+        { $match: { $expr: { $gt: [{ $size: "$atoms" }, 1] } } },
+      ]);
+
+      const atomsWithoutExp = await AtomModel.aggregate([
+        { $match: { status: "HEALTHY", "attributeSet.expDate": { $exists: false } } },
+        { $sort: { createdAt: 1 } },
+        { $unwind: { path: "$batchNumbers" } },
+        {
+          $group: {
+            _id: {
+              batch: "$batchNumbers",
+              productId: "$productId",
+              currentInventory: "$currentInventory",
+            },
+            atoms: { $addToSet: "$$ROOT" },
+          },
+        },
+        { $match: { $expr: { $gt: [{ $size: "$atoms" }, 1] } } },
+      ]);
+
+      const allGroups = [...atomsWithExp, ...atomsWithoutExp];
+
+      const atomsToMerge = [];
+
+      for (let i = 0; i < allGroups.length; ++i) {
+        let currAtoms = allGroups[i].atoms;
+        let atomToUpdate = currAtoms[0];
+        currAtoms.splice(0, 1);
+
+        currAtoms.forEach((atom) => {
+          atomToUpdate.quantity += atom.quantity;
+          atomToUpdate.shipmentIds.push(...atom.shipmentIds);
+          atomsToMerge.push(atom.id);
+        });
+
+        const updatedAtom = await AtomModel.findOneAndUpdate(
+          { id: atomToUpdate.id },
+          {
+            $set: { quantity: atomToUpdate.quantity },
+            $addToSet: { shipmentIds: { $each: atomToUpdate.shipmentIds } },
+          },
+          { new: true },
+        );
+      }
+
+      await AtomModel.updateMany({ id: { $in: atomsToMerge } }, { $set: { status: "MERGED" } });
+
+      return apiResponse.successResponse(res, "Success!");
     } catch (err) {
       console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
