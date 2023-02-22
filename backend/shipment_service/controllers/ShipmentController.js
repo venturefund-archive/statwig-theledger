@@ -402,19 +402,19 @@ async function poUpdate(id, quantity, poId, shipmentStatus, actor) {
 }
 
 const shipmentUpdate = async (id, quantity, shipmentId, atomId) => {
-	let shipmentUpdated = await ShipmentModel.findOneAndUpdate(
-		{
-			$and: [{ id: shipmentId }, { products: { $elemMatch: { productID: id, atomId: atomId } } }],
-		},
-		{
-			$inc: {
-				"products.$.productQuantityDelivered": quantity,
-			},
-		},
-		{
-			new: true,
-		},
-	);
+  let shipmentUpdated = await ShipmentModel.findOneAndUpdate(
+    {
+      $and: [{ id: shipmentId }, { products: { $elemMatch: { productID: id, atomId: atomId } } }],
+    },
+    {
+      $inc: {
+        "products.$.productQuantityDelivered": quantity,
+      },
+    },
+    {
+      new: true,
+    },
+  );
 };
 
 async function userShipments(mode, warehouseId, skip, limit) {
@@ -622,116 +622,116 @@ exports.createShipment = [
       }
 
       if (flag == "Y") {
-				const po = await RecordModel.findOne({
-					id: data.poId,
-				});
-				if (po == null) {
-					return apiResponse.ErrorResponse(
-						res,
-						responses(req.user.preferredLanguage).orderid_not_defined,
-					);
-				}
-				let quantityMismatch = false;
-				let missingProducts = false;
+        const po = await RecordModel.findOne({
+          id: data.poId,
+        });
+        if (po == null) {
+          return apiResponse.ErrorResponse(
+            res,
+            responses(req.user.preferredLanguage).orderid_not_defined,
+          );
+        }
+        let quantityMismatch = false;
+        let missingProducts = false;
 
-				const shippedProductsMap = data.products.reduce((map, p) => {
-					map[p.productID] = (map[p.productID] || 0) + p.productQuantity;
-					return map;
+        const shippedProductsMap = data.products.reduce((map, p) => {
+          map[p.productID] = (map[p.productID] || 0) + p.productQuantity;
+          return map;
         }, {});
 
-				po.products.every((product) => {
-					const poQuantity = product.productQuantity || product.quantity;
+        po.products.every((product) => {
+          const poQuantity = product.productQuantity || product.quantity;
 
-					const alreadyShipped =
-						parseInt(product?.productQuantityShipped || 0) +
-						parseInt(product?.productQuantityDelivered || 0);
+          const alreadyShipped =
+            parseInt(product?.productQuantityShipped || 0) +
+            parseInt(product?.productQuantityDelivered || 0);
 
-					if (poQuantity === alreadyShipped) {
-						return true;
-					}
+          if (poQuantity === alreadyShipped) {
+            return true;
+          }
 
-					const shippedQuantity = alreadyShipped
-						? parseInt(shippedProductsMap[product.id]) + parseInt(alreadyShipped)
-						: shippedProductsMap[product.id] || 0;
+          const shippedQuantity = alreadyShipped
+            ? parseInt(shippedProductsMap[product.id]) + parseInt(alreadyShipped)
+            : shippedProductsMap[product.id] || 0;
 
-					if (!shippedQuantity) {
-						missingProducts = true;
-						return false;
-					}
+          if (!shippedQuantity) {
+            missingProducts = true;
+            return false;
+          }
 
-					if (shippedQuantity < poQuantity) {
-						quantityMismatch = true;
-						return false;
-					}
+          if (shippedQuantity < poQuantity) {
+            quantityMismatch = true;
+            return false;
+          }
 
-					return true;
-				});
+          return true;
+        });
 
-				if (quantityMismatch || missingProducts) {
-					if (po.poStatus === "CREATED" || po.poStatus === "ACCEPTED") {
-						let date = new Date(po.createdAt);
-						let milliseconds = date.getTime();
-						let d = new Date();
-						let currentTime = d.getTime();
-						let orderProcessingTime = currentTime - milliseconds;
-						let prevOrderCount = await OrganisationModel.find({
-							id: req.user.organisationId,
-						});
-						prevOrderCount = prevOrderCount.totalProcessingTime
-							? prevOrderCount.totalProcessingTime
-							: 0;
-						OrganisationModel.updateOne(
-							{ id: req.user.organisationId },
-							{
-								$set: {
-									totalProcessingTime: prevOrderCount + orderProcessingTime,
-								},
-							},
-						);
-					}
-					po.poStatus = "TRANSIT&PARTIALLYFULFILLED";
-				} else {
-					if (po.poStatus === "CREATED" || po.poStatus === "ACCEPTED") {
-						let date = new Date(po.createdAt);
-						let milliseconds = date.getTime();
-						let d = new Date();
-						let currentTime = d.getTime();
-						let orderProcessingTime = currentTime - milliseconds;
-						let prevOrderCount = await OrganisationModel.find({
-							id: req.user.organisationId,
-						});
-						prevOrderCount = prevOrderCount.totalProcessingTime
-							? prevOrderCount.totalProcessingTime
-							: 0;
-						OrganisationModel.updateOne(
-							{ id: req.user.organisationId },
-							{
-								$set: {
-									totalProcessingTime: prevOrderCount + orderProcessingTime,
-								},
-							},
-						);
-					}
-					po.poStatus = "TRANSIT&FULLYFULFILLED";
-				}
-				await po.save();
-				const poidupdate = await RecordModel.findOneAndUpdate(
-					{
-						id: data.poId,
-					},
-					{
-						$push: {
-							shipments: data.id,
-						},
-					},
-				);
-				if (poidupdate == null) {
-					return apiResponse.ErrorResponse(
-						res,
-						responses(req.user.preferredLanguage).product_not_updated,
-					);
-				}
-			}
+        if (quantityMismatch || missingProducts) {
+          if (po.poStatus === "CREATED" || po.poStatus === "ACCEPTED") {
+            let date = new Date(po.createdAt);
+            let milliseconds = date.getTime();
+            let d = new Date();
+            let currentTime = d.getTime();
+            let orderProcessingTime = currentTime - milliseconds;
+            let prevOrderCount = await OrganisationModel.find({
+              id: req.user.organisationId,
+            });
+            prevOrderCount = prevOrderCount.totalProcessingTime
+              ? prevOrderCount.totalProcessingTime
+              : 0;
+            OrganisationModel.updateOne(
+              { id: req.user.organisationId },
+              {
+                $set: {
+                  totalProcessingTime: prevOrderCount + orderProcessingTime,
+                },
+              },
+            );
+          }
+          po.poStatus = "TRANSIT&PARTIALLYFULFILLED";
+        } else {
+          if (po.poStatus === "CREATED" || po.poStatus === "ACCEPTED") {
+            let date = new Date(po.createdAt);
+            let milliseconds = date.getTime();
+            let d = new Date();
+            let currentTime = d.getTime();
+            let orderProcessingTime = currentTime - milliseconds;
+            let prevOrderCount = await OrganisationModel.find({
+              id: req.user.organisationId,
+            });
+            prevOrderCount = prevOrderCount.totalProcessingTime
+              ? prevOrderCount.totalProcessingTime
+              : 0;
+            OrganisationModel.updateOne(
+              { id: req.user.organisationId },
+              {
+                $set: {
+                  totalProcessingTime: prevOrderCount + orderProcessingTime,
+                },
+              },
+            );
+          }
+          po.poStatus = "TRANSIT&FULLYFULFILLED";
+        }
+        await po.save();
+        const poidupdate = await RecordModel.findOneAndUpdate(
+          {
+            id: data.poId,
+          },
+          {
+            $push: {
+              shipments: data.id,
+            },
+          },
+        );
+        if (poidupdate == null) {
+          return apiResponse.ErrorResponse(
+            res,
+            responses(req.user.preferredLanguage).product_not_updated,
+          );
+        }
+      }
       if (flag != "N") {
         const suppWarehouseDetails = await WarehouseModel.findOne({
           id: data.supplier.locationId,
@@ -1430,66 +1430,66 @@ exports.receiveShipment = [
         });
 
         if (shipmentInfo) {
-					const shipmentProducts = shipmentInfo.products;
+          const shipmentProducts = shipmentInfo.products;
 
-					let shippedQuantity = 0;
-					let receivedQuantity = 0;
+          let shippedQuantity = 0;
+          let receivedQuantity = 0;
 
-					//Creating a map to store the productQuantity for each product
-					const shippedProductMap = new Map();
-					const receivedProductMap = new Map();
+          //Creating a map to store the productQuantity for each product
+          const shippedProductMap = new Map();
+          const receivedProductMap = new Map();
 
-					for (const product of shipmentProducts) {
-						//Storing productQuantity for each product
-						const key = product.productID + "-" + product.batchNumber + "-" + product.atomId;
-						if (shippedProductMap.has(key)) {
-							shippedProductMap.set(key, shippedProductMap.get(key) + product.productQuantity);
-						} else {
-							shippedProductMap.set(key, product.productQuantity);
-						}
-					}
+          for (const product of shipmentProducts) {
+            //Storing productQuantity for each product
+            const key = product.productID + "-" + product.batchNumber + "-" + product.atomId;
+            if (shippedProductMap.has(key)) {
+              shippedProductMap.set(key, shippedProductMap.get(key) + product.productQuantity);
+            } else {
+              shippedProductMap.set(key, product.productQuantity);
+            }
+          }
 
-					for (const product of receivedProducts) {
-						//Storing productQuantity for each product
-						const key = product.productID + "-" + product.batchNumber + "-" + product.atomId;
-						if (receivedProductMap.has(key)) {
-							receivedProductMap.set(key, receivedProductMap.get(key) + product.productQuantity);
-						} else {
-							receivedProductMap.set(key, product.productQuantity);
-						}
-					}
+          for (const product of receivedProducts) {
+            //Storing productQuantity for each product
+            const key = product.productID + "-" + product.batchNumber + "-" + product.atomId;
+            if (receivedProductMap.has(key)) {
+              receivedProductMap.set(key, receivedProductMap.get(key) + product.productQuantity);
+            } else {
+              receivedProductMap.set(key, product.productQuantity);
+            }
+          }
 
-					for (const product of shipmentProducts) {
-						const key = product.productID + "-" + product.batchNumber + "-" + product.atomId;
-						if (shippedProductMap.has(key)) {
-							shippedQuantity = shippedProductMap.get(key);
-						}
-						if (receivedProductMap.has(key)) {
-							receivedQuantity = receivedProductMap.get(key);
-						}
+          for (const product of shipmentProducts) {
+            const key = product.productID + "-" + product.batchNumber + "-" + product.atomId;
+            if (shippedProductMap.has(key)) {
+              shippedQuantity = shippedProductMap.get(key);
+            }
+            if (receivedProductMap.has(key)) {
+              receivedQuantity = receivedProductMap.get(key);
+            }
 
-						if (receivedQuantity > shippedQuantity) {
-							throw new Error(responses(req.user.preferredLanguage).rec_quantity_error);
-						}
-						const quantityDifference = shippedQuantity - receivedQuantity;
-						const rejectionRate = (quantityDifference / shippedQuantity) * 100;
-						product.quantityDelivered = receivedQuantity;
-						product.rejectionRate = rejectionRate;
-						await ShipmentModel.updateOne(
-							{
-								id: shipmentID,
-								"products.productID": product.productID,
-								"products.batchNumber": product.batchNumber,
-								"products.atomId": product.atomId,
-							},
-							{
-								$set: {
-									"products.$.rejectionRate": rejectionRate,
-								},
-							},
-						);
-					}
-				}
+            if (receivedQuantity > shippedQuantity) {
+              throw new Error(responses(req.user.preferredLanguage).rec_quantity_error);
+            }
+            const quantityDifference = shippedQuantity - receivedQuantity;
+            const rejectionRate = (quantityDifference / shippedQuantity) * 100;
+            product.quantityDelivered = receivedQuantity;
+            product.rejectionRate = rejectionRate;
+            await ShipmentModel.updateOne(
+              {
+                id: shipmentID,
+                "products.productID": product.productID,
+                "products.batchNumber": product.batchNumber,
+                "products.atomId": product.atomId,
+              },
+              {
+                $set: {
+                  "products.$.rejectionRate": rejectionRate,
+                },
+              },
+            );
+          }
+        }
         var flag = "Y";
         // if (data.poId == "null") {
         //   flag = "YS";
@@ -1517,7 +1517,7 @@ exports.receiveShipment = [
           const po = await RecordModel.findOne({
             id: data.poId,
           });
-          if(!po) {
+          if (!po) {
             throw new Error("Purchase order does not exist!");
           }
           let quantityMismatch = false;
@@ -1572,10 +1572,10 @@ exports.receiveShipment = [
           var totalReturns = 0;
           var shipmentRejectionRate = 0;
           for (count = 0; count < products.length; count++) {
-						var shipmentProducts = shipmentInfo.products;
-						totalProducts = totalProducts + shipmentProducts[count].productQuantity;
-						totalReturns = totalReturns + products[count].productQuantity;
-						shipmentRejectionRate = ((totalProducts - totalReturns) / totalProducts) * 100;
+            var shipmentProducts = shipmentInfo.products;
+            totalProducts = totalProducts + shipmentProducts[count].productQuantity;
+            totalReturns = totalReturns + products[count].productQuantity;
+            shipmentRejectionRate = ((totalProducts - totalReturns) / totalProducts) * 100;
             products[count]["productId"] = products[count].productID;
             
 						await inventoryUpdate(
@@ -2560,15 +2560,15 @@ exports.viewShipment = [
             element.unitofMeasure = product.unitofMeasure;
 
             // const batch = await AtomModel.findOne({
-						// 	batchNumbers: element.batchNumber,
-						// 	$or: [
-						// 		{ currentShipment: element.id },
-						// 		{ shipmentIds: element.id },
-						// 		{
-						// 			currentInventory: Shipment.receiver.warehouse.warehouseInventory,
-						// 			status: { $ne: "CONSUMED" },
-						// 		},
-						// 	],
+            // 	batchNumbers: element.batchNumber,
+            // 	$or: [
+            // 		{ currentShipment: element.id },
+            // 		{ shipmentIds: element.id },
+            // 		{
+            // 			currentInventory: Shipment.receiver.warehouse.warehouseInventory,
+            // 			status: { $ne: "CONSUMED" },
+            // 		},
+            // 	],
             // });
             element.mfgDate = element?.attributeSet?.mfgDate;
             element.expDate = element?.attributeSet?.expDate;
@@ -4474,7 +4474,7 @@ exports.exportInboundShipments = [
         let rowData;
         for (const row of inboundShipmentsRes) {
           for (const product of row.products) {
-            let receiverAtom = await AtomModel.findOne({id: product.atomId});
+            let receiverAtom = await AtomModel.findOne({ id: product.atomId });
             rowData = {
               id: row.id,
               poId: row.poId,
@@ -4639,7 +4639,7 @@ exports.exportOutboundShipments = [
         let rowData;
         for (const row of outboundShipmentsRes) {
           for (const product of row.products) {
-            let receiverAtom = await AtomModel.findOne({id: product.atomId});
+            let receiverAtom = await AtomModel.findOne({ id: product.atomId });
             rowData = {
               id: row.id,
               poId: row.poId,
@@ -5700,6 +5700,7 @@ exports.sensorHistory = [
  * http://localhost:3002/shipmentmanagement/api/shipment/syncAtoms
  */
 exports.syncAtoms = [
+<<<<<<< HEAD
 	async (req, res) => {
 		try {
 			const allGroups = await AtomModel.aggregate([
@@ -5726,36 +5727,76 @@ exports.syncAtoms = [
 				},
 				{ $match: { $expr: { $gt: [{ $size: "$atoms" }, 1] } } },
 			]);
+=======
+  async (req, res) => {
+    try {
+      const atomsWithExp = await AtomModel.aggregate([
+        { $match: { status: "HEALTHY" } },
+        { $sort: { createdAt: 1 } },
+        { $unwind: { path: "$batchNumbers" } },
+        {
+          $group: {
+            _id: {
+              batch: "$batchNumbers",
+              productId: "$productId",
+              currentInventory: "$currentInventory",
+              expDate: "$attributeSet.expDate",
+            },
+            atoms: { $addToSet: "$$ROOT" },
+          },
+        },
+        { $match: { $expr: { $gt: [{ $size: "$atoms" }, 1] } } },
+      ]);
+
+      const atomsWithoutExp = await AtomModel.aggregate([
+        { $match: { status: "HEALTHY", "attributeSet.expDate": { $exists: false } } },
+        { $sort: { createdAt: 1 } },
+        { $unwind: { path: "$batchNumbers" } },
+        {
+          $group: {
+            _id: {
+              batch: "$batchNumbers",
+              productId: "$productId",
+              currentInventory: "$currentInventory",
+            },
+            atoms: { $addToSet: "$$ROOT" },
+          },
+        },
+        { $match: { $expr: { $gt: [{ $size: "$atoms" }, 1] } } },
+      ]);
+
+      const allGroups = [...atomsWithExp, ...atomsWithoutExp];
+>>>>>>> a7f74674e9b65b7c22459bc296ecec062cfc94e6
 
       const atomsToMerge = [];
-      
-			for (let i = 0; i < allGroups.length; ++i) {
-				let currAtoms = allGroups[i].atoms;
-				let atomToUpdate = currAtoms[0];
-				currAtoms.splice(0, 1);
 
-				currAtoms.forEach((atom) => {
-					atomToUpdate.quantity += atom.quantity;
-					atomToUpdate.shipmentIds.push(...atom.shipmentIds);
-					atomsToMerge.push(atom.id);
-				});
+      for (let i = 0; i < allGroups.length; ++i) {
+        let currAtoms = allGroups[i].atoms;
+        let atomToUpdate = currAtoms[0];
+        currAtoms.splice(0, 1);
 
-				const updatedAtom = await AtomModel.findOneAndUpdate(
-					{ id: atomToUpdate.id },
-					{
-						$set: { quantity: atomToUpdate.quantity },
-						$addToSet: { shipmentIds: { $each: atomToUpdate.shipmentIds } },
-					},
-					{ new: true },
-				);
-			}
+        currAtoms.forEach((atom) => {
+          atomToUpdate.quantity += atom.quantity;
+          atomToUpdate.shipmentIds.push(...atom.shipmentIds);
+          atomsToMerge.push(atom.id);
+        });
+
+        const updatedAtom = await AtomModel.findOneAndUpdate(
+          { id: atomToUpdate.id },
+          {
+            $set: { quantity: atomToUpdate.quantity },
+            $addToSet: { shipmentIds: { $each: atomToUpdate.shipmentIds } },
+          },
+          { new: true },
+        );
+      }
 
       await AtomModel.updateMany({ id: { $in: atomsToMerge } }, { $set: { status: "MERGED" } });
 
-			return apiResponse.successResponse(res, "Success!");
-		} catch (err) {
-			console.log(err);
-			return apiResponse.ErrorResponse(res, err.message);
-		}
-	},
+      return apiResponse.successResponse(res, "Success!");
+    } catch (err) {
+      console.log(err);
+      return apiResponse.ErrorResponse(res, err.message);
+    }
+  },
 ];
