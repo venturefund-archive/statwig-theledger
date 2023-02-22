@@ -1613,15 +1613,34 @@ exports.receiveShipment = [
 							status: "TRANSIT",
 						});
 
-						let atomInTransitDate = atomInTransit?.attributeSet?.expDate;
+            let atomInTransitDate = new Date(atomInTransit?.attributeSet?.expDate);
+            let expDateString = null;
+            if (atomInTransitDate) {
+							let yyyy = atomInTransitDate.getFullYear();
+							let mm = atomInTransitDate.getMonth() + 1;
+							let dd = atomInTransitDate.getDate();
+							expDateString = `${yyyy}-${(mm > 9 ? "" : "0") + mm}-${(dd > 9 ? "" : "0") + dd}`;
+						}
 
-						const atomExists = await AtomModel.findOne({
-							batchNumbers: products[count].batchNumber,
-							productId: products[count].productId,
-							currentInventory: recvInventoryId,
-							"attributeSet.expDate": atomInTransitDate,
-							status: { $in: ["HEALTHY", "CONSUMED", "EXPIRED"] },
-						});
+            let atomExists = await AtomModel.aggregate([
+							{
+								$addFields: {
+									expDateString: {
+										$dateToString: { format: "%Y-%m-%d", date: "$attributeSet.expDate" },
+									},
+								},
+							},
+							{
+								$match: {
+									batchNumbers: products[count].batchNumber,
+									productId: products[count].productId,
+									currentInventory: recvInventoryId,
+									expDateString: expDateString,
+									status: { $in: ["HEALTHY", "CONSUMED", "EXPIRED"] },
+								},
+							},
+						]);
+            atomExists = atomExists?.length ? atomExists[0] : null;
 
 						if (shipmentRejectionRate > 0) {
 							// partial Receive Shipment
@@ -5683,7 +5702,14 @@ exports.sensorHistory = [
 exports.syncAtoms = [
 	async (req, res) => {
 		try {
-			const atomsWithExp = await AtomModel.aggregate([
+			const allGroups = await AtomModel.aggregate([
+				{
+					$addFields: {
+						expDateString: {
+							$dateToString: { format: "%Y-%m-%d", date: "$attributeSet.expDate" },
+						},
+					},
+				},
 				{ $match: { status: "HEALTHY" } },
 				{ $sort: { createdAt: 1 } },
 				{ $unwind: { path: "$batchNumbers" } },
@@ -5693,32 +5719,13 @@ exports.syncAtoms = [
 							batch: "$batchNumbers",
 							productId: "$productId",
 							currentInventory: "$currentInventory",
-							expDate: "$attributeSet.expDate",
+							expDateString: "$expDateString",
 						},
 						atoms: { $addToSet: "$$ROOT" },
 					},
 				},
 				{ $match: { $expr: { $gt: [{ $size: "$atoms" }, 1] } } },
 			]);
-
-			const atomsWithoutExp = await AtomModel.aggregate([
-				{ $match: { status: "HEALTHY", "attributeSet.expDate": { $exists: false } } },
-				{ $sort: { createdAt: 1 } },
-				{ $unwind: { path: "$batchNumbers" } },
-				{
-					$group: {
-						_id: {
-							batch: "$batchNumbers",
-							productId: "$productId",
-							currentInventory: "$currentInventory",
-						},
-						atoms: { $addToSet: "$$ROOT" },
-					},
-				},
-				{ $match: { $expr: { $gt: [{ $size: "$atoms" }, 1] } } },
-			]);
-
-			const allGroups = [...atomsWithExp, ...atomsWithoutExp];
 
       const atomsToMerge = [];
       

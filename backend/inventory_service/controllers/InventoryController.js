@@ -45,6 +45,7 @@ async function getRealTimeInventory(inventoryId) {
 						{
 							$or: [
 								{ "attributeSet.expDate": { $exists: false } },
+								{ "attributeSet.expDate": { $in: [null, ""] } },
 								{ "attributeSet.expDate": { $gte: today } },
 							],
 						},
@@ -775,36 +776,35 @@ exports.addProductsToInventory = [
               };
               atomsArray.push(atom);
             }
-            // ==================================================
-            // LOOP TO CHECK DUPLICATE
-
-            // for (let i = 0; i < atomsArray.length; i++) {
-            //   let batchDup = await AtomModel.findOne({
-            //     batchNumbers: atomsArray[i].batchNumbers[0],
-            //     currentInventory: warehouse.warehouseInventory,
-            //   });
-            //   if (!batchDup) {
-            //     continue;
-            //   }
-            //   if (process.env.PROD != "ABINBEV") {
-            //     if (batchDup) {
-            //       duplicateBatch = true;
-            //       duplicateBatchNo = batchDup.batchNumbers[0];
-            //       break;
-            //     }
-            //   }
-            // }
-            // ===================================================
 
             const insertAtomsArray = [];
             for (let i = 0; i < atomsArray.length; i++) {
-              let batchDup = await AtomModel.findOne({
-								productId: atomsArray[i].productId,
-								batchNumbers: atomsArray[i].batchNumbers[0],
-								"attributeSet.expDate": expDate,
-								currentInventory: warehouse.warehouseInventory,
-              });
-              
+              let expDateString = null;
+              if(expDate) {
+                let yyyy = expDate.getFullYear();
+                let mm = expDate.getMonth() + 1;
+                let dd = expDate.getDate();
+                expDateString = `${yyyy}-${(mm > 9 ? "" : "0") + mm}-${(dd > 9 ? "" : "0") + dd}`;
+              }
+              const atomExists = await AtomModel.aggregate([
+								{
+									$addFields: {
+										expDateString: {
+											$dateToString: { format: "%Y-%m-%d", date: "$attributeSet.expDate" },
+										},
+									},
+								},
+								{
+									$match: {
+										productId: atomsArray[i].productId,
+										batchNumbers: atomsArray[i].batchNumbers[0],
+                    currentInventory: warehouse.warehouseInventory,
+                    expDateString: expDateString,
+                    status: {$in: ["HEALTHY", "CONSUMED"]}
+									},
+								},
+              ]);
+              const batchDup = atomExists?.length ? atomExists[0] : null;
               if (batchDup) {
                 await AtomModel.updateOne(
                   { id: batchDup.id },
@@ -2253,27 +2253,16 @@ exports.getBatchNearExpiration = [
 
       const warehouse = await WarehouseModel.findOne({ id: warehouseId });
       if (warehouse) {
-        const result = await AtomModel.aggregate([
+				const result = await AtomModel.aggregate([
 					{
 						$match: {
 							$and: [
-								{
-									$and: [
-										{ "attributeSet.expDate": { $gte: today } },
-										{ "attributeSet.expDate": { $lt: nextMonth } },
-									],
-								},
-								{
-									$expr: {
-										$in: [warehouse.warehouseInventory, "$inventoryIds"],
-									},
-								},
-								{
-									$or: [
-										{ "attributeSet.expDate": { $exists: true } },
-										{ "attributeSet.expDate": { $ne: "" } },
-									],
-								},
+								{ "attributeSet.expDate": { $exists: true } },
+								{ "attributeSet.expDate": { $nin: ["", null] } },
+								{ "attributeSet.expDate": { $gte: today } },
+								{ "attributeSet.expDate": { $lt: nextMonth } },
+								{ currentInventory: warehouse?.warehouseInventory },
+								{ batchNumbers: { $ne: "" } },
 							],
 						},
 					},
@@ -2288,17 +2277,13 @@ exports.getBatchNearExpiration = [
 					},
 					{ $unwind: "$products" },
 				]);
-        return apiResponse.successResponseWithData(
-          res,
-          "Near expiring batch Details",
-          result
-        );
-      } else {
-        return apiResponse.ErrorResponse(
-          res,
-          responses(req.user.preferredLanguage).warehouse_not_found
-        );
-      }
+				return apiResponse.successResponseWithData(res, "Near expiring batch Details", result);
+			} else {
+				return apiResponse.ErrorResponse(
+					res,
+					responses(req.user.preferredLanguage).warehouse_not_found,
+				);
+			}
     } catch (err) {
       console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
@@ -2331,12 +2316,13 @@ exports.getBatchExpired = [
 								{
 									$or: [
 										{ "attributeSet.expDate": { $exists: true } },
-										{ "attributeSet.expDate": { $ne: "" } },
+										{ "attributeSet.expDate": { $nin: ["", null] } },
 									],
 								},
 							],
 						},
 					},
+					{ $sort: { "attributeSet.expDate": -1 } },
 					{
 						$lookup: {
 							from: "products",
