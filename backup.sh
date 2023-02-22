@@ -1,10 +1,10 @@
 #!/bin/bash
 
-DATABASE="production"           #replace with database name
-HOSTNAME="dbprod.statledger.io" #replace with database hostname
+DATABASE="production" #replace with database name
+HOSTNAME=""           #replace with database hostname
 PORT=27017
-USERNAME="prodservice" #replace with database username
-PASSWORD=""            #replace with database password
+USERNAME="" #replace with database username
+PASSWORD="" #replace with database password
 
 TIMESTAMP=$(date +%F-%H%M)
 S3_BUCKET_NAME="database-backups-archive"
