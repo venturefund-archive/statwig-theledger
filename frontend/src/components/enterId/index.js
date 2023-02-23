@@ -98,10 +98,10 @@ const EnterId = (props) => {
     } else {
       if (shipmentId) {
         if (shipmentArray.filter((e) => e.id === shipmentId).length > 0) {
-          props.history.push(`/updatestatus/${shipmentId}`);
+          props.history.push(`/updatestatus/${shipmentId}/false`);
         }
       } else {
-        props.history.push(`/updatestatus/${shipmentId2}`);
+        props.history.push(`/updatestatus/${shipmentId2}/false`);
       }
     }
   };

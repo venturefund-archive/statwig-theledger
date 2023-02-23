@@ -25,7 +25,7 @@ const UpdateStatus = (props) => {
 		return state.user;
 	});
 	const intelEnabled = props.user.type === "Third Party Logistics" ? true : false;
-	const { id } = props.match.params;
+	const { id, returnToView } = props.match.params;
 	const billNo = shipmentData?.airWayBillNo;
 	const { quantity, weight } = useState("");
 	const [photo, setPhoto] = useState("");
@@ -312,14 +312,16 @@ const UpdateStatus = (props) => {
 												</label>
 												<input
 													type="text"
-													className={`form-control mb-2 ${values.updateStatusLocation === "" ? "border-danger" : ""
-														}`}
+													className={`form-control mb-2 ${
+														values.updateStatusLocation === "" ? "border-danger" : ""
+													}`}
 													name="updateStatusLocation"
 													onBlur={handleBlur}
 													onChange={handleChange}
 													value={values.updateStatusLocation}
-													placeholder={` ${values.updateStatusLocation === "" ? t("Required") : ""
-														}`}
+													placeholder={` ${
+														values.updateStatusLocation === "" ? t("Required") : ""
+													}`}
 												/>
 											</div>
 										</div>
@@ -327,8 +329,9 @@ const UpdateStatus = (props) => {
 											<div>
 												<h6 className="poheads potext m-4">Shipment Cargo Status</h6>
 												<div
-													className={`col-12 p-3 mb-3 ml-1 rounded1 row bg-white shadow justify-content-between ${loader && "fade-color"
-														}`}
+													className={`col-12 p-3 mb-3 ml-1 rounded1 row bg-white shadow justify-content-between ${
+														loader && "fade-color"
+													}`}
 												>
 													<div className="cargoLabels">
 														<label className="mb-1 text-secondary">Acceptance Date</label>
@@ -373,8 +376,9 @@ const UpdateStatus = (props) => {
 													/>
 												</div>
 												<div
-													className={`col-12 p-3 mb-3 ml-1 rounded1 row bg-white shadow justify-content-between ${loaderC && "fade-color"
-														}`}
+													className={`col-12 p-3 mb-3 ml-1 rounded1 row bg-white shadow justify-content-between ${
+														loaderC && "fade-color"
+													}`}
 												>
 													<div className="cargoLabels">
 														<label className="mb-1 text-secondary">Customs clearance Date</label>
@@ -408,8 +412,9 @@ const UpdateStatus = (props) => {
 													/>
 												</div>
 												<div
-													className={`col-12 p-3 mb-3 ml-1 rounded1 row bg-white shadow justify-content-between ${loaderL && "fade-color"
-														}`}
+													className={`col-12 p-3 mb-3 ml-1 rounded1 row bg-white shadow justify-content-between ${
+														loaderL && "fade-color"
+													}`}
 												>
 													<div className="cargoLabels">
 														<label className="mb-1 text-secondary">Last Status</label>
@@ -718,11 +723,15 @@ const UpdateStatus = (props) => {
 										<button
 											type="button"
 											className="btn btn-outline-primary mr-3"
-											onClick={() =>
-												props.history.push(
-													`/${intelEnabled === true ? `viewgmrshipment` : `viewshipment`}/${id}`,
-												)
-											}
+											onClick={() => {
+												const path =
+													returnToView === "false"
+														? "/shipments"
+														: `/${
+																intelEnabled === true ? `viewgmrshipment` : `viewshipment`
+														  }/${id}`;
+												props.history.push(path);
+											}}
 										>
 											{t("cancel")}
 										</button>

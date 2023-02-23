@@ -15,17 +15,20 @@ exports.asyncForEach = async (array, callback) => {
 };
 
 exports.excludeExpireProduct = (data) => {
-	let today = new Date();
-	today.setHours(0, 0, 0, 0);
+  let today = new Date();
+  let year = today.getFullYear();
+  let month = today.getMonth() + 1;
+  let day = today.getDate();
+	today = `${year}-${month < 10 ? "0" + month : month}-${day < 10 ? "0" + day : day}`;
 	return data.filter((product) => {
-    if (product?.manufacturingDate) {
-      if (today.valueOf() < product.manufacturingDate.valueOf()) return false;
-    }
+		if (product?.manufacturingDate) {
+			if (today < product.manufacturingDate) return false;
+		}
 		if (product?.expiryDate) {
 			if (product?.manufacturingDate) {
-				if (product.expiryDate.valueOf() < product.manufacturingDate.valueOf()) return false;
+				if (product.expiryDate < product.manufacturingDate) return false;
 			}
-			if (product.expiryDate.valueOf() < today.valueOf()) return false;
+			if (product.expiryDate < today) return false;
 		}
 		return true;
 	});
@@ -53,7 +56,7 @@ exports.getDateStringForMongo = function (date) {
 	let year = currDate.getFullYear();
 	let month = currDate.getMonth() + 1;
 	let day = currDate.getDate();
-	let dateString = `${year}${month < 9 ? "0" + month : month}${day < 9 ? "0" + day : day}`;
+	let dateString = `${year}${month < 10 ? "0" + month : month}${day < 10 ? "0" + day : day}`;
 
 	return dateString;
 };

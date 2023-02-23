@@ -86,10 +86,12 @@ const NetworkingContainer = (props) => {
     const warehouses = await getManufacturerWarehouses("", "", partnerLocation, MylocationFilter);
     setManufacturer(warehouses.data);
   };
+
   const getManFilters = async () => {
     const filterWarehouse = await getManufacturerFilterOptions("org");
     setOManufacturer(filterWarehouse.data);
   };
+
   useEffect(() => {
     getManFilters();
     getInstockFilters();

@@ -264,7 +264,7 @@ exports.fetchBatchById = [
 						if (currProd?.atom?.attributeSet?.expDate) {
 							let expDate = new Date(productDetails[0].atom.attributeSet.expDate);
 							let today = new Date();
-							today.setUTCHours(23,59,59,999);
+							today.setUTCHours(0, 0, 0, 0);
 
 							if (expDate < today) {
 						    // if (expDate.toLocaleDateString() < today.toLocaleDateString()) {		

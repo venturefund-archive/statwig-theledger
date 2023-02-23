@@ -21,7 +21,6 @@ exports.getDateStringForMongo = function (date) {
 	let year = currDate.getFullYear();
 	let month = currDate.getMonth() + 1;
 	let day = currDate.getDate();
-	let dateString = `${year}${month < 9 ? "0" + month : month}${day < 9 ? "0" + day : day}`;
+	let dateString = `${year}${month < 10 ? "0" + month : month}${day < 10 ? "0" + day : day}`;
 
-	return dateString;
-};
+	return dateString;};
