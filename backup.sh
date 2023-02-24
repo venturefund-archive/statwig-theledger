@@ -35,3 +35,11 @@ rm -rf $TAR
 rm -rf $DEST
 
 echo "Backup Complete ✅"
+
+# for db in $DBS; do
+#     col=$(mongo $db --host example.com --quiet --eval "db.getCollectionNames()" | tr -d ',"[]')
+#     for collection in $col; do
+#         $MONGODUMP_PATH -h $HOSTNAME:$PORT -q '{_id: {$gt: 10}}' -d $db -c $collection --out dump
+
+#     done
+# done
