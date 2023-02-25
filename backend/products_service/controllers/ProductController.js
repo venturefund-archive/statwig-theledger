@@ -57,17 +57,25 @@ exports.getProductsOld = [
 ];
 
 function getProductCondition(query) {
-	let matchCondition = {};
+	let matchArr = [];
 
 	if (query.status && query.status != "") {
-		matchCondition.status = query.status;
+		matchArr.push({ status: query.status });
 	}
 	if (query.orgId && query.orgId != "") {
-		matchCondition.manufacturerId = query.orgId;
+		matchArr.push({ manufacturerId: query.orgId });
 	}
 	if (query.name && query.name != "") {
-		matchCondition.name = { $regex: query.name ? query.name : "", $options: "i" };
+		matchArr.push({
+			$or: [
+				{ name: { $regex: query.name, $options: "i" } },
+				{ type: { $regex: query.name, $options: "i" } },
+				{ manufacturer: { $regex: query.name, $options: "i" } },
+			],
+		});
 	}
+
+	const matchCondition =  matchArr?.length ? { $and: matchArr } : {};
 
 	return matchCondition;
 }

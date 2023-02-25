@@ -19,7 +19,7 @@ export default function UsersTable(props) {
 		t,
 		refetch,
 		userStatus,
-		searchByName,
+		searchKey,
 	} = props;
 
 	const [users, setUsers] = useState([]);
@@ -53,12 +53,12 @@ export default function UsersTable(props) {
 			getOrgUsers(
 				`skip=${
 					(page - 1) * 10
-				}&limit=${rowsPerPage}&status=${userStatus}&firstName=${searchByName}`,
+				}&limit=${rowsPerPage}&status=${userStatus}&searchKey=${searchKey}`,
 			),
 		);
 		setUsers(res.paginatedResults);
 		setTotalCount(res.totalCount);
-	}, [dispatch, page, userStatus, searchByName, rowsPerPage, props.tableFlag, refetch, refetchOnEdit]);
+	}, [dispatch, page, userStatus, searchKey, rowsPerPage, props.tableFlag, refetch, refetchOnEdit]);
 
 	const handleChangePage = (event, newPage) => {
 		if (newPage > 1) setPage(newPage);
