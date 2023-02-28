@@ -64,7 +64,7 @@ export default function Users(props) {
   const [ButtonOpen, setButtonOpen] = useState(false);
   const [ButtonOpen2, setButtonOpen2] = useState(false);
   const [userStatus, setUserStatus] = useState("");
-  const [searchByName, setSearchByName] = useState("");
+  const [searchKey, setSearchKey] = useState("");
   let domNode = useClickOutside(() => {
     setButtonOpen(false);
   });
@@ -225,9 +225,8 @@ export default function Users(props) {
 										type="text"
 										placeholder={t("search")}
 										onChange={(event) => {
-											console.log("event.target.value ", event.target.value);
 											// handleChange(event);
-											setSearchByName(event.target.value);
+											setSearchKey(event.target.value);
 										}}
 									/>
 								</div>
@@ -282,7 +281,7 @@ export default function Users(props) {
 								tableFlag={tableFlag}
 								refetch={refetch}
 								userStatus={userStatus}
-								searchByName={searchByName}
+								searchKey={searchKey}
 							/>
 						</div>
 					</div>

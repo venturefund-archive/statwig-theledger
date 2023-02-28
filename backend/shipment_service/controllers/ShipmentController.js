@@ -5700,7 +5700,6 @@ exports.sensorHistory = [
  * http://localhost:3002/shipmentmanagement/api/shipment/syncAtoms
  */
 exports.syncAtoms = [
-<<<<<<< HEAD
 	async (req, res) => {
 		try {
 			const allGroups = await AtomModel.aggregate([
@@ -5727,46 +5726,6 @@ exports.syncAtoms = [
 				},
 				{ $match: { $expr: { $gt: [{ $size: "$atoms" }, 1] } } },
 			]);
-=======
-  async (req, res) => {
-    try {
-      const atomsWithExp = await AtomModel.aggregate([
-        { $match: { status: "HEALTHY" } },
-        { $sort: { createdAt: 1 } },
-        { $unwind: { path: "$batchNumbers" } },
-        {
-          $group: {
-            _id: {
-              batch: "$batchNumbers",
-              productId: "$productId",
-              currentInventory: "$currentInventory",
-              expDate: "$attributeSet.expDate",
-            },
-            atoms: { $addToSet: "$$ROOT" },
-          },
-        },
-        { $match: { $expr: { $gt: [{ $size: "$atoms" }, 1] } } },
-      ]);
-
-      const atomsWithoutExp = await AtomModel.aggregate([
-        { $match: { status: "HEALTHY", "attributeSet.expDate": { $exists: false } } },
-        { $sort: { createdAt: 1 } },
-        { $unwind: { path: "$batchNumbers" } },
-        {
-          $group: {
-            _id: {
-              batch: "$batchNumbers",
-              productId: "$productId",
-              currentInventory: "$currentInventory",
-            },
-            atoms: { $addToSet: "$$ROOT" },
-          },
-        },
-        { $match: { $expr: { $gt: [{ $size: "$atoms" }, 1] } } },
-      ]);
-
-      const allGroups = [...atomsWithExp, ...atomsWithoutExp];
->>>>>>> a7f74674e9b65b7c22459bc296ecec062cfc94e6
 
       const atomsToMerge = [];
 

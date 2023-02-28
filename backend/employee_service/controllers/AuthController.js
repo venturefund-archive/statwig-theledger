@@ -147,6 +147,8 @@ async function createWarehouse(payload) {
 				{ id: { $in: employees } },
 				{ $addToSet: { warehouseId: warehouseId } },
 			);
+
+			return true;
 		}
 	} catch(err) {
 		throw err;
@@ -154,20 +156,27 @@ async function createWarehouse(payload) {
 }
 
 function getUserCondition(query, orgId) {
-	let matchCondition = {};
-	matchCondition.organisationId = orgId;
-	matchCondition.accountStatus = { $ne: "NOTAPPROVED" };
+	let matchArr = [];
+	matchArr.push({ organisationId: orgId });
+	matchArr.push({ accountStatus: { $ne: "NOTAPPROVED" } });
 	if (query.role && query.role != "") {
-		matchCondition.role = query.role;
+		matchArr.push({ role: query.role });
 	}
-	if (query.firstName && query.firstName != "") {
-		matchCondition.firstName= { $regex: query.firstName ? query.firstName : "", $options: "i" }
+	if (query.searchKey && query.searchKey != "") {
+		matchArr.push({
+			$or: [
+				{ firstName: { $regex: query.searchKey ? query.searchKey : "", $options: "i" } },
+				{ lastName: { $regex: query.searchKey ? query.searchKey : "", $options: "i" } },
+				{ emailId: { $regex: query.searchKey ? query.searchKey : "", $options: "i" } },
+				{ role: { $regex: query.searchKey ? query.searchKey : "", $options: "i" } },
+			],
+		});
 	}
 	if (query.status && query.status != "") {
-		if(query.status==="INACTIVE"){
-            matchCondition.accountStatus = { "$ne" : 'ACTIVE'};
-        }else{
-			matchCondition.accountStatus = query.status;
+		if (query.status === "INACTIVE") {
+			matchArr.push({ accountStatus: { $ne: "ACTIVE" } });
+		} else {
+			matchArr.push({ accountStatus: query.status });
 		}
 	}
 	if (query.creationFilter && query.creationFilter == "true") {
@@ -179,37 +188,51 @@ function getUserCondition(query, orgId) {
 		let oneWeek = moment().subtract(1, "weeks");
 		let sixMonths = moment().subtract(6, "months");
 		if (query.dateRange == "today") {
-			matchCondition.createdAt = {
-				$gte: new Date(oneDayAgo),
-				$lte: new Date(now),
-			};
+			matchArr.push({
+				createdAt: {
+					$gte: new Date(oneDayAgo),
+					$lte: new Date(now),
+				},
+			});
 		} else if (query.dateRange == "thisMonth") {
-			matchCondition.createdAt = {
-				$gte: new Date(oneMonthAgo),
-				$lte: new Date(now),
-			};
+			matchArr.push({
+				createdAt: {
+					$gte: new Date(oneMonthAgo),
+					$lte: new Date(now),
+				},
+			});
 		} else if (query.dateRange == "threeMonths") {
-			matchCondition.createdAt = {
-				$gte: new Date(threeMonthsAgo),
-				$lte: new Date(now),
-			};
+			matchArr.push({
+				createdAt: {
+					$gte: new Date(threeMonthsAgo),
+					$lte: new Date(now),
+				},
+			});
 		} else if (query.dateRange == "thisYear") {
-			matchCondition.createdAt = {
-				$gte: new Date(oneYearAgo),
-				$lte: new Date(now),
-			};
+			matchArr.push({
+				createdAt: {
+					$gte: new Date(oneYearAgo),
+					$lte: new Date(now),
+				},
+			});
 		} else if (query.dateRange == "thisWeek") {
-			matchCondition.createdAt = {
-				$gte: new Date(oneWeek),
-				$lte: new Date(now),
-			};
+			matchArr.push({
+				createdAt: {
+					$gte: new Date(oneWeek),
+					$lte: new Date(now),
+				},
+			});
 		} else if (query.dateRange == "sixMonths") {
-			matchCondition.createdAt = {
-				$gte: new Date(sixMonths),
-				$lte: new Date(now),
-			};
+			matchArr.push({
+				createdAt: {
+					$gte: new Date(sixMonths),
+					$lte: new Date(now),
+				},
+			});
 		}
 	}
+
+	let matchCondition = matchArr?.length ? { $and: matchArr } : {};
 	return matchCondition;
 }
 
@@ -2383,6 +2406,10 @@ exports.addUsersFromExcel = [
 					roles.push(r.role);
 				});
 	
+				let warehousesAdded = 0;
+				let employeesAdded = 0;
+				let employeesRejected = 0;
+
 				const warehouseMap = new Map();
 				const formattedData = new Array();
 				for (const [index, user] of data.entries()) {
@@ -2435,6 +2462,7 @@ exports.addUsersFromExcel = [
 						!roles.includes(userPayload.role) ||
 						formattedData.find((elem) => elem.emailId === userPayload.emailId)
 					) {
+						++employeesRejected;
 						continue;
 					}
 
@@ -2471,6 +2499,7 @@ exports.addUsersFromExcel = [
 						var employeeId = employeeCounter.counters[0].format + employeeCounter.counters[0].value;
 						const User = new EmployeeModel({ ...user, id: employeeId });
 						await User.save();
+						++employeesAdded;
 
 						warehousePayload = user.payload;
 						employees.push(employeeId);
@@ -2486,14 +2515,21 @@ exports.addUsersFromExcel = [
 							});
 					}
 
-					await createWarehouse({ ...warehousePayload, employees: employees });
+					let success = await createWarehouse({ ...warehousePayload, employees: employees });
+					if(success) ++warehousesAdded;
 				}
+
+				const responsePayload = {
+					insertedRecords: employeesAdded,
+					invalidRecords: employeesRejected,
+					warehousesAdded: warehousesAdded,
+				};
 
 				return apiResponse.successResponseWithData(
 					req,
 					res,
 					"success",
-					formattedData
+					responsePayload
 				);
 			} catch (err) {
 				console.log(err);
@@ -2682,7 +2718,7 @@ exports.getOrgUsers = [
 		try {
 			const pagniationQuery = [];
 			if (req.query.skip) {
-				pagniationQuery.push({ $skip: parseInt(req.query.skip) })
+				pagniationQuery.push({ $skip: parseInt(req.query.skip) });
 			}
 			if (req.query.limit) {
 				pagniationQuery.push({ $limit: parseInt(req.query.limit) });
@@ -2740,12 +2776,7 @@ exports.getOrgUsers = [
 
 			const result = users?.length ? users[0] : {};
 
-			return apiResponse.successResponseWithData(
-				req,
-				res,
-				"Organisation Users",
-				result
-			);
+			return apiResponse.successResponseWithData(req, res, "Organisation Users", result);
 		} catch (err) {
 			console.log(err);
 			return apiResponse.ErrorResponse(req, res, err);
