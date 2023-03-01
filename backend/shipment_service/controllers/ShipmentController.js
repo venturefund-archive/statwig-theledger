@@ -184,21 +184,48 @@ async function calculateCurrentLocationData(trackedShipment, allowedOrgs, tracki
 }
 
 async function quantityOverflow(warehouseId, shipmentProducts) {
-  let overflow = false;
-  const warehouse = await WarehouseModel.findOne({ id: warehouseId });
-  const inventory = await InventoryModel.findOne({
-    id: warehouse.warehouseInventory,
-  });
-  for (let i = 0; i < shipmentProducts.length; i++) {
-    const product = inventory.inventoryDetails.find(
-      (item) => item.productId === shipmentProducts[i].productID
-    );
-    if (
-      parseInt(shipmentProducts[i].productQuantity) > parseInt(product.quantity)
-    )
-      overflow = true;
-  }
-  return overflow;
+	let overflow = false;
+	const warehouse = await WarehouseModel.findOne({ id: warehouseId });
+
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+
+	const atoms = await AtomModel.aggregate([
+		{
+			$match: {
+				$and: [
+					{ currentInventory: warehouse.warehouseInventory },
+					{ status: "HEALTHY" },
+					{
+						$or: [
+							{ "attributeSet.expDate": { $exists: false } },
+							{ "attributeSet.expDate": { $in: [null, ""] } },
+							{ "attributeSet.expDate": { $gte: today } },
+						],
+					},
+				],
+			},
+		},
+		{
+			$group: {
+				_id: "$productId",
+				quantity: { $sum: "$quantity" },
+			},
+		},
+	]);
+
+	const shippedProductsMap = shipmentProducts.reduce((map, p) => {
+		map[p.productID] = (map[p.productID] || 0) + p.productQuantity;
+		return map;
+	}, {});
+
+	for (let i = 0; i < atoms?.length; ++i) {
+		if (parseInt(atoms[i].quantity) < (parseInt(shippedProductsMap[atoms[i]._id]) || 0)) {
+			overflow = true;
+		}
+	}
+
+	return overflow;
 }
 
 async function inventoryUpdate(
@@ -2763,47 +2790,87 @@ exports.updateStatus = [
 ];
 
 exports.getProductsByInventory = [
-  auth,
-  async (req, res) => {
-    try {
-      const { invId } = req.query;
-      const inventories = await InventoryModel.aggregate([
-        { $match: { id: invId } },
-        { $unwind: "$inventoryDetails" },
-        {
-          $lookup: {
-            from: "products",
-            localField: "inventoryDetails.productId",
-            foreignField: "id",
-            as: "products",
-          },
-        },
-        { $unwind: "$products" },
-        {
-          $group: {
-            _id: "$inventoryDetails.productId",
-            productCategory: { $first: "$products.type" },
-            productName: { $first: "$products.name" },
-            unitofMeasure: { $first: "$products.unitofMeasure" },
-            manufacturer: { $first: "$products.manufacturer" },
-            productQuantity: { $sum: "$inventoryDetails.quantity" },
-            quantity: { $sum: "$inventoryDetails.quantity" },
-          },
-        },
-        {
-          $match: { productQuantity: { $gt: 0 } },
-        },
-      ]);
+	auth,
+	async (req, res) => {
+		try {
+			const { invId } = req.query;
 
-      return apiResponse.successResponseWithData(
-        res,
-        "Products by inventory ",
-        inventories
-      );
-    } catch (err) {
-      return apiResponse.ErrorResponse(res, err.message);
-    }
-  },
+			const today = new Date();
+			today.setHours(0, 0, 0, 0);
+
+			const inventories = await InventoryModel.aggregate([
+				{ $match: { id: invId } },
+				{ $unwind: "$inventoryDetails" },
+				{
+					$lookup: {
+						from: "products",
+						localField: "inventoryDetails.productId",
+						foreignField: "id",
+						as: "products",
+					},
+				},
+				{ $unwind: "$products" },
+				{
+					$lookup: {
+						from: "atoms",
+						let: {
+							currentInventory: "$id",
+							productId: "$inventoryDetails.productId",
+						},
+						pipeline: [
+							{
+								$match: {
+									$expr: {
+										$and: [
+											{ $eq: ["$currentInventory", "$$currentInventory"] },
+											{ $eq: ["$productId", "$$productId"] },
+											{ $eq: ["$status", "HEALTHY"] },
+											{
+												$or: [
+													{ $lte: ["$attributeSet.expDate", null] },
+													{ $in: ["$attributeSet.expDate", [null, ""]] },
+													{ $gte: ["$attributeSet.expDate", today] },
+												],
+											},
+										],
+									},
+								},
+							},
+							{
+								$group: {
+									_id: "$batchNumbers",
+									quantity: { $sum: "$quantity" },
+								},
+							},
+						],
+						as: "atom",
+					},
+				},
+				{
+					$unwind: "$atom",
+				},
+				{
+					$group: {
+						_id: "$inventoryDetails.productId",
+						productCategory: { $first: "$products.type" },
+						productName: { $first: "$products.name" },
+						unitofMeasure: { $first: "$products.unitofMeasure" },
+						manufacturer: { $first: "$products.manufacturer" },
+						productQuantity: { $sum: "$atom.quantity" },
+						quantity: { $sum: "$atom.quantity" },
+					},
+				},
+				{
+					$match: { productQuantity: { $gt: 0 } },
+				},
+			]);
+
+			return apiResponse.successResponseWithData(res, "Products by inventory ", inventories);
+		} catch (err) {
+      console.log(err);
+			return apiResponse.ErrorResponse(res, err.message);
+		}
+	},
 ];
 
 exports.uploadImage = [
