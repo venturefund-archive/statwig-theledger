@@ -214,7 +214,9 @@ exports.fetchBatchById = [
 			}
 
 			const warehouse = await WarehouseModel.findOne({ id: warehouseId });
-
+			if (!warehouse) {
+				throw new Error("Warehouse does not exist");
+			}
 			const productDetails = await EmployeeModel.aggregate(
 				[
 					{ $match: { id: userId } },
@@ -267,7 +269,7 @@ exports.fetchBatchById = [
 							today.setUTCHours(0, 0, 0, 0);
 
 							if (expDate < today) {
-						    // if (expDate.toLocaleDateString() < today.toLocaleDateString()) {		
+								// if (expDate.toLocaleDateString() < today.toLocaleDateString()) {		
 								errors.push("expired_batch");
 								continue;
 							} else {
@@ -282,7 +284,7 @@ exports.fetchBatchById = [
 						}
 					}
 					let priorityError;
-					if(!validBatches.length) {
+					if (!validBatches.length) {
 						if (errors.includes("batch_exhausted")) {
 							priorityError = "Batch exhausted!";
 						} else if (errors.includes("expired_batch")) {
@@ -301,7 +303,7 @@ exports.fetchBatchById = [
 					if (existingAtom)
 						throw new Error("Batch exhausted!");
 					else
-						throw new Error("Batch not found!");
+						throw new Error("Batch not found in Warehouse !");
 				}
 			}
 
@@ -823,7 +825,7 @@ exports.getAnalyticsWithFilters = [
 				const vaccineVials = warehouses[i].vaccinations;
 				for (let j = 0; j < vaccineVials.length; ++j) {
 					let createdAt = new Date(vaccineVials[j].createdAt);
-					let createdAtString = getDateStringForMongo(createdAt); 
+					let createdAtString = getDateStringForMongo(createdAt);
 
 					const doses = vaccineVials[j].doses;
 
@@ -1584,10 +1586,10 @@ exports.addDateStringToDoses = [
 	async (req, res) => {
 		const allDoses = await DoseModel.find();
 		let count = 0;
-		for(let i=0; i<allDoses.length; ++i) {
+		for (let i = 0; i < allDoses.length; ++i) {
 			let currDose = allDoses[i];
 			let createdDateString = getDateStringForMongo(new Date(currDose.createdAt));
-			await DoseModel.updateOne({id: currDose.id}, {$set: {createdDateString: createdDateString}})
+			await DoseModel.updateOne({ id: currDose.id }, { $set: { createdDateString: createdDateString } })
 			++count;
 		}
 		return apiResponse.successResponseWithData(res, "Done", count)
