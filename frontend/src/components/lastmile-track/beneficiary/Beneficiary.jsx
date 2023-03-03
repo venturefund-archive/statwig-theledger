@@ -218,6 +218,7 @@ export default function Beneficiary(props) {
 							warehouseId={userLocation?.id ? userLocation.id : props.user.warehouseId[0]}
 							productId={batchDetails.product.id}
 							batchNumber={batchDetails?.batchNumber}
+							atomId={batchDetails?.atom?.id}
 							newVaccination={newVaccination}
 						/>
 					)}

@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 
 export default function ScanBatch(props) {
-  const { setBatchDetails, setSteps } = props;
+  const { setBatchDetails, setBatchesList, toggleShowBatchesList, setSteps } = props;
   const [openAlert, setOpenAlert] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const { t } = useTranslation();
@@ -37,20 +37,8 @@ export default function ScanBatch(props) {
       };
       const result = await fetchBatch(data);
       if (result?.data?.success === true) {
-        let dIndex = result.data.data[0].atom.batchNumbers.findIndex(
-          (element) => {
-            return element.toLowerCase() === values.batchNumber.toLowerCase();
-          },
-        );
-        const bNo =
-          result.data.data[0].atom.batchNumbers[
-            dIndex > -1 ? dIndex : values.batchNumber
-          ];
-        setBatchDetails({
-          ...result.data.data[0],
-          batchNumber: bNo,
-        });
-        setSteps(2);
+        setBatchesList(result.data.data);
+        toggleShowBatchesList(true);
       } else {
         setError("batchNumber", {
           type: "custom",

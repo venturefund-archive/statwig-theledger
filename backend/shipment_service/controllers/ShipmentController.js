@@ -1556,7 +1556,7 @@ exports.receiveShipment = [
 
           po.products.forEach((product) => {
             const poQuantity = product.productQuantity || product.quantity;
-            const shipmentQuantity = receivedProductsMap[product.id] + (product.quantityDelivered || 0) || 0;
+            const shipmentQuantity = (receivedProductsMap[product.id] || 0) + (product.productQuantityDelivered || 0) || 0;
 
             if (!shipmentQuantity) {
               missingProducts = true;
