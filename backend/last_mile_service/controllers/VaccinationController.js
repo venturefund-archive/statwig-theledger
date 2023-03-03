@@ -388,6 +388,9 @@ exports.vaccinateIndividual = [
 			const warehouse = await WarehouseModel.findOne({ id: warehouseId });
 			// Open a new bottle if first dose
 			if (!vaccineVialId) {
+				if(!atomId) {
+					throw new Error("AtomID is required for first dose!");
+				}
 				const existingInventory = await InventoryModel.findOne(
 					{ id: warehouse.warehouseInventory },
 					{ _id: 1, id: 1, inventoryDetails: { $elemMatch: { productId: productId } } },
