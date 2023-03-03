@@ -262,11 +262,11 @@ exports.fetchBatchById = [
 					for (let i = 0; i < productDetails.length; ++i) {
 						let currProd = productDetails[i];
 						if (currProd?.atom?.attributeSet?.expDate) {
-							let expDate = new Date(productDetails[0].atom.attributeSet.expDate);
+							let expDate = new Date(productDetails[i].atom.attributeSet.expDate);
 							let today = new Date();
 							today.setUTCHours(0, 0, 0, 0);
 
-							if (expDate < today) {
+							if (expDate.valueOf() < today.valueOf()) {
 						    // if (expDate.toLocaleDateString() < today.toLocaleDateString()) {		
 								errors.push("expired_batch");
 								continue;
@@ -381,7 +381,7 @@ exports.vaccinateIndividual = [
 	auth,
 	async (req, res) => {
 		try {
-			const { warehouseId, productId, batchNumber, age, ageMonths, gender } = req.body;
+			const { warehouseId, productId, batchNumber, atomId, age, ageMonths, gender } = req.body;
 			let vaccineVialId = req.body?.vaccineVialId;
 			let vaccineVial;
 
@@ -398,8 +398,7 @@ exports.vaccinateIndividual = [
 					}
 				}
 				const existingAtom = await AtomModel.findOne({
-					currentInventory: warehouse.warehouseInventory,
-					batchNumbers: batchNumber,
+					id: atomId,
 					status: "HEALTHY",
 				});
 				if (!existingAtom?.quantity) {
@@ -422,8 +421,7 @@ exports.vaccinateIndividual = [
 				// Reduce inventory in AtomModel
 				await AtomModel.updateOne(
 					{
-						currentInventory: warehouse.warehouseInventory,
-						batchNumbers: batchNumber,
+						id: atomId,
 						status: "HEALTHY",
 					},
 					{
@@ -454,6 +452,7 @@ exports.vaccinateIndividual = [
 					batchNumber: batchNumber,
 					isComplete: false,
 					numberOfDoses: 0,
+					atomId: atomId
 				});
 				await vaccineVial.save();
 			} else {
@@ -506,7 +505,7 @@ exports.vaccinateMultiple = [
 	auth,
 	async (req, res) => {
 		try {
-			const { warehouseId, productId, batchNumber, doses } = req.body;
+			const { warehouseId, productId, batchNumber, atomId, doses } = req.body;
 			let vaccineVialId = req.body?.vaccineVialId;
 			let vaccineVial;
 			const warehouse = await WarehouseModel.findOne({ id: warehouseId });
@@ -522,8 +521,7 @@ exports.vaccinateMultiple = [
 					}
 				}
 				const existingAtom = await AtomModel.findOne({
-					currentInventory: warehouse.warehouseInventory,
-					batchNumbers: batchNumber,
+					id: atomId,
 					status: "HEALTHY",
 				});
 				if (!existingAtom?.quantity) {
@@ -559,14 +557,14 @@ exports.vaccinateMultiple = [
 					batchNumber: batchNumber,
 					isComplete: false,
 					numberOfDoses: doses.length,
+					atomId: atomId
 				});
 				await vaccineVial.save();
 
 				// Reduce inventory in InventoryModel and AtomModel
 				await AtomModel.updateOne(
 					{
-						currentInventory: warehouse.warehouseInventory,
-						batchNumbers: batchNumber,
+						atomId: atomId,
 						status: "HEALTHY",
 					},
 					{
