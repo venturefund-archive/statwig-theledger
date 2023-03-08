@@ -58,6 +58,7 @@ import ViewUsers from "../admin/pages/statwig-admin/ViewUsers/ViewUsers";
 import Configuration from "../admin/pages/statwig-admin/Configuration/Configuration";
 import Users from "../admin/pages/org-admin/Users/Users";
 import AdminProductList from "../admin/pages/org-admin/ProductList/ProductList";
+import NetworkReportContainer from "../containers/NetworkReports/NetworkReportContainer";
 
 
 const routes = (
@@ -148,6 +149,7 @@ const routes = (
     <Route path='/addNewProduct' component={requireAuth(AddProductContainer)} />
     <Route path='/network' component={requireAuth(NetworkingContainer)} />
     <Route path='/tracking/:id' component={requireAuth(TrackingContainer)} />
+    <Route path='/reports' component={requireAuth(NetworkReportContainer)} />
 
     {/* Admin Statwig */}
     <Route path='/statwig/dashboard' component={requireAuth(Dashboard, true)} />
@@ -160,6 +162,7 @@ const routes = (
     <Route path='/org/dashboard' component={requireAuth(OrgDashboard, true)} />
     <Route path='/org/manage-users' component={requireAuth(Users, true)} />
     <Route path='/org/product-list' component={requireAuth(AdminProductList, true)} />
+
 
     <Route component={ErrorPageContainer} />
   </Switch>
