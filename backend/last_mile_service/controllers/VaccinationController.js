@@ -206,13 +206,10 @@ exports.fetchBatchById = [
 			const userId = req.user.id;
 			const batchNumber = req.body.batchNumber;
 			const warehouseId = req.body.warehouseId;
-
 			const user = await EmployeeModel.findOne({ id: userId });
-
 			if (!user.warehouseId.includes(warehouseId)) {
 				throw new Error("User does not have access to this warehouse!");
 			}
-
 			const warehouse = await WarehouseModel.findOne({ id: warehouseId });
 			if (!warehouse) {
 				throw new Error("Warehouse does not exist");
@@ -257,25 +254,21 @@ exports.fetchBatchById = [
 				],
 				{ collation: { locale: "en", strength: 2 } },
 			);
-			let validBatches = [];
+			const validBatches = [];
 			if (productDetails) {
 				if (productDetails?.length) {
-					let errors = [];
-					for (let i = 0; i < productDetails.length; ++i) {
-						let currProd = productDetails[i];
+					const errors = [];
+					for (const currProd of productDetails) {
 						if (currProd?.atom?.attributeSet?.expDate) {
-							let expDate = new Date(productDetails[0].atom.attributeSet.expDate);
-							let today = new Date();
+							const expDate = new Date(currProd.atom.attributeSet.expDate);
+							const today = new Date();
 							today.setUTCHours(0, 0, 0, 0);
-
 							if (expDate < today) {
 								// if (expDate.toLocaleDateString() < today.toLocaleDateString()) {		
 								errors.push("expired_batch");
-								continue;
 							} else {
-								if (!currProd?.atom?.quantity) {
+								if (currProd?.atom?.quantity <= 0) {
 									errors.push("batch_exhausted");
-									continue;
 								}
 								validBatches.push(currProd);
 							}
@@ -306,7 +299,6 @@ exports.fetchBatchById = [
 						throw new Error("Batch not found in Warehouse !");
 				}
 			}
-
 			return apiResponse.successResponseWithData(res, "Product Details", validBatches);
 		} catch (err) {
 			console.log(err);
