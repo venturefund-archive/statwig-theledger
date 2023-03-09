@@ -61,6 +61,405 @@ async function getDistributedProducts(matchQuery, warehouseId, fieldName) {
   return matchQuery;
 }
 
+async function GovtBodyExpired(warehouse, date, body) {
+	let query = {};
+	let matchQueryStage2 = {};
+	const { type, id, productName } = body;
+
+	// if (id)
+	// query[`_id`] = id;
+	// if (type)
+	// query[`productCategory`] = type;
+
+	if (warehouse) {
+		query[`id`] = warehouse;
+	}
+
+	if (type) matchQueryStage2["productCategory"] = type;
+	if (productName) matchQueryStage2["productName"] = productName;
+
+  let today = new Date();
+  const nextMonth = new Date();
+  nextMonth.setDate(today.getDate() + 30);
+
+	const nearExpiryProducts = await WarehouseModel.aggregate([
+		{
+			$match: query,
+		},
+		{
+			$lookup: {
+				localField: "warehouseInventory",
+				from: "inventories",
+				foreignField: "id",
+				as: "inventory",
+			},
+		},
+		{
+			$unwind: {
+				path: "$inventory",
+				preserveNullAndEmptyArrays: true,
+			},
+		},
+		{
+			$replaceWith: {
+				$mergeObjects: [null, "$inventory"],
+			},
+		},
+		{
+			$unwind: {
+				path: "$inventoryDetails",
+			},
+		},
+		{
+			$match: {
+				"inventoryDetails.quantity": {
+					$gt: 0,
+				},
+			},
+		},
+		{
+			$lookup: {
+				from: "products",
+				let: { productId: "$inventoryDetails.productId", inventoryId: "$id" },
+				pipeline: [
+					{
+						$match: {
+							$expr: {
+								$and: [{ $eq: ["$id", "$$productId"] }],
+							},
+						},
+					},
+					{
+						$lookup: {
+							from: "atoms",
+							let: { inventoryId: "$$inventoryId", productId: "$id" },
+							pipeline: [
+								{
+									$match: {
+										$expr: {
+											$and: [
+												{ $eq: ["$currentInventory", "$$inventoryId"] },
+												{ $eq: ["$productId", "$$productId"] },
+												{ $eq: ["$status", "HEALTHY"] },
+												{ $gte: ["$attributeSet.expDate", null] },
+												{ $ne: ["$attributeSet.expDate", null] },
+												{ $gte: ["$attributeSet.expDate", today] },
+												{ $lt: ["$attributeSet.expDate", nextMonth] },
+											],
+										},
+									},
+								},
+								{
+									$unwind: "$batchNumbers",
+								},
+								{
+									$group: {
+										_id: {
+											productId: "$productId",
+											batchNumber: "$batchNumbers",
+											expDate: "$attributeSet.expDate",
+										},
+										quantity: { $sum: "$quantity" },
+									},
+								},
+							],
+							as: "atom",
+						},
+					},
+					{
+						$unwind: "$atom",
+					},
+				],
+				as: "product",
+			},
+		},
+		{
+			$unwind: {
+				path: "$product",
+			},
+		},
+		{
+			$lookup: {
+				from: "inventory_analytics",
+				let: {
+					arg1: "$inventoryDetails.productId",
+					arg2: date,
+					arg3: "$id",
+				},
+				pipeline: [
+					{
+						$match: {
+							$expr: {
+								$and: [
+									{
+										$eq: ["$productId", "$$arg1"],
+									},
+									{
+										$eq: ["$inventoryId", "$$arg3"],
+									},
+									{
+										$eq: ["$date", "$$arg2"],
+									},
+								],
+							},
+						},
+					},
+				],
+				as: "inventory_analytics",
+			},
+		},
+		{
+			$unwind: {
+				path: "$inventory_analytics",
+				preserveNullAndEmptyArrays: true,
+			},
+		},
+		{
+			$group: {
+				_id: "$inventoryDetails.productId",
+				productCategory: {
+					$first: "$product.type",
+				},
+				productName: {
+					$first: "$product.name",
+				},
+				unitofMeasure: {
+					$first: "$product.unitofMeasure",
+				},
+				manufacturer: {
+					$first: "$product.manufacturer",
+				},
+				manufacturerId: {
+					$first: "$product.manufacturerId",
+				},
+				productQuantity: {
+					$sum: "$inventoryDetails.quantity",
+				},
+				totalSales: {
+					$sum: "$inventoryDetails.totalSales",
+				},
+				inventoryAnalytics: {
+					$first: "$inventory_analytics",
+				},
+				updatedAt: {
+					$first: "$inventoryDetails.updatedAt",
+				},
+				expiredDates: {
+					$first: "$product.atom._id.expDate",
+				},
+			},
+		},
+		{
+			$match: matchQueryStage2,
+		},
+		{
+			$sort: {
+				productQuantity: -1,
+			},
+		},
+	]);
+
+	return nearExpiryProducts;
+}
+
+async function GovtBodyExpired(warehouse, date, body) {
+	let query = {};
+	let matchQueryStage2 = {};
+	const { type, id, productName } = body;
+
+	// if (id)
+	// query[`_id`] = id;
+	// if (type)
+	// query[`productCategory`] = type;
+
+	if (warehouse) {
+		query[`id`] = warehouse;
+	}
+
+	if (type) matchQueryStage2["productCategory"] = type;
+	if (productName) matchQueryStage2["productName"] = productName;
+
+  let today = new Date();
+
+	const expiredProducts = await WarehouseModel.aggregate([
+		{
+			$match: query,
+		},
+		{
+			$lookup: {
+				localField: "warehouseInventory",
+				from: "inventories",
+				foreignField: "id",
+				as: "inventory",
+			},
+		},
+		{
+			$unwind: {
+				path: "$inventory",
+				preserveNullAndEmptyArrays: true,
+			},
+		},
+		{
+			$replaceWith: {
+				$mergeObjects: [null, "$inventory"],
+			},
+		},
+		{
+			$unwind: {
+				path: "$inventoryDetails",
+			},
+		},
+		{
+			$match: {
+				"inventoryDetails.quantity": {
+					$gt: 0,
+				},
+			},
+		},
+		{
+			$lookup: {
+				from: "products",
+				let: { productId: "$inventoryDetails.productId", inventoryId: "$id" },
+				pipeline: [
+					{
+						$match: {
+							$expr: {
+								$and: [{ $eq: ["$id", "$$productId"] }],
+							},
+						},
+					},
+					{
+						$lookup: {
+							from: "atoms",
+							let: { inventoryId: "$$inventoryId", productId: "$id" },
+							pipeline: [
+								{
+									$match: {
+										$expr: {
+											$and: [
+												{ $eq: ["$currentInventory", "$$inventoryId"] },
+												{ $eq: ["$productId", "$$productId"] },
+												{ $eq: ["$status", "HEALTHY"] },
+												{ $gte: ["$attributeSet.expDate", null] },
+												{ $ne: ["$attributeSet.expDate", null] },
+												{ $lt: ["$attributeSet.expDate", today] },
+											],
+										},
+									},
+								},
+								{
+									$unwind: "$batchNumbers",
+								},
+								{
+									$group: {
+										_id: {
+											productId: "$productId",
+											batchNumber: "$batchNumbers",
+											expDate: "$attributeSet.expDate",
+										},
+										quantity: { $sum: "$quantity" },
+									},
+								},
+							],
+							as: "atom",
+						},
+					},
+					{
+						$unwind: "$atom",
+					},
+				],
+				as: "product",
+			},
+		},
+		{
+			$unwind: {
+				path: "$product",
+			},
+		},
+		{
+			$lookup: {
+				from: "inventory_analytics",
+				let: {
+					arg1: "$inventoryDetails.productId",
+					arg2: date,
+					arg3: "$id",
+				},
+				pipeline: [
+					{
+						$match: {
+							$expr: {
+								$and: [
+									{
+										$eq: ["$productId", "$$arg1"],
+									},
+									{
+										$eq: ["$inventoryId", "$$arg3"],
+									},
+									{
+										$eq: ["$date", "$$arg2"],
+									},
+								],
+							},
+						},
+					},
+				],
+				as: "inventory_analytics",
+			},
+		},
+		{
+			$unwind: {
+				path: "$inventory_analytics",
+				preserveNullAndEmptyArrays: true,
+			},
+		},
+		{
+			$group: {
+				_id: "$inventoryDetails.productId",
+				productCategory: {
+					$first: "$product.type",
+				},
+				productName: {
+					$first: "$product.name",
+				},
+				unitofMeasure: {
+					$first: "$product.unitofMeasure",
+				},
+				manufacturer: {
+					$first: "$product.manufacturer",
+				},
+				manufacturerId: {
+					$first: "$product.manufacturerId",
+				},
+				productQuantity: {
+					$sum: "$inventoryDetails.quantity",
+				},
+				totalSales: {
+					$sum: "$inventoryDetails.totalSales",
+				},
+				inventoryAnalytics: {
+					$first: "$inventory_analytics",
+				},
+				updatedAt: {
+					$first: "$inventoryDetails.updatedAt",
+				},
+				expiredDates: {
+					$first: "$product.atom._id.expDate",
+				},
+			},
+		},
+		{
+			$match: matchQueryStage2,
+		},
+		{
+			$sort: {
+				productQuantity: -1,
+			},
+		},
+	]);
+
+	return expiredProducts;
+}
+
 async function GovtBodyInstock(warehouse, date, body) {
 	let query = {};
 	let matchQueryStage2 = {};
@@ -1843,6 +2242,492 @@ exports.outOfStockReport = [
 			} else {
 				return apiResponse.successResponseWithData(res, "Out of stock Report", {
 					outOfStockReport,
+					warehouseId: warehouse,
+				});
+			}
+		} catch (err) {
+			console.log(err);
+			return apiResponse.ErrorResponse(res, err);
+		}
+	},
+];
+
+exports.expiredStockReport = [
+	auth,
+	async (req, res) => {
+		try {
+			const warehouse = req.query.warehouseId || req.user.warehouseId;
+			const date = req.query.date
+				? format(startOfMonth(new Date(req.query.date)), "yyyy-MM-dd")
+        : format(startOfMonth(new Date()), "yyyy-MM-dd");
+        
+      const today = new Date();
+			const reportType = req.query.reportType || null;
+			const organisation = await OrganisationModel.findOne({
+				id: req.user.organisationId,
+			});
+			let expiredProducts;
+			const isGoverningBody = organisation?.type === "GoverningBody";
+			if (isGoverningBody) {
+				// Default warehouseId
+				expiredProducts = await GovtBodyExpired(warehouse, date, req.query);
+			} else {
+				const isDist =
+					organisation?.type === "DISTRIBUTORS" || organisation?.type === "DROGUERIA"
+						? true
+						: false;
+				let matchQuery1 = {};
+				let matchQuery2 = {};
+				let matchQuery3 = {};
+				const { type, id } = req.query;
+				if (id) matchQuery3[`_id`] = id;
+				if (type) matchQuery3[`productCategory`] = type;
+				if (!isDist) {
+					matchQuery2[`manufacturerId`] = req.user.organisationId;
+				} else {
+					if (req.user.warehouseId && req.user.warehouseId !== req.query.warehouseId) {
+						matchQuery1 = await getDistributedProducts(
+							matchQuery1,
+							req.user.warehouseId,
+							`inventoryDetails.productId`,
+						);
+					}
+				}
+				expiredProducts = await WarehouseModel.aggregate([
+					{
+						$match: {
+							id: warehouse,
+						},
+					},
+					{
+						$lookup: {
+							localField: "warehouseInventory",
+							from: "inventories",
+							foreignField: "id",
+							as: "inventory",
+						},
+					},
+					{
+						$unwind: {
+							path: "$inventory",
+							preserveNullAndEmptyArrays: true,
+						},
+					},
+					{
+						$replaceWith: {
+							$mergeObjects: [null, "$inventory"],
+						},
+					},
+					{
+						$unwind: {
+							path: "$inventoryDetails",
+						},
+					},
+					{
+						$match: matchQuery1,
+					},
+					{
+						$match: {
+							"inventoryDetails.quantity": {
+								$gt: 0,
+							},
+						},
+					},
+					{
+						$lookup: {
+							from: "products",
+							let: { productId: "$inventoryDetails.productId", inventoryId: "$id" },
+							pipeline: [
+								{
+									$match: {
+										$expr: {
+											$and: [{ $eq: ["$id", "$$productId"] }],
+										},
+									},
+								},
+								{
+									$lookup: {
+										from: "atoms",
+										let: { inventoryId: "$$inventoryId", productId: "$id" },
+										pipeline: [
+											{
+												$match: {
+													$expr: {
+														$and: [
+															{ $eq: ["$currentInventory", "$$inventoryId"] },
+															{ $eq: ["$productId", "$$productId"] },
+															{ $eq: ["$status", "HEALTHY"] },
+															{ $gte: ["$attributeSet.expDate", null] },
+															{ $ne: ["$attributeSet.expDate", null] },
+															{ $lt: ["$attributeSet.expDate", today] },
+														],
+													},
+												},
+                      },
+                      {
+                        $unwind: "$batchNumbers"
+                      },
+											{
+												$group: {
+													_id: {productId: "$productId", batchNumber: "$batchNumbers", expDate: "$attributeSet.expDate"},
+													quantity: { $sum: "$quantity" },
+												},
+											},
+										],
+										as: "atom",
+									},
+								},
+								{
+									$unwind: "$atom",
+								},
+							],
+							as: "product",
+						},
+					},
+					{
+						$unwind: {
+							path: "$product",
+						},
+					},
+					{
+						$lookup: {
+							from: "inventory_analytics",
+							let: {
+								arg1: "$inventoryDetails.productId",
+								arg2: date,
+								arg3: "$id",
+							},
+							pipeline: [
+								{
+									$match: {
+										$expr: {
+											$and: [
+												{
+													$eq: ["$productId", "$$arg1"],
+												},
+												{
+													$eq: ["$inventoryId", "$$arg3"],
+												},
+												{
+													$eq: ["$date", "$$arg2"],
+												},
+											],
+										},
+									},
+								},
+							],
+							as: "inventory_analytics",
+						},
+					},
+					{
+						$unwind: {
+							path: "$inventory_analytics",
+							preserveNullAndEmptyArrays: true,
+						},
+					},
+					{
+						$group: {
+							_id: "$inventoryDetails.productId",
+							productCategory: {
+								$first: "$product.type",
+							},
+							productName: {
+								$first: "$product.name",
+							},
+							unitofMeasure: {
+								$first: "$product.unitofMeasure",
+							},
+							manufacturer: {
+								$first: "$product.manufacturer",
+							},
+							manufacturerId: {
+								$first: "$product.manufacturerId",
+							},
+							productQuantity: {
+								$sum: "$product.atom.quantity",
+							},
+							totalSales: {
+								$sum: "$inventoryDetails.totalSales",
+							},
+							inventoryAnalytics: {
+								$first: "$inventory_analytics",
+							},
+							updatedAt: {
+								$first: "$inventoryDetails.updatedAt",
+							},
+							expiredDates: {
+								$first: "$product.atom._id.expDate",
+							},
+						},
+					},
+					{
+						$match: matchQuery2,
+					},
+					{
+						$match: matchQuery3,
+					},
+					{
+						$sort: {
+							productQuantity: -1,
+						},
+					},
+				]);
+			}
+			if (reportType) {
+        const reportData = await getDataForReport("INSTOCK", expiredProducts);
+				if (reportType === "excel") {
+					await buildExcelReport(res, reportData.header, reportData.excelData, "EXPIRED", date);
+				} else {
+					await buildPdfReport(res, reportData.pdfData, "EXPIRED", date);
+				}
+			} else {
+				return apiResponse.successResponseWithData(res, "Expired products Report", {
+					expiredProducts,
+					warehouseId: warehouse,
+				});
+			}
+		} catch (err) {
+			console.log(err);
+			return apiResponse.ErrorResponse(res, err);
+		}
+	},
+];
+
+exports.nearExpiryStockReport = [
+	auth,
+	async (req, res) => {
+		try {
+			const warehouse = req.query.warehouseId || req.user.warehouseId;
+			const date = req.query.date
+				? format(startOfMonth(new Date(req.query.date)), "yyyy-MM-dd")
+        : format(startOfMonth(new Date()), "yyyy-MM-dd");
+        
+      const today = new Date();
+      const nextMonth = new Date();
+      nextMonth.setDate(today.getDate() + 30);
+      
+			const reportType = req.query.reportType || null;
+			const organisation = await OrganisationModel.findOne({
+				id: req.user.organisationId,
+			});
+			let nearExpiryProducts;
+			const isGoverningBody = organisation?.type === "GoverningBody";
+			if (isGoverningBody) {
+				// Default warehouseId
+				nearExpiryProducts = await GovtBodyExpired(warehouse, date, req.query);
+			} else {
+				const isDist =
+					organisation?.type === "DISTRIBUTORS" || organisation?.type === "DROGUERIA"
+						? true
+						: false;
+				let matchQuery1 = {};
+				let matchQuery2 = {};
+				let matchQuery3 = {};
+				const { type, id } = req.query;
+				if (id) matchQuery3[`_id`] = id;
+				if (type) matchQuery3[`productCategory`] = type;
+				if (!isDist) {
+					matchQuery2[`manufacturerId`] = req.user.organisationId;
+				} else {
+					if (req.user.warehouseId && req.user.warehouseId !== req.query.warehouseId) {
+						matchQuery1 = await getDistributedProducts(
+							matchQuery1,
+							req.user.warehouseId,
+							`inventoryDetails.productId`,
+						);
+					}
+				}
+				nearExpiryProducts = await WarehouseModel.aggregate([
+					{
+						$match: {
+							id: warehouse,
+						},
+					},
+					{
+						$lookup: {
+							localField: "warehouseInventory",
+							from: "inventories",
+							foreignField: "id",
+							as: "inventory",
+						},
+					},
+					{
+						$unwind: {
+							path: "$inventory",
+							preserveNullAndEmptyArrays: true,
+						},
+					},
+					{
+						$replaceWith: {
+							$mergeObjects: [null, "$inventory"],
+						},
+					},
+					{
+						$unwind: {
+							path: "$inventoryDetails",
+						},
+					},
+					{
+						$match: matchQuery1,
+					},
+					{
+						$match: {
+							"inventoryDetails.quantity": {
+								$gt: 0,
+							},
+						},
+					},
+					{
+						$lookup: {
+							from: "products",
+							let: { productId: "$inventoryDetails.productId", inventoryId: "$id" },
+							pipeline: [
+								{
+									$match: {
+										$expr: {
+											$and: [{ $eq: ["$id", "$$productId"] }],
+										},
+									},
+								},
+								{
+									$lookup: {
+										from: "atoms",
+										let: { inventoryId: "$$inventoryId", productId: "$id" },
+										pipeline: [
+											{
+												$match: {
+													$expr: {
+														$and: [
+															{ $eq: ["$currentInventory", "$$inventoryId"] },
+															{ $eq: ["$productId", "$$productId"] },
+															{ $eq: ["$status", "HEALTHY"] },
+															{ $gte: ["$attributeSet.expDate", null] },
+															{ $ne: ["$attributeSet.expDate", null] },
+															{ $gte: ["$attributeSet.expDate", today] },
+															{ $lt: ["$attributeSet.expDate", nextMonth] },
+														],
+													},
+												},
+                      },
+                      {
+                        $unwind: "$batchNumbers"
+                      },
+											{
+												$group: {
+													_id: {productId: "$productId", batchNumber: "$batchNumbers", expDate: "$attributeSet.expDate"},
+													quantity: { $sum: "$quantity" },
+												},
+											},
+										],
+										as: "atom",
+									},
+								},
+								{
+									$unwind: "$atom",
+								},
+							],
+							as: "product",
+						},
+					},
+					{
+						$unwind: {
+							path: "$product",
+						},
+					},
+					{
+						$lookup: {
+							from: "inventory_analytics",
+							let: {
+								arg1: "$inventoryDetails.productId",
+								arg2: date,
+								arg3: "$id",
+							},
+							pipeline: [
+								{
+									$match: {
+										$expr: {
+											$and: [
+												{
+													$eq: ["$productId", "$$arg1"],
+												},
+												{
+													$eq: ["$inventoryId", "$$arg3"],
+												},
+												{
+													$eq: ["$date", "$$arg2"],
+												},
+											],
+										},
+									},
+								},
+							],
+							as: "inventory_analytics",
+						},
+					},
+					{
+						$unwind: {
+							path: "$inventory_analytics",
+							preserveNullAndEmptyArrays: true,
+						},
+					},
+					{
+						$group: {
+							_id: "$inventoryDetails.productId",
+							productCategory: {
+								$first: "$product.type",
+							},
+							productName: {
+								$first: "$product.name",
+							},
+							unitofMeasure: {
+								$first: "$product.unitofMeasure",
+							},
+							manufacturer: {
+								$first: "$product.manufacturer",
+							},
+							manufacturerId: {
+								$first: "$product.manufacturerId",
+							},
+							productQuantity: {
+								$sum: "$product.atom.quantity",
+							},
+							totalSales: {
+								$sum: "$inventoryDetails.totalSales",
+							},
+							inventoryAnalytics: {
+								$first: "$inventory_analytics",
+							},
+							updatedAt: {
+								$first: "$inventoryDetails.updatedAt",
+							},
+							expiredDates: {
+								$first: "$product.atom._id.expDate",
+							},
+						},
+					},
+					{
+						$match: matchQuery2,
+					},
+					{
+						$match: matchQuery3,
+					},
+					{
+						$sort: {
+							productQuantity: -1,
+						},
+					},
+				]);
+			}
+			if (reportType) {
+        const reportData = await getDataForReport("INSTOCK", nearExpiryProducts);
+				if (reportType === "excel") {
+					await buildExcelReport(res, reportData.header, reportData.excelData, "EXPIRED", date);
+				} else {
+					await buildPdfReport(res, reportData.pdfData, "EXPIRED", date);
+				}
+			} else {
+				return apiResponse.successResponseWithData(res, "Expired products Report", {
+					nearExpiryProducts,
 					warehouseId: warehouse,
 				});
 			}
