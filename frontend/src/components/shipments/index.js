@@ -140,7 +140,7 @@ const ShipmentAnalytic = (props) => {
         setCount(inboundRes.data.count);
         dispatch(turnOff());
       } else {
-        if(statusFilter == null) setStatusFilter("");
+        if (statusFilter == null) setStatusFilter("");
         dispatch(turnOn());
         const outboundRes = await getOutboundShipments(
           idFilter,
@@ -389,7 +389,7 @@ const ShipmentAnalytic = (props) => {
       dispatch(turnOff());
     }
   };
-  
+
   const sendData = () => {
     let rtnArr = visible === "one" ? inboundShipments : outboundShipments;
     if (alerts)
@@ -489,14 +489,12 @@ const ShipmentAnalytic = (props) => {
     setShowExportFilter(false);
     let url = "";
     if (visible === "one") {
-      url = `${
-        config().getExportFileForInboundShipmentUrl
-      }?type=${value.toLowerCase()}&shipmentId=${idFilter}&from=${fromFilter}&to=${toFilter}&dateFilter=${dateFilter}&status=${statusFilter}&fromDate=${fromFilterDate}&toDate=${toFilterDate}`;
+      url = `${config().getExportFileForInboundShipmentUrl
+        }?type=${value.toLowerCase()}&shipmentId=${idFilter}&from=${fromFilter}&to=${toFilter}&dateFilter=${dateFilter}&status=${statusFilter}&fromDate=${fromFilterDate}&toDate=${toFilterDate}`;
     }
     if (visible === "two") {
-      url = `${
-        config().getExportFileForOutboundShipmentUrl
-      }?type=${value.toLowerCase()}&shipmentId=${idFilter}&from=${fromFilter}&to=${toFilter}&dateFilter=${dateFilter}&status=${statusFilter}&fromDate=${fromFilterDate}&toDate=${toFilterDate}`;
+      url = `${config().getExportFileForOutboundShipmentUrl
+        }?type=${value.toLowerCase()}&shipmentId=${idFilter}&from=${fromFilter}&to=${toFilter}&dateFilter=${dateFilter}&status=${statusFilter}&fromDate=${fromFilterDate}&toDate=${toFilterDate}`;
     }
 
     var today = new Date();
@@ -529,8 +527,7 @@ const ShipmentAnalytic = (props) => {
         link.href = downloadUrl;
         link.setAttribute(
           "download",
-          `${nameOfFile}.${
-            value.toLowerCase() === "excel" ? "xlsx" : value.toLowerCase()
+          `${nameOfFile}.${value.toLowerCase() === "excel" ? "xlsx" : value.toLowerCase()
           }`
         ); //any other extension
         document.body.appendChild(link);
@@ -596,7 +593,7 @@ const ShipmentAnalytic = (props) => {
           />
         </div>
       )}
-      <div className='ribben-space'  style={{pointerEvents: props.demoLogin ? "none" : "auto" }}>
+      <div className='ribben-space' style={{ pointerEvents: props.demoLogin ? "none" : "auto" }}>
         <Table
           {...props}
           skip={skip}

@@ -1,5 +1,5 @@
-var mongoose = require("mongoose");
-ShipmentSchema = new mongoose.Schema(
+const mongoose = require("mongoose");
+const ShipmentSchema = new mongoose.Schema(
   {
     id: { type: String, required: true, unique: true },
     shippingOrderId: String,

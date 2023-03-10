@@ -109,27 +109,22 @@ function Table(props) {
                       {shipment.supplier.org
                         ? shipment.supplier.org.name
                         : intelEnabled
-                        ? shipment.supplier.id
-                        : "-"}
+                          ? shipment.supplier.id
+                          : "-"}
                     </h5>
                     <p className=' mb-0  text-sm-2 grey'>
-                      {`${
-                        supplierAddress?.firstLine
-                          ? supplierAddress?.firstLine
-                          : intelEnabled
+                      {`${supplierAddress?.firstLine
+                        ? supplierAddress?.firstLine
+                        : intelEnabled
                           ? shipment.supplier.locationId
                           : ""
-                      } ${
-                        supplierAddress?.secondLine
+                        } ${supplierAddress?.secondLine
                           ? supplierAddress?.secondLine
                           : ""
-                      } ${
-                        supplierAddress?.city ? supplierAddress?.city : ""
-                      }\n ${
-                        supplierAddress?.state ? supplierAddress?.state : ""
-                      }\n ${
-                        supplierAddress?.country ? supplierAddress?.country : ""
-                      } `}
+                        } ${supplierAddress?.city ? supplierAddress?.city : ""
+                        }\n ${supplierAddress?.state ? supplierAddress?.state : ""
+                        }\n ${supplierAddress?.country ? supplierAddress?.country : ""
+                        } `}
                     </p>
                   </div>
                 </td>
@@ -139,27 +134,22 @@ function Table(props) {
                       {shipment.receiver.org
                         ? shipment.receiver.org.name
                         : intelEnabled
-                        ? shipment.receiver.id
-                        : "-"}
+                          ? shipment.receiver.id
+                          : "-"}
                     </h5>
                     <p className='mb-0 text-sm-2 grey'>
-                      {`${
-                        receiverAddress?.firstLine
-                          ? receiverAddress?.firstLine
-                          : intelEnabled
+                      {`${receiverAddress?.firstLine
+                        ? receiverAddress?.firstLine
+                        : intelEnabled
                           ? shipment.receiver.locationId
                           : ""
-                      }  ${
-                        receiverAddress?.secondLine
+                        }  ${receiverAddress?.secondLine
                           ? receiverAddress?.secondLine
                           : ""
-                      } ${
-                        receiverAddress?.city ? receiverAddress?.city : ""
-                      } \n ${
-                        receiverAddress?.state ? receiverAddress?.state : ""
-                      } \n ${
-                        receiverAddress?.country ? receiverAddress?.country : ""
-                      } `}
+                        } ${receiverAddress?.city ? receiverAddress?.city : ""
+                        } \n ${receiverAddress?.state ? receiverAddress?.state : ""
+                        } \n ${receiverAddress?.country ? receiverAddress?.country : ""
+                        } `}
                     </p>
                   </div>
                 </td>
@@ -192,11 +182,10 @@ function Table(props) {
                       </button>
                     ) : null}
                     <Link
-                      to={`/${
-                        intelEnabled === true
-                          ? `viewgmrshipment`
-                          : `viewshipment`
-                      }/${shipment.id}`}
+                      to={`/${intelEnabled === true
+                        ? `viewgmrshipment`
+                        : `viewshipment`
+                        }/${shipment.id}`}
                       className='mi-btn mi-btn-sm mi-btn-secondary-outline'
                       style={{
                         border: "1px solid #007bff",
