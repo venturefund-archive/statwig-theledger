@@ -13,6 +13,7 @@ import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import FailPopUp from "../../../shared/PopUp/failedPopUp";
 import Modal from "../../../shared/modal";
+import { formatDate } from "../../../utils/dateHelper";
 
 function ResultCard({ doseDetails, variant, update, deleteDose }) {
   const { t } = useTranslation();
@@ -160,6 +161,12 @@ export default function Beneficiary(props) {
 							<p className="vl-note batch-number-label f-500">
 								{t("batchNumber")} : {batchDetails?.batchNumber}
 							</p>
+						</div>
+						<div className="Product-field-grid">
+							<div className="field-header">
+								<p className="vl-body f-500 vl-blue">{t("exp_date")} :</p>
+							</div>
+							<p className="vl-body f-500 vl-blue">{formatDate(batchDetails.atom.attributeSet?.expDate)}</p>
 						</div>
 					</div>
 				</div>
