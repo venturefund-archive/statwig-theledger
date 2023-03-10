@@ -186,18 +186,45 @@ async function calculateCurrentLocationData(trackedShipment, allowedOrgs, tracki
 async function quantityOverflow(warehouseId, shipmentProducts) {
   let overflow = false;
   const warehouse = await WarehouseModel.findOne({ id: warehouseId });
-  const inventory = await InventoryModel.findOne({
-    id: warehouse.warehouseInventory,
-  });
-  for (let i = 0; i < shipmentProducts.length; i++) {
-    const product = inventory.inventoryDetails.find(
-      (item) => item.productId === shipmentProducts[i].productID
-    );
-    if (
-      parseInt(shipmentProducts[i].productQuantity) > parseInt(product.quantity)
-    )
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const atoms = await AtomModel.aggregate([
+    {
+      $match: {
+        $and: [
+          { currentInventory: warehouse.warehouseInventory },
+          { status: "HEALTHY" },
+          {
+            $or: [
+              { "attributeSet.expDate": { $exists: false } },
+              { "attributeSet.expDate": { $in: [null, ""] } },
+              { "attributeSet.expDate": { $gte: today } },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      $group: {
+        _id: "$productId",
+        quantity: { $sum: "$quantity" },
+      },
+    },
+  ]);
+
+  const shippedProductsMap = shipmentProducts.reduce((map, p) => {
+    map[p.productID] = (map[p.productID] || 0) + p.productQuantity;
+    return map;
+  }, {});
+
+  for (let i = 0; i < atoms?.length; ++i) {
+    if (parseInt(atoms[i].quantity) < (parseInt(shippedProductsMap[atoms[i]._id]) || 0)) {
       overflow = true;
+    }
   }
+
   return overflow;
 }
 
@@ -1529,7 +1556,7 @@ exports.receiveShipment = [
 
           po.products.forEach((product) => {
             const poQuantity = product.productQuantity || product.quantity;
-            const shipmentQuantity = receivedProductsMap[product.id] + (product.quantityDelivered || 0) || 0;
+            const shipmentQuantity = (receivedProductsMap[product.id] || 0) + (product.productQuantityDelivered || 0) || 0;
 
             if (!shipmentQuantity) {
               missingProducts = true;
@@ -2767,6 +2794,10 @@ exports.getProductsByInventory = [
   async (req, res) => {
     try {
       const { invId } = req.query;
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
       const inventories = await InventoryModel.aggregate([
         { $match: { id: invId } },
         { $unwind: "$inventoryDetails" },
@@ -2780,14 +2811,53 @@ exports.getProductsByInventory = [
         },
         { $unwind: "$products" },
         {
+          $lookup: {
+            from: "atoms",
+            let: {
+              currentInventory: "$id",
+              productId: "$inventoryDetails.productId",
+            },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$currentInventory", "$$currentInventory"] },
+                      { $eq: ["$productId", "$$productId"] },
+                      { $eq: ["$status", "HEALTHY"] },
+                      {
+                        $or: [
+                          { $lte: ["$attributeSet.expDate", null] },
+                          { $in: ["$attributeSet.expDate", [null, ""]] },
+                          { $gte: ["$attributeSet.expDate", today] },
+                        ],
+                      },
+                    ],
+                  },
+                },
+              },
+              {
+                $group: {
+                  _id: "$batchNumbers",
+                  quantity: { $sum: "$quantity" },
+                },
+              },
+            ],
+            as: "atom",
+          },
+        },
+        {
+          $unwind: "$atom",
+        },
+        {
           $group: {
             _id: "$inventoryDetails.productId",
             productCategory: { $first: "$products.type" },
             productName: { $first: "$products.name" },
             unitofMeasure: { $first: "$products.unitofMeasure" },
             manufacturer: { $first: "$products.manufacturer" },
-            productQuantity: { $sum: "$inventoryDetails.quantity" },
-            quantity: { $sum: "$inventoryDetails.quantity" },
+            productQuantity: { $sum: "$atom.quantity" },
+            quantity: { $sum: "$atom.quantity" },
           },
         },
         {
@@ -2795,12 +2865,9 @@ exports.getProductsByInventory = [
         },
       ]);
 
-      return apiResponse.successResponseWithData(
-        res,
-        "Products by inventory ",
-        inventories
-      );
+      return apiResponse.successResponseWithData(res, "Products by inventory ", inventories);
     } catch (err) {
+      console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
     }
   },
@@ -5702,7 +5769,14 @@ exports.sensorHistory = [
 exports.syncAtoms = [
   async (req, res) => {
     try {
-      const atomsWithExp = await AtomModel.aggregate([
+      const allGroups = await AtomModel.aggregate([
+        {
+          $addFields: {
+            expDateString: {
+              $dateToString: { format: "%Y-%m-%d", date: "$attributeSet.expDate" },
+            },
+          },
+        },
         { $match: { status: "HEALTHY" } },
         { $sort: { createdAt: 1 } },
         { $unwind: { path: "$batchNumbers" } },
@@ -5712,32 +5786,13 @@ exports.syncAtoms = [
               batch: "$batchNumbers",
               productId: "$productId",
               currentInventory: "$currentInventory",
-              expDate: "$attributeSet.expDate",
+              expDateString: "$expDateString",
             },
             atoms: { $addToSet: "$$ROOT" },
           },
         },
         { $match: { $expr: { $gt: [{ $size: "$atoms" }, 1] } } },
       ]);
-
-      const atomsWithoutExp = await AtomModel.aggregate([
-        { $match: { status: "HEALTHY", "attributeSet.expDate": { $exists: false } } },
-        { $sort: { createdAt: 1 } },
-        { $unwind: { path: "$batchNumbers" } },
-        {
-          $group: {
-            _id: {
-              batch: "$batchNumbers",
-              productId: "$productId",
-              currentInventory: "$currentInventory",
-            },
-            atoms: { $addToSet: "$$ROOT" },
-          },
-        },
-        { $match: { $expr: { $gt: [{ $size: "$atoms" }, 1] } } },
-      ]);
-
-      const allGroups = [...atomsWithExp, ...atomsWithoutExp];
 
       const atomsToMerge = [];
 
