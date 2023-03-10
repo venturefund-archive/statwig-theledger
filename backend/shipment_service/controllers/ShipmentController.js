@@ -5769,6 +5769,7 @@ exports.sensorHistory = [
 exports.syncAtoms = [
   async (req, res) => {
     try {
+      // MERGE CONFLICTS
       const allGroups = await AtomModel.aggregate([
         {
           $addFields: {
