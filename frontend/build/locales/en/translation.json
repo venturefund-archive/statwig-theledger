@@ -617,5 +617,6 @@
   "vialsutilized_report":"VialsUtilizedReport",
   "vaccination_report":"VaccinationReport",
   "mfg_greater_than_today": "Manufacturing Date cannot be greater than today!",
-  "mfg_greater_than_exp": "Manufacturing Date cannot be greater than Expiry Date!"
+  "mfg_greater_than_exp": "Manufacturing Date cannot be greater than Expiry Date!",
+  "choose_batch_to_continue": "Choose Batch to continue ->"
 }
