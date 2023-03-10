@@ -17,6 +17,10 @@ const VaccineVialSchema = new mongoose.Schema(
 			required: true,
 			type: String,
 		},
+		atomId: {
+			required: true,
+			type: String,
+		},
 		isComplete: {
 			type: Boolean,
 			default: false,

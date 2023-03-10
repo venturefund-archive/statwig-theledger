@@ -47,20 +47,19 @@ export default function UploadPopup({
       else result = await addUsersFromExcel(formData);
       dispatch(turnOff());
       if (result.status === 200) {
-				if (orgUpload) {
-					const response = result.data.data;
-					if (response.insertedRecords > 0) {
-						setMessage(
-							`Organisations added: ${result.data.data.insertedRecords} (Invalid: ${result.data.data.invalidRecords})`,
-						);
-						setOpenSuccessPopup(true);
-					} else {
-            setMessage("Invalid data in excel!");
-						setOpenFailurePopup(true);
-					}
-				} else {
-					setMessage(`Users added successfully!`);
+				const response = result.data.data;
+				if (response.insertedRecords > 0) {
+					setMessage(
+						`${orgUpload ? "Organisations" : "Users"} added: ${result.data.data.insertedRecords} ${
+							result.data.data.invalidRecords > 0
+								? `(Invalid: ${result.data.data.invalidRecords})`
+								: ""
+						}`,
+					);
 					setOpenSuccessPopup(true);
+				} else {
+					setMessage("Invalid data in excel!");
+					setOpenFailurePopup(true);
 				}
 			} else {
 				setOpenFailurePopup(true);
@@ -95,11 +94,7 @@ export default function UploadPopup({
 					close={() => closeModal()}
 					size="modal-sm" //for other size's use `modal-lg, modal-md, modal-sm`
 				>
-					<SuccessPopup
-						onHide={closeModal}
-						successMessage={message}
-						// errorMessage="Put the Error Message Here"
-					/>
+					<SuccessPopup onHide={closeModal} successMessage={message} />
 				</Modal>
 			)}
 			{openFailurePopup && (
@@ -109,7 +104,6 @@ export default function UploadPopup({
 				>
 					<SuccessPopup
 						onHide={closeModal}
-						// successMessage="Product added succesfully"
 						errorMessage={
 							message
 								? message
