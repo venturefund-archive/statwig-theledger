@@ -165,7 +165,7 @@ export default function LastmileTrack(props) {
 				</div>
 			</div>
 			{showBatchesList && (
-				<Modal title={"Choose Batch to continue ->"} close={() => toggleShowBatchesList(false)} size="modal-md">
+				<Modal title={t("choose_batch_to_continue")} close={() => toggleShowBatchesList(false)} size="modal-md">
 					<BatchesTable
 						batchesList={batchesList}
 						setBatchDetails={setBatchDetails}
