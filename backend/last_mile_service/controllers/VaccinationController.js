@@ -206,15 +206,14 @@ exports.fetchBatchById = [
 			const userId = req.user.id;
 			const batchNumber = req.body.batchNumber;
 			const warehouseId = req.body.warehouseId;
-
 			const user = await EmployeeModel.findOne({ id: userId });
-
 			if (!user.warehouseId.includes(warehouseId)) {
 				throw new Error("User does not have access to this warehouse!");
 			}
-
 			const warehouse = await WarehouseModel.findOne({ id: warehouseId });
-
+			if (!warehouse) {
+				throw new Error("Warehouse does not exist");
+			}
 			const productDetails = await EmployeeModel.aggregate(
 				[
 					{ $match: { id: userId } },
@@ -255,25 +254,21 @@ exports.fetchBatchById = [
 				],
 				{ collation: { locale: "en", strength: 2 } },
 			);
-			let validBatches = [];
+			const validBatches = [];
 			if (productDetails) {
 				if (productDetails?.length) {
-					let errors = [];
-					for (let i = 0; i < productDetails.length; ++i) {
-						let currProd = productDetails[i];
+					const errors = [];
+					for (const currProd of productDetails) {
 						if (currProd?.atom?.attributeSet?.expDate) {
-							let expDate = new Date(productDetails[i].atom.attributeSet.expDate);
-							let today = new Date();
+							const expDate = new Date(currProd.atom.attributeSet.expDate);
+							const today = new Date();
 							today.setUTCHours(0, 0, 0, 0);
-
-							if (expDate.valueOf() < today.valueOf()) {
-						    // if (expDate.toLocaleDateString() < today.toLocaleDateString()) {		
+							if (expDate < today) {
+								// if (expDate.toLocaleDateString() < today.toLocaleDateString()) {		
 								errors.push("expired_batch");
-								continue;
 							} else {
-								if (!currProd?.atom?.quantity) {
+								if (currProd?.atom?.quantity <= 0) {
 									errors.push("batch_exhausted");
-									continue;
 								}
 								validBatches.push(currProd);
 							}
@@ -282,7 +277,7 @@ exports.fetchBatchById = [
 						}
 					}
 					let priorityError;
-					if(!validBatches.length) {
+					if (!validBatches.length) {
 						if (errors.includes("batch_exhausted")) {
 							priorityError = "Batch exhausted!";
 						} else if (errors.includes("expired_batch")) {
@@ -301,10 +296,9 @@ exports.fetchBatchById = [
 					if (existingAtom)
 						throw new Error("Batch exhausted!");
 					else
-						throw new Error("Batch not found!");
+						throw new Error("Batch not found in Warehouse !");
 				}
 			}
-
 			return apiResponse.successResponseWithData(res, "Product Details", validBatches);
 		} catch (err) {
 			console.log(err);
@@ -824,7 +818,7 @@ exports.getAnalyticsWithFilters = [
 				const vaccineVials = warehouses[i].vaccinations;
 				for (let j = 0; j < vaccineVials.length; ++j) {
 					let createdAt = new Date(vaccineVials[j].createdAt);
-					let createdAtString = getDateStringForMongo(createdAt); 
+					let createdAtString = getDateStringForMongo(createdAt);
 
 					const doses = vaccineVials[j].doses;
 
@@ -1585,10 +1579,10 @@ exports.addDateStringToDoses = [
 	async (req, res) => {
 		const allDoses = await DoseModel.find();
 		let count = 0;
-		for(let i=0; i<allDoses.length; ++i) {
+		for (let i = 0; i < allDoses.length; ++i) {
 			let currDose = allDoses[i];
 			let createdDateString = getDateStringForMongo(new Date(currDose.createdAt));
-			await DoseModel.updateOne({id: currDose.id}, {$set: {createdDateString: createdDateString}})
+			await DoseModel.updateOne({ id: currDose.id }, { $set: { createdDateString: createdDateString } })
 			++count;
 		}
 		return apiResponse.successResponseWithData(res, "Done", count)
