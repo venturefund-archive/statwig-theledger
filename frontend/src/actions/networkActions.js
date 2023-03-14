@@ -42,6 +42,7 @@ export const getmanufacturerInStockReport = async (reportWarehouse, date, type, 
 		return false;
 	}
 };
+
 export const getInStockFilterOptions = async (reportWarehouse, date) => {
   try {
     date = date ? format(startOfMonth(new Date(date)), "yyyy-MM-dd") : "";
@@ -74,6 +75,40 @@ export const getmanufacturerOutStockReport = async (reportWarehouse, date, type,
 	try {
 		date = date ? format(startOfMonth(new Date(date)), "yyyy-MM-dd") : "";
 		const url = config().getmanufacturerOutStockReportUrl;
+		const result = await axios.get(
+			url +
+				`?warehouseId=${reportWarehouse}&date=${date}&type=${type ? type : ""}&id=${
+					productName ? productName : ""
+				}`,
+		);
+		return result.data;
+	} catch (e) {
+		console.log(e);
+		return false;
+	}
+};
+
+export const getManufacturerNearExpiryStockReport = async (reportWarehouse, date, type, productName) => {
+	try {
+		date = date ? format(startOfMonth(new Date(date)), "yyyy-MM-dd") : "";
+		const url = config().getManufacturerNearExpiryStockReportUrl;
+		const result = await axios.get(
+			url +
+				`?warehouseId=${reportWarehouse}&date=${date}&type=${type ? type : ""}&id=${
+					productName ? productName : ""
+				}`,
+		);
+		return result.data;
+	} catch (e) {
+		console.log(e);
+		return false;
+	}
+};
+
+export const getManufacturerExpiredStockReport = async (reportWarehouse, date, type, productName) => {
+	try {
+		date = date ? format(startOfMonth(new Date(date)), "yyyy-MM-dd") : "";
+		const url = config().getManufacturerExpiredStockReportUrl;
 		const result = await axios.get(
 			url +
 				`?warehouseId=${reportWarehouse}&date=${date}&type=${type ? type : ""}&id=${

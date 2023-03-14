@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -6,6 +6,8 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import BestsellerRow from "./BestsellerRow";
+import { useTranslation } from "react-i18next";
+import { getBestSellers } from "../../../../actions/networkActions";
 
 function TableHeader() {
   return (
@@ -53,7 +55,22 @@ function TableHeader() {
 }
 
 export default function BestsellerTable() {
-  const rows = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }];
+  const [bestseller, setBestseller] = useState([]);
+  const [bestsellerFilters, setBestsellerFilters] = useState();
+	const [reportWarehouse, setReportWarehouse] = useState("");
+
+  const { t } = useTranslation();
+
+  const getBestsellers = async () => {
+		const bestSellers = await getBestSellers(reportWarehouse);
+		if (bestSellers) setBestseller(bestSellers.data.bestSellers);
+	};
+
+  useEffect(() => {
+		getBestsellers();
+		// getexpiredStockFilters();
+  }, []);
+  
   return (
     <TableContainer>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -61,8 +78,8 @@ export default function BestsellerTable() {
           <TableHeader />
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
-            <BestsellerRow />
+          {bestseller.map((product, index) => (
+            <BestsellerRow t={t} product={product} key={index} />
           ))}
         </TableBody>
       </Table>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -6,6 +6,8 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import InstocksRow from "./InstocksRow";
+import { useTranslation } from "react-i18next";
+import { getInStockFilterOptions, getmanufacturerInStockReport } from "../../../../actions/networkActions";
 
 function TableHeader() {
   return (
@@ -53,19 +55,43 @@ function TableHeader() {
 }
 
 export default function InstocksTable() {
-  const rows = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }];
+  const [inStock, setInStock] = useState([]);
+  const [inStockFilters, setInStockFilters] = useState();
+	const [reportWarehouse, setReportWarehouse] = useState("");
+
+  const { t } = useTranslation();
+
+  const getInstock = async (startDate) => {
+    const inStock = await getmanufacturerInStockReport(
+      reportWarehouse,
+      // startDate,
+    );
+    if (inStock) setInStock(inStock.data.inStockReport);
+    if (inStock) setReportWarehouse(inStock.data.warehouseId);
+  };
+
+  const getInstockFilters = async () => {
+    const inStockFilters = await getInStockFilterOptions(reportWarehouse, "");
+    if (inStockFilters) setInStockFilters(inStockFilters.filters);
+  };
+
+  useEffect(() => {
+		getInstock();
+		getInstockFilters();
+	}, []);
+
   return (
-    <TableContainer>
-      <Table sx={{ minWidth: 650 }} aria-label="simple table">
-        <TableHead>
-          <TableHeader />
-        </TableHead>
-        <TableBody>
-          {rows.map((row) => (
-            <InstocksRow />
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  );
+		<TableContainer>
+			<Table sx={{ minWidth: 650 }} aria-label="simple table">
+				<TableHead>
+					<TableHeader />
+				</TableHead>
+				<TableBody>
+					{inStock.map((product, index) => (
+						<InstocksRow t={t} product={product} reportWarehouse={reportWarehouse} key={index} />
+					))}
+				</TableBody>
+			</Table>
+		</TableContainer>
+	);
 }

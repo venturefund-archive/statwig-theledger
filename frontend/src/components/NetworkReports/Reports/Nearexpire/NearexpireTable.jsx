@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -6,6 +6,8 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import NearexpireRow from "./NearexpireRow";
+import { useTranslation } from "react-i18next";
+import { getManufacturerNearExpiryStockReport } from "../../../../actions/networkActions";
 
 function TableHeader() {
   return (
@@ -59,7 +61,31 @@ function TableHeader() {
 }
 
 export default function NearexpireTable() {
-  const rows = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }];
+  const [nearExpiryStock, setNearExpiryStock] = useState([]);
+  const [nearExpiryStockFilters, setNearExpiryStockFilters] = useState();
+	const [reportWarehouse, setReportWarehouse] = useState("");
+
+  const { t } = useTranslation();
+
+  const getNearExpiryStock = async (startDate) => {
+    const nearExpiryStock = await getManufacturerNearExpiryStockReport(
+      reportWarehouse,
+      // startDate,
+    );
+    if (nearExpiryStock) setNearExpiryStock(nearExpiryStock.data.nearExpiryProducts);
+    if (nearExpiryStock) setReportWarehouse(nearExpiryStock.data.warehouseId);
+  };
+
+  // const getNearExpiryStockFilters = async () => {
+  //   const nearExpiryStockFilters = await getInStockFilterOptions(reportWarehouse, "");
+  //   if (nearExpiryStockFilters) setNearExpiryStockFilters(nearExpiryStockFilters.filters);
+  // };
+
+  useEffect(() => {
+		getNearExpiryStock();
+		// getNearExpiryStockFilters();
+	}, []);
+
   return (
     <TableContainer>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -67,8 +93,8 @@ export default function NearexpireTable() {
           <TableHeader />
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
-            <NearexpireRow />
+          {nearExpiryStock.map((product, index) => (
+            <NearexpireRow t={t} product={product} key={index} />
           ))}
         </TableBody>
       </Table>

@@ -61,7 +61,7 @@ async function getDistributedProducts(matchQuery, warehouseId, fieldName) {
   return matchQuery;
 }
 
-async function GovtBodyExpired(warehouse, date, body) {
+async function GovtBodyNearExpiry(warehouse, date, body) {
 	let query = {};
 	let matchQueryStage2 = {};
 	const { type, id, productName } = body;
@@ -83,8 +83,27 @@ async function GovtBodyExpired(warehouse, date, body) {
   nextMonth.setDate(today.getDate() + 30);
 
 	const nearExpiryProducts = await WarehouseModel.aggregate([
+		// {
+		// 	$match: query,
+		// },
 		{
-			$match: query,
+			$match: {
+				status: "ACTIVE",
+			},
+		},
+		{
+			$lookup: {
+				from: "organisations",
+				let: { orgId: "$organisationId" },
+				pipeline: [
+					{ $match: { $expr: { $eq: ["$$orgId", "$id"] } } },
+					{ $project: { _id: 0, organisation: "$name" } },
+				],
+				as: "organisation",
+			},
+		},
+		{
+			$unwind: "$organisation",
 		},
 		{
 			$lookup: {
@@ -101,8 +120,21 @@ async function GovtBodyExpired(warehouse, date, body) {
 			},
 		},
 		{
+			$addFields: {
+				address: {
+					address: {
+						firstLine: "$warehouseAddress.firstLine",
+						city: "$warehouseAddress.city",
+						state: "$warehouseAddress.state",
+						country: "$country.countryName",
+						region: "$region.regionName",
+					},
+				},
+			},
+		},
+		{
 			$replaceWith: {
-				$mergeObjects: [null, "$inventory"],
+				$mergeObjects: [null, "$inventory", "$organisation", "$address"],
 			},
 		},
 		{
@@ -232,8 +264,17 @@ async function GovtBodyExpired(warehouse, date, body) {
 				manufacturerId: {
 					$first: "$product.manufacturerId",
 				},
+				organisation: {
+					$first: "$organisation",
+				},
+				address: {
+					$first: "$address",
+				},
 				productQuantity: {
 					$sum: "$inventoryDetails.quantity",
+				},
+				batchNumber: {
+					$first: "$product.atom._id.batchNumber",
 				},
 				totalSales: {
 					$sum: "$inventoryDetails.totalSales",
@@ -282,8 +323,27 @@ async function GovtBodyExpired(warehouse, date, body) {
   let today = new Date();
 
 	const expiredProducts = await WarehouseModel.aggregate([
+		// {
+		// 	$match: query,
+		// },
 		{
-			$match: query,
+			$match: {
+				status: "ACTIVE",
+			},
+		},
+		{
+			$lookup: {
+				from: "organisations",
+				let: { orgId: "$organisationId" },
+				pipeline: [
+					{ $match: { $expr: { $eq: ["$$orgId", "$id"] } } },
+					{ $project: { _id: 0, organisation: "$name" } },
+				],
+				as: "organisation",
+			},
+		},
+		{
+			$unwind: "$organisation"
 		},
 		{
 			$lookup: {
@@ -300,8 +360,21 @@ async function GovtBodyExpired(warehouse, date, body) {
 			},
 		},
 		{
+			$addFields: {
+				address: {
+					address: {
+						firstLine: "$warehouseAddress.firstLine",
+						city: "$warehouseAddress.city",
+						state: "$warehouseAddress.state",
+						country: "$country.countryName",
+						region: "$region.regionName",
+					},
+				},
+			},
+		},
+		{
 			$replaceWith: {
-				$mergeObjects: [null, "$inventory"],
+				$mergeObjects: [null, "$inventory", "$organisation", "$address"],
 			},
 		},
 		{
@@ -430,8 +503,17 @@ async function GovtBodyExpired(warehouse, date, body) {
 				manufacturerId: {
 					$first: "$product.manufacturerId",
 				},
+				organisation: {
+					$first: "$organisation",
+				},
+				address: {
+					$first: "$address",
+				},
 				productQuantity: {
 					$sum: "$inventoryDetails.quantity",
+				},
+				batchNumber: {
+					$first: "$product.atom._id.batchNumber",
 				},
 				totalSales: {
 					$sum: "$inventoryDetails.totalSales",
@@ -478,8 +560,25 @@ async function GovtBodyInstock(warehouse, date, body) {
 	if (productName) matchQueryStage2["productName"] = productName;
 
 	const inStockReport = await WarehouseModel.aggregate([
+		// { $match: query },
 		{
-			$match: query,
+			$match: {
+				status: "ACTIVE",
+			},
+		},
+		{
+			$lookup: {
+				from: "organisations",
+				let: { orgId: "$organisationId" },
+				pipeline: [
+					{ $match: { $expr: { $eq: ["$$orgId", "$id"] } } },
+					{ $project: { _id: 0, organisation: "$name" } },
+				],
+				as: "organisation",
+			},
+		},
+		{
+			$unwind: "$organisation"
 		},
 		{
 			$lookup: {
@@ -496,8 +595,21 @@ async function GovtBodyInstock(warehouse, date, body) {
 			},
 		},
 		{
+			$addFields: {
+				address: {
+					address: {
+						firstLine: "$warehouseAddress.firstLine",
+						city: "$warehouseAddress.city",
+						state: "$warehouseAddress.state",
+						country: "$country.countryName",
+						region: "$region.regionName",
+					},
+				},
+			},
+		},
+		{
 			$replaceWith: {
-				$mergeObjects: [null, "$inventory"],
+				$mergeObjects: [null, "$inventory", "$organisation", "$address"],
 			},
 		},
 		{
@@ -579,6 +691,12 @@ async function GovtBodyInstock(warehouse, date, body) {
 				manufacturerId: {
 					$first: "$product.manufacturerId",
 				},
+				organisation: {
+					$first: "$organisation",
+				},
+				address: {
+					$first: "$address",
+				},
 				productQuantity: {
 					$sum: "$inventoryDetails.quantity",
 				},
@@ -607,6 +725,7 @@ async function GovtBodyInstock(warehouse, date, body) {
 }
 
 async function GovtBodyOutstock(warehouse, date, body) {
+	console.log("Here")
   let matchQueryStage2 = {};
   let { type, productName } = body;
   
@@ -616,8 +735,23 @@ async function GovtBodyOutstock(warehouse, date, body) {
 	const outOfStockReport = await WarehouseModel.aggregate([
 		{
 			$match: {
-				id: warehouse,
+				// id: warehouse,
+				status: "ACTIVE",
 			},
+		},
+		{
+			$lookup: {
+				from: "organisations",
+				let: { orgId: "$organisationId" },
+				pipeline: [
+					{ $match: { $expr: { $eq: ["$$orgId", "$id"] } } },
+					{ $project: { _id: 0, organisation: "$name" } },
+				],
+				as: "organisation",
+			},
+		},
+		{
+			$unwind: "$organisation",
 		},
 		{
 			$lookup: {
@@ -634,8 +768,21 @@ async function GovtBodyOutstock(warehouse, date, body) {
 			},
 		},
 		{
+			$addFields: {
+				address: {
+					address: {
+						firstLine: "$warehouseAddress.firstLine",
+						city: "$warehouseAddress.city",
+						state: "$warehouseAddress.state",
+						country: "$country.countryName",
+						region: "$region.regionName",
+					},
+				},
+			},
+		},
+		{
 			$replaceWith: {
-				$mergeObjects: [null, "$inventory"],
+				$mergeObjects: [null, "$inventory", "$organisation", "$address"],
 			},
 		},
 		{
@@ -714,6 +861,12 @@ async function GovtBodyOutstock(warehouse, date, body) {
 				manufacturerId: {
 					$first: "$product.manufacturerId",
 				},
+				organisation: {
+					$first: "$organisation",
+				},
+				address: {
+					$first: "$address",
+				},
 				productQuantity: {
 					$sum: "$inventoryDetails.quantity",
 				},
@@ -727,8 +880,8 @@ async function GovtBodyOutstock(warehouse, date, body) {
 					$first: "$inventoryDetails.updatedAt",
 				},
 			},
-    },
-    {
+		},
+		{
 			$match: matchQueryStage2,
 		},
 		{
@@ -2443,6 +2596,9 @@ exports.expiredStockReport = [
 							manufacturerId: {
 								$first: "$product.manufacturerId",
 							},
+							batchNumber: {
+								$first: "$product.atom._id.batchNumber",
+							},
 							productQuantity: {
 								$sum: "$product.atom.quantity",
 							},
@@ -2514,7 +2670,7 @@ exports.nearExpiryStockReport = [
 			const isGoverningBody = organisation?.type === "GoverningBody";
 			if (isGoverningBody) {
 				// Default warehouseId
-				nearExpiryProducts = await GovtBodyExpired(warehouse, date, req.query);
+				nearExpiryProducts = await GovtBodyNearExpiry(warehouse, date, req.query);
 			} else {
 				const isDist =
 					organisation?.type === "DISTRIBUTORS" || organisation?.type === "DROGUERIA"
@@ -2687,6 +2843,9 @@ exports.nearExpiryStockReport = [
 							},
 							manufacturerId: {
 								$first: "$product.manufacturerId",
+							},
+							batchNumber: {
+								$first: "$product.atom._id.batchNumber",
 							},
 							productQuantity: {
 								$sum: "$product.atom.quantity",

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -6,6 +6,9 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import ExpiredRow from "./ExpiredRow";
+import ProductList from "../../../productList";
+import { useTranslation } from "react-i18next";
+import { getManufacturerExpiredStockReport } from "../../../../actions/networkActions";
 
 function TableHeader() {
   return (
@@ -59,7 +62,31 @@ function TableHeader() {
 }
 
 export default function ExpiredTable() {
-  const rows = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }];
+  const [expiredStock, setExpiredStock] = useState([]);
+  const [expiredStockFilters, setExpiredStockFilters] = useState();
+	const [reportWarehouse, setReportWarehouse] = useState("");
+
+  const { t } = useTranslation();
+
+  const getExpiredStock = async (startDate) => {
+    const expiredStock = await getManufacturerExpiredStockReport(
+      reportWarehouse,
+      // startDate,
+    );
+    if (expiredStock) setExpiredStock(expiredStock.data.expiredProducts);
+    if (expiredStock) setReportWarehouse(expiredStock.data.warehouseId);
+  };
+
+  // const getExpiredStockFilters = async () => {
+  //   const expiredStockFilters = await getInStockFilterOptions(reportWarehouse, "");
+  //   if (expiredStockFilters) setExpiredStockFilters(expiredStockFilters.filters);
+  // };
+
+  useEffect(() => {
+		getExpiredStock();
+		// getexpiredStockFilters();
+	}, []);
+
   return (
     <TableContainer>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -67,8 +94,8 @@ export default function ExpiredTable() {
           <TableHeader />
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
-            <ExpiredRow />
+          {expiredStock.map((product, index) => (
+            <ExpiredRow t={t} product={product} />
           ))}
         </TableBody>
       </Table>
