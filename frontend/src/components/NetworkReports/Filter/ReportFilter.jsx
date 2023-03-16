@@ -112,6 +112,8 @@ const Button = styled(ButtonBase)(({ theme }) => ({
 }));
 
 export default function ReportFilter({
+  title,
+  fieldName,
   anchorEl,
   value,
   pendingValue,
@@ -122,6 +124,8 @@ export default function ReportFilter({
   handleClose,
   theme,
   labels,
+  selectedFilters,
+  handleFilterUpdate
 }) {
   const open = Boolean(anchorEl);
   const id = open ? "github-label" : undefined;
@@ -145,17 +149,16 @@ export default function ReportFilter({
                 fontWeight: 600,
               }}
             >
-              Filter Product Category
+              Filter {title}
             </Box>
             <Autocomplete
               open
-              multiple
               onClose={(event, reason) => {
                 if (reason === "escape") {
                   handleClose();
                 }
               }}
-              value={pendingValue}
+              value={selectedFilters[fieldName]}
               onChange={(event, newValue, reason) => {
                 if (
                   event.type === "keydown" &&
@@ -165,6 +168,7 @@ export default function ReportFilter({
                   return;
                 }
                 setPendingValue(newValue);
+                handleFilterUpdate(fieldName, newValue)
               }}
               disableCloseOnSelect
               PopperComponent={PopperComponent}
@@ -187,14 +191,7 @@ export default function ReportFilter({
                   </Box>
                 </li>
               )}
-              options={[...labels].sort((a, b) => {
-                // Display the selected labels first.
-                let ai = value.indexOf(a);
-                ai = ai === -1 ? value.length + labels.indexOf(a) : ai;
-                let bi = value.indexOf(b);
-                bi = bi === -1 ? value.length + labels.indexOf(b) : bi;
-                return ai - bi;
-              })}
+              options={[...labels]}
               getOptionLabel={(option) => option.name}
               renderInput={(params) => (
                 <StyledInput

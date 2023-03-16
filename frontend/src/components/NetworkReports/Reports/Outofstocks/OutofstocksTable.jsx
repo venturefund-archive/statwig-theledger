@@ -16,102 +16,140 @@ import ReportFilter from "../../Filter/ReportFilter";
 import { useTheme, styled } from "@mui/material/styles";
 
 function TableHeader({
-  anchorEl,
-  value,
-  pendingValue,
-  setAnchorEl,
-  setValue,
-  setPendingValue,
-  handleClick,
-  handleClose,
-  theme,
-  labels,
+	anchorEl,
+	value,
+	pendingValue,
+	setAnchorEl,
+	setValue,
+	setPendingValue,
+	handleClick,
+	handleClose,
+	theme,
+  outStockFilters,
+  selectedFilters,
+  handleFilterUpdate,
+	t,
 }) {
-  return (
-    <TableRow>
-      <TableCell>
-        <div className="mi_report_table_head" onClick={handleClick}>
-          <p className="mi-body-sm f-400 mi-reset grey-400">Product category</p>
-          <i class="fa-solid fa-sort grey-400"></i>
-        </div>
-        <ReportFilter
-          anchorEl={anchorEl}
-          value={value}
-          pendingValue={pendingValue}
-          setAnchorEl={setAnchorEl}
-          setValue={setValue}
-          setPendingValue={setPendingValue}
-          handleClick={handleClick}
-          handleClose={handleClose}
-          theme={theme}
-          labels={labels}
-        />
-      </TableCell>
-      <TableCell>
-        <div className="mi_report_table_head" onClick={handleClick}>
-          <p className="mi-body-sm f-400 mi-reset grey-400">Product Name</p>
-          <i class="fa-solid fa-sort grey-400"></i>
-        </div>
-        <ReportFilter
-          anchorEl={anchorEl}
-          value={value}
-          pendingValue={pendingValue}
-          setAnchorEl={setAnchorEl}
-          setValue={setValue}
-          setPendingValue={setPendingValue}
-          handleClick={handleClick}
-          handleClose={handleClose}
-          theme={theme}
-          labels={labels}
-        />
-      </TableCell>
-      <TableCell>
-        <div className="mi_report_table_head">
-          <p className="mi-body-sm f-400 mi-reset grey-400">Manufacturer</p>
-          <i class="fa-solid fa-sort grey-400"></i>
-        </div>
-      </TableCell>
-      <TableCell>
-        <div className="mi_report_table_head">
-          <p className="mi-body-sm f-400 mi-reset grey-400">
-            Organization Name
-          </p>
-          <i class="fa-solid fa-sort grey-400"></i>
-        </div>
-      </TableCell>
-      <TableCell>
-        <div className="mi_report_table_head">
-          <p className="mi-body-sm f-400 mi-reset grey-400">Location Details</p>
-          <i class="fa-solid fa-sort grey-400"></i>
-        </div>
-      </TableCell>
-      <TableCell>
-        <div className="mi_report_table_head">
-          <p className="mi-body-sm f-400 mi-reset grey-400">No of Days</p>
-          <i class="fa-solid fa-sort grey-400"></i>
-        </div>
-      </TableCell>
-    </TableRow>
-  );
+  const [productCategories, setProductCategories] = useState([]);
+  const [productNames, setProductNames] = useState([]);
+  const [manufacturers, setManufacturers] = useState([]);
+
+  useEffect(() => {
+		if (outStockFilters?.length) {
+      let categoriesSet = new Set();
+      let productNamesSet = new Set();
+      let manufacturersSet = new Set();
+			outStockFilters.map((elem) => {
+				categoriesSet.add({ name: elem.productCategory });
+				productNamesSet.add({ name: elem.productName });
+				manufacturersSet.add({ name: elem.manufacturer });
+			});
+			setProductCategories([...categoriesSet]);
+			setProductNames([...productNamesSet]);
+			setManufacturers([...manufacturersSet]);
+		}
+	}, [outStockFilters]);
+
+	return (
+		<TableRow>
+			<TableCell>
+				<div className="mi_report_table_head" onClick={handleClick}>
+					<p className="mi-body-sm f-400 mi-reset grey-400">Product category</p>
+					<i class="fa-solid fa-sort grey-400"></i>
+				</div>
+				<ReportFilter
+          title={t("product_category")}
+          fieldName="productCategory"
+					anchorEl={anchorEl}
+					value={value}
+					pendingValue={pendingValue}
+					setAnchorEl={setAnchorEl}
+					setValue={setValue}
+					setPendingValue={setPendingValue}
+					handleClick={handleClick}
+					handleClose={handleClose}
+					theme={theme}
+          labels={productCategories}
+          selectedFilters={selectedFilters}
+          handleFilterUpdate={handleFilterUpdate}
+				/>
+			</TableCell>
+			<TableCell>
+				<div className="mi_report_table_head" onClick={handleClick}>
+					<p className="mi-body-sm f-400 mi-reset grey-400">Product Name</p>
+					<i class="fa-solid fa-sort grey-400"></i>
+				</div>
+				<ReportFilter
+					title={t("product_name")}
+          fieldName="productName"
+					anchorEl={anchorEl}
+					value={value}
+					pendingValue={pendingValue}
+					setAnchorEl={setAnchorEl}
+					setValue={setValue}
+					setPendingValue={setPendingValue}
+					handleClick={handleClick}
+					handleClose={handleClose}
+					theme={theme}
+					labels={productNames}
+          selectedFilters={selectedFilters}
+          handleFilterUpdate={handleFilterUpdate}
+				/>
+			</TableCell>
+			<TableCell>
+				<div className="mi_report_table_head">
+					<p className="mi-body-sm f-400 mi-reset grey-400">Manufacturer</p>
+					<i class="fa-solid fa-sort grey-400"></i>
+				</div>
+			</TableCell>
+			<TableCell>
+				<div className="mi_report_table_head">
+					<p className="mi-body-sm f-400 mi-reset grey-400">Organization Name</p>
+					<i class="fa-solid fa-sort grey-400"></i>
+				</div>
+			</TableCell>
+			<TableCell>
+				<div className="mi_report_table_head">
+					<p className="mi-body-sm f-400 mi-reset grey-400">Location Details</p>
+					<i class="fa-solid fa-sort grey-400"></i>
+				</div>
+			</TableCell>
+			<TableCell>
+				<div className="mi_report_table_head">
+					<p className="mi-body-sm f-400 mi-reset grey-400">No of Days</p>
+					<i class="fa-solid fa-sort grey-400"></i>
+				</div>
+			</TableCell>
+		</TableRow>
+	);
 }
 
 export default function OutofstocksTable() {
-  const rows = [
-    { id: 1 },
-    { id: 2 },
-    { id: 3 },
-    { id: 4 },
-    { id: 5 },
-    { id: 6 },
-    { id: 7 },
-    { id: 8 },
-    { id: 9 },
-    { id: 10 },
-  ];
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [value, setValue] = React.useState([labels[1], labels[11]]);
   const [pendingValue, setPendingValue] = React.useState([]);
+  const [outStockFilters, setOutStockFilters] = useState();
+	const [outStock, setOutStock] = useState([]);
+	const [reportWarehouse, setReportWarehouse] = useState("");
+  const [selectedFilters, setSelectedFilters] = useState({
+    productCategory: "",
+    productName: "",
+    manufacturer: "",
+    organisationName: "",
+    numberOfDays: ""
+  });
+
   const theme = useTheme();
+  const { t } = useTranslation();
+
+  const handleFilterUpdate = (fieldName, newValue) => {
+		if (!fieldName) return;
+		let oldFilters = selectedFilters;
+    oldFilters[fieldName] = newValue;
+    setSelectedFilters(oldFilters);
+  };
+  
+  console.log(value, pendingValue)
 
   const handleClick = (event) => {
     setPendingValue(value);
@@ -126,15 +164,10 @@ export default function OutofstocksTable() {
     setAnchorEl(null);
   };
 
-  const [outStockFilters, setOutStockFilters] = useState();
-	const [outStock, setOutStock] = useState([]);
-	const [reportWarehouse, setReportWarehouse] = useState("");
-
-  const { t } = useTranslation();
-
 	const getOutstockFilters = async () => {
 		const outStockFilters = await getOutStockFilterOptions(reportWarehouse, "");
-		if (outStockFilters) setOutStockFilters(outStockFilters.filters);
+    if (outStockFilters) setOutStockFilters(outStockFilters.filters);
+    console.log(outStockFilters)
 	};
 
 	const getOutStock = async () => {
@@ -165,7 +198,10 @@ export default function OutofstocksTable() {
             handleClick={handleClick}
             handleClose={handleClose}
             theme={theme}
-            labels={labels}
+            outStockFilters={outStockFilters}
+            selectedFilters={selectedFilters}
+            handleFilterUpdate={handleFilterUpdate}
+            t={t}
           />
         </TableHead>
         <TableBody>
