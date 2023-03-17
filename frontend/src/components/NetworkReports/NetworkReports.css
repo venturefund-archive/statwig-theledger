@@ -81,3 +81,27 @@
 .mi_report_table_head > i {
   font-size: 0.75rem;
 }
+
+.filter_header_area {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ui_filter_clear_btn {
+  font-size: 0.8rem;
+  border: 1px solid rgb(238, 44, 96);
+  background-color: var(--white);
+  color: rgb(238, 44, 96);
+  outline: none;
+  padding: 0.2rem 1rem;
+  border-radius: 0.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.ui_filter_clear_btn:hover {
+  border: 1px solid rgb(238, 44, 96);
+  background-color: rgb(238, 44, 96);
+  color: var(--white);
+}
