@@ -35,13 +35,10 @@ export const getmanufacturerInStockReport = async (payload) => {
 	}
 };
 
-export const getInStockFilterOptions = async (reportWarehouse, date) => {
+export const getInStockFilterOptions = async (payload) => {
   try {
-    date = date ? format(startOfMonth(new Date(date)), "yyyy-MM-dd") : "";
     const url = config().getmanufacturerInStockFilterOptions;
-    const result = await axios.get(
-      url + `?warehouseId=${reportWarehouse}&date=${date}`
-    );
+    const result = await axios.post(url, payload);
     return result.data.data;
   } catch (e) {
     console.log(e);
@@ -49,13 +46,43 @@ export const getInStockFilterOptions = async (reportWarehouse, date) => {
   }
 };
 
-export const getOutStockFilterOptions = async (reportWarehouse, date) => {
+export const getOutStockFilterOptions = async (payload) => {
   try {
-    date = date ? format(startOfMonth(new Date(date)), "yyyy-MM-dd") : "";
     const url = config().getmanufacturerOutStockFilterOptions;
-    const result = await axios.get(
-      url + `?warehouseId=${reportWarehouse}&date=${date}`
-    );
+    const result = await axios.post(url, payload);
+    return result.data.data;
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+};
+
+export const getBestsellerFilterOptions = async (payload) => {
+  try {
+    const url = config().getmanufacturerBestsellerFilterOptions;
+    const result = await axios.post(url, payload);
+    return result.data.data;
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+};
+
+export const getNearExpiryFilterOptions = async (payload) => {
+  try {
+    const url = config().getmanufacturerNearExpiryFilterOptions;
+    const result = await axios.post(url, payload);
+    return result.data.data;
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+};
+
+export const getExpiredFilterOptions = async (payload) => {
+  try {
+    const url = config().getmanufacturerExpiredFilterOptions;
+    const result = await axios.post(url, payload);
     return result.data.data;
   } catch (e) {
     console.log(e);

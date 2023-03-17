@@ -92,13 +92,13 @@ function TableHeader({
 			<TableCell>
 				<div
 					className="mi_report_table_head"
-					onClick={(event) => handleClick(event, "organisationName")}
+					onClick={(event) => handleClick(event, "organisation")}
 				>
 					<p className="mi-body-sm f-400 mi-reset grey-400">Organization Name</p>
 					<i class="fa-solid fa-sort grey-400"></i>
 					<Filterbar
 						title={t("organisation_name")}
-						fieldName="organisationName"
+						fieldName="organisation"
 						anchorEl={anchorEl}
             selectedColumn={selectedColumn}
 						handleClose={handleClose}
@@ -126,10 +126,10 @@ function TableHeader({
 }
 
 export default function OutofstocksTable() {
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [outStock, setOutStock] = useState([]);
   const [outStockFilters, setOutStockFilters] = useState();
-	const [outStock, setOutStock] = useState([]);
   const [reportWarehouse, setReportWarehouse] = useState("");
+  const [anchorEl, setAnchorEl] = React.useState(null);
   const [selectedColumn, setSelectedColumn] = useState("");
   const [filterOptions, setFilterOptions] = useState({
     productCategories: [],
@@ -141,15 +141,13 @@ export default function OutofstocksTable() {
     productCategory: "",
     productName: "",
     manufacturer: "",
-    organisationName: "",
-    numberOfDays: ""
+    organisation: "",
   });
 
   const theme = useTheme();
   const { t } = useTranslation();
 
   const handleFilterUpdate = (fieldName, newValue) => {
-    console.log(fieldName, newValue);
     if (!fieldName) return;
     setSelectedFilters((prevState) => ({
 			...prevState,
@@ -171,9 +169,11 @@ export default function OutofstocksTable() {
   };
 
 	const getOutstockFilters = async () => {
-		const outStockFilters = await getOutStockFilterOptions(reportWarehouse, "");
+    let payload = selectedFilters;
+    payload.reportWarehouse = reportWarehouse;
+    payload.date = "";
+		const outStockFilters = await getOutStockFilterOptions(payload);
     if (outStockFilters) setOutStockFilters(outStockFilters.filters);
-    console.log(outStockFilters)
 	};
 
 	const getOutStock = async () => {
@@ -184,7 +184,6 @@ export default function OutofstocksTable() {
 		if (outStock) setReportWarehouse(outStock.data.warehouseId);
 	};
 
-  console.log(selectedFilters);
 	useEffect(() => {
     console.log("In useEffect!");
 		getOutStock();
