@@ -112,93 +112,27 @@ const Button = styled(ButtonBase)(({ theme }) => ({
 }));
 
 export default function Filterbar({
+  title,
+  fieldName,
   anchorEl,
-  DefaultValue,
-  inputValue,
-  setAnchorEl,
-  setDefaultValue,
-  setInputValue,
-  handleClick,
+  selectedColumn,
   handleClose,
   theme,
   options,
+  selectedFilters,
+  handleFilterUpdate
 }) {
-  const open = Boolean(anchorEl);
-  const id = open ? "github-label" : undefined;
+  const open = Boolean(anchorEl) && fieldName === selectedColumn;
 
   return (
     <React.Fragment>
       <StyledPopper
-        id={id}
+        id={fieldName}
         open={open}
         anchorEl={anchorEl}
         placement="bottom-start"
       >
         <ClickAwayListener onClickAway={handleClose}>
-          {/* <div>
-            <Box
-              sx={{
-                borderBottom: `1px solid ${
-                  theme.palette.mode === "light" ? "#eaecef" : "#30363d"
-                }`,
-                padding: "8px 10px",
-                fontWeight: 600,
-              }}
-            >
-              Apply labels to this pull request
-            </Box>
-            <Autocomplete
-              open
-              multiple
-              onClose={(event, reason) => {
-                if (reason === "escape") {
-                  handleClose();
-                }
-              }}
-              value={pendingValue}
-              onChange={(event, newValue, reason) => {
-                if (
-                  event.type === "keydown" &&
-                  event.key === "Backspace" &&
-                  reason === "removeOption"
-                ) {
-                  return;
-                }
-                setPendingValue(newValue);
-              }}
-              disableCloseOnSelect
-              PopperComponent={PopperComponent}
-              renderTags={() => null}
-              noOptionsText="No labels"
-              renderOption={(props, option, { selected }) => (
-                <li {...props}>
-                  <Box
-                    sx={{
-                      flexGrow: 1,
-                      "& span": {
-                        color:
-                          theme.palette.mode === "light"
-                            ? "#586069"
-                            : "#8b949e",
-                      },
-                    }}
-                  >
-                    {option.name}
-                  </Box>
-                </li>
-              )}
-              options={[...labels]}
-              getOptionLabel={(option) => option.name}
-              renderInput={(params) => (
-                <StyledInput
-                  ref={params.InputProps.ref}
-                  inputProps={params.inputProps}
-                  autoFocus
-                  placeholder="Filter labels"
-                />
-              )}
-            />
-          </div> */}
           <div>
             <Box
               sx={{
@@ -209,11 +143,11 @@ export default function Filterbar({
                 fontWeight: 600,
               }}
             >
-              Apply labels to this pull request
+              Filter {title}
             </Box>
             <Autocomplete
               open
-              value={DefaultValue}
+              value={selectedFilters[fieldName]}
               onClose={(event, reason) => {
                 if (reason === "escape") {
                   handleClose();
@@ -227,14 +161,11 @@ export default function Filterbar({
                 ) {
                   return;
                 }
-                setDefaultValue(newValue);
+                console.log("Updating filter value!");
+                handleFilterUpdate(fieldName, newValue);
               }}
               disableCloseOnSelect
               PopperComponent={PopperComponent}
-              inputValue={inputValue}
-              onInputChange={(event, newInputValue) => {
-                setInputValue(newInputValue);
-              }}
               options={options}
               renderOption={(props, option, { selected }) => (
                 <li {...props}>

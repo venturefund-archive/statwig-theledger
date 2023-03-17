@@ -14,98 +14,99 @@ import {
 import { useTranslation } from "react-i18next";
 import ReportFilter from "../../Filter/ReportFilter";
 import { useTheme, styled } from "@mui/material/styles";
+import Filterbar from "../../Filter/Filterbar";
 
 function TableHeader({
 	anchorEl,
-	value,
-	pendingValue,
-	setAnchorEl,
-	setValue,
-	setPendingValue,
+  selectedColumn,
 	handleClick,
 	handleClose,
-	theme,
-  outStockFilters,
+  theme,
+  filterOptions,
   selectedFilters,
   handleFilterUpdate,
 	t,
 }) {
-  const [productCategories, setProductCategories] = useState([]);
-  const [productNames, setProductNames] = useState([]);
-  const [manufacturers, setManufacturers] = useState([]);
-
-  useEffect(() => {
-		if (outStockFilters?.length) {
-      let categoriesSet = new Set();
-      let productNamesSet = new Set();
-      let manufacturersSet = new Set();
-			outStockFilters.map((elem) => {
-				categoriesSet.add({ name: elem.productCategory });
-				productNamesSet.add({ name: elem.productName });
-				manufacturersSet.add({ name: elem.manufacturer });
-			});
-			setProductCategories([...categoriesSet]);
-			setProductNames([...productNamesSet]);
-			setManufacturers([...manufacturersSet]);
-		}
-	}, [outStockFilters]);
-
 	return (
 		<TableRow>
 			<TableCell>
-				<div className="mi_report_table_head" onClick={handleClick}>
+				<div
+					className="mi_report_table_head"
+					onClick={(event) => handleClick(event, "productCategory")}
+				>
 					<p className="mi-body-sm f-400 mi-reset grey-400">Product category</p>
 					<i class="fa-solid fa-sort grey-400"></i>
 				</div>
-				<ReportFilter
-          title={t("product_category")}
-          fieldName="productCategory"
-					anchorEl={anchorEl}
-					value={value}
-					pendingValue={pendingValue}
-					setAnchorEl={setAnchorEl}
-					setValue={setValue}
-					setPendingValue={setPendingValue}
-					handleClick={handleClick}
+				<Filterbar
+					title={t("product_category")}
+					fieldName="productCategory"
+          anchorEl={anchorEl}
+          selectedColumn={selectedColumn}
 					handleClose={handleClose}
 					theme={theme}
-          labels={productCategories}
-          selectedFilters={selectedFilters}
-          handleFilterUpdate={handleFilterUpdate}
+					options={filterOptions.productCategories}
+					selectedFilters={selectedFilters}
+					handleFilterUpdate={handleFilterUpdate}
 				/>
 			</TableCell>
 			<TableCell>
-				<div className="mi_report_table_head" onClick={handleClick}>
+				<div
+					className="mi_report_table_head"
+					onClick={(event) => handleClick(event, "productName")}
+				>
 					<p className="mi-body-sm f-400 mi-reset grey-400">Product Name</p>
 					<i class="fa-solid fa-sort grey-400"></i>
 				</div>
-				<ReportFilter
+				<Filterbar
 					title={t("product_name")}
-          fieldName="productName"
+					fieldName="productName"
 					anchorEl={anchorEl}
-					value={value}
-					pendingValue={pendingValue}
-					setAnchorEl={setAnchorEl}
-					setValue={setValue}
-					setPendingValue={setPendingValue}
-					handleClick={handleClick}
+          selectedColumn={selectedColumn}
 					handleClose={handleClose}
 					theme={theme}
-					labels={productNames}
-          selectedFilters={selectedFilters}
-          handleFilterUpdate={handleFilterUpdate}
+					options={filterOptions.productNames}
+					selectedFilters={selectedFilters}
+					handleFilterUpdate={handleFilterUpdate}
 				/>
 			</TableCell>
 			<TableCell>
-				<div className="mi_report_table_head">
+				<div
+					className="mi_report_table_head"
+					onClick={(event) => handleClick(event, "manufacturer")}
+				>
 					<p className="mi-body-sm f-400 mi-reset grey-400">Manufacturer</p>
 					<i class="fa-solid fa-sort grey-400"></i>
+					<Filterbar
+						title={t("manufacturer")}
+						fieldName="manufacturer"
+						anchorEl={anchorEl}
+            selectedColumn={selectedColumn}
+						handleClose={handleClose}
+						theme={theme}
+						options={filterOptions.manufacturers}
+						selectedFilters={selectedFilters}
+						handleFilterUpdate={handleFilterUpdate}
+					/>
 				</div>
 			</TableCell>
 			<TableCell>
-				<div className="mi_report_table_head">
+				<div
+					className="mi_report_table_head"
+					onClick={(event) => handleClick(event, "organisationName")}
+				>
 					<p className="mi-body-sm f-400 mi-reset grey-400">Organization Name</p>
 					<i class="fa-solid fa-sort grey-400"></i>
+					<Filterbar
+						title={t("organisation_name")}
+						fieldName="organisationName"
+						anchorEl={anchorEl}
+            selectedColumn={selectedColumn}
+						handleClose={handleClose}
+						theme={theme}
+						options={filterOptions.organisations}
+						selectedFilters={selectedFilters}
+						handleFilterUpdate={handleFilterUpdate}
+					/>
 				</div>
 			</TableCell>
 			<TableCell>
@@ -126,11 +127,16 @@ function TableHeader({
 
 export default function OutofstocksTable() {
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const [value, setValue] = React.useState([labels[1], labels[11]]);
-  const [pendingValue, setPendingValue] = React.useState([]);
   const [outStockFilters, setOutStockFilters] = useState();
 	const [outStock, setOutStock] = useState([]);
-	const [reportWarehouse, setReportWarehouse] = useState("");
+  const [reportWarehouse, setReportWarehouse] = useState("");
+  const [selectedColumn, setSelectedColumn] = useState("");
+  const [filterOptions, setFilterOptions] = useState({
+    productCategories: [],
+    productNames: [],
+    manufacturers: [],
+    organisations: []
+  });
   const [selectedFilters, setSelectedFilters] = useState({
     productCategory: "",
     productName: "",
@@ -143,25 +149,25 @@ export default function OutofstocksTable() {
   const { t } = useTranslation();
 
   const handleFilterUpdate = (fieldName, newValue) => {
-		if (!fieldName) return;
-		let oldFilters = selectedFilters;
-    oldFilters[fieldName] = newValue;
-    setSelectedFilters(oldFilters);
+    console.log(fieldName, newValue);
+    if (!fieldName) return;
+    setSelectedFilters((prevState) => ({
+			...prevState,
+			[fieldName]: newValue,
+		}));
   };
-  
-  console.log(value, pendingValue)
 
-  const handleClick = (event) => {
-    setPendingValue(value);
+  const handleClick = (event, fieldName) => {
     setAnchorEl(event.currentTarget);
+    setSelectedColumn(fieldName);
   };
 
   const handleClose = () => {
-    setValue(pendingValue);
     if (anchorEl) {
       anchorEl.focus();
     }
     setAnchorEl(null);
+    setSelectedColumn("");
   };
 
 	const getOutstockFilters = async () => {
@@ -171,34 +177,53 @@ export default function OutofstocksTable() {
 	};
 
 	const getOutStock = async () => {
-		const outStock = await getmanufacturerOutStockReport(
-			reportWarehouse,
-			// startDate,
-		);
+    let payload = selectedFilters;
+    payload.reportWarehouse = reportWarehouse;
+		const outStock = await getmanufacturerOutStockReport(payload);
 		if (outStock) setOutStock(outStock.data.outOfStockReport);
 		if (outStock) setReportWarehouse(outStock.data.warehouseId);
 	};
 
+  console.log(selectedFilters);
 	useEffect(() => {
+    console.log("In useEffect!");
 		getOutStock();
 		getOutstockFilters();
-	}, []);
+	}, [selectedFilters]);
 
+  useEffect(() => {
+		if (outStockFilters?.length) {
+			let categoriesSet = new Set();
+			let productNamesSet = new Set();
+      let manufacturersSet = new Set();
+      let organisationSet = new Set();
+			outStockFilters.map((elem) => {
+				categoriesSet.add(elem.productCategory);
+				productNamesSet.add(elem.productName);
+        manufacturersSet.add(elem.manufacturer);
+        organisationSet.add(elem.organisation);
+      });
+      let cols = filterOptions;
+      cols.productCategories = [...categoriesSet];
+      cols.productNames = [...productNamesSet];
+      cols.manufacturers = [...manufacturersSet];
+      cols.organisations = [...organisationSet];
+      setFilterOptions(cols);
+		}
+  }, [outStockFilters]);
+  
   return (
     <TableContainer>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
           <TableHeader
             anchorEl={anchorEl}
-            value={value}
-            pendingValue={pendingValue}
             setAnchorEl={setAnchorEl}
-            setValue={setValue}
-            setPendingValue={setPendingValue}
+            selectedColumn={selectedColumn}
             handleClick={handleClick}
             handleClose={handleClose}
             theme={theme}
-            outStockFilters={outStockFilters}
+            filterOptions={filterOptions}
             selectedFilters={selectedFilters}
             handleFilterUpdate={handleFilterUpdate}
             t={t}

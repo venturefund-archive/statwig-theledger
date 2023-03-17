@@ -1,18 +1,16 @@
 import axios from "axios";
 import { config } from "../config";
 import { startOfMonth, format } from "date-fns";
-export const getBestSellers = async (reportWarehouse, date) => {
-  try {
-    date = date ? format(startOfMonth(new Date(date)), "yyyy-MM-dd") : "";
+
+export const getBestSellers = async (payload) => {
+	try {
     const url = config().getBestSellersUrl;
-    const result = await axios.get(
-      url + `?warehouseId=${reportWarehouse}&date=${date}`
-    );
-    return result.data;
-  } catch (e) {
-    console.log(e);
-    return false;
-  }
+    const result = await axios.post(url, payload);
+		return result.data;
+	} catch (e) {
+		console.log(e);
+		return false;
+	}
 };
 
 export const getBestSellerSummary = async (reportWarehouse) => {
@@ -26,16 +24,10 @@ export const getBestSellerSummary = async (reportWarehouse) => {
   }
 };
 
-export const getmanufacturerInStockReport = async (reportWarehouse, date, type, productName) => {
+export const getmanufacturerInStockReport = async (payload) => {
 	try {
-		date = date ? format(startOfMonth(new Date(date)), "yyyy-MM-dd") : "";
-		const url = config().getmanufacturerInStockReportUrl;
-		const result = await axios.get(
-			url +
-				`?warehouseId=${reportWarehouse}&date=${date}&type=${type ? type : ""}&productName=${
-					productName ? productName : ""
-				}`,
-		);
+    const url = config().getmanufacturerInStockReportUrl;
+    const result = await axios.post(url, payload);
 		return result.data;
 	} catch (e) {
 		console.log(e);
@@ -71,16 +63,10 @@ export const getOutStockFilterOptions = async (reportWarehouse, date) => {
   }
 };
 
-export const getmanufacturerOutStockReport = async (reportWarehouse, date, type, productName) => {
+export const getmanufacturerOutStockReport = async (payload) => {
 	try {
-		date = date ? format(startOfMonth(new Date(date)), "yyyy-MM-dd") : "";
-		const url = config().getmanufacturerOutStockReportUrl;
-		const result = await axios.get(
-			url +
-				`?warehouseId=${reportWarehouse}&date=${date}&type=${type ? type : ""}&id=${
-					productName ? productName : ""
-				}`,
-		);
+    const url = config().getmanufacturerOutStockReportUrl;
+    const result = await axios.post(url, payload);
 		return result.data;
 	} catch (e) {
 		console.log(e);
@@ -88,16 +74,10 @@ export const getmanufacturerOutStockReport = async (reportWarehouse, date, type,
 	}
 };
 
-export const getManufacturerNearExpiryStockReport = async (reportWarehouse, date, type, productName) => {
+export const getManufacturerNearExpiryStockReport = async (payload) => {
 	try {
-		date = date ? format(startOfMonth(new Date(date)), "yyyy-MM-dd") : "";
-		const url = config().getManufacturerNearExpiryStockReportUrl;
-		const result = await axios.get(
-			url +
-				`?warehouseId=${reportWarehouse}&date=${date}&type=${type ? type : ""}&id=${
-					productName ? productName : ""
-				}`,
-		);
+    const url = config().getManufacturerNearExpiryStockReportUrl;
+    const result = await axios.post(url, payload);
 		return result.data;
 	} catch (e) {
 		console.log(e);
@@ -105,16 +85,11 @@ export const getManufacturerNearExpiryStockReport = async (reportWarehouse, date
 	}
 };
 
-export const getManufacturerExpiredStockReport = async (reportWarehouse, date, type, productName) => {
+
+export const getManufacturerExpiredStockReport = async (payload) => {
 	try {
-		date = date ? format(startOfMonth(new Date(date)), "yyyy-MM-dd") : "";
-		const url = config().getManufacturerExpiredStockReportUrl;
-		const result = await axios.get(
-			url +
-				`?warehouseId=${reportWarehouse}&date=${date}&type=${type ? type : ""}&id=${
-					productName ? productName : ""
-				}`,
-		);
+    const url = config().getManufacturerExpiredStockReportUrl;
+    const result = await axios.post(url, payload);
 		return result.data;
 	} catch (e) {
 		console.log(e);
@@ -154,6 +129,8 @@ export const getManufacturerFilterOptions = async (type, regExp='') => {
   }
 };
 
+
+// NEEDS TO BE UPDATED; REQUESTS ARE NOW type:POST
 export const getReports = async (report, fileType, reportWarehouse, date) => {
   try {
     let url;

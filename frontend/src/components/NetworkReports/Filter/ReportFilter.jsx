@@ -153,6 +153,7 @@ export default function ReportFilter({
             </Box>
             <Autocomplete
               open
+              multiple
               onClose={(event, reason) => {
                 if (reason === "escape") {
                   handleClose();
