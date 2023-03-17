@@ -120,7 +120,7 @@ export default function Filterbar({
   theme,
   options,
   selectedFilters,
-  handleFilterUpdate
+  handleFilterUpdate,
 }) {
   const open = Boolean(anchorEl) && fieldName === selectedColumn;
 
@@ -143,7 +143,10 @@ export default function Filterbar({
                 fontWeight: 600,
               }}
             >
-              Filter {title}
+              <div className="filter_header_area">
+                <div> Filter {title}</div>
+                <button className="ui_filter_clear_btn">Clear</button>
+              </div>
             </Box>
             <Autocomplete
               open
@@ -189,7 +192,7 @@ export default function Filterbar({
                   ref={params.InputProps.ref}
                   inputProps={params.inputProps}
                   autoFocus
-                  placeholder="Filter labels"
+                  placeholder="Filter Options"
                 />
               )}
             />
