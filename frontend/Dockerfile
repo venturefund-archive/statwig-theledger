@@ -1,4 +1,4 @@
-FROM node:lts as react_build 
+FROM --platform=linux/amd64 node:lts as react_build 
 
 WORKDIR /app
 
@@ -10,7 +10,7 @@ COPY . /app/
  
 RUN yarn run build 
 
-FROM nginx:stable-alpine
+FROM --platform=linux/amd64 nginx:stable-alpine
 
 COPY --from=react_build /app /usr/share/nginx/html
 
