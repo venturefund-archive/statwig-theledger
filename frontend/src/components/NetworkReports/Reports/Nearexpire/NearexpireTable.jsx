@@ -126,7 +126,7 @@ function TableHeader({
   );
 }
 
-export default function NearexpireTable() {
+export default function NearexpireTable({locationParams}) {
   const [nearExpiryStock, setNearExpiryStock] = useState([]);
   const [nearExpiryStockFilters, setNearExpiryStockFilters] = useState();
 	const [reportWarehouse, setReportWarehouse] = useState("");
@@ -170,7 +170,10 @@ export default function NearexpireTable() {
   };
 
   const getNearExpiryStock = async (startDate) => {
-    let payload = selectedFilters;
+    let payload = {
+			...selectedFilters,
+			...locationParams,
+		};
     payload.reportWarehouse = reportWarehouse;
     const nearExpiryStock = await getManufacturerNearExpiryStockReport(payload);
     if (nearExpiryStock) setNearExpiryStock(nearExpiryStock.data.nearExpiryProducts);
@@ -178,7 +181,10 @@ export default function NearexpireTable() {
   };
 
   const getNearExpiryStockFilters = async () => {
-    let payload = selectedFilters;
+    let payload = {
+			...selectedFilters,
+			...locationParams,
+		};
     payload.reportWarehouse = reportWarehouse;
     payload.date = "";
     const nearExpiryStockFilters = await getNearExpiryFilterOptions(payload);

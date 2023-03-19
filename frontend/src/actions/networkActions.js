@@ -35,6 +35,17 @@ export const getmanufacturerInStockReport = async (payload) => {
 	}
 };
 
+export const getNetworkPageAnalytics = async (payload) => {
+  try {
+    const url = config().getNetworkAnalytics;
+    const result = await axios.post(url, payload);
+    return result.data.data;
+  } catch(err) {
+    console.log(err);
+    return err.response;
+  }
+}
+
 export const getInStockFilterOptions = async (payload) => {
   try {
     const url = config().getmanufacturerInStockFilterOptions;

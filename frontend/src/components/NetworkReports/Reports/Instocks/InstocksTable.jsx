@@ -120,7 +120,7 @@ function TableHeader({
 	);
 }
 
-export default function InstocksTable() {
+export default function InstocksTable({locationParams}) {
   const [inStock, setInStock] = useState([]);
   const [inStockFilters, setInStockFilters] = useState();
 	const [reportWarehouse, setReportWarehouse] = useState("");
@@ -164,7 +164,10 @@ export default function InstocksTable() {
   };
 
   const getInstock = async (startDate) => {
-    let payload = selectedFilters;
+    let payload = {
+			...selectedFilters,
+			...locationParams,
+		};
     payload.reportWarehouse = reportWarehouse;
     const inStock = await getmanufacturerInStockReport(payload);
     if (inStock) setInStock(inStock.data.inStockReport);
@@ -172,7 +175,10 @@ export default function InstocksTable() {
   };
 
   const getInstockFilters = async () => {
-    let payload = selectedFilters;
+    let payload = {
+			...selectedFilters,
+			...locationParams,
+		};
     payload.reportWarehouse = reportWarehouse;
     payload.date = "";
     const inStockFilters = await getInStockFilterOptions(payload);

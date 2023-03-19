@@ -64,29 +64,50 @@ async function getDistributedProducts(matchQuery, warehouseId, fieldName) {
 async function GovtBodyNearExpiry(warehouse, date, body) {
 	let query = {};
 	let matchQueryStage2 = {};
-  let { productCategory, productName, manufacturer, organisation } = body;
-  
-  if (productCategory) matchQueryStage2["productCategory"] = productCategory;
-  if (productName) matchQueryStage2["productName"] = productName;
-  if (manufacturer) matchQueryStage2["manufacturer"] = manufacturer;
-  if (organisation) matchQueryStage2["organisation"] = organisation;
+	let { productCategory, productName, manufacturer, organisation } = body;
+
+	if (productCategory) matchQueryStage2["productCategory"] = productCategory;
+	if (productName) matchQueryStage2["productName"] = productName;
+	if (manufacturer) matchQueryStage2["manufacturer"] = manufacturer;
+	if (organisation) matchQueryStage2["organisation"] = organisation;
+
+	let { country, state, city } = body;
+	let matchQueryStage1 = {
+		status: "ACTIVE",
+	};
+	if (country) {
+		let temp = {
+			...matchQueryStage1,
+			"country.countryName": country,
+		};
+		matchQueryStage1 = temp;
+	}
+	if (state) {
+		let temp = {
+			...matchQueryStage1,
+			"warehouseAddress.state": state,
+		};
+		matchQueryStage1 = temp;
+	}
+	if (city) {
+		let temp = {
+			...matchQueryStage1,
+			"warehouseAddress.city": city,
+		};
+		matchQueryStage1 = temp;
+	}
 
 	if (warehouse) {
 		query[`id`] = warehouse;
 	}
 
-  let today = new Date();
-  const nextMonth = new Date();
-  nextMonth.setDate(today.getDate() + 30);
+	let today = new Date();
+	const nextMonth = new Date();
+	nextMonth.setDate(today.getDate() + 30);
 
 	const nearExpiryProducts = await WarehouseModel.aggregate([
-		// {
-		// 	$match: query,
-		// },
 		{
-			$match: {
-				status: "ACTIVE",
-			},
+			$match: matchQueryStage1		
 		},
 		{
 			$lookup: {
@@ -310,6 +331,32 @@ async function GovtBodyExpired(warehouse, date, body) {
   if (manufacturer) matchQueryStage2["manufacturer"] = manufacturer;
   if (organisation) matchQueryStage2["organisation"] = organisation;
 
+	let { country, state, city } = body;
+	let matchQueryStage1 = {
+		status: "ACTIVE",
+	};
+	if (country) {
+		let temp = {
+			...matchQueryStage1,
+			"country.countryName": country,
+		};
+		matchQueryStage1 = temp;
+	}
+	if (state) {
+		let temp = {
+			...matchQueryStage1,
+			"warehouseAddress.state": state,
+		};
+		matchQueryStage1 = temp;
+	}
+	if (city) {
+		let temp = {
+			...matchQueryStage1,
+			"warehouseAddress.city": city,
+		};
+		matchQueryStage1 = temp;
+	}
+
 	if (warehouse) {
 		query[`id`] = warehouse;
 	}
@@ -317,13 +364,8 @@ async function GovtBodyExpired(warehouse, date, body) {
   let today = new Date();
 
 	const expiredProducts = await WarehouseModel.aggregate([
-		// {
-		// 	$match: query,
-		// },
 		{
-			$match: {
-				status: "ACTIVE",
-			},
+			$match: matchQueryStage1,
 		},
 		{
 			$lookup: {
@@ -407,8 +449,8 @@ async function GovtBodyExpired(warehouse, date, body) {
 												{ $eq: ["$currentInventory", "$$inventoryId"] },
 												{ $eq: ["$productId", "$$productId"] },
 												{ $eq: ["$status", "HEALTHY"] },
-												{ $gte: ["$attributeSet.expDate", null] },
 												{ $ne: ["$attributeSet.expDate", null] },
+												{ $gte: ["$attributeSet.expDate", null] },
 												{ $lt: ["$attributeSet.expDate", today] },
 											],
 										},
@@ -546,16 +588,39 @@ async function GovtBodyInstock(warehouse, date, body) {
   if (manufacturer) matchQueryStage2["manufacturer"] = manufacturer;
   if (organisation) matchQueryStage2["organisation"] = organisation;
 
+	let { country, state, city } = body;
+	let matchQueryStage1 = {
+		status: "ACTIVE",
+	};
+	if (country) {
+		let temp = {
+			...matchQueryStage1,
+			"country.countryName": country,
+		};
+		matchQueryStage1 = temp;
+	}
+	if (state) {
+		let temp = {
+			...matchQueryStage1,
+			"warehouseAddress.state": state,
+		};
+		matchQueryStage1 = temp;
+	}
+	if (city) {
+		let temp = {
+			...matchQueryStage1,
+			"warehouseAddress.city": city,
+		};
+		matchQueryStage1 = temp;
+	}
+
 	if (warehouse) {
 		query[`id`] = warehouse;
 	}
 
 	const inStockReport = await WarehouseModel.aggregate([
-		// { $match: query },
 		{
-			$match: {
-				status: "ACTIVE",
-			},
+			$match: matchQueryStage1
 		},
 		{
 			$lookup: {
@@ -724,12 +789,35 @@ async function GovtBodyOutstock(warehouse, date, body) {
   if (manufacturer) matchQueryStage2["manufacturer"] = manufacturer;
   if (organisation) matchQueryStage2["organisation"] = organisation;
 
+	let { country, state, city } = body;
+	let matchQueryStage1 = {
+		status: "ACTIVE",
+	};
+	if (country) {
+		let temp = {
+			...matchQueryStage1,
+			"country.countryName": country,
+		};
+		matchQueryStage1 = temp;
+	}
+	if (state) {
+		let temp = {
+			...matchQueryStage1,
+			"warehouseAddress.state": state,
+		};
+		matchQueryStage1 = temp;
+	}
+	if (city) {
+		let temp = {
+			...matchQueryStage1,
+			"warehouseAddress.city": city,
+		};
+		matchQueryStage1 = temp;
+	}
+
 	const outOfStockReport = await WarehouseModel.aggregate([
 		{
-			$match: {
-				// id: warehouse,
-				status: "ACTIVE",
-			},
+			$match: matchQueryStage1,
 		},
 		{
 			$lookup: {
@@ -1707,187 +1795,404 @@ exports.getOrderAnalytics = [
   },
 ];
 
-exports.bestSellers = [
-  auth,
-  async (req, res) => {
-    try {
-      const warehouse = req.body?.warehouseId || req.user.warehouseId;
-      const date =
-        req.body?.date || format(startOfMonth(new Date()), "yyyy-MM-dd");
-      const organisation = await OrganisationModel.findOne({
-        id: req.user.organisationId,
-      });
-      const reportType = req.body?.reportType || null;
-      const isDist = organisation?.type === "DISTRIBUTORS" || organisation?.type === "DROGUERIA" ? true : false;
-      const isGoverningBody = organisation?.type === "GoverningBody";
-      let matchQuery = {};
-      if (!isDist) {
-        matchQuery[`manufacturerId`] = req.user.organisationId;
-      } else {
-        if (
-          req.user.warehouseId &&
-          req.user.warehouseId !== req.body.warehouseId
-        ) {
-          matchQuery = await getDistributedProducts(
-            matchQuery,
-            req.user.warehouseId,
-            `_id`
-          );
-        }
-      }
-      if (isGoverningBody) matchQuery = {}
-      const bestSellers = await WarehouseModel.aggregate([
-        {
-          $match: {
-            id: warehouse,
-          },
-        },
-        {
-          $lookup: {
-            localField: "warehouseInventory",
-            from: "inventories",
-            foreignField: "id",
-            as: "inventory",
-          },
-        },
-        {
-          $unwind: {
-            path: "$inventory",
-            preserveNullAndEmptyArrays: true,
-          },
-        },
-        {
-          $replaceWith: {
-            $mergeObjects: [null, "$inventory"],
-          },
-        },
-        {
-          $unwind: {
-            path: "$inventoryDetails",
-          },
-        },
-        {
-          $lookup: {
-            from: "products",
-            localField: "inventoryDetails.productId",
-            foreignField: "id",
-            as: "product",
-          },
-        },
-        {
-          $unwind: {
-            path: "$product",
-          },
-        },
-        {
-          $lookup: {
-            from: "inventory_analytics",
-            let: {
-              arg1: "$inventoryDetails.productId",
-              arg2: date,
-              arg3: "$id",
-            },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $and: [
-                      {
-                        $eq: ["$productId", "$$arg1"],
-                      },
-                      {
-                        $eq: ["$inventoryId", "$$arg3"],
-                      },
-                      {
-                        $eq: ["$date", "$$arg2"],
-                      },
-                    ],
-                  },
-                },
-              },
-            ],
-            as: "inventory_analytics",
-          },
-        },
-        {
-          $unwind: {
-            path: "$inventory_analytics",
-            preserveNullAndEmptyArrays: true,
-          },
-        },
-        {
-          $group: {
-            _id: "$inventoryDetails.productId",
-            productCategory: {
-              $first: "$product.type",
-            },
-            productName: {
-              $first: "$product.name",
-            },
-            unitofMeasure: {
-              $first: "$product.unitofMeasure",
-            },
-            totalSales: {
-              $first: "$inventoryDetails.totalSales",
-            },
-            manufacturer: {
-              $first: "$product.manufacturer",
-            },
-            manufacturerId: {
-              $first: "$product.manufacturerId",
-            },
-            productQuantity: {
-              $sum: "$inventoryDetails.quantity",
-            },
-            inventoryAnalytics: {
-              $first: "$inventory_analytics",
-            },
-            updatedAt: {
-              $first: "$inventoryDetails.updatedAt",
-            },
-          },
-        },
-        {
-          $match: {
-            "inventoryAnalytics.sales": {
-              $gt: 0,
-            },
-          },
-        },
-        {
-          $match: matchQuery,
-        },
-        {
-          $sort: {
-            "inventoryAnalytics.sales": -1,
-          },
-        },
-      ]);
+// CENTRAL_AUTHORITY/GoverningBody only
+exports.getNetworkAnalytics = [
+	auth,
+	async (req, res) => {
+		try {
+			const date =
+			req.body?.date || format(startOfMonth(new Date()), "yyyy-MM-dd");
+			
+			let matchQueryStage1 = {
+				status: "ACTIVE",
+			};
+			let { country, state, city } = req.body;
+			if (country) {
+				let temp = {
+					...matchQueryStage1,
+					"country.countryName": country,
+				};
+				matchQueryStage1 = temp;
+			}
+			if (state) {
+				let temp = {
+					...matchQueryStage1,
+					"warehouseAddress.state": state,
+				};
+				matchQueryStage1 = temp;
+			}
+			if (city) {
+				let temp = {
+					...matchQueryStage1,
+					"warehouseAddress.city": city,
+				};
+				matchQueryStage1 = temp;
+			}
 
-      if (reportType) {
-        const reportData = await getDataForReport("BESTSELLERS", bestSellers);
-        if (reportType === "excel") {
-          await buildExcelReport(
-            res,
-            reportData.header,
-            reportData.excelData,
-            "BESTSELLERS",
-            date
-          );
-        } else {
-          await buildPdfReport(res, reportData.pdfData, "BESTSELLERS", date);
-        }
-      } else {
-        return apiResponse.successResponseWithData(res, "Best Sellers", {
-          bestSellers,
-          warehouseId: warehouse,
-        });
-      }
-    } catch (err) {
-      console.log(err);
-      return apiResponse.ErrorResponse(res, err);
-    }
-  },
+			const networkAnalytics = await WarehouseModel.aggregate([
+				{ $match: matchQueryStage1 },
+				{
+					$lookup: {
+						from: "organisations",
+						let: { orgId: "$organisationId" },
+						pipeline: [
+							{ $match: { $expr: { $eq: ["$$orgId", "$id"] } } },
+							{ $project: { _id: 0, organisationId: "$name" } },
+						],
+						as: "organisation",
+					},
+				},
+				{ $unwind: "$organisation" },
+				{
+					$lookup: {
+						localField: "warehouseInventory",
+						from: "inventories",
+						foreignField: "id",
+						as: "inventory",
+					},
+				},
+				{ $unwind: { path: "$inventory", preserveNullAndEmptyArrays: true } },
+				{
+					$replaceWith: {
+						$mergeObjects: [null, "$inventory"],
+					},
+				},
+				{
+					$unwind: {
+						path: "$inventoryDetails",
+					},
+				},
+				{
+					$lookup: {
+						from: "inventory_analytics",
+						let: {
+							arg1: "$inventoryDetails.productId",
+							arg2: date,
+							arg3: "$id",
+						},
+						pipeline: [
+							{
+								$match: {
+									$expr: {
+										$and: [
+											{
+												$eq: ["$productId", "$$arg1"],
+											},
+											{
+												$eq: ["$inventoryId", "$$arg3"],
+											},
+											{
+												$eq: ["$date", "$$arg2"],
+											},
+										],
+									},
+								},
+							},
+						],
+						as: "inventory_analytics",
+					},
+				},
+				{
+					$unwind: {
+						path: "$inventory_analytics",
+					},
+				},
+				{
+					$facet: {
+						outStock: [
+							{
+								$match: {
+									"inventoryDetails.quantity": 0,
+								},
+							},
+							{
+								$group: {
+									_id: "$inventoryDetails.productId",
+								},
+							},
+							{
+								$count: "count",
+							},
+						],
+						inStock: [
+							{
+								$match: {
+									"inventoryDetails.quantity": {
+										$gt: 0,
+									},
+								},
+							},
+							{
+								$group: {
+									_id: "$inventoryDetails.productId",
+								},
+							},
+							{
+								$count: "count",
+							},
+						],
+						bestSellers: [
+							{
+								$match: {
+									"inventoryAnalytics.sales": {
+										$gt: 0,
+									},
+								},
+							},
+							{
+								$group: {
+									_id: "$inventoryDetails.productId",
+								},
+							},
+							{
+								$count: "count",
+							},
+						],
+					},
+				},
+			]);
+		
+			const {bestSellers, inStock, outStock} = networkAnalytics[0];
+			const analytics = {
+				bestSeller: bestSellers[0]?.count || 0,
+				inStock: inStock[0]?.count || 0,
+				outStock: outStock[0]?.count || 0,
+			};
+
+			return apiResponse.successResponseWithData(res, "Network Analytics", {analytics})
+		} catch (err) {
+			console.log(err);
+			return apiResponse.ErrorResponse(res, err);
+		}
+	},
+];
+
+exports.bestSellers = [
+	auth,
+	async (req, res) => {
+		try {
+			const warehouse = req.body?.warehouseId || req.user.warehouseId;
+			const date = req.body?.date || format(startOfMonth(new Date()), "yyyy-MM-dd");
+			const organisation = await OrganisationModel.findOne({
+				id: req.user.organisationId,
+			});
+			const reportType = req.body?.reportType || null;
+			const isDist =
+				organisation?.type === "DISTRIBUTORS" || organisation?.type === "DROGUERIA" ? true : false;
+			const isGoverningBody = organisation?.type === "GoverningBody";
+
+			let { country, state, city } = req.body;
+			let matchQueryStage1 = {
+				status: "ACTIVE",
+			};
+			if (country) {
+				let temp = {
+					...matchQueryStage1,
+					"country.countryName": country,
+				};
+				matchQueryStage1 = temp;
+			}
+			if (state) {
+				let temp = {
+					...matchQueryStage1,
+					"warehouseAddress.state": state,
+				};
+				matchQueryStage1 = temp;
+			}
+			if (city) {
+				let temp = {
+					...matchQueryStage1,
+					"warehouseAddress.city": city,
+				};
+				matchQueryStage1 = temp;
+			}		
+
+			let matchQuery = {};
+			if (!isDist) {
+				matchQuery[`manufacturerId`] = req.user.organisationId;
+			} else {
+				if (req.user.warehouseId && req.user.warehouseId !== req.body.warehouseId) {
+					matchQuery = await getDistributedProducts(matchQuery, req.user.warehouseId, `_id`);
+				}
+			}
+			if (isGoverningBody) matchQuery = {};
+			const bestSellers = await WarehouseModel.aggregate([
+				{
+					$match: matchQueryStage1,
+				},
+				{
+					$lookup: {
+						from: "organisations",
+						let: { orgId: "$organisationId" },
+						pipeline: [
+							{ $match: { $expr: { $eq: ["$$orgId", "$id"] } } },
+							{ $project: { _id: 0, organisation: "$name" } },
+						],
+						as: "organisation",
+					},
+				},
+				{
+					$unwind: "$organisation",
+				},
+				{
+					$lookup: {
+						localField: "warehouseInventory",
+						from: "inventories",
+						foreignField: "id",
+						as: "inventory",
+					},
+				},
+				{
+					$unwind: {
+						path: "$inventory",
+						preserveNullAndEmptyArrays: true,
+					},
+				},
+				{
+					$addFields: {
+						address: {
+							address: {
+								firstLine: "$warehouseAddress.firstLine",
+								city: "$warehouseAddress.city",
+								state: "$warehouseAddress.state",
+								country: "$country.countryName",
+								region: "$region.regionName",
+							},
+						},
+					},
+				},
+				{
+					$replaceWith: {
+						$mergeObjects: [null, "$inventory", "$organisation", "$address"],
+					},
+				},
+				{
+					$unwind: {
+						path: "$inventoryDetails",
+					},
+				},
+				{
+					$lookup: {
+						from: "products",
+						localField: "inventoryDetails.productId",
+						foreignField: "id",
+						as: "product",
+					},
+				},
+				{
+					$unwind: {
+						path: "$product",
+					},
+				},
+				{
+					$lookup: {
+						from: "inventory_analytics",
+						let: {
+							arg1: "$inventoryDetails.productId",
+							arg2: date,
+							arg3: "$id",
+						},
+						pipeline: [
+							{
+								$match: {
+									$expr: {
+										$and: [
+											{
+												$eq: ["$productId", "$$arg1"],
+											},
+											{
+												$eq: ["$inventoryId", "$$arg3"],
+											},
+											{
+												$eq: ["$date", "$$arg2"],
+											},
+										],
+									},
+								},
+							},
+						],
+						as: "inventory_analytics",
+					},
+				},
+				{
+					$unwind: {
+						path: "$inventory_analytics",
+						preserveNullAndEmptyArrays: true,
+					},
+				},
+				{
+					$group: {
+						_id: "$inventoryDetails.productId",
+						productCategory: {
+							$first: "$product.type",
+						},
+						productName: {
+							$first: "$product.name",
+						},
+						unitofMeasure: {
+							$first: "$product.unitofMeasure",
+						},
+						manufacturer: {
+							$first: "$product.manufacturer",
+						},
+						manufacturerId: {
+							$first: "$product.manufacturerId",
+						},
+						organisation: {
+							$first: "$organisation",
+						},
+						address: {
+							$first: "$address",
+						},
+						productQuantity: {
+							$sum: "$inventoryDetails.quantity",
+						},
+						totalSales: {
+							$sum: "$inventoryDetails.totalSales",
+						},
+						inventoryAnalytics: {
+							$first: "$inventory_analytics",
+						},
+						updatedAt: {
+							$first: "$inventoryDetails.updatedAt",
+						},
+					},
+				},
+				{
+					$match: {
+						"inventoryAnalytics.sales": {
+							$gt: 0,
+						},
+					},
+				},
+				{
+					$match: matchQuery,
+				},
+				{
+					$sort: {
+						"inventoryAnalytics.sales": -1,
+					},
+				},
+			]);
+
+			if (reportType) {
+				const reportData = await getDataForReport("BESTSELLERS", bestSellers);
+				if (reportType === "excel") {
+					await buildExcelReport(res, reportData.header, reportData.excelData, "BESTSELLERS", date);
+				} else {
+					await buildPdfReport(res, reportData.pdfData, "BESTSELLERS", date);
+				}
+			} else {
+				return apiResponse.successResponseWithData(res, "Best Sellers", {
+					bestSellers,
+					warehouseId: warehouse,
+				});
+			}
+		} catch (err) {
+			console.log(err);
+			return apiResponse.ErrorResponse(res, err);
+		}
+	},
 ];
 
 exports.bestSellerSummary = [
@@ -3269,6 +3574,33 @@ exports.bestSellerFilterOptions = [
 				organisation?.type === "DISTRIBUTORS" || organisation?.type === "DROGUERIA" ? true : false;
 			const isGoverningBody = organisation?.type === "GoverningBody";
 			let matchQuery = {};
+
+			let { country, state, city } = req.body;
+			let matchQueryStage1 = {
+				status: "ACTIVE",
+			};
+			if (country) {
+				let temp = {
+					...matchQueryStage1,
+					"country.countryName": country,
+				};
+				matchQueryStage1 = temp;
+			}
+			if (state) {
+				let temp = {
+					...matchQueryStage1,
+					"warehouseAddress.state": state,
+				};
+				matchQueryStage1 = temp;
+			}
+			if (city) {
+				let temp = {
+					...matchQueryStage1,
+					"warehouseAddress.city": city,
+				};
+				matchQueryStage1 = temp;
+			}		
+
 			let Filters;
 			if (!isDist) {
 				matchQuery[`manufacturerId`] = req.user.organisationId;
@@ -3280,9 +3612,21 @@ exports.bestSellerFilterOptions = [
 			if (isGoverningBody) matchQuery = {};
 			let bestSellerStockReport = await WarehouseModel.aggregate([
 				{
-					$match: {
-						id: warehouse,
+					$match: matchQueryStage1,
+				},
+				{
+					$lookup: {
+						from: "organisations",
+						let: { orgId: "$organisationId" },
+						pipeline: [
+							{ $match: { $expr: { $eq: ["$$orgId", "$id"] } } },
+							{ $project: { _id: 0, organisation: "$name" } },
+						],
+						as: "organisation",
 					},
+				},
+				{
+					$unwind: "$organisation",
 				},
 				{
 					$lookup: {
@@ -3299,8 +3643,21 @@ exports.bestSellerFilterOptions = [
 					},
 				},
 				{
+					$addFields: {
+						address: {
+							address: {
+								firstLine: "$warehouseAddress.firstLine",
+								city: "$warehouseAddress.city",
+								state: "$warehouseAddress.state",
+								country: "$country.countryName",
+								region: "$region.regionName",
+							},
+						},
+					},
+				},
+				{
 					$replaceWith: {
-						$mergeObjects: [null, "$inventory"],
+						$mergeObjects: [null, "$inventory", "$organisation", "$address"],
 					},
 				},
 				{
@@ -3373,6 +3730,12 @@ exports.bestSellerFilterOptions = [
 						},
 						manufacturerId: {
 							$first: "$product.manufacturerId",
+						},
+						organisation: {
+							$first: "$organisation",
+						},
+						address: {
+							$first: "$address",
 						},
 						productQuantity: {
 							$sum: "$inventoryDetails.quantity",

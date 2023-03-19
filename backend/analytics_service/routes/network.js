@@ -13,4 +13,5 @@ router.post("/outStockFilterOptions", AnalyticsController.outOfStockFilterOption
 router.post("/nearExpiryFilterOptions", AnalyticsController.nearExpiryFilterOptions);
 router.post("/expiredFilterOptions", AnalyticsController.expiredFilterOptions);
 router.post("/bestSellerFilterOptions", AnalyticsController.bestSellerFilterOptions);
+router.post("/getNetworkAnalytics", AnalyticsController.getNetworkAnalytics);
 module.exports = router;

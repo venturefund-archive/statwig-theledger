@@ -120,7 +120,7 @@ function TableHeader({
 	);
 }
 
-export default function BestsellerTable() {
+export default function BestsellerTable({locationParams}) {
   const [bestseller, setBestseller] = useState([]);
   const [bestsellerFilters, setBestsellerFilters] = useState();
   const [reportWarehouse, setReportWarehouse] = useState("");
@@ -165,7 +165,10 @@ export default function BestsellerTable() {
   };
 
   const getBestSellerStockFilters = async () => {
-    let payload = selectedFilters;
+    let payload = {
+			...selectedFilters,
+			...locationParams,
+		};
     payload.reportWarehouse = reportWarehouse;
     payload.date = "";
 		const outStockFilters = await getBestsellerFilterOptions(payload);
@@ -173,10 +176,13 @@ export default function BestsellerTable() {
 	};
 
   const getBestsellers = async () => {
-    let payload = selectedFilters;
+    let payload = {
+			...selectedFilters,
+			...locationParams,
+		};
     payload.reportWarehouse = reportWarehouse;
     const bestSellers = await getBestSellers(payload);
-    if (bestSellers) setBestseller(bestSellers.data.bestSellers);
+		if (bestSellers) setBestseller(bestSellers.data.bestSellers);
 		if (bestSellers) setReportWarehouse(bestSellers.data.warehouseId);
   };
 

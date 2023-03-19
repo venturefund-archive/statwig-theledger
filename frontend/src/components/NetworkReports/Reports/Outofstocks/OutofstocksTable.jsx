@@ -125,7 +125,7 @@ function TableHeader({
 	);
 }
 
-export default function OutofstocksTable() {
+export default function OutofstocksTable({locationParams}) {
   const [outStock, setOutStock] = useState([]);
   const [outStockFilters, setOutStockFilters] = useState();
   const [reportWarehouse, setReportWarehouse] = useState("");
@@ -169,7 +169,10 @@ export default function OutofstocksTable() {
   };
 
 	const getOutstockFilters = async () => {
-    let payload = selectedFilters;
+    let payload = {
+			...selectedFilters,
+			...locationParams,
+		};
     payload.reportWarehouse = reportWarehouse;
     payload.date = "";
 		const outStockFilters = await getOutStockFilterOptions(payload);
@@ -177,18 +180,20 @@ export default function OutofstocksTable() {
 	};
 
 	const getOutStock = async () => {
-    let payload = selectedFilters;
+    let payload = {
+			...selectedFilters,
+			...locationParams,
+		};
     payload.reportWarehouse = reportWarehouse;
 		const outStock = await getmanufacturerOutStockReport(payload);
-		if (outStock) setOutStock(outStock.data.outOfStockReport);
+    if (outStock) setOutStock(outStock.data.outOfStockReport);
 		if (outStock) setReportWarehouse(outStock.data.warehouseId);
 	};
 
 	useEffect(() => {
-    console.log("In useEffect!");
 		getOutStock();
 		getOutstockFilters();
-	}, [selectedFilters]);
+	}, [selectedFilters, locationParams]);
 
   useEffect(() => {
 		if (outStockFilters?.length) {

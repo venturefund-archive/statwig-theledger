@@ -126,7 +126,7 @@ function TableHeader({
   );
 }
 
-export default function ExpiredTable() {
+export default function ExpiredTable({locationParams}) {
   const [expiredStock, setExpiredStock] = useState([]);
   const [expiredStockFilters, setExpiredStockFilters] = useState();
 	const [reportWarehouse, setReportWarehouse] = useState("");
@@ -170,7 +170,10 @@ export default function ExpiredTable() {
   };
 
   const getExpiredStock = async (startDate) => {
-    let payload = selectedFilters;
+    let payload = {
+			...selectedFilters,
+			...locationParams,
+		};
     payload.reportWarehouse = reportWarehouse;
     const expiredStock = await getManufacturerExpiredStockReport(payload);
     if (expiredStock) setExpiredStock(expiredStock.data.expiredProducts);
@@ -178,7 +181,10 @@ export default function ExpiredTable() {
   };
 
   const getExpiredStockFilters = async () => {
-    let payload = selectedFilters;
+    let payload = {
+			...selectedFilters,
+			...locationParams,
+		};
     payload.reportWarehouse = reportWarehouse;
     payload.date = "";
     const expiredStockFilters = await getExpiredFilterOptions(payload);
