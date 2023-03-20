@@ -1,0 +1,307 @@
+import React, { useEffect, useState } from "react";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
+import OutofstocksRow from "./OutofstocksRow";
+import {
+	getmanufacturerOutStockReport,
+	getOutStockFilterOptions,
+} from "../../../../actions/networkActions";
+import { useTranslation } from "react-i18next";
+import ReportFilter from "../../Filter/ReportFilter";
+import { useTheme, styled } from "@mui/material/styles";
+import Filterbar from "../../Filter/Filterbar";
+
+function TableHeader({
+	anchorEl,
+  selectedColumn,
+	handleClick,
+	handleClose,
+  theme,
+  filterOptions,
+  selectedFilters,
+  handleFilterUpdate,
+	t,
+}) {
+	return (
+		<TableRow>
+			<TableCell>
+				<div
+					className="mi_report_table_head"
+					onClick={(event) => handleClick(event, "productCategory")}
+				>
+					<p className="mi-body-sm f-400 mi-reset grey-400">Product category</p>
+					<i class="fa-solid fa-sort grey-400"></i>
+				</div>
+				<Filterbar
+					title={t("product_category")}
+					fieldName="productCategory"
+          anchorEl={anchorEl}
+          selectedColumn={selectedColumn}
+					handleClose={handleClose}
+					theme={theme}
+					options={filterOptions.productCategories}
+					selectedFilters={selectedFilters}
+					handleFilterUpdate={handleFilterUpdate}
+				/>
+			</TableCell>
+			<TableCell>
+				<div
+					className="mi_report_table_head"
+					onClick={(event) => handleClick(event, "productName")}
+				>
+					<p className="mi-body-sm f-400 mi-reset grey-400">Product Name</p>
+					<i class="fa-solid fa-sort grey-400"></i>
+				</div>
+				<Filterbar
+					title={t("product_name")}
+					fieldName="productName"
+					anchorEl={anchorEl}
+          selectedColumn={selectedColumn}
+					handleClose={handleClose}
+					theme={theme}
+					options={filterOptions.productNames}
+					selectedFilters={selectedFilters}
+					handleFilterUpdate={handleFilterUpdate}
+				/>
+			</TableCell>
+			<TableCell>
+				<div
+					className="mi_report_table_head"
+					onClick={(event) => handleClick(event, "manufacturer")}
+				>
+					<p className="mi-body-sm f-400 mi-reset grey-400">Manufacturer</p>
+					<i class="fa-solid fa-sort grey-400"></i>
+					<Filterbar
+						title={t("manufacturer")}
+						fieldName="manufacturer"
+						anchorEl={anchorEl}
+            selectedColumn={selectedColumn}
+						handleClose={handleClose}
+						theme={theme}
+						options={filterOptions.manufacturers}
+						selectedFilters={selectedFilters}
+						handleFilterUpdate={handleFilterUpdate}
+					/>
+				</div>
+			</TableCell>
+			<TableCell>
+				<div
+					className="mi_report_table_head"
+					onClick={(event) => handleClick(event, "organisation")}
+				>
+					<p className="mi-body-sm f-400 mi-reset grey-400">Organization Name</p>
+					<i class="fa-solid fa-sort grey-400"></i>
+					<Filterbar
+						title={t("organisation_name")}
+						fieldName="organisation"
+						anchorEl={anchorEl}
+            selectedColumn={selectedColumn}
+						handleClose={handleClose}
+						theme={theme}
+						options={filterOptions.organisations}
+						selectedFilters={selectedFilters}
+						handleFilterUpdate={handleFilterUpdate}
+					/>
+				</div>
+			</TableCell>
+			<TableCell>
+				<div className="mi_report_table_head">
+					<p className="mi-body-sm f-400 mi-reset grey-400">Location Details</p>
+					<i class="fa-solid fa-sort grey-400"></i>
+				</div>
+			</TableCell>
+			<TableCell>
+				<div className="mi_report_table_head">
+					<p className="mi-body-sm f-400 mi-reset grey-400">No of Days</p>
+					<i class="fa-solid fa-sort grey-400"></i>
+				</div>
+			</TableCell>
+		</TableRow>
+	);
+}
+
+export default function OutofstocksTable({locationParams}) {
+  const [outStock, setOutStock] = useState([]);
+  const [outStockFilters, setOutStockFilters] = useState();
+  const [reportWarehouse, setReportWarehouse] = useState("");
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [selectedColumn, setSelectedColumn] = useState("");
+  const [filterOptions, setFilterOptions] = useState({
+    productCategories: [],
+    productNames: [],
+    manufacturers: [],
+    organisations: []
+  });
+  const [selectedFilters, setSelectedFilters] = useState({
+    productCategory: "",
+    productName: "",
+    manufacturer: "",
+    organisation: "",
+  });
+
+  const theme = useTheme();
+  const { t } = useTranslation();
+
+  const handleFilterUpdate = (fieldName, newValue) => {
+    if (!fieldName) return;
+    setSelectedFilters((prevState) => ({
+			...prevState,
+			[fieldName]: newValue,
+		}));
+  };
+
+  const handleClick = (event, fieldName) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedColumn(fieldName);
+  };
+
+  const handleClose = () => {
+    if (anchorEl) {
+      anchorEl.focus();
+    }
+    setAnchorEl(null);
+    setSelectedColumn("");
+  };
+
+	const getOutstockFilters = async () => {
+    let payload = {
+			...selectedFilters,
+			...locationParams,
+		};
+    payload.reportWarehouse = reportWarehouse;
+    payload.date = "";
+		const outStockFilters = await getOutStockFilterOptions(payload);
+    if (outStockFilters) setOutStockFilters(outStockFilters.filters);
+	};
+
+	const getOutStock = async () => {
+    let payload = {
+			...selectedFilters,
+			...locationParams,
+		};
+    payload.reportWarehouse = reportWarehouse;
+		const outStock = await getmanufacturerOutStockReport(payload);
+    if (outStock) setOutStock(outStock.data.outOfStockReport);
+		if (outStock) setReportWarehouse(outStock.data.warehouseId);
+	};
+
+	useEffect(() => {
+		getOutStock();
+		getOutstockFilters();
+	}, [selectedFilters, locationParams]);
+
+  useEffect(() => {
+		if (outStockFilters?.length) {
+			let categoriesSet = new Set();
+			let productNamesSet = new Set();
+      let manufacturersSet = new Set();
+      let organisationSet = new Set();
+			outStockFilters.map((elem) => {
+				categoriesSet.add(elem.productCategory);
+				productNamesSet.add(elem.productName);
+        manufacturersSet.add(elem.manufacturer);
+        organisationSet.add(elem.organisation);
+      });
+      let cols = filterOptions;
+      cols.productCategories = [...categoriesSet];
+      cols.productNames = [...productNamesSet];
+      cols.manufacturers = [...manufacturersSet];
+      cols.organisations = [...organisationSet];
+      setFilterOptions(cols);
+		}
+  }, [outStockFilters]);
+  
+  return (
+    <TableContainer>
+      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+        <TableHead>
+          <TableHeader
+            anchorEl={anchorEl}
+            setAnchorEl={setAnchorEl}
+            selectedColumn={selectedColumn}
+            handleClick={handleClick}
+            handleClose={handleClose}
+            theme={theme}
+            filterOptions={filterOptions}
+            selectedFilters={selectedFilters}
+            handleFilterUpdate={handleFilterUpdate}
+            t={t}
+          />
+        </TableHead>
+        <TableBody>
+        {outStock.map((product, index) => (
+						<OutofstocksRow t={t} product={product} key={index} />
+					))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+}
+
+const labels = [
+  {
+    name: "1 Filter Option",
+  },
+  {
+    name: "2 Filter Option",
+  },
+  {
+    name: "3 Filter Option",
+  },
+  {
+    name: "4 Filter Option",
+  },
+  {
+    name: "5 Filter Option",
+  },
+  {
+    name: "6 Filter Option",
+  },
+  {
+    name: "7 Filter Option",
+  },
+  {
+    name: "8 Filter Option",
+  },
+  {
+    name: "9 Filter Option",
+  },
+  {
+    name: "10 Filter Option",
+  },
+  {
+    name: "11 Filter Option",
+  },
+  {
+    name: "12 Filter Option",
+  },
+  {
+    name: "13 Filter Option",
+  },
+  {
+    name: "14 Filter Option",
+  },
+  {
+    name: "15 Filter Option",
+  },
+  {
+    name: "16 Filter Option",
+  },
+  {
+    name: "17 Filter Option",
+  },
+  {
+    name: "18 Filter Option",
+  },
+  {
+    name: "19 Filter Option",
+  },
+  {
+    name: "10 Filter Option",
+  },
+];
