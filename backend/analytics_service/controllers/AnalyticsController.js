@@ -14,51 +14,51 @@ const { buildExcelReport, buildPdfReport } = require("../helpers/reports");
 const { getDateStringForMongo } = require("../helpers/utility");
 
 async function getDistributedProducts(matchQuery, warehouseId, fieldName) {
-  const products = await WarehouseModel.aggregate([
-    {
-      $match: {
-        id: warehouseId,
-      },
-    },
-    {
-      $lookup: {
-        localField: "warehouseInventory",
-        from: "inventories",
-        foreignField: "id",
-        as: "inventory",
-      },
-    },
-    {
-      $unwind: {
-        path: "$inventory",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
-      $replaceWith: {
-        $mergeObjects: [null, "$inventory"],
-      },
-    },
-    {
-      $unwind: {
-        path: "$inventoryDetails",
-      },
-    },
-    {
-      $group: {
-        _id: "items",
-        distItems: { $addToSet: "$inventoryDetails.productId" },
-      },
-    },
-  ]);
-  if (products.length > 0) {
-    if (products[0].distItems.length > 0) {
-      matchQuery[`${fieldName}`] = {
-        $in: products[0].distItems,
-      };
-    }
-  }
-  return matchQuery;
+	const products = await WarehouseModel.aggregate([
+		{
+			$match: {
+				id: warehouseId,
+			},
+		},
+		{
+			$lookup: {
+				localField: "warehouseInventory",
+				from: "inventories",
+				foreignField: "id",
+				as: "inventory",
+			},
+		},
+		{
+			$unwind: {
+				path: "$inventory",
+				preserveNullAndEmptyArrays: true,
+			},
+		},
+		{
+			$replaceWith: {
+				$mergeObjects: [null, "$inventory"],
+			},
+		},
+		{
+			$unwind: {
+				path: "$inventoryDetails",
+			},
+		},
+		{
+			$group: {
+				_id: "items",
+				distItems: { $addToSet: "$inventoryDetails.productId" },
+			},
+		},
+	]);
+	if (products.length > 0) {
+		if (products[0].distItems.length > 0) {
+			matchQuery[`${fieldName}`] = {
+				$in: products[0].distItems,
+			};
+		}
+	}
+	return matchQuery;
 }
 
 async function GovtBodyNearExpiry(warehouse, date, body) {
@@ -105,9 +105,18 @@ async function GovtBodyNearExpiry(warehouse, date, body) {
 	const nextMonth = new Date();
 	nextMonth.setDate(today.getDate() + 30);
 
+	let { skip, limit } = body;
+	let paginationQuery = [];
+	if (skip) {
+		paginationQuery.push({ $skip: skip });
+	}
+	if (limit) {
+		paginationQuery.push({ $limit: limit });
+	}
+
 	const nearExpiryProducts = await WarehouseModel.aggregate([
 		{
-			$match: matchQueryStage1		
+			$match: matchQueryStage1,
 		},
 		{
 			$lookup: {
@@ -266,7 +275,10 @@ async function GovtBodyNearExpiry(warehouse, date, body) {
 		},
 		{
 			$group: {
-				_id: "$inventoryDetails.productId",
+				_id: {
+					productId: "$inventoryDetails.productId",
+					orgId: "$organisation",
+				},
 				productCategory: {
 					$first: "$product.type",
 				},
@@ -316,6 +328,14 @@ async function GovtBodyNearExpiry(warehouse, date, body) {
 				productQuantity: -1,
 			},
 		},
+		{
+			$facet: {
+				paginatedResults: paginationQuery,
+				totalCount: [{ $count: "count" }],
+			},
+		},
+		{ $unwind: "$totalCount" },
+		{ $project: { paginatedResults: 1, totalCount: "$totalCount.count" } },
 	]);
 
 	return nearExpiryProducts;
@@ -324,12 +344,12 @@ async function GovtBodyNearExpiry(warehouse, date, body) {
 async function GovtBodyExpired(warehouse, date, body) {
 	let query = {};
 	let matchQueryStage2 = {};
-  let { productCategory, productName, manufacturer, organisation } = body;
-  
-  if (productCategory) matchQueryStage2["productCategory"] = productCategory;
-  if (productName) matchQueryStage2["productName"] = productName;
-  if (manufacturer) matchQueryStage2["manufacturer"] = manufacturer;
-  if (organisation) matchQueryStage2["organisation"] = organisation;
+	let { productCategory, productName, manufacturer, organisation } = body;
+
+	if (productCategory) matchQueryStage2["productCategory"] = productCategory;
+	if (productName) matchQueryStage2["productName"] = productName;
+	if (manufacturer) matchQueryStage2["manufacturer"] = manufacturer;
+	if (organisation) matchQueryStage2["organisation"] = organisation;
 
 	let { country, state, city } = body;
 	let matchQueryStage1 = {
@@ -361,7 +381,16 @@ async function GovtBodyExpired(warehouse, date, body) {
 		query[`id`] = warehouse;
 	}
 
-  let today = new Date();
+	let { skip, limit } = body;
+	let paginationQuery = [];
+	if (skip) {
+		paginationQuery.push({ $skip: skip });
+	}
+	if (limit) {
+		paginationQuery.push({ $limit: limit });
+	}
+
+	let today = new Date();
 
 	const expiredProducts = await WarehouseModel.aggregate([
 		{
@@ -379,7 +408,7 @@ async function GovtBodyExpired(warehouse, date, body) {
 			},
 		},
 		{
-			$unwind: "$organisation"
+			$unwind: "$organisation",
 		},
 		{
 			$lookup: {
@@ -523,7 +552,10 @@ async function GovtBodyExpired(warehouse, date, body) {
 		},
 		{
 			$group: {
-				_id: "$inventoryDetails.productId",
+				_id: {
+					productId: "$inventoryDetails.productId",
+					orgId: "$organisation",
+				},
 				productCategory: {
 					$first: "$product.type",
 				},
@@ -573,6 +605,14 @@ async function GovtBodyExpired(warehouse, date, body) {
 				productQuantity: -1,
 			},
 		},
+		{
+			$facet: {
+				paginatedResults: paginationQuery,
+				totalCount: [{ $count: "count" }],
+			},
+		},
+		{ $unwind: "$totalCount" },
+		{ $project: { paginatedResults: 1, totalCount: "$totalCount.count" } },
 	]);
 
 	return expiredProducts;
@@ -581,12 +621,12 @@ async function GovtBodyExpired(warehouse, date, body) {
 async function GovtBodyInstock(warehouse, date, body) {
 	let query = {};
 	let matchQueryStage2 = {};
-  let { productCategory, productName, manufacturer, organisation } = body;
-  
-  if (productCategory) matchQueryStage2["productCategory"] = productCategory;
-  if (productName) matchQueryStage2["productName"] = productName;
-  if (manufacturer) matchQueryStage2["manufacturer"] = manufacturer;
-  if (organisation) matchQueryStage2["organisation"] = organisation;
+	let { productCategory, productName, manufacturer, organisation } = body;
+
+	if (productCategory) matchQueryStage2["productCategory"] = productCategory;
+	if (productName) matchQueryStage2["productName"] = productName;
+	if (manufacturer) matchQueryStage2["manufacturer"] = manufacturer;
+	if (organisation) matchQueryStage2["organisation"] = organisation;
 
 	let { country, state, city } = body;
 	let matchQueryStage1 = {
@@ -618,9 +658,18 @@ async function GovtBodyInstock(warehouse, date, body) {
 		query[`id`] = warehouse;
 	}
 
+	let { skip, limit } = body;
+	let paginationQuery = [];
+	if (skip) {
+		paginationQuery.push({ $skip: skip });
+	}
+	if (limit) {
+		paginationQuery.push({ $limit: limit });
+	}
+
 	const inStockReport = await WarehouseModel.aggregate([
 		{
-			$match: matchQueryStage1
+			$match: matchQueryStage1,
 		},
 		{
 			$lookup: {
@@ -634,7 +683,7 @@ async function GovtBodyInstock(warehouse, date, body) {
 			},
 		},
 		{
-			$unwind: "$organisation"
+			$unwind: "$organisation",
 		},
 		{
 			$lookup: {
@@ -731,7 +780,10 @@ async function GovtBodyInstock(warehouse, date, body) {
 		},
 		{
 			$group: {
-				_id: "$inventoryDetails.productId",
+				_id: {
+					productId: "$inventoryDetails.productId",
+					orgId: "$organisation",
+				},
 				productCategory: {
 					$first: "$product.type",
 				},
@@ -775,20 +827,20 @@ async function GovtBodyInstock(warehouse, date, body) {
 				productQuantity: -1,
 			},
 		},
+		{
+			$facet: {
+				paginatedResults: paginationQuery,
+				totalCount: [{ $count: "count" }],
+			},
+		},
+		{ $unwind: "$totalCount" },
+		{ $project: { paginatedResults: 1, totalCount: "$totalCount.count" } },
 	]);
 
 	return inStockReport;
 }
 
 async function GovtBodyOutstock(warehouse, date, body) {
-  let matchQueryStage2 = {};
-  let { productCategory, productName, manufacturer, organisation } = body;
-  
-  if (productCategory) matchQueryStage2["productCategory"] = productCategory;
-  if (productName) matchQueryStage2["productName"] = productName;
-  if (manufacturer) matchQueryStage2["manufacturer"] = manufacturer;
-  if (organisation) matchQueryStage2["organisation"] = organisation;
-
 	let { country, state, city } = body;
 	let matchQueryStage1 = {
 		status: "ACTIVE",
@@ -813,6 +865,22 @@ async function GovtBodyOutstock(warehouse, date, body) {
 			"warehouseAddress.city": city,
 		};
 		matchQueryStage1 = temp;
+	}
+
+	let { productCategory, productName, manufacturer, organisation } = body;
+	let matchQueryStage2 = {};
+	if (productCategory) matchQueryStage2["productCategory"] = productCategory;
+	if (productName) matchQueryStage2["productName"] = productName;
+	if (manufacturer) matchQueryStage2["manufacturer"] = manufacturer;
+	if (organisation) matchQueryStage2["organisation"] = organisation;
+
+	let { skip, limit } = body;
+	let paginationQuery = [];
+	if (skip) {
+		paginationQuery.push({ $skip: skip });
+	}
+	if (limit) {
+		paginationQuery.push({ $limit: limit });
 	}
 
 	const outOfStockReport = await WarehouseModel.aggregate([
@@ -925,7 +993,10 @@ async function GovtBodyOutstock(warehouse, date, body) {
 		},
 		{
 			$group: {
-				_id: "$inventoryDetails.productId",
+				_id: {
+					productId: "$inventoryDetails.productId",
+					orgId: "$organisation",
+				},
 				productCategory: {
 					$first: "$product.type",
 				},
@@ -969,503 +1040,495 @@ async function GovtBodyOutstock(warehouse, date, body) {
 				"inventoryAnalytics.outOfStockDays": -1,
 			},
 		},
+		{
+			$facet: {
+				paginatedResults: paginationQuery,
+				totalCount: [{ $count: "count" }],
+			},
+		},
+		{ $unwind: "$totalCount" },
+		{ $project: { paginatedResults: 1, totalCount: "$totalCount.count" } },
 	]);
+
 	return outOfStockReport;
 }
 
 exports.getAnalytics = [
-  auth,
-  async (req, res) => {
-    try {
-      const { id: warehouseId } = req.user;
-      var overview = {};
-      var inventory = {};
-      var shipment = {};
-      var data = {};
+	auth,
+	async (req, res) => {
+		try {
+			const { id: warehouseId } = req.user;
+			var overview = {};
+			var inventory = {};
+			var shipment = {};
+			var data = {};
 
-      var today = new Date();
-      var lastWeek = new Date();
-      lastWeek.setDate(today.getDate() - 7);
-      var lastMonth = new Date();
-      lastMonth.setDate(today.getDate() - 30);
-      var lastYear = new Date();
-      lastYear.setDate(today.getDate() - 365);
+			var today = new Date();
+			var lastWeek = new Date();
+			lastWeek.setDate(today.getDate() - 7);
+			var lastMonth = new Date();
+			lastMonth.setDate(today.getDate() - 30);
+			var lastYear = new Date();
+			lastYear.setDate(today.getDate() - 365);
 
-      const totalShipmentsSentLastYear = await ShipmentModel.count({
-        $and: [
-          { "supplier.id": warehouseId },
-          { status: { $in: ["SHIPPED", "RECEIVED", "LOST", "DAMAGED"] } },
-          {
-            shippingDate: {
-              $lte: today.toISOString(),
-              $gte: lastYear.toISOString(),
-            },
-          },
-        ],
-      });
-      overview.totalShipmentsSentLastYear = totalShipmentsSentLastYear;
+			const totalShipmentsSentLastYear = await ShipmentModel.count({
+				$and: [
+					{ "supplier.id": warehouseId },
+					{ status: { $in: ["SHIPPED", "RECEIVED", "LOST", "DAMAGED"] } },
+					{
+						shippingDate: {
+							$lte: today.toISOString(),
+							$gte: lastYear.toISOString(),
+						},
+					},
+				],
+			});
+			overview.totalShipmentsSentLastYear = totalShipmentsSentLastYear;
 
-      const totalProductsAddedToInventory = await InventoryModel.count();
-      overview.totalProductsAddedToInventory = totalProductsAddedToInventory;
+			const totalProductsAddedToInventory = await InventoryModel.count();
+			overview.totalProductsAddedToInventory = totalProductsAddedToInventory;
 
-      const totalShipmentsInTransitLastMonth = await ShipmentModel.count({
-        $and: [
-          { "supplier.id": warehouseId },
-          { status: { $in: ["SHIPPED"] } },
-          {
-            shippingDate: {
-              $lte: today.toISOString(),
-              $gte: lastMonth.toISOString(),
-            },
-          },
-        ],
-      });
-      overview.totalShipmentsInTransitLastMonth =
-        totalShipmentsInTransitLastMonth;
+			const totalShipmentsInTransitLastMonth = await ShipmentModel.count({
+				$and: [
+					{ "supplier.id": warehouseId },
+					{ status: { $in: ["SHIPPED"] } },
+					{
+						shippingDate: {
+							$lte: today.toISOString(),
+							$gte: lastMonth.toISOString(),
+						},
+					},
+				],
+			});
+			overview.totalShipmentsInTransitLastMonth = totalShipmentsInTransitLastMonth;
 
-      const totalShipmentsSentLastWeek = await ShipmentModel.count({
-        $and: [
-          { "supplier.id": warehouseId },
-          { status: { $in: ["SHIPPED", "RECEIVED", "LOST", "DAMAGED"] } },
-          {
-            shippingDate: {
-              $lte: today.toISOString(),
-              $gte: lastWeek.toISOString(),
-            },
-          },
-        ],
-      });
-      overview.totalShipmentsSentLastWeek = totalShipmentsSentLastWeek;
+			const totalShipmentsSentLastWeek = await ShipmentModel.count({
+				$and: [
+					{ "supplier.id": warehouseId },
+					{ status: { $in: ["SHIPPED", "RECEIVED", "LOST", "DAMAGED"] } },
+					{
+						shippingDate: {
+							$lte: today.toISOString(),
+							$gte: lastWeek.toISOString(),
+						},
+					},
+				],
+			});
+			overview.totalShipmentsSentLastWeek = totalShipmentsSentLastWeek;
 
-      const totalShipmentsWithDelayInTransit = await ShipmentModel.count({
-        $and: [
-          { status: { $in: ["SHIPPED"] } },
-          { "supplier.id": warehouseId },
-          { expectedDeliveryDate: { $lt: new Date().toISOString() } },
-        ],
-      });
-      overview.totalShipmentsWithDelayInTransit =
-        totalShipmentsWithDelayInTransit;
+			const totalShipmentsWithDelayInTransit = await ShipmentModel.count({
+				$and: [
+					{ status: { $in: ["SHIPPED"] } },
+					{ "supplier.id": warehouseId },
+					{ expectedDeliveryDate: { $lt: new Date().toISOString() } },
+				],
+			});
+			overview.totalShipmentsWithDelayInTransit = totalShipmentsWithDelayInTransit;
 
-      const totalProductsInInventory = await InventoryModel.count();
-      inventory.totalProductsInInventory = totalProductsInInventory;
+			const totalProductsInInventory = await InventoryModel.count();
+			inventory.totalProductsInInventory = totalProductsInInventory;
 
-      //  const totalProductsAddedToInventory = await InventoryModel.count();
-      //  inventory.totalProductsAddedToInventory = totalProductsAddedToInventory;
-      let todayString = getDateStringForMongo(today);
+			//  const totalProductsAddedToInventory = await InventoryModel.count();
+			//  inventory.totalProductsAddedToInventory = totalProductsAddedToInventory;
+			let todayString = getDateStringForMongo(today);
 
-      var nextWeek = new Date();
-      nextWeek.setDate(today.getDate() + 7);
-      let nextWeekString = getDateStringForMongo(nextWeek);
+			var nextWeek = new Date();
+			nextWeek.setDate(today.getDate() + 7);
+			let nextWeekString = getDateStringForMongo(nextWeek);
 
-      const expiringToday = await AtomModel.count({
+			const expiringToday = await AtomModel.count({
 				"attributeSet.expDate": { $eq: today },
 			});
-      inventory.expiringToday = expiringToday;
+			inventory.expiringToday = expiringToday;
 
-      const expiringThisWeek = await AtomModel.count({
-        "attributeSet.expDate": {
-          $gte: today,
-          $lt: nextWeek,
-        },
-      });
-      inventory.expiringThisWeek = expiringThisWeek;
+			const expiringThisWeek = await AtomModel.count({
+				"attributeSet.expDate": {
+					$gte: today,
+					$lt: nextWeek,
+				},
+			});
+			inventory.expiringThisWeek = expiringThisWeek;
 
-      var nextMonth = new Date();
-      nextMonth.setDate(today.getDate() + 30);
-      let nextMonthString = getDateStringForMongo(nextMonth);
+			var nextMonth = new Date();
+			nextMonth.setDate(today.getDate() + 30);
+			let nextMonthString = getDateStringForMongo(nextMonth);
 
-      const expiringThisMonth = await AtomModel.count({
-        "attributeSet.expDate": {
-          $gte: today,
-          $lt: nextMonth,
-        },
-      });
-      inventory.expiringThisMonth = expiringThisMonth;
+			const expiringThisMonth = await AtomModel.count({
+				"attributeSet.expDate": {
+					$gte: today,
+					$lt: nextMonth,
+				},
+			});
+			inventory.expiringThisMonth = expiringThisMonth;
 
-      var nextYear = new Date();
-      nextYear.setDate(today.getDate() + 365);
-      let nextyearString = getDateStringForMongo(nextYear);
+			var nextYear = new Date();
+			nextYear.setDate(today.getDate() + 365);
+			let nextyearString = getDateStringForMongo(nextYear);
 
-      const expiringThisYear = await AtomModel.count({
-        "attributeSet.expDate": {
-          $gte: today,
-          $lt: nextyear,
-        },
-      });
-      inventory.expiringThisYear = expiringThisYear;
+			const expiringThisYear = await AtomModel.count({
+				"attributeSet.expDate": {
+					$gte: today,
+					$lt: nextyear,
+				},
+			});
+			inventory.expiringThisYear = expiringThisYear;
 
-      inventory.expiredToday = expiringToday;
+			inventory.expiredToday = expiringToday;
 
-      let lastWeekString = getDateStringForMongo(lastWeek);
-      const expiredThisWeek = await AtomModel.count({
-        "attributeSet.expDate": {
-          $lt: today,
-          $gte: lastWeek,
-        },
-      });
-      inventory.expiredThisWeek = expiredThisWeek;
+			let lastWeekString = getDateStringForMongo(lastWeek);
+			const expiredThisWeek = await AtomModel.count({
+				"attributeSet.expDate": {
+					$lt: today,
+					$gte: lastWeek,
+				},
+			});
+			inventory.expiredThisWeek = expiredThisWeek;
 
-      let lastMonthString = getDateStringForMongo(lastMonth);
-      const expiredThisMonth = await AtomModel.count({
-        "attributeSet.expDate": {
-          $lt: today,
-          $gte: lastMonth,
-        },
-      });
-      inventory.expiredThisMonth = expiredThisMonth;
+			let lastMonthString = getDateStringForMongo(lastMonth);
+			const expiredThisMonth = await AtomModel.count({
+				"attributeSet.expDate": {
+					$lt: today,
+					$gte: lastMonth,
+				},
+			});
+			inventory.expiredThisMonth = expiredThisMonth;
 
-      let lastYearString = getDateStringForMongo(lastYear);
-      const expiredThisYear = await AtomModel.count({
-        "attributeSet.expDate": {
-          $lt: today,
-          $gte: lastYear,
-        },
-      });
-      inventory.expiredThisYear = expiredThisYear;
+			let lastYearString = getDateStringForMongo(lastYear);
+			const expiredThisYear = await AtomModel.count({
+				"attributeSet.expDate": {
+					$lt: today,
+					$gte: lastYear,
+				},
+			});
+			inventory.expiredThisYear = expiredThisYear;
 
-      const inboundShipments = await ShipmentModel.count({
-        $and: [
-          { "receiver.id": warehouseId },
-          { status: { $in: ["SHIPPED"] } },
-        ],
-      });
-      shipment.inboundShipments = inboundShipments;
+			const inboundShipments = await ShipmentModel.count({
+				$and: [{ "receiver.id": warehouseId }, { status: { $in: ["SHIPPED"] } }],
+			});
+			shipment.inboundShipments = inboundShipments;
 
-      const outboundShipments = await ShipmentModel.count({
-        $and: [
-          { "supplier.id": warehouseId },
-          { status: { $in: ["SHIPPED", "RECEIVED"] } },
-        ],
-      });
-      shipment.outboundShipments = outboundShipments;
+			const outboundShipments = await ShipmentModel.count({
+				$and: [{ "supplier.id": warehouseId }, { status: { $in: ["SHIPPED", "RECEIVED"] } }],
+			});
+			shipment.outboundShipments = outboundShipments;
 
-      const inboundAlerts = await ShipmentModel.count({
-        $and: [
-          { "receiver.id": warehouseId },
-          { status: { $in: ["DAMAGED"] } },
-        ],
-      });
-      shipment.inboundAlerts = inboundAlerts;
+			const inboundAlerts = await ShipmentModel.count({
+				$and: [{ "receiver.id": warehouseId }, { status: { $in: ["DAMAGED"] } }],
+			});
+			shipment.inboundAlerts = inboundAlerts;
 
-      const outboundAlerts = await ShipmentModel.count({
-        $and: [
-          { "supplier.id": warehouseId },
-          { status: { $in: ["DAMAGED"] } },
-        ],
-      });
-      shipment.outboundAlerts = outboundAlerts;
+			const outboundAlerts = await ShipmentModel.count({
+				$and: [{ "supplier.id": warehouseId }, { status: { $in: ["DAMAGED"] } }],
+			});
+			shipment.outboundAlerts = outboundAlerts;
 
-      data.overview = overview;
-      data.inventory = inventory;
-      data.shipment = shipment;
+			data.overview = overview;
+			data.inventory = inventory;
+			data.shipment = shipment;
 
-      const totalShipmentsSent = await ShipmentModel.count({
-        $and: [
-          { "supplier.id": warehouseId },
-          { status: { $in: ["SHIPPED", "RECEIVED", "LOST", "DAMAGED"] } },
-          {
-            shippingDate: {
-              $lte: today.toISOString(),
-              $gte: lastYear.toISOString(),
-            },
-          },
-        ],
-      });
-      data.totalShipmentsSent = totalShipmentsSent;
+			const totalShipmentsSent = await ShipmentModel.count({
+				$and: [
+					{ "supplier.id": warehouseId },
+					{ status: { $in: ["SHIPPED", "RECEIVED", "LOST", "DAMAGED"] } },
+					{
+						shippingDate: {
+							$lte: today.toISOString(),
+							$gte: lastYear.toISOString(),
+						},
+					},
+				],
+			});
+			data.totalShipmentsSent = totalShipmentsSent;
 
-      // const totalShipmentsSentLastYear = await ShipmentModel.count(
-      //   { $and : [
-      //     {"supplier.id": warehouseId},
-      //     { status: { $in : ["SHIPPED", "RECEIVED", "LOST", "DAMAGED"]} },
-      //     { shippingDate :  {
-      //         $lte: today.toISOString(),
-      //         $gte: lastYear.toISOString()
-      //       }
-      //     }
-      //   ]
-      // }
-      // );
-      // data.totalShipmentsSentLastYear = totalShipmentsSentLastYear;
+			// const totalShipmentsSentLastYear = await ShipmentModel.count(
+			//   { $and : [
+			//     {"supplier.id": warehouseId},
+			//     { status: { $in : ["SHIPPED", "RECEIVED", "LOST", "DAMAGED"]} },
+			//     { shippingDate :  {
+			//         $lte: today.toISOString(),
+			//         $gte: lastYear.toISOString()
+			//       }
+			//     }
+			//   ]
+			// }
+			// );
+			// data.totalShipmentsSentLastYear = totalShipmentsSentLastYear;
 
-      // const totalShipmentsSentLastWeek = await ShipmentModel.count(
-      //   { $and : [
-      //     {"supplier.id": warehouseId},
-      //     { status: { $in : ["SHIPPED", "RECEIVED", "LOST", "DAMAGED"]} },
-      //     { shippingDate :  {
-      //         $lte: today.toISOString(),
-      //         $gte: lastWeek.toISOString()
-      //       }
-      //     }
-      //   ]
-      // }
-      // );
-      // data.totalShipmentsSentLastWeek = totalShipmentsSentLastWeek;
+			// const totalShipmentsSentLastWeek = await ShipmentModel.count(
+			//   { $and : [
+			//     {"supplier.id": warehouseId},
+			//     { status: { $in : ["SHIPPED", "RECEIVED", "LOST", "DAMAGED"]} },
+			//     { shippingDate :  {
+			//         $lte: today.toISOString(),
+			//         $gte: lastWeek.toISOString()
+			//       }
+			//     }
+			//   ]
+			// }
+			// );
+			// data.totalShipmentsSentLastWeek = totalShipmentsSentLastWeek;
 
-      const totalShipmentsReceived = await ShipmentModel.count({
-        status: "RECEIVED",
-      });
+			const totalShipmentsReceived = await ShipmentModel.count({
+				status: "RECEIVED",
+			});
 
-      data.totalShipmentsReceived = totalShipmentsReceived;
+			data.totalShipmentsReceived = totalShipmentsReceived;
 
-      const totalProductsSent = await ShipmentModel.aggregate([
-        { $match: { status: "SHIPPED" } },
-        {
-          $group: {
-            _id: "$status",
-            total: { $sum: { $size: "$products" } },
-          },
-        },
-      ]);
-      data.totalProductsSent = totalProductsSent[0]?.total || 0;
+			const totalProductsSent = await ShipmentModel.aggregate([
+				{ $match: { status: "SHIPPED" } },
+				{
+					$group: {
+						_id: "$status",
+						total: { $sum: { $size: "$products" } },
+					},
+				},
+			]);
+			data.totalProductsSent = totalProductsSent[0]?.total || 0;
 
-      const totalProductsReceived = await ShipmentModel.aggregate([
-        { $match: { status: "RECEIVED" } },
-        {
-          $group: {
-            _id: "$status",
-            total: { $sum: { $size: "$products" } },
-          },
-        },
-      ]);
-      data.totalProductsReceived = totalProductsReceived[0]?.total || 0;
-      const productTypes = await InventoryModel.aggregate([
-        { $match: { id: "inv-bh-1" } },
-        {
-          $group: {
-            _id: "$id",
-            total: { $sum: { $size: "$inventoryDetails" } },
-          },
-        },
-      ]);
-      const numProductTypes = productTypes[0]?.total || 0;
-      data.numProductTypes = numProductTypes;
-      const totalProductCount = await ProductModel.distinct("type");
-      var stockOut = numProductTypes - totalProductCount.length;
-      data.stockOut = stockOut;
+			const totalProductsReceived = await ShipmentModel.aggregate([
+				{ $match: { status: "RECEIVED" } },
+				{
+					$group: {
+						_id: "$status",
+						total: { $sum: { $size: "$products" } },
+					},
+				},
+			]);
+			data.totalProductsReceived = totalProductsReceived[0]?.total || 0;
+			const productTypes = await InventoryModel.aggregate([
+				{ $match: { id: "inv-bh-1" } },
+				{
+					$group: {
+						_id: "$id",
+						total: { $sum: { $size: "$inventoryDetails" } },
+					},
+				},
+			]);
+			const numProductTypes = productTypes[0]?.total || 0;
+			data.numProductTypes = numProductTypes;
+			const totalProductCount = await ProductModel.distinct("type");
+			var stockOut = numProductTypes - totalProductCount.length;
+			data.stockOut = stockOut;
 
-      const expiredProducts = await AtomModel.count({
-        "attributeSet.expDate": {
-          $lt: today,
-        },
-      });
-      data.expiredProducts = expiredProducts;
+			const expiredProducts = await AtomModel.count({
+				"attributeSet.expDate": {
+					$lt: today,
+				},
+			});
+			data.expiredProducts = expiredProducts;
 
-      const numPO = await POModel.count();
-      const numSO = await ShippingOrderModel.count();
-      var pendingOrders = numPO + numSO;
-      data.pendingOrders = pendingOrders;
+			const numPO = await POModel.count();
+			const numSO = await ShippingOrderModel.count();
+			var pendingOrders = numPO + numSO;
+			data.pendingOrders = pendingOrders;
 
-      const batchExpired = await AtomModel.aggregate([
-        {
-          $match: {
-            "attributeSet.expDate": {
-              $lt: today,
-            },
-          },
-        },
-        {
-          $group: {
-            _id: "$status",
-            total: { $sum: { $size: "$batchNumbers" } },
-          },
-        },
-      ]);
-      data.batchExpired = batchExpired[0]?.total || 0;
+			const batchExpired = await AtomModel.aggregate([
+				{
+					$match: {
+						"attributeSet.expDate": {
+							$lt: today,
+						},
+					},
+				},
+				{
+					$group: {
+						_id: "$status",
+						total: { $sum: { $size: "$batchNumbers" } },
+					},
+				},
+			]);
+			data.batchExpired = batchExpired[0]?.total || 0;
 
-      var nearExpirationTime = new Date();
-      nearExpirationTime.setDate(today.getDate() + 90);
-      let nearExpirationString = getDateStringForMongo(nearExpirationTime);
+			var nearExpirationTime = new Date();
+			nearExpirationTime.setDate(today.getDate() + 90);
+			let nearExpirationString = getDateStringForMongo(nearExpirationTime);
 
-      const batchNearExpiration = await AtomModel.aggregate([
-        {
-          $match: {
-            "attributeSet.expDate": {
-              $gte: today,
-              $lt: nearExpiration,
-            },
-          },
-        },
-        {
-          $group: {
-            _id: "$status",
-            total: { $sum: { $size: "$batchNumbers" } },
-          },
-        },
-      ]);
-      data.batchNearExpiration = batchNearExpiration[0]?.total || 0;
+			const batchNearExpiration = await AtomModel.aggregate([
+				{
+					$match: {
+						"attributeSet.expDate": {
+							$gte: today,
+							$lt: nearExpiration,
+						},
+					},
+				},
+				{
+					$group: {
+						_id: "$status",
+						total: { $sum: { $size: "$batchNumbers" } },
+					},
+				},
+			]);
+			data.batchNearExpiration = batchNearExpiration[0]?.total || 0;
 
-      const inventorySupplier = await ShipmentModel.count({
-        "supplier.id": warehouseId,
-      });
-      const orderReceiver = await ShipmentModel.count({
-        "receiver.id": warehouseId,
-      });
-      var inventoryToOrderRatio = 0;
-      if (orderReceiver !== 0) {
-        inventoryToOrderRatio = inventorySupplier / orderReceiver;
-      }
-      data.inventoryToOrderRatio = inventoryToOrderRatio;
-      var count = 0;
-      let org = await OrganisationModel.find({ id: req.user.organisationId });
-      var totalmilliseconds = org.totalProcessingTime ? org.totalProcessingTime : 0;
+			const inventorySupplier = await ShipmentModel.count({
+				"supplier.id": warehouseId,
+			});
+			const orderReceiver = await ShipmentModel.count({
+				"receiver.id": warehouseId,
+			});
+			var inventoryToOrderRatio = 0;
+			if (orderReceiver !== 0) {
+				inventoryToOrderRatio = inventorySupplier / orderReceiver;
+			}
+			data.inventoryToOrderRatio = inventoryToOrderRatio;
+			var count = 0;
+			let org = await OrganisationModel.find({ id: req.user.organisationId });
+			var totalmilliseconds = org.totalProcessingTime ? org.totalProcessingTime : 0;
 
-      count = await POModel.aggregate([
-        {
-          $match: {
-            poStatus: { $nin: ["CREATED", "ACCEPTED"] },
-            // poStatus: { $ne: "ACCEPTED" },
-          },
-        },
-        { $group: { _id: null, myCount: { $sum: 1 } } },
-      ]).sort({
-        createdAt: -1,
-      });
-      if (count.myCount > 0)
-        totalmilliseconds = totalmilliseconds / count.myCount;
+			count = await POModel.aggregate([
+				{
+					$match: {
+						poStatus: { $nin: ["CREATED", "ACCEPTED"] },
+						// poStatus: { $ne: "ACCEPTED" },
+					},
+				},
+				{ $group: { _id: null, myCount: { $sum: 1 } } },
+			]).sort({
+				createdAt: -1,
+			});
+			if (count.myCount > 0) totalmilliseconds = totalmilliseconds / count.myCount;
 
-      var seconds = totalmilliseconds / 1000;
-      var numdays = Math.floor(seconds / 86400);
+			var seconds = totalmilliseconds / 1000;
+			var numdays = Math.floor(seconds / 86400);
 
-      var numhours = Math.floor((seconds % 86400) / 3600);
+			var numhours = Math.floor((seconds % 86400) / 3600);
 
-      var numminutes = Math.floor(((seconds % 86400) % 3600) / 60);
+			var numminutes = Math.floor(((seconds % 86400) % 3600) / 60);
 
-      // var numseconds = ((seconds % 86400) % 3600) % 60;
-      var averageOrderProcessingTime =
-        numdays + "days " + numhours + "hrs " + numminutes + "min";
+			// var numseconds = ((seconds % 86400) % 3600) % 60;
+			var averageOrderProcessingTime = numdays + "days " + numhours + "hrs " + numminutes + "min";
 
-      data.averageOrderProcessingTime = averageOrderProcessingTime;
-      return apiResponse.successResponseWithData(res, "Analytics", data);
-    } catch (err) {
-      console.log(err);
-      return apiResponse.ErrorResponse(res, err);
-    }
-  },
+			data.averageOrderProcessingTime = averageOrderProcessingTime;
+			return apiResponse.successResponseWithData(res, "Analytics", data);
+		} catch (err) {
+			console.log(err);
+			return apiResponse.ErrorResponse(res, err);
+		}
+	},
 ];
 
 exports.getOverviewAnalytics = [
-  auth,
-  async (req, res) => {
-    try {
-      const { warehouseId, organisationId } = req.user;
-      var overview = {};
-      var data = {};
+	auth,
+	async (req, res) => {
+		try {
+			const { warehouseId, organisationId } = req.user;
+			var overview = {};
+			var data = {};
 
-      var today = new Date();
-      var lastMonth = new Date();
-      lastMonth.setDate(today.getDate() - 30);
-      const lastWeek = new Date();
-      lastWeek.setDate(today.getDate() - 7);
+			var today = new Date();
+			var lastMonth = new Date();
+			lastMonth.setDate(today.getDate() - 30);
+			const lastWeek = new Date();
+			lastWeek.setDate(today.getDate() - 7);
 
-      const outboundShipments = await ShipmentModel.count({
-        $and: [
-          { "supplier.locationId": warehouseId },
-          // { status: { $in : [ "SHIPPED", "RECEIVED" ]} }
-        ],
-      });
-      overview.outboundShipments = outboundShipments;
+			const outboundShipments = await ShipmentModel.count({
+				$and: [
+					{ "supplier.locationId": warehouseId },
+					// { status: { $in : [ "SHIPPED", "RECEIVED" ]} }
+				],
+			});
+			overview.outboundShipments = outboundShipments;
 
-      const inboundShipments = await ShipmentModel.count({
-        $and: [
-          { "receiver.locationId": warehouseId },
-          // { status: { $in : [ "SHIPPED" ]} }
-        ],
-      });
-      overview.inboundShipments = inboundShipments;
+			const inboundShipments = await ShipmentModel.count({
+				$and: [
+					{ "receiver.locationId": warehouseId },
+					// { status: { $in : [ "SHIPPED" ]} }
+				],
+			});
+			overview.inboundShipments = inboundShipments;
 
-      const totalProductCategory = await ProductModel.distinct("type");
-      overview.totalProductCategory = totalProductCategory.length;
+			const totalProductCategory = await ProductModel.distinct("type");
+			overview.totalProductCategory = totalProductCategory.length;
 
-      const records = await RecordModel.find();
-      const shipments = await ShipmentModel.find({
-        createdAt: {
-          $gte: today.toISOString(),
-          $lte: lastMonth.toISOString(),
-        },
-      });
+			const records = await RecordModel.find();
+			const shipments = await ShipmentModel.find({
+				createdAt: {
+					$gte: today.toISOString(),
+					$lte: lastMonth.toISOString(),
+				},
+			});
 
-      var count = 0;
-      var sum = 0;
-      for (var i = 0; i < records.length; i++) {
-        for (var j = 0; j < shipments.length; j++) {
-          if (records[i].id === shipments[j].poId) {
-            count++;
-            var shipmentCreationTime = shipments[j].createdAt;
-            var poCreationTime = records[i].createdAt;
-            sum = sum + (shipmentCreationTime - poCreationTime);
-          }
-        }
-      }
-      var totalmilliseconds = 0;
-      if (count !== 0) {
-        totalmilliseconds = sum / count;
-      }
+			var count = 0;
+			var sum = 0;
+			for (var i = 0; i < records.length; i++) {
+				for (var j = 0; j < shipments.length; j++) {
+					if (records[i].id === shipments[j].poId) {
+						count++;
+						var shipmentCreationTime = shipments[j].createdAt;
+						var poCreationTime = records[i].createdAt;
+						sum = sum + (shipmentCreationTime - poCreationTime);
+					}
+				}
+			}
+			var totalmilliseconds = 0;
+			if (count !== 0) {
+				totalmilliseconds = sum / count;
+			}
 
-      var seconds = totalmilliseconds / 1000;
-      var numdays = Math.floor(seconds / 86400);
+			var seconds = totalmilliseconds / 1000;
+			var numdays = Math.floor(seconds / 86400);
 
-      var numhours = Math.floor((seconds % 86400) / 3600);
+			var numhours = Math.floor((seconds % 86400) / 3600);
 
-      var numminutes = Math.floor(((seconds % 86400) % 3600) / 60);
+			var numminutes = Math.floor(((seconds % 86400) % 3600) / 60);
 
-      // var numseconds = ((seconds % 86400) % 3600) % 60;
-      var averageOrderProcessingTime =
-        numdays + "d " + numhours + "h " + numminutes + "m";
+			// var numseconds = ((seconds % 86400) % 3600) % 60;
+			var averageOrderProcessingTime = numdays + "d " + numhours + "h " + numminutes + "m";
 
-      overview.averageOrderProcessingTime = averageOrderProcessingTime;
+			overview.averageOrderProcessingTime = averageOrderProcessingTime;
 
-      // const numPO = await POModel.count();
-      // const numSO = await ShippingOrderModel.count();
-      // var pendingOrders = numPO + numSO;
-      const pendingOrders = await RecordModel.count({
-        $and: [
-          { "supplier.supplierOrganisation": organisationId },
-          { createdAt: { $lte: lastWeek } },
-          { poStatus: "CREATED" },
-        ],
-      });
-      overview.pendingOrders = pendingOrders;
+			// const numPO = await POModel.count();
+			// const numSO = await ShippingOrderModel.count();
+			// var pendingOrders = numPO + numSO;
+			const pendingOrders = await RecordModel.count({
+				$and: [
+					{ "supplier.supplierOrganisation": organisationId },
+					{ createdAt: { $lte: lastWeek } },
+					{ poStatus: "CREATED" },
+				],
+			});
+			overview.pendingOrders = pendingOrders;
 
-      data.overview = overview;
+			data.overview = overview;
 
-      return apiResponse.successResponseWithData(res, "Analytics", data);
-    } catch (err) {
-      console.log(err);
-      return apiResponse.ErrorResponse(res, err);
-    }
-  },
+			return apiResponse.successResponseWithData(res, "Analytics", data);
+		} catch (err) {
+			console.log(err);
+			return apiResponse.ErrorResponse(res, err);
+		}
+	},
 ];
 
 exports.getInventoryAnalytics = [
-  auth,
-  async (req, res) => {
-    try {
-      const { warehouseId } = req.user;
-      var inventory = {};
-      var data = {};
+	auth,
+	async (req, res) => {
+		try {
+			const { warehouseId } = req.user;
+			var inventory = {};
+			var data = {};
 
-      const totalProductCategory = await ProductModel.distinct("type");
-      inventory.totalProductCategory = totalProductCategory.length;
-      const warehouse = await WarehouseModel.findOne({ id: warehouseId });
+			const totalProductCategory = await ProductModel.distinct("type");
+			inventory.totalProductCategory = totalProductCategory.length;
+			const warehouse = await WarehouseModel.findOne({ id: warehouseId });
 
-      const stockOut = await InventoryModel.find(
-        {
-          id: warehouse?.warehouseInventory,
-          "inventoryDetails.quantity": { $lte: 0 },
-        },
-        "inventoryDetails"
-      );
+			const stockOut = await InventoryModel.find(
+				{
+					id: warehouse?.warehouseInventory,
+					"inventoryDetails.quantity": { $lte: 0 },
+				},
+				"inventoryDetails",
+			);
 
-      inventory.stockOut = stockOut.length
-        ? stockOut[0].inventoryDetails.filter((i) => i.quantity < 1).length
-        : 0;
+			inventory.stockOut = stockOut.length
+				? stockOut[0].inventoryDetails.filter((i) => i.quantity < 1).length
+				: 0;
 
-      var today = new Date();
-      var nextMonth = new Date();
-      nextMonth.setDate(today.getDate() + 30);
+			var today = new Date();
+			var nextMonth = new Date();
+			nextMonth.setDate(today.getDate() + 30);
 
-      const batchNearExpiration = await AtomModel.aggregate([
+			const batchNearExpiration = await AtomModel.aggregate([
 				{
 					$match: {
 						$and: [
@@ -1486,7 +1549,7 @@ exports.getInventoryAnalytics = [
 				},
 			]);
 
-      const batchExpired = await AtomModel.aggregate([
+			const batchExpired = await AtomModel.aggregate([
 				{
 					$match: {
 						$and: [
@@ -1506,293 +1569,287 @@ exports.getInventoryAnalytics = [
 				},
 			]);
 
-      inventory.batchExpired = 0;
-      if (batchExpired.length !== 0) {
-        let sum = 0;
-        for (let row of batchExpired) sum += parseInt(row.total);
-        inventory.batchExpired = sum;
-      }
+			inventory.batchExpired = 0;
+			if (batchExpired.length !== 0) {
+				let sum = 0;
+				for (let row of batchExpired) sum += parseInt(row.total);
+				inventory.batchExpired = sum;
+			}
 
-      inventory.batchNearExpiration = 0;
-      if (batchNearExpiration.length !== 0) {
-        let sum = 0;
-        for (let row of batchNearExpiration) sum += parseInt(row.total);
-        inventory.batchNearExpiration = sum;
-      }
+			inventory.batchNearExpiration = 0;
+			if (batchNearExpiration.length !== 0) {
+				let sum = 0;
+				for (let row of batchNearExpiration) sum += parseInt(row.total);
+				inventory.batchNearExpiration = sum;
+			}
 
-      //   var nextMonth = new Date();
-      //   nextMonth.setDate(today.getDate() + 30);
+			//   var nextMonth = new Date();
+			//   nextMonth.setDate(today.getDate() + 30);
 
-      //   const batchExpiringThisMonth = await AtomModel.aggregate(
-      //     [ { $match: {
-      //       "attributeSet.expDate" :  {
-      //         $gte: today.toISOString(),
-      //         $lt: nextMonth.toISOString()
-      //         }
-      //       }
-      //     },
-      //   {
-      //     $group: {
-      //       _id: "$status",
-      //       total: {$sum: {$size: "$batchNumbers"}}
-      //     }
-      //   }]
-      // );
+			//   const batchExpiringThisMonth = await AtomModel.aggregate(
+			//     [ { $match: {
+			//       "attributeSet.expDate" :  {
+			//         $gte: today.toISOString(),
+			//         $lt: nextMonth.toISOString()
+			//         }
+			//       }
+			//     },
+			//   {
+			//     $group: {
+			//       _id: "$status",
+			//       total: {$sum: {$size: "$batchNumbers"}}
+			//     }
+			//   }]
+			// );
 
-      //   inventory.batchExpiringThisMonth = 0
-      //   if(batchExpiringThisMonth.length !== 0){
-      //     inventory.batchExpiringThisMonth = batchExpiringThisMonth[0].total;
-      //   }
+			//   inventory.batchExpiringThisMonth = 0
+			//   if(batchExpiringThisMonth.length !== 0){
+			//     inventory.batchExpiringThisMonth = batchExpiringThisMonth[0].total;
+			//   }
 
-      //   var nextThreeMonths = new Date();
-      //   nextThreeMonths.setDate(today.getDate() + 90 );
+			//   var nextThreeMonths = new Date();
+			//   nextThreeMonths.setDate(today.getDate() + 90 );
 
-      //   const batchExpiringInThreeMonths = await AtomModel.aggregate(
-      //     [ { $match: {
-      //       "attributeSet.expDate" :  {
-      //         $gte: today.toISOString(),
-      //         $lt: nextThreeMonths.toISOString()
-      //         }
-      //       }
-      //     },
-      //   {
-      //     $group: {
-      //       _id: "$status",
-      //       total: {$sum: {$size: "$batchNumbers"}}
-      //     }
-      //   }]
-      // );
-      //   inventory.batchExpiringInThreeMonths = 0
-      //   if(batchExpiringInThreeMonths.length !== 0){
-      //     inventory.batchExpiringInThreeMonths = batchExpiringInThreeMonths[0].total;
-      //   }
+			//   const batchExpiringInThreeMonths = await AtomModel.aggregate(
+			//     [ { $match: {
+			//       "attributeSet.expDate" :  {
+			//         $gte: today.toISOString(),
+			//         $lt: nextThreeMonths.toISOString()
+			//         }
+			//       }
+			//     },
+			//   {
+			//     $group: {
+			//       _id: "$status",
+			//       total: {$sum: {$size: "$batchNumbers"}}
+			//     }
+			//   }]
+			// );
+			//   inventory.batchExpiringInThreeMonths = 0
+			//   if(batchExpiringInThreeMonths.length !== 0){
+			//     inventory.batchExpiringInThreeMonths = batchExpiringInThreeMonths[0].total;
+			//   }
 
-      //   var nextSixMonths = new Date();
-      //   nextSixMonths.setDate(today.getDate() + 180 );
+			//   var nextSixMonths = new Date();
+			//   nextSixMonths.setDate(today.getDate() + 180 );
 
-      //   const batchExpiringInSixMonths = await AtomModel.aggregate(
-      //     [ { $match: {
-      //       "attributeSet.expDate" :  {
-      //         $gte: today.toISOString(),
-      //         $lt: nextSixMonths.toISOString()
-      //         }
-      //       }
-      //     },
-      //   {
-      //     $group: {
-      //       _id: "$status",
-      //       total: {$sum: {$size: "$batchNumbers"}}
-      //     }
-      //   }]
-      // );
-      //   inventory.batchExpiringInSixMonths = 0
-      //   if(batchExpiringInSixMonths.length !== 0){
-      //     inventory.batchExpiringInSixMonths = batchExpiringInSixMonths[0].total;
-      //   }
+			//   const batchExpiringInSixMonths = await AtomModel.aggregate(
+			//     [ { $match: {
+			//       "attributeSet.expDate" :  {
+			//         $gte: today.toISOString(),
+			//         $lt: nextSixMonths.toISOString()
+			//         }
+			//       }
+			//     },
+			//   {
+			//     $group: {
+			//       _id: "$status",
+			//       total: {$sum: {$size: "$batchNumbers"}}
+			//     }
+			//   }]
+			// );
+			//   inventory.batchExpiringInSixMonths = 0
+			//   if(batchExpiringInSixMonths.length !== 0){
+			//     inventory.batchExpiringInSixMonths = batchExpiringInSixMonths[0].total;
+			//   }
 
-      //   const batchExpiredToday = await AtomModel.aggregate(
-      //     [ { $match: {
-      //         "attributeSet.expDate" :  {
-      //           $eq: today.toISOString(),
-      //           }
-      //         }
-      //       },
-      //     {
-      //       $group: {
-      //         _id: "$status",
-      //         total: {$sum: {$size: "$batchNumbers"}}
-      //       }
-      //     }]
-      //   );
-      //   inventory.batchExpiredToday = 0
-      //   if(batchExpiredToday.length !== 0){
-      //     inventory.batchExpiredToday = batchExpiredToday[0].total;
-      //   }
+			//   const batchExpiredToday = await AtomModel.aggregate(
+			//     [ { $match: {
+			//         "attributeSet.expDate" :  {
+			//           $eq: today.toISOString(),
+			//           }
+			//         }
+			//       },
+			//     {
+			//       $group: {
+			//         _id: "$status",
+			//         total: {$sum: {$size: "$batchNumbers"}}
+			//       }
+			//     }]
+			//   );
+			//   inventory.batchExpiredToday = 0
+			//   if(batchExpiredToday.length !== 0){
+			//     inventory.batchExpiredToday = batchExpiredToday[0].total;
+			//   }
 
-      //   var lastWeek = new Date();
-      //   lastWeek.setDate(today.getDate() - 7);
+			//   var lastWeek = new Date();
+			//   lastWeek.setDate(today.getDate() - 7);
 
-      //   const batchExpiredLastWeek = await AtomModel.aggregate(
-      //     [ { $match: {
-      //         "attributeSet.expDate" :  {
-      //           $lte: today.toISOString(),
-      //           $gte: lastWeek.toISOString()
-      //           }
-      //         }
-      //       },
-      //     {
-      //       $group: {
-      //         _id: "$status",
-      //         total: {$sum: {$size: "$batchNumbers"}}
-      //       }
-      //     }]
-      //   );
-      //   inventory.batchExpiredLastWeek = 0
-      //   if(batchExpiredLastWeek.length !== 0){
-      //     inventory.batchExpiredLastWeek = batchExpiredLastWeek[0].total;
-      //   }
+			//   const batchExpiredLastWeek = await AtomModel.aggregate(
+			//     [ { $match: {
+			//         "attributeSet.expDate" :  {
+			//           $lte: today.toISOString(),
+			//           $gte: lastWeek.toISOString()
+			//           }
+			//         }
+			//       },
+			//     {
+			//       $group: {
+			//         _id: "$status",
+			//         total: {$sum: {$size: "$batchNumbers"}}
+			//       }
+			//     }]
+			//   );
+			//   inventory.batchExpiredLastWeek = 0
+			//   if(batchExpiredLastWeek.length !== 0){
+			//     inventory.batchExpiredLastWeek = batchExpiredLastWeek[0].total;
+			//   }
 
-      //   var lastMonth = new Date();
-      //   lastMonth.setDate(today.getDate() - 30);
+			//   var lastMonth = new Date();
+			//   lastMonth.setDate(today.getDate() - 30);
 
-      //   const batchExpiredLastMonth = await AtomModel.aggregate(
-      //     [ { $match: {
-      //         "attributeSet.expDate" :  {
-      //           $lte: today.toISOString(),
-      //           $gte: lastMonth.toISOString()
-      //           }
-      //         }
-      //       },
-      //     {
-      //       $group: {
-      //         _id: "$status",
-      //         total: {$sum: {$size: "$batchNumbers"}}
-      //       }
-      //     }]
-      //   );
-      //   inventory.batchExpiredLastMonth = 0
-      //   if(batchExpiredLastMonth.length !== 0){
-      //     inventory.batchExpiredLastMonth = batchExpiredLastMonth[0].total;
-      //   }
+			//   const batchExpiredLastMonth = await AtomModel.aggregate(
+			//     [ { $match: {
+			//         "attributeSet.expDate" :  {
+			//           $lte: today.toISOString(),
+			//           $gte: lastMonth.toISOString()
+			//           }
+			//         }
+			//       },
+			//     {
+			//       $group: {
+			//         _id: "$status",
+			//         total: {$sum: {$size: "$batchNumbers"}}
+			//       }
+			//     }]
+			//   );
+			//   inventory.batchExpiredLastMonth = 0
+			//   if(batchExpiredLastMonth.length !== 0){
+			//     inventory.batchExpiredLastMonth = batchExpiredLastMonth[0].total;
+			//   }
 
-      //   var lastYear = new Date();
-      //   lastYear.setDate(today.getDate() -365 );
+			//   var lastYear = new Date();
+			//   lastYear.setDate(today.getDate() -365 );
 
-      //   const batchExpiredLastYear = await AtomModel.aggregate(
-      //     [ { $match: {
-      //         "attributeSet.expDate" :  {
-      //           $lte: today.toISOString(),
-      //           $gte: lastYear.toISOString()
-      //           }
-      //         }
-      //       },
-      //     {
-      //       $group: {
-      //         _id: "$status",
-      //         total: {$sum: {$size: "$batchNumbers"}}
-      //       }
-      //     }]
-      //   );
-      //   inventory.batchExpiredLastYear = 0
-      //   if(batchExpiredLastYear.length !== 0){
-      //     inventory.batchExpiredLastYear = batchExpiredLastYear[0].total;
-      //   }
+			//   const batchExpiredLastYear = await AtomModel.aggregate(
+			//     [ { $match: {
+			//         "attributeSet.expDate" :  {
+			//           $lte: today.toISOString(),
+			//           $gte: lastYear.toISOString()
+			//           }
+			//         }
+			//       },
+			//     {
+			//       $group: {
+			//         _id: "$status",
+			//         total: {$sum: {$size: "$batchNumbers"}}
+			//       }
+			//     }]
+			//   );
+			//   inventory.batchExpiredLastYear = 0
+			//   if(batchExpiredLastYear.length !== 0){
+			//     inventory.batchExpiredLastYear = batchExpiredLastYear[0].total;
+			//   }
 
-      data.inventory = inventory;
+			data.inventory = inventory;
 
-      return apiResponse.successResponseWithData(res, "Analytics", data);
-    } catch (err) {
-      console.log(err);
-      return apiResponse.ErrorResponse(res, err);
-    }
-  },
+			return apiResponse.successResponseWithData(res, "Analytics", data);
+		} catch (err) {
+			console.log(err);
+			return apiResponse.ErrorResponse(res, err);
+		}
+	},
 ];
 
 exports.getShipmentAnalytics = [
-  auth,
-  async (req, res) => {
-    try {
-      const { warehouseId } = req.user;
-      var shipment = {};
-      var data = {};
+	auth,
+	async (req, res) => {
+		try {
+			const { warehouseId } = req.user;
+			var shipment = {};
+			var data = {};
 
-      const inboundShipments = await ShipmentModel.count({
-        $and: [
-          { "receiver.locationId": warehouseId },
-          // { status: { $in : [ "SHIPPED" ]} }
-        ],
-      });
-      shipment.inboundShipments = inboundShipments;
+			const inboundShipments = await ShipmentModel.count({
+				$and: [
+					{ "receiver.locationId": warehouseId },
+					// { status: { $in : [ "SHIPPED" ]} }
+				],
+			});
+			shipment.inboundShipments = inboundShipments;
 
-      const outboundShipments = await ShipmentModel.count({
-        $and: [{ "supplier.locationId": warehouseId }],
-      });
-      shipment.outboundShipments = outboundShipments;
+			const outboundShipments = await ShipmentModel.count({
+				$and: [{ "supplier.locationId": warehouseId }],
+			});
+			shipment.outboundShipments = outboundShipments;
 
-      const inboundAlerts = await ShipmentModel.count({
-        $and: [
-          { "receiver.locationId": warehouseId },
-          {
-            "shipmentAlerts.alertType": {
-              $in: ["IOT", "DELAYED", "DAMAGED", "LOST"],
-            },
-          },
-        ],
-      });
-      shipment.inboundAlerts = inboundAlerts;
+			const inboundAlerts = await ShipmentModel.count({
+				$and: [
+					{ "receiver.locationId": warehouseId },
+					{
+						"shipmentAlerts.alertType": {
+							$in: ["IOT", "DELAYED", "DAMAGED", "LOST"],
+						},
+					},
+				],
+			});
+			shipment.inboundAlerts = inboundAlerts;
 
-      const outboundAlerts = await ShipmentModel.count({
-        $and: [
-          { "supplier.locationId": warehouseId },
-          {
-            "shipmentAlerts.alertType": {
-              $in: ["IOT", "DELAYED", "DAMAGED", "LOST"],
-            },
-          },
-        ],
-      });
-      shipment.outboundAlerts = outboundAlerts;
+			const outboundAlerts = await ShipmentModel.count({
+				$and: [
+					{ "supplier.locationId": warehouseId },
+					{
+						"shipmentAlerts.alertType": {
+							$in: ["IOT", "DELAYED", "DAMAGED", "LOST"],
+						},
+					},
+				],
+			});
+			shipment.outboundAlerts = outboundAlerts;
 
-      data.shipment = shipment;
+			data.shipment = shipment;
 
-      return apiResponse.successResponseWithData(res, "Analytics", data);
-    } catch (err) {
-      console.log(err);
-      return apiResponse.ErrorResponse(res, err);
-    }
-  },
+			return apiResponse.successResponseWithData(res, "Analytics", data);
+		} catch (err) {
+			console.log(err);
+			return apiResponse.ErrorResponse(res, err);
+		}
+	},
 ];
 
 exports.getOrderAnalytics = [
-  auth,
-  async (req, res) => {
-    try {
-      const { organisationId } = req.user;
-      const order = {};
-      const data = {};
+	auth,
+	async (req, res) => {
+		try {
+			const { organisationId } = req.user;
+			const order = {};
+			const data = {};
 
-      const today = new Date();
-      const lastWeek = new Date();
-      lastWeek.setDate(today.getDate() - 7);
+			const today = new Date();
+			const lastWeek = new Date();
+			lastWeek.setDate(today.getDate() - 7);
 
-      const inboundPO = await RecordModel.count({
-        $and: [{ "supplier.supplierOrganisation": organisationId }],
-      });
-      order.inboundPO = inboundPO;
+			const inboundPO = await RecordModel.count({
+				$and: [{ "supplier.supplierOrganisation": organisationId }],
+			});
+			order.inboundPO = inboundPO;
 
-      const outboundPO = await RecordModel.count({
-        $or: [
-          { "customer.customerOrganisation": organisationId },
-          { createdBy: req.user.id },
-        ],
-      });
-      order.outboundPO = outboundPO;
+			const outboundPO = await RecordModel.count({
+				$or: [{ "customer.customerOrganisation": organisationId }, { createdBy: req.user.id }],
+			});
+			order.outboundPO = outboundPO;
 
-      const pendingOrders = await RecordModel.count({
-        $and: [
-          { "supplier.supplierOrganisation": organisationId },
-          { createdAt: { $lte: lastWeek } },
-          { poStatus: "CREATED" },
-        ],
-      });
-      order.pendingOrders = pendingOrders;
+			const pendingOrders = await RecordModel.count({
+				$and: [
+					{ "supplier.supplierOrganisation": organisationId },
+					{ createdAt: { $lte: lastWeek } },
+					{ poStatus: "CREATED" },
+				],
+			});
+			order.pendingOrders = pendingOrders;
 
-      const rejectedOrders = await RecordModel.count({
-        $and: [
-          { "supplier.supplierOrganisation": organisationId },
-          { poStatus: "REJECTED" },
-        ],
-      });
-      order.rejectedOrders = rejectedOrders;
+			const rejectedOrders = await RecordModel.count({
+				$and: [{ "supplier.supplierOrganisation": organisationId }, { poStatus: "REJECTED" }],
+			});
+			order.rejectedOrders = rejectedOrders;
 
-      data.order = order;
+			data.order = order;
 
-      return apiResponse.successResponseWithData(res, "Analytics", data);
-    } catch (err) {
-      console.log(err);
-      return apiResponse.ErrorResponse(res, err);
-    }
-  },
+			return apiResponse.successResponseWithData(res, "Analytics", data);
+		} catch (err) {
+			console.log(err);
+			return apiResponse.ErrorResponse(res, err);
+		}
+	},
 ];
 
 // CENTRAL_AUTHORITY/GoverningBody only
@@ -1800,9 +1857,8 @@ exports.getNetworkAnalytics = [
 	auth,
 	async (req, res) => {
 		try {
-			const date =
-			req.body?.date || format(startOfMonth(new Date()), "yyyy-MM-dd");
-			
+			const date = req.body?.date || format(startOfMonth(new Date()), "yyyy-MM-dd");
+
 			let matchQueryStage1 = {
 				status: "ACTIVE",
 			};
@@ -1837,7 +1893,7 @@ exports.getNetworkAnalytics = [
 						let: { orgId: "$organisationId" },
 						pipeline: [
 							{ $match: { $expr: { $eq: ["$$orgId", "$id"] } } },
-							{ $project: { _id: 0, organisationId: "$name" } },
+							{ $project: { _id: 0, organisation: "$name" } },
 						],
 						as: "organisation",
 					},
@@ -1854,7 +1910,7 @@ exports.getNetworkAnalytics = [
 				{ $unwind: { path: "$inventory", preserveNullAndEmptyArrays: true } },
 				{
 					$replaceWith: {
-						$mergeObjects: [null, "$inventory"],
+						$mergeObjects: [null, "$inventory", "$organisation"],
 					},
 				},
 				{
@@ -1907,7 +1963,10 @@ exports.getNetworkAnalytics = [
 							},
 							{
 								$group: {
-									_id: "$inventoryDetails.productId",
+									_id: {
+										productId: "$inventoryDetails.productId",
+										orgId: "$organisation",
+									},
 								},
 							},
 							{
@@ -1924,7 +1983,10 @@ exports.getNetworkAnalytics = [
 							},
 							{
 								$group: {
-									_id: "$inventoryDetails.productId",
+									_id: {
+										productId: "$inventoryDetails.productId",
+										orgId: "$organisation",
+									},
 								},
 							},
 							{
@@ -1933,17 +1995,24 @@ exports.getNetworkAnalytics = [
 						],
 						bestSellers: [
 							{
-								$match: {
-									"inventoryAnalytics.sales": {
-										$gt: 0,
+								$group: {
+									_id: {
+										productId: "$inventoryDetails.productId",
+										orgId: "$organisation",
+									},
+									sales: {
+										$sum: "$inventory_analytics.sales",
 									},
 								},
 							},
 							{
-								$group: {
-									_id: "$inventoryDetails.productId",
+								$match: {
+									sales: {
+										$gt: 0,
+									},
 								},
 							},
+
 							{
 								$count: "count",
 							},
@@ -1951,15 +2020,15 @@ exports.getNetworkAnalytics = [
 					},
 				},
 			]);
-		
-			const {bestSellers, inStock, outStock} = networkAnalytics[0];
+
+			const { bestSellers, inStock, outStock } = networkAnalytics[0];
 			const analytics = {
 				bestSeller: bestSellers[0]?.count || 0,
 				inStock: inStock[0]?.count || 0,
 				outStock: outStock[0]?.count || 0,
 			};
 
-			return apiResponse.successResponseWithData(res, "Network Analytics", {analytics})
+			return apiResponse.successResponseWithData(res, "Network Analytics", { analytics });
 		} catch (err) {
 			console.log(err);
 			return apiResponse.ErrorResponse(res, err);
@@ -2005,7 +2074,16 @@ exports.bestSellers = [
 					"warehouseAddress.city": city,
 				};
 				matchQueryStage1 = temp;
-			}		
+			}
+
+			let { skip, limit } = req.body;
+			let paginationQuery = [];
+			if (skip) {
+				paginationQuery.push({ $skip: skip });
+			}
+			if (limit) {
+				paginationQuery.push({ $limit: limit });
+			}
 
 			let matchQuery = {};
 			if (!isDist) {
@@ -2016,6 +2094,7 @@ exports.bestSellers = [
 				}
 			}
 			if (isGoverningBody) matchQuery = {};
+
 			const bestSellers = await WarehouseModel.aggregate([
 				{
 					$match: matchQueryStage1,
@@ -2122,7 +2201,10 @@ exports.bestSellers = [
 				},
 				{
 					$group: {
-						_id: "$inventoryDetails.productId",
+						_id: {
+							productId: "$inventoryDetails.productId",
+							orgId: "$organisation",
+						},
 						productCategory: {
 							$first: "$product.type",
 						},
@@ -2153,6 +2235,9 @@ exports.bestSellers = [
 						inventoryAnalytics: {
 							$first: "$inventory_analytics",
 						},
+						sales: {
+							$sum: "$inventory_analytics.sales",
+						},
 						updatedAt: {
 							$first: "$inventoryDetails.updatedAt",
 						},
@@ -2160,7 +2245,7 @@ exports.bestSellers = [
 				},
 				{
 					$match: {
-						"inventoryAnalytics.sales": {
+						sales: {
 							$gt: 0,
 						},
 					},
@@ -2170,23 +2255,34 @@ exports.bestSellers = [
 				},
 				{
 					$sort: {
-						"inventoryAnalytics.sales": -1,
+						sales: -1,
 					},
 				},
+				{
+					$facet: {
+						paginatedResults: paginationQuery,
+						totalCount: [{ $count: "count" }],
+					},
+				},
+				{ $unwind: "$totalCount" },
+				{ $project: { paginatedResults: 1, totalCount: "$totalCount.count" } },
 			]);
 
+			const result = {
+				bestSellers: bestSellers[0].paginatedResults,
+				totalCount: bestSellers[0].totalCount,
+				warehouseId: warehouse
+			};
+
 			if (reportType) {
-				const reportData = await getDataForReport("BESTSELLERS", bestSellers);
+				const reportData = await getDataForReport("BESTSELLERS", result.bestSellers);
 				if (reportType === "excel") {
 					await buildExcelReport(res, reportData.header, reportData.excelData, "BESTSELLERS", date);
 				} else {
 					await buildPdfReport(res, reportData.pdfData, "BESTSELLERS", date);
 				}
 			} else {
-				return apiResponse.successResponseWithData(res, "Best Sellers", {
-					bestSellers,
-					warehouseId: warehouse,
-				});
+				return apiResponse.successResponseWithData(res, "Best Sellers", result);
 			}
 		} catch (err) {
 			console.log(err);
@@ -2196,122 +2292,123 @@ exports.bestSellers = [
 ];
 
 exports.bestSellerSummary = [
-  auth,
-  async function (req, res) {
-    try {
-      const limit = req.body.limit || 5;
-      const organisation = await OrganisationModel.findOne({
-        id: req.user.organisationId,
-      });
-      const isDist = organisation?.type === "DISTRIBUTORS" || organisation?.type === "DROGUERIA" ? true : false;
-      const isGoverningBody = organisation?.type === "GoverningBody";
-      let warehouseQuery = {
-        id: req.body.warehouseId || req.user.warehouseId
-      };
-      let matchQuery = {};
-      if (!isDist) {
-        matchQuery[`manufacturerId`] = req.user.organisationId;
-      }
-      if (isGoverningBody) {
-        matchQuery = {};
-        warehouseQuery = {}
-      }
-      const bestSellers = await WarehouseModel.aggregate([
-        {
-          $match: warehouseQuery,
-        },
-        {
-          $lookup: {
-            localField: "warehouseInventory",
-            from: "inventories",
-            foreignField: "id",
-            as: "inventory",
-          },
-        },
-        {
-          $unwind: {
-            path: "$inventory",
-            preserveNullAndEmptyArrays: true,
-          },
-        },
-        {
-          $replaceWith: {
-            $mergeObjects: [null, "$inventory"],
-          },
-        },
-        {
-          $unwind: {
-            path: "$inventoryDetails",
-          },
-        },
-        {
-          $lookup: {
-            from: "products",
-            localField: "inventoryDetails.productId",
-            foreignField: "id",
-            as: "products",
-          },
-        },
-        {
-          $unwind: {
-            path: "$products",
-          },
-        },
-        {
-          $group: {
-            _id: "$inventoryDetails.productId",
-            productCategory: {
-              $first: "$products.type",
-            },
-            productName: {
-              $first: "$products.name",
-            },
-            unitofMeasure: {
-              $first: "$products.unitofMeasure",
-            },
-            manufacturer: {
-              $first: "$products.manufacturer",
-            },
-            manufacturerId: {
-              $first: "$products.manufacturerId",
-            },
-            productQuantity: {
-              $sum: "$inventoryDetails.quantity",
-            },
-            totalSales: {
-              $sum: "$inventoryDetails.totalSales",
-            },
-          },
-        },
-        {
-          $match: {
-            totalSales: {
-              $gt: 0,
-            },
-          },
-        },
-        {
-          $match: matchQuery,
-        },
-        {
-          $sort: {
-            totalSales: -1,
-          },
-        },
-        {
-          $limit: limit,
-        },
-      ]);
-      return apiResponse.successResponseWithData(res, "Best Sellers Summary", {
-        limit,
-        warehouseId: req.body.warehouseId || req.user.warehouseId,
-        bestSellers,
-      });
-    } catch (err) {
-      console.log(err);
-      return apiResponse.ErrorResponse(res, err);
-    }
-  },
+	auth,
+	async function (req, res) {
+		try {
+			const limit = req.body.limit || 5;
+			const organisation = await OrganisationModel.findOne({
+				id: req.user.organisationId,
+			});
+			const isDist =
+				organisation?.type === "DISTRIBUTORS" || organisation?.type === "DROGUERIA" ? true : false;
+			const isGoverningBody = organisation?.type === "GoverningBody";
+			let warehouseQuery = {
+				id: req.body.warehouseId || req.user.warehouseId,
+			};
+			let matchQuery = {};
+			if (!isDist) {
+				matchQuery[`manufacturerId`] = req.user.organisationId;
+			}
+			if (isGoverningBody) {
+				matchQuery = {};
+				warehouseQuery = {};
+			}
+			const bestSellers = await WarehouseModel.aggregate([
+				{
+					$match: warehouseQuery,
+				},
+				{
+					$lookup: {
+						localField: "warehouseInventory",
+						from: "inventories",
+						foreignField: "id",
+						as: "inventory",
+					},
+				},
+				{
+					$unwind: {
+						path: "$inventory",
+						preserveNullAndEmptyArrays: true,
+					},
+				},
+				{
+					$replaceWith: {
+						$mergeObjects: [null, "$inventory"],
+					},
+				},
+				{
+					$unwind: {
+						path: "$inventoryDetails",
+					},
+				},
+				{
+					$lookup: {
+						from: "products",
+						localField: "inventoryDetails.productId",
+						foreignField: "id",
+						as: "products",
+					},
+				},
+				{
+					$unwind: {
+						path: "$products",
+					},
+				},
+				{
+					$group: {
+						_id: "$inventoryDetails.productId",
+						productCategory: {
+							$first: "$products.type",
+						},
+						productName: {
+							$first: "$products.name",
+						},
+						unitofMeasure: {
+							$first: "$products.unitofMeasure",
+						},
+						manufacturer: {
+							$first: "$products.manufacturer",
+						},
+						manufacturerId: {
+							$first: "$products.manufacturerId",
+						},
+						productQuantity: {
+							$sum: "$inventoryDetails.quantity",
+						},
+						totalSales: {
+							$sum: "$inventoryDetails.totalSales",
+						},
+					},
+				},
+				{
+					$match: {
+						totalSales: {
+							$gt: 0,
+						},
+					},
+				},
+				{
+					$match: matchQuery,
+				},
+				{
+					$sort: {
+						totalSales: -1,
+					},
+				},
+				{
+					$limit: limit,
+				},
+			]);
+			return apiResponse.successResponseWithData(res, "Best Sellers Summary", {
+				limit,
+				warehouseId: req.body.warehouseId || req.user.warehouseId,
+				bestSellers,
+			});
+		} catch (err) {
+			console.log(err);
+			return apiResponse.ErrorResponse(res, err);
+		}
+	},
 ];
 
 exports.inStockReport = [
@@ -2487,18 +2584,22 @@ exports.inStockReport = [
 					},
 				]);
 			}
+
+			const result = {
+				inStockReport: inStockReport[0].paginatedResults,
+				totalCount: inStockReport[0].totalCount,
+				warehouseId: warehouse
+			};
+
 			if (reportType) {
-        const reportData = await getDataForReport("INSTOCK", inStockReport);
+				const reportData = await getDataForReport("INSTOCK", result.inStockReport);
 				if (reportType === "excel") {
 					await buildExcelReport(res, reportData.header, reportData.excelData, "INSTOCK", date);
 				} else {
 					await buildPdfReport(res, reportData.pdfData, "INSTOCK", date);
 				}
 			} else {
-				return apiResponse.successResponseWithData(res, "In stock Report", {
-					inStockReport,
-					warehouseId: warehouse,
-				});
+				return apiResponse.successResponseWithData(res, "In stock Report", result);
 			}
 		} catch (err) {
 			console.log(err);
@@ -2682,18 +2783,22 @@ exports.outOfStockReport = [
 					},
 				]);
 			}
+
+			const result = {
+				outOfStockReport: outOfStockReport[0].paginatedResults,
+				totalCount: outOfStockReport[0].totalCount,
+				warehouseId: warehouse
+			};
+
 			if (reportType) {
-        const reportData = await getDataForReport("OUTOFSTOCK", outOfStockReport);
+				const reportData = await getDataForReport("OUTOFSTOCK", result.outOfStockReport);
 				if (reportType === "excel") {
 					await buildExcelReport(res, reportData.header, reportData.excelData, "OUTSTOCK", date);
 				} else {
 					await buildPdfReport(res, reportData.pdfData, "OUTSTOCK", date);
 				}
 			} else {
-				return apiResponse.successResponseWithData(res, "Out of stock Report", {
-					outOfStockReport,
-					warehouseId: warehouse,
-				});
+				return apiResponse.successResponseWithData(res, "Out of stock Report", result);
 			}
 		} catch (err) {
 			console.log(err);
@@ -2709,9 +2814,9 @@ exports.expiredStockReport = [
 			const warehouse = req.body.warehouseId || req.user.warehouseId;
 			const date = req.body.date
 				? format(startOfMonth(new Date(req.body.date)), "yyyy-MM-dd")
-        : format(startOfMonth(new Date()), "yyyy-MM-dd");
-        
-      const today = new Date();
+				: format(startOfMonth(new Date()), "yyyy-MM-dd");
+
+			const today = new Date();
 			const reportType = req.body.reportType || null;
 			const organisation = await OrganisationModel.findOne({
 				id: req.user.organisationId,
@@ -2813,13 +2918,17 @@ exports.expiredStockReport = [
 														],
 													},
 												},
-                      },
-                      {
-                        $unwind: "$batchNumbers"
-                      },
+											},
+											{
+												$unwind: "$batchNumbers",
+											},
 											{
 												$group: {
-													_id: {productId: "$productId", batchNumber: "$batchNumbers", expDate: "$attributeSet.expDate"},
+													_id: {
+														productId: "$productId",
+														batchNumber: "$batchNumbers",
+														expDate: "$attributeSet.expDate",
+													},
 													quantity: { $sum: "$quantity" },
 												},
 											},
@@ -2926,18 +3035,22 @@ exports.expiredStockReport = [
 					},
 				]);
 			}
+
+			const result = {
+				expiredProducts: expiredProducts[0].paginatedResults,
+				totalCount: expiredProducts[0].totalCount,
+				warehouseId: warehouse
+			};
+
 			if (reportType) {
-        const reportData = await getDataForReport("INSTOCK", expiredProducts);
+				const reportData = await getDataForReport("EXPIRED", expiredProducts);
 				if (reportType === "excel") {
 					await buildExcelReport(res, reportData.header, reportData.excelData, "EXPIRED", date);
 				} else {
 					await buildPdfReport(res, reportData.pdfData, "EXPIRED", date);
 				}
 			} else {
-				return apiResponse.successResponseWithData(res, "Expired products Report", {
-					expiredProducts,
-					warehouseId: warehouse,
-				});
+				return apiResponse.successResponseWithData(res, "Expired products Report", result);
 			}
 		} catch (err) {
 			console.log(err);
@@ -2953,12 +3066,12 @@ exports.nearExpiryStockReport = [
 			const warehouse = req.body.warehouseId || req.user.warehouseId;
 			const date = req.body.date
 				? format(startOfMonth(new Date(req.body.date)), "yyyy-MM-dd")
-        : format(startOfMonth(new Date()), "yyyy-MM-dd");
-        
-      const today = new Date();
-      const nextMonth = new Date();
-      nextMonth.setDate(today.getDate() + 30);
-      
+				: format(startOfMonth(new Date()), "yyyy-MM-dd");
+
+			const today = new Date();
+			const nextMonth = new Date();
+			nextMonth.setDate(today.getDate() + 30);
+
 			const reportType = req.body.reportType || null;
 			const organisation = await OrganisationModel.findOne({
 				id: req.user.organisationId,
@@ -3061,13 +3174,17 @@ exports.nearExpiryStockReport = [
 														],
 													},
 												},
-                      },
-                      {
-                        $unwind: "$batchNumbers"
-                      },
+											},
+											{
+												$unwind: "$batchNumbers",
+											},
 											{
 												$group: {
-													_id: {productId: "$productId", batchNumber: "$batchNumbers", expDate: "$attributeSet.expDate"},
+													_id: {
+														productId: "$productId",
+														batchNumber: "$batchNumbers",
+														expDate: "$attributeSet.expDate",
+													},
 													quantity: { $sum: "$quantity" },
 												},
 											},
@@ -3174,18 +3291,22 @@ exports.nearExpiryStockReport = [
 					},
 				]);
 			}
+
+			const result = {
+				nearExpiryProducts: nearExpiryProducts[0].paginatedResults,
+				totalCount: nearExpiryProducts[0].totalCount,
+				warehouseId: warehouse
+			};
+
 			if (reportType) {
-        const reportData = await getDataForReport("INSTOCK", nearExpiryProducts);
+				const reportData = await getDataForReport("NEAR_EXPIRY", result.nearExpiryProducts);
 				if (reportType === "excel") {
-					await buildExcelReport(res, reportData.header, reportData.excelData, "EXPIRED", date);
+					await buildExcelReport(res, reportData.header, reportData.excelData, "NEAR_EXPIRY", date);
 				} else {
-					await buildPdfReport(res, reportData.pdfData, "EXPIRED", date);
+					await buildPdfReport(res, reportData.pdfData, "NEAR_EXPIRY", date);
 				}
 			} else {
-				return apiResponse.successResponseWithData(res, "Expired products Report", {
-					nearExpiryProducts,
-					warehouseId: warehouse,
-				});
+				return apiResponse.successResponseWithData(res, "Near expiry products Report", result);
 			}
 		} catch (err) {
 			console.log(err);
@@ -3215,7 +3336,7 @@ exports.inStockFilterOptions = [
 			if (!isDist) {
 				// matchQuery2[`manufacturerId`] = req.user.organisationId;
 				inStockReport = await GovtBodyInstock(warehouse, date, req.body);
-				Filters = inStockReport;
+				Filters = inStockReport[0].paginatedResults;
 			} else {
 				if (req.user.warehouseId && req.user.warehouseId !== req.body.warehouseId) {
 					matchQuery1 = await getDistributedProducts(
@@ -3397,7 +3518,7 @@ exports.outOfStockFilterOptions = [
 			if (!isDist) {
 				// matchQuery2[`manufacturerId`] = req.user.organisationId;
 				outOfStockReport = await GovtBodyOutstock(warehouse, date, req.body);
-				Filters = outOfStockReport;
+				Filters = outOfStockReport[0].paginatedResults;
 			} else {
 				matchQuery[`totalSales`] = {
 					$gt: 0,
@@ -3599,7 +3720,7 @@ exports.bestSellerFilterOptions = [
 					"warehouseAddress.city": city,
 				};
 				matchQueryStage1 = temp;
-			}		
+			}
 
 			let Filters;
 			if (!isDist) {
@@ -3715,7 +3836,10 @@ exports.bestSellerFilterOptions = [
 				},
 				{
 					$group: {
-						_id: "$inventoryDetails.productId",
+						_id: {
+							productId: "$inventoryDetails.productId",
+							orgId: "$organisation",
+						},
 						productCategory: {
 							$first: "$product.type",
 						},
@@ -3751,21 +3875,21 @@ exports.bestSellerFilterOptions = [
 						},
 					},
 				},
-        {
-          $match: {
-            "inventoryAnalytics.sales": {
-              $gt: 0,
-            },
-          },
-        },
-        {
-          $match: matchQuery,
-        },
-        {
-          $sort: {
-            "inventoryAnalytics.sales": -1,
-          },
-        },
+				{
+					$match: {
+						"inventoryAnalytics.sales": {
+							$gt: 0,
+						},
+					},
+				},
+				{
+					$match: matchQuery,
+				},
+				{
+					$sort: {
+						"inventoryAnalytics.sales": -1,
+					},
+				},
 			]);
 
 			Filters = bestSellerStockReport.length > 0 ? bestSellerStockReport : [];
@@ -3802,7 +3926,7 @@ exports.nearExpiryFilterOptions = [
 			if (!isDist) {
 				// matchQuery2[`manufacturerId`] = req.user.organisationId;
 				inStockReport = await GovtBodyNearExpiry(warehouse, date, req.body);
-				Filters = inStockReport;
+				Filters = inStockReport[0].paginatedResults;
 			} else {
 				if (req.user.warehouseId && req.user.warehouseId !== req.body.warehouseId) {
 					matchQuery1 = await getDistributedProducts(
@@ -3813,15 +3937,15 @@ exports.nearExpiryFilterOptions = [
 				}
 
 				let { productCategory, productName, manufacturer } = body;
-				
+
 				if (productCategory) matchQuery2["productCategory"] = productCategory;
 				if (productName) matchQuery2["productName"] = productName;
 				if (manufacturer) matchQuery2["manufacturer"] = manufacturer;
-			
+
 				let today = new Date();
 				const nextMonth = new Date();
 				nextMonth.setDate(today.getDate() + 30);
-			
+
 				inStockReport = await WarehouseModel.aggregate([
 					{
 						$match: {
@@ -3917,7 +4041,7 @@ exports.nearExpiryFilterOptions = [
 							],
 							as: "product",
 						},
-					},			
+					},
 					{
 						$unwind: {
 							path: "$product",
@@ -4045,7 +4169,7 @@ exports.expiredFilterOptions = [
 			if (!isDist) {
 				// matchQuery2[`manufacturerId`] = req.user.organisationId;
 				inStockReport = await GovtBodyExpired(warehouse, date, req.body);
-				Filters = inStockReport;
+				Filters = inStockReport[0].paginatedResults;
 			} else {
 				if (req.user.warehouseId && req.user.warehouseId !== req.body.warehouseId) {
 					matchQuery1 = await getDistributedProducts(
@@ -4056,13 +4180,13 @@ exports.expiredFilterOptions = [
 				}
 
 				let { productCategory, productName, manufacturer } = body;
-				
+
 				if (productCategory) matchQuery2["productCategory"] = productCategory;
 				if (productName) matchQuery2["productName"] = productName;
 				if (manufacturer) matchQuery2["manufacturer"] = manufacturer;
-			
+
 				let today = new Date();
-			
+
 				inStockReport = await WarehouseModel.aggregate([
 					{
 						$match: {
@@ -4157,7 +4281,7 @@ exports.expiredFilterOptions = [
 							],
 							as: "product",
 						},
-					},			
+					},
 					{
 						$unwind: {
 							path: "$product",
@@ -4265,79 +4389,77 @@ exports.expiredFilterOptions = [
 ];
 
 async function getDataForReport(reportType, data) {
-  const rowsPDF = [];
-  const rowsExcel = [];
-  const head = [
-    { text: "Product ID", bold: true, field: "_id" },
-    { text: "Product Category", bold: true, field: "productCategory" },
-    { text: "Product Name", bold: true, field: "productName" },
-    { text: "Manufacturer", bold: true, field: "manufacturer" },
-  ];
-  if (reportType === "INSTOCK") {
-    head.push({
-      text: "Opening Balance",
-      bold: true,
-      field: "openingBalance",
-    });
-    head.push({
-      text: "Current Inventory Balance",
-      bold: true,
-      field: "productQuantity",
-    });
-    head.push({ text: "Total Sales", bold: true, field: "totalSales" });
-  } else if (reportType === "OUTOFSTOCK") {
-    head.push({
-      text: "Product out of Stock",
-      bold: true,
-      field: "outOfStockDays",
-    });
-  } else if (reportType === "BESTSELLERS") {
-    head.push({
-      text: "No. of Units Sold",
-      bold: true,
-      field: "sales",
-    });
-  }
-  rowsPDF.push(head);
-  for (let i = 0; i < data.length; i++) {
-    const row = [
-      data[i]._id || "N/A",
-      data[i].productCategory || "N/A",
-      data[i].productName || "N/A",
-      data[i].manufacturer || "N/A",
-    ];
-    const rowObj = {
-      _id: data[i]._id || "N/A",
-      productCategory: data[i].productCategory || "N/A",
-      productName: data[i].productName || "N/A",
-      manufacturer: data[i].manufacturer || "N/A",
-    };
+	const rowsPDF = [];
+	const rowsExcel = [];
+	const head = [
+		{ text: "Product ID", bold: true, field: "_id" },
+		{ text: "Product Category", bold: true, field: "productCategory" },
+		{ text: "Product Name", bold: true, field: "productName" },
+		{ text: "Manufacturer", bold: true, field: "manufacturer" },
+	];
+	if (reportType === "INSTOCK") {
+		head.push({
+			text: "Opening Balance",
+			bold: true,
+			field: "openingBalance",
+		});
+		head.push({
+			text: "Current Inventory Balance",
+			bold: true,
+			field: "productQuantity",
+		});
+		head.push({ text: "Total Sales", bold: true, field: "totalSales" });
+	} else if (reportType === "OUTOFSTOCK") {
+		head.push({
+			text: "Product out of Stock",
+			bold: true,
+			field: "outOfStockDays",
+		});
+	} else if (reportType === "BESTSELLERS") {
+		head.push({
+			text: "No. of Units Sold",
+			bold: true,
+			field: "sales",
+		});
+	}
+	rowsPDF.push(head);
+	for (let i = 0; i < data.length; i++) {
+		const row = [
+			data[i]._id || "N/A",
+			data[i].productCategory || "N/A",
+			data[i].productName || "N/A",
+			data[i].manufacturer || "N/A",
+		];
+		const rowObj = {
+			_id: data[i]._id || "N/A",
+			productCategory: data[i].productCategory || "N/A",
+			productName: data[i].productName || "N/A",
+			manufacturer: data[i].manufacturer || "N/A",
+		};
 
-    if (reportType === "INSTOCK") {
-      row.push(data[i].inventoryAnalytics?.openingBalance || 0);
-      row.push(data[i].productQuantity || 0);
-      row.push(data[i].totalSales || 0);
+		if (reportType === "INSTOCK") {
+			row.push(data[i].inventoryAnalytics?.openingBalance || 0);
+			row.push(data[i].productQuantity || 0);
+			row.push(data[i].totalSales || 0);
 
-      rowObj["openingBalance"] =
-        data[i].inventoryAnalytics?.openingBalance || 0;
-      rowObj["productQuantity"] = data[i].productQuantity || 0;
-      rowObj["totalSales"] = data[i].inventoryAnalytics?.totalSales || 0;
-    } else if (reportType === "OUTOFSTOCK") {
-      row.push(data[i].inventoryAnalytics?.outOfStockDays || "N/A");
+			rowObj["openingBalance"] = data[i].inventoryAnalytics?.openingBalance || 0;
+			rowObj["productQuantity"] = data[i].productQuantity || 0;
+			rowObj["totalSales"] = data[i].inventoryAnalytics?.totalSales || 0;
+		} else if (reportType === "OUTOFSTOCK") {
+			row.push(data[i].inventoryAnalytics?.outOfStockDays || "N/A");
 
-      rowObj["outOfStockDays"] =
-        data[i].inventoryAnalytics?.outOfStockDays || "N/A";
-    } else if (reportType === "BESTSELLERS") {
-      row.push(data[i].inventoryAnalytics?.sales || "N/A");
+			rowObj["outOfStockDays"] = data[i].inventoryAnalytics?.outOfStockDays || "N/A";
+		} else if (reportType === "BESTSELLERS") {
+			row.push(data[i]?.sales || "N/A");
 
-      rowObj["sales"] = data[i].inventoryAnalytics?.sales || "N/A";
-    }
-    rowsPDF.push(row);
-    rowsExcel.push(rowObj);
-  }
-  return {
-    header: head,
-    pdfData: rowsPDF,
-    excelData: rowsExcel,
-  };
+			rowObj["sales"] = data[i]?.sales || "N/A";
+		}
+		rowsPDF.push(row);
+		rowsExcel.push(rowObj);
+	}
+	return {
+		header: head,
+		pdfData: rowsPDF,
+		excelData: rowsExcel,
+	};
 }

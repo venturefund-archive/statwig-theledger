@@ -52,7 +52,7 @@ export default function ReportSearch({ updateSearchParams }) {
 			<form onSubmit={handleSubmit(onSubmit)}>
 				<div className="main_searchbar_wrapper">
 					<div className="search_icon_wrap">
-						<i class="fa-solid fa-magnifying-glass"></i>
+						{/* <i class="fa-solid fa-magnifying-glass"></i> */}
 					</div>
 					<div className="input_hold bdr">
 						<TextField

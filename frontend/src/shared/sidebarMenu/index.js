@@ -31,6 +31,7 @@ const SideBar = (props) => {
 	};
 
 	const lastMilePath = user?.type === "GoverningBody" ? "/lastMile-Centeral" : "/lastMile-Track";
+	const networkEnabled = user?.type === "GoverningBody";
 
 	return (
 		<div className="sidebar">
@@ -113,7 +114,7 @@ const SideBar = (props) => {
 					</li>
 				)}
 
-				{isAuthenticated("overview") && enable && (
+				{isAuthenticated("overview") && enable && networkEnabled && (
 					<li className={url === "/network" ? "active" : ""}>
 						<Link to="/network" className="d-inline-block">
 							<img src={url === "/network" ? NetworkIcon : NetworkIcon} alt="network" />

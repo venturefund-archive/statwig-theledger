@@ -47,43 +47,43 @@ function TabList({ Tab, setTab }) {
 }
 
 export default function NetworkReports() {
-  const [locationParams, setLocationParams] = useState({
+	const [locationParams, setLocationParams] = useState({
 		country: "Costa Rica",
 		state: "",
 		city: "",
 	});
-  const [Tab, setTab] = useState("out_stock");
-  const [analytics, setAnalytics] = useState({
-    outStock: 0,
-    inStock: 0,
-    bestSellers: 0
-  });
+	const [Tab, setTab] = useState("out_stock");
+	const [analytics, setAnalytics] = useState({
+		outStock: 0,
+		inStock: 0,
+		bestSellers: 0,
+	});
 
-  const getNetworkAnalytics = async () => {
+	const getNetworkAnalytics = async () => {
 		const result = await getNetworkPageAnalytics(locationParams);
 		if (result?.analytics) {
 			setAnalytics((prevState) => ({
 				...prevState,
 				outStock: result?.analytics?.outStock,
 				inStock: result?.analytics?.inStock,
-				bestSellers: result?.analytics?.bestSellers,
+				bestSellers: result?.analytics?.bestSeller,
 			}));
 		}
-  }
-  
-  const updateSearchParams = (data) => {
+	};
+
+	const updateSearchParams = (data) => {
 		setLocationParams((prevState) => ({
 			...prevState,
 			state: data.state,
 			city: data.city,
 		}));
-  }
+	};
 
-  useEffect(async () => {
-    getNetworkAnalytics();
-  }, [locationParams]);
+	useEffect(async () => {
+		getNetworkAnalytics();
+	}, [locationParams]);
 
-  return (
+	return (
 		<section className="NetworkReports_container">
 			<div className="NetworkReports_Search_Header">
 				<ReportSearch updateSearchParams={updateSearchParams} />

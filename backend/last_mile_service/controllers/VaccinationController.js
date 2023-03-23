@@ -112,12 +112,12 @@ const buildDoseQuery = async (gender, minAge, maxAge, ageType, vaccineVialIds, t
 };
 
 const generateVaccinationsList = async (doseQuery, req, skip = 0, limit) => {
-	const pagniationQuery = [];
+	const paginationQuery = [];
 	if (skip) {
-		pagniationQuery.push({ $skip: skip })
+		paginationQuery.push({ $skip: skip })
 	}
 	if (limit) {
-		pagniationQuery.push({ $limit: limit });
+		paginationQuery.push({ $limit: limit });
 	}
 	const dosesResult = await DoseModel.aggregate([
 		{ $match: doseQuery },
@@ -160,7 +160,7 @@ const generateVaccinationsList = async (doseQuery, req, skip = 0, limit) => {
 		{ $sort: { createdAt: -1 } },
 		{
 			$facet: {
-				paginatedResults: pagniationQuery,
+				paginatedResults: paginationQuery,
 				totalCount: [{ $count: "count" }],
 			},
 		},
@@ -912,19 +912,19 @@ exports.getVialsUtilised = [
 			const warehouseQuery = await buildWarehouseQuery(user, city, organisation);
 			const warehouses = await WarehouseModel.find(warehouseQuery);
 			const warehouseIds = warehouses.map((warehouse) => warehouse.id);
-			const pagniationQuery = [];
+			const paginationQuery = [];
 			if (skip) {
-				pagniationQuery.push({ $skip: skip })
+				paginationQuery.push({ $skip: skip })
 			}
 			if (limit) {
-				pagniationQuery.push({ $limit: limit });
+				paginationQuery.push({ $limit: limit });
 			}
 			const vialsResult = await VaccineVialModel.aggregate([
 				{ $match: { warehouseId: { $in: warehouseIds } } },
 				{ $sort: { createdAt: -1 } },
 				{
 					$facet: {
-						paginatedResults: pagniationQuery,
+						paginatedResults: paginationQuery,
 						totalCount: [{ $count: "count" }],
 					},
 				},
@@ -985,12 +985,12 @@ exports.getVaccinationsList = [
 				queryExprs.push({ $gte: ["$createdDateString", todayString] });
 			}
 
-			const pagniationQuery = [];
+			const paginationQuery = [];
 			if (skip) {
-				pagniationQuery.push({ $skip: skip });
+				paginationQuery.push({ $skip: skip });
 			}
 			if (limit) {
-				pagniationQuery.push({ $limit: limit });
+				paginationQuery.push({ $limit: limit });
 			}
 			const dosesResult = await DoseModel.aggregate([
 				{
@@ -1012,7 +1012,7 @@ exports.getVaccinationsList = [
 				{ $sort: { createdAt: -1 } },
 				{
 					$facet: {
-						paginatedResults: pagniationQuery,
+						paginatedResults: paginationQuery,
 						totalCount: [{ $count: "count" }],
 					},
 				},

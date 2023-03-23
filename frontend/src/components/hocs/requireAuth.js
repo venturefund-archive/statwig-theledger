@@ -4,41 +4,44 @@ import { Redirect } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 
 // eslint-disable-next-line import/no-anonymous-default-export
-export default (ComposedComponent, isAdminComponent) => {
-  class RequireAuth extends Component {
-    render() {
-      const { user } = this.props;
+export default (ComposedComponent, options) => {
+	class RequireAuth extends Component {
+		render() {
+			const { user } = this.props;
 
-      let token = localStorage?.theLedgerToken;
-      let userDetails = jwt_decode(token);
-      const demoLogin = userDetails?.partialRegistration;
-      let check = user;
-      
-      if (!user)
-        check = localStorage.theLedgerToken;
+			let token = localStorage?.theLedgerToken;
+			let userDetails = jwt_decode(token);
+			const demoLogin = userDetails?.partialRegistration;
+			let check = user;
 
-      if(isAdminComponent){
-          const userRole = user?.role || userDetails?.role;
-          const userType = user?.type || userDetails?.type;
-          if(userRole === "admin" || userType === "CENTRAL_AUTHORITY")
-            check = true;
-          else
-            check = null; 
-          console.log(check)
-        }
-      switch (check) {
-        case null:
-          return <Redirect to='/' />;
+			if (!user) check = localStorage.theLedgerToken;
 
-        default:
-          return <ComposedComponent {...this.props} demoLogin={demoLogin} />;
+			if (options?.isAdminComponent) {
+				const userRole = user?.role || userDetails?.role;
+				const userType = user?.type || userDetails?.type;
+				if (userRole === "admin" || userType === "CENTRAL_AUTHORITY") check = true;
+				else check = null;
       }
-    }
-  }
 
-  const mapStateToProps = (state) => ({
-    user: state.user,
-  });
+      if (options?.governingBody) {
+				const userType = user?.type || userDetails?.type;
+				if (userType === "GoverningBody") check = true;
+				else check = null;
+			}
+      
+			switch (check) {
+				case null:
+					return <Redirect to="/" />;
 
-  return connect(mapStateToProps)(RequireAuth);
+				default:
+					return <ComposedComponent {...this.props} demoLogin={demoLogin} />;
+			}
+		}
+	}
+
+	const mapStateToProps = (state) => ({
+		user: state.user,
+	});
+
+	return connect(mapStateToProps)(RequireAuth);
 };

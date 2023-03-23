@@ -14,7 +14,7 @@ client.on("error", (err) => {
 });
 
 exports.RbacCache = function () {
-  RbacModel.find({orgId: "ORG100001"})
+  RbacModel.find({})
     .then((permissions) => {
       if (permissions.length > 0) {
         permissions.forEach((role) => {
