@@ -23,9 +23,9 @@ export default function BestsellerRow({t, product}) {
 			</TableCell>
 			<TableCell component="th" scope="row">
 				<div className="mi-table-data">
-					<p className="mi-body-md black f-500 mi-reset">{`${
-						product?.sales || 0
-					} ( ${product?.unitofMeasure?.name} )`}</p>
+					<p className="mi-body-md black f-500 mi-reset">{`${product?.sales || 0} ( ${
+						product?.unitofMeasure?.name
+					} )`}</p>
 				</div>
 			</TableCell>
 
@@ -36,7 +36,7 @@ export default function BestsellerRow({t, product}) {
 			</TableCell>
 			<TableCell component="th" scope="row">
 				<div className="mi-table-data">
-					<p className="mi-body-md black f-500 mi-reset">{product.address.firstLine}</p>
+					<p className="mi-body-md black f-500 mi-reset">{`${product.address.city}, ${product.address.state}`}</p>
 				</div>
 			</TableCell>
 		</TableRow>

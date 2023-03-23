@@ -28,7 +28,7 @@ export default function OutofstocksRow({product, t}) {
 			</TableCell>
 			<TableCell component="th" scope="row">
 				<div className="mi-table-data">
-					<p className="mi-body-md black f-500 mi-reset">{product?.address?.firstLine}</p>
+					<p className="mi-body-md black f-500 mi-reset">{`${product.address.city}, ${product.address.state}`}</p>
 				</div>
 			</TableCell>
 			<TableCell component="th" scope="row">

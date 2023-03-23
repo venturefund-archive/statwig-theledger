@@ -325,7 +325,8 @@ async function GovtBodyNearExpiry(warehouse, date, body) {
 		},
 		{
 			$sort: {
-				productQuantity: -1,
+				expiredDates: -1,
+				productName: 1
 			},
 		},
 		{
@@ -602,7 +603,8 @@ async function GovtBodyExpired(warehouse, date, body) {
 		},
 		{
 			$sort: {
-				productQuantity: -1,
+				expiredDates: -1,
+				productName: 1
 			},
 		},
 		{
