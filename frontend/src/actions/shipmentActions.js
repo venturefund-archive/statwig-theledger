@@ -408,7 +408,6 @@ export const receiveApi = async (formData) => {
       },
     });
     return result;
-    return "";
   } catch (e) {
     return e.response;
   }
