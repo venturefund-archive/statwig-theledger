@@ -1055,6 +1055,225 @@ async function GovtBodyOutstock(warehouse, date, body) {
 	return outOfStockReport;
 }
 
+async function GovtBodyBestsellers(warehouse, date, body) {
+	let { country, state, city } = body;
+	let matchQueryStage1 = {
+		status: "ACTIVE",
+	};
+	if (country) {
+		let temp = {
+			...matchQueryStage1,
+			"country.countryName": country,
+		};
+		matchQueryStage1 = temp;
+	}
+	if (state) {
+		let temp = {
+			...matchQueryStage1,
+			"warehouseAddress.state": state,
+		};
+		matchQueryStage1 = temp;
+	}
+	if (city) {
+		let temp = {
+			...matchQueryStage1,
+			"warehouseAddress.city": city,
+		};
+		matchQueryStage1 = temp;
+	}
+
+	let { productCategory, productName, manufacturer, organisation } = body;
+	let matchQueryStage2 = {};
+	if (productCategory) matchQueryStage2["productCategory"] = productCategory;
+	if (productName) matchQueryStage2["productName"] = productName;
+	if (manufacturer) matchQueryStage2["manufacturer"] = manufacturer;
+	if (organisation) matchQueryStage2["organisation"] = organisation;
+
+	let { skip, limit } = body;
+	let paginationQuery = [];
+	if (skip) {
+		paginationQuery.push({ $skip: skip });
+	}
+	if (limit) {
+		paginationQuery.push({ $limit: limit });
+	}
+
+	const bestSellers = await WarehouseModel.aggregate([
+		{
+			$match: matchQueryStage1,
+		},
+		{
+			$lookup: {
+				from: "organisations",
+				let: { orgId: "$organisationId" },
+				pipeline: [
+					{ $match: { $expr: { $eq: ["$$orgId", "$id"] } } },
+					{ $project: { _id: 0, organisation: "$name" } },
+				],
+				as: "organisation",
+			},
+		},
+		{
+			$unwind: "$organisation",
+		},
+		{
+			$lookup: {
+				localField: "warehouseInventory",
+				from: "inventories",
+				foreignField: "id",
+				as: "inventory",
+			},
+		},
+		{
+			$unwind: {
+				path: "$inventory",
+				preserveNullAndEmptyArrays: true,
+			},
+		},
+		{
+			$addFields: {
+				address: {
+					address: {
+						firstLine: "$warehouseAddress.firstLine",
+						city: "$warehouseAddress.city",
+						state: "$warehouseAddress.state",
+						country: "$country.countryName",
+						region: "$region.regionName",
+					},
+				},
+			},
+		},
+		{
+			$replaceWith: {
+				$mergeObjects: [null, "$inventory", "$organisation", "$address"],
+			},
+		},
+		{
+			$unwind: {
+				path: "$inventoryDetails",
+			},
+		},
+		{
+			$lookup: {
+				from: "products",
+				localField: "inventoryDetails.productId",
+				foreignField: "id",
+				as: "product",
+			},
+		},
+		{
+			$unwind: {
+				path: "$product",
+			},
+		},
+		{
+			$lookup: {
+				from: "inventory_analytics",
+				let: {
+					arg1: "$inventoryDetails.productId",
+					arg2: date,
+					arg3: "$id",
+				},
+				pipeline: [
+					{
+						$match: {
+							$expr: {
+								$and: [
+									{
+										$eq: ["$productId", "$$arg1"],
+									},
+									{
+										$eq: ["$inventoryId", "$$arg3"],
+									},
+									{
+										$eq: ["$date", "$$arg2"],
+									},
+								],
+							},
+						},
+					},
+				],
+				as: "inventory_analytics",
+			},
+		},
+		{
+			$unwind: {
+				path: "$inventory_analytics",
+				preserveNullAndEmptyArrays: true,
+			},
+		},
+		{
+			$group: {
+				_id: {
+					productId: "$inventoryDetails.productId",
+					orgId: "$organisation",
+				},
+				productCategory: {
+					$first: "$product.type",
+				},
+				productName: {
+					$first: "$product.name",
+				},
+				unitofMeasure: {
+					$first: "$product.unitofMeasure",
+				},
+				manufacturer: {
+					$first: "$product.manufacturer",
+				},
+				manufacturerId: {
+					$first: "$product.manufacturerId",
+				},
+				organisation: {
+					$first: "$organisation",
+				},
+				address: {
+					$first: "$address",
+				},
+				productQuantity: {
+					$sum: "$inventoryDetails.quantity",
+				},
+				totalSales: {
+					$sum: "$inventoryDetails.totalSales",
+				},
+				inventoryAnalytics: {
+					$first: "$inventory_analytics",
+				},
+				sales: {
+					$sum: "$inventory_analytics.sales",
+				},
+				updatedAt: {
+					$first: "$inventoryDetails.updatedAt",
+				},
+			},
+		},
+		{
+			$match: {
+				sales: {
+					$gt: 0,
+				},
+			},
+		},
+		{
+			$match: matchQuery,
+		},
+		{
+			$sort: {
+				sales: -1,
+			},
+		},
+		{
+			$facet: {
+				paginatedResults: paginationQuery,
+				totalCount: [{ $count: "count" }],
+			},
+		},
+		{ $unwind: "$totalCount" },
+		{ $project: { paginatedResults: 1, totalCount: "$totalCount.count" } },
+	]);
+
+	return bestSellers;
+}
+
 exports.getAnalytics = [
 	auth,
 	async (req, res) => {
@@ -2048,232 +2267,161 @@ exports.bestSellers = [
 				id: req.user.organisationId,
 			});
 			const reportType = req.body?.reportType || null;
-			const isDist =
-				organisation?.type === "DISTRIBUTORS" || organisation?.type === "DROGUERIA" ? true : false;
+
+			let bestSellers;
+			let totalCount;
 			const isGoverningBody = organisation?.type === "GoverningBody";
 
-			let { country, state, city } = req.body;
-			let matchQueryStage1 = {
-				status: "ACTIVE",
-			};
-			if (country) {
-				let temp = {
-					...matchQueryStage1,
-					"country.countryName": country,
-				};
-				matchQueryStage1 = temp;
-			}
-			if (state) {
-				let temp = {
-					...matchQueryStage1,
-					"warehouseAddress.state": state,
-				};
-				matchQueryStage1 = temp;
-			}
-			if (city) {
-				let temp = {
-					...matchQueryStage1,
-					"warehouseAddress.city": city,
-				};
-				matchQueryStage1 = temp;
-			}
-
-			let { skip, limit } = req.body;
-			let paginationQuery = [];
-			if (skip) {
-				paginationQuery.push({ $skip: skip });
-			}
-			if (limit) {
-				paginationQuery.push({ $limit: limit });
-			}
-
-			let matchQuery = {};
-			if (!isDist) {
-				matchQuery[`manufacturerId`] = req.user.organisationId;
+			if (isGoverningBody) {
+				let res = await GovtBodyBestsellers(warehouse, date, req.body);
+				bestSellers = res[0].paginatedResults;
+				totalCount = res[0].totalCount;
 			} else {
-				if (req.user.warehouseId && req.user.warehouseId !== req.body.warehouseId) {
-					matchQuery = await getDistributedProducts(matchQuery, req.user.warehouseId, `_id`);
+				const isDist =
+					organisation?.type === "DISTRIBUTORS" || organisation?.type === "DROGUERIA"
+						? true
+						: false;
+				let matchQuery = {};
+				if (!isDist) {
+					matchQuery[`manufacturerId`] = req.user.organisationId;
+				} else {
+					if (req.user.warehouseId && req.user.warehouseId !== req.body.warehouseId) {
+						matchQuery = await getDistributedProducts(matchQuery, req.user.warehouseId, `_id`);
+					}
 				}
-			}
-			if (isGoverningBody) matchQuery = {};
-
-			const bestSellers = await WarehouseModel.aggregate([
-				{
-					$match: matchQueryStage1,
-				},
-				{
-					$lookup: {
-						from: "organisations",
-						let: { orgId: "$organisationId" },
-						pipeline: [
-							{ $match: { $expr: { $eq: ["$$orgId", "$id"] } } },
-							{ $project: { _id: 0, organisation: "$name" } },
-						],
-						as: "organisation",
+				bestSellers = await WarehouseModel.aggregate([
+					{
+						$match: {
+							id: warehouse,
+						},
 					},
-				},
-				{
-					$unwind: "$organisation",
-				},
-				{
-					$lookup: {
-						localField: "warehouseInventory",
-						from: "inventories",
-						foreignField: "id",
-						as: "inventory",
+					{
+						$lookup: {
+							localField: "warehouseInventory",
+							from: "inventories",
+							foreignField: "id",
+							as: "inventory",
+						},
 					},
-				},
-				{
-					$unwind: {
-						path: "$inventory",
-						preserveNullAndEmptyArrays: true,
+					{
+						$unwind: {
+							path: "$inventory",
+							preserveNullAndEmptyArrays: true,
+						},
 					},
-				},
-				{
-					$addFields: {
-						address: {
-							address: {
-								firstLine: "$warehouseAddress.firstLine",
-								city: "$warehouseAddress.city",
-								state: "$warehouseAddress.state",
-								country: "$country.countryName",
-								region: "$region.regionName",
+					{
+						$replaceWith: {
+							$mergeObjects: [null, "$inventory"],
+						},
+					},
+					{
+						$unwind: {
+							path: "$inventoryDetails",
+						},
+					},
+					{
+						$lookup: {
+							from: "products",
+							localField: "inventoryDetails.productId",
+							foreignField: "id",
+							as: "product",
+						},
+					},
+					{
+						$unwind: {
+							path: "$product",
+						},
+					},
+					{
+						$lookup: {
+							from: "inventory_analytics",
+							let: {
+								arg1: "$inventoryDetails.productId",
+								arg2: date,
+								arg3: "$id",
 							},
-						},
-					},
-				},
-				{
-					$replaceWith: {
-						$mergeObjects: [null, "$inventory", "$organisation", "$address"],
-					},
-				},
-				{
-					$unwind: {
-						path: "$inventoryDetails",
-					},
-				},
-				{
-					$lookup: {
-						from: "products",
-						localField: "inventoryDetails.productId",
-						foreignField: "id",
-						as: "product",
-					},
-				},
-				{
-					$unwind: {
-						path: "$product",
-					},
-				},
-				{
-					$lookup: {
-						from: "inventory_analytics",
-						let: {
-							arg1: "$inventoryDetails.productId",
-							arg2: date,
-							arg3: "$id",
-						},
-						pipeline: [
-							{
-								$match: {
-									$expr: {
-										$and: [
-											{
-												$eq: ["$productId", "$$arg1"],
-											},
-											{
-												$eq: ["$inventoryId", "$$arg3"],
-											},
-											{
-												$eq: ["$date", "$$arg2"],
-											},
-										],
+							pipeline: [
+								{
+									$match: {
+										$expr: {
+											$and: [
+												{
+													$eq: ["$productId", "$$arg1"],
+												},
+												{
+													$eq: ["$inventoryId", "$$arg3"],
+												},
+												{
+													$eq: ["$date", "$$arg2"],
+												},
+											],
+										},
 									},
 								},
+							],
+							as: "inventory_analytics",
+						},
+					},
+					{
+						$unwind: {
+							path: "$inventory_analytics",
+							preserveNullAndEmptyArrays: true,
+						},
+					},
+					{
+						$group: {
+							_id: "$inventoryDetails.productId",
+							productCategory: {
+								$first: "$product.type",
 							},
-						],
-						as: "inventory_analytics",
-					},
-				},
-				{
-					$unwind: {
-						path: "$inventory_analytics",
-						preserveNullAndEmptyArrays: true,
-					},
-				},
-				{
-					$group: {
-						_id: {
-							productId: "$inventoryDetails.productId",
-							orgId: "$organisation",
-						},
-						productCategory: {
-							$first: "$product.type",
-						},
-						productName: {
-							$first: "$product.name",
-						},
-						unitofMeasure: {
-							$first: "$product.unitofMeasure",
-						},
-						manufacturer: {
-							$first: "$product.manufacturer",
-						},
-						manufacturerId: {
-							$first: "$product.manufacturerId",
-						},
-						organisation: {
-							$first: "$organisation",
-						},
-						address: {
-							$first: "$address",
-						},
-						productQuantity: {
-							$sum: "$inventoryDetails.quantity",
-						},
-						totalSales: {
-							$sum: "$inventoryDetails.totalSales",
-						},
-						inventoryAnalytics: {
-							$first: "$inventory_analytics",
-						},
-						sales: {
-							$sum: "$inventory_analytics.sales",
-						},
-						updatedAt: {
-							$first: "$inventoryDetails.updatedAt",
+							productName: {
+								$first: "$product.name",
+							},
+							unitofMeasure: {
+								$first: "$product.unitofMeasure",
+							},
+							totalSales: {
+								$first: "$inventoryDetails.totalSales",
+							},
+							manufacturer: {
+								$first: "$product.manufacturer",
+							},
+							manufacturerId: {
+								$first: "$product.manufacturerId",
+							},
+							productQuantity: {
+								$sum: "$inventoryDetails.quantity",
+							},
+							inventoryAnalytics: {
+								$first: "$inventory_analytics",
+							},
+							updatedAt: {
+								$first: "$inventoryDetails.updatedAt",
+							},
 						},
 					},
-				},
-				{
-					$match: {
-						sales: {
-							$gt: 0,
+					{
+						$match: {
+							"inventoryAnalytics.sales": {
+								$gt: 0,
+							},
 						},
 					},
-				},
-				{
-					$match: matchQuery,
-				},
-				{
-					$sort: {
-						sales: -1,
+					{
+						$match: matchQuery,
 					},
-				},
-				{
-					$facet: {
-						paginatedResults: paginationQuery,
-						totalCount: [{ $count: "count" }],
+					{
+						$sort: {
+							"inventoryAnalytics.sales": -1,
+						},
 					},
-				},
-				{ $unwind: "$totalCount" },
-				{ $project: { paginatedResults: 1, totalCount: "$totalCount.count" } },
-			]);
+				]);
+			}
 
 			const result = {
-				bestSellers: bestSellers[0].paginatedResults,
-				totalCount: bestSellers[0].totalCount,
-				warehouseId: warehouse
+				bestSellers: bestSellers,
+				totalCount: totalCount,
+				warehouseId: warehouse,
 			};
 
 			if (reportType) {
@@ -2426,10 +2574,13 @@ exports.inStockReport = [
 				id: req.user.organisationId,
 			});
 			let inStockReport;
+			let totalCount;
 			const isGoverningBody = organisation?.type === "GoverningBody";
 			if (isGoverningBody) {
 				// Default warehouseId
-				inStockReport = await GovtBodyInstock(warehouse, date, req.body);
+				let res = await GovtBodyInstock(warehouse, date, req.body);
+				inStockReport = res[0].paginatedResults;
+				totalCount = res[0].totalCount;
 			} else {
 				const isDist =
 					organisation?.type === "DISTRIBUTORS" || organisation?.type === "DROGUERIA"
@@ -2438,7 +2589,7 @@ exports.inStockReport = [
 				let matchQuery1 = {};
 				let matchQuery2 = {};
 				let matchQuery3 = {};
-				const { productCategory, productName, manufacturer, organisation, id } = req.body;
+				const { productCategory, id } = req.body;
 				if (id) matchQuery3[`_id`] = id;
 				if (productCategory) matchQuery3[`productCategory`] = productCategory;
 				if (!isDist) {
@@ -2588,8 +2739,8 @@ exports.inStockReport = [
 			}
 
 			const result = {
-				inStockReport: inStockReport[0].paginatedResults,
-				totalCount: inStockReport[0].totalCount,
+				inStockReport: inStockReport,
+				totalCount: totalCount,
 				warehouseId: warehouse
 			};
 
@@ -2621,9 +2772,12 @@ exports.outOfStockReport = [
 				id: req.user.organisationId,
 			});
 			let outOfStockReport;
+			let totalCount;
 			const isGoverningBody = organisation?.type === "GoverningBody";
 			if (isGoverningBody) {
-				outOfStockReport = await GovtBodyOutstock(warehouse, date, req.body);
+				let res = await GovtBodyOutstock(warehouse, date, req.body);
+				outOfStockReport = res[0].paginatedResults;
+				totalCount = res[0].totalCount;
 			} else {
 				const isDist =
 					organisation?.type === "DISTRIBUTORS" || organisation?.type === "DROGUERIA"
@@ -2787,8 +2941,8 @@ exports.outOfStockReport = [
 			}
 
 			const result = {
-				outOfStockReport: outOfStockReport[0].paginatedResults,
-				totalCount: outOfStockReport[0].totalCount,
+				outOfStockReport: outOfStockReport,
+				totalCount: totalCount,
 				warehouseId: warehouse
 			};
 
@@ -2824,10 +2978,13 @@ exports.expiredStockReport = [
 				id: req.user.organisationId,
 			});
 			let expiredProducts;
+			let totalCount;
 			const isGoverningBody = organisation?.type === "GoverningBody";
 			if (isGoverningBody) {
 				// Default warehouseId
-				expiredProducts = await GovtBodyExpired(warehouse, date, req.body);
+				let res = await GovtBodyExpired(warehouse, date, req.body);
+				expiredProducts = res[0].paginatedResults;
+				totalCount = res[0].totalCount;
 			} else {
 				const isDist =
 					organisation?.type === "DISTRIBUTORS" || organisation?.type === "DROGUERIA"
@@ -3039,8 +3196,8 @@ exports.expiredStockReport = [
 			}
 
 			const result = {
-				expiredProducts: expiredProducts[0].paginatedResults,
-				totalCount: expiredProducts[0].totalCount,
+				expiredProducts: expiredProducts,
+				totalCount: totalCount,
 				warehouseId: warehouse
 			};
 
@@ -3079,10 +3236,13 @@ exports.nearExpiryStockReport = [
 				id: req.user.organisationId,
 			});
 			let nearExpiryProducts;
+			let totalCount;
 			const isGoverningBody = organisation?.type === "GoverningBody";
 			if (isGoverningBody) {
 				// Default warehouseId
-				nearExpiryProducts = await GovtBodyNearExpiry(warehouse, date, req.body);
+				let res = await GovtBodyNearExpiry(warehouse, date, req.body);
+				nearExpiryProducts = res[0].paginatedResults;
+				totalCount = res[0].totalCount;
 			} else {
 				const isDist =
 					organisation?.type === "DISTRIBUTORS" || organisation?.type === "DROGUERIA"
@@ -3295,8 +3455,8 @@ exports.nearExpiryStockReport = [
 			}
 
 			const result = {
-				nearExpiryProducts: nearExpiryProducts[0].paginatedResults,
-				totalCount: nearExpiryProducts[0].totalCount,
+				nearExpiryProducts: nearExpiryProducts,
+				totalCount: totalCount,
 				warehouseId: warehouse
 			};
 

@@ -28,6 +28,12 @@ export default (ComposedComponent, options) => {
 				if (userType === "GoverningBody") check = true;
 				else check = null;
 			}
+
+			if(options?.distributor) {
+				const userType = user?.type || userDetails?.type;
+				if (userType === "DISTRIBUTORS" || userType === "DROGUERIA") check = true;
+				else check = null;
+			}
       
 			switch (check) {
 				case null:
