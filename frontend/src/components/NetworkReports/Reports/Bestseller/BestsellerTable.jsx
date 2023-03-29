@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import { getBestsellerFilterOptions, getBestSellers } from "../../../../actions/networkActions";
 import { useTheme, styled } from "@mui/material/styles";
 import Filterbar from "../../Filter/Filterbar";
+import { Pagination } from "@mui/material";
 
 function TableHeader({
 	anchorEl,
@@ -50,7 +51,7 @@ function TableHeader({
 					onClick={(event) => handleClick(event, "productName")}
 				>
 					<p className="mi-body-sm f-400 mi-reset grey-400">Product Name</p>
-					<i class="fa-solid fa-sort grey-400"></i>
+					{/* <i class="fa-solid fa-sort grey-400"></i> */}
 				</div>
 				<Filterbar
 					title={t("product_name")}
@@ -87,7 +88,7 @@ function TableHeader({
 			<TableCell>
 				<div className="mi_report_table_head">
 					<p className="mi-body-sm f-400 mi-reset grey-400">No of Units Sold</p>
-					<i class="fa-solid fa-sort grey-400"></i>
+					{/* <i class="fa-solid fa-sort grey-400"></i> */}
 				</div>
 			</TableCell>
 			<TableCell>
@@ -113,7 +114,7 @@ function TableHeader({
 			<TableCell>
 				<div className="mi_report_table_head">
 					<p className="mi-body-sm f-400 mi-reset grey-400">Address</p>
-					<i class="fa-solid fa-sort grey-400"></i>
+					{/* <i class="fa-solid fa-sort grey-400"></i> */}
 				</div>
 			</TableCell>
 		</TableRow>
@@ -122,11 +123,12 @@ function TableHeader({
 
 export default function BestsellerTable({locationParams}) {
   const [bestseller, setBestseller] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [bestsellerFilters, setBestsellerFilters] = useState();
   const [reportWarehouse, setReportWarehouse] = useState("");
-
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [selectedColumn, setSelectedColumn] = useState("");
+  const [page, setPage] = useState(1);
   const [filterOptions, setFilterOptions] = useState({
     productCategories: [],
     productNames: [],
@@ -142,6 +144,10 @@ export default function BestsellerTable({locationParams}) {
 
   const theme = useTheme();
   const { t } = useTranslation();
+
+  const handlePageChange = (event, newValue) => {
+    setPage(newValue);
+  };
 
   const handleFilterUpdate = (fieldName, newValue) => {
     if (!fieldName) return;
@@ -176,20 +182,30 @@ export default function BestsellerTable({locationParams}) {
 	};
 
   const getBestsellers = async () => {
-    let payload = {
+		let payload = {
 			...selectedFilters,
 			...locationParams,
 		};
-    payload.reportWarehouse = reportWarehouse;
-    const bestSellers = await getBestSellers(payload);
-		if (bestSellers) setBestseller(bestSellers.data.bestSellers);
-		if (bestSellers) setReportWarehouse(bestSellers.data.warehouseId);
-  };
+		payload.reportWarehouse = reportWarehouse;
+		payload.skip = (page - 1) * 10;
+		payload.limit = 10;
+		const bestSellers = await getBestSellers(payload);
+		if (bestSellers) {
+			setBestseller(bestSellers.data.bestSellers);
+			setTotalCount(bestSellers.data.totalCount);
+			setReportWarehouse(bestSellers.data.warehouseId);
+		}
+	};
 
   useEffect(() => {
-    getBestsellers();
-    getBestSellerStockFilters();
-  }, [selectedFilters]);
+		getBestSellerStockFilters();
+		if(page === 1) getBestsellers();
+		setPage(1);
+  }, [selectedFilters, locationParams]);
+
+	useEffect(() => {
+		getBestsellers();
+	}, [page]);
 
   useEffect(() => {
 		if (bestsellerFilters?.length) {
@@ -235,6 +251,7 @@ export default function BestsellerTable({locationParams}) {
           ))}
         </TableBody>
       </Table>
+			<Pagination count={Math.ceil(totalCount / 10)} page={page} onChange={handlePageChange} />
     </TableContainer>
   );
 }

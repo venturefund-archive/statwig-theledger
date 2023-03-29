@@ -8,7 +8,7 @@ import TableRow from "@mui/material/TableRow";
 import ExpiredRow from "./ExpiredRow";
 import { useTranslation } from "react-i18next";
 import { getExpiredFilterOptions, getManufacturerExpiredStockReport } from "../../../../actions/networkActions";
-import { useTheme } from "@mui/material";
+import { Pagination, useTheme } from "@mui/material";
 import Filterbar from "../../Filter/Filterbar";
 
 function TableHeader({
@@ -87,13 +87,13 @@ function TableHeader({
       <TableCell>
         <div className="mi_report_table_head">
           <p className="mi-body-sm f-400 mi-reset grey-400">Batch Number</p>
-          <i class="fa-solid fa-sort grey-400"></i>
+          {/* <i class="fa-solid fa-sort grey-400"></i> */}
         </div>
       </TableCell>
       <TableCell>
         <div className="mi_report_table_head">
           <p className="mi-body-sm f-400 mi-reset grey-400">Expiry Date</p>
-          <i class="fa-solid fa-sort grey-400"></i>
+          {/* <i class="fa-solid fa-sort grey-400"></i> */}
         </div>
       </TableCell>
 			<TableCell>
@@ -119,7 +119,7 @@ function TableHeader({
       <TableCell>
         <div className="mi_report_table_head">
           <p className="mi-body-sm f-400 mi-reset grey-400">Location Details</p>
-          <i class="fa-solid fa-sort grey-400"></i>
+          {/* <i class="fa-solid fa-sort grey-400"></i> */}
         </div>
       </TableCell>
     </TableRow>
@@ -128,10 +128,12 @@ function TableHeader({
 
 export default function ExpiredTable({locationParams}) {
   const [expiredStock, setExpiredStock] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [expiredStockFilters, setExpiredStockFilters] = useState();
 	const [reportWarehouse, setReportWarehouse] = useState("");
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [selectedColumn, setSelectedColumn] = useState("");
+  const [page, setPage] = useState(1);
   const [filterOptions, setFilterOptions] = useState({
     productCategories: [],
     productNames: [],
@@ -147,6 +149,10 @@ export default function ExpiredTable({locationParams}) {
 
   const theme = useTheme();
   const { t } = useTranslation();
+
+  const handlePageChange = (event, newValue) => {
+    setPage(newValue);
+  };
 
   const handleFilterUpdate = (fieldName, newValue) => {
     if (!fieldName) return;
@@ -175,9 +181,14 @@ export default function ExpiredTable({locationParams}) {
 			...locationParams,
 		};
     payload.reportWarehouse = reportWarehouse;
+		payload.skip = (page - 1) * 10;
+		payload.limit = 10;
     const expiredStock = await getManufacturerExpiredStockReport(payload);
-    if (expiredStock) setExpiredStock(expiredStock.data.expiredProducts);
-    if (expiredStock) setReportWarehouse(expiredStock.data.warehouseId);
+    if (expiredStock) {
+      setExpiredStock(expiredStock.data.expiredProducts);
+			setTotalCount(expiredStock.data.totalCount);
+      setReportWarehouse(expiredStock.data.warehouseId);
+    }
   };
 
   const getExpiredStockFilters = async () => {
@@ -188,13 +199,21 @@ export default function ExpiredTable({locationParams}) {
     payload.reportWarehouse = reportWarehouse;
     payload.date = "";
     const expiredStockFilters = await getExpiredFilterOptions(payload);
-    if (expiredStockFilters) setExpiredStockFilters(expiredStockFilters.filters);
+    if (expiredStockFilters) {
+      setExpiredStockFilters(expiredStockFilters.filters);
+    }
   };
 
   useEffect(() => {
+    getExpiredStockFilters();
+    if(page === 1) getExpiredStock();
+    setPage(1);
+	}, [selectedFilters, locationParams]);
+
+
+  useEffect(() => {
 		getExpiredStock();
-		getExpiredStockFilters();
-	}, [selectedFilters]);
+	}, [page]);
 
   useEffect(() => {
 		if (expiredStockFilters?.length) {
@@ -240,6 +259,7 @@ export default function ExpiredTable({locationParams}) {
           ))}
         </TableBody>
       </Table>
+			<Pagination count={Math.ceil(totalCount / 10)} page={page} onChange={handlePageChange} />
     </TableContainer>
   );
 }

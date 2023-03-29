@@ -47,7 +47,11 @@ const NetworkingContainer = (props) => {
   const [MylocationFilter, setMylocationFilter] = useState(false);
 
   const getBestsellers = async () => {
-    const bestSellers = await getBestSellers(reportWarehouse, startDate);
+    const payload = {
+      reportWarehouse: reportWarehouse,
+      startDate: startDate
+    };
+    const bestSellers = await getBestSellers(payload);
     if (bestSellers) setBestseller(bestSellers.data.bestSellers);
   };
 
@@ -58,26 +62,33 @@ const NetworkingContainer = (props) => {
   };
   
   const getInstock = async (startDate) => {
-    const inStock = await getmanufacturerInStockReport(
-      reportWarehouse,
-      startDate,
-    );
+    const payload = {
+      reportWarehouse: reportWarehouse,
+      startDate: startDate
+    };
+
+    const inStock = await getmanufacturerInStockReport(payload);
     if (inStock) setInStock(inStock.data.inStockReport);
     if (inStock) setReportWarehouse(inStock.data.warehouseId);
   };
 
   const getInstockFilters = async () => {
-    const inStockFilters = await getInStockFilterOptions(reportWarehouse, "");
-    const outStockFilters = await getOutStockFilterOptions(reportWarehouse, "");
+    const payload = {
+      reportWarehouse: reportWarehouse,
+      startDate: startDate
+    };
+    const inStockFilters = await getInStockFilterOptions(payload);
+    const outStockFilters = await getOutStockFilterOptions(payload);
     if (inStockFilters) setInStockFilters(inStockFilters.filters);
     if (outStockFilters) setOutStockFilters(outStockFilters.filters);
   };
   
   const getOutStock = async () => {
-    const outStock = await getmanufacturerOutStockReport(
-      reportWarehouse,
-      startDate,
-    );
+    const payload = {
+      reportWarehouse: reportWarehouse,
+      startDate: startDate
+    };
+    const outStock = await getmanufacturerOutStockReport(payload);
     if (outStock) setOutStock(outStock.data.outOfStockReport);
     if (outStock) setReportWarehouse(outStock.data.warehouseId);
   };
@@ -117,12 +128,14 @@ const NetworkingContainer = (props) => {
 				productName = InstockId;
 			}
 
-			const inStock = await getmanufacturerInStockReport(
-				reportWarehouse,
-				startDate,
-				type,
-				productName,
-			);
+      const payload = {
+        reportWarehouse: reportWarehouse,
+        startDate: startDate,
+        type: type,
+				productName: productName,
+     };
+  
+			const inStock = await getmanufacturerInStockReport(payload);
 
 			setInStock(inStock.data.inStockReport);
 		}
@@ -146,13 +159,15 @@ const NetworkingContainer = (props) => {
 			} else {
 				productName = OutstockId;
 				setFilters({ productName: InstockId });
-			}
-			const outStock = await getmanufacturerOutStockReport(
-				reportWarehouse,
-				startDate,
-				type,
-				productName,
-			);
+      }
+      
+      const payload = {
+        reportWarehouse: reportWarehouse,
+        startDate: startDate,
+        type: type,
+				productName: productName,
+     };
+			const outStock = await getmanufacturerOutStockReport(payload);
 
 			setOutStock(outStock.data.outOfStockReport);
 		}

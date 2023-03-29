@@ -8,7 +8,7 @@ import TableRow from "@mui/material/TableRow";
 import InstocksRow from "./InstocksRow";
 import { useTranslation } from "react-i18next";
 import { getInStockFilterOptions, getmanufacturerInStockReport } from "../../../../actions/networkActions";
-import { useTheme } from "@mui/material";
+import { Pagination, useTheme } from "@mui/material";
 import Filterbar from "../../Filter/Filterbar";
 
 function TableHeader({
@@ -107,13 +107,13 @@ function TableHeader({
 			<TableCell>
 				<div className="mi_report_table_head">
 					<p className="mi-body-sm f-400 mi-reset grey-400">Location Details</p>
-					<i class="fa-solid fa-sort grey-400"></i>
+					{/* <i class="fa-solid fa-sort grey-400"></i> */}
 				</div>
 			</TableCell>
 			<TableCell>
 				<div className="mi_report_table_head">
 					<p className="mi-body-sm f-400 mi-reset grey-400">Quantity (UOM)</p>
-					<i class="fa-solid fa-sort grey-400"></i>
+					{/* <i class="fa-solid fa-sort grey-400"></i> */}
 				</div>
 			</TableCell>
 		</TableRow>
@@ -122,10 +122,12 @@ function TableHeader({
 
 export default function InstocksTable({locationParams}) {
   const [inStock, setInStock] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [inStockFilters, setInStockFilters] = useState();
 	const [reportWarehouse, setReportWarehouse] = useState("");
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [selectedColumn, setSelectedColumn] = useState("");
+  const [page, setPage] = useState(1);
   const [filterOptions, setFilterOptions] = useState({
     productCategories: [],
     productNames: [],
@@ -141,6 +143,10 @@ export default function InstocksTable({locationParams}) {
 
   const theme = useTheme();
   const { t } = useTranslation();
+
+	const handlePageChange = (event, newValue) => {
+    setPage(newValue);
+  };
 
   const handleFilterUpdate = (fieldName, newValue) => {
     if (!fieldName) return;
@@ -169,9 +175,14 @@ export default function InstocksTable({locationParams}) {
 			...locationParams,
 		};
     payload.reportWarehouse = reportWarehouse;
+		payload.skip = (page - 1) * 10;
+		payload.limit = 10;
     const inStock = await getmanufacturerInStockReport(payload);
-    if (inStock) setInStock(inStock.data.inStockReport);
-    if (inStock) setReportWarehouse(inStock.data.warehouseId);
+    if (inStock) {
+			setInStock(inStock.data.inStockReport);
+			setTotalCount(inStock.data.totalCount);
+			setReportWarehouse(inStock.data.warehouseId);		
+		}
   };
 
   const getInstockFilters = async () => {
@@ -186,9 +197,14 @@ export default function InstocksTable({locationParams}) {
   };
 
   useEffect(() => {
-		getInstock();
 		getInstockFilters();
-	}, [selectedFilters]);
+		if(page === 1) getInstock();
+    setPage(1);
+  }, [selectedFilters, locationParams]);
+  
+  useEffect(() => {
+		getInstock();
+	}, [page]);
 
   useEffect(() => {
 		if (inStockFilters?.length) {
@@ -234,6 +250,7 @@ export default function InstocksTable({locationParams}) {
 					))}
 				</TableBody>
 			</Table>
+			<Pagination count={Math.ceil(totalCount / 10)} page={page} onChange={handlePageChange} />
 		</TableContainer>
 	);
 }

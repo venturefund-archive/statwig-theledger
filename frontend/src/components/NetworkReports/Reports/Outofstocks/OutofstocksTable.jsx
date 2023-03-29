@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import ReportFilter from "../../Filter/ReportFilter";
 import { useTheme, styled } from "@mui/material/styles";
 import Filterbar from "../../Filter/Filterbar";
+import { Pagination } from "@mui/material";
 
 function TableHeader({
 	anchorEl,
@@ -112,13 +113,13 @@ function TableHeader({
 			<TableCell>
 				<div className="mi_report_table_head">
 					<p className="mi-body-sm f-400 mi-reset grey-400">Location Details</p>
-					<i class="fa-solid fa-sort grey-400"></i>
+					{/* <i class="fa-solid fa-sort grey-400"></i> */}
 				</div>
 			</TableCell>
 			<TableCell>
 				<div className="mi_report_table_head">
 					<p className="mi-body-sm f-400 mi-reset grey-400">No of Days</p>
-					<i class="fa-solid fa-sort grey-400"></i>
+					{/* <i class="fa-solid fa-sort grey-400"></i> */}
 				</div>
 			</TableCell>
 		</TableRow>
@@ -127,10 +128,12 @@ function TableHeader({
 
 export default function OutofstocksTable({locationParams}) {
   const [outStock, setOutStock] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [outStockFilters, setOutStockFilters] = useState();
   const [reportWarehouse, setReportWarehouse] = useState("");
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [selectedColumn, setSelectedColumn] = useState("");
+  const [page, setPage] = useState(1);
   const [filterOptions, setFilterOptions] = useState({
     productCategories: [],
     productNames: [],
@@ -146,6 +149,10 @@ export default function OutofstocksTable({locationParams}) {
 
   const theme = useTheme();
   const { t } = useTranslation();
+
+  const handlePageChange = (event, newValue) => {
+    setPage(newValue);
+  };
 
   const handleFilterUpdate = (fieldName, newValue) => {
     if (!fieldName) return;
@@ -180,20 +187,30 @@ export default function OutofstocksTable({locationParams}) {
 	};
 
 	const getOutStock = async () => {
-    let payload = {
+		let payload = {
 			...selectedFilters,
 			...locationParams,
 		};
-    payload.reportWarehouse = reportWarehouse;
+		payload.reportWarehouse = reportWarehouse;
+		payload.skip = (page - 1) * 10;
+		payload.limit = 10;
 		const outStock = await getmanufacturerOutStockReport(payload);
-    if (outStock) setOutStock(outStock.data.outOfStockReport);
-		if (outStock) setReportWarehouse(outStock.data.warehouseId);
+		if (outStock) {
+			setOutStock(outStock.data.outOfStockReport);
+			setTotalCount(outStock.data.totalCount);
+			setReportWarehouse(outStock.data.warehouseId);
+		}
 	};
 
 	useEffect(() => {
+    getOutstockFilters();
+		if(page === 1) getOutStock();
+    setPage(1);
+  }, [selectedFilters, locationParams]);
+  
+  useEffect(() => {
 		getOutStock();
-		getOutstockFilters();
-	}, [selectedFilters, locationParams]);
+	}, [page]);
 
   useEffect(() => {
 		if (outStockFilters?.length) {
@@ -217,91 +234,29 @@ export default function OutofstocksTable({locationParams}) {
   }, [outStockFilters]);
   
   return (
-    <TableContainer>
-      <Table sx={{ minWidth: 650 }} aria-label="simple table">
-        <TableHead>
-          <TableHeader
-            anchorEl={anchorEl}
-            setAnchorEl={setAnchorEl}
-            selectedColumn={selectedColumn}
-            handleClick={handleClick}
-            handleClose={handleClose}
-            theme={theme}
-            filterOptions={filterOptions}
-            selectedFilters={selectedFilters}
-            handleFilterUpdate={handleFilterUpdate}
-            t={t}
-          />
-        </TableHead>
-        <TableBody>
-        {outStock.map((product, index) => (
+		<TableContainer>
+			<Table sx={{ minWidth: 650 }} aria-label="simple table">
+				<TableHead>
+					<TableHeader
+						anchorEl={anchorEl}
+						setAnchorEl={setAnchorEl}
+						selectedColumn={selectedColumn}
+						handleClick={handleClick}
+						handleClose={handleClose}
+						theme={theme}
+						filterOptions={filterOptions}
+						selectedFilters={selectedFilters}
+						handleFilterUpdate={handleFilterUpdate}
+						t={t}
+					/>
+				</TableHead>
+				<TableBody>
+					{outStock.map((product, index) => (
 						<OutofstocksRow t={t} product={product} key={index} />
 					))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  );
+				</TableBody>
+			</Table>
+			<Pagination count={Math.ceil(totalCount / 10)} page={page} onChange={handlePageChange} />
+		</TableContainer>
+	);
 }
-
-const labels = [
-  {
-    name: "1 Filter Option",
-  },
-  {
-    name: "2 Filter Option",
-  },
-  {
-    name: "3 Filter Option",
-  },
-  {
-    name: "4 Filter Option",
-  },
-  {
-    name: "5 Filter Option",
-  },
-  {
-    name: "6 Filter Option",
-  },
-  {
-    name: "7 Filter Option",
-  },
-  {
-    name: "8 Filter Option",
-  },
-  {
-    name: "9 Filter Option",
-  },
-  {
-    name: "10 Filter Option",
-  },
-  {
-    name: "11 Filter Option",
-  },
-  {
-    name: "12 Filter Option",
-  },
-  {
-    name: "13 Filter Option",
-  },
-  {
-    name: "14 Filter Option",
-  },
-  {
-    name: "15 Filter Option",
-  },
-  {
-    name: "16 Filter Option",
-  },
-  {
-    name: "17 Filter Option",
-  },
-  {
-    name: "18 Filter Option",
-  },
-  {
-    name: "19 Filter Option",
-  },
-  {
-    name: "10 Filter Option",
-  },
-];
