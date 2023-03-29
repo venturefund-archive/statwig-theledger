@@ -1,4 +1,5 @@
 import React from "react";
+import { formatDate } from "../../../utils/dateHelper"
 import "./style.scss";
 
 const ViewShippingModal = (props) => {
@@ -10,17 +11,7 @@ const ViewShippingModal = (props) => {
     <div className='PO'>
       <p className='date-alignment mr-5'>
         Date:
-        {props.shipments.shippingOrderDetails[0].createdAt
-          .split("T")[0]
-          .split("-")[2] +
-          "/" +
-          props.shipments.shippingOrderDetails[0].createdAt
-            .split("T")[0]
-            .split("-")[1] +
-          "/" +
-          props.shipments.shippingOrderDetails[0].createdAt
-            .split("T")[0]
-            .split("-")[0]}
+        {formatDate(props.shipments.shippingOrderDetails[0].createdAt)}
       </p>
       <div className='d-flex flex-row ml-4 mb-5'>
         <div className='input-group'>

@@ -302,15 +302,15 @@ const EditRow = (props) => {
 										className="form-control text-center manufacturingPlaceholder"
 										onChange={(date) => {
 											let today = new Date();
-											if(isAfter(date, today)) {
+											if (isAfter(date, today)) {
 												setInventoryError(t("mfg_greater_than_today"));
 												setOpenFailInventory(true);
 												return;
 											}
-											if(expiryDate && isAfter(date, new Date(expiryDate))) {
+											if (expiryDate && isAfter(date, new Date(expiryDate))) {
 												setInventoryError(t("mfg_greater_than_exp"));
 												setOpenFailInventory(true);
-												return;												
+												return;
 											}
 											handleInventoryChange(idx, "manufacturingDate", date);
 										}}

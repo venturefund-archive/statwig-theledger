@@ -1,4 +1,5 @@
 import React from "react";
+import { formatDate } from "../../../utils/dateHelper"
 import "./style.scss";
 
 const PurchasePopUp = (props) => {
@@ -10,13 +11,7 @@ const PurchasePopUp = (props) => {
     <div className='PO'>
       <p className='date-alignment mr-5'>
         Date:
-        {props.shipments.poDetails[0].creationDate.split("T")[0].split("-")[2] +
-          "/" +
-          props.shipments.poDetails[0].creationDate
-            .split("T")[0]
-            .split("-")[1] +
-          "/" +
-          props.shipments.poDetails[0].creationDate.split("T")[0].split("-")[0]}
+        {formatDate(props.shipments.poDetails[0].creationDate)}
       </p>
       <div className='row'>
         <div className='col'>

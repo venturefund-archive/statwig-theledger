@@ -350,23 +350,9 @@ const CreateShipment = (props) => {
           id: toOrg.split("/")[0],
           locationId: toOrgLoc.split("/")[0],
         },
-        shippingDate: new Date(
-          shipmentDate.getTime() - shipmentDate.getTimezoneOffset() * 60000
-        ).toISOString(),
-        expectedDeliveryDate:
-          estimateDeliveryDate !== ""
-            ? new Date(
-              estimateDeliveryDate.getTime() -
-              estimateDeliveryDate.getTimezoneOffset() * 60000
-            ).toISOString()
-            : "",
-        actualDeliveryDate:
-          estimateDeliveryDate !== ""
-            ? new Date(
-              estimateDeliveryDate.getTime() -
-              estimateDeliveryDate.getTimezoneOffset() * 60000
-            ).toISOString()
-            : "",
+        shippingDate: shipmentDate,
+        expectedDeliveryDate: estimateDeliveryDate,
+        actualDeliveryDate: null,
         status: "CREATED",
         products: products,
         // poId: OrderDetails.purchaseOrderId ? OrderDetails.purchaseOrderId : null,
@@ -983,8 +969,8 @@ const CreateShipment = (props) => {
                       </label>
                       <div
                         className={`line ${errors.fromOrgLoc && touched.fromOrgLoc
-                            ? "border-danger"
-                            : ""
+                          ? "border-danger"
+                          : ""
                           }`}
                       >
                         {/* <DropdownButton
@@ -1211,8 +1197,8 @@ const CreateShipment = (props) => {
                       </label>
                       <div
                         className={`line ${errors.toOrgLoc && touched.toOrgLoc
-                            ? "border-danger"
-                            : ""
+                          ? "border-danger"
+                          : ""
                           }`}
                       >
                         {/* <DropdownButton
@@ -1305,8 +1291,8 @@ const CreateShipment = (props) => {
                     </label>
                     <input
                       className={`input refship ${errors.airWayBillNo && touched.airWayBillNo
-                          ? "border-danger"
-                          : ""
+                        ? "border-danger"
+                        : ""
                         }`}
                       type='text'
                       id='referenceShipmentId'
@@ -1330,8 +1316,8 @@ const CreateShipment = (props) => {
                       </label>
                       <div
                         className={`input refship ${errors.shipmentDate && touched.shipmentDate
-                            ? "border-danger"
-                            : ""
+                          ? "border-danger"
+                          : ""
                           }`}
                       >
                         <DatePicker
@@ -1404,9 +1390,9 @@ const CreateShipment = (props) => {
                       </label>
                       <div
                         className={`input refship ${errors.estimateDeliveryDate &&
-                            touched.estimateDeliveryDate
-                            ? "border-danger"
-                            : ""
+                          touched.estimateDeliveryDate
+                          ? "border-danger"
+                          : ""
                           }`}
                       >
                         <DatePicker
