@@ -36,7 +36,7 @@ const excel = require("node-excel-export");
 const { resolve } = require("path");
 const PdfPrinter = require("pdfmake");
 const { responses } = require("../helpers/responses");
-const { asyncForEach, getDateStringForMongo } = require("../helpers/utility");
+const { asyncForEach } = require("../helpers/utility");
 const { fromUnixTime, format, startOfMonth } = require("date-fns");
 const fontDescriptors = {
   Roboto: {
@@ -57,7 +57,7 @@ async function calculateCurrentLocationData(trackedShipment, allowedOrgs, tracki
     if (!allowedOrgs.includes(shipment.receiver.id)) allowedOrgs.push(shipment.receiver.id)
     if (currentLocationData[shipment.supplier.locationId]) {
       shipment.products.forEach(async function (product) {
-        for await (productSupplier of currentLocationData[shipment.supplier.locationId]) {
+        for await (const productSupplier of currentLocationData[shipment.supplier.locationId]) {
           if (productSupplier.productName == product.productName) {
             productSupplier.productQuantity += product.productQuantity;
           }
@@ -77,7 +77,7 @@ async function calculateCurrentLocationData(trackedShipment, allowedOrgs, tracki
     if (shipment.status == "RECEIVED") {
       if (currentLocationData[shipment.receiver.locationId]) {
         shipment.products.forEach(async function (product) {
-          for await (productReceiver of currentLocationData[shipment.receiver.locationId]) {
+          for await (const productReceiver of currentLocationData[shipment.receiver.locationId]) {
             if (productReceiver.productName == product.productName) {
               productReceiver.productQuantityDelivered += product.productQuantityDelivered;
             }
@@ -139,9 +139,9 @@ async function calculateCurrentLocationData(trackedShipment, allowedOrgs, tracki
         },
       },
     ]);
-    for await (warehouse of warehouseAtoms) {
-      for await (atom of warehouse.atoms) {
-        for await (shipmentProducts of shipmentDetails.products) {
+    for await (const warehouse of warehouseAtoms) {
+      for await (const atom of warehouse.atoms) {
+        for await (const shipmentProducts of shipmentDetails.products) {
           if (atom.batchNumbers.includes(shipmentProducts.batchNumber)) {
             atomsData.push(atom)
           }
@@ -149,12 +149,12 @@ async function calculateCurrentLocationData(trackedShipment, allowedOrgs, tracki
       }
     }
   }
-  for await (atom of atomsData) {
-    warehouseCurrentStock = await WarehouseModel.findOne({ warehouseInventory: atom.currentInventory });
-    organisation = await OrganisationModel.findOne({ id: warehouseCurrentStock.organisationId });
-    atomProduct = await ProductModel.findOne({ id: atom.productId });
+  for await (const atom of atomsData) {
+    const warehouseCurrentStock = await WarehouseModel.findOne({ warehouseInventory: atom.currentInventory });
+    const organisation = await OrganisationModel.findOne({ id: warehouseCurrentStock.organisationId });
+    const atomProduct = await ProductModel.findOne({ id: atom.productId });
     if (currentLocationData[warehouseCurrentStock.id]) {
-      for await (product of currentLocationData[warehouseCurrentStock.id]) {
+      for await (const product of currentLocationData[warehouseCurrentStock.id]) {
         if (product.productName == atomProduct.name && product?.stock) {
           product.stock += atom.quantity;
         }
@@ -429,7 +429,7 @@ async function poUpdate(id, quantity, poId, shipmentStatus, actor) {
 }
 
 const shipmentUpdate = async (id, quantity, shipmentId, atomId) => {
-  let shipmentUpdated = await ShipmentModel.findOneAndUpdate(
+  await ShipmentModel.findOneAndUpdate(
     {
       $and: [{ id: shipmentId }, { products: { $elemMatch: { productID: id, atomId: atomId } } }],
     },
@@ -544,18 +544,6 @@ exports.createShipment = [
     try {
       let data = req.body;
       data.originalReceiver = data.receiver;
-      if (req.body.shippingDate.includes("/")) {
-        var shipmentData = req.body.shippingDate.split("/");
-        const shippingDate =
-          shipmentData[2] +
-          "-" +
-          shipmentData[1] +
-          "-" +
-          shipmentData[0] +
-          "T00:00:00.000Z";
-        data.shippingDate = shippingDate;
-      }
-      data.shippingDate = new Date(data.shippingDate);
       const checkOverflow = await quantityOverflow(
         data.supplier.locationId,
         data.products
@@ -1109,18 +1097,6 @@ exports.createShipmentForTpl = [
       data.originalReceiver = data.receiver;
       data.tplOrgId = req.user.organisationId;
       data.isCustom = true;
-      if (req.body.shippingDate.includes("/")) {
-        var shipmentData = req.body.shippingDate.split("/");
-        const shippingDate =
-          shipmentData[2] +
-          "-" +
-          shipmentData[1] +
-          "-" +
-          shipmentData[0] +
-          "T00:00:00.000Z";
-        data.shippingDate = shippingDate;
-      }
-      data.shippingDate = new Date(data.shippingDate);
       const shipmentCounter = await CounterModel.findOneAndUpdate(
         {
           "counters.name": "shipmentId",
@@ -1282,18 +1258,6 @@ exports.newShipment = [
     try {
       let data = req.body;
       data.originalReceiver = data.receiver;
-      if (req.body.shippingDate.includes("/")) {
-        var shipmentData = req.body.shippingDate.split("/");
-        const shippingDate =
-          shipmentData[2] +
-          "-" +
-          shipmentData[1] +
-          "-" +
-          shipmentData[0] +
-          "T00:00:00.000Z";
-        data.shippingDate = shippingDate;
-      }
-      data.shippingDate = new Date(data.shippingDate);
       const shipmentCounter = await CounterModel.findOneAndUpdate(
         {
           "counters.name": "shipmentId",
@@ -1811,6 +1775,7 @@ exports.receiveShipment = [
               $set: {
                 status: "RECEIVED",
                 rejectionRate: shipmentRejectionRate,
+                actualDeliveryDate: new Date().toISOString(),
               },
             },
             { new: true }
@@ -2013,8 +1978,8 @@ exports.customReceiveShipment = [
         Products: JSON.stringify(shipmentData.products),
         Misc: "",
       };
-      const token =
-        req.headers["x-access-token"] || req.headers["authorization"];
+      // const token =
+      //   req.headers["x-access-token"] || req.headers["authorization"];
       // await axios.put(
       //   `${hf_blockchain_url}/api/v1/transactionapi/shipment/update`,
       //   bc_data,
@@ -2877,7 +2842,7 @@ exports.uploadImage = [
   auth,
   async (req, res) => {
     try {
-      const Id = req.query.id;
+      // const Id = req.query.id;
       const Upload = await uploadFile(req.file);
       await unlinkFile(req.file.path);
       // const update = await ShipmentModel.findOneAndUpdate(
@@ -2927,7 +2892,6 @@ exports.updateTrackingStatus = [
   auth,
   async (req, res) => {
     try {
-      let Upload = null;
       const data = {
         updateComment: req.body.updateComment,
         orgId: req.body.orgId,
@@ -3762,7 +3726,7 @@ exports.fetchOutboundShipments = [
               }
             );
 
-            Promise.all(findOutboundShipmentData).then(function (results) {
+            Promise.all(findOutboundShipmentData).then(function () {
               return apiResponse.successResponseWithMultipleData(
                 res,
                 "Outbound Shipment Records",
@@ -4508,7 +4472,6 @@ exports.exportInboundShipments = [
       }
 
       try {
-        let inboundShipmentsCount = await ShipmentModel.count(whereQuery);
         let inboundShipmentsList = await ShipmentModel.find(whereQuery).sort({ createdAt: -1 });
         if (!inboundShipmentsList || !inboundShipmentsList.length) {
           throw new Error("No shipment data found!");
@@ -5763,13 +5726,11 @@ exports.sensorHistory = [
 
 
 /**
- * API LINK
- * http://localhost:3002/shipmentmanagement/api/shipment/syncAtoms
+ * Internal API to Sync Atoms 
  */
 exports.syncAtoms = [
   async (req, res) => {
     try {
-      // MERGE CONFLICTS
       const allGroups = await AtomModel.aggregate([
         {
           $addFields: {

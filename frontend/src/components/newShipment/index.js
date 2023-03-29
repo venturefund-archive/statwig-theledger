@@ -270,21 +270,9 @@ const NewShipment = (props) => {
 					id: toOrg.split("/")[0],
 					locationId: toOrgLoc.split("/")[0],
 				},
-				shippingDate: new Date(
-					shipmentDate.getTime() - shipmentDate.getTimezoneOffset() * 60000,
-				).toISOString(),
-				expectedDeliveryDate:
-					estimateDeliveryDate !== ""
-						? new Date(
-							estimateDeliveryDate.getTime() - estimateDeliveryDate.getTimezoneOffset() * 60000,
-						).toISOString()
-						: "",
-				actualDeliveryDate:
-					estimateDeliveryDate !== ""
-						? new Date(
-							estimateDeliveryDate.getTime() - estimateDeliveryDate.getTimezoneOffset() * 60000,
-						).toISOString()
-						: "",
+				shippingDate: shipmentDate,
+				expectedDeliveryDate: estimateDeliveryDate,
+				actualDeliveryDate: null,
 				status: "CREATED",
 				products: products,
 				// poId: OrderDetails.purchaseOrderId ? OrderDetails.purchaseOrderId : null,
@@ -292,12 +280,12 @@ const NewShipment = (props) => {
 
 			var check = 0;
 
-			for (var i = 0; i < data.products.length; i++) {
-				if (typeof data.products[i].productQuantity === "undefined") {
+			for (const element of data.products) {
+				if (typeof element.productQuantity === "undefined") {
 					check = 1;
 					break;
 				}
-				if (typeof data.products[i].batchNumber === "undefined") {
+				if (typeof element.batchNumber === "undefined") {
 					check = 2;
 					break;
 				}
@@ -306,7 +294,7 @@ const NewShipment = (props) => {
 				setShipmentError(t("check_product_quantity"));
 				setOpenShipmentFail(true);
 			} else if (check === 2) {
-				setShipmentError(t("check_batch_numberssssssssssss"));
+				setShipmentError(t("check_batch_numbers"));
 				setOpenShipmentFail(true);
 			} else {
 				let i, j;
@@ -506,27 +494,27 @@ const NewShipment = (props) => {
 														dispatch(turnOn());
 														let result = await dispatch(getOrder(v.value));
 														setSenderOrgId(result.poDetails[0].customer.warehouse.id);
-														for (let i = 0; i < result.poDetails[0].products.length; i++) {
+														for (const element of result.poDetails[0].products) {
 															if (
-																result.poDetails[0].products[i].productQuantityShipped ||
-																result.poDetails[0].products[i].productQuantityDelivered
+																element.productQuantityShipped ||
+																element.productQuantityDelivered
 															) {
-																result.poDetails[0].products[i].productQuantity =
-																	parseInt(result.poDetails[0].products[i].productQuantity) -
+																element.productQuantity =
+																	parseInt(element.productQuantity) -
 																	parseInt(
-																		result.poDetails[0].products[i].productQuantityShipped || 0,
+																		element.productQuantityShipped || 0,
 																	) -
 																	parseInt(
-																		result.poDetails[0].products[i].productQuantityDelivered || 0,
+																		element.productQuantityDelivered || 0,
 																	);
 															}
-															result.poDetails[0].products[i].orderedQuantity =
-																result.poDetails[0].products[i].productQuantity;
+															element.orderedQuantity =
+																element.productQuantity;
 														}
 														setReceiverOrgLoc(
 															result.poDetails[0].customer.warehouse.title +
-																"/" +
-																result.poDetails[0].customer.warehouse.postalAddress,
+															"/" +
+															result.poDetails[0].customer.warehouse.postalAddress,
 														);
 														setReceiverOrgId(result.poDetails[0].customer.organisation.name);
 														setOrderDetails(result.poDetails[0]);
@@ -535,8 +523,8 @@ const NewShipment = (props) => {
 														let warehouse = senderWarehouses.filter((w) => {
 															let supplierWarehouse =
 																result.poDetails[0].supplier.organisation.warehouses;
-															for (let i = 0; i < supplierWarehouse.length; i++) {
-																return w.id === supplierWarehouse[i];
+															for (const element of supplierWarehouse) {
+																return w.id === element;
 															}
 														});
 														setFieldValue("fromOrg", senderOrganisation[0]);
@@ -544,30 +532,30 @@ const NewShipment = (props) => {
 														setFieldValue(
 															"toOrg",
 															result.poDetails[0].customer.organisation.id +
-																"/" +
-																result.poDetails[0].customer.organisation.name,
+															"/" +
+															result.poDetails[0].customer.organisation.name,
 														);
 														// settoOrgLocLabel(result.poDetails[0].customer.organisation.id + "/"+result.poDetails[0].customer.organisation.name)
 														let wa = result.poDetails[0].customer.warehouse;
 														setFieldValue(
 															"toOrgLoc",
 															result.poDetails[0].customer.shippingAddress.shippingAddressId +
+															"/" +
+															(wa?.warehouseAddress
+																? wa?.title +
 																"/" +
-																(wa?.warehouseAddress
-																	? wa?.title +
-																	  "/" +
-																	  wa?.warehouseAddress?.firstLine +
-																	  ", " +
-																	  wa?.warehouseAddress?.city
-																	: wa?.title + "/" + wa.postalAddress),
+																wa?.warehouseAddress?.firstLine +
+																", " +
+																wa?.warehouseAddress?.city
+																: wa?.title + "/" + wa.postalAddress),
 														);
 														settoOrgLocLabel(
 															wa?.warehouseAddress
 																? wa?.title +
-																		"/" +
-																		wa?.warehouseAddress?.firstLine +
-																		", " +
-																		wa?.warehouseAddress?.city
+																"/" +
+																wa?.warehouseAddress?.firstLine +
+																", " +
+																wa?.warehouseAddress?.city
 																: wa?.title + "/" + wa.postalAddress,
 														);
 														setFieldValue("rtype", result.poDetails[0].customer.organisation.type);
@@ -812,7 +800,7 @@ const NewShipment = (props) => {
 													noOptionsMessage={() => t("no_options")}
 													styles={customStyles}
 													isDisabled={true}
-													onChange={(v) => {}}
+													onChange={(v) => { }}
 													placeholder={senderOrganisation[0]}
 													defaultInputValue={senderOrganisation[0]}
 													value={senderOrganisation[0]}
@@ -833,9 +821,8 @@ const NewShipment = (props) => {
 												{t("organisation_location")}*
 											</label>
 											<div
-												className={`line ${
-													errors.fromOrgLoc && touched.fromOrgLoc ? "border-danger" : ""
-												}`}
+												className={`line ${errors.fromOrgLoc && touched.fromOrgLoc ? "border-danger" : ""
+													}`}
 											>
 												{/* <DropdownButton
                           name={senderOrgLoc}
@@ -897,9 +884,9 @@ const NewShipment = (props) => {
 														values.fromOrgLoc === ""
 															? t("select") + " " + t("organisation_location")
 															: {
-																	value: values.fromOrgLoc,
-																	label: FromOrgLabel,
-															  }
+																value: values.fromOrgLoc,
+																label: FromOrgLabel,
+															}
 													}
 													options={senderWarehouses.filter(
 														(ele, ind) =>
@@ -1020,9 +1007,8 @@ const NewShipment = (props) => {
 												{t("delivery_location")}*
 											</label>
 											<div
-												className={`line ${
-													errors.toOrgLoc && touched.toOrgLoc ? "border-danger" : ""
-												}`}
+												className={`line ${errors.toOrgLoc && touched.toOrgLoc ? "border-danger" : ""
+													}`}
 											>
 												{/* <DropdownButton
                           name={receiverOrgLoc}
@@ -1087,9 +1073,8 @@ const NewShipment = (props) => {
 											{t("transit_no")}
 										</label>
 										<input
-											className={`input refship ${
-												errors.airWayBillNo && touched.airWayBillNo ? "" : ""
-											}`}
+											className={`input refship ${errors.airWayBillNo && touched.airWayBillNo ? "" : ""
+												}`}
 											type="text"
 											id="referenceShipmentId"
 											name="airWayBillNo"
@@ -1111,9 +1096,8 @@ const NewShipment = (props) => {
 												{t("shipment_date")}*
 											</label>
 											<div
-												className={`input refship ${
-													errors.shipmentDate && touched.shipmentDate ? "border-danger" : ""
-												}`}
+												className={`input refship ${errors.shipmentDate && touched.shipmentDate ? "border-danger" : ""
+													}`}
 											>
 												<DatePicker
 													dateFormat="dd/MM/yyyy"
@@ -1127,10 +1111,8 @@ const NewShipment = (props) => {
 													onKeyDown={(e) => e.keyCode !== 8 && e.preventDefault()}
 													minDate={new Date()}
 													placeholderText={t("enter") + " " + t("shipment_date")}
-													//        <img src={Date} width="20" height="17" className="mr-2 mb-1" />
 													onChange={(date) => {
 														setFieldValue("shipmentDate", date);
-														// setShipmentDate(date);
 													}}
 													showYearDropdown
 													dateFormatCalendar="MMMM"
@@ -1178,11 +1160,10 @@ const NewShipment = (props) => {
 												{t("estimated_delivery_date")}
 											</label>
 											<div
-												className={`input refship ${
-													errors.estimateDeliveryDate && touched.estimateDeliveryDate
-														? "border-danger"
-														: ""
-												}`}
+												className={`input refship ${errors.estimateDeliveryDate && touched.estimateDeliveryDate
+													? "border-danger"
+													: ""
+													}`}
 											>
 												<DatePicker
 													dateFormat="dd/MM/yyyy"
@@ -1321,7 +1302,6 @@ const NewShipment = (props) => {
 										setAddProducts((prod) => [...newArr]);
 									}}
 									handleLabelIdChange={handleLabelIdChange}
-									FromLocationSelected={FromLocationSelected}
 								/>
 							) : (
 								products?.length <= 0 && (
@@ -1477,7 +1457,6 @@ const NewShipment = (props) => {
 										}}
 										handleLabelIdChange={handleLabelIdChange}
 										handleCategoryChange={onCategoryChange}
-										FromLocationSelected={FromLocationSelected}
 									/>
 									<div className="d-flex justify-content-between">
 										<button

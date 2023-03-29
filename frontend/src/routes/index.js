@@ -58,111 +58,107 @@ import ViewUsers from "../admin/pages/statwig-admin/ViewUsers/ViewUsers";
 import Configuration from "../admin/pages/statwig-admin/Configuration/Configuration";
 import Users from "../admin/pages/org-admin/Users/Users";
 import AdminProductList from "../admin/pages/org-admin/ProductList/ProductList";
+import NetworkReportContainer from "../containers/NetworkReports/NetworkReportContainer";
 
 
 const routes = (
-  <Switch>
-    <Route exact path='/' component={LandingContainer} />
-    <Route exact path='/signup'>
-      <ConnectionContainer connection="account" />
-    </Route>
-    <Route exact path='/neworganization'>
-      <ConnectionContainer connection="organization" />
-    </Route>
-    <Route exact path='/verify'>
-      <ConnectionContainer connection="verify" />
-    </Route>
-    <Route exact path='/success'>
-      <ConnectionContainer connection="success" />
-    </Route>
-    <Route path='/overview' component={requireAuth(OverView)} />
-    <Route path='/resetPassword' component={resetPasswordPage} />
-    <Route path='/profile' component={requireAuth(Profile)} />
-    <Route path='/settings' component={requireAuth(SettingsContainer)} />
-    <Route path='/adminprofile' component={requireAuth(AdminProfile)} />
-    <Route path='/shipments' component={requireAuth(Shipment)} />
-    <Route path='/newshipment' component={requireAuth(NewShipment)} />
-    <Route path='/createshipment' component={requireAuth(CreateShipment)} />
-    <Route path='/viewshipment/:id' component={requireAuth(ViewShipment)} />
-    <Route
-      path='/viewgmrshipment/:id'
-      component={requireAuth(ViewGMRShipment)}
-    />
-    <Route path='/reviewshipment' component={requireAuth(VerifyShipment)} />
-    <Route path='/inventory' component={requireAuth(Inventory)} />
-    <Route path='/productlist/:id' component={requireAuth(ProductList)} />
-    <Route path='/dashboard' component={requireAuth(DashBoard)} />
-    <Route path='/addproduct' component={requireAuth(AddProduct)} />
-    <Route path='/qrcode' component={requireAuth(QrCode)} />
-    <Route path='/newinventory' component={requireAuth(NewInventory)} />
-    <Route path='/reviewinventory' component={requireAuth(VerifyInventory)} />
-    <Route path='/track/:id?' component={requireAuth(TrackingContainer)} />
-    <Route path='/trackAndTrace' component={requireAuth(trackAndTrace)} />
-    <Route path='/tracing/:id' component={requireAuth(Track)} />
-    <Route path='/producttracing' component={requireAuth(ProductTracing)} />
-    {/* <Route path='/network' component={requireAuth(Network)} /> */}
-    <Route
-      path='/transactionHistory'
-      component={requireAuth(TransactionHistory)}
-    />
-    <Route path='/orders' component={requireAuth(Orders)} />
-    <Route path='/neworder' component={requireAuth(NewOrder)} />
-    <Route path='/vieworder/:id' component={requireAuth(ViewOrder)} />
-    <Route path='/revieworder' component={requireAuth(ReviewOrder)} />
-    <Route path='/updateStatus/:id/:returnToView' component={requireAuth(UpdateStatus)} />
-    <Route
-      path='/receiveShipment/:id'
-      component={requireAuth(ReceiveShipment)}
-    />
-    <Route path='/Addlocation' component={requireAuth(AddLocation)} />
-    <Route path='/lastMile' component={requireAuth(LastMile)} />
-    <Route path='/lastMile-Track' component={requireAuth(LastmileTrackingContainer)} />
-    <Route path='/lastMile-Centeral' component={requireAuth(LastmileCenteralContainer)} />
-    <Route path='/enterid' component={requireAuth(enterId)} />
-    <Route path='/editLocation/:id' component={requireAuth(EditLocation)} />
-    <Route
-      path='/transactionproducts'
-      component={requireAuth(TransactionProducts)}
-    />
-    <Route path='/productcategory' component={requireAuth(ProductCategory)} />
-    <Route
-      path='/productinventory/:category'
-      component={requireAuth(ProductInventory)}
-    />
-    <Route
-      path='/productoutofstock'
-      component={requireAuth(ProductInventory)}
-    />
-    <Route
-      path='/batchnearexpiry/:category'
-      component={requireAuth(BatchExpiry)}
-    />
-    <Route path='/batchexpired' component={requireAuth(BatchExpiry)} />
-    <Route
-      path='/viewinventory/:warehouseId'
-      component={requireAuth(ViewInventory)}
-    />
-    <Route path='/addNewCategory' component={requireAuth(AddNewCategory)} />
-    <Route path='/viewexpiry' component={requireAuth(ViewExpiry)} />
-    <Route path='/viewproduct' component={requireAuth(ViewProduct)} />
-    <Route path='/addNewProduct' component={requireAuth(AddProductContainer)} />
-    <Route path='/network' component={requireAuth(NetworkingContainer)} />
-    <Route path='/tracking/:id' component={requireAuth(TrackingContainer)} />
+	<Switch>
+		<Route exact path="/" component={LandingContainer} />
+		<Route exact path="/signup">
+			<ConnectionContainer connection="account" />
+		</Route>
+		<Route exact path="/neworganization">
+			<ConnectionContainer connection="organization" />
+		</Route>
+		<Route exact path="/verify">
+			<ConnectionContainer connection="verify" />
+		</Route>
+		<Route exact path="/success">
+			<ConnectionContainer connection="success" />
+		</Route>
+		<Route path="/overview" component={requireAuth(OverView)} />
+		<Route path="/resetPassword" component={resetPasswordPage} />
+		<Route path="/profile" component={requireAuth(Profile)} />
+		<Route path="/settings" component={requireAuth(SettingsContainer)} />
+		<Route path="/adminprofile" component={requireAuth(AdminProfile)} />
+		<Route path="/shipments" component={requireAuth(Shipment)} />
+		<Route path="/newshipment" component={requireAuth(NewShipment)} />
+		<Route path="/createshipment" component={requireAuth(CreateShipment)} />
+		<Route path="/viewshipment/:id" component={requireAuth(ViewShipment)} />
+		<Route path="/viewgmrshipment/:id" component={requireAuth(ViewGMRShipment)} />
+		<Route path="/reviewshipment" component={requireAuth(VerifyShipment)} />
+		<Route path="/inventory" component={requireAuth(Inventory)} />
+		<Route path="/productlist/:id" component={requireAuth(ProductList)} />
+		<Route path="/dashboard" component={requireAuth(DashBoard)} />
+		<Route path="/addproduct" component={requireAuth(AddProduct)} />
+		<Route path="/qrcode" component={requireAuth(QrCode)} />
+		<Route path="/newinventory" component={requireAuth(NewInventory)} />
+		<Route path="/reviewinventory" component={requireAuth(VerifyInventory)} />
+		<Route path="/track/:id?" component={requireAuth(TrackingContainer)} />
+		<Route path="/trackAndTrace" component={requireAuth(trackAndTrace)} />
+		<Route path="/tracing/:id" component={requireAuth(Track)} />
+		<Route path="/producttracing" component={requireAuth(ProductTracing)} />
+		{/* <Route path='/network' component={requireAuth(Network)} /> */}
+		<Route path="/transactionHistory" component={requireAuth(TransactionHistory)} />
+		<Route path="/orders" component={requireAuth(Orders)} />
+		<Route path="/neworder" component={requireAuth(NewOrder)} />
+		<Route path="/vieworder/:id" component={requireAuth(ViewOrder)} />
+		<Route path="/revieworder" component={requireAuth(ReviewOrder)} />
+		<Route path="/updateStatus/:id/:returnToView" component={requireAuth(UpdateStatus)} />
+		<Route path="/receiveShipment/:id" component={requireAuth(ReceiveShipment)} />
+		<Route path="/Addlocation" component={requireAuth(AddLocation)} />
+		<Route path="/lastMile" component={requireAuth(LastMile)} />
+		<Route path="/lastMile-Track" component={requireAuth(LastmileTrackingContainer)} />
+		<Route path="/lastMile-Centeral" component={requireAuth(LastmileCenteralContainer)} />
+		<Route path="/enterid" component={requireAuth(enterId)} />
+		<Route path="/editLocation/:id" component={requireAuth(EditLocation)} />
+		<Route path="/transactionproducts" component={requireAuth(TransactionProducts)} />
+		<Route path="/productcategory" component={requireAuth(ProductCategory)} />
+		<Route path="/productinventory/:category" component={requireAuth(ProductInventory)} />
+		<Route path="/productoutofstock" component={requireAuth(ProductInventory)} />
+		<Route path="/batchnearexpiry/:category" component={requireAuth(BatchExpiry)} />
+		<Route path="/batchexpired" component={requireAuth(BatchExpiry)} />
+		<Route path="/viewinventory/:warehouseId" component={requireAuth(ViewInventory)} />
+		<Route path="/addNewCategory" component={requireAuth(AddNewCategory)} />
+		<Route path="/viewexpiry" component={requireAuth(ViewExpiry)} />
+		<Route path="/viewproduct" component={requireAuth(ViewProduct)} />
+		<Route path="/addNewProduct" component={requireAuth(AddProductContainer)} />
+		<Route path="/network" component={requireAuth(NetworkingContainer, { distributor: true })} />
+		<Route
+			path="/admin-network-reports"
+			component={requireAuth(NetworkReportContainer, { governingBody: true })}
+		/>
+		<Route path="/tracking/:id" component={requireAuth(TrackingContainer)} />
 
-    {/* Admin Statwig */}
-    <Route path='/statwig/dashboard' component={requireAuth(Dashboard, true)} />
-    <Route path='/statwig/manage-organization' component={requireAuth(AdminOrganization, true)} />
-    <Route path='/statwig/view-locations/:orgId' component={requireAuth(Locations, true)} />
-    <Route path='/statwig/view-users/:warehouseId/:orgId' component={requireAuth(ViewUsers, true)} />
-    <Route path='/statwig/roles' component={requireAuth(Configuration, true)} />
+		{/* Admin Statwig */}
+		<Route
+			path="/statwig/dashboard"
+			component={requireAuth(Dashboard, { adminComponent: { adminComponent: true } })}
+		/>
+		<Route
+			path="/statwig/manage-organization"
+			component={requireAuth(AdminOrganization, { adminComponent: true })}
+		/>
+		<Route
+			path="/statwig/view-locations/:orgId"
+			component={requireAuth(Locations, { adminComponent: true })}
+		/>
+		<Route
+			path="/statwig/view-users/:warehouseId/:orgId"
+			component={requireAuth(ViewUsers, { adminComponent: true })}
+		/>
+		<Route path="/statwig/roles" component={requireAuth(Configuration, { adminComponent: true })} />
 
-    {/* Admin Organization */}
-    <Route path='/org/dashboard' component={requireAuth(OrgDashboard, true)} />
-    <Route path='/org/manage-users' component={requireAuth(Users, true)} />
-    <Route path='/org/product-list' component={requireAuth(AdminProductList, true)} />
+		{/* Admin Organization */}
+		<Route path="/org/dashboard" component={requireAuth(OrgDashboard, { adminComponent: true })} />
+		<Route path="/org/manage-users" component={requireAuth(Users, { adminComponent: true })} />
+		<Route
+			path="/org/product-list"
+			component={requireAuth(AdminProductList, { adminComponent: true })}
+		/>
 
-    <Route component={ErrorPageContainer} />
-  </Switch>
+		<Route component={ErrorPageContainer} />
+	</Switch>
 );
 
 export default routes;

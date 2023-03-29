@@ -1,10 +1,9 @@
 import React from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import {
   setTracingShipments,
   setVisibleShipments,
 } from "../../../actions/shipmentActions";
-import { useDispatch } from "react-redux";
 import Verifiedpic from "../../../assets/icons/Verifiedpic.png";
 import { formatDate } from "../../../utils/dateHelper";
 
@@ -22,7 +21,7 @@ const Table = (props) => {
       <div className='rTable'>
         <div className='overflow'>
           {props.shipments.map((shipment, index) => (
-            <div className='rTableRow'>
+            <div className='rTableRow' key={index}>
               <div className='rTableCell'>
                 <div className='combine-data'>
                   <img
