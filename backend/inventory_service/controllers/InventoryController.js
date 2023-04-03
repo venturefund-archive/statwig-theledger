@@ -1,5 +1,4 @@
 const { body, validationResult } = require("express-validator");
-const moveFile = require("move-file");
 require("../utils/date");
 const XLSX = require("xlsx");
 const apiResponse = require("../helpers/apiResponse");
@@ -15,7 +14,7 @@ const EmployeeModel = require("../models/EmployeeModel");
 const AtomModel = require("../models/AtomModel");
 const ProductModel = require("../models/ProductModel");
 const NotificationModel = require("../models/NotificationModel");
-const { format, startOfMonth } = require("date-fns");
+const { format, startOfMonth, parse } = require("date-fns");
 const { responses } = require("../helpers/responses");
 const logEvent = require("../../../utils/event_logger");
 const checkPermissions =
@@ -32,6 +31,40 @@ const AnalyticsModel = require("../models/AnalyticsModel");
 const CENTRAL_AUTHORITY_ID = null;
 const CENTRAL_AUTHORITY_NAME = null;
 const CENTRAL_AUTHORITY_ADDRESS = null;
+
+async function getRealTimeInventory(inventoryId) {
+	try {
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		const atoms = await AtomModel.aggregate([
+			{
+				$match: {
+					$and: [
+						{ currentInventory: inventoryId },
+						{ status: "HEALTHY" },
+						{
+							$or: [
+								{ "attributeSet.expDate": { $exists: false } },
+								{ "attributeSet.expDate": { $in: [null, ""] } },
+								{ "attributeSet.expDate": { $gte: today } },
+							],
+						},
+					],
+				},
+			},
+			{
+				$group: {
+					_id: "$productId",
+					quantity: { $sum: "$quantity" },
+				},
+			},
+			{ $sort: { createdAt: -1 } },
+		]);
+		return atoms;
+	} catch (err) {
+		throw err;
+	}
+}
 
 exports.getTotalCount = [
   auth,
@@ -549,19 +582,9 @@ exports.addProductsToInventory = [
   auth,
   body("products")
     .isLength({ min: 1 })
-    .withMessage("Products  must be specified."),
+    .withMessage("Products must be specified"),
   async (req, res) => {
     try {
-      const email = req.user.emailId;
-      const user_id = req.user.id;
-      const empData = await EmployeeModel.findOne({
-				emailId: req.user.emailId,
-				accountStatus: { $ne: "DELETED" },
-			});
-      const orgId = empData?.organisationId || req.user.organisationId || null;
-      const orgName = empData.name;
-      const orgData = await OrganisationModel.findOne({ id: orgId });
-      const address = orgData?.postalAddress;
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return apiResponse.validationErrorWithData(
@@ -570,12 +593,23 @@ exports.addProductsToInventory = [
           errors.array()
         );
       }
-      let payload = req.body;
       let warehouseId;
-      payload.products.forEach((element) => {
-        const product = ProductModel.findOne({ id: element.productId });
-        element.type = product.type;
+      const email = req.user.emailId;
+      const user_id = req.user.id;
+      const empData = await EmployeeModel.findOne({
+        emailId: req.user.emailId,
+        accountStatus: { $ne: "DELETED" },
       });
+      const orgId = empData?.organisationId || req.user.organisationId || null;
+      const orgName = empData.name;
+      const orgData = await OrganisationModel.findOne({ id: orgId });
+      const address = orgData?.postalAddress;
+      for (const element of req.body.products) {
+        const product = await ProductModel.findOne({
+          id: element.productId
+        });
+        element.type = product.type;
+      }
       const permission_request = {
         role: req.user.role,
         permissionRequired: ["addInventory"],
@@ -602,7 +636,7 @@ exports.addProductsToInventory = [
               res,
               responses(req.user.preferredLanguage).cant_find_warehouse_inv
             );
-          let atoms = [];
+          const atoms = [];
           products.forEach((product) => {
             const serialNumbers = product.serialNumbersRange?.split("-");
             if (serialNumbers?.length > 1) {
@@ -628,9 +662,7 @@ exports.addProductsToInventory = [
               responses(req.user.preferredLanguage).duplicated_sno
             );
           }
-          var duplicateBatch = false;
-          var duplicateBatchNo = "";
-          await utility.asyncForEach(products, async (product) => {
+          for (const product of products) {
             const inventoryId = warehouse.warehouseInventory;
             const checkProduct = await InventoryModel.find({
               $and: [
@@ -638,7 +670,8 @@ exports.addProductsToInventory = [
                 { "inventoryDetails.productId": product.productId },
               ],
             });
-            if (checkProduct != "") {
+            // Updating inventory
+            if (checkProduct && checkProduct?.length) {
               const exist_quantity = await InventoryModel.find(
                 { id: inventoryId },
                 {
@@ -665,6 +698,14 @@ exports.addProductsToInventory = [
             }
 
             const serialNumbers = product.serialNumbersRange?.split("-");
+            let mfgDate;
+            let expDate;
+            if(product?.mfgDate) {
+              mfgDate = new Date(product.mfgDate);
+            }
+            if(product?.expDate) {
+              expDate = new Date(product.expDate);
+						}
             let atomsArray = [];
             if (serialNumbers?.length > 1) {
               const serialNumbersFrom = parseInt(
@@ -690,12 +731,13 @@ exports.addProductsToInventory = [
                   currentInventory: inventory.id,
                   poIds: [],
                   shipmentIds: [],
+                  currentShipment: null,
                   txIds: [],
                   batchNumbers: [product.batchNumber],
                   status: "HEALTHY",
                   attributeSet: {
-                    mfgDate: product.mfgDate,
-                    expDate: product.expDate,
+                    mfgDate: mfgDate,
+                    expDate: expDate,
                   },
                   eolInfo: {
                     eolId: "IDN29402-23423-23423",
@@ -718,13 +760,14 @@ exports.addProductsToInventory = [
                 currentInventory: inventory.id,
                 poIds: [],
                 shipmentIds: [],
+                currentShipment: null,
                 txIds: [],
                 batchNumbers: [product.batchNumber],
                 status: "HEALTHY",
                 attributeSet: {
-                  mfgDate: product.mfgDate,
-                  expDate: product.expDate,
-                },
+                  mfgDate: mfgDate,
+                  expDate: expDate,
+              },
                 eolInfo: {
                   eolId: "IDN29402-23423-23423",
                   eolDate: "2021-03-31T18:30:00.000Z",
@@ -733,23 +776,46 @@ exports.addProductsToInventory = [
               };
               atomsArray.push(atom);
             }
+
+            const insertAtomsArray = [];
             for (let i = 0; i < atomsArray.length; i++) {
-              let batchDup = await AtomModel.findOne({
-                batchNumbers: atomsArray[i].batchNumbers[0],
-                currentInventory: warehouse.warehouseInventory,
-              });
-              if (!batchDup) {
-                continue;
+              let expDateString = null;
+              if(expDate) {
+                let yyyy = expDate.getFullYear();
+                let mm = expDate.getMonth() + 1;
+                let dd = expDate.getDate();
+                expDateString = `${yyyy}-${(mm > 9 ? "" : "0") + mm}-${(dd > 9 ? "" : "0") + dd}`;
               }
-              if (process.env.PROD != "ABINBEV") {
-                if (batchDup) {
-                  duplicateBatch = true;
-                  duplicateBatchNo = batchDup.batchNumbers[0];
-                  break;
-                }
+              const atomExists = await AtomModel.aggregate([
+								{
+									$addFields: {
+										expDateString: {
+											$dateToString: { format: "%Y-%m-%d", date: "$attributeSet.expDate" },
+										},
+									},
+								},
+								{
+									$match: {
+										productId: atomsArray[i].productId,
+										batchNumbers: atomsArray[i].batchNumbers[0],
+                    currentInventory: warehouse.warehouseInventory,
+                    expDateString: expDateString,
+                    status: {$in: ["HEALTHY", "CONSUMED"]}
+									},
+								},
+              ]);
+              const batchDup = atomExists?.length ? atomExists[0] : null;
+              if (batchDup) {
+                await AtomModel.updateOne(
+                  { id: batchDup.id },
+                  { quantity: batchDup.quantity + atomsArray[i].quantity, status: "HEALTHY" },
+                );
+              } else {
+                insertAtomsArray.push(atomsArray[i]);
               }
             }
-            if (atomsArray.length > 0) await AtomModel.insertMany(atomsArray);
+
+            if (insertAtomsArray.length > 0) await AtomModel.insertMany(insertAtomsArray);
             await inventory.save();
             await InventoryAnalyticsModel.updateOne(
               {
@@ -768,14 +834,6 @@ exports.addProductsToInventory = [
               {
                 upsert: true,
               }
-            );
-          });
-          if (duplicateBatch) {
-            return apiResponse.ErrorResponse(
-              res,
-              responses(req.user.preferredLanguage).batchExists(
-                duplicateBatchNo
-              )
             );
           }
           const event_data = {
@@ -809,7 +867,7 @@ exports.addProductsToInventory = [
               },
             },
             payload: {
-              data: payload,
+              data: req.body
             },
           };
           await logEvent(event_data);
@@ -821,6 +879,7 @@ exports.addProductsToInventory = [
           res.json(responses(req.user.preferredLanguage).no_permission);
         }
       });
+    
     } catch (err) {
       console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
@@ -829,194 +888,86 @@ exports.addProductsToInventory = [
 ];
 
 exports.addInventoriesFromExcel = [
-  auth,
-  async (req, res) => {
-    try {
-      const { role } = req.user;
-      const permission_request = {
-        role: role,
-        permissionRequired: ["addInventory"],
-      };
-      const email = req.user.emailId;
-      const user_id = req.user.id;
-      const empData = await EmployeeModel.findOne({
-				emailId: req.user.emailId,
-				accountStatus: { $ne: "DELETED" },
+	auth,
+	async (req, res) => {
+		try {
+			const { role } = req.user;
+			const permission_request = {
+				role: role,
+				permissionRequired: ["addInventory"],
+			};
+			checkPermissions(permission_request, async (permissionResult) => {
+				try {
+					if (permissionResult.success) {
+						const dir = `uploads`;
+						if (!fs.existsSync(dir)) {
+							fs.mkdirSync(dir);
+						}
+            const workbook = XLSX.readFile(req.file.path);
+						const data = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {
+							dateNF: 'yyyy-mm-dd',
+							cellDates: true,
+							raw: false,
+            });
+
+						const formatedData = new Array();
+						for (const [index, prod] of data.entries()) {
+							const productCategory = prod?.["PRODUCT CATEGORY"] || prod?.["CATEGORIA DE PRODUCTO"];
+							const productName = prod?.["PRODUCT NAME"] || prod?.["NOMBRE DEL PRODUCTO"];
+							const batchNumber = prod?.["BATCH NO"] || prod?.["LOT NUMBER"];
+							const manufacturerName = prod?.["MANUFACTURER"] || prod?.["FABRICANTE"];
+							const quantity = prod?.["QUANTITY"] || prod?.["CANTIDAD"] || 1;
+							const unitOfMeasure = prod?.["UNITS"] || prod?.["UNIDAD DE MEDIDA"];
+							let mfgDate = prod?.["MFG DATE"] || prod?.["FECHA DE FABRICACION"];
+							let expDate = prod?.["EXP DATE"] || prod?.["FECHA DE VENCIMIENTO"];
+							const product = await ProductModel.findOne({
+								name: productName?.trim(),
+							});
+							if (product) {
+								formatedData[index] = {
+									productId: product.id,
+									type: product.type,
+									categories: productCategory,
+									productName: productName,
+									batchNumber: batchNumber,
+									manufacturer: manufacturerName,
+									quantity: quantity,
+									unitofMeasure: { id: unitOfMeasure, name: unitOfMeasure },
+									...(mfgDate ? { manufacturingDate: mfgDate } : {}),
+									...(expDate ? { expiryDate: expDate } : {}),
+								};
+							} else {
+								return apiResponse.ErrorResponse(res, "Product Doesn't exist in the inventory");
+							}
+            }
+            const validRecords = utility.excludeExpireProduct(formatedData);
+            
+            const result = {
+							validRecords: validRecords,
+							invalidRecordsCount: formatedData.length - validRecords.length,
+						};
+
+						return apiResponse.successResponseWithData(
+							res,
+							responses(req.user.preferredLanguage).success,
+							result,
+						);
+					} else {
+						return apiResponse.ErrorResponse(
+							res,
+							responses(req.user.preferredLanguage).no_permission,
+						);
+					}
+				} catch (err) {
+					console.log(err);
+					return apiResponse.ErrorResponse(res, err.message);
+				}
 			});
-      const orgId = empData.organisationId;
-      const orgName = empData.name;
-      checkPermissions(permission_request, async (permissionResult) => {
-        if (permissionResult.success) {
-          const dir = `uploads`;
-          if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir);
-          }
-          await moveFile(req.file.path, `${dir}/${req.file.originalname}`);
-          const workbook = XLSX.readFile(`${dir}/${req.file.originalname}`);
-          const sheet_name_list = workbook.SheetNames;
-          let data = XLSX.utils.sheet_to_json(
-            workbook.Sheets[sheet_name_list[0]],
-            { dateNF: "dd/mm/yyyy;@", cellDates: true, raw: false }
-          );
-
-          // Validate excel format
-          // I'm not sure how to put camel case field names in spanish so only validating english
-          const expectedColNames = [
-            "productName",
-            "manufacturerName",
-            "quantity",
-            "unitOfMeasure.name",
-            "manufacturingDate",
-            "expiryDate",
-            "storageConditionsMax",
-            "batchNumber",
-            "serialNumber",
-            "storageConditionsMin",
-            "orderID",
-          ];
-          if (!utility.compareArrays(expectedColNames, Object.keys(data[0]))) {
-            // Invalid format logic
-            return apiResponse.validationErrorWithData(
-              res,
-              responses(req.user.preferredLanguage).invalid_excel,
-              Object.keys(data[0])
-            );
-          }
-
-          const resData = utility.excludeExpireProduct(data);
-
-          const { address } = req.user;
-          let count = 0;
-          const chunkSize = 50;
-          let limit = chunkSize;
-          let skip = 0;
-
-          async function recursiveFun() {
-            skip = chunkSize * count;
-            count++;
-            limit = chunkSize * count;
-            const chunkedData = resData.slice(skip, limit);
-            let chunkUrls = [];
-            const serialNumbers = chunkedData.map((inventory) => {
-              return { id: inventory.serialNumber.trim() };
-            });
-            const inventoriesFound = await AtomModel.findOne({
-              $or: serialNumbers,
-            });
-            if (inventoriesFound) {
-              const newNotification = new NotificationModel({
-                owner: address,
-                message: `Your inventories from excel is failed to add on ${new Date().toLocaleString()} due to Duplicate Inventory found ${
-                  inventoriesFound.serialNumber
-                }`,
-              });
-              await newNotification.save();
-              return apiResponse.ErrorResponse(
-                res,
-                "Duplicate Inventory Found"
-              );
-            }
-            chunkedData.forEach((inventory) => {
-              inventory.serialNumber = inventory.serialNumber.trim();
-              const userData = {
-                stream: stream_name,
-                key: inventory.serialNumber.trim(),
-                address: address,
-                data: inventory,
-              };
-              const postRequest = axios.post(
-                `${blockchain_service_url}/publishExcelData`,
-                userData
-              );
-              chunkUrls.push(postRequest);
-            });
-            axios
-              .all(chunkUrls)
-              .then(
-                axios.spread(async (...responses) => {
-                  const inventoryData = responses.map(
-                    (response) => response.data
-                  );
-                  if (limit < resData.length) {
-                    recursiveFun();
-                  }
-                })
-              )
-              .catch((errors) => {
-                console.log(errors);
-              });
-          }
-          recursiveFun();
-          for (const [index, prod] of resData.entries()) {
-            let product = await ProductModel.findOne({
-              name: prod.productName,
-            });
-            if (product) {
-              resData[index].productId = product.id;
-              resData[index].type = product.type;
-            } else {
-              return apiResponse.ErrorResponse(
-                res,
-                // preferred Language in not working in correct manner.
-                // responses(req.user.preferredLanguage).product_doesnt_exist
-                "Product_Doesn't_exist_in_the_inventory"
-              );
-            }
-          }
-
-          const event_data = {
-            eventID: cuid(),
-            eventTime: new Date().toISOString(),
-            eventType: {
-              primary: "ADD",
-              description: "INVENTORY",
-            },
-            actor: {
-              actorid: user_id || null,
-              actoruserid: email || null,
-            },
-            actorWarehouseId: req.user.warehouseId,
-            stackholders: {
-              ca: {
-                id: CENTRAL_AUTHORITY_ID || null,
-                name: CENTRAL_AUTHORITY_NAME || null,
-                address: CENTRAL_AUTHORITY_ADDRESS || null,
-              },
-              actororg: {
-                id: orgId || req.user.organisationId || null,
-                name: orgName || null,
-                address: address || null,
-              },
-              secondorg: {
-                id: null,
-                name: null,
-                address: null,
-              },
-            },
-            payload: {
-              data: {
-                products: [...resData],
-              },
-            },
-          };
-          logEvent(event_data);
-          return apiResponse.successResponseWithData(
-            res,
-            responses(req.user.preferredLanguage).success,
-            resData
-          );
-        } else {
-          return apiResponse.ErrorResponse(
-            res,
-            responses(req.user.preferredLanguage).no_permission
-          );
-        }
-      });
-    } catch (err) {
-      console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
-    }
-  },
+		} catch (err) {
+			console.log(err);
+			return apiResponse.ErrorResponse(res, err.message);
+		}
+	},
 ];
 
 exports.getInventoryDetails = [
@@ -1384,8 +1335,9 @@ exports.getProductListCounts = [
       const val = InventoryId[0]?.warehouseInventory;
       const productList = await InventoryModel.find({ id: val });
       const list = productList[0]?.inventoryDetails;
+      const atoms = await getRealTimeInventory(val);
 
-      if(!list || !list?.length) {
+      if (!list || !list?.length) {
         return apiResponse.successResponseWithData(res, []);
       }
 
@@ -1402,11 +1354,13 @@ exports.getProductListCounts = [
           product[0] &&
           product[0].name
         ) {
+          const atomExists = atoms.find((atom) => atom._id === productId);
+          const qty = atomExists?.quantity || 0;
           productObj = {
             productCategory: product && product[0] && product[0].type,
             productName: product && product[0] && product[0].name,
             productId: product && product[0] && product[0].id,
-            quantity: (list && list[0] && list[j].quantity) || 0,
+            quantity: qty,
             manufacturer: product && product[0] && product[0].manufacturer,
             unitofMeasure: product && product[0] && product[0].unitofMeasure,
           };
@@ -2216,9 +2170,7 @@ exports.uploadSalesData = [
       if (recordExists && recordExists.length) {
         throw new Error("Record for the given month already exists!");
       }
-
-      await moveFile(req.file.path, `${dir}/${req.file.originalname}`);
-      const workbook = XLSX.readFile(`${dir}/${req.file.originalname}`);
+      const workbook = XLSX.readFile(req.file.path);
       const sheet_name_list = workbook.SheetNames;
 
       var range = XLSX.utils.decode_range(
@@ -2297,51 +2249,41 @@ exports.getBatchNearExpiration = [
 
       const today = new Date();
       const nextMonth = new Date();
-      nextMonth.setDate(today.getDate() + 30);
+      nextMonth.setDate(today.getDate() + 31);
 
       const warehouse = await WarehouseModel.findOne({ id: warehouseId });
       if (warehouse) {
-        const result = await AtomModel.aggregate([
-          {
-            $match: {
-              $and: [
-                {
-                  "attributeSet.expDate": {
-                    $gte: today.toISOString(),
-                    $lt: nextMonth.toISOString(),
-                  },
-                },
-                {
-                  $expr: {
-                    $in: [warehouse.warehouseInventory, "$inventoryIds"],
-                  },
-                },
-                { "attributeSet.mfgDate": { $ne: "" } },
-                { "attributeSet.expDate": { $ne: "" } },
-              ],
-            },
-          },
-          {
-            $lookup: {
-              from: "products",
-              localField: "productId",
-              foreignField: "id",
-              as: "products",
-            },
-          },
-          { $unwind: "$products" },
-        ]);
-        return apiResponse.successResponseWithData(
-          res,
-          "Near expiring batch Details",
-          result
-        );
-      } else {
-        return apiResponse.ErrorResponse(
-          res,
-          responses(req.user.preferredLanguage).warehouse_not_found
-        );
-      }
+				const result = await AtomModel.aggregate([
+					{
+						$match: {
+							$and: [
+								{ "attributeSet.expDate": { $exists: true } },
+								{ "attributeSet.expDate": { $nin: ["", null] } },
+								{ "attributeSet.expDate": { $gte: today } },
+								{ "attributeSet.expDate": { $lt: nextMonth } },
+								{ currentInventory: warehouse?.warehouseInventory },
+								{ batchNumbers: { $ne: "" } },
+							],
+						},
+					},
+					{ $sort: { "attributeSet.expDate": 1 } },
+					{
+						$lookup: {
+							from: "products",
+							localField: "productId",
+							foreignField: "id",
+							as: "products",
+						},
+					},
+					{ $unwind: "$products" },
+				]);
+				return apiResponse.successResponseWithData(res, "Near expiring batch Details", result);
+			} else {
+				return apiResponse.ErrorResponse(
+					res,
+					responses(req.user.preferredLanguage).warehouse_not_found,
+				);
+			}
     } catch (err) {
       console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
@@ -2359,36 +2301,38 @@ exports.getBatchExpired = [
         : (warehouseId = req.user.warehouseId);
       const warehouse = await WarehouseModel.findOne({ id: warehouseId });
       if (warehouse) {
+        let today = new Date();
         const result = await AtomModel.aggregate([
-          {
-            $match: {
-              $and: [
-                {
-                  "attributeSet.expDate": {
-                    $lt: new Date().toISOString(),
-                  },
-                },
-                {
-                  $expr: {
-                    $in: [warehouse.warehouseInventory, "$inventoryIds"],
-                  },
-                },
-                { batchNumbers: { $ne: "" } },
-                { "attributeSet.mfgDate": { $ne: "" } },
-                { "attributeSet.expDate": { $ne: "" } },
-              ],
-            },
-          },
-          {
-            $lookup: {
-              from: "products",
-              localField: "productId",
-              foreignField: "id",
-              as: "products",
-            },
-          },
-          { $unwind: "$products" },
-        ]);
+					{
+						$match: {
+							$and: [
+								{
+									"attributeSet.expDate": {
+										$lt: today,
+									},
+								},
+								{ currentInventory: warehouse.warehouseInventory },
+								{ batchNumbers: { $ne: "" } },
+								{
+									$or: [
+										{ "attributeSet.expDate": { $exists: true } },
+										{ "attributeSet.expDate": { $nin: ["", null] } },
+									],
+								},
+							],
+						},
+					},
+					{ $sort: { "attributeSet.expDate": -1 } },
+					{
+						$lookup: {
+							from: "products",
+							localField: "productId",
+							foreignField: "id",
+							as: "products",
+						},
+					},
+					{ $unwind: "$products" },
+				]);
         return apiResponse.successResponseWithData(
           res,
           "Expired Batch Details",
@@ -2414,22 +2358,23 @@ exports.getBatchWarehouse = [
       const inventoryId = req.query.inventory_id;
       const productId = req.query.product_id;
       const result = await AtomModel.aggregate([
-        {
-          $match: {
-            productId: productId,
-            currentInventory: inventoryId,
-          },
-        },
-        {
-          $lookup: {
-            from: "products",
-            localField: "productId",
-            foreignField: "id",
-            as: "products",
-          },
-        },
-        { $unwind: "$products" },
-      ]);
+				{
+					$match: {
+						productId: productId,
+						currentInventory: inventoryId,
+						status: { $in : ["HEALTHY", "EXPIRED", "CONSUMED"]},
+					},
+				},
+				{
+					$lookup: {
+						from: "products",
+						localField: "productId",
+						foreignField: "id",
+						as: "products",
+					},
+				},
+				{ $unwind: "$products" },
+			]);
       return apiResponse.successResponseWithData(
         res,
         "Warehouse Batch Details",
@@ -2537,9 +2482,9 @@ exports.deleteProductsFromInventory = [
       const user_id = req.user.id;
       const email = req.user.emailId;
       const empData = await EmployeeModel.findOne({
-				emailId: req.user.emailId,
-				accountStatus: { $ne: "DELETED" },
-			});
+        emailId: req.user.emailId,
+        accountStatus: { $ne: "DELETED" },
+      });
       const orgId = empData.organisationId;
       const orgData = await OrganisationModel.findOne({
         id: orgId,
@@ -2554,14 +2499,14 @@ exports.deleteProductsFromInventory = [
       const receiverAddress = receiverOrgData.postalAddress;
       const payload = req.body;
 
-      utility.asyncForEach(data.products, async (product) => {
+      for (const product of data.products) {
         await inventoryTransfer(
           product?.productID,
           product?.productQuantity,
           suppWarehouseDetails?.warehouseInventory,
           recvWarehouseDetails?.warehouseInventory
         );
-      });
+      }
 
       const datee = new Date().toISOString();
       const evid = Math.random().toString(36).slice(2);
@@ -2630,70 +2575,59 @@ exports.deleteProductsFromInventory = [
 ];
 
 exports.searchProduct = [
-  auth,
-  async (req, res) => {
-    try {
-      let warehouseId;
-      const permission_request = {
-        role: req.user.role,
-        permissionRequired: ["searchByProductName"],
-      };
-      checkPermissions(permission_request, async (permissionResult) => {
-        if (permissionResult.success) {
-          const { productName, productType } = req.query;
-          req.query.warehouseId
-            ? (warehouseId = req.query.warehouseId)
-            : (warehouseId = req.user.warehouseId);
-          const warehouse = await WarehouseModel.findOne({ id: warehouseId });
-          if (warehouse) {
-            let elementMatchQuery = {};
-            // elementMatchQuery["id"] = warehouse.warehouseInventory;
-            if (productName) {
-              elementMatchQuery[`products.name`] = productName;
-            }
-            if (productType) {
-              elementMatchQuery[`products.type`] = productType;
-            }
-            const inventory = await InventoryModel.aggregate([
-              { $unwind: "$inventoryDetails" },
-              {
-                $lookup: {
-                  from: "products",
-                  localField: "inventoryDetails.productId",
-                  foreignField: "id",
-                  as: "products",
-                },
-              },
-              { $unwind: "$products" },
-              { $match: elementMatchQuery },
-              //   { $project:{
-              //     products:"",
-              //   }
-              // }
-            ]).sort({ createdAt: -1 });
-            return apiResponse.successResponseWithData(
-              res,
-              "Inventory Details",
-              inventory
-            );
-          } else {
-            return apiResponse.ErrorResponse(
-              res,
-              responses(req.user.preferredLanguage).warehouse_not_found
-            );
-          }
-        } else {
-          return apiResponse.forbiddenResponse(
-            res,
-            responses(req.user.preferredLanguage).no_permission
-          );
-        }
-      });
-    } catch (err) {
-      console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
-    }
-  },
+	auth,
+	async (req, res) => {
+		try {
+			const permission_request = {
+				role: req.user.role,
+				permissionRequired: ["searchByProductName"],
+			};
+			checkPermissions(permission_request, async (permissionResult) => {
+				if (permissionResult.success) {
+					const { productName, productType } = req.query;
+					const warehouseId = req.query.warehouseId || req.user.warehouseId;
+					const warehouse = await WarehouseModel.findOne({ id: warehouseId });
+					if (warehouse) {
+						let elementMatchQuery = {};
+						if (productName) {
+							elementMatchQuery[`products.name`] = productName;
+						}
+						if (productType) {
+							elementMatchQuery[`products.type`] = productType;
+						}
+						const inventory = await InventoryModel.aggregate([
+							{ $match: { id: warehouse.warehouseInventory } },
+							{ $unwind: "$inventoryDetails" },
+							{
+								$lookup: {
+									from: "products",
+									localField: "inventoryDetails.productId",
+									foreignField: "id",
+									as: "products",
+								},
+							},
+							{ $unwind: "$products" },
+							{ $match: elementMatchQuery },
+						]).sort({ createdAt: -1 });
+						return apiResponse.successResponseWithData(res, "Inventory Details", inventory);
+					} else {
+						return apiResponse.ErrorResponse(
+							res,
+							responses(req.user.preferredLanguage).warehouse_not_found,
+						);
+					}
+				} else {
+					return apiResponse.forbiddenResponse(
+						res,
+						responses(req.user.preferredLanguage).no_permission,
+					);
+				}
+			});
+		} catch (err) {
+			console.log(err);
+			return apiResponse.ErrorResponse(res, err.message);
+		}
+	},
 ];
 
 exports.autoCompleteSuggestions = [
@@ -2820,7 +2754,6 @@ exports.autoCompleteSuggestions = [
           },
         },
       ]).sort({ createdAt: -1 });
-      // console.log( [...new Set([...suggestions1, ...suggestions2, ...suggestions3])])
       return apiResponse.successResponseWithData(
         res,
         "Autocorrect Suggestions",
@@ -2841,13 +2774,23 @@ exports.fetchBatchesOfInventory = [
       const warehouseId = wareId ? wareId : req.user.warehouseId;
       const warehouse = await WarehouseModel.findOne({ id: warehouseId });
       const inventoryId = warehouse.warehouseInventory;
-      const batches = await AtomModel.find({
-        productId: productId,
-        batchNumbers: { $nin: ["", "null", null] },
-        status: "HEALTHY",
-        currentInventory: inventoryId,
-        quantity: { $nin: [0] },
-      }).sort({ "attributeSet.expDate": 1 });
+      let today = new Date();
+      const payload = {
+				$and: [
+					{ productId: productId },
+					{ status: "HEALTHY" },
+					{ quantity: { $gt: 0 } },
+					{ currentInventory: inventoryId },
+					{
+						$or: [
+							{ "attributeSet.expDate": { $exists: false } },
+							{ "attributeSet.expDate": { $in: [null, ""] } },
+							{ "attributeSet.expDate": { $gte: today } },
+						],
+					},
+				],
+      };
+      const batches = await AtomModel.find(payload).sort({ "attributeSet.expDate": 1 });
       return apiResponse.successResponseWithData(
         res,
         "Batches of product",
@@ -2867,17 +2810,21 @@ exports.reduceBatch = [
       const email = req.user.emailId;
       const user_id = req.user.id;
       const empData = await EmployeeModel.findOne({
-				emailId: req.user.emailId,
-				accountStatus: { $ne: "DELETED" },
-			});
+        emailId: req.user.emailId,
+        accountStatus: { $ne: "DELETED" },
+      });
       const orgId = empData?.organisationId || null;
       const orgName = empData.name;
       const orgData = await OrganisationModel.findOne({ id: orgId });
       const address = orgData.postalAddress;
-      const { batchNumber, quantity } = req.query;
+      const { id, quantity, } = req.query;
+      const batchExists = await AtomModel.findOne({ id: { $in: [id] } });
+      if(batchExists.quantity < Math.abs(quantity)) {
+        return apiResponse.validationErrorWithData(res, "Insufficient quantity in batch!", {});
+      }
       const batch = await AtomModel.findOneAndUpdate(
         {
-          batchNumbers: { $in: [batchNumber] },
+          id: { $in: [id] },
         },
         { $inc: { quantity: -Math.abs(quantity || 0) } },
         { new: true }
@@ -2893,14 +2840,13 @@ exports.reduceBatch = [
         },
         { $inc: { "inventoryDetails.$.quantity": -Math.abs(quantity || 0) } }
       );
-
       var datee = new Date();
       datee = datee.toISOString();
       var evid = Math.random().toString(36).slice(2);
       let event_data = {
         eventID: null,
         eventTime: null,
-        transactionId: batchNumber,
+        transactionId: id,
         eventType: {
           primary: "BUY",
           description: "INVENTORY",
@@ -2932,7 +2878,7 @@ exports.reduceBatch = [
             quantityPurchased: quantity,
             products: {
               productId: batch.productId,
-              batchNumber: batchNumber,
+              id: id,
             },
             sender: {
               id: req.user.organisationId,

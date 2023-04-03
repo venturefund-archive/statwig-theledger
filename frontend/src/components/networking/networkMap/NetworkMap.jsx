@@ -4,7 +4,7 @@ import {
   GoogleMap,
   InfoWindow,
   Marker,
-  useJsApiLoader,
+  useLoadScript,
 } from "@react-google-maps/api";
 import "./NetworkMap.scss";
 import BlueMap from "./data/BlueMap";
@@ -37,16 +37,54 @@ export default function NetworkMap({
 }) {
   const { user } = useSelector((state) => state);
   const [MapSelected, setMapSelected] = useState(null);
-  const { isLoaded } = useJsApiLoader({
-    id: "google-map-script",
+  const [oms, setOms] = useState(null);
+  const [selectedPlace, setSelectedPlace] = useState(null);
+  const [selectedMarker, setSelectedMarker] = useState(null);
+  const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: "AIzaSyBLwFrIrQx_0UUAIaUwt6wfItNMIIvXJ78",
   });
 
+  // const { isLoaded } = useJsApiLoader({
+  //   id: "google-map-script",
+  //   googleMapsApiKey: "AIzaSyBLwFrIrQx_0UUAIaUwt6wfItNMIIvXJ78",
+  // });
+
+  // useEffect(() => {
+  //   if (MapSelected && MapSelected.warehouseId !== reportWarehouse)
+	// 		setReportWarehouse(MapSelected.warehouseId);
+  // }, [MapSelected]);
+
   useEffect(() => {
-    if (MapSelected) setReportWarehouse(MapSelected.warehouseId);
-  }, [MapSelected]);
+		if (reportWarehouse !== MapSelected?.warehouseId) {
+			const currPlace = manufacturer?.warehouses?.filter(
+				(warehouse) => warehouse.warehouseId === reportWarehouse,
+      );
+      if (currPlace && currPlace?.length) {
+        console.log(currPlace[0]);
+        setMapSelected(currPlace[0]);
+      }
+		}
+	}, [reportWarehouse, manufacturer]);
+
+  const onLoad = (map) => {
+    const tempOms = require(`npm-overlapping-marker-spiderfier/lib/oms.min`);
+    const newOms = new tempOms.OverlappingMarkerSpiderfier(map, {
+      markersWontMove: true, // we promise not to move any markers, allowing optimizations
+      markersWontHide: true, // we promise not to change visibility of any markers, allowing optimizations
+      basicFormatEvents: true, // allow the library to skip calculating advanced formatting information
+    });
+    setOms(newOms);
+  };
+
+  const markerClickHandler = (event, place, marker) => {
+    setSelectedMarker(marker);
+    setSelectedPlace(place);
+    setMapSelected(place);
+  };
+
   return isLoaded ? (
     <GoogleMap
+      onLoad={onLoad}
       mapContainerStyle={containerStyle}
       center={center}
       zoom={2}
@@ -61,19 +99,29 @@ export default function NetworkMap({
                 lat: parseFloat(
                   Array.isArray(park?.location?.coordinates)
                     ? park?.location?.coordinates[0]
-                    : park?.location?.latitude
+                    : park?.location?.latitude,
                 ),
                 lng: parseFloat(
                   Array.isArray(park?.location?.coordinates)
                     ? park?.location?.coordinates[1]
-                    : park?.location?.longitude
+                    : park?.location?.longitude,
                 ),
               }}
-              onClick={() => {
-                setMapSelected(park);
+              onLoad={(marker) => {
+                oms?.addMarker(marker);
+                window.google.maps.event.addListener(
+                  marker,
+                  "spider_click",
+                  (e) => {
+                    markerClickHandler(e, park, marker);
+                  },
+                );
               }}
-              onMouseEnter={() => setMapSelected(park)}
-              onMouseLeave={() => setMapSelected(null)}
+              // onClick={() => {
+              //   setMapSelected(park);
+              // }}
+              // onMouseEnter={() => setMapSelected(park)}
+              // onMouseLeave={() => setMapSelected(null)}
               icon={{
                 url:
                   park.warehouseId === (reportWarehouse || user.warehouseId[0])
@@ -91,19 +139,29 @@ export default function NetworkMap({
                 lat: parseFloat(
                   Array.isArray(park?.location?.coordinates)
                     ? park?.location?.coordinates[0]
-                    : park?.location?.latitude
+                    : park?.location?.latitude,
                 ),
                 lng: parseFloat(
                   Array.isArray(park?.location?.coordinates)
                     ? park?.location?.coordinates[1]
-                    : park?.location?.longitude
+                    : park?.location?.longitude,
                 ),
               }}
-              onClick={() => {
-                setMapSelected(park);
+              onLoad={(marker) => {
+                oms?.addMarker(marker);
+                window.google.maps.event.addListener(
+                  marker,
+                  "spider_click",
+                  (e) => {
+                    markerClickHandler(e, park, marker);
+                  },
+                );
               }}
-              onMouseEnter={() => setMapSelected(park)}
-              onMouseLeave={() => setMapSelected(null)}
+              // onClick={() => {
+              //   setMapSelected(park);
+              // }}
+              // onMouseEnter={() => setMapSelected(park)}
+              // onMouseLeave={() => setMapSelected(null)}
               icon={{
                 url:
                   park.warehouseId === (reportWarehouse || user.warehouseId[0])
@@ -114,7 +172,7 @@ export default function NetworkMap({
                 anchor: new window.google.maps.Point(15, 15),
               }}
             />
-          )
+          ),
         )}
 
         {MapSelected ? (
@@ -152,7 +210,5 @@ export default function NetworkMap({
         ) : null}
       </>
     </GoogleMap>
-  ) : (
-    <></>
-  );
+  ) : null;
 }

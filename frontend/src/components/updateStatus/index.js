@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import uploadBlue from "../../assets/icons/UploadBlue.svg";
-import uploadWhite from "../../assets/icons/UploadWhite.svg";
 import { useSelector } from "react-redux";
 import crossIcon from "../../assets/icons/crossRed.svg";
 import SuccessPopup from "./successPopup";
@@ -26,7 +25,7 @@ const UpdateStatus = (props) => {
 		return state.user;
 	});
 	const intelEnabled = props.user.type === "Third Party Logistics" ? true : false;
-	const { id } = props.match.params;
+	const { id, returnToView } = props.match.params;
 	const billNo = shipmentData?.airWayBillNo;
 	const { quantity, weight } = useState("");
 	const [photo, setPhoto] = useState("");
@@ -40,7 +39,7 @@ const UpdateStatus = (props) => {
 	const [loader, setLoader] = useState(false);
 	const [loaderC, setLoaderC] = useState(false);
 	const [loaderL, setLoaderL] = useState(false);
-  const [commentEnabled, setCommentEnabled] = useState(false);
+	const [commentEnabled, setCommentEnabled] = useState(false);
 	const setFile = (evt) => {
 		setPhotoUrl(URL.createObjectURL(evt.target.files[0]));
 		setPhoto(evt.target.files[0]);
@@ -61,8 +60,8 @@ const UpdateStatus = (props) => {
 			}
 		}
 		fetchData();
-  }, [dispatch, props.match.params.id]);
-  
+	}, [dispatch, props.match.params.id]);
+
 	useEffect(() => {
 		const acceptanceArr = shipmentData.shipmentUpdates?.filter(
 			(u) => u.updateComment === "Acceptance Date",
@@ -93,8 +92,8 @@ const UpdateStatus = (props) => {
 			value.target.id === "toggle1"
 				? "Acceptance Date"
 				: value.target.id === "toggle2"
-				? "Customs clearance Date"
-				: "Last Status";
+					? "Customs clearance Date"
+					: "Last Status";
 		const formData = new FormData();
 		formData.append("photo", photo, photo.name);
 		formData.append("id", id);
@@ -143,57 +142,64 @@ const UpdateStatus = (props) => {
 	const uploadPhoto = async () => {
 		const formData = new FormData();
 		formData.append("photo", photo, photo.name);
-    const result = await uploadImage(id, formData);
+		const result = await uploadImage(id, formData);
+		return result.data.data;
 	};
 
 	const updateStatus = async (values) => {
-		if (shipmentData.status === "RECEIVED") {
-			setErrorMessage("delivered_shipments_cannot_be_updated");
-			setTryAgainEnabled(false);
-			setOpenShipmentFail(true);
-			return;
-		}
+		try {
+			if (shipmentData.status === "RECEIVED") {
+				setErrorMessage("delivered_shipments_cannot_be_updated");
+				setTryAgainEnabled(false);
+				setOpenShipmentFail(true);
+				return;
+			}
 
-		const { shipmentId, updateStatusLocation } = values;
+			const { shipmentId, updateStatusLocation } = values;
 
-		if (updateStatusLocation === "") {
-			setErrorMessage("Require Update Status Location");
-		}
-		const formData = new FormData();
-		if (photo) {
-			formData.append("photo", photo, photo.name);
-    }
-		formData.append("id", shipmentId);
-		formData.append("updateComment", comment);
-		formData.append("updatedBy", profile.id);
-		formData.append("orgId", profile.organisation);
-		formData.append("orgLocation", profile.location);
-		formData.append("updatedAt", updateStatusLocation);
-		formData.append("isAlertTrue", true);
+			if (updateStatusLocation === "") {
+				setErrorMessage("Require Update Status Location");
+			}
+			const formData = new FormData();
 
-		for (var pair of formData.entries()) {
-			console.log(pair[0] + " : ", pair[1]);
-		}
+			if (photo) {
+				const uploadRes = await uploadPhoto();
+				formData.append("imageId", uploadRes.imageId);
+			}
+			formData.append("id", shipmentId);
+			formData.append("updateComment", comment);
+			formData.append("updatedBy", profile.id);
+			formData.append("orgId", profile.organisation);
+			formData.append("orgLocation", profile.location);
+			formData.append("updatedAt", updateStatusLocation);
+			formData.append("isAlertTrue", true);
 
-		const result = await updateTrackingStatus(formData);
-		if (result.status === 200) {
-			setOpenUpdatedStatus(true);
-		} else {
-			setOpenShipmentFail(true);
-			setErrorMessage("Failed to Update");
+			for (var pair of formData.entries()) {
+				console.log(pair[0] + " : ", pair[1]);
+			}
+
+			const result = await updateTrackingStatus(formData);
+			if (result.status === 200) {
+				setOpenUpdatedStatus(true);
+			} else {
+				setOpenShipmentFail(true);
+				setErrorMessage("Failed to Update");
+			}
+		} catch (err) {
+			console.log(err);
 		}
 	};
 
 	const closeModal = () => {
 		setOpenUpdatedStatus(false);
 		props.history.push(`/${intelEnabled === true ? `viewgmrshipment` : `viewshipment`}/${id}`);
-  };
-  
+	};
+
 	const closeModalFail = () => {
 		setOpenShipmentFail(false);
 		if (shipmentData.status === "RECEIVED") props.history.push(`/shipments`);
-  };
-  
+	};
+
 	return (
 		<div className="updateStatus">
 			<h1 className="breadcrumb m-3">{t("update_status")}</h1>
@@ -543,9 +549,9 @@ const UpdateStatus = (props) => {
 										)}
 									</div>
 									<div className="col">
-										<div className="row">
+										{/* <div className="row">
 											<h6 className="col font-weight-bold mt-4">{t("uploaded_image")}</h6>
-											{/* <button
+											<button
 												type="button"
 												className="col col-3 btn btn-primary font-weight-bold mr-5 mb-3"
 												onClick={uploadPhoto}
@@ -558,8 +564,8 @@ const UpdateStatus = (props) => {
 													alt="Upload"
 												/>
 												<span>{t("upload")}</span>
-											</button> */}
-										</div>
+											</button>
+										</div> */}
 										<div className="d-flex flex-column upload bg-white col-9 p-5">
 											{photo ? (
 												<div className="row">
@@ -717,11 +723,15 @@ const UpdateStatus = (props) => {
 										<button
 											type="button"
 											className="btn btn-outline-primary mr-3"
-											onClick={() =>
-												props.history.push(
-													`/${intelEnabled === true ? `viewgmrshipment` : `viewshipment`}/${id}`,
-												)
-											}
+											onClick={() => {
+												const path =
+													returnToView === "false"
+														? "/shipments"
+														: `/${
+																intelEnabled === true ? `viewgmrshipment` : `viewshipment`
+														  }/${id}`;
+												props.history.push(path);
+											}}
 										>
 											{t("cancel")}
 										</button>

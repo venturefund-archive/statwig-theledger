@@ -9,6 +9,8 @@ import Tooltip from "@mui/material/Tooltip";
 import Button from "@mui/material/Button";
 import { getBatchesofWarehouse } from "../../../../../actions/inventoryActions";
 import moment from "moment";
+import { formatDate } from "../../../../../utils/dateHelper";
+
 function BatchRow({ row, isNearExpiry, uom }) {
   return (
     <>
@@ -50,14 +52,14 @@ function BatchRow({ row, isNearExpiry, uom }) {
         <TableCell className='mi-custom-cell'>
           <div className='mi-table-data'>
             <p className='mi-body-md black f-700 mi-reset'>
-              {moment(row.attributeSet?.mfgDate).format("MM-yyyy") || "N/A"}
+              {formatDate(row.attributeSet?.mfgDate) || "N/A"}
             </p>
           </div>
         </TableCell>
         <TableCell className='mi-custom-cell'>
           <div className='mi-table-data'>
             <p className='mi-body-md black f-700 mi-reset'>
-              {moment(row.attributeSet?.expDate).format("MM-yyyy") || "N/A"}
+              {formatDate(row.attributeSet?.expDate) || "N/A"}
             </p>
           </div>
         </TableCell>
@@ -71,6 +73,7 @@ export default function BatchDetails({
   warehouseId,
   isNearExpiry,
   uom,
+  t
 }) {
   const [Data, setData] = useState([]);
   useEffect(() => {
@@ -91,16 +94,16 @@ export default function BatchDetails({
           <TableHead>
             <TableRow>
               <TableCell className='mi-custom-tableHead mi-first-cell-padding'>
-                <p className='mi-body-sm mi-reset grey-400'>Batch Number</p>
+                <p className='mi-body-sm mi-reset grey-400'>{t("batch_no")}</p>
               </TableCell>
               <TableCell className='mi-custom-tableHead'>
-                <p className='mi-body-sm mi-reset grey-400'>Quantity</p>
+                <p className='mi-body-sm mi-reset grey-400'>{t("quantity")}</p>
               </TableCell>
               <TableCell className='mi-custom-tableHead'>
-                <p className='mi-body-sm mi-reset grey-400'>Mfg Date</p>
+                <p className='mi-body-sm mi-reset grey-400'>{t("mfg_date")}</p>
               </TableCell>
               <TableCell className='mi-custom-tableHead'>
-                <p className='mi-body-sm mi-reset grey-400'>Exp Date</p>
+                <p className='mi-body-sm mi-reset grey-400'>{t("exp_date")}</p>
               </TableCell>
             </TableRow>
           </TableHead>

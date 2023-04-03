@@ -1,5 +1,4 @@
 import React from "react";
-
 import "./style.scss";
 import CloseIcon from "../../assets/icons/cross.svg";
 

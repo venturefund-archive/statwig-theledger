@@ -3,30 +3,51 @@ import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 
-export default (ComposedComponent) => {
-  class RequireAuth extends Component {
-    render() {
-      const { user } = this.props;
-      let token = localStorage?.theLedgerToken;
-      let userDetails = jwt_decode(token);
-      const demoLogin = userDetails?.partialRegistration;
+// eslint-disable-next-line import/no-anonymous-default-export
+export default (ComposedComponent, options) => {
+	class RequireAuth extends Component {
+		render() {
+			const { user } = this.props;
 
-      let check = user;
-      if (!user)
-        check = localStorage.theLedgerToken;
-      switch (check) {
-        case null:
-          return <Redirect to='/' />;
+			let token = localStorage?.theLedgerToken;
+			let userDetails = jwt_decode(token);
+			const demoLogin = userDetails?.partialRegistration;
+			let check = user;
 
-        default:
-          return <ComposedComponent {...this.props} demoLogin={demoLogin} />;
+			if (!user) check = localStorage.theLedgerToken;
+
+			if (options?.isAdminComponent) {
+				const userRole = user?.role || userDetails?.role;
+				const userType = user?.type || userDetails?.type;
+				if (userRole === "admin" || userType === "CENTRAL_AUTHORITY") check = true;
+				else check = null;
       }
-    }
-  }
 
-  const mapStateToProps = ({ user }) => ({
-    user: user,
-  });
+      if (options?.governingBody) {
+				const userType = user?.type || userDetails?.type;
+				if (userType === "GoverningBody") check = true;
+				else check = null;
+			}
 
-  return connect(mapStateToProps)(RequireAuth);
+			if(options?.distributor) {
+				const userType = user?.type || userDetails?.type;
+				if (userType === "DISTRIBUTORS" || userType === "DROGUERIA") check = true;
+				else check = null;
+			}
+      
+			switch (check) {
+				case null:
+					return <Redirect to="/" />;
+
+				default:
+					return <ComposedComponent {...this.props} demoLogin={demoLogin} />;
+			}
+		}
+	}
+
+	const mapStateToProps = (state) => ({
+		user: state.user,
+	});
+
+	return connect(mapStateToProps)(RequireAuth);
 };

@@ -15,19 +15,24 @@ exports.asyncForEach = async (array, callback) => {
 };
 
 exports.excludeExpireProduct = (data) => {
-  return data.filter((product) => {
-    const expiryDate = product.expiryDate.split('/');
-    const expiryDateInShortDate = [expiryDate[1], expiryDate[0], expiryDate[2]].join('/');
-    const d = new Date(expiryDateInShortDate);
-    const currentDate = new Date();
-    if (d.getFullYear() > currentDate.getFullYear()) {
-      return true;
-    } else if (d.getFullYear() === currentDate.getFullYear() && d.getMonth() > currentDate.getMonth()) {
-      return true
-    }
-    return false
-  })
-}
+  let today = new Date();
+  let year = today.getFullYear();
+  let month = today.getMonth() + 1;
+  let day = today.getDate();
+	today = `${year}-${month < 10 ? "0" + month : month}-${day < 10 ? "0" + day : day}`;
+	return data.filter((product) => {
+		if (product?.manufacturingDate) {
+			if (today < product.manufacturingDate) return false;
+		}
+		if (product?.expiryDate) {
+			if (product?.manufacturingDate) {
+				if (product.expiryDate < product.manufacturingDate) return false;
+			}
+			if (product.expiryDate < today) return false;
+		}
+		return true;
+	});
+};
 
 exports.compareArrays = function (array1, array2) {
   if (!array1 || !array2) return false;
@@ -43,3 +48,15 @@ exports.compareArrays = function (array1, array2) {
 
   return true;
 }
+
+exports.getDateStringForMongo = function (date) {
+	if (!date) return;
+
+	let currDate = new Date(date);
+	let year = currDate.getFullYear();
+	let month = currDate.getMonth() + 1;
+	let day = currDate.getDate();
+	let dateString = `${year}${month < 10 ? "0" + month : month}${day < 10 ? "0" + day : day}`;
+
+	return dateString;
+};

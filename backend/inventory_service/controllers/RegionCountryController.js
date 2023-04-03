@@ -284,28 +284,25 @@ exports.getCountryDetailsByRegion = [
       const { region, orgType } = req.query;
       const countrySet = new Set();
       if (region && orgType) {
-        const countriesList = await CountryModel.find(
-          { region: region },
-          { _id: 0 }
-        ).select("name");
-        const countries = countriesList.map((country) => country?.name);
-        const orgs = await OrganisationModel.find({ type: orgType }).select(
-          "country id"
+        const countriesList = await CountryModel.find({ region: region }, { _id: 0 }).select(
+          "name",
         );
+        const countries = countriesList.map((country) => country?.name);
+        const orgs = await OrganisationModel.find({ type: orgType }).select("country id");
         const warehouseCountries = await WarehouseModel.find({
           organisationId: { $in: orgs.map((org) => org.id) },
         }).select("country");
         for (const warehouse of warehouseCountries) {
           if (typeof warehouse.country === "string") {
             countrySet.add(warehouse.country);
-          } else {
+          } else if (warehouse?.country?.countryName) {
             countrySet.add(warehouse.country.countryName);
           }
         }
         for (const org of orgs) {
           if (typeof orgs.country === "string") {
             countrySet.add(org.country);
-          } else {
+          } else if (orgs?.country?.countryName) {
             countrySet.add(org.country.countryName);
           }
         }
@@ -330,16 +327,13 @@ exports.getCountryDetailsByRegion = [
         if (region) {
           common = await CountryModel.find({ region: region }).select("name");
         } else {
-          return apiResponse.ErrorResponse(
-            res,
-            "Please provide region and orgType"
-          );
+          return apiResponse.ErrorResponse(res, "Please provide region and orgType");
         }
       }
       return apiResponse.successResponseWithData(
         res,
         `Countries in Region ${region} & OrgType ${orgType}`,
-        common
+        common,
       );
     } catch (err) {
       console.log(err);
@@ -393,18 +387,27 @@ exports.getOrganizations = [
   auth,
   async (req, res) => {
     try {
-      var orgs = [];
+      let orgs = new Array();
       const { orgType, country } = req.query;
       if (orgType && country) {
-        orgs = await OrganisationModel.find({
-          $and: [
-            { type: orgType },
-            {$or: [{ "country.countryName": country }, { country: country }]},
-            { status: "ACTIVE" },
-          ],
-        });
-      } else if (country) {
-        orgs = await OrganisationModel.find({$or: [{ "country.countryName": country }, { country: country }]});
+        if ((req.user.type === "DISTRIBUTORS" || req.user.type === "DROGUERIA") && (orgType === "PHARMACY" || orgType === "Farmacia")) {
+          orgs = await OrganisationModel.find({
+            $and: [
+              { type: orgType },
+              { parentOrgId: req.user.organisationId },
+              { $or: [{ "country.countryName": country }, { country: country }] },
+              { status: "ACTIVE" },
+            ],
+          })
+        } else {
+          orgs = await OrganisationModel.find({
+            $and: [
+              { type: orgType },
+              { $or: [{ "country.countryName": country }, { country: country }] },
+              { status: "ACTIVE" },
+            ],
+          })
+        }
       } else {
         return apiResponse.ErrorResponse(res, "Provide OrgType and Country");
       }

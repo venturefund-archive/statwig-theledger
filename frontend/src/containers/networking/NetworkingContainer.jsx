@@ -29,9 +29,13 @@ const NetworkingContainer = (props) => {
   const [OutstockType, setOutstockType] = useState("");
   const [OutstockId, setOutstockId] = useState("");
   const [InstockId, setInstockId] = useState("");
+  const [filters, setFilters] = useState({
+    type: null,
+    productName: null
+  });
   const date = new Date();
   const [startDate, setStartDate] = useState(
-    new Date(date.getFullYear(), date.getMonth(), 1)
+    new Date(date.getFullYear(), date.getMonth(), 1),
   );
   const [manufacturer, setManufacturer] = useState({
     myLocations: 0,
@@ -43,110 +47,141 @@ const NetworkingContainer = (props) => {
   const [MylocationFilter, setMylocationFilter] = useState(false);
 
   const getBestsellers = async () => {
-    const bestSellers = await getBestSellers(reportWarehouse, startDate);
+    const payload = {
+      reportWarehouse: reportWarehouse,
+      startDate: startDate
+    };
+    const bestSellers = await getBestSellers(payload);
     if (bestSellers) setBestseller(bestSellers.data.bestSellers);
   };
+
   const getTopBestsellers = async () => {
     const bestSellers = await getBestSellerSummary(reportWarehouse);
     if (bestSellers) setTopBestseller(bestSellers.data.bestSellers);
     if (bestSellers) setReportWarehouse(bestSellers.data.warehouseId);
   };
+  
   const getInstock = async (startDate) => {
-    const inStock = await getmanufacturerInStockReport(
-      reportWarehouse,
-      startDate
-    );
+    const payload = {
+      reportWarehouse: reportWarehouse,
+      startDate: startDate
+    };
+
+    const inStock = await getmanufacturerInStockReport(payload);
     if (inStock) setInStock(inStock.data.inStockReport);
     if (inStock) setReportWarehouse(inStock.data.warehouseId);
   };
+
   const getInstockFilters = async () => {
-    const inStockFilters = await getInStockFilterOptions(reportWarehouse, "");
-    const outStockFilters = await getOutStockFilterOptions(reportWarehouse, "");
+    const payload = {
+      reportWarehouse: reportWarehouse,
+      startDate: startDate
+    };
+    const inStockFilters = await getInStockFilterOptions(payload);
+    const outStockFilters = await getOutStockFilterOptions(payload);
     if (inStockFilters) setInStockFilters(inStockFilters.filters);
     if (outStockFilters) setOutStockFilters(outStockFilters.filters);
   };
+  
   const getOutStock = async () => {
-    const outStock = await getmanufacturerOutStockReport(
-      reportWarehouse,
-      startDate
-    );
+    const payload = {
+      reportWarehouse: reportWarehouse,
+      startDate: startDate
+    };
+    const outStock = await getmanufacturerOutStockReport(payload);
     if (outStock) setOutStock(outStock.data.outOfStockReport);
     if (outStock) setReportWarehouse(outStock.data.warehouseId);
   };
+  
   const getWarehouses = async (org) => {
-    const warehouses = await getManufacturerWarehouses(
-      "",
-      "",
-      partnerLocation,
-      MylocationFilter
-    );
+    const warehouses = await getManufacturerWarehouses("", "", partnerLocation, MylocationFilter);
     setManufacturer(warehouses.data);
   };
+
   const getManFilters = async () => {
     const filterWarehouse = await getManufacturerFilterOptions("org");
     setOManufacturer(filterWarehouse.data);
   };
+
   useEffect(() => {
     getManFilters();
     getInstockFilters();
     getTopBestsellers();
   }, []);
+
   useEffect(() => {
-    async function filterInstockReports() {
-      let pname;
-      let type;
-      if (InstockType && InstockType === "clear") {
-        pname = null;
-        type = null;
-      } else if (InstockType && InstockType === "productCategory") {
-        type = InstockId;
-      } else {
-        pname = InstockId;
+		async function filterInstockReports() {
+			let productName = filters.productName;
+			let type = filters.type;
+			if (InstockType && InstockType === "clear") {
+				productName = null;
+				type = null;
+				setFilters({
+					productName: null,
+					type: null,
+				});
+			} else if (InstockType && InstockType === "productCategory") {
+				setFilters({ type: InstockId });
+				type = InstockId;
+			} else {
+				setFilters({ productName: InstockId });
+				productName = InstockId;
+			}
+
+      const payload = {
+        reportWarehouse: reportWarehouse,
+        startDate: startDate,
+        type: type,
+				productName: productName,
+     };
+  
+			const inStock = await getmanufacturerInStockReport(payload);
+
+			setInStock(inStock.data.inStockReport);
+		}
+		filterInstockReports();
+	}, [InstockType, InstockId]);
+
+  useEffect(() => {
+		async function filterOustockReports() {
+			let productName = filters.productName;
+			let type = filters.type;
+			if (OutstockType && OutstockType === "clear") {
+				productName = null;
+				type = null;
+				setFilters({
+					productName: null,
+					type: null,
+				});
+			} else if (OutstockType && OutstockType === "productCategory") {
+				type = OutstockId;
+				setFilters({ type: InstockId });
+			} else {
+				productName = OutstockId;
+				setFilters({ productName: InstockId });
       }
+      
+      const payload = {
+        reportWarehouse: reportWarehouse,
+        startDate: startDate,
+        type: type,
+				productName: productName,
+     };
+			const outStock = await getmanufacturerOutStockReport(payload);
 
-      const inStock = await getmanufacturerInStockReport(
-        reportWarehouse,
-        startDate,
-        type,
-        pname
-      );
-
-      setInStock(inStock.data.inStockReport);
-    }
-    filterInstockReports();
-  }, [InstockType, InstockId]);
-
-  useEffect(() => {
-    async function filterOustockReports() {
-      let pname;
-      let type;
-      if (OutstockType && OutstockType === "clear") {
-        pname = null;
-        type = null;
-      } else if (OutstockType && OutstockType === "productCategory") {
-        type = OutstockId;
-      } else {
-        pname = OutstockId;
-      }
-      const outStock = await getmanufacturerOutStockReport(
-        reportWarehouse,
-        startDate,
-        type,
-        pname
-      );
-
-      setOutStock(outStock.data.outOfStockReport);
-    }
-    filterOustockReports();
-  }, [OutstockType, OutstockId]);
+			setOutStock(outStock.data.outOfStockReport);
+		}
+		filterOustockReports();
+	}, [OutstockType, OutstockId]);
 
   useEffect(() => {
+    setFilters({ type: null, productName: null });
     (async () => {
       getBestsellers(startDate);
-      getInstock(startDate);
-      getOutStock(startDate);
-    })();
-  }, [reportWarehouse, MainTab, startDate]);
+			getInstock(startDate);
+			getOutStock(startDate);
+		})();
+	}, [reportWarehouse, MainTab, startDate]);
 
   useEffect(() => {
     (async () => {
@@ -189,6 +224,7 @@ const NetworkingContainer = (props) => {
             setOutstockType={setOutstockType}
             setOutstockId={setOutstockId}
             demoLogin={props.demoLogin}
+            t={t}
           />
         </div>
       </div>

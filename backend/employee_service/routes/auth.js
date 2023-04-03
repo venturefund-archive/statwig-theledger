@@ -1,5 +1,6 @@
 const express = require("express");
 const AuthController = require("../controllers/AuthController");
+const OrganisationController = require("../controllers/OrganisationController");
 const cuid = require("cuid");
 const multer = require("multer");
 
@@ -604,5 +605,21 @@ router.post("/googleLogin", AuthController.googleLogIn);
  *           description: User account deleted successfully!
 */ 
 router.delete("/deleteProfile", AuthController.deleteProfile);
+router.post(
+  "/addUsersFromExcel",
+  upload.single("excel"),
+  AuthController.addUsersFromExcel
+);
+router.post(
+  "/addOrgsFromExcel",
+  upload.single("excel"),
+  OrganisationController.addOrgsFromExcel
+);
+router.get("/getAllUsers", AuthController.getAllUsers);
+router.get("/getOrgUsers", AuthController.getOrgUsers);
+router.get("/getWarehouseUsers", AuthController.getWarehouseUsers);
+router.get("/getOrgUserAnalytics", AuthController.getOrgUserAnalytics);
 
+router.get("/getOrgActiveUsers", AuthController.getOrgActiveUsers);
+router.get("/getUsers", AuthController.getUsers);
 module.exports = router;

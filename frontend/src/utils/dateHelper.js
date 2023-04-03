@@ -76,3 +76,15 @@ export const formatTimeAMPM = (d) => {
   var strTime = hours + ":" + minutes + "" + ampm;
   return strTime;
 };
+
+export const getDateStringForMongo = function (date) {
+	if (!date) return;
+
+	let currDate = new Date(date);
+	let year = currDate.getFullYear();
+	let month = currDate.getMonth() + 1;
+	let day = currDate.getDate();
+	let dateString = `${year}${month < 10 ? "0" + month : month}${day < 10 ? "0" + day : day}`;
+
+	return dateString;
+};

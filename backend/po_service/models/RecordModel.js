@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const RecordSchema = new mongoose.Schema(
   {
     id: { type: String, required: true, unique: true },
-    externalId: { type: "String" },
+    externalId: { type: String },
     creationDate: {
       type: Date,
     },
@@ -24,16 +24,13 @@ const RecordSchema = new mongoose.Schema(
     lastUpdatedBy: { type: String },
     lastUpdatedOn: {
       type: String,
-      required: false,
     },
     shippingOrders: {
       type: Array,
-      required: false,
       default: [],
     },
     shipments: {
       type: Array,
-      required: false,
       default: [],
     },
   },

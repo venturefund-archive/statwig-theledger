@@ -10,14 +10,13 @@ import received from "../../assets/icons/Received1.svg";
 import status from "../../assets/icons/Status.svg";
 import EmptyShipment from "../../assets/icons/Mt-Shipment.webp";
 import EmptyShipmentEs from "../../assets/icons/Mt-Shipment-Es.webp";
-
 import { formatDate } from "../../utils/dateHelper";
-import OverviewEmptyPage from "./OverviewEmptyPage";
 
 const SummaryTable = (props) => {
-  const profile = useSelector((state) => {
-    return state.user;
-  });
+  const profile = useSelector(state => state.user.warehouseId[0]);
+  const currLocation = useSelector(state => state.userLocation);
+  const warehouseId = currLocation?.id ? currLocation.id : profile;
+
   const { shipments, t } = props;
   return (
     <React.Fragment>
@@ -29,8 +28,8 @@ const SummaryTable = (props) => {
                 t("english") === "English"
                   ? EmptyShipment
                   : t("english") === "Inglés"
-                  ? EmptyShipmentEs
-                  : EmptyShipment
+                    ? EmptyShipmentEs
+                    : EmptyShipment
               }
               height="200"
               width="200"
@@ -96,9 +95,9 @@ const SummaryTable = (props) => {
               index < 5 ? (
                 <div className="row combine-data" key={index}>
                   <div className="text-sm-2">
-                    {profile.warehouseId === shipment.supplier.locationId
-                      ? "Outbound"
-                      : "Inbound"}
+                    {warehouseId === shipment.supplier.locationId
+                      ? "OUTBOUND"
+                      : "INBOUND"}
                   </div>
                 </div>
               ) : null
@@ -115,7 +114,7 @@ const SummaryTable = (props) => {
                   height="15"
                   width="15"
                   className="mr-1"
-                  alt=""
+                  alt="shipment"
                 ></img>
                 <span style={{ fontWeight: 600 }}>{t("shipping_date")}</span>
               </span>
@@ -250,7 +249,7 @@ const SummaryTable = (props) => {
                 </div>
                 <div className="d-flex">
                   <div className="mr-3">{t("type")}</div>
-                  <div className="font-weight-bold">Inbound</div>
+                  <div className="font-weight-bold">INBOUND</div>
                 </div>
                 <div className="d-flex">
                   <div className="mr-3">{t("status")}</div>

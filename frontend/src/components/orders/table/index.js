@@ -1,5 +1,4 @@
 import React from "react";
-import user from "../../../assets/icons/user.svg";
 import { Link } from "react-router-dom";
 import { formatDate } from "../../../utils/dateHelper";
 import Pagination from "@material-ui/lab/Pagination";
@@ -7,25 +6,25 @@ import "./style.scss";
 import AdvanceTableFilter from "../../../shared/advanceTableFilter";
 
 function Table(props) {
-  const { visible, outboundRecords, inboundRecords, t } = props;
-  const orders = visible === "one" ? outboundRecords : inboundRecords;
+	const handlePageChange = (event, value) => {
+		props.onPageChange(value);
+	};
+	const { visible, outboundRecords, inboundRecords, t } = props;
+	const orders = visible === "one" ? outboundRecords : inboundRecords;
 
-  const handlePageChange = (event, value) => {
-    props.onPageChange(value);
-  };
-  orders.sort(function (a, b) {
-    if (a.id > b.id) {
-      return -1;
-    } else {
-      return 1;
-    }
-  });
+	orders.sort(function (a, b) {
+		if (a.id > b.id) {
+			return -1;
+		} else {
+			return 1;
+		}
+	});
 
-  const truncate = (str, n) => {
-    return str?.length > n ? str.substr(0, n - 1) + "..." : str;
-  };
+	const truncate = (str, n) => {
+		return str?.length > n ? str.substr(0, n - 1) + "..." : str;
+	};
 
-  return (
+	return (
 		<div style={{ pointerEvents: props.demoLogin ? "none" : "auto" }}>
 			<table className="table">
 				<AdvanceTableFilter
@@ -88,7 +87,7 @@ function Table(props) {
 
 						const { customer, products, supplier, creatorOrganisation } = order;
 						return (
-							<tr>
+							<tr key={index}>
 								<td>
 									<div className="user-info">
 										<div className="user-image-holder">
@@ -121,7 +120,7 @@ function Table(props) {
 										<h5 className="table-data black">
 											{truncate(
 												(products[0]?.name || products[0]?.productId) +
-													(products.length > 1 ? " + " + (products.length - 1) + " more" : ""),
+												(products.length > 1 ? " + " + (products.length - 1) + " more" : ""),
 												15,
 											)}
 										</h5>
@@ -129,12 +128,12 @@ function Table(props) {
 								</td>
 								<td>
 									<div className="user-info__basic">
-										<h5 className="mb-0 table-data black">{customer.warehouse.title}</h5>
+										<h5 className="mb-0 table-data black">{customer?.warehouse?.title}</h5>
 										<p className="mb-0 text-sm-2 grey">
 											{customer.warehouse && customer.warehouse.warehouseAddress
 												? customer.warehouse.warehouseAddress.firstLine +
-												  " " +
-												  customer.warehouse.warehouseAddress.city
+												" " +
+												customer.warehouse.warehouseAddress.city
 												: null}
 										</p>
 									</div>

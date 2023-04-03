@@ -1,5 +1,4 @@
 const express = require("express");
-const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const cors = require("cors");
 const mongoose = require("mongoose");
@@ -41,10 +40,10 @@ i18next
   .use(i18nextMiddleware.LanguageDetector)
   .init({
     detection: {
-        order: ["querystring", "cookie", "header"],
+      order: ["querystring", "cookie", "header"],
       //   lookupQuerystring: "lang",
       //   lookupCookie: "lang",
-        lookupHeader: "accept-language",
+      lookupHeader: "accept-language",
     },
     preload: ['en', 'es'],
     fallbackLng: "en",
@@ -61,7 +60,6 @@ if (process.env.NODE_ENV !== "test") {
 }
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: false }));
-app.use(cookieParser());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openApiDocumentation));
 
 //To allow cross-origin requests

@@ -13,7 +13,7 @@ import { isAuthenticated } from "../../utils/commonHelper";
 import "./style.scss";
 
 const Overview = (props) => {
-  const { t, i18n } = props;
+  const { t } = props;
   const [visible, setvisible] = useState("one");
   const [shpmnts, setShpmnts] = useState([]);
   const [overviewAnalytics, setOverViewAnalytics] = useState({});
@@ -31,11 +31,11 @@ const Overview = (props) => {
     let rtnArr =
       v === "two"
         ? props.shipments.filter(
-            (row) => props.user.warehouseId === row.supplier.locationId
-          )
+          (row) => props.user.warehouseId === row.supplier.locationId
+        )
         : props.shipments.filter(
-            (row) => props.user.warehouseId !== row.supplier.locationId
-          );
+          (row) => props.user.warehouseId !== row.supplier.locationId
+        );
     if (a !== "")
       rtnArr = rtnArr.filter((row) => row?.shipmentAlerts?.length > 0);
     setShpmnts(rtnArr);
@@ -43,7 +43,7 @@ const Overview = (props) => {
 
   return (
     <div className="overview">
-      <h1 style={{paddingBottom:"10px", marginBottom:"1.2rem"}} className="vl-heading-bdr f-700 black">{t("overview")}</h1>
+      <h1 style={{ paddingBottom: "10px", marginBottom: "1.2rem" }} className="vl-heading-bdr f-700 black">{t("overview")}</h1>
       <div className="full-width-ribben">
         <div className="row no-gutters">
           <div className="col">
@@ -217,9 +217,3 @@ const Overview = (props) => {
 };
 
 export default Overview;
-
-/*
- {props.shipmentsCount.totalShipments.thisYear}
-            { props.inventoriesCount.counts.inventoryAdded.total}
-            {props.shipmentsCount.currentShipments.thisMonth}
-             {props.shipmentsCount.totalShipments.thisWeek} */

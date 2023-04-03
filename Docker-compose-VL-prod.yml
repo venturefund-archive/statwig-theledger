@@ -12,7 +12,6 @@ services:
       - "./traefik.toml:/traefik.toml"
       - "./traefik_dynamic.toml:/traefik_dynamic.toml"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-
   cache:
     image: "redis"
     container_name: "cache"
@@ -31,28 +30,10 @@ services:
       - ./cache-data:/data
     command: ["redis-server", "--requirepass", "StaTwig2021"]
 
-  advancedanalytics:
-    build: "./backend/advanced_analytics_service"
-    image: "advanced_analytics_service1.0"
-    container_name: "advanced_analytics_service1.0"
-    restart: always
-    env_file:
-      - ./env/ledger.env
-    depends_on:
-      - cache
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
-      - "traefik.http.routers.advancedanalytics.entrypoints=websecure"
-      - "traefik.http.routers.advancedanalytics.rule=Host(`vaccineledger.com`) && PathPrefix(`/advancedanalytics/`)"
-      - "traefik.http.routers.advancedanalytics.tls=true"
-      - "traefik.http.routers.advancedanalytics.tls.certresolver=lets-encrypt"
-
   alert:
     build: "./backend/alert_service"
     image: "alert_service1.0"
     container_name: "alert_service1.0"
-    restart: always
     env_file:
       - ./env/ledger.env
     depends_on:
@@ -85,8 +66,8 @@ services:
     build:
       context: .
       dockerfile: backend/employee_service/Dockerfile
-    image: "employee_service1.0"
-    container_name: "employee_service1.0"
+    image: "employee_service"
+    container_name: "employee_service"
     restart: always
     env_file:
       - ./env/ledger.env
@@ -107,6 +88,8 @@ services:
     restart: always
     env_file:
       - ./env/ledger.env
+    depends_on:
+      - cache
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -118,7 +101,7 @@ services:
   inventory:
     build:
       context: .
-      dockerfile: /backend/inventory_service/Dockerfile
+      dockerfile: backend/inventory_service/Dockerfile
     image: "inventory_service1.0"
     container_name: "inventory_service1.0"
     restart: always
@@ -158,6 +141,8 @@ services:
     restart: always
     env_file:
       - ./env/ledger.env
+    depends_on:
+      - cache
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -169,12 +154,14 @@ services:
   po:
     build:
       context: .
-      dockerfile: /backend/po_service/Dockerfile
+      dockerfile: backend/po_service/Dockerfile
     image: "po_service1.0"
     container_name: "po_service1.0"
     restart: always
     env_file:
       - ./env/ledger.env
+    depends_on:
+      - cache
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -190,6 +177,8 @@ services:
     restart: always
     env_file:
       - ./env/ledger.env
+    depends_on:
+      - cache
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -224,6 +213,8 @@ services:
     restart: always
     env_file:
       - ./env/ledger.env
+    depends_on:
+      - cache
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -238,6 +229,8 @@ services:
     restart: always
     env_file:
       - ./env/ledger.env
+    depends_on:
+      - cache
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -245,15 +238,63 @@ services:
       - "traefik.http.routers.track.rule=Host(`vaccineledger.com`) && PathPrefix(`/tracktracemanagement/`)"
       - "traefik.http.routers.track.tls=true"
       - "traefik.http.routers.track.tls.certresolver=lets-encrypt"
+  address:
+    build: "./backend/address_service"
+    image: "address_service2.0"
+    container_name: "address_service"
+    restart: always
+    env_file:
+      - ./env/ledger.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.address.entrypoints=websecure"
+      - "traefik.http.routers.address.rule=Host(`vaccineledger.com`) && PathPrefix(`/api/address_service`)"
+      - "traefik.http.routers.address.tls=true"
+      - "traefik.http.routers.address.tls.certresolver=lets-encrypt"
+  affliate:
+    build: "./backend/affliation_service"
+    image: "affliation_service2.0"
+    container_name: "affliate_service"
+    restart: always
+    env_file:
+      - ./env/ledger.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.affliate.entrypoints=websecure"
+      - "traefik.http.routers.affliate.rule=Host(`vaccineledger.com`) && PathPrefix(`/api/affliation_service`)"
+      - "traefik.http.routers.affliate.tls=true"
+      - "traefik.http.routers.affliate.tls.certresolver=lets-encrypt"
+  configuration:
+    build: "./backend/configuration_service"
+    image: "configuration_service1.0"
+    container_name: "configuration_service"
+    restart: always
+    env_file:
+      - ./env/ledger.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.configuration.entrypoints=websecure"
+      - "traefik.http.routers.configuration.rule=Host(`vaccineledger.com`) && PathPrefix(`/api/configuration_service`)"
+      - "traefik.http.routers.configuration.tls=true"
+      - "traefik.http.routers.configuration.tls.certresolver=lets-encrypt"
 
   frontend:
-    build: "./frontend"
-    image: "frontend1.0"
-    container_name: "frontend"
+    # build:
+    #   context: frontend
+    #   dockerfile: Dockerfile
+    #   args:
+    #     - "ENVIRONMENT=prod"
+    #     - "SERVER_URL=https://vaccineledger.com"
+    #     - "GOOGLE_CLIENT_ID="
+    build:
+      context: "./frontend"
+      dockerfile: "Dockerfile.prebuilt"
+    image: "frontend2.0"
+    container_name: "cra-frontend"
     restart: always
-    environment:
-      - "NODE_ENV=production"
-      - "ENVIRONMENT=prod"
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -264,5 +305,5 @@ services:
 
 networks:
   default:
-    external:
-      name: proxy
+    name: proxy
+    external: true

@@ -32,8 +32,8 @@ export const AddLocationCard = (props) => {
     props.user.type === "Third Party Logistics" ? true : false;
   const [addressTitle, setAddressTitle] = useState("");
   const [pincode, setPincode] = useState("");
-  const [region, setregion] = useState("");
-  const [country, setcountry] = useState("");
+  const [region, setregion] = useState("Americas");
+  const [country, setcountry] = useState("Costa Rica");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [addressLine, setAddressLine] = useState("");
@@ -55,7 +55,7 @@ export const AddLocationCard = (props) => {
     async function fetchAllRegions1() {
       let arr = await fetchAllRegions();
       setallregions(arr.data);
-      // fetchAllState1(53);
+      fetchAllState1(53);
     }
     fetchAllRegions1();
   }, []);
@@ -223,14 +223,16 @@ export const AddLocationCard = (props) => {
                         <Autocomplete
                           value={region}
                           labelId='demo-simple-select-label'
+                          disabled
                           id='demo-simple-select controllable-states-demo'
-                          placeholder={
-                            <div className='select-placeholder-text'>
-                              {t("Select_Region")}
-                            </div>
-                          }
+                          // placeholder={
+                          //   <div className='select-placeholder-text'>
+                          //     {t("Select_Region")}
+                          //   </div>
+                          // }
                           onChange={(event, newValue) => {
                             fetchAllCountries1(newValue);
+                            console.log(newValue)
                             setregion(newValue);
                             setcountry("");
                             setState("");
@@ -238,7 +240,7 @@ export const AddLocationCard = (props) => {
                           }}
                           options={allregions}
                           renderInput={(params) => (
-                            <TextField {...params} label={t("Select_Region")} />
+                            <TextField {...params} label={t("")} />
                           )}
                         />
                         {errors.region && touched.region && (
@@ -264,26 +266,29 @@ export const AddLocationCard = (props) => {
                         <Autocomplete
                           labelId='demo-simple-select-label'
                           id='demo-simple-select controllable-states-demo'
-                          placeholder={
-                            <div className='select-placeholder-text'>
-                              {t("Select_Country")}
-                            </div>
-                          }
+                          // placeholder={
+                          //   <div className='select-placeholder-text'>
+                          //     {t("Select_Country")}
+                          //   </div>
+                          // }
                           value={country}
+                          disabled
+                          onClick={(e) => {e.preventDefault(); return}}
                           onChange={(event, newValue) => {
                             let v = search(newValue, allCountries);
                             fetchAllState1(v);
                             setcountry(newValue);
+                            console.log(newValue)
                             setState("");
                             setCity("");
                           }}
                           options={allCountries.map(
-                            (option) => option.spanishName
+                            (option) => option.spanishName ? option.spanishName : option.name
                           )}
                           renderInput={(params) => (
                             <TextField
                               {...params}
-                              label={t("Select_Country")}
+                              label={t("")}
                             />
                           )}
                         />

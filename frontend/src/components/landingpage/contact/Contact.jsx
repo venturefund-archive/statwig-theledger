@@ -13,7 +13,12 @@ import {
 } from "../../../actions/userActions";
 import { turnOff, turnOn } from "../../../actions/spinnerActions";
 
-export default function Contact({ handleClose, handleAlertClick, setAlertDetails }) {
+export default function Contact({
+  handleClose,
+  handleAlertClick,
+  setAlertDetails,
+  t,
+}) {
   const dispatch = useDispatch();
 
   const {
@@ -48,7 +53,7 @@ export default function Contact({ handleClose, handleAlertClick, setAlertDetails
           if (watchEmail.match(emailRegex) === null) {
             setError("email", {
               type: "custom",
-              message: "Email ID is invalid!",
+              message: `${t("email")} ${t("is_invalid")}!`,
             });
             reject("Invalid email!");
           }
@@ -58,7 +63,7 @@ export default function Contact({ handleClose, handleAlertClick, setAlertDetails
           if (isValidPhoneNumber(watchPhone) === false) {
             setError("phone", {
               type: "custom",
-              message: "Phone Number is invalid!",
+              message: `${t("phone")} ${t("is_invalid")}!`,
             });
             reject("Invalid phone!");
           }
@@ -70,7 +75,7 @@ export default function Contact({ handleClose, handleAlertClick, setAlertDetails
           } else {
             setError("email", {
               type: "custom",
-              message: "Duplicate Email ID!",
+              message: `${t("duplicate")} ${t("email")}!`,
             });
             reject("Duplicate EmailId/Phone!");
           }
@@ -100,7 +105,10 @@ export default function Contact({ handleClose, handleAlertClick, setAlertDetails
 
         const result = await newDemoRequest(data);
         if (result.status === 200) {
-          setAlertDetails({type: "success", message: "Your request is received!"});
+          setAlertDetails({
+            type: "success",
+            message: t("your_request_is_received"),
+          });
           handleAlertClick();
           dispatch(turnOff());
           handleClose();
@@ -109,7 +117,7 @@ export default function Contact({ handleClose, handleAlertClick, setAlertDetails
         }
       });
     } catch (err) {
-      setAlertDetails({type: "error", message: err.message});
+      setAlertDetails({ type: "error", message: err.message });
       handleAlertClick();
       dispatch(turnOff());
       console.log(err);
@@ -122,9 +130,9 @@ export default function Contact({ handleClose, handleAlertClick, setAlertDetails
         <i className="fa-solid fa-times vl-body"></i>
       </div>
       <hgroup className="form-headers-popup ">
-        <h1 className="vl-subtitle f-700 vl-black">Let's Connect</h1>
+        <h1 className="vl-subtitle f-700 vl-black">{t("let_connect")}</h1>
         <h2 className="vl-body f-400 vl-grey-xs vl-line-sm">
-          Our team will contact you very soon, Thankyou
+          {t("let_sub_connect")}
         </h2>
       </hgroup>
       <form onSubmit={handleSubmit(requestDemo)}>
@@ -138,10 +146,12 @@ export default function Contact({ handleClose, handleAlertClick, setAlertDetails
                 <TextField
                   fullWidth
                   variant="outlined"
-                  label="Name"
+                  label={t("name")}
                   {...field}
                   error={Boolean(errors.name)}
-                  helperText={Boolean(errors.name) && "Name is required!"}
+                  helperText={
+                    Boolean(errors.name) && `${t("name")} ${t("is_required")}!`
+                  }
                 />
               )}
             />
@@ -155,12 +165,12 @@ export default function Contact({ handleClose, handleAlertClick, setAlertDetails
                 <TextField
                   fullWidth
                   variant="outlined"
-                  label="Business Email"
+                  label={t("bussiness_email")}
                   {...field}
                   error={Boolean(errors.email)}
                   helperText={
                     errors.email?.type === "required"
-                      ? "Email is required!"
+                      ? `${t("email")} ${t("is_required")}!`
                       : errors.email?.message
                   }
                 />
@@ -203,11 +213,12 @@ export default function Contact({ handleClose, handleAlertClick, setAlertDetails
                 <TextField
                   fullWidth
                   variant="outlined"
-                  label="Company Name"
+                  label={t("company")}
                   {...field}
                   error={Boolean(errors.companyName)}
                   helperText={
-                    Boolean(errors.companyName) && "Company Name is required!"
+                    Boolean(errors.companyName) &&
+                    `${t("company")} ${t("is_required")}`
                   }
                 />
               )}
@@ -222,11 +233,12 @@ export default function Contact({ handleClose, handleAlertClick, setAlertDetails
                 <TextField
                   fullWidth
                   variant="outlined"
-                  label="Designation"
+                  label={t("des")}
                   {...field}
                   error={Boolean(errors.designation)}
                   helperText={
-                    Boolean(errors.designation) && "Designation is required!"
+                    Boolean(errors.designation) &&
+                    `${t("des")} ${t("is_required")}`
                   }
                 />
               )}
@@ -240,12 +252,12 @@ export default function Contact({ handleClose, handleAlertClick, setAlertDetails
                 <TextField
                   fullWidth
                   variant="outlined"
-                  label="Software Application (Optional)"
+                  label={t("software")}
                   {...field}
                   error={Boolean(errors.softwareApplication)}
                   helperText={
                     Boolean(errors.softwareApplication) &&
-                    "Software Application is required!"
+                    `${t("software")} ${t("is_required")}`
                   }
                 />
               )}
@@ -259,24 +271,22 @@ export default function Contact({ handleClose, handleAlertClick, setAlertDetails
                 <TextField
                   fullWidth
                   variant="outlined"
-                  label="Number of employees (Optional)"
+                  label={t("no_of_work")}
                   type="number"
                   InputProps={{ inputProps: { min: 1 } }}
                   {...field}
                   error={Boolean(errors.numberOfEmployees)}
                   helperText={
                     Boolean(errors.numberOfEmployees) &&
-                    "Number of employees is required!"
+                    `${t("no_of_work")} ${t("is_required")}`
                   }
                 />
               )}
             />
           </div>
           <section className="call-by-action">
-            <button
-              className="vl-btn vl-btn-md vl-btn-full vl-btn-primary"
-            >
-              Submit
+            <button className="vl-btn vl-btn-md vl-btn-full vl-btn-primary">
+              {t("submit")}
             </button>
           </section>
         </article>

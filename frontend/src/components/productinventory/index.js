@@ -27,14 +27,14 @@ const ProductInventory = (props) => {
     (category ? category : products[0]?.type),
     ...categoryArray.filter((value) => value !== (category ? category : products[0]?.type)),
   ];
-  
+
   useEffect(() => {
     if (props.match && props.match.params && category) {
       let prodArray = [];
       inventories.map((val) => {
         // if(val.payloadData && val.payloadData.data && val.payloadData.data.products && val.payloadData.data.products.length){
         //     val.payloadData.data.products.map((productRecord)=>{
-        if (val.products.type ===  category) {
+        if (val.products.type === category) {
           prodArray.push(val);
           //     }
           // })
@@ -47,7 +47,7 @@ const ProductInventory = (props) => {
       setOutOfStockProducts(inv);
       setData(inv);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inventories, category]);
   const changeType = (cat) => {
     history.replace(`/productinventory/${cat}`);
@@ -102,8 +102,9 @@ const ProductInventory = (props) => {
           className='row ml-0 flex-nowrap'
           ref={ref}
         >
-          {categoryArrayNew.map((cat) => (
+          {categoryArrayNew.map((cat, i) => (
             <div
+              key={i}
               className={`panel m-2 ${(category && category === cat) ? `active` : ``}`}
               onClick={() => {
                 changeType(cat)
@@ -196,7 +197,7 @@ const ProductInventory = (props) => {
           </Link>
         </div>
       </div>
-      {enable && categoryArrayNew.length > 5 ? scrollingCategory() : nonScrollingCategory()}
+      {enable ? (categoryArrayNew.length > 5 ? scrollingCategory() : nonScrollingCategory()) : <div></div>}
       <div className='row'>
         <div className='p-2 mt-3 rounded full-width-ribbon'>
           <div className='row filter'>

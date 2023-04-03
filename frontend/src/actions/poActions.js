@@ -43,9 +43,9 @@ export const resetPOs = () => {
   };
 };
 
-export const getProducts = async () => {
+export const getProducts = async (params) => {
   try {
-    const result = await axios.get(config().getProducts);
+    const result = await axios.get(params ? `${config().getProducts}?${params}` : config().getProducts);
     return result.data.data;
   } catch (e) {
     return [];
@@ -104,6 +104,15 @@ export const getManufacturers = async () => {
   } catch (e) {
     return e.response;
   }
+};
+
+export const validateProductName = async (productName) => {
+	try {
+		const result = await axios.get(`${config().validateProductName}?productName=${productName}`);
+		return result.data.data;
+	} catch (e) {
+		return e.response;
+	}
 };
 
 export const addNewProduct = async (data) => {

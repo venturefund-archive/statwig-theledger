@@ -16,7 +16,7 @@ import { isAuthenticated } from "../../utils/commonHelper";
 import Cards from "./cards/cards";
 
 const Inventory = (props) => {
-  const { t } = props;
+  const { t, ProdDetails } = props;
   const headers = {
     coloumn1: "Product Name",
     coloumn2: "Product Category",
@@ -151,7 +151,7 @@ const Inventory = (props) => {
       //   resultAnalytics.data.inventory.stockOut
       // )
     }
-    if(props.demoLogin) return;
+    if (props.demoLogin) return;
     fetchData();
   }, []);
 
@@ -286,9 +286,9 @@ const Inventory = (props) => {
     ); //(skip, limit, dateFilter, productName, productCategory, status)
   };
   return (
-    <div className='inventory' style={{pointerEvents: props.demoLogin ? "none" : "auto" }}>
+    <div className='inventory' style={{ pointerEvents: props.demoLogin ? "none" : "auto" }}>
       <div className='d-flex justify-content-between'>
-      <h1 className="vl-heading-bdr black f-700">{t("inventory")}</h1>
+        <h1 className="vl-heading-bdr black f-700">{t("inventory")}</h1>
         <div className='d-flex'>
           {isAuthenticated("addInventory") && (
             <Link to='/newinventory'>
@@ -369,7 +369,14 @@ const Inventory = (props) => {
                 >
                   <div className='row'>
                     {productsList?.map((product, index) => (
-                      <div className='col-sm-6' key={index}>
+
+                      <div className='col-sm-6 mi-link' key={index} onClick={() => {
+                        const inv = ProdDetails.filter(prod => {
+                          return prod.inventoryDetails.productId === product.productId;
+                        });
+                        props.history.push(`/viewproduct`, { data: [inv[0]] })
+                      }
+                      }>
                         <div
                           className='d-flex card flex-column align-items-center'
                           style={{ backgroundColor: colors[index] }}
@@ -378,11 +385,11 @@ const Inventory = (props) => {
                             {product.productName.length <= MAX_LENGTH ? (
                               <div>{product.productName}</div>
                             ) : (
-                                <div>{`${product.productName.substring(
-                                  0,
-                                  MAX_LENGTH
-                                )}...`}</div>
-                              )}
+                              <div>{`${product.productName.substring(
+                                0,
+                                MAX_LENGTH
+                              )}...`}</div>
+                            )}
                           </div>
 
                           {/* <p className="product">{product.productName}</p> */}
@@ -391,10 +398,10 @@ const Inventory = (props) => {
                             <span>{"  ("}</span>
                             {product.unitofMeasure &&
                               product.unitofMeasure.name ? (
-                                <span>{product.unitofMeasure.name}</span>
-                              ) : (
-                                ""
-                              )}
+                              <span>{product.unitofMeasure.name}</span>
+                            ) : (
+                              ""
+                            )}
                             <span>{")"}</span>
                           </h3>
                         </div>

@@ -17,13 +17,16 @@ import {
 import { turnOn, turnOff } from "../../actions/spinnerActions";
 import { getProducts } from "../../actions/poActions";
 import { isAuthenticated } from "../../utils/commonHelper";
+import { isBefore } from "date-fns";
+import { getDateStringForMongo } from "../../utils/dateHelper";
 
 const NewInventory = (props) => {
   const { t } = props;
   const editInventories = useSelector((state) => {
-    return state.reviewInventory;
+    return state.reviewInventory.validRecords;
   });
   const [category, setCategory] = useState([]);
+  const dispatch = useDispatch();
   if (!isAuthenticated("addInventory")) props.history.push(`/profile`);
   useEffect(() => {
     async function fetchData() {
@@ -53,7 +56,7 @@ const NewInventory = (props) => {
           })
       );
       setBlankInventory({ ...blankInventory, products: productsArray });
-      if (editInventories.length === 0) {
+      if (!editInventories?.length) {
         setInventoryState([{ ...blankInventory, products: productsArray }]);
       } else {
         setInventoryState(editInventories);
@@ -62,7 +65,7 @@ const NewInventory = (props) => {
     }
     fetchData();
     dispatch(resetReviewInventories([]));
-  }, []);
+  }, [dispatch]);
 
   const [openCreatedInventory, setOpenCreatedInventory] = useState(false);
   const [openFailInventory, setOpenFailInventory] = useState(false);
@@ -96,9 +99,6 @@ const NewInventory = (props) => {
     "quantity",
     "unitofMeasure",
   ];
-
-  const dispatch = useDispatch();
-
   const closeModal = () => {
     setOpenCreatedInventory(false);
   };
@@ -117,33 +117,22 @@ const NewInventory = (props) => {
   const newMonth = `0${month}`.slice(-2);
   const todayDate = newMonth + "/" + new Date().getFullYear();
   const dateValidationFields = ["expiryDate"];
-  const expiryDateValidation = (date) => {
-    let error = false;
-    inventoryState.forEach((inventory) => {
-      if (error) return;
-      let validationVariable = inventory.expiryDate;
-      let a = new Date(
-        Date.parse(
-          typeof validationVariable == "string"
-            ? validationVariable
-            : validationVariable.toLocaleDateString()
-        )
-      ).getFullYear();
-      let b = todayDate.slice(-4);
-      let c = `0${new Date(validationVariable).getMonth() + 1}`.slice(-2);
-      let d = todayDate.substring(0, 2);
-      a = a.toString();
-      console.log(validationVariable);
-      console.log(a, b, c, d);
-      if (a < b || (a === b && c <= d)) {
-        setInventoryError("Check expiryDate");
-        setOpenFailInventory(true);
-        error = true;
-      }
-    });
 
-    return error;
-  };
+  const expiryDateValidation = (date) => {
+		let error = false;
+		inventoryState.forEach((inventory) => {
+			if (error) return;
+      let expDate = new Date(inventory.expiryDate);
+      let today = new Date();
+      today.setHours(0, 0, 0, 0);
+			if (expDate < today) {
+				setInventoryError("Check Expiry Date");
+				setOpenFailInventory(true);
+				error = true;
+			}
+		});
+		return error;
+	};
 
   const checkValidationErrors = (validations) => {
     let error = false;
@@ -173,6 +162,7 @@ const NewInventory = (props) => {
   };
 
   const importError = (message) => {
+    console.log(message);
     setInventoryError(message);
     setOpenFailInventory(true);
   };
@@ -184,7 +174,10 @@ const NewInventory = (props) => {
       return;
     }
 
-    dispatch(setReviewinventories(inventoryState));
+    const payload = {
+			validRecords: inventoryState,
+		};
+    dispatch(setReviewinventories(payload));
     props.history.push("/reviewinventory");
   };
 

@@ -54,3 +54,7 @@ input::-webkit-inner-spin-button {
   border-radius: 10px;
   box-shadow: 0 3px 10px #e4e4e4;
 }
+
+.MuiInput-underline.Mui-disabled:before {
+  border-bottom: 2px solid #d1cbcb !important;
+}

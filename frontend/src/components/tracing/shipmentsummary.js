@@ -1,4 +1,5 @@
 import React from "react";
+import { formatDate } from "../../utils/dateHelper";
 import "./style.scss";
 
 const ShipmentSummary = (props) => {
@@ -16,18 +17,7 @@ const ShipmentSummary = (props) => {
         <ul className='elemens'>
           <li className='mb-1'>{props.shipments.shipmentDetails[0].id}</li>
           <li className='mb-1'>
-            {" "}
-            {props.shipments.shipmentDetails[0].shippingDate
-              .split("T")[0]
-              .split("-")[2] +
-              "/" +
-              props.shipments.shipmentDetails[0].shippingDate
-                .split("T")[0]
-                .split("-")[1] +
-              "/" +
-              props.shipments.shipmentDetails[0].shippingDate
-                .split("T")[0]
-                .split("-")[0]}{" "}
+            {formatDate(props.shipments.shipmentDetails[0].shippingDate)}
           </li>
           <li className='mb-1'>
             {props.shipments.supplierOrgName}.,{props.shipments.fromLocation}

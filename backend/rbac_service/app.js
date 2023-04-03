@@ -1,7 +1,6 @@
-const express = require("express");
-const cookieParser = require("cookie-parser");
-const logger = require("morgan");
 require("dotenv").config();
+const express = require("express");
+const logger = require("morgan");
 const indexRouter = require("./routes/index");
 const apiResponse = require("./helpers/apiResponse");
 const { RbacCache } = require("./helpers/rbacCache");
@@ -32,7 +31,6 @@ mongoose
     console.error("App starting error:", err.message);
     process.exit(1);
   });
-const db = mongoose.connection;
 
 const app = express();
 
@@ -42,7 +40,6 @@ if (process.env.NODE_ENV !== "test") {
 }
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
 
 //To allow cross-origin requests
 app.use(cors());

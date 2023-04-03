@@ -1,10 +1,10 @@
+require("dotenv").config();
 const express = require("express");
 const helmet = require("helmet");
 const logger = require("morgan");
 const cors = require("cors");
 const fs = require("fs");
 const mongoose = require("mongoose");
-require("dotenv").config();
 const indexRouter = require("./routes/index");
 const apiRouter = require("./routes/api");
 const apiResponse = require("./helpers/apiResponse");

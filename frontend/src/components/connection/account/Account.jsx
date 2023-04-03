@@ -9,16 +9,24 @@ import { useHistory, useLocation } from "react-router";
 import PhoneInput from "react-phone-number-input";
 import { COUNTRY_CODE } from "../../../constants/countryCode";
 import { useForm, Controller } from "react-hook-form";
-import { getOrganizationsByType, verifyEmailAndPhoneNo } from "../../../actions/userActions";
-import { getOrganisationsAtSignup, fetchUnregisteredOrganisations } from "../../../actions/productActions";
+import { getOrganizationsByType } from "../../../actions/userActions";
+import {
+	getOrganisationsAtSignup,
+	fetchUnregisteredOrganisations,
+} from "../../../actions/productActions";
 import GoogleAuth from "../../landingpage/showcase/access-form/GoogleAuth";
 import TorusAuth from "../../landingpage/showcase/access-form/TorusAuth";
-import { isValidPhoneNumber } from "react-phone-number-input";
 import { createFilterOptions } from "@material-ui/lab";
+import {
+	checkDuplicateEmail,
+	checkDuplicateOrgName,
+	checkDuplicatePhone,
+} from "../../../utils/dataValidator";
 
 const filter = createFilterOptions();
 
 export default function Account(props) {
+	const { t } = props;
 	const location = useLocation();
 	const [authData, setAuthData] = useState({
 		firstName: location?.state?.firstName,
@@ -133,76 +141,52 @@ export default function Account(props) {
 		return arr;
 	};
 
-	const validateEmailPhone = () => {
-		const emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-		return new Promise((resolve, reject) => {
-			try {
-				let data;
-				let type;
-
-				if (watchEmail) {
-					data = "emailId=" + watchEmail;
-					type = "email";
-					if (watchEmail.match(emailRegex) === null) {
-						setError("email", { type: "custom", message: "Email ID is invalid!" });
-						setErrorMessage("Email ID is invalid!");
-						reject("Invalid email!");
-					}
-				}
-
-				if (watchPhone) {
-					data = "phoneNumber=" + watchPhone;
-					type = "phone";
-					if (isValidPhoneNumber(watchPhone) === false) {
-						setError("phone", { type: "custom", message: "Phone Number is invalid!" });
-						setErrorMessage("Phone number is invalid!");
-						reject("Invalid phone!");
-					}
-				}
-
-				if (data) {
-					verifyEmailAndPhoneNo(data).then((res) => {
-						if (res.status === 200) {
-							resolve("Valid email/phone!");
-						} else {
-							setError(type, {
-								type: "custom",
-								message: "Duplicate " + (type === "email" ? "Email ID!" : "Phone Number!"),
-							});
-							setErrorMessage("Duplicate EmailId/Phone!");
-							reject("Duplicate EmailId/Phone!");
-						}
+	const validateData = async () => {
+		try {
+			let flag = true;
+			if (watchEmail) {
+				await checkDuplicateEmail(watchEmail).catch((err) => {
+					setError("email", {
+						type: "custom",
+						message: err.message,
 					});
-				}
-			} catch (err) {
-				reject(err);
+					flag = false;
+				});
 			}
-		});
+
+			if (watchPhone) {
+				await checkDuplicatePhone(watchPhone).catch((err) => {
+					setError("phone", {
+						type: "custom",
+						message: err.message,
+					});
+					flag = false;
+				});
+			}
+
+			if (organizationExists === "new") {
+				await checkDuplicateOrgName(watchOrgName).catch((err) => {
+					setError("organizationName", {
+						type: "custom",
+						message: err.message,
+					});
+					flag = false;
+				});
+			}
+
+			return flag;
+		} catch (err) {
+			throw err;
+		}
 	};
 
-	const validateOrgName = () => {
-		if(!watchOrgName) return false;
-		let orgs = organizations.filter((organization) => organization.name === watchOrgName);
-
-		if(orgs && orgs.length) {
-			console.log("Org with the same name exists!");
-			setError("organizationName", { type: "custom", message: "Duplicate Organization name!" });
-			return false;
-		}
-
-		return true;
-	}
-
-	const onSubmit = (data) => {
-		if (!data.email && !data.phone) {
-			console.log("Please enter email or phone!");
-		} else {
-			validateEmailPhone()
-				.then((res) => {
-					if(organizationExists === "new") {
-						if(!validateOrgName()) return;
-					}
+	const onSubmit = async (data) => {
+		try {
+			if (!data.email && !data.phone) {
+				console.log("Please enter email or phone!");
+			} else {
+				const isValidData = await validateData();
+				if (isValidData) {
 					let finalFlag = organizationExists === "existing" || skipOrgRegistration;
 					props.onUserDataSubmit(data, finalFlag);
 					if (!finalFlag) {
@@ -210,10 +194,10 @@ export default function Account(props) {
 							pathname: "/neworganization",
 						});
 					}
-				})
-				.catch((err) => {
-					console.log("Error in validation - ", err);
-				});
+				}
+			}
+		} catch (err) {
+			console.log(err);
 		}
 	};
 
@@ -222,19 +206,27 @@ export default function Account(props) {
 			<div className="vl-connection-container">
 				<form onSubmit={handleSubmit(onSubmit)} className="account-form-container">
 					<hgroup className="form-headers">
-						<h1 className="vl-heading f-700 vl-black">Create your Account</h1>
-						<h2 className="vl-subheading f-400 vl-grey-xs vl-line-sm">
-							Join VaccineLedger to ensure quality and safety of your Vaccines using Blockchain
-						</h2>
+						<h1 className="vl-heading f-700 vl-black">{t("create_ur_account")}</h1>
+						<h2 className="vl-subheading f-400 vl-grey-xs vl-line-sm">{t("create_sub_message")}</h2>
 					</hgroup>
 					<section className="vl-input-group form-auto-fill-section">
 						<div className="input-two-auto-column">
-							<GoogleAuth register={true} onAuthSuccess={onAuthSuccess} onFailure={onFailure} />
-							<TorusAuth register={true} onAuthSuccess={onAuthSuccess} onFailure={onFailure} />
+							<GoogleAuth
+								t={t}
+								register={true}
+								onAuthSuccess={onAuthSuccess}
+								onFailure={onFailure}
+							/>
+							<TorusAuth
+								t={t}
+								register={true}
+								onAuthSuccess={onAuthSuccess}
+								onFailure={onFailure}
+							/>
 						</div>
 						<div className="option-divider">
 							<div className="divider-bar"></div>
-							<p className="vl-subheading vl-grey-xs">OR</p>
+							<p className="vl-subheading vl-grey-xs">{t("or")}</p>
 							<div className="divider-bar"></div>
 						</div>
 					</section>
@@ -249,10 +241,10 @@ export default function Account(props) {
 									<TextField
 										fullWidth
 										variant="outlined"
-										label="First Name"
+										label={t("first_name")}
 										{...field}
 										error={Boolean(errors.firstName)}
-										helperText={errors.firstName && "First Name is required!"}
+										helperText={errors.firstName && t("first_name_required")}
 									/>
 								)}
 							/>
@@ -264,10 +256,10 @@ export default function Account(props) {
 									<TextField
 										fullWidth
 										variant="outlined"
-										label="Last Name"
+										label={t("last_name")}
 										{...field}
 										error={Boolean(errors.lastName)}
-										helperText={errors.lastName && "Last Name is required!"}
+										helperText={errors.lastName && t("Last_name_required")}
 									/>
 								)}
 							/>
@@ -281,12 +273,12 @@ export default function Account(props) {
 									<TextField
 										fullWidth
 										variant="outlined"
-										label="Email Address"
+										label={t("email_address")}
 										{...field}
 										error={Boolean(errors.email)}
 										helperText={
 											errors.email?.type === "required"
-												? "Email or Phone is required!"
+												? t("email_or_phone_required")
 												: errors.email?.message
 										}
 									/>
@@ -306,7 +298,9 @@ export default function Account(props) {
 										className="vl-custom-phone-input"
 										{...field}
 										maxLength={15}
-										style={{ borderColor: Boolean(errors.phone) ? "#da323c" : "" }}
+										style={{
+											borderColor: Boolean(errors.phone) ? "#da323c" : "",
+										}}
 									/>
 								)}
 							/>
@@ -329,11 +323,11 @@ export default function Account(props) {
 										>
 											<div className="vl-radio-btn vl-align-center">
 												<Radio value={"existing"} inputProps={{ "aria-label": "A" }} />
-												<p className="vl-body f-400 vl-grey-md vl-line-sm">Existing Organization</p>
+												<p className="vl-body f-400 vl-grey-md vl-line-sm">{t("ext_org")}</p>
 											</div>
 											<div className="vl-radio-btn vl-align-center">
 												<Radio value={"new"} inputProps={{ "aria-label": "B" }} />
-												<p className="vl-body f-400 vl-grey-md vl-line-sm">New Organization</p>
+												<p className="vl-body f-400 vl-grey-md vl-line-sm">{t("new_org")}</p>
 											</div>
 										</RadioGroup>
 									)}
@@ -354,9 +348,9 @@ export default function Account(props) {
 											renderInput={(params) => (
 												<TextField
 													{...params}
-													label="Organization Type"
+													label={t("organization_type")}
 													error={Boolean(errors.organizationType)}
-													helperText={errors.organizationType && "Organization type is required!"}
+													helperText={errors.organizationType && t("org_type_required")}
 												/>
 											)}
 											{...field}
@@ -378,9 +372,9 @@ export default function Account(props) {
 											renderInput={(params) => (
 												<TextField
 													{...params}
-													label="Organization Name"
+													label={t("organization_name")}
 													error={Boolean(errors.organization)}
-													helperText={errors.organization && "Organization Name is required!"}
+													helperText={errors.organization && t("org_name_required")}
 												/>
 											)}
 											{...field}
@@ -463,9 +457,7 @@ export default function Account(props) {
 										control={control}
 										render={({ field }) => <Checkbox {...field} />}
 									/>
-									<h2 className="vl-subheading f-400 vl-grey-xs">
-										Skip the Organization Registration
-									</h2>
+									<h2 className="vl-subheading f-400 vl-grey-xs">{t("skip")}</h2>
 								</div>
 							</div>
 						)}
@@ -474,7 +466,7 @@ export default function Account(props) {
 						className={`call-by-action ${organizationExists === "existing" && "top-space"} `}
 					>
 						<button type="submit" className="vl-btn vl-btn-md vl-btn-full vl-btn-primary">
-							Continue
+							{t("continue")}
 						</button>
 					</section>
 				</form>

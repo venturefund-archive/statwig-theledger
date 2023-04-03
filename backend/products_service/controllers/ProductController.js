@@ -4,7 +4,7 @@ const CounterModel = require("../models/CounterModel");
 const { body, validationResult } = require("express-validator");
 const checkPermissions =
   require("../middlewares/rbac_middleware").checkPermissions;
-const moveFile = require("move-file");
+const XLSX = require("xlsx");
 const fs = require("fs");
 const QRCode = require("qrcode");
 const array = require("lodash/array");
@@ -26,7 +26,8 @@ const printer = new PdfPrinter(fonts);
 const { uploadFile } = require("../helpers/s3");
 const util = require("util");
 const unlinkFile = util.promisify(fs.unlink);
-exports.getProducts = [
+
+exports.getProductsOld = [
   auth,
   async (req, res) => {
     try {
@@ -36,7 +37,10 @@ exports.getProducts = [
       };
       checkPermissions(permission_request, async (permissionResult) => {
         if (permissionResult.success) {
-          const products = await ProductModel.find({});
+          let matchQuery = {}
+          if (req.query.orgId)
+            matchQuery[`manufacturerId`] = req.query.orgId
+          const products = await ProductModel.find(matchQuery).sort({ _id: -1 }).skip(parseInt(req.query.skip) || 0).limit(parseInt(req.query.limit) || 0);
           return apiResponse.successResponseWithData(res, "Products", products);
         } else {
           return apiResponse.forbiddenResponse(
@@ -45,6 +49,65 @@ exports.getProducts = [
           );
         }
       });
+    } catch (err) {
+      console.error(err);
+      return apiResponse.ErrorResponse(res, err.message);
+    }
+  },
+];
+
+function getProductCondition(query) {
+	let matchArr = [];
+
+	if (query.status && query.status != "") {
+		matchArr.push({ status: query.status });
+	}
+	if (query.orgId && query.orgId != "") {
+		matchArr.push({ manufacturerId: query.orgId });
+	}
+	if (query.name && query.name != "") {
+		matchArr.push({
+			$or: [
+				{ name: { $regex: query.name, $options: "i" } },
+				{ type: { $regex: query.name, $options: "i" } },
+				{ manufacturer: { $regex: query.name, $options: "i" } },
+			],
+		});
+	}
+
+	const matchCondition =  matchArr?.length ? { $and: matchArr } : {};
+
+	return matchCondition;
+}
+
+exports.getProducts = [
+  auth,
+  async (req, res) => {
+    try {
+      const permission_request = {
+        role: req.user.role,
+        permissionRequired: ["viewProductList"],
+      };
+      checkPermissions(permission_request, async (permissionResult) => {
+				if (permissionResult.success) {
+					const stages = [
+						{ $match: getProductCondition(req.query) },
+						{ $sort: { _id: -1 } },
+						{ $setWindowFields: { output: { totalCount: { $count: {} } } } },
+					];
+					if (req.query?.skip !== undefined && req.query?.limit !== undefined) {
+						stages.push({ $skip: parseInt(req.query.skip) });
+						stages.push({ $limit: parseInt(req.query.limit) });
+					}
+					const products = await ProductModel.aggregate(stages);
+					return apiResponse.successResponseWithData(res, "Products", products);
+				} else {
+					return apiResponse.forbiddenResponse(
+						res,
+						responses(req.user.preferredLanguage).no_permission,
+					);
+				}
+			});
     } catch (err) {
       console.error(err);
       return apiResponse.ErrorResponse(res, err.message);
@@ -108,6 +171,39 @@ exports.getProductInfo = [
   },
 ];
 
+exports.validateProductName = [
+  auth,
+  async (req, res) => {
+    try {
+      const permission_request = {
+        role: req.user.role,
+        permissionRequired: ["addNewProduct"],
+      };
+      checkPermissions(permission_request, async (permissionResult) => {
+        if (permissionResult.success) {
+          let result = false;
+          const product = await ProductModel.findOne({
+            $or: [
+              { name: { $regex: new RegExp("^" + req.query.productName + "$", "i") } },
+              { shortName: { $regex: new RegExp("^" + req.query.productName + "$", "i") } },
+            ],
+          });
+          if (product?.id) result = true;
+          return apiResponse.successResponseWithData(res, "Product Exists", result);
+        } else {
+          return apiResponse.forbiddenResponse(
+            res,
+            responses(req.user.preferredLanguage).no_permission,
+          );
+        }
+      });
+    } catch (err) {
+      console.error(err);
+      return apiResponse.ErrorResponse(res, err.message);
+    }
+  },
+];
+
 exports.addMultipleProducts = [
   auth,
   async (req, res) => {
@@ -122,8 +218,7 @@ exports.addMultipleProducts = [
           if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir);
           }
-          await moveFile(req.file.path, `${dir}/${req.file.originalname}`);
-          const obj = xlsx.parse(`${dir}/${req.file.originalname}`); // parses a file
+          const obj = XLSX.parse(req.file.path); // parses a file
           const data = obj[0].data;
           const products = data
             .map((element) => {
@@ -228,7 +323,7 @@ exports.addProduct = [
 
         checkPermissions(permission_request, async (permissionResult) => {
           let manufacturerRef;
-          
+
           const manufacturerExists = await OrganisationModel.findOne({
             name: req.body.manufacturer,
           });
@@ -246,6 +341,8 @@ exports.addProduct = [
             const organisationId = orgCounter.counters[2].format + orgCounter.counters[2].value;
             const newManufacturer = new OrganisationModel({
               id: organisationId,
+              region: 'Americas',
+              country: 'Costa Rica',
               name: req.body.manufacturer,
               type: "VENDOR",
               isRegistered: false
@@ -254,7 +351,7 @@ exports.addProduct = [
 
             manufacturerRef = newManufacturer;
           }
-          if(!manufacturerRef) {
+          if (!manufacturerRef) {
             throw new Error("Could not find/create a new manufacturer!");
           }
 
@@ -274,7 +371,7 @@ exports.addProduct = [
             );
 
             let Upload;
-            if(req.file!=undefined){
+            if (req.file != undefined) {
               Upload = await uploadFile(req.file);
               await unlinkFile(req.file.path);
             }
@@ -289,7 +386,7 @@ exports.addProduct = [
               manufacturer: req.body.manufacturer,
               manufacturerId: manufacturerRef.id,
               pricing: req.body.pricing,
-              photoId: Upload!=undefined?Upload.key:"",
+              photoId: Upload != undefined ? Upload.key : "",
               unitofMeasure: JSON.parse(req.body.unitofMeasure),
               characteristicSet: {
                 temperature_max: req.body.characteristicSet?.temperature_max,
@@ -340,7 +437,6 @@ exports.uploadImage = [
               console.log(err);
             });
           }
-          await moveFile(req.files[0].path, `${dir}/photo.png`);
           return apiResponse.successResponse(res, "Success");
         } else {
           return apiResponse.forbiddenResponse(
@@ -520,12 +616,12 @@ exports.getproductname = [
   async (req, res) => {
     try {
       const manufacturers = await ProductModel.aggregate([
-				{
-					$group: {
-						_id: "$manufacturer",
-						products: { $addToSet: "$id" },
-					},
-				},
+        {
+          $group: {
+            _id: "$manufacturer",
+            products: { $addToSet: "$id" },
+          },
+        },
       ]);
       
       for(ind in manufacturers) {
@@ -560,7 +656,7 @@ exports.getproductname = [
         console.log("Found - ", products.length);
 
         const res = await ProductModel.updateMany(
-					{ id: { $in: products } },
+          { id: { $in: products } },
           { $set: { manufacturerId: manufacturer.id } }
         );
         
