@@ -52,7 +52,7 @@ export default function Landingfooter({ contactRef, t }) {
                   <p className="vl-subheading f-700 vl-grey-md">India</p>
                   <article className="full-address">
                     <p className="vl-body f-400 vl-grey-sm">
-                      T-Hub, IIIT-Hyderabad, Gachibowli, Hyderabad, Telangana,
+                    T-Hub, 2.0, Silpa Gram Craft Village, Gachibowli, Hyderabad, Telangana,
                     </p>
                     <p className="vl-body f-400 vl-grey-sm">India – 500032</p>
                   </article>

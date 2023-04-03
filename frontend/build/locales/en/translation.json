@@ -599,7 +599,7 @@
   "save_changes":"Save Changes",
   "add_pharmacies": "Add Pharmacies",
   "import_pharmacy": "Import Pharmacies",
-  "add_pharmacy": "Add Pharamcy",
+  "add_pharmacy": "Add Pharmacy",
   "no_access_receiveshipment":"No Access to Receive the shipment",
   "please_try_again":"Please Try Again",
   "check_expiryDate":"Check expiryDate",
@@ -617,5 +617,11 @@
   "vialsutilized_report":"VialsUtilizedReport",
   "vaccination_report":"VaccinationReport",
   "mfg_greater_than_today": "Manufacturing Date cannot be greater than today!",
-  "mfg_greater_than_exp": "Manufacturing Date cannot be greater than Expiry Date!"
+  "mfg_greater_than_exp": "Manufacturing Date cannot be greater than Expiry Date!",
+  "choose_batch_to_continue": "Choose Batch to continue ->",
+  "first_name_required":"First name required",
+  "Last_name_required":"Last name required",
+  "org_type_required":"Organisation type required",
+  "org_name_required":"Organisation name required",
+  "email_or_phone_required":"Email or Phone required"
 }
