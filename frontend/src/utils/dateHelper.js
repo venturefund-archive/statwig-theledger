@@ -30,7 +30,7 @@ export const expired = (dates, time) => {
 };
 
 export const Count = (data) => {
-  var sum = 0;
+  let sum = 0;
   if (typeof data == "object") {
     data.forEach((expire) => {
       sum += parseFloat(expire.quantity);
@@ -55,36 +55,35 @@ export const formatDate = (date, format) => {
 
 export const formatTime = (d) => {
   const date = new Date(d);
-  var hours = date.getHours();
-  var minutes = date.getMinutes();
-  var ampm = hours >= 12 ? "pm" : "am";
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  const ampm = hours >= 12 ? "pm" : "am";
   hours = hours % 12;
   hours = hours ? hours : 12;
   minutes = minutes < 10 ? "0" + minutes : minutes;
-  var strTime = hours + ":" + minutes + "" + ampm;
-  return strTime;
+  return hours + ":" + minutes + "" + ampm;
 };
 
 export const formatTimeAMPM = (d) => {
   const date = d.split(":");
-  var hours = parseInt(date[0]);
-  var minutes = parseInt(date[1]);
-  var ampm = hours >= 12 ? "pm" : "am";
+  let hours = parseInt(date[0]);
+  let minutes = parseInt(date[1]);
+  let ampm = hours >= 12 ? "pm" : "am";
   hours = hours % 12;
   hours = hours ? hours : 12;
   minutes = minutes < 10 ? "0" + minutes : minutes;
-  var strTime = hours + ":" + minutes + "" + ampm;
+  const strTime = hours + ":" + minutes + "" + ampm;
   return strTime;
 };
 
 export const getDateStringForMongo = function (date) {
-	if (!date) return;
+  if (!date) return;
 
-	let currDate = new Date(date);
-	let year = currDate.getFullYear();
-	let month = currDate.getMonth() + 1;
-	let day = currDate.getDate();
-	let dateString = `${year}${month < 10 ? "0" + month : month}${day < 10 ? "0" + day : day}`;
+  let currDate = new Date(date);
+  let year = currDate.getFullYear();
+  let month = currDate.getMonth() + 1;
+  let day = currDate.getDate();
+  let dateString = `${year}${month < 10 ? "0" + month : month}${day < 10 ? "0" + day : day}`;
 
-	return dateString;
+  return dateString;
 };
