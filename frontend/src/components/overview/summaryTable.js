@@ -234,11 +234,7 @@ const SummaryTable = (props) => {
                 <div className="d-flex">
                   <div className="mr-3">{t("shipping_date")}</div>
                   <div className="font-weight-bold">
-                    {shipment.shippingDate.split("T")[0].split("-")[2] +
-                      "/" +
-                      shipment.shippingDate.split("T")[0].split("-")[1] +
-                      "/" +
-                      shipment.shippingDate.split("T")[0].split("-")[0]}
+                    {formatDate(shipment.shippingDate)}
                   </div>
                 </div>
                 <div className="d-flex">
