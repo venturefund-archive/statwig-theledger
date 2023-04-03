@@ -140,7 +140,7 @@ const ShipmentAnalytic = (props) => {
         setCount(inboundRes.data.count);
         dispatch(turnOff());
       } else {
-        if(statusFilter == null) setStatusFilter("");
+        if (statusFilter == null) setStatusFilter("");
         dispatch(turnOn());
         const outboundRes = await getOutboundShipments(
           idFilter,
@@ -389,7 +389,7 @@ const ShipmentAnalytic = (props) => {
       dispatch(turnOff());
     }
   };
-  
+
   const sendData = () => {
     let rtnArr = visible === "one" ? inboundShipments : outboundShipments;
     if (alerts)
@@ -488,20 +488,19 @@ const ShipmentAnalytic = (props) => {
   const onSelectionOfDropdownValue = (index, type, value) => {
     setShowExportFilter(false);
     let url = "";
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     if (visible === "one") {
-      url = `${
-        config().getExportFileForInboundShipmentUrl
-      }?type=${value.toLowerCase()}&shipmentId=${idFilter}&from=${fromFilter}&to=${toFilter}&dateFilter=${dateFilter}&status=${statusFilter}&fromDate=${fromFilterDate}&toDate=${toFilterDate}`;
+      url = `${config().getExportFileForInboundShipmentUrl
+        }?type=${value.toLowerCase()}&shipmentId=${idFilter}&from=${fromFilter}&to=${toFilter}&dateFilter=${dateFilter}&status=${statusFilter}&fromDate=${fromFilterDate}&toDate=${toFilterDate}&timezone=${timezone}`;
     }
     if (visible === "two") {
-      url = `${
-        config().getExportFileForOutboundShipmentUrl
-      }?type=${value.toLowerCase()}&shipmentId=${idFilter}&from=${fromFilter}&to=${toFilter}&dateFilter=${dateFilter}&status=${statusFilter}&fromDate=${fromFilterDate}&toDate=${toFilterDate}`;
+      url = `${config().getExportFileForOutboundShipmentUrl
+        }?type=${value.toLowerCase()}&shipmentId=${idFilter}&from=${fromFilter}&to=${toFilter}&dateFilter=${dateFilter}&status=${statusFilter}&fromDate=${fromFilterDate}&toDate=${toFilterDate}&timezone=${timezone}`;
     }
 
-    var today = new Date();
+    const today = new Date();
 
-    var nameOfFile;
+    let nameOfFile;
 
     if (visible === "one") {
       nameOfFile =
@@ -529,8 +528,7 @@ const ShipmentAnalytic = (props) => {
         link.href = downloadUrl;
         link.setAttribute(
           "download",
-          `${nameOfFile}.${
-            value.toLowerCase() === "excel" ? "xlsx" : value.toLowerCase()
+          `${nameOfFile}.${value.toLowerCase() === "excel" ? "xlsx" : value.toLowerCase()
           }`
         ); //any other extension
         document.body.appendChild(link);
@@ -596,7 +594,7 @@ const ShipmentAnalytic = (props) => {
           />
         </div>
       )}
-      <div className='ribben-space'  style={{pointerEvents: props.demoLogin ? "none" : "auto" }}>
+      <div className='ribben-space' style={{ pointerEvents: props.demoLogin ? "none" : "auto" }}>
         <Table
           {...props}
           skip={skip}
