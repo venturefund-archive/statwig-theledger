@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Modal from "../../../shared/modal";
 import ViewShippingModal from "./viewShippingModal";
 import { getShippingOrders } from "../../../actions/shippingOrderAction";
+import { formatDate } from "../../../utils/dateHelper";
 import "./style.scss";
 
 const ShippingOrderTable = (props) => {
@@ -84,11 +85,7 @@ const ShippingOrderTable = (props) => {
                     {shipping.products[0].manufacturer}
                   </div>
                   <div className='rTableCell'>
-                    {shipping.soUpdatedOn.split("T")[0].split("-")[2] +
-                      "/" +
-                      shipping.soUpdatedOn.split("T")[0].split("-")[1] +
-                      "/" +
-                      shipping.soUpdatedOn.split("T")[0].split("-")[0]}
+                    {formatDate(shipping.soUpdatedOn)}
                   </div>
 
                   <div className='rTableCell'>

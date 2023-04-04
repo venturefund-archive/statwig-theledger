@@ -86,10 +86,10 @@ export const searchProduct = async (id, warehouseId) => {
   try {
     const result = await axios.get(
       config().searchProduct +
-        "&productType=" +
-        id +
-        "&warehouseId=" +
-        warehouseId
+      "&productType=" +
+      id +
+      "&warehouseId=" +
+      warehouseId
     );
     return result.data.data;
   } catch (e) {
@@ -107,12 +107,12 @@ export const getManufacturers = async () => {
 };
 
 export const validateProductName = async (productName) => {
-	try {
-		const result = await axios.get(`${config().validateProductName}?productName=${productName}`);
-		return result.data.data;
-	} catch (e) {
-		return e.response;
-	}
+  try {
+    const result = await axios.get(`${config().validateProductName}?productName=${productName}`);
+    return result.data.data;
+  } catch (e) {
+    return e.response;
+  }
 };
 
 export const addNewProduct = async (data) => {
@@ -170,8 +170,7 @@ export const getSentPOs = async (
   //outbound po with filter(to, orderId, productName, deliveryLocation, date, skip, limit)
   try {
     const result = await axios.get(
-      `${
-        config().fetchOutboundPurchaseOrderUrl
+      `${config().fetchOutboundPurchaseOrderUrl
       }?to=${to}&orderId=${orderId}&productName=${productName}&dateFilter=${dateFilter}&deliveryLocation=${deliveryLocation}&poStatus=${status}&fromDate=${fromDate}&toDate=${toDate}&skip=${skip}&limit=${limit}`
     );
     return result.data;
@@ -195,8 +194,7 @@ export const getReceivedPOs = async (
   //outbound po with filter(to, orderId, productName, deliveryLocation, date, skip, limit)
   try {
     const result = await axios.get(
-      `${
-        config().fetchInboundPurchaseOrderUrl
+      `${config().fetchInboundPurchaseOrderUrl
       }?from=${from}&orderId=${orderId}&productName=${productName}&dateFilter=${dateFilter}&deliveryLocation=${deliveryLocation}&poStatus=${status}&fromDate=${fromDate}&toDate=${toDate}&skip=${skip}&limit=${limit}`
     );
     return result.data;
@@ -293,7 +291,7 @@ export const getOrganizationsByTypes = async (id) => {
   }
 };
 
-export const getExportFile = async (url, value,language) => {
+export const getExportFile = async (url, value, language) => {
   try {
     if (language === undefined || language === "en-US") {
       language = "en";

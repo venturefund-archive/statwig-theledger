@@ -30,7 +30,7 @@ exports.expired = (dates, time) => {
 };
 
 exports.Count = (data) => {
-  var sum = 0;
+  let sum = 0;
   if (typeof data == "object") {
     data.forEach((expire) => {
       sum += parseFloat(expire.quantity);

@@ -2,7 +2,7 @@ exports.responses = (language) => {
   const resps = {
     EN: {
       email_not_found: "Email is not found",
-      orgdata_not_found: "Orgdata not found",
+      orgdata_not_found: "Organization not found",
       config_not_found: "Configuration not found",
       supplier_not_defined: "Supplier not defined",
       receiver_not_defined: "Receiver not defined",
@@ -13,7 +13,7 @@ exports.responses = (language) => {
       shipment_not_found: "Shipment not found",
       shipment_found: "Shipment found",
       shipment_not_saved: "Shipment Not saved",
-      shipment_created: "Shipment Created Succesfully",
+      shipment_created: "Shipment Created Successfully",
       tagged_error: "Tagged product quantity not available",
       product_quantity_error: "Product quantity not available",
       rec_quantity_error:
