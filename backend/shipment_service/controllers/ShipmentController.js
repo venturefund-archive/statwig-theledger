@@ -4523,9 +4523,9 @@ exports.exportInboundShipments = [
               recieverOrgLocation: row?.receiver?.locationId,
               airWayBillNo: row.airWayBillNo,
               label: row?.label?.labelId,
-              shippingDate: formatInTimeZone(row.shippingDate, timezone, 'yyyy-MM-dd HH:mm:ss zzz') || "N/A",
-              expectedDeliveryDate: formatInTimeZone(row.expectedDeliveryDate, timezone, 'yyyy-MM-dd HH:mm:ss zzz') || "N/A",
-              expiryDate: formatInTimeZone(receiverAtom?.attributeSet?.expDate, timezone, 'yyyy-MM-dd HH:mm:ss zzz') || "N/A",
+              shippingDate: row.shippingDate ? formatInTimeZone(row.shippingDate, timezone, 'dd/MM/yyyy HH:mm:ss') || "N/A" : "NA",
+              expectedDeliveryDate: row.expectedDeliveryDate ? formatInTimeZone(row.expectedDeliveryDate, timezone, 'dd/MM/yyyy HH:mm:ss') || "N/A" : "NA",
+              expiryDate: receiverAtom?.attributeSet?.expDate || "N/A",
             };
             data.push(rowData);
           }
@@ -4683,12 +4683,11 @@ exports.exportOutboundShipments = [
             recieverOrgLocation: row?.receiver?.locationId,
             airWayBillNo: row.airWayBillNo,
             label: row?.label?.labelId,
-            shippingDate: formatInTimeZone(row.shippingDate, timezone, 'yyyy-MM-dd HH:mm:ss zzz') || "N/A",
-            expectedDeliveryDate: formatInTimeZone(row.expectedDeliveryDate, timezone, 'yyyy-MM-dd HH:mm:ss zzz') || "N/A",
-            expiryDate: formatInTimeZone(receiverAtom?.attributeSet?.expDate, timezone, 'yyyy-MM-dd HH:mm:ss zzz') || "N/A",
+            expiryDate: receiverAtom?.attributeSet?.expDate,
+            shippingDate: row.shippingDate ? formatInTimeZone(row.shippingDate, timezone, 'dd/MM/yyyy HH:mm:ss') || "N/A" : "NA",
+            expectedDeliveryDate: row.expectedDeliveryDate ? formatInTimeZone(row.expectedDeliveryDate, timezone, 'dd/MM/yyyy HH:mm:ss') || "N/A" : "NA",
           };
           data.push(rowData);
-          console.log(rowData.shippingDate, rowData.expectedDeliveryDate)
         }
       }
       if (req.query.type == "pdf") {

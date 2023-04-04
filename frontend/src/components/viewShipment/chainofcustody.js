@@ -3,7 +3,7 @@ import "./style.scss";
 import traceDrop from "../../assets/icons/traceDrop.png";
 import Down from "../../assets/icons/up.png";
 import { getAddress } from "../../utils/commonHelper";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format } from "date-fns";
 const ChainOfCustody = (props) => {
   const { t } = props;
   const [op, setOp] = useState("");
@@ -79,10 +79,12 @@ const ChainOfCustody = (props) => {
                   <div className='d-flex flex-column mr-5'>
                     <div className='emp'></div>
                     <div>
+                      {format(new Date(custody?.updatedOn), "dd/MM/yyyy HH:mm:ss zzz")}
+                    </div>
+                    <div className="text-right">
                       {formatDistanceToNow(Date.parse(custody?.updatedOn)) +
                         " ago"}
                     </div>
-                    <div></div>
                   </div>
                 </div>
                 {op === index ? (
@@ -194,10 +196,12 @@ const ChainOfCustody = (props) => {
                       <div className='d-flex flex-column mr-5'>
                         <div className='emp'></div>
                         <div>
+                          {format(new Date(custody?.updatedOn), "dd/MM/yyyy HH:mm:ss zzz")}
+                        </div>
+                        <div className="text-right">
                           {formatDistanceToNow(Date.parse(custody?.updatedOn)) +
                             " ago"}
                         </div>
-                        <div></div>
                       </div>
                     </div>
                     {op === index ? (
@@ -300,10 +304,12 @@ const ChainOfCustody = (props) => {
                       <div className='d-flex flex-column mr-5'>
                         <div className='emp'></div>
                         <div>
+                          {format(new Date(custody?.updatedOn), "dd/MM/yyyy HH:mm:ss zzz")}
+                        </div>
+                        <div className="text-right">
                           {formatDistanceToNow(Date.parse(custody?.updatedOn)) +
                             " ago"}
                         </div>
-                        <div></div>
                       </div>
                     </div>
                     {op === index ? (
