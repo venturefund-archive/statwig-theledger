@@ -4,7 +4,6 @@ import ChainofCustody from "./chain-of-custody/ChainofCustody";
 import CurrentLocation from "./current-location/CurrentLocation";
 import Tab from "./tabs/Tab";
 import TrackingMap from "./tracking-map/TrackingMap";
-import TrackIllustration from "../../assets/images/track.webp";
 import "./Tracking.scss";
 import { useHistory, useParams } from "react-router";
 import Modal from "../../shared/modal";
@@ -68,37 +67,37 @@ export default function Tracking() {
   };
 
   return (
-    <div className="tracking-main-layout">
-      <div className="track-grid-container">
-        <div className="tracking-content-area">
-          <div className="tracking-header">
+    <div className='tracking-main-layout'>
+      <div className='track-grid-container'>
+        <div className='tracking-content-area'>
+          <div className='tracking-header'>
             <h1
               style={{ paddingBottom: "10px" }}
-              className="vl-heading-bdr black f-700 mi-reset"
+              className='vl-heading-bdr black f-700 mi-reset'
             >
               {t("trackntrace")}
             </h1>
-            <div className="tracking-search-bar">
-              <div className="mi-flex-ac">
+            <div className='tracking-search-bar'>
+              <div className='mi-flex-ac'>
                 <input
-                  type="search"
+                  type='search'
                   placeholder={t("search_track")}
-                  className="track-search"
+                  className='track-search'
                   onKeyUp={handleKeyPress}
                   onChange={(event) => setTrackingID(event.target.value)}
                   value={trackingID}
                 />
                 <i
-                  className="bx bx-search search-track-icon"
+                  className='bx bx-search search-track-icon'
                   onClick={handleSearch}
                 ></i>
               </div>
             </div>
           </div>
-          <div className="tab-buttons">
+          <div className='tab-buttons'>
             <Tab
               t={t}
-              layout="button"
+              layout='button'
               LocationTab={LocationTab}
               setLocationTab={setLocationTab}
             />
@@ -113,7 +112,7 @@ export default function Tracking() {
             />
           )}
         </div>
-        <div className="tracking-map-area">
+        <div className='tracking-map-area'>
           <TrackingMap
             t={t}
             LocationTab={LocationTab}
@@ -123,7 +122,7 @@ export default function Tracking() {
       </div>
 
       {openFailedPopup && (
-        <Modal close={() => closeModalFailedPopUp()} size="modal-sm">
+        <Modal close={() => closeModalFailedPopUp()} size='modal-sm'>
           <FailedPopUp
             message={errorInTrack}
             onHide={closeModalFailedPopUp}
