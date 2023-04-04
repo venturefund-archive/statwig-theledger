@@ -30,7 +30,13 @@ const EnterId = (props) => {
     }
     async function fetchairwayBill() {
       let temp_arr = await fetchairwayBillNumber();
-      settransitNumberArray(temp_arr.data);
+      let newArr=temp_arr.data||[]
+      let newArr1=newArr.filter(each=>{
+        if(each.airWayBillNo){
+          return each
+        }
+      })
+      settransitNumberArray(newArr1);
     }
     getShipmentArray();
     fetchairwayBill();

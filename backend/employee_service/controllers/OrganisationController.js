@@ -250,10 +250,7 @@ function getOrgCondition(query) {
 	
 	if (query.status && query.status != "") {
 		matchCondition.status = query.status;
-	} else {
-		matchCondition.status = {$in: ["ACTIVE", "DEACTIVATED"]}
-	}
-
+	} 
 	if (query.region && query.region != "") {
 		matchCondition["region.name"] = query.region;
 	}

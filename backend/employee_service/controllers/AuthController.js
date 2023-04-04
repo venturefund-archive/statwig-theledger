@@ -158,7 +158,7 @@ async function createWarehouse(payload) {
 function getUserCondition(query, orgId) {
 	let matchArr = [];
 	matchArr.push({ organisationId: orgId });
-	matchArr.push({ accountStatus: { $ne: "NOTAPPROVED" } });
+	// matchArr.push({ accountStatus: { $ne: "NOTAPPROVED" } });
 	if (query.role && query.role != "") {
 		matchArr.push({ role: query.role });
 	}
