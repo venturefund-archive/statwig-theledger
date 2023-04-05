@@ -10,6 +10,8 @@ import { useTranslation } from "react-i18next";
 import { getManufacturerNearExpiryStockReport, getNearExpiryFilterOptions } from "../../../../actions/networkActions";
 import Filterbar from "../../Filter/Filterbar";
 import { Pagination, useTheme } from "@mui/material";
+import { useDispatch } from "react-redux";
+import { turnOff, turnOn } from "../../../../actions/spinnerActions";
 
 function TableHeader({
 	anchorEl,
@@ -127,6 +129,7 @@ function TableHeader({
 }
 
 export default function NearexpireTable({locationParams}) {
+	const dispatch = useDispatch();
 	const [nearExpiryStock, setNearExpiryStock] = useState([]);
 	const [totalCount, setTotalCount] = useState(0);
 	const [nearExpiryStockFilters, setNearExpiryStockFilters] = useState();
@@ -183,12 +186,14 @@ export default function NearexpireTable({locationParams}) {
 		payload.reportWarehouse = reportWarehouse;
 		payload.skip = (page - 1) * 10;
 		payload.limit = 10;
+		dispatch(turnOn());
 		const nearExpiryStock = await getManufacturerNearExpiryStockReport(payload);
 		if (nearExpiryStock) {
 			setNearExpiryStock(nearExpiryStock.data.nearExpiryProducts);
 			setTotalCount(nearExpiryStock.data.totalCount);
 			setReportWarehouse(nearExpiryStock.data.warehouseId);
 		}
+		dispatch(turnOff());
 	};
 
 	const getNearExpiryStockFilters = async () => {
@@ -198,8 +203,10 @@ export default function NearexpireTable({locationParams}) {
 		};
 		payload.reportWarehouse = reportWarehouse;
 		payload.date = "";
+		dispatch(turnOn());
 		const nearExpiryStockFilters = await getNearExpiryFilterOptions(payload);
 		if (nearExpiryStockFilters) setNearExpiryStockFilters(nearExpiryStockFilters.filters);
+		dispatch(turnOff());
 	};
 
 	useEffect(() => {

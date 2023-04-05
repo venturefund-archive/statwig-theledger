@@ -7,10 +7,12 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import BestsellerRow from "./BestsellerRow";
 import { useTranslation } from "react-i18next";
-import { getBestsellerFilterOptions, getBestSellers } from "../../../../actions/networkActions";
+import { getBestsellerFilterOptions, getBestSellersReport } from "../../../../actions/networkActions";
 import { useTheme, styled } from "@mui/material/styles";
 import Filterbar from "../../Filter/Filterbar";
 import { Pagination } from "@mui/material";
+import { useDispatch } from "react-redux";
+import { turnOff, turnOn } from "../../../../actions/spinnerActions";
 
 function TableHeader({
 	anchorEl,
@@ -122,6 +124,7 @@ function TableHeader({
 }
 
 export default function BestsellerTable({locationParams}) {
+	const dispatch = useDispatch();
   const [bestseller, setBestseller] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [bestsellerFilters, setBestsellerFilters] = useState();
@@ -176,9 +179,11 @@ export default function BestsellerTable({locationParams}) {
 			...locationParams,
 		};
     payload.reportWarehouse = reportWarehouse;
-    payload.date = "";
+		payload.date = "";
+		dispatch(turnOn());
 		const outStockFilters = await getBestsellerFilterOptions(payload);
-    if (outStockFilters) setBestsellerFilters(outStockFilters.filters);
+		if (outStockFilters) setBestsellerFilters(outStockFilters.filters);
+		dispatch(turnOff());
 	};
 
   const getBestsellers = async () => {
@@ -189,12 +194,14 @@ export default function BestsellerTable({locationParams}) {
 		payload.reportWarehouse = reportWarehouse;
 		payload.skip = (page - 1) * 10;
 		payload.limit = 10;
-		const bestSellers = await getBestSellers(payload);
+		dispatch(turnOn());
+		const bestSellers = await getBestSellersReport(payload);
 		if (bestSellers) {
 			setBestseller(bestSellers.data.bestSellers);
 			setTotalCount(bestSellers.data.totalCount);
 			setReportWarehouse(bestSellers.data.warehouseId);
 		}
+		dispatch(turnOff());
 	};
 
   useEffect(() => {

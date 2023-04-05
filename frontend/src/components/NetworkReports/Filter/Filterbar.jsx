@@ -140,7 +140,8 @@ export default function Filterbar({
 								<div> Filter {title}</div>
 								<button
 									onClick={() => {
-										handleFilterUpdate(fieldName, "");
+                    handleFilterUpdate(fieldName, "");
+                    handleClose();
 									}}
 									className="ui_filter_clear_btn"
 								>
@@ -165,8 +166,9 @@ export default function Filterbar({
 									return;
 								}
 								handleFilterUpdate(fieldName, newValue);
+								handleClose();
 							}}
-							disableCloseOnSelect
+							// disableCloseOnSelect
 							PopperComponent={PopperComponent}
 							options={options}
 							renderOption={(props, option, { selected }) => (
