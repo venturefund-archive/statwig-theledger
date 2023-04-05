@@ -2257,6 +2257,7 @@ exports.getBatchNearExpiration = [
 					{
 						$match: {
 							$and: [
+								{ status: "HEALTHY" },
 								{ "attributeSet.expDate": { $exists: true } },
 								{ "attributeSet.expDate": { $nin: ["", null] } },
 								{ "attributeSet.expDate": { $gte: today } },
@@ -2306,6 +2307,7 @@ exports.getBatchExpired = [
 					{
 						$match: {
 							$and: [
+								{ status: "HEALTHY" },
 								{
 									"attributeSet.expDate": {
 										$lt: today,

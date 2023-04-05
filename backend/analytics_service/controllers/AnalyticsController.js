@@ -1753,6 +1753,7 @@ exports.getInventoryAnalytics = [
 				{
 					$match: {
 						$and: [
+							{ status: "HEALTHY" },
 							{ "attributeSet.expDate": { $exists: true } },
 							{ "attributeSet.expDate": { $nin: ["", null] } },
 							{ "attributeSet.expDate": { $gte: today } },
@@ -1774,6 +1775,7 @@ exports.getInventoryAnalytics = [
 				{
 					$match: {
 						$and: [
+							{ status: "HEALTHY" },
 							{ "attributeSet.expDate": { $exists: true } },
 							{ "attributeSet.expDate": { $nin: ["", null] } },
 							{ "attributeSet.expDate": { $lte: today } },
