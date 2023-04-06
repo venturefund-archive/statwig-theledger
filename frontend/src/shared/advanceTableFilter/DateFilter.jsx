@@ -3,7 +3,7 @@ import { Calendar } from "react-multi-date-picker";
 
 export default function DateFilter({ t, onSelectionDateFilter }) {
   const [fweek, setFweek] = React.useState([new Date(), new Date()]);
-  const [DateType, setDateType] = React.useState(2);
+  const [DateType, _] = React.useState(2);
   return (
     <>
       {/* <div className="calenderHeader">
@@ -41,7 +41,7 @@ export default function DateFilter({ t, onSelectionDateFilter }) {
         range={DateType === 2 ? true : false}
         onChange={(e) => {
           setFweek(e);
-          onSelectionDateFilter(e);
+          if (e.length === DateType) onSelectionDateFilter(e);
         }}
       />
       <div className='valueDisplay'>
@@ -55,8 +55,8 @@ export default function DateFilter({ t, onSelectionDateFilter }) {
           variant='outlined'
           color='primary'
           onClick={() => {
-            setFweek(new Array("", ""));
-            onSelectionDateFilter(new Array("", ""));
+            setFweek(["", ""]);
+            onSelectionDateFilter(["", ""]);
           }}
         >
           {t("clear")}
