@@ -4523,8 +4523,8 @@ exports.exportInboundShipments = [
               recieverOrgLocation: row?.receiver?.locationId,
               airWayBillNo: row.airWayBillNo,
               label: row?.label?.labelId,
-              shippingDate: row.shippingDate ? formatInTimeZone(row.shippingDate, timezone, 'dd/MM/yyyy HH:mm:ss') || "N/A" : "NA",
-              expectedDeliveryDate: row.expectedDeliveryDate ? formatInTimeZone(row.expectedDeliveryDate, timezone, 'dd/MM/yyyy HH:mm:ss') || "N/A" : "NA",
+              shippingDate: row.shippingDate ? formatInTimeZone(row.shippingDate, timezone, 'dd/MM/yyyy hh:mm:ss a') || "N/A" : "NA",
+              expectedDeliveryDate: row.expectedDeliveryDate ? formatInTimeZone(row.expectedDeliveryDate, timezone, 'dd/MM/yyyy hh:mm:ss a') || "N/A" : "NA",
               expiryDate: receiverAtom?.attributeSet?.expDate || "N/A",
             };
             data.push(rowData);
@@ -4640,7 +4640,6 @@ exports.exportOutboundShipments = [
 
       let outboundShipmentsRes = [];
       for (let i = 0; i < outboundShipmentsCount; ++i) {
-        // let outboundShipment = outboundShipmentsList[i];
         let outboundShipmentData = outboundShipmentsList[i];
         let supplierOrganisation = await OrganisationModel.findOne({
           id: outboundShipmentData.supplier.id,
@@ -4684,10 +4683,11 @@ exports.exportOutboundShipments = [
             airWayBillNo: row.airWayBillNo,
             label: row?.label?.labelId,
             expiryDate: receiverAtom?.attributeSet?.expDate,
-            shippingDate: row.shippingDate ? formatInTimeZone(row.shippingDate, timezone, 'dd/MM/yyyy HH:mm:ss') || "N/A" : "NA",
-            expectedDeliveryDate: row.expectedDeliveryDate ? formatInTimeZone(row.expectedDeliveryDate, timezone, 'dd/MM/yyyy HH:mm:ss') || "N/A" : "NA",
+            shippingDate: row.shippingDate ? formatInTimeZone(row.shippingDate, timezone, 'dd/MM/yyyy hh:mm:ss a') || "N/A" : "NA",
+            expectedDeliveryDate: row.expectedDeliveryDate ? formatInTimeZone(row.expectedDeliveryDate, timezone, 'dd/MM/yyyy hh:mm:ss a') || "N/A" : "NA",
           };
           data.push(rowData);
+          console.log(row.id)
         }
       }
       if (req.query.type == "pdf") {
