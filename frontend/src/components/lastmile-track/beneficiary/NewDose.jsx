@@ -178,6 +178,11 @@ export default function NewDose(props) {
 							{t("save")}
 						</button>
 					</div>
+					<div className="Beneficiary--action">
+						<button onClick={() => props.setLayoutType(1)} className="vl-btn vl-btn-md vl-btn-alert">
+							{t("cancel")}
+						</button>
+					</div>
 				</div>
 			</form>
 		</section>
