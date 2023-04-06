@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import Networking from "../../components/networking/Networking";
 import { getUserInfoUpdated } from "../../actions/userActions";
 import {
-  getBestSellers,
+  getBestSellersReport,
   getmanufacturerInStockReport,
   getmanufacturerOutStockReport,
   getManufacturerWarehouses,
@@ -51,7 +51,7 @@ const NetworkingContainer = (props) => {
       reportWarehouse: reportWarehouse,
       startDate: startDate
     };
-    const bestSellers = await getBestSellers(payload);
+    const bestSellers = await getBestSellersReport(payload);
     if (bestSellers) setBestseller(bestSellers.data.bestSellers);
   };
 

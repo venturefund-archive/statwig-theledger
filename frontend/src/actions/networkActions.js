@@ -2,7 +2,7 @@ import axios from "axios";
 import { config } from "../config";
 import { startOfMonth, format } from "date-fns";
 
-export const getBestSellers = async (payload) => {
+export const getBestSellersReport = async (payload) => {
 	try {
     const url = config().getBestSellersUrl;
     const result = await axios.post(url, payload);

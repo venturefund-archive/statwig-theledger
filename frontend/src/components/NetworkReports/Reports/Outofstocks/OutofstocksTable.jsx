@@ -16,6 +16,8 @@ import ReportFilter from "../../Filter/ReportFilter";
 import { useTheme, styled } from "@mui/material/styles";
 import Filterbar from "../../Filter/Filterbar";
 import { Pagination } from "@mui/material";
+import { useDispatch } from "react-redux";
+import { turnOff, turnOn } from "../../../../actions/spinnerActions";
 
 function TableHeader({
 	anchorEl,
@@ -127,6 +129,7 @@ function TableHeader({
 }
 
 export default function OutofstocksTable({locationParams}) {
+	const dispatch = useDispatch();
   const [outStock, setOutStock] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [outStockFilters, setOutStockFilters] = useState();
@@ -182,8 +185,10 @@ export default function OutofstocksTable({locationParams}) {
 		};
     payload.reportWarehouse = reportWarehouse;
     payload.date = "";
+		dispatch(turnOn());
 		const outStockFilters = await getOutStockFilterOptions(payload);
     if (outStockFilters) setOutStockFilters(outStockFilters.filters);
+		dispatch(turnOff());
 	};
 
 	const getOutStock = async () => {
@@ -194,12 +199,14 @@ export default function OutofstocksTable({locationParams}) {
 		payload.reportWarehouse = reportWarehouse;
 		payload.skip = (page - 1) * 10;
 		payload.limit = 10;
+		dispatch(turnOn());
 		const outStock = await getmanufacturerOutStockReport(payload);
 		if (outStock) {
 			setOutStock(outStock.data.outOfStockReport);
 			setTotalCount(outStock.data.totalCount);
 			setReportWarehouse(outStock.data.warehouseId);
 		}
+		dispatch(turnOff());
 	};
 
 	useEffect(() => {
