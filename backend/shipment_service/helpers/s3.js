@@ -1,6 +1,7 @@
-const S3 = require("aws-sdk/clients/s3");
-const sharp = require("sharp");
+const { Upload } = require("@aws-sdk/lib-storage");
+const { S3 } = require("@aws-sdk/client-s3");
 const { getImageURL, setImageURL } = require("../middlewares/rbac_middleware");
+const sharp = require("sharp");
 const bucketName = process.env.AWS_BUCKET_NAME;
 const region = process.env.AWS_BUCKET_REGION;
 const accessKeyId = process.env.AWS_ACCESS_KEY;
@@ -25,7 +26,10 @@ exports.uploadFile = async (file) => {
       Body: image,
       Key: file.filename,
     };
-    return s3.upload(uploadParams).promise();
+    return new Upload({
+      client: s3,
+      params: uploadParams
+    }).done();
   } else {
     const image = await sharp(file.path)
       .jpeg({ quality: 60, force: true })
@@ -35,7 +39,10 @@ exports.uploadFile = async (file) => {
       Body: image,
       Key: file.filename,
     };
-    return s3.upload(uploadParams).promise();
+    return new Upload({
+      client: s3,
+      params: uploadParams
+    }).done();
   }
 };
 
@@ -59,7 +66,7 @@ async function getFileBinary(fileKey) {
     Key: fileKey,
     Bucket: bucketName,
   };
-  return s3.getObject(downloadParams).promise();
+  return s3.getObject(downloadParams);
 }
 
 exports.getFile = async (fileKey) => {
