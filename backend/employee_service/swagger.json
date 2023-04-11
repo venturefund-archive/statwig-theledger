@@ -56,13 +56,7 @@
             "name": "organisationId",
             "in": "body",
             "description": "OrganisationId of the user"
-          },
-          {
-            "name": "emailId",
-            "in": "body",
-            "description": "EmailId of the user"
-          },
-
+          }
         ],
         "produces": ["application/json"],
         "responses": {

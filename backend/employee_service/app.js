@@ -7,6 +7,29 @@ const apiResponse = require("./helpers/apiResponse");
 const cors = require("cors");
 const MONGODB_URL = process.env.MONGODB_URL;
 const mongoose = require("mongoose");
+const swaggerUi = require("swagger-ui-express");
+// const swaggerDocument = require("swagger");
+// import swaggerDocs from ("./utils/swagger")
+
+const swaggerJsDoc = require('swagger-jsdoc');
+
+const swaggerDefinition = {
+  openapi: '3.0.0',
+  info: {
+    title: 'Express API for JSONPlaceholder',
+    version: '1.0.0',
+  },
+};
+
+const options = {
+  swaggerDefinition,
+  // Paths to files containing OpenAPI definitions
+  apis: ['./routes/*.js'],
+};
+
+// const swaggerSpec = swaggerJSDoc(options);
+// const swaggerJSDoc = require('swagger-jsdoc');
+
 mongoose
   .connect(MONGODB_URL, {
     keepAlive: true,
@@ -45,6 +68,25 @@ i18next
   });
 
 const app = express();
+const swaggerOptions={
+  failOnErrors: true,
+  definition:{
+    openapi: "3.0.0",
+    info:{
+      title: 'Employee Service API',
+      version: '1.0.0'
+
+    }
+  },
+  apis:['./routes/auth.js'],
+};
+
+const swaggerDocs= swaggerJsDoc(swaggerOptions);
+
+//Routes
+
+
+
 
 //don't show the log when it is test
 if (process.env.NODE_ENV !== "test") {
@@ -60,6 +102,12 @@ app.use(cors());
 //Route Prefixes
 app.use("/", indexRouter);
 app.use("/usermanagement/api/", apiRouter);
+app.use(
+'/apidocs',
+swaggerUi.serve, 
+swaggerUi.setup(swaggerDocs)
+);
+
 
 // throw 404 if URL not found
 app.all("*", function (req, res) {
@@ -71,5 +119,11 @@ app.use((err, req, res) => {
     return apiResponse.unauthorizedResponse(req, res, err.message);
   }
 });
+
+
+
+
+
+
 
 module.exports = app;
