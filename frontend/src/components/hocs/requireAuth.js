@@ -16,25 +16,26 @@ export default (ComposedComponent, options) => {
 
 			if (!user) check = localStorage.theLedgerToken;
 
+			const userRole = user?.role || userDetails?.role;
+			const userType = user?.type || userDetails?.type;
+
 			if (options?.isAdminComponent) {
-				const userRole = user?.role || userDetails?.role;
-				const userType = user?.type || userDetails?.type;
 				if (userRole === "admin" || userType === "CENTRAL_AUTHORITY") check = true;
 				else check = null;
-      }
+			}
 
-      if (options?.governingBody) {
-				const userType = user?.type || userDetails?.type;
+			if (options?.governingBody) {
 				if (userType === "GoverningBody") check = true;
 				else check = null;
 			}
 
-			if(options?.distributor) {
-				const userType = user?.type || userDetails?.type;
-				if (userType === "DISTRIBUTORS" || userType === "DROGUERIA") check = true;
-				else check = null;
+			if (options?.distributor) {
+				if (userType !== "GoverningBody") {
+					if (userType === "DISTRIBUTORS" || userType === "DROGUERIA") check = true;
+					else check = null;
+				}
 			}
-      
+
 			switch (check) {
 				case null:
 					return <Redirect to="/" />;

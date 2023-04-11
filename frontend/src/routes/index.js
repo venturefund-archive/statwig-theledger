@@ -123,7 +123,7 @@ const routes = (
 		<Route path="/viewexpiry" component={requireAuth(ViewExpiry)} />
 		<Route path="/viewproduct" component={requireAuth(ViewProduct)} />
 		<Route path="/addNewProduct" component={requireAuth(AddProductContainer)} />
-		<Route path="/network" component={requireAuth(NetworkingContainer, { distributor: true })} />
+		<Route path="/network" component={requireAuth(NetworkingContainer, { distributor: true, governingBody: true })} />
 		<Route
 			path="/admin-network-reports"
 			component={requireAuth(NetworkReportContainer, { governingBody: true })}

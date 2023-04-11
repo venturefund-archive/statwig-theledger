@@ -1,7 +1,18 @@
+.network-header {
+    color: teal;
+    position: fixed;
+    height: 5vh;
+    width: 100%;
+    display: flex;
+}
+
 .network-grid-container{
     display: grid;
     grid-template-columns: 24rem 1fr;
     grid-template-areas: "dashboard  map";
+    position: fixed;
+    top: calc(88px + 5vh);
+    height: 100% !important;
 }
 
 .network-dashboard{
@@ -10,7 +21,7 @@
     border-right: 1px solid #ddd;
     height: calc( 100vh - 88px );
     position: fixed !important;
-    top: 88px !important;
+    top: calc(88px + 5vh) !important;
     left: 130px !important;
     overflow-y: auto;
     z-index: 1000;
@@ -23,12 +34,18 @@
     width: 100% !important;
     min-width: auto !important;
     max-width: auto !important;
+    position: relative;
     overflow-x: scroll;
 }
 
 .network-map-holder{
     width: 100%;
-    height: 79vh;
+    height: 75vh;
+    position: relative;
+}
+
+.network-report-holder {
+    width: auto;
     position: relative;
 }
 
