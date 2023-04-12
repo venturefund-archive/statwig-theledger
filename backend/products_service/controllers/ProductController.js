@@ -27,7 +27,7 @@ const { uploadFile } = require("../helpers/s3");
 const util = require("util");
 const unlinkFile = util.promisify(fs.unlink);
 
-exports.getProducts = [
+exports.getProductsOld = [
   auth,
   async (req, res) => {
     try {
@@ -49,6 +49,65 @@ exports.getProducts = [
           );
         }
       });
+    } catch (err) {
+      console.error(err);
+      return apiResponse.ErrorResponse(res, err.message);
+    }
+  },
+];
+
+function getProductCondition(query) {
+	let matchArr = [];
+
+	if (query.status && query.status != "") {
+		matchArr.push({ status: query.status });
+	}
+	if (query.orgId && query.orgId != "") {
+		matchArr.push({ manufacturerId: query.orgId });
+	}
+	if (query.name && query.name != "") {
+		matchArr.push({
+			$or: [
+				{ name: { $regex: query.name, $options: "i" } },
+				{ type: { $regex: query.name, $options: "i" } },
+				{ manufacturer: { $regex: query.name, $options: "i" } },
+			],
+		});
+	}
+
+	const matchCondition =  matchArr?.length ? { $and: matchArr } : {};
+
+	return matchCondition;
+}
+
+exports.getProducts = [
+  auth,
+  async (req, res) => {
+    try {
+      const permission_request = {
+        role: req.user.role,
+        permissionRequired: ["viewProductList"],
+      };
+      checkPermissions(permission_request, async (permissionResult) => {
+				if (permissionResult.success) {
+					const stages = [
+						{ $match: getProductCondition(req.query) },
+						{ $sort: { _id: -1 } },
+						{ $setWindowFields: { output: { totalCount: { $count: {} } } } },
+					];
+					if (req.query?.skip !== undefined && req.query?.limit !== undefined) {
+						stages.push({ $skip: parseInt(req.query.skip) });
+						stages.push({ $limit: parseInt(req.query.limit) });
+					}
+					const products = await ProductModel.aggregate(stages);
+					return apiResponse.successResponseWithData(res, "Products", products);
+				} else {
+					return apiResponse.forbiddenResponse(
+						res,
+						responses(req.user.preferredLanguage).no_permission,
+					);
+				}
+			});
     } catch (err) {
       console.error(err);
       return apiResponse.ErrorResponse(res, err.message);

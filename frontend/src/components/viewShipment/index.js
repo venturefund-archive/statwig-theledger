@@ -8,8 +8,7 @@ import "./style.scss";
 import ChainOfCustody from "./chainofcustody";
 import Modal from "../../shared/modal";
 import { Link } from "react-router-dom";
-import { getAddress } from "../../utils/commonHelper";
-import { isAuthenticated } from "../../utils/commonHelper";
+import { getAddress, isAuthenticated } from "../../utils/commonHelper";
 import ViewShippingModal from "../shipments/shippingOrder/viewShippingModal";
 import { t } from "i18next";
 import ShipmentInfo from "./ShipmentInfo";
@@ -28,7 +27,7 @@ const Tracing = (props) => {
     setOpenShipping(false);
   };
 
-  
+
   const shippmentChainOfCustodyData = props.shippmentChainOfCustodyData;
   const { id } = props.match.params;
   if (!isAuthenticated("viewShipment")) props.history.push(`/profile`);
@@ -50,7 +49,7 @@ const Tracing = (props) => {
               to={
                 status === "RECEIVED"
                   ? `/viewshipment/${id}`
-                  : `/updatestatus/${id}`
+                  : `/updatestatus/${id}/true`
               }
             >
               <button
@@ -73,7 +72,7 @@ const Tracing = (props) => {
                 status === "RECEIVED"
                   ? `/viewshipment/${id}`
                   : `/receiveShipment/${id}`
-                  
+
               }
             >
               <button

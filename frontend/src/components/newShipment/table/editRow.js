@@ -27,7 +27,9 @@ const EditRow = (props) => {
 		products,
 		check,
 		warehouseID,
-		t,
+		FromLocationSelected,
+		setFromLocationCheck,
+		t
 	} = props;
 
 	const headers = {
@@ -44,8 +46,8 @@ const EditRow = (props) => {
 		img4: <img src={date} width="15" height="15" alt="" />,
 		img5: <img src={date} width="15" height="15" alt="" />,
 		img6: <img src={Quantity} width="20" height="15" alt="" />,
-  };
-  
+	};
+
 	const [editButtonStatus, setEditButtonStatus] = useState(false);
 	const [changebtn, setbtn] = useState(false);
 	const [addnew] = useState(!props.category);
@@ -64,8 +66,8 @@ const EditRow = (props) => {
 	const onEditClick = (e) => {
 		setDisabled(!disabled);
 		setEditButtonStatus(true);
-  };
-  
+	};
+
 	const editBatchSelected = (index, type, value) => {
 		let buffer = [...batches];
 		buffer[index][type] = value;
@@ -108,9 +110,9 @@ const EditRow = (props) => {
 
 	const updateQuantity = () => {
 		setQuantityChecker(0);
-  };
+	};
 
-  useEffect(() => {
+	useEffect(() => {
 		if (
 			check === "0" &&
 			quantityChecker === 1 &&
@@ -146,16 +148,19 @@ const EditRow = (props) => {
 				updateQuantity();
 			}
 		}
-	}, [quantityChecker, prod, productsList]);
-  
-  function existsInShipment(prod) {
+	}, [quantityChecker, prod, productsList, check, props?.product, handleQuantityChange, index]);
+
+	function existsInShipment(prod) {
 		if (props?.product?.length) {
-      for(let i=0; i<props.product.length; ++i) {
-        let currProd = props.product[i];
-        if (prod.productId === currProd.id && prod.batchNumbers[0] === currProd.batchNumber) {
-          return { exists: true, quantity: currProd.productQuantity };
-        }
-      }
+			for (let i = 0; i < props.product.length; ++i) {
+				let currProd = props.product[i];
+				if (
+					prod.productId === currProd.id &&
+					prod.id === currProd.atomId
+				) {
+					return { exists: true, quantity: currProd.productQuantity };
+				}
+			}
 		}
 		return { exists: false };
 	}
@@ -164,15 +169,14 @@ const EditRow = (props) => {
 		handleBatchChange(batch.bnp, index, [batch]);
 		handleQuantityChange(batch.quant, index);
 		// closeModal()
-  }
-  
+	}
+
 	async function fetchBatches(prod, index) {
 		const today = new Date();
 		setSelectedIndex(index);
 		setModelProduct(prod);
 		let res = await axios.get(
-			`${config().fetchBatchesOfInventory}?productId=${
-				prod.id ? prod.id : prod.productID
+			`${config().fetchBatchesOfInventory}?productId=${prod.id ? prod.id : prod.productID
 			}&wareId=${warehouseID}`,
 		);
 		let buffer = res.data.data;
@@ -196,7 +200,7 @@ const EditRow = (props) => {
 		});
 		setBatches(buffer);
 	}
-  
+
 	const numbersOnly = (e) => {
 		// Handle paste
 		let key;
@@ -212,18 +216,18 @@ const EditRow = (props) => {
 			e.returnValue = false;
 			if (e.preventDefault) e.preventDefault();
 		}
-  };
-  
+	};
+
 	const handleChange = (value) => {
 		setSelectedBatch(value);
-  };
-  
+	};
+
 	const setQuantity = (value) => {
 		let buffer = selectedBatch;
 		buffer.quant = value;
 		setSelectedBatch(buffer);
-  };
-  
+	};
+
 	const editQuantity = (value, index) => {
 		let buffer = [...batches];
 		if (parseInt(value) > parseInt(buffer[index].immutableQuantity)) {
@@ -234,7 +238,7 @@ const EditRow = (props) => {
 
 		setBatches(buffer);
 		setQuantity(value);
-  };
+	};
 
 	return (
 		<div className="row ml-3 mr-1">
@@ -259,12 +263,12 @@ const EditRow = (props) => {
 										}
 										value={
 											(prod.type === undefined && prod.productCategory === undefined) ||
-											prod.id === undefined
+												prod.id === undefined
 												? null
 												: {
-														value: prod.id,
-														label: prod.type,
-												  }
+													value: prod.id,
+													label: prod.type,
+												}
 										}
 										defaultInputValue={prod.type}
 										onChange={(v) => {
@@ -329,7 +333,7 @@ const EditRow = (props) => {
 					)}
 				</div>
 
-				<div className="col tcell text-center justify-content-center p-2" style={{ position: "relative"}}>
+				<div className="col tcell text-center justify-content-center p-2" style={{ position: "relative" }}>
 					<div className="">
 						<input
 							className="form-control text-center"
@@ -348,17 +352,17 @@ const EditRow = (props) => {
 						/>
 					</div>
 					<div
-					className="title recived-text align-self-center"
-					style={{ position: "absolute", right: "16px", top:"16px" }}
-				>
-					{prod.unitofMeasure && prod.unitofMeasure.name ? (
-						<div>{prod.unitofMeasure.name}</div>
-					) : (
-						<div className="placeholder_id">{t("unit")}</div>
-					)}
+						className="title recived-text align-self-center"
+						style={{ position: "absolute", right: "16px", top: "16px" }}
+					>
+						{prod.unitofMeasure && prod.unitofMeasure.name ? (
+							<div>{prod.unitofMeasure.name}</div>
+						) : (
+							<div className="placeholder_id">{t("unit")}</div>
+						)}
+					</div>
 				</div>
-				</div>
-				
+
 
 				<div className="col tcell text-center justify-content-center p-2">
 					<div className="">
@@ -378,11 +382,14 @@ const EditRow = (props) => {
 				<div className="d-flex">
 					<button
 						type="button"
-						className="btn btn-outline-primary mr-2 ml-2"
+						disabled={FromLocationSelected ? false : true}
+						className={`btn  mr-2 ml-2 ${FromLocationSelected ? "btn-outline-primary" : "fetchDisable"}`}
 						style={{ height: "30px", width: "70px" }}
+						disabled={!FromLocationSelected}
 						onClick={() => {
 							setShowModal(true);
 							fetchBatches(prod, index);
+							setFromLocationCheck("VALUE")
 						}}
 					>
 						<div style={{ position: "relative", fontSize: "12px", left: "-6px" }}>
@@ -422,13 +429,15 @@ const EditRow = (props) => {
 															}}
 														>
 															<input
+																name="productRadio"
 																className="txt2 ml-3"
-																type="checkbox"
+																type="radio"
 																id={index}
 																onChange={(e) => {
 																	handleChange({
 																		quant: product.quantity,
 																		bnp: product.batchNumbers[0],
+																		atomId: product.id,
 																	});
 																	editBatchSelected(index, "selected", !batches[index].selected);
 																	editBatchSelected(index, "editable", false);
@@ -454,8 +463,8 @@ const EditRow = (props) => {
 																className="col txt1"
 																style={{ position: "relative", left: "8%" }}
 															>
-																{product.attributeSet.mfgDate &&
-																product.attributeSet.mfgDate.length > 0
+																{product?.attributeSet?.mfgDate &&
+																	product.attributeSet.mfgDate.length > 0
 																	? formatDate(product.attributeSet.mfgDate)
 																	: "-"}
 															</div>
@@ -463,8 +472,8 @@ const EditRow = (props) => {
 																className="col txt1"
 																style={{ position: "relative", left: "8%" }}
 															>
-																{product.attributeSet.expDate &&
-																product.attributeSet.expDate.length > 0
+																{product?.attributeSet?.expDate &&
+																	product.attributeSet.expDate.length > 0
 																	? formatDate(product.attributeSet.expDate)
 																	: "-"}
 															</div>

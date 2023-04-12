@@ -18,11 +18,12 @@ import { turnOn, turnOff } from "../../actions/spinnerActions";
 import { getProducts } from "../../actions/poActions";
 import { isAuthenticated } from "../../utils/commonHelper";
 import { isBefore } from "date-fns";
+import { getDateStringForMongo } from "../../utils/dateHelper";
 
 const NewInventory = (props) => {
   const { t } = props;
   const editInventories = useSelector((state) => {
-    return state.reviewInventory;
+    return state.reviewInventory.validRecords;
   });
   const [category, setCategory] = useState([]);
   const dispatch = useDispatch();
@@ -55,7 +56,7 @@ const NewInventory = (props) => {
           })
       );
       setBlankInventory({ ...blankInventory, products: productsArray });
-      if (editInventories.length === 0) {
+      if (!editInventories?.length) {
         setInventoryState([{ ...blankInventory, products: productsArray }]);
       } else {
         setInventoryState(editInventories);
@@ -121,10 +122,11 @@ const NewInventory = (props) => {
 		let error = false;
 		inventoryState.forEach((inventory) => {
 			if (error) return;
-			let expDate = new Date(inventory.expiryDate).setHours(0, 0, 0, 0);
-			let today = new Date().setHours(0, 0, 0, 0);
-			if (isBefore(expDate, today)) {
-				setInventoryError("Check expiryDate");
+      let expDate = new Date(inventory.expiryDate);
+      let today = new Date();
+      today.setHours(0, 0, 0, 0);
+			if (expDate < today) {
+				setInventoryError("Check Expiry Date");
 				setOpenFailInventory(true);
 				error = true;
 			}
@@ -172,7 +174,10 @@ const NewInventory = (props) => {
       return;
     }
 
-    dispatch(setReviewinventories(inventoryState));
+    const payload = {
+			validRecords: inventoryState,
+		};
+    dispatch(setReviewinventories(payload));
     props.history.push("/reviewinventory");
   };
 

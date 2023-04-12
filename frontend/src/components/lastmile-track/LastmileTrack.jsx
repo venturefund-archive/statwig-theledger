@@ -5,7 +5,9 @@ import {
   fetchAnalytics,
   getVaccinationsList,
 } from "../../actions/lastMileActions";
+import Modal from "../../shared/modal";
 import AnalyticTiles from "../../shared/stats-tile/AnalyticTiles";
+import BatchesTable from "./batches-table/BatchesTable";
 import Beneficiary from "./beneficiary/Beneficiary";
 import "./LastmileTrack.css";
 import ScanBatch from "./scan-batch/ScanBatch";
@@ -22,6 +24,8 @@ export default function LastmileTrack(props) {
   const [totalVaccinations, setTotalVaccinations] = useState();
   const [todaysVaccinations, setTodaysVaccinations] = useState();
   const [batchDetails, setBatchDetails] = useState();
+  const [batchesList, setBatchesList] = useState();
+  const [showBatchesList, toggleShowBatchesList] = useState();
   const [save, setSave] = useState(false);
   const { t } = useTranslation();
 
@@ -83,88 +87,93 @@ export default function LastmileTrack(props) {
   };
 
   return (
-    <>
-      <div className="Lastmile--mainPage-layout">
-        <div className="Lastmile--pageHeader">
-          <h1
-            style={{ paddingBottom: "10px" }}
-            className="vl-heading-bdr black f-700 mi-reset"
-          >
-            {t("lastmile")}
-          </h1>
-          {(tableView || Steps != 1) && (
-            <div className="back-link-button-space">
-              <button
-                className="back-action-btn"
-                onClick={() => {
-                  if (tableView) {
-                    setTableView(false);
-                    setSteps(1);
-                  } else {
-                    setSteps(1);
-                  }
-                }}
-              >
-                <i className="fa-solid fa-arrow-left"></i>
-                <span>{t("back_to_batch_details")}</span>
-              </button>
-            </div>
-          )}
-        </div>
-        <div className="Lastmile--gridLayout-wrapper">
-          {tableView ? (
-            <div className="Lastmile--Interaction-space">{tableComp}</div>
-          ) : (
-            <div className="Lastmile--Interaction-space">
-              {Steps === 1 ? (
-                <ScanBatch
-                  setBatchDetails={setBatchDetails}
-                  setSteps={setSteps}
-                  {...props}
-                />
-              ) : (
-                <Beneficiary
-                  vialId={vialId}
-                  setVialId={setVialId}
-                  batchDetails={batchDetails}
-                  saveVaccination={saveVaccination}
-                  {...props}
-                />
-              )}
-            </div>
-          )}
-          <div className="Lastmile--Analytics-space">
-            <AnalyticTiles
-              layout="1"
-              variant="1"
-              title={t("total_units_utilized")}
-              stat={analytics?.unitsUtilized ? analytics.unitsUtilized : 0}
-              name="unitsUtilized"
-              onClick={handleAnalyticsClicked}
-            />
-            <AnalyticTiles
-              layout="1"
-              variant="2"
-              title={t("no_beneficiaries_vaccinated_so_far")}
-              stat={
-                analytics?.totalVaccinations ? analytics.totalVaccinations : 0
-              }
-              name="totalVaccinations"
-              onClick={handleAnalyticsClicked}
-            />
-            <AnalyticTiles
-              layout="1"
-              variant="3"
-              title={t("no_beneficiaries_vaccinated_today")}
-              stat={
-                analytics?.todaysVaccinations ? analytics.todaysVaccinations : 0
-              }
-              name="todaysVaccinations"
-              onClick={handleAnalyticsClicked}
-            />
-          </div>
-        </div>
-      </div>
-    </>
-  );
+		<>
+			<div className="Lastmile--mainPage-layout">
+				<div className="Lastmile--pageHeader">
+					<h1 style={{ paddingBottom: "10px" }} className="vl-heading-bdr black f-700 mi-reset">
+						{t("lastmile")}
+					</h1>
+					{(tableView || Steps != 1) && (
+						<div className="back-link-button-space">
+							<button
+								className="back-action-btn"
+								onClick={() => {
+									if (tableView) {
+										setTableView(false);
+										setSteps(1);
+									} else {
+										setSteps(1);
+									}
+								}}
+							>
+								<i className="fa-solid fa-arrow-left"></i>
+								<span>{t("back_to_batch_details")}</span>
+							</button>
+						</div>
+					)}
+				</div>
+				<div className="Lastmile--gridLayout-wrapper">
+					{tableView ? (
+						<div className="Lastmile--Interaction-space">{tableComp}</div>
+					) : (
+						<div className="Lastmile--Interaction-space">
+							{Steps === 1 ? (
+								<ScanBatch
+									setBatchDetails={setBatchDetails}
+									setBatchesList={setBatchesList}
+									toggleShowBatchesList={toggleShowBatchesList}
+									setSteps={setSteps}
+									{...props}
+								/>
+							) : (
+								<Beneficiary
+									vialId={vialId}
+									setVialId={setVialId}
+									batchDetails={batchDetails}
+									saveVaccination={saveVaccination}
+									{...props}
+								/>
+							)}
+						</div>
+					)}
+					<div className="Lastmile--Analytics-space">
+						<AnalyticTiles
+							layout="1"
+							variant="1"
+							title={t("total_units_utilized")}
+							stat={analytics?.unitsUtilized ? analytics.unitsUtilized : 0}
+							name="unitsUtilized"
+							onClick={handleAnalyticsClicked}
+						/>
+						<AnalyticTiles
+							layout="1"
+							variant="2"
+							title={t("no_beneficiaries_vaccinated_so_far")}
+							stat={analytics?.totalVaccinations ? analytics.totalVaccinations : 0}
+							name="totalVaccinations"
+							onClick={handleAnalyticsClicked}
+						/>
+						<AnalyticTiles
+							layout="1"
+							variant="3"
+							title={t("no_beneficiaries_vaccinated_today")}
+							stat={analytics?.todaysVaccinations ? analytics.todaysVaccinations : 0}
+							name="todaysVaccinations"
+							onClick={handleAnalyticsClicked}
+						/>
+					</div>
+				</div>
+			</div>
+			{showBatchesList && (
+				<Modal title={t("choose_batch_to_continue")} close={() => toggleShowBatchesList(false)} size="modal-md">
+					<BatchesTable
+						batchesList={batchesList}
+						setBatchDetails={setBatchDetails}
+            setSteps={setSteps}
+            toggleShowBatchesList={toggleShowBatchesList}
+					/>
+				</Modal>
+			)}
+		</>
+	);
 }

@@ -17,6 +17,7 @@ const SideBar = (props) => {
 	const { url } = match;
 	const [enable, setEnable] = useState(true);
 	const intelEnabled = props.user?.type === "Third Party Logistics" ? true : false;
+
 	useEffect(() => {
 		if (intelEnabled) setEnable(false);
 	}, [intelEnabled, user]);
@@ -30,6 +31,19 @@ const SideBar = (props) => {
 	};
 
 	const lastMilePath = user?.type === "GoverningBody" ? "/lastMile-Centeral" : "/lastMile-Track";
+	let networkPath;
+	switch (user?.type) {
+		case "GoverningBody":
+			networkPath = "/admin-network-reports";
+			break;
+		case "DISTRIBUTORS":
+		case "DROGUERIA":
+			networkPath = "/network";
+			break;
+		default:
+			networkPath = null;
+			break;
+	}
 
 	return (
 		<div className="sidebar">
@@ -59,13 +73,13 @@ const SideBar = (props) => {
 					<li
 						className={
 							url === "/inventory" ||
-								url === "/newinventory" ||
-								url === "/productcategory" ||
-								url === "/batchexpired" ||
-								url === "/batchnearexpiry/product" ||
-								url === "/productoutofstock" ||
-								url === "/addproduct" ||
-								url === "/productlist/all"
+							url === "/newinventory" ||
+							url === "/productcategory" ||
+							url === "/batchexpired" ||
+							url === "/batchnearexpiry/product" ||
+							url === "/productoutofstock" ||
+							url === "/addproduct" ||
+							url === "/productlist/all"
 								? "active"
 								: ""
 						}
@@ -74,13 +88,13 @@ const SideBar = (props) => {
 							<img
 								src={
 									url === "/inventory" ||
-										url === "/newinventory" ||
-										url === "/productcategory" ||
-										url === "/batchexpired" ||
-										url === "/batchnearexpiry/product" ||
-										url === "/productoutofstock" ||
-										url === "/addproduct" ||
-										url === "/productlist/all"
+									url === "/newinventory" ||
+									url === "/productcategory" ||
+									url === "/batchexpired" ||
+									url === "/batchnearexpiry/product" ||
+									url === "/productoutofstock" ||
+									url === "/addproduct" ||
+									url === "/productlist/all"
 										? InventoryIcon
 										: InventoryIcon
 								}
@@ -112,10 +126,10 @@ const SideBar = (props) => {
 					</li>
 				)}
 
-				{isAuthenticated("overview") && enable && (
-					<li className={url === "/network" ? "active" : ""}>
-						<Link to="/network" className="d-inline-block">
-							<img src={url === "/network" ? NetworkIcon : NetworkIcon} alt="network" />
+				{isAuthenticated("overview") && enable && networkPath && (
+					<li className={url === networkPath ? "active" : ""}>
+						<Link to={networkPath} className="d-inline-block">
+							<img src={url === networkPath ? NetworkIcon : NetworkIcon} alt="network" />
 							<span className="ml-2">{t("network")}</span>
 						</Link>
 					</li>

@@ -10,7 +10,7 @@ import { getImage } from "../../../../actions/notificationActions";
 import { useTranslation } from "react-i18next";
 import EnglishFlag from "../../../../assets/files/images/flags/English.webp";
 import SpanishFlag from "../../../../assets/files/images/flags/Spanish.webp";
-import { logoutUser } from "../../../../actions/userActions";
+import { logoutUser,getUserInfo } from "../../../../actions/userActions";
 
 let useClickOutside = (handler) => {
   let domNode = useRef();
@@ -47,9 +47,12 @@ export default function OrgHeader() {
   const [name, setName] = useState("");
   const [orgName, setOrgName] = useState("");
   const [image, setImage] = useState("");
+  useEffect(() => {
+    dispatch(getUserInfo());
+  }, []);
 
   useEffect(() => {
-    let userName = user?.firstName;
+    let userName = user?.firstName + " " + user?.lastName;
     let org = user?.organisation?.split("/")[0];
     if (user?.photoId) {
       getImage(user?.photoId).then((result) => {

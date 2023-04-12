@@ -13,7 +13,8 @@ export default function NewDose(props) {
     vaccineVialId,
     warehouseId,
     productId,
-    batchNumber,
+		batchNumber,
+		atomId,
     defaultValues,
     setDefaultValues,
   } = props;
@@ -29,12 +30,13 @@ export default function NewDose(props) {
     console.log(selectedValue, event.target.value);
     setSelectedValue(event.target.value === "true" ? true : false);
     console.log(selectedValue);
-  };
-
+	};
+	
   const {
     control,
     formState: { errors },
-    handleSubmit,
+		handleSubmit,
+		getValues
   } = useForm({
     defaultValues: {
       gender: defaultValues?.gender || "",
@@ -52,7 +54,8 @@ export default function NewDose(props) {
         vaccineVialId: vaccineVialId,
         warehouseId: warehouseId,
         productId: productId,
-        batchNumber: batchNumber,
+				batchNumber: batchNumber,
+				atomId: atomId,
         gender: values.gender.value,
         age: selectedValue ? 0 : parseInt(values.age),
         ageMonths: selectedValue ? parseInt(values.age) : 0,
@@ -103,6 +106,7 @@ export default function NewDose(props) {
 									fullWidth
 									options={genderOptions}
 									getOptionLabel={(option) => option.display || ""}
+									defaultValue={genderOptions.find((elem) => elem.value === getValues().gender)}
 									renderInput={(params) => (
 										<TextField
 											{...params}
@@ -172,6 +176,11 @@ export default function NewDose(props) {
 					<div className="Beneficiary--action">
 						<button type="submit" disabled={isDisabled} className="vl-btn vl-btn-md vl-btn-primary">
 							{t("save")}
+						</button>
+					</div>
+					<div className="Beneficiary--action">
+						<button onClick={() => props.setLayoutType(1)} className="vl-btn vl-btn-md vl-btn-alert">
+							{t("cancel")}
 						</button>
 					</div>
 				</div>

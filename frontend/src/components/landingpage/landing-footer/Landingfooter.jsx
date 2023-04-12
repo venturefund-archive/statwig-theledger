@@ -23,7 +23,7 @@ export default function Landingfooter({ contactRef, t }) {
                 </figure>
                 <figure className="mobile-app-stores">
                   <a
-                    href="https://apps.apple.com/us/app/vaccineledger-lite/id1565684295"
+                    href="https://apps.apple.com/us/app/vaccineledger/id1559086870"
                     target="_blank"
                   >
                     <img
@@ -52,7 +52,7 @@ export default function Landingfooter({ contactRef, t }) {
                   <p className="vl-subheading f-700 vl-grey-md">India</p>
                   <article className="full-address">
                     <p className="vl-body f-400 vl-grey-sm">
-                      T-Hub, IIIT-Hyderabad, Gachibowli, Hyderabad, Telangana,
+                    T-Hub, 2.0, Silpa Gram Craft Village, Gachibowli, Hyderabad, Telangana,
                     </p>
                     <p className="vl-body f-400 vl-grey-sm">India – 500032</p>
                   </article>

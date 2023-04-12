@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { receiveApi, uploadImage } from "../../actions/shipmentActions";
+import {
+  receiveApi,
+  uploadImage,
+  fetchairwayBillNumber,
+} from "../../actions/shipmentActions";
 import { turnOn, turnOff } from "../../actions/spinnerActions";
 import { useDispatch } from "react-redux";
 import Modal from "../../shared/modal";
@@ -9,7 +13,6 @@ import "./style.scss";
 import uploadBlue from "../../assets/icons/UploadBlue.svg";
 import SuccessPopup from "./successPopup";
 import FailedPopup from "./failPopup";
-import { fetchairwayBillNumber } from "../../actions/shipmentActions";
 import { Alert, AlertTitle } from "@material-ui/lab";
 import ModalImage from "react-modal-image";
 import ShipmentInfo from "./ShipmentInfo";
@@ -107,8 +110,8 @@ const ReceiveShipment = (props) => {
 
   const uploadPhoto = async () => {
     const formData = new FormData();
-    for (let i = 0; i < files.length; i++) {
-      formData.append("photo", files[i], files[i].name);
+    for (const element of files) {
+      formData.append("photo", element, element.name);
       const result = await uploadImage(id, formData);
       if (result.status === 200) {
         setMessage("Image Uploaded");

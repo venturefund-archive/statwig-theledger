@@ -181,10 +181,10 @@ const CreateShipment = (props) => {
             value: v.id,
             label: v?.warehouseAddress
               ? v?.warehouseAddress?.firstLine +
-                "/" +
-                v?.warehouseAddress?.city +
-                ", " +
-                v?.warehouseAddress?.state
+              "/" +
+              v?.warehouseAddress?.city +
+              ", " +
+              v?.warehouseAddress?.state
               : v?.title + "/" + v.postalAddress,
           };
         });
@@ -196,11 +196,11 @@ const CreateShipment = (props) => {
       setOrgTypes(
         orgType.data.length > 0
           ? orgType.data[0].organisationTypes.map((item) => {
-              return {
-                value: item.id,
-                label: item.name,
-              };
-            })
+            return {
+              value: item.id,
+              label: item.name,
+            };
+          })
           : []
       );
 
@@ -216,7 +216,7 @@ const CreateShipment = (props) => {
   const closeModalFail = () => {
     setOpenShipmentFail(false);
   };
-  
+
   const closeModal = () => {
     setOpenCreatedInventory(false);
     props.history.push("/shipments");
@@ -234,10 +234,10 @@ const CreateShipment = (props) => {
             value: v.id,
             label: v?.warehouseAddress
               ? v?.warehouseAddress?.firstLine +
-                "/" +
-                v?.warehouseAddress?.city +
-                ", " +
-                v?.warehouseAddress?.state
+              "/" +
+              v?.warehouseAddress?.city +
+              ", " +
+              v?.warehouseAddress?.state
               : v?.title + "/" + v.postalAddress,
           };
         })
@@ -259,10 +259,10 @@ const CreateShipment = (props) => {
             value: v.id,
             label: v?.warehouseAddress
               ? v?.warehouseAddress?.firstLine +
-                "/" +
-                v?.warehouseAddress?.city +
-                ", " +
-                v?.warehouseAddress?.state
+              "/" +
+              v?.warehouseAddress?.city +
+              ", " +
+              v?.warehouseAddress?.state
               : v?.title + "/" + v.postalAddress,
           };
         })
@@ -350,23 +350,9 @@ const CreateShipment = (props) => {
           id: toOrg.split("/")[0],
           locationId: toOrgLoc.split("/")[0],
         },
-        shippingDate: new Date(
-          shipmentDate.getTime() - shipmentDate.getTimezoneOffset() * 60000
-        ).toISOString(),
-        expectedDeliveryDate:
-          estimateDeliveryDate !== ""
-            ? new Date(
-                estimateDeliveryDate.getTime() -
-                  estimateDeliveryDate.getTimezoneOffset() * 60000
-              ).toISOString()
-            : "",
-        actualDeliveryDate:
-          estimateDeliveryDate !== ""
-            ? new Date(
-                estimateDeliveryDate.getTime() -
-                  estimateDeliveryDate.getTimezoneOffset() * 60000
-              ).toISOString()
-            : "",
+        shippingDate: shipmentDate,
+        expectedDeliveryDate: estimateDeliveryDate,
+        actualDeliveryDate: null,
         status: "CREATED",
         products: products,
         // poId: OrderDetails.purchaseOrderId ? OrderDetails.purchaseOrderId : null,
@@ -621,9 +607,9 @@ const CreateShipment = (props) => {
                             }
                             setReceiverOrgLoc(
                               result.poDetails[0].customer.warehouse.title +
-                                "/" +
-                                result.poDetails[0].customer.warehouse
-                                  .postalAddress
+                              "/" +
+                              result.poDetails[0].customer.warehouse
+                                .postalAddress
                             );
                             setReceiverOrgId(
                               result.poDetails[0].customer.organisation.name
@@ -646,8 +632,8 @@ const CreateShipment = (props) => {
                             setFieldValue(
                               "toOrg",
                               result.poDetails[0].customer.organisation.id +
-                                "/" +
-                                result.poDetails[0].customer.organisation.name
+                              "/" +
+                              result.poDetails[0].customer.organisation.name
                             );
                             // settoOrgLocLabel(result.poDetails[0].customer.organisation.id + "/"+result.poDetails[0].customer.organisation.name)
                             let wa = result.poDetails[0].customer.warehouse;
@@ -655,22 +641,22 @@ const CreateShipment = (props) => {
                               "toOrgLoc",
                               result.poDetails[0].customer.shippingAddress
                                 .shippingAddressId +
+                              "/" +
+                              (wa?.warehouseAddress
+                                ? wa?.title +
                                 "/" +
-                                (wa?.warehouseAddress
-                                  ? wa?.title +
-                                    "/" +
-                                    wa?.warehouseAddress?.firstLine +
-                                    ", " +
-                                    wa?.warehouseAddress?.city
-                                  : wa?.title + "/" + wa.postalAddress)
+                                wa?.warehouseAddress?.firstLine +
+                                ", " +
+                                wa?.warehouseAddress?.city
+                                : wa?.title + "/" + wa.postalAddress)
                             );
                             settoOrgLocLabel(
                               wa?.warehouseAddress
                                 ? wa?.title +
-                                    "/" +
-                                    wa?.warehouseAddress?.firstLine +
-                                    ", " +
-                                    wa?.warehouseAddress?.city
+                                "/" +
+                                wa?.warehouseAddress?.firstLine +
+                                ", " +
+                                wa?.warehouseAddress?.city
                                 : wa?.title + "/" + wa.postalAddress
                             );
                             setFieldValue(
@@ -748,9 +734,6 @@ const CreateShipment = (props) => {
                       placeholder={
                         t("enter") + " " + t("reference_shipment_id")
                       }
-                      onInputChange={(event, newInputValue) => {
-                        onSearchChange(newInputValue);
-                      }}
                       onChange={(event, newValue) => {
                         handleChange(event);
                         onSearchChange(event.target.value);
@@ -985,11 +968,10 @@ const CreateShipment = (props) => {
                         {t("organisation_location")}*
                       </label>
                       <div
-                        className={`line ${
-                          errors.fromOrgLoc && touched.fromOrgLoc
-                            ? "border-danger"
-                            : ""
-                        }`}
+                        className={`line ${errors.fromOrgLoc && touched.fromOrgLoc
+                          ? "border-danger"
+                          : ""
+                          }`}
                       >
                         {/* <DropdownButton
                           name={senderOrgLoc}
@@ -1054,25 +1036,25 @@ const CreateShipment = (props) => {
                             values.fromOrgLoc === ""
                               ? t("select") + " " + t("organisation_location")
                               : {
-                                  value: values.fromOrgLoc,
-                                  label: FromOrgLabel,
-                                }
+                                value: values.fromOrgLoc,
+                                label: FromOrgLabel,
+                              }
                           }
                           options={
                             senderWarehouses.length
                               ? [
-                                  ...senderWarehouses.filter(
-                                    (ele, ind) =>
-                                      ind ===
-                                      senderWarehouses.findIndex(
-                                        (elem) => elem.label === ele.label
-                                      )
-                                  ),
-                                  {
-                                    value: "New Org Location",
-                                    label: "New Org Location",
-                                  },
-                                ]
+                                ...senderWarehouses.filter(
+                                  (ele, ind) =>
+                                    ind ===
+                                    senderWarehouses.findIndex(
+                                      (elem) => elem.label === ele.label
+                                    )
+                                ),
+                                {
+                                  value: "New Org Location",
+                                  label: "New Org Location",
+                                },
+                              ]
                               : []
                           }
                         />
@@ -1144,9 +1126,8 @@ const CreateShipment = (props) => {
                         {t("organisation_name")}*
                       </label>
                       <div
-                        className={`line ${
-                          errors.toOrg && touched.toOrg ? "border-danger" : ""
-                        }`}
+                        className={`line ${errors.toOrg && touched.toOrg ? "border-danger" : ""
+                          }`}
                       >
                         {/* <DropdownButton
                           name={receiverOrgId}
@@ -1215,11 +1196,10 @@ const CreateShipment = (props) => {
                         {t("delivery_location")}*
                       </label>
                       <div
-                        className={`line ${
-                          errors.toOrgLoc && touched.toOrgLoc
-                            ? "border-danger"
-                            : ""
-                        }`}
+                        className={`line ${errors.toOrgLoc && touched.toOrgLoc
+                          ? "border-danger"
+                          : ""
+                          }`}
                       >
                         {/* <DropdownButton
                           name={receiverOrgLoc}
@@ -1263,18 +1243,18 @@ const CreateShipment = (props) => {
                           options={
                             receiverWarehouses.length
                               ? [
-                                  ...receiverWarehouses.filter(
-                                    (ele, ind) =>
-                                      ind ===
-                                      receiverWarehouses.findIndex(
-                                        (elem) => elem.label === ele.label
-                                      )
-                                  ),
-                                  {
-                                    value: "New Org Location",
-                                    label: "New Org Location",
-                                  },
-                                ]
+                                ...receiverWarehouses.filter(
+                                  (ele, ind) =>
+                                    ind ===
+                                    receiverWarehouses.findIndex(
+                                      (elem) => elem.label === ele.label
+                                    )
+                                ),
+                                {
+                                  value: "New Org Location",
+                                  label: "New Org Location",
+                                },
+                              ]
                               : []
                           }
                           noOptionsMessage={() => t("no_options")}
@@ -1310,11 +1290,10 @@ const CreateShipment = (props) => {
                       {t("transit_no")}*
                     </label>
                     <input
-                      className={`input refship ${
-                        errors.airWayBillNo && touched.airWayBillNo
-                          ? "border-danger"
-                          : ""
-                      }`}
+                      className={`input refship ${errors.airWayBillNo && touched.airWayBillNo
+                        ? "border-danger"
+                        : ""
+                        }`}
                       type='text'
                       id='referenceShipmentId'
                       name='airWayBillNo'
@@ -1336,11 +1315,10 @@ const CreateShipment = (props) => {
                         {t("shipment_date")}*
                       </label>
                       <div
-                        className={`input refship ${
-                          errors.shipmentDate && touched.shipmentDate
-                            ? "border-danger"
-                            : ""
-                        }`}
+                        className={`input refship ${errors.shipmentDate && touched.shipmentDate
+                          ? "border-danger"
+                          : ""
+                          }`}
                       >
                         <DatePicker
                           dateFormat="dd/MM/yyyy"
@@ -1411,12 +1389,11 @@ const CreateShipment = (props) => {
                         {t("estimated_delivery_date")}
                       </label>
                       <div
-                        className={`input refship ${
-                          errors.estimateDeliveryDate &&
+                        className={`input refship ${errors.estimateDeliveryDate &&
                           touched.estimateDeliveryDate
-                            ? "border-danger"
-                            : ""
-                        }`}
+                          ? "border-danger"
+                          : ""
+                          }`}
                       >
                         <DatePicker
                           dateFormat="dd/MM/yyyy"
@@ -1430,8 +1407,8 @@ const CreateShipment = (props) => {
                           selected={
                             values.estimateDeliveryDate
                               ? new Date(
-                                  Date.parse(values.estimateDeliveryDate)
-                                )
+                                Date.parse(values.estimateDeliveryDate)
+                              )
                               : values.estimateDeliveryDate
                           }
                           minDate={new Date()}

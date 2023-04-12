@@ -1,11 +1,11 @@
-const mongoose = require("mongoose");
-const ShipmentSchema = new mongoose.Schema(
+const { SchemaTypes, Schema, model } = require("mongoose");
+const ShipmentSchema = new Schema(
   {
     id: { type: String, required: true, unique: true },
     shippingOrderId: String,
     poId: String,
     label: {
-      labelId: { type: String, required: true, unique: true },
+      labelId: { type: String },
       labelType: { type: String, default: "QR_2DBAR" },
     },
     externalShipmentId: String,
@@ -35,8 +35,8 @@ const ShipmentSchema = new mongoose.Schema(
     shipmentUpdates: { type: Array, default: [] },
     airWayBillNo: String,
     shippingDate: Date,
-    expectedDeliveryDate: String,
-    actualDeliveryDate: String,
+    expectedDeliveryDate: Date,
+    actualDeliveryDate: Date,
     status: String,
     transactionIds: [String],
     rejectionRate: { type: Number, default: 0.0 },
@@ -52,17 +52,43 @@ const ShipmentSchema = new mongoose.Schema(
         rejectionRate: { type: Number, default: 0.0 },
         labelId: String,
         productCategory: String,
+        serialNumbersRange: { type: Array, default: [] },
         unitofMeasure: {
           id: { type: String },
           name: {
             type: String,
           },
         },
+        attributeSet: {
+          mfgDate: Date,
+          expDate: Date,
+          mfgDateString: String,
+          expDateString: String,
+        },
+        atomId: { type: String, default: "" },
       },
     ],
     acceptedRequests: [String],
+    isCustom: { type: Boolean, default: false },
+    vehicleId: String,
+    trips: [
+      {
+        externalId: String,
+        tripScore: String,
+        totalCASAlerts: Number,
+        distance: Number,
+        duration: Number,
+        startTimeInISO: String,
+        endTimeInISO: String,
+        startTime: SchemaTypes.Date,
+        endTime: SchemaTypes.Date,
+        startLocation: String,
+        endLocation: String,
+      },
+    ],
+    tplOrgId: { type: String, required: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-module.exports = mongoose.model("Shipment", ShipmentSchema);
+module.exports = model("Shipment", ShipmentSchema);

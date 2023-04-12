@@ -641,5 +641,8 @@
   "org_name_required":"¡El nombre de la organización es obligatorio!",
   "email_or_phone_required":"¡Se requiere correo electrónico o teléfono!",
   "first_name_required":"¡Se requiere el primer nombre!",
-  "Last_name_required":"¡Se requiere apellido!"
+  "Last_name_required":"¡Se requiere apellido!",
+  "mfg_greater_than_today": "La fecha de fabricación no puede ser posterior a hoy!",
+  "mfg_greater_than_exp": "La fecha de fabricación no puede ser posterior a la fecha de caducidad!",
+  "choose_batch_to_continue": "Elija lote para continuar ->"
 }

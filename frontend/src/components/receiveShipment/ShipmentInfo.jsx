@@ -1,4 +1,5 @@
 import React from "react";
+import { formatDate } from "../../utils/dateHelper";
 
 function GridRow({ heading, context }) {
   return (
@@ -21,13 +22,7 @@ export default function ShipmentInfo(props) {
         <div className='ShipmentInfo--content-space-2'>
           <GridRow
             heading={t("shipment_date")}
-            context={
-              props.shipments.shippingDate.split("T")[0].split("-")[2] +
-              "/" +
-              props.shipments.shippingDate.split("T")[0].split("-")[1] +
-              "/" +
-              props.shipments.shippingDate.split("T")[0].split("-")[0]
-            }
+            context={formatDate(props.shipments.shippingDate)}
           />
         </div>
       </div>

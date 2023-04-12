@@ -13,3 +13,14 @@ exports.asyncForEach = async (array, callback) => {
     await callback(array[index], index, array);
   }
 };
+
+exports.getDateStringForMongo = function (date) {
+  if (!date) return;
+  const currDate = new Date(date);
+  const year = currDate.getFullYear();
+  const month = currDate.getMonth() + 1;
+  const day = currDate.getDate();
+  const dateString = `${year}${month < 10 ? "0" + month : month}${day < 10 ? "0" + day : day}`;
+
+  return dateString;
+};

@@ -56,13 +56,15 @@ export default function Users(props) {
   );
   const addresses = useSelector(
     (state) => state?.organisationReducer?.addresses
-  );
+	);
+	console.log(addresses);
   const { userAnalytics } = useSelector((state) => state.organisationReducer);
   const { totalCount, activeCount, inactiveCount } = userAnalytics;
 
   const [ButtonOpen, setButtonOpen] = useState(false);
   const [ButtonOpen2, setButtonOpen2] = useState(false);
-
+  const [userStatus, setUserStatus] = useState("");
+  const [searchKey, setSearchKey] = useState("");
   let domNode = useClickOutside(() => {
     setButtonOpen(false);
   });
@@ -83,7 +85,7 @@ export default function Users(props) {
   const [openAlert, setOpenAlert] = React.useState(false);
   const [alertDetails, setAlertDetails] = React.useState({});
 
-  const [refetch, togggleRefetch] = useState(false);
+	const [refetch, togggleRefetch] = useState(false);
 
   useEffect(() => {
     dispatch(getRequestsPending());
@@ -107,7 +109,12 @@ export default function Users(props) {
       setDefaultRoles(roles);
     }
     getRoles();
-  }, []);
+	}, []);
+	
+	useEffect(() => {
+		dispatch(getWareHouses());
+    dispatch(getOrgUserAnalytics(user.organisationId));
+	}, [tableFlag]);
 
   const onSuccess = async (data) => {
 		try {
@@ -131,6 +138,7 @@ export default function Users(props) {
 				});
         setOpenAlert(true);
 			}
+			dispatch(getOrgUserAnalytics(user.organisationId));
 		} catch (err) {
 			console.log("error - ", err);
       dispatch(turnOff());
@@ -188,6 +196,7 @@ export default function Users(props) {
 								valueTitle={t("to_no_of_user")}
 								bgColor="analytic-bg-1"
 								textColor="analytic-text-1"
+								onClick={() => setUserStatus("")}
 							/>
 							<AnalyticsCard
 								layout="type4"
@@ -196,6 +205,7 @@ export default function Users(props) {
 								valueTitle={`${t("active")} ${t("users")}`}
 								bgColor="analytic-bg-2"
 								textColor="analytic-text-2"
+								onClick={() => setUserStatus("ACTIVE")}
 							/>
 							<AnalyticsCard
 								layout="type4"
@@ -204,13 +214,21 @@ export default function Users(props) {
 								valueTitle={`${t("inactive")} ${t("users")}`}
 								bgColor="analytic-bg-3"
 								textColor="analytic-text-3"
+								onClick={() => setUserStatus("INACTIVE")}
 							/>
 						</div>
 						<div className="organization-table-container">
 							<div className="organization-table-header-area">
 								<div className="table-search-bar">
 									<i className="fa-solid fa-magnifying-glass"></i>
-									<input type="text" placeholder={t("search")} />
+									<input
+										type="text"
+										placeholder={t("search")}
+										onChange={(event) => {
+											// handleChange(event);
+											setSearchKey(event.target.value);
+										}}
+									/>
 								</div>
 								<div className="table-actions-area">
 									{(user.type === "DISTRIBUTORS" || user.type === "DROGUERIA") && (
@@ -257,7 +275,14 @@ export default function Users(props) {
 									</div>
 								</div>
 							</div>
-							<UsersTable t={t} defaultRoles={defaultRoles} tableFlag={tableFlag} refetch={refetch} />
+							<UsersTable
+								t={t}
+								defaultRoles={defaultRoles}
+								tableFlag={tableFlag}
+								refetch={refetch}
+								userStatus={userStatus}
+								searchKey={searchKey}
+							/>
 						</div>
 					</div>
 				</div>

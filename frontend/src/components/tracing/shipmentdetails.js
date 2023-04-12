@@ -1,6 +1,6 @@
 import React from "react";
 import "./style.scss";
-
+import { formatDate } from "../../utils/dateHelper";
 const ShipmentDetails = (props) => {
   return Object.keys(props.shipments).length === 0 ? (
     <div className='row panel justify-content-between'>N/A</div>
@@ -43,30 +43,11 @@ const ShipmentDetails = (props) => {
             {props.shipments.shipmentDetails[0].label.labelId}
           </li>
           <li className='mb-1'>
-            {props.shipments.shipmentDetails[0].shippingDate
-              .split("T")[0]
-              .split("-")[2] +
-              "/" +
-              props.shipments.shipmentDetails[0].shippingDate
-                .split("T")[0]
-                .split("-")[1] +
-              "/" +
-              props.shipments.shipmentDetails[0].shippingDate
-                .split("T")[0]
-                .split("-")[0]}{" "}
+            {
+              formatDate(props.shipments.shipmentDetails[0].shippingDate)}
           </li>
           <li className='mb-1'>
-            {props.shipments.shipmentDetails[0].expectedDeliveryDate
-              .split("T")[0]
-              .split("-")[2] +
-              "/" +
-              props.shipments.shipmentDetails[0].expectedDeliveryDate
-                .split("T")[0]
-                .split("-")[1] +
-              "/" +
-              props.shipments.shipmentDetails[0].expectedDeliveryDate
-                .split("T")[0]
-                .split("-")[0]}
+            {formatDate(props.shipments.shipmentDetails[0].expectedDeliveryDate)}
           </li>
         </ul>
         <div></div>

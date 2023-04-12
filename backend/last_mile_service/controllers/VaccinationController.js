@@ -15,6 +15,7 @@ const { resolve } = require("path");
 const fs = require("fs");
 const CountryModel = require("../models/CountryModel");
 const { formatDate } = require("../helpers/dateHelper");
+const { getDateStringForMongo } = require("../helpers/utility");
 
 const fontDescriptors = {
 	Roboto: {
@@ -95,9 +96,8 @@ const buildDoseQuery = async (gender, minAge, maxAge, ageType, vaccineVialIds, t
 		}
 	}
 	if (today) {
-		let now = new Date();
-		now.setHours(0, 0, 0, 0);
-		queryExprs.push({ $gte: ["$createdAt", now] });
+		let todayString = getDateStringForMongo(new Date());
+		queryExprs.push({ $gte: ["$createdDateString", todayString] });
 	}
 
 	if (queryExprs.length) {
@@ -112,12 +112,12 @@ const buildDoseQuery = async (gender, minAge, maxAge, ageType, vaccineVialIds, t
 };
 
 const generateVaccinationsList = async (doseQuery, req, skip = 0, limit) => {
-	const pagniationQuery = [];
+	const paginationQuery = [];
 	if (skip) {
-		pagniationQuery.push({ $skip: skip })
+		paginationQuery.push({ $skip: skip })
 	}
 	if (limit) {
-		pagniationQuery.push({ $limit: limit });
+		paginationQuery.push({ $limit: limit });
 	}
 	const dosesResult = await DoseModel.aggregate([
 		{ $match: doseQuery },
@@ -160,7 +160,7 @@ const generateVaccinationsList = async (doseQuery, req, skip = 0, limit) => {
 		{ $sort: { createdAt: -1 } },
 		{
 			$facet: {
-				paginatedResults: pagniationQuery,
+				paginatedResults: paginationQuery,
 				totalCount: [{ $count: "count" }],
 			},
 		},
@@ -206,15 +206,14 @@ exports.fetchBatchById = [
 			const userId = req.user.id;
 			const batchNumber = req.body.batchNumber;
 			const warehouseId = req.body.warehouseId;
-
 			const user = await EmployeeModel.findOne({ id: userId });
-
 			if (!user.warehouseId.includes(warehouseId)) {
 				throw new Error("User does not have access to this warehouse!");
 			}
-
 			const warehouse = await WarehouseModel.findOne({ id: warehouseId });
-
+			if (!warehouse) {
+				throw new Error("Warehouse does not exist");
+			}
 			const productDetails = await EmployeeModel.aggregate(
 				[
 					{ $match: { id: userId } },
@@ -255,26 +254,39 @@ exports.fetchBatchById = [
 				],
 				{ collation: { locale: "en", strength: 2 } },
 			);
-
+			const validBatches = [];
 			if (productDetails) {
-				console.log("here");
-				if (productDetails.length) {
-					if (!productDetails[0]?.atom?.quantity) {
-						throw new Error("Batch exhausted!");
-					} else {
-						console.log(productDetails[0].atom.attributeSet.expDate);
-						let expDate = new Date(productDetails[0].atom.attributeSet.expDate);
-						console.log(expDate);
-						expDate.setHours(0, 0, 0, 0);
-						console.log(expDate);
-						let today = new Date();
-						console.log(today);
-						today.setHours(0, 0, 0, 0);
-						console.log(today);
-						console.log(expDate.toDateString(), today.toDateString());
-						if (expDate < today) {
-							throw new Error("Batch expired!");
+				if (productDetails?.length) {
+					const errors = [];
+					for (const currProd of productDetails) {
+						if (currProd?.atom?.attributeSet?.expDate) {
+							const expDate = new Date(currProd.atom.attributeSet.expDate);
+							const today = new Date();
+							today.setUTCHours(0, 0, 0, 0);
+							if (expDate < today) {
+								// if (expDate.toLocaleDateString() < today.toLocaleDateString()) {		
+								errors.push("expired_batch");
+							} else {
+								if (currProd?.atom?.quantity <= 0) {
+									errors.push("batch_exhausted");
+								}
+								validBatches.push(currProd);
+							}
+						} else {
+							errors.push("no_expiry_date");
 						}
+					}
+					let priorityError;
+					if (!validBatches.length) {
+						if (errors.includes("batch_exhausted")) {
+							priorityError = "Batch exhausted!";
+						} else if (errors.includes("expired_batch")) {
+							priorityError = "Batch expired!";
+						} else {
+							priorityError = "Batch has no expiry date!";
+						}
+
+						return apiResponse.validationErrorWithData(res, priorityError, batchNumber);
 					}
 				} else {
 					const existingAtom = await AtomModel.findOne({
@@ -284,11 +296,10 @@ exports.fetchBatchById = [
 					if (existingAtom)
 						throw new Error("Batch exhausted!");
 					else
-						throw new Error("Batch not found!");
+						throw new Error("Batch not found in Warehouse !");
 				}
 			}
-
-			return apiResponse.successResponseWithData(res, "Product Details", productDetails);
+			return apiResponse.successResponseWithData(res, "Product Details", validBatches);
 		} catch (err) {
 			console.log(err);
 			return apiResponse.ErrorResponse(res, err.message);
@@ -364,13 +375,16 @@ exports.vaccinateIndividual = [
 	auth,
 	async (req, res) => {
 		try {
-			const { warehouseId, productId, batchNumber, age, ageMonths, gender } = req.body;
+			const { warehouseId, productId, batchNumber, atomId, age, ageMonths, gender } = req.body;
 			let vaccineVialId = req.body?.vaccineVialId;
 			let vaccineVial;
 
 			const warehouse = await WarehouseModel.findOne({ id: warehouseId });
 			// Open a new bottle if first dose
 			if (!vaccineVialId) {
+				if(!atomId) {
+					throw new Error("AtomID is required for first dose!");
+				}
 				const existingInventory = await InventoryModel.findOne(
 					{ id: warehouse.warehouseInventory },
 					{ _id: 1, id: 1, inventoryDetails: { $elemMatch: { productId: productId } } },
@@ -381,8 +395,7 @@ exports.vaccinateIndividual = [
 					}
 				}
 				const existingAtom = await AtomModel.findOne({
-					currentInventory: warehouse.warehouseInventory,
-					batchNumbers: batchNumber,
+					id: atomId,
 					status: "HEALTHY",
 				});
 				if (!existingAtom?.quantity) {
@@ -405,8 +418,7 @@ exports.vaccinateIndividual = [
 				// Reduce inventory in AtomModel
 				await AtomModel.updateOne(
 					{
-						currentInventory: warehouse.warehouseInventory,
-						batchNumbers: batchNumber,
+						id: atomId,
 						status: "HEALTHY",
 					},
 					{
@@ -437,6 +449,7 @@ exports.vaccinateIndividual = [
 					batchNumber: batchNumber,
 					isComplete: false,
 					numberOfDoses: 0,
+					atomId: atomId
 				});
 				await vaccineVial.save();
 			} else {
@@ -466,6 +479,7 @@ exports.vaccinateIndividual = [
 				age: age || 0,
 				ageMonths: ageMonths || 0,
 				gender: gender === "GENERAL" ? "OTHERS" : gender.toUpperCase(),
+				createdDateString: getDateStringForMongo(new Date()),
 			});
 			await dose.save();
 			// Increment number of doses in VaccineVial model
@@ -488,7 +502,7 @@ exports.vaccinateMultiple = [
 	auth,
 	async (req, res) => {
 		try {
-			const { warehouseId, productId, batchNumber, doses } = req.body;
+			const { warehouseId, productId, batchNumber, atomId, doses } = req.body;
 			let vaccineVialId = req.body?.vaccineVialId;
 			let vaccineVial;
 			const warehouse = await WarehouseModel.findOne({ id: warehouseId });
@@ -504,8 +518,7 @@ exports.vaccinateMultiple = [
 					}
 				}
 				const existingAtom = await AtomModel.findOne({
-					currentInventory: warehouse.warehouseInventory,
-					batchNumbers: batchNumber,
+					id: atomId,
 					status: "HEALTHY",
 				});
 				if (!existingAtom?.quantity) {
@@ -541,14 +554,14 @@ exports.vaccinateMultiple = [
 					batchNumber: batchNumber,
 					isComplete: false,
 					numberOfDoses: doses.length,
+					atomId: atomId
 				});
 				await vaccineVial.save();
 
 				// Reduce inventory in InventoryModel and AtomModel
 				await AtomModel.updateOne(
 					{
-						currentInventory: warehouse.warehouseInventory,
-						batchNumbers: batchNumber,
+						atomId: atomId,
 						status: "HEALTHY",
 					},
 					{
@@ -604,6 +617,7 @@ exports.vaccinateMultiple = [
 						age: doses[i].age || 0,
 						ageMonths: doses[i].ageMonths || 0,
 						gender: doses[i].gender === "GENERAL" ? "OTHERS" : doses[i].gender.toUpperCase(),
+						createdDateString: getDateStringForMongo(new Date()),
 					});
 					await dose.save();
 				}
@@ -798,13 +812,13 @@ exports.getAnalyticsWithFilters = [
 			let todaysVaccinations = 0;
 			let vialsUtilized = 0;
 			let now = new Date();
-			now.setHours(0, 0, 0, 0);
+			let nowString = getDateStringForMongo(now);
 
 			for (let i = 0; i < warehouses.length; ++i) {
 				const vaccineVials = warehouses[i].vaccinations;
 				for (let j = 0; j < vaccineVials.length; ++j) {
 					let createdAt = new Date(vaccineVials[j].createdAt);
-					createdAt.setHours(0, 0, 0, 0);
+					let createdAtString = getDateStringForMongo(createdAt);
 
 					const doses = vaccineVials[j].doses;
 
@@ -813,7 +827,7 @@ exports.getAnalyticsWithFilters = [
 					if (doses.length) {
 						totalVaccinations += doses.length;
 
-						if (now.toDateString() === createdAt.toDateString()) {
+						if (nowString === createdAtString) {
 							todaysVaccinations += doses.length;
 						}
 					}
@@ -862,15 +876,15 @@ exports.getAnalytics = [
 			let totalVaccinations = 0;
 			let todaysVaccinations = 0;
 			let now = new Date();
-			now.setHours(0, 0, 0, 0);
+			let nowString = getDateStringForMongo(now);
 
 			for (let i = 0; i < analytics.length; ++i) {
 				let createdAt = new Date(analytics[i].createdAt);
-				createdAt.setHours(0, 0, 0, 0);
+				let createdAtString = getDateStringForMongo(createdAt);
 
 				totalVaccinations += analytics[i].numberOfDoses;
 
-				if (now.toDateString() === createdAt.toDateString()) {
+				if (nowString === createdAtString) {
 					todaysVaccinations += analytics[i].numberOfDoses;
 				}
 			}
@@ -898,19 +912,19 @@ exports.getVialsUtilised = [
 			const warehouseQuery = await buildWarehouseQuery(user, city, organisation);
 			const warehouses = await WarehouseModel.find(warehouseQuery);
 			const warehouseIds = warehouses.map((warehouse) => warehouse.id);
-			const pagniationQuery = [];
+			const paginationQuery = [];
 			if (skip) {
-				pagniationQuery.push({ $skip: skip })
+				paginationQuery.push({ $skip: skip })
 			}
 			if (limit) {
-				pagniationQuery.push({ $limit: limit });
+				paginationQuery.push({ $limit: limit });
 			}
 			const vialsResult = await VaccineVialModel.aggregate([
 				{ $match: { warehouseId: { $in: warehouseIds } } },
 				{ $sort: { createdAt: -1 } },
 				{
 					$facet: {
-						paginatedResults: pagniationQuery,
+						paginatedResults: paginationQuery,
 						totalCount: [{ $count: "count" }],
 					},
 				},
@@ -967,17 +981,16 @@ exports.getVaccinationsList = [
 
 			let queryExprs = [{ $in: ["$vaccineVialId", vialsList] }];
 			if (today) {
-				let now = new Date();
-				now.setHours(0, 0, 0, 0);
-				queryExprs.push({ $gte: ["$createdAt", now] });
+				let todayString = getDateStringForMongo(new Date());
+				queryExprs.push({ $gte: ["$createdDateString", todayString] });
 			}
 
-			const pagniationQuery = [];
+			const paginationQuery = [];
 			if (skip) {
-				pagniationQuery.push({ $skip: skip });
+				paginationQuery.push({ $skip: skip });
 			}
 			if (limit) {
-				pagniationQuery.push({ $limit: limit });
+				paginationQuery.push({ $limit: limit });
 			}
 			const dosesResult = await DoseModel.aggregate([
 				{
@@ -999,7 +1012,7 @@ exports.getVaccinationsList = [
 				{ $sort: { createdAt: -1 } },
 				{
 					$facet: {
-						paginatedResults: pagniationQuery,
+						paginatedResults: paginationQuery,
 						totalCount: [{ $count: "count" }],
 					},
 				},
@@ -1067,11 +1080,11 @@ exports.getVaccinationsListOld = [
 			const todaysVaccinationsList = [];
 
 			let now = new Date();
-			now.setHours(0, 0, 0, 0);
+			let nowString = getDateStringForMongo(now);
 
 			for (let i = 0; i < vialsUtilized.length; ++i) {
 				let createdAt = new Date(vialsUtilized[i].createdAt);
-				createdAt.setHours(0, 0, 0, 0);
+				let createdAtString = getDateStringForMongo(createdAt);
 
 				let currDoses = await DoseModel.aggregate([
 					{ $match: { vaccineVialId: vialsUtilized[i].id } },
@@ -1079,7 +1092,7 @@ exports.getVaccinationsListOld = [
 				]);
 
 				vaccinationsList.push(...currDoses);
-				if (now.toDateString() === createdAt.toDateString()) {
+				if (nowString === createdAtString) {
 					todaysVaccinationsList.push(...currDoses);
 				}
 			}
@@ -1413,7 +1426,7 @@ function buildPdfReportDoses(req, res, data, today) {
 		{ text: req.t("organization"), bold: true },
 	]);
 	for (const element of data) {
-		const date = element.date ? new Date(element.date).toLocaleDateString() : "N/A";
+		const date = element.date ? formatDate(new Date(element.date)) : "N/A";
 		rows.push([
 			date,
 			element.batchNumber || "N/A",
@@ -1561,3 +1574,17 @@ function buildPdfReportVials(req, res, data) {
 	});
 	return;
 }
+
+exports.addDateStringToDoses = [
+	async (req, res) => {
+		const allDoses = await DoseModel.find();
+		let count = 0;
+		for (let i = 0; i < allDoses.length; ++i) {
+			let currDose = allDoses[i];
+			let createdDateString = getDateStringForMongo(new Date(currDose.createdAt));
+			await DoseModel.updateOne({ id: currDose.id }, { $set: { createdDateString: createdDateString } })
+			++count;
+		}
+		return apiResponse.successResponseWithData(res, "Done", count)
+	}
+]

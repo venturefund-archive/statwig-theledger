@@ -20,6 +20,7 @@ export default function UploadPopup({
   const dispatch = useDispatch();
   const [openSuccessPopup, setOpenSuccessPopup] = useState(false);
   const [openFailurePopup, setOpenFailurePopup] = useState(false);
+  const [message, setMessage] = useState("");
   // const setExcelFile = (evt) => {
   //   const extension = evt.target.files[0].name.split(".").pop()
   //   if(["xlsx","xls"].includes(extension)){
@@ -29,6 +30,7 @@ export default function UploadPopup({
   //   }
   // };
   const closeModal = () => {
+    setMessage("");
     if (openSuccessPopup) {
       setOpenSuccessPopup(false);
     }
@@ -44,9 +46,24 @@ export default function UploadPopup({
       if (orgUpload) result = await addOrgsFromExcel(formData);
       else result = await addUsersFromExcel(formData);
       dispatch(turnOff());
-      result.status === 200
-        ? setOpenSuccessPopup(true)
-        : setOpenFailurePopup(true);
+      if (result.status === 200) {
+				const response = result.data.data;
+				if (response.insertedRecords > 0) {
+					setMessage(
+						`${orgUpload ? "Organisations" : "Users"} added: ${result.data.data.insertedRecords} ${
+							result.data.data.invalidRecords > 0
+								? `(Invalid: ${result.data.data.invalidRecords})`
+								: ""
+						}`,
+					);
+					setOpenSuccessPopup(true);
+				} else {
+					setMessage("Invalid data in excel!");
+					setOpenFailurePopup(true);
+				}
+			} else {
+				setOpenFailurePopup(true);
+			}
       resetFlag();
     } catch (err) {
       console.log(err);
@@ -54,55 +71,47 @@ export default function UploadPopup({
     }
   };
   return (
-    <div className="addOrganization-container">
-      <div className="addorganization-header">
-        <p className="vl-subheading f-500 vl-blue">
-          {type === "org" ? t("import_org") : t("import_users")}
-        </p>
-        <i className="fa-solid fa-xmark" onClick={handleImportClose}></i>
-      </div>
-      <div className="addorganization-body">
-        <div className="Popup-wrapper">
-          <FileUpload t={t} files={excel} setFiles={setExcel} />
-          <FileList files={excel} />
-        </div>
-      </div>
-      <div className="addorganization-actions">
-        <button
-          onClick={uploadExcel}
-          className="vl-btn vl-btn-sm vl-btn-primary"
-        >
-          {t("import_file")}
-        </button>
-      </div>
-      {openSuccessPopup && (
-        <Modal
-          close={() => closeModal()}
-          size="modal-sm" //for other size's use `modal-lg, modal-md, modal-sm`
-        >
-          <SuccessPopup
-            onHide={closeModal}
-            successMessage={`${
-              orgUpload ? "Organisations" : "Users"
-            } added succesfully`}
-            // errorMessage="Put the Error Message Here"
-          />
-        </Modal>
-      )}
-      {openFailurePopup && (
-        <Modal
-          close={() => closeModal()}
-          size="modal-sm" //for other size's use `modal-lg, modal-md, modal-sm`
-        >
-          <SuccessPopup
-            onHide={closeModal}
-            // successMessage="Product added succesfully"
-            errorMessage={`Unable to Add ${
-              orgUpload ? "Organisations" : "Users"
-            } please try again later`}
-          />
-        </Modal>
-      )}
-    </div>
-  );
+		<div className="addOrganization-container">
+			<div className="addorganization-header">
+				<p className="vl-subheading f-500 vl-blue">
+					{type === "org" ? t("import_org") : t("import_users")}
+				</p>
+				<i className="fa-solid fa-xmark" onClick={handleImportClose}></i>
+			</div>
+			<div className="addorganization-body">
+				<div className="Popup-wrapper">
+					<FileUpload t={t} files={excel} setFiles={setExcel} />
+					<FileList files={excel} />
+				</div>
+			</div>
+			<div className="addorganization-actions">
+				<button onClick={uploadExcel} className="vl-btn vl-btn-sm vl-btn-primary">
+					{t("import_file")}
+				</button>
+			</div>
+			{openSuccessPopup && (
+				<Modal
+					close={() => closeModal()}
+					size="modal-sm" //for other size's use `modal-lg, modal-md, modal-sm`
+				>
+					<SuccessPopup onHide={closeModal} successMessage={message} />
+				</Modal>
+			)}
+			{openFailurePopup && (
+				<Modal
+					close={() => closeModal()}
+					size="modal-sm" //for other size's use `modal-lg, modal-md, modal-sm`
+				>
+					<SuccessPopup
+						onHide={closeModal}
+						errorMessage={
+							message
+								? message
+								: `Unable to Add ${orgUpload ? "Organisations" : "Users"} please try again later`
+						}
+					/>
+				</Modal>
+			)}
+		</div>
+	);
 }

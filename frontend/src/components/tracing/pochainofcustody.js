@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./style.scss";
+import { formatDate } from "../../utils/dateHelper";
 import traceDrop from "../../assets/icons/traceDrop.png";
 import Down from "../../assets/icons/up.png";
 
@@ -12,7 +13,7 @@ const PoChainOfCustody = (props) => {
   ) : (
     <div>
       {props.shipments.map((custody, index) => (
-        <div className='row mb-3'>
+        <div className='row mb-3' key={index}>
           <div></div>
           <div className='big-dot bg-info ml-4'></div>
           <div className='col'>
@@ -36,11 +37,7 @@ const PoChainOfCustody = (props) => {
                 </div>
                 <div className='d-flex flex-column mr-5'>
                   <div>
-                    {custody.createdAt.split("T")[0].split("-")[2] +
-                      "/" +
-                      custody.createdAt.split("T")[0].split("-")[1] +
-                      "/" +
-                      custody.createdAt.split("T")[0].split("-")[0]}
+                    {formatDate(custody.createdAt)}
                   </div>
                   <div></div>
                   <div></div>
