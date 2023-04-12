@@ -38,7 +38,7 @@ const checkPermissions = async (request, next) => {
   try {
     const required_permission = request["permissionRequired"];
     const request_role = request["role"];
-    for (var i = 0; i < required_permission.length; i++) {
+    for (let i = 0; i < required_permission.length; i++) {
       const result = await member(request_role, required_permission[i]);
       if (result === 1) {
         next({
@@ -68,7 +68,7 @@ const checkPermissionAwait = async (request) => {
   try {
     const required_permission = request["permissionRequired"];
     const request_role = request["role"];
-    for (var i = 0; i < required_permission.length; i++) {
+    for (let i = 0; i < required_permission.length; i++) {
       const result = await member(request_role, required_permission[i]);
       if (result === 1) {
         return true;

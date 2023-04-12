@@ -21,7 +21,7 @@ const hf_blockchain_url = process.env.HF_BLOCKCHAIN_URL;
 const emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const phoneRegex = /^[\+]\d{11,12}$/;
 const blockchain_service_url = process.env.URL;
-const { uploadFile, getFileStream, getSignedUrl } = require("../helpers/s3");
+const { uploadFile, getSignedUrl } = require("../helpers/s3");
 const fs = require("fs");
 const util = require("util");
 const unlinkFile = util.promisify(fs.unlink);
@@ -130,11 +130,11 @@ async function createWarehouse(payload) {
 					$set: {
 						...(skipOrgRegistration
 							? {
-									postalAddress: addr,
-									country: warehouseAddress.country,
-									region: warehouseAddress.region,
-									status: "NOTVERIFIED",
-							  }
+								postalAddress: addr,
+								country: warehouseAddress.country,
+								region: warehouseAddress.region,
+								status: "NOTVERIFIED",
+							}
 							: {}),
 					},
 					$push: {
@@ -1453,11 +1453,11 @@ exports.addWarehouse = [
 					$set: {
 						...(skipOrgRegistration
 							? {
-									postalAddress: addr,
-									country: warehouseAddress.country,
-									region: warehouseAddress.region,
-									status: "NOTVERIFIED",
-							  }
+								postalAddress: addr,
+								country: warehouseAddress.country,
+								region: warehouseAddress.region,
+								status: "NOTVERIFIED",
+							}
 							: {}),
 					},
 					$push: {
@@ -2132,14 +2132,6 @@ exports.emailverify = [
 			console.log(err);
 			return apiResponse.ErrorResponse(req, res, "default_error");
 		}
-	},
-];
-
-exports.Image = [
-	auth,
-	async (req, res) => {
-		const FileStream = getFileStream(req.params.key);
-		FileStream.pipe(req, res);
 	},
 ];
 
