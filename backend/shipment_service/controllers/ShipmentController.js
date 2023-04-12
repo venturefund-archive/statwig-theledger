@@ -2227,129 +2227,126 @@ exports.fetchShipmentsForAbInBev = [
       const { skip, limit } = req.query;
       // const { warehouseId } = req.user;
       const filters = req.query;
-      try {
-        // const warehouses = await OrganisationModel.aggregate([
-        //   {
-        //     $match: getFilterConditions(filters)
-        //   },
-        //   {
-        //     $group: {
-        //       _id: 'warehouses',
-        //       warehouses: {
-        //         $addToSet: '$warehouses'
-        //       }
-        //     }
-        //   },
-        //   {
-        //     $unwind: {
-        //       path: '$warehouses'
-        //     }
-        //   },
-        //   {
-        //     $unwind: {
-        //       path: '$warehouses'
-        //     }
-        //   },
-        //   {
-        //     $group: {
-        //       _id: 'warehouses',
-        //       warehouseIds: {
-        //         $addToSet: '$warehouses'
-        //       }
-        //     }
-        //   }
-        // ]);
-        let warehouseIds = [];
-        // if (warehouses[0] && warehouses[0].warehouseIds) {
-        //   warehouseIds = warehouses[0].warehouseIds;
-        // }
-        const shipments = await ShipmentModel.aggregate([
-          {
-            $match: getShipmentFilterCondition(filters, warehouseIds),
+      // const warehouses = await OrganisationModel.aggregate([
+      //   {
+      //     $match: getFilterConditions(filters)
+      //   },
+      //   {
+      //     $group: {
+      //       _id: 'warehouses',
+      //       warehouses: {
+      //         $addToSet: '$warehouses'
+      //       }
+      //     }
+      //   },
+      //   {
+      //     $unwind: {
+      //       path: '$warehouses'
+      //     }
+      //   },
+      //   {
+      //     $unwind: {
+      //       path: '$warehouses'
+      //     }
+      //   },
+      //   {
+      //     $group: {
+      //       _id: 'warehouses',
+      //       warehouseIds: {
+      //         $addToSet: '$warehouses'
+      //       }
+      //     }
+      //   }
+      // ]);
+      let warehouseIds = [];
+      // if (warehouses[0] && warehouses[0].warehouseIds) {
+      //   warehouseIds = warehouses[0].warehouseIds;
+      // }
+      const shipments = await ShipmentModel.aggregate([
+        {
+          $match: getShipmentFilterCondition(filters, warehouseIds),
+        },
+        {
+          $lookup: {
+            from: "warehouses",
+            localField: "supplier.locationId",
+            foreignField: "id",
+            as: "supplier.warehouse",
           },
-          {
-            $lookup: {
-              from: "warehouses",
-              localField: "supplier.locationId",
-              foreignField: "id",
-              as: "supplier.warehouse",
-            },
+        },
+        {
+          $unwind: {
+            path: "$supplier.warehouse",
           },
-          {
-            $unwind: {
-              path: "$supplier.warehouse",
-            },
+        },
+        {
+          $lookup: {
+            from: "organisations",
+            localField: "supplier.warehouse.organisationId",
+            foreignField: "id",
+            as: "supplier.org",
           },
-          {
-            $lookup: {
-              from: "organisations",
-              localField: "supplier.warehouse.organisationId",
-              foreignField: "id",
-              as: "supplier.org",
-            },
+        },
+        {
+          $unwind: {
+            path: "$supplier.org",
           },
-          {
-            $unwind: {
-              path: "$supplier.org",
-            },
+        },
+        {
+          $lookup: {
+            from: "organisations",
+            localField: "supplier.org.authority",
+            foreignField: "id",
+            as: "supplier.org.S1",
           },
-          {
-            $lookup: {
-              from: "organisations",
-              localField: "supplier.org.authority",
-              foreignField: "id",
-              as: "supplier.org.S1",
-            },
+        },
+        {
+          $unwind: {
+            path: "$supplier.org.S1",
+            preserveNullAndEmptyArrays: true,
           },
-          {
-            $unwind: {
-              path: "$supplier.org.S1",
-              preserveNullAndEmptyArrays: true,
-            },
+        },
+        {
+          $lookup: {
+            from: "warehouses",
+            localField: "receiver.locationId",
+            foreignField: "id",
+            as: "receiver.warehouse",
           },
-          {
-            $lookup: {
-              from: "warehouses",
-              localField: "receiver.locationId",
-              foreignField: "id",
-              as: "receiver.warehouse",
-            },
+        },
+        {
+          $unwind: {
+            path: "$receiver.warehouse",
           },
-          {
-            $unwind: {
-              path: "$receiver.warehouse",
-            },
+        },
+        {
+          $lookup: {
+            from: "organisations",
+            localField: "receiver.warehouse.organisationId",
+            foreignField: "id",
+            as: "receiver.org",
           },
-          {
-            $lookup: {
-              from: "organisations",
-              localField: "receiver.warehouse.organisationId",
-              foreignField: "id",
-              as: "receiver.org",
-            },
+        },
+        {
+          $unwind: {
+            path: "$receiver.org",
           },
-          {
-            $unwind: {
-              path: "$receiver.org",
-            },
-          },
-          { $match: matchConditionShipment(filters) },
-        ])
-          .sort({
-            createdAt: -1,
-          })
-          .skip(parseInt(skip))
-          .limit(parseInt(limit));
+        },
+        { $match: matchConditionShipment(filters) },
+      ])
+        .sort({
+          createdAt: -1,
+        })
+        .skip(parseInt(skip))
+        .limit(parseInt(limit));
 
-        return apiResponse.successResponseWithMultipleData(
-          res,
-          "Shipments Table",
-          shipments
-        );
-      } catch (err) {
-        return apiResponse.ErrorResponse(res, err.message);
-      }
+      return apiResponse.successResponseWithMultipleData(
+        res,
+        "Shipments Table",
+        shipments
+      );
     } catch (err) {
+      console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
     }
   },
@@ -2454,6 +2451,7 @@ exports.fetchShipments = [
         outboundShipments
       );
     } catch (err) {
+      console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
     }
   },
@@ -2639,6 +2637,7 @@ exports.viewShipmentGmr = [
         }
       });
     } catch (err) {
+      console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
     }
   },
@@ -2854,8 +2853,9 @@ exports.uploadImage = [
         "Image uploaded successfully",
         { imageId: Upload?.Key }
       );
-    } catch (e) {
-      return apiResponse.ErrorResponse(res, e.message);
+    } catch (err) {
+      console.log(err);
+      return apiResponse.ErrorResponse(res, err.message);
     }
   },
 ];
@@ -2880,9 +2880,9 @@ exports.fetchImage = [
         "Images of Shipment",
         resArray
       );
-    } catch (e) {
-      console.log(e);
-      return apiResponse.ErrorResponse(res, e.message);
+    } catch (err) {
+      console.log(err);
+      return apiResponse.ErrorResponse(res, err.message);
     }
   },
 ];
@@ -3157,7 +3157,7 @@ exports.chainOfCustody = [
                     shipments[i].shipmentUpdates[j].imageId.length
                   ) {
                     shipments[i].shipmentUpdates[j].image = await getSignedUrl(
-                      shipments[i].shipmentUpdates[j].imageId
+                      shipments?.[i].shipmentUpdates?.[j]?.imageId
                     );
                   }
                 }
@@ -3185,6 +3185,7 @@ exports.chainOfCustody = [
         }
       });
     } catch (err) {
+      console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
     }
   },
@@ -3412,6 +3413,7 @@ exports.fetchShipmentIds = [
         }
       });
     } catch (err) {
+      console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
     }
   },
@@ -3422,7 +3424,7 @@ exports.fetchShipmentIds = [
   async (req, res) => {
     try {
       const { warehouseId } = req.user;
-      await ShipmentModel.find(
+      const shipments = await ShipmentModel.find(
         {
           $and: [
             {
@@ -3449,17 +3451,14 @@ exports.fetchShipmentIds = [
         },
         "id"
       )
-        .then((shipments) => {
-          return apiResponse.successResponseWithData(
-            res,
-            "All Shipments",
-            shipments
-          );
-        })
-        .catch((err) => {
-          return apiResponse.ErrorResponse(res, err.message);
-        });
+      return apiResponse.successResponseWithData(
+        res,
+        "All Shipments",
+        shipments
+      );
+
     } catch (err) {
+      console.log(err)
       return apiResponse.ErrorResponse(res, err.message);
     }
   },
@@ -3598,6 +3597,7 @@ exports.fetchInboundShipments = [
         }
       );
     } catch (err) {
+      console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
     }
   },
@@ -3692,54 +3692,51 @@ exports.fetchOutboundShipments = [
       if (toReceiver) {
         whereQuery["receiver.id"] = toReceiver;
       }
-      try {
-        let outboundShipmentsCount = await ShipmentModel.count(whereQuery);
-        ShipmentModel.find(whereQuery)
-          .skip(parseInt(skip))
-          .limit(parseInt(limit))
-          .sort({ createdAt: -1 })
-          .then((outboundShipmentsList) => {
-            let outboundShipmentsRes = [];
-            let findOutboundShipmentData = outboundShipmentsList.map(
-              async (outboundShipment) => {
-                let outboundShipmentData = JSON.parse(
-                  JSON.stringify(outboundShipment)
-                );
-                let supplierOrganisation = await OrganisationModel.findOne({
-                  id: outboundShipmentData.supplier.id,
-                });
-                let supplierWarehouse = await WarehouseModel.findOne({
-                  id: outboundShipmentData.supplier.locationId,
-                });
-                let receiverOrganisation = await OrganisationModel.findOne({
-                  id: outboundShipmentData.receiver.id,
-                });
-                let receiverWarehouse = await WarehouseModel.findOne({
-                  id: outboundShipmentData.receiver.locationId,
-                });
-                outboundShipmentData.supplier[`org`] = supplierOrganisation;
-                outboundShipmentData.supplier[`warehouse`] = supplierWarehouse;
-                outboundShipmentData.receiver[`org`] = receiverOrganisation;
-                outboundShipmentData.receiver[`warehouse`] = receiverWarehouse;
-                outboundShipmentsRes.push(outboundShipmentData);
+      let outboundShipmentsCount = await ShipmentModel.count(whereQuery);
+      ShipmentModel.find(whereQuery)
+        .skip(parseInt(skip))
+        .limit(parseInt(limit))
+        .sort({ createdAt: -1 })
+        .then((outboundShipmentsList) => {
+          let outboundShipmentsRes = [];
+          let findOutboundShipmentData = outboundShipmentsList.map(
+            async (outboundShipment) => {
+              let outboundShipmentData = JSON.parse(
+                JSON.stringify(outboundShipment)
+              );
+              let supplierOrganisation = await OrganisationModel.findOne({
+                id: outboundShipmentData.supplier.id,
+              });
+              let supplierWarehouse = await WarehouseModel.findOne({
+                id: outboundShipmentData.supplier.locationId,
+              });
+              let receiverOrganisation = await OrganisationModel.findOne({
+                id: outboundShipmentData.receiver.id,
+              });
+              let receiverWarehouse = await WarehouseModel.findOne({
+                id: outboundShipmentData.receiver.locationId,
+              });
+              outboundShipmentData.supplier[`org`] = supplierOrganisation;
+              outboundShipmentData.supplier[`warehouse`] = supplierWarehouse;
+              outboundShipmentData.receiver[`org`] = receiverOrganisation;
+              outboundShipmentData.receiver[`warehouse`] = receiverWarehouse;
+              outboundShipmentsRes.push(outboundShipmentData);
+            }
+          );
+
+          Promise.all(findOutboundShipmentData).then(function () {
+            return apiResponse.successResponseWithMultipleData(
+              res,
+              "Outbound Shipment Records",
+              {
+                outboundShipments: outboundShipmentsRes,
+                count: outboundShipmentsCount,
               }
             );
-
-            Promise.all(findOutboundShipmentData).then(function () {
-              return apiResponse.successResponseWithMultipleData(
-                res,
-                "Outbound Shipment Records",
-                {
-                  outboundShipments: outboundShipmentsRes,
-                  count: outboundShipmentsCount,
-                }
-              );
-            });
           });
-      } catch (err) {
-        return apiResponse.ErrorResponse(res, err.message);
-      }
+        });
     } catch (err) {
+      console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
     }
   },
@@ -3764,6 +3761,7 @@ exports.fetchSupplierAndReceiverList = [
         );
       }
     } catch (err) {
+      console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
     }
   },
@@ -3865,6 +3863,7 @@ exports.fetchAllWarehouseShipments = [
         shipments
       );
     } catch (err) {
+      console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
     }
   },
@@ -3881,276 +3880,52 @@ exports.trackJourney = [
       var poDetails, trackedShipment;
       let trackingId = req.query.trackingId;
       var poShipmentsArray = "";
-      try {
-        if (!trackingId.includes("PO")) {
-          const inwardShipments = await ShipmentModel.findOne(
-            {
-              $or: [
-                {
-                  id: trackingId,
-                },
-                {
-                  airWayBillNo: trackingId,
-                },
-                {
-                  "products.batchNumber": trackingId,
-                },
-              ],
-            },
-            {
-              _id: 0,
-              taggedShipments: 1,
-              poId: 1,
-            },
-          );
+      if (!trackingId.includes("PO")) {
+        const inwardShipments = await ShipmentModel.findOne(
+          {
+            $or: [
+              {
+                id: trackingId,
+              },
+              {
+                airWayBillNo: trackingId,
+              },
+              {
+                "products.batchNumber": trackingId,
+              },
+            ],
+          },
+          {
+            _id: 0,
+            taggedShipments: 1,
+            poId: 1,
+          },
+        );
 
-          if (inwardShipments == null)
-            throw new Error(responses(req.user.preferredLanguage).id_not_exists);
+        if (inwardShipments == null)
+          throw new Error(responses(req.user.preferredLanguage).id_not_exists);
 
-          shipmentsArray = inwardShipments.taggedShipments;
-          shipmentsArray.push(trackingId);
-          poDetails = await RecordModel.findOne({
-            shipments: {
-              $in: shipmentsArray,
-            },
-          });
-          if (inwardShipments.taggedShipments) {
-            if (
-              inwardShipments.taggedShipments.length > 0 &&
-              inwardShipments.taggedShipments[0] !== ""
-            )
-              inwardShipmentsArray = await ShipmentModel.aggregate([
-                {
-                  $match: {
-                    $and: [
-                      {
-                        id: { $in: shipmentsArray.pull(trackingId) },
-                      },
-                      {
-                        status: "RECEIVED",
-                      },
-                    ],
-                  },
-                },
-                {
-                  $lookup: {
-                    from: "warehouses",
-                    localField: "supplier.locationId",
-                    foreignField: "id",
-                    as: "supplier.warehouse",
-                  },
-                },
-                {
-                  $unwind: {
-                    path: "$supplier.warehouse",
-                  },
-                },
-                {
-                  $lookup: {
-                    from: "organisations",
-                    localField: "supplier.warehouse.organisationId",
-                    foreignField: "id",
-                    as: "supplier.org",
-                  },
-                },
-                {
-                  $unwind: {
-                    path: "$supplier.org",
-                  },
-                },
-                {
-                  $lookup: {
-                    from: "warehouses",
-                    localField: "receiver.locationId",
-                    foreignField: "id",
-                    as: "receiver.warehouse",
-                  },
-                },
-                {
-                  $unwind: {
-                    path: "$receiver.warehouse",
-                  },
-                },
-                {
-                  $lookup: {
-                    from: "organisations",
-                    localField: "receiver.warehouse.organisationId",
-                    foreignField: "id",
-                    as: "receiver.org",
-                  },
-                },
-                {
-                  $unwind: {
-                    path: "$receiver.org",
-                  },
-                },
-              ]);
-          }
-          trackedShipment = await ShipmentModel.aggregate([
-            {
-              $match: {
-                $or: [
-                  {
-                    id: trackingId,
-                  },
-                  {
-                    airWayBillNo: trackingId,
-                  },
-                  {
-                    "products.batchNumber": trackingId,
-                  },
-                  {
-                    "products.serialNumbersRange": trackingId,
-                  },
-                ],
-              },
-            },
-            {
-              $lookup: {
-                from: "warehouses",
-                localField: "supplier.locationId",
-                foreignField: "id",
-                as: "supplier.warehouse",
-              },
-            },
-            {
-              $unwind: {
-                path: "$supplier.warehouse",
-              },
-            },
-            {
-              $lookup: {
-                from: "organisations",
-                localField: "supplier.warehouse.organisationId",
-                foreignField: "id",
-                as: "supplier.org",
-              },
-            },
-            {
-              $unwind: {
-                path: "$supplier.org",
-              },
-            },
-            {
-              $lookup: {
-                from: "warehouses",
-                localField: "receiver.locationId",
-                foreignField: "id",
-                as: "receiver.warehouse",
-              },
-            },
-            {
-              $unwind: {
-                path: "$receiver.warehouse",
-              },
-            },
-            {
-              $lookup: {
-                from: "organisations",
-                localField: "receiver.warehouse.organisationId",
-                foreignField: "id",
-                as: "receiver.org",
-              },
-            },
-            {
-              $unwind: {
-                path: "$receiver.org",
-              },
-            },
-          ]);
-          try {
-            var currentLocationData = await calculateCurrentLocationData(
-              trackedShipment,
-              allowedOrgs,
-              trackingId,
-            );
-          } catch (err) {
-            console.log(err);
-          }
-          outwardShipmentsArray = await ShipmentModel.aggregate([
-            {
-              $match: {
-                $and: [
-                  {
-                    taggedShipments: trackingId,
-                  },
-                  {
-                    status: "RECEIVED",
-                  },
-                ],
-              },
-            },
-            {
-              $lookup: {
-                from: "warehouses",
-                localField: "supplier.locationId",
-                foreignField: "id",
-                as: "supplier.warehouse",
-              },
-            },
-            {
-              $unwind: {
-                path: "$supplier.warehouse",
-              },
-            },
-            {
-              $lookup: {
-                from: "organisations",
-                localField: "supplier.warehouse.organisationId",
-                foreignField: "id",
-                as: "supplier.org",
-              },
-            },
-            {
-              $unwind: {
-                path: "$supplier.org",
-              },
-            },
-            {
-              $lookup: {
-                from: "warehouses",
-                localField: "receiver.locationId",
-                foreignField: "id",
-                as: "receiver.warehouse",
-              },
-            },
-            {
-              $unwind: {
-                path: "$receiver.warehouse",
-              },
-            },
-            {
-              $lookup: {
-                from: "organisations",
-                localField: "receiver.warehouse.organisationId",
-                foreignField: "id",
-                as: "receiver.org",
-              },
-            },
-            {
-              $unwind: {
-                path: "$receiver.org",
-              },
-            },
-          ]);
-        } else if (trackingId.includes("PO")) {
-          poDetails = await RecordModel.findOne({
-            id: trackingId,
-          });
-
-          if (poDetails == null)
-            throw new Error(responses(req.user.preferredLanguage).id_not_exists);
-
-          if (poDetails.shipments.length > 0) {
-            outwardShipmentsArray = await ShipmentModel.aggregate([
+        shipmentsArray = inwardShipments.taggedShipments;
+        shipmentsArray.push(trackingId);
+        poDetails = await RecordModel.findOne({
+          shipments: {
+            $in: shipmentsArray,
+          },
+        });
+        if (inwardShipments.taggedShipments) {
+          if (
+            inwardShipments.taggedShipments.length > 0 &&
+            inwardShipments.taggedShipments[0] !== ""
+          )
+            inwardShipmentsArray = await ShipmentModel.aggregate([
               {
                 $match: {
-                  $or: [
+                  $and: [
                     {
-                      id: { $in: poDetails.shipments },
+                      id: { $in: shipmentsArray.pull(trackingId) },
                     },
                     {
-                      taggedShipments: { $in: poDetails.shipments },
+                      status: "RECEIVED",
                     },
                   ],
                 },
@@ -4208,97 +3983,307 @@ exports.trackJourney = [
                 },
               },
             ]);
-            poShipmentsArray = await ShipmentModel.aggregate([
-              {
-                $match: {
-                  id: { $in: poDetails.shipments },
-                },
-              },
-              {
-                $lookup: {
-                  from: "warehouses",
-                  localField: "supplier.locationId",
-                  foreignField: "id",
-                  as: "supplier.warehouse",
-                },
-              },
-              {
-                $unwind: {
-                  path: "$supplier.warehouse",
-                },
-              },
-              {
-                $lookup: {
-                  from: "organisations",
-                  localField: "supplier.warehouse.organisationId",
-                  foreignField: "id",
-                  as: "supplier.org",
-                },
-              },
-              {
-                $unwind: {
-                  path: "$supplier.org",
-                },
-              },
-              {
-                $lookup: {
-                  from: "warehouses",
-                  localField: "receiver.locationId",
-                  foreignField: "id",
-                  as: "receiver.warehouse",
-                },
-              },
-              {
-                $unwind: {
-                  path: "$receiver.warehouse",
-                },
-              },
-              {
-                $lookup: {
-                  from: "organisations",
-                  localField: "receiver.warehouse.organisationId",
-                  foreignField: "id",
-                  as: "receiver.org",
-                },
-              },
-              {
-                $unwind: {
-                  path: "$receiver.org",
-                },
-              },
-            ]);
-          }
-          try {
-            trackedShipment = trackedShipment?.length > 0 ? trackedShipment : poShipmentsArray;
-            if (trackedShipment?.length == 0) trackedShipment = outwardShipmentsArray;
-            var currentLocationData = await calculateCurrentLocationData(
-              trackedShipment,
-              allowedOrgs,
-              trackingId,
-            );
-          } catch (err) {
-            console.log(err);
-            allowedOrgs = [];
-          }
         }
-        return apiResponse.successResponseWithData(res, "Shipments Table", {
-          poDetails: poDetails,
-          inwardShipmentsArray: allowedOrgs?.includes(req.user.organisationId)
-            ? inwardShipmentsArray
-            : [],
-          trackedShipment: allowedOrgs?.includes(req.user.organisationId) ? trackedShipment : [],
-          outwardShipmentsArray: allowedOrgs?.includes(req.user.organisationId)
-            ? outwardShipmentsArray
-            : [],
-          poShipmentsArray: allowedOrgs?.includes(req.user.organisationId) ? poShipmentsArray : [],
-          currentLocationData: allowedOrgs?.includes(req.user.organisationId)
-            ? currentLocationData
-            : {},
+        trackedShipment = await ShipmentModel.aggregate([
+          {
+            $match: {
+              $or: [
+                {
+                  id: trackingId,
+                },
+                {
+                  airWayBillNo: trackingId,
+                },
+                {
+                  "products.batchNumber": trackingId,
+                },
+                {
+                  "products.serialNumbersRange": trackingId,
+                },
+              ],
+            },
+          },
+          {
+            $lookup: {
+              from: "warehouses",
+              localField: "supplier.locationId",
+              foreignField: "id",
+              as: "supplier.warehouse",
+            },
+          },
+          {
+            $unwind: {
+              path: "$supplier.warehouse",
+            },
+          },
+          {
+            $lookup: {
+              from: "organisations",
+              localField: "supplier.warehouse.organisationId",
+              foreignField: "id",
+              as: "supplier.org",
+            },
+          },
+          {
+            $unwind: {
+              path: "$supplier.org",
+            },
+          },
+          {
+            $lookup: {
+              from: "warehouses",
+              localField: "receiver.locationId",
+              foreignField: "id",
+              as: "receiver.warehouse",
+            },
+          },
+          {
+            $unwind: {
+              path: "$receiver.warehouse",
+            },
+          },
+          {
+            $lookup: {
+              from: "organisations",
+              localField: "receiver.warehouse.organisationId",
+              foreignField: "id",
+              as: "receiver.org",
+            },
+          },
+          {
+            $unwind: {
+              path: "$receiver.org",
+            },
+          },
+        ]);
+        var currentLocationData = await calculateCurrentLocationData(
+          trackedShipment,
+          allowedOrgs,
+          trackingId,
+        );
+        outwardShipmentsArray = await ShipmentModel.aggregate([
+          {
+            $match: {
+              $and: [
+                {
+                  taggedShipments: trackingId,
+                },
+                {
+                  status: "RECEIVED",
+                },
+              ],
+            },
+          },
+          {
+            $lookup: {
+              from: "warehouses",
+              localField: "supplier.locationId",
+              foreignField: "id",
+              as: "supplier.warehouse",
+            },
+          },
+          {
+            $unwind: {
+              path: "$supplier.warehouse",
+            },
+          },
+          {
+            $lookup: {
+              from: "organisations",
+              localField: "supplier.warehouse.organisationId",
+              foreignField: "id",
+              as: "supplier.org",
+            },
+          },
+          {
+            $unwind: {
+              path: "$supplier.org",
+            },
+          },
+          {
+            $lookup: {
+              from: "warehouses",
+              localField: "receiver.locationId",
+              foreignField: "id",
+              as: "receiver.warehouse",
+            },
+          },
+          {
+            $unwind: {
+              path: "$receiver.warehouse",
+            },
+          },
+          {
+            $lookup: {
+              from: "organisations",
+              localField: "receiver.warehouse.organisationId",
+              foreignField: "id",
+              as: "receiver.org",
+            },
+          },
+          {
+            $unwind: {
+              path: "$receiver.org",
+            },
+          },
+        ]);
+      } else if (trackingId.includes("PO")) {
+        poDetails = await RecordModel.findOne({
+          id: trackingId,
         });
-      } catch (err) {
-        console.log(err);
-        return apiResponse.ErrorResponse(res, err.message);
+
+        if (poDetails == null)
+          throw new Error(responses(req.user.preferredLanguage).id_not_exists);
+
+        if (poDetails.shipments.length > 0) {
+          outwardShipmentsArray = await ShipmentModel.aggregate([
+            {
+              $match: {
+                $or: [
+                  {
+                    id: { $in: poDetails.shipments },
+                  },
+                  {
+                    taggedShipments: { $in: poDetails.shipments },
+                  },
+                ],
+              },
+            },
+            {
+              $lookup: {
+                from: "warehouses",
+                localField: "supplier.locationId",
+                foreignField: "id",
+                as: "supplier.warehouse",
+              },
+            },
+            {
+              $unwind: {
+                path: "$supplier.warehouse",
+              },
+            },
+            {
+              $lookup: {
+                from: "organisations",
+                localField: "supplier.warehouse.organisationId",
+                foreignField: "id",
+                as: "supplier.org",
+              },
+            },
+            {
+              $unwind: {
+                path: "$supplier.org",
+              },
+            },
+            {
+              $lookup: {
+                from: "warehouses",
+                localField: "receiver.locationId",
+                foreignField: "id",
+                as: "receiver.warehouse",
+              },
+            },
+            {
+              $unwind: {
+                path: "$receiver.warehouse",
+              },
+            },
+            {
+              $lookup: {
+                from: "organisations",
+                localField: "receiver.warehouse.organisationId",
+                foreignField: "id",
+                as: "receiver.org",
+              },
+            },
+            {
+              $unwind: {
+                path: "$receiver.org",
+              },
+            },
+          ]);
+          poShipmentsArray = await ShipmentModel.aggregate([
+            {
+              $match: {
+                id: { $in: poDetails.shipments },
+              },
+            },
+            {
+              $lookup: {
+                from: "warehouses",
+                localField: "supplier.locationId",
+                foreignField: "id",
+                as: "supplier.warehouse",
+              },
+            },
+            {
+              $unwind: {
+                path: "$supplier.warehouse",
+              },
+            },
+            {
+              $lookup: {
+                from: "organisations",
+                localField: "supplier.warehouse.organisationId",
+                foreignField: "id",
+                as: "supplier.org",
+              },
+            },
+            {
+              $unwind: {
+                path: "$supplier.org",
+              },
+            },
+            {
+              $lookup: {
+                from: "warehouses",
+                localField: "receiver.locationId",
+                foreignField: "id",
+                as: "receiver.warehouse",
+              },
+            },
+            {
+              $unwind: {
+                path: "$receiver.warehouse",
+              },
+            },
+            {
+              $lookup: {
+                from: "organisations",
+                localField: "receiver.warehouse.organisationId",
+                foreignField: "id",
+                as: "receiver.org",
+              },
+            },
+            {
+              $unwind: {
+                path: "$receiver.org",
+              },
+            },
+          ]);
+        }
+        trackedShipment = trackedShipment?.length > 0 ? trackedShipment : poShipmentsArray;
+        if (trackedShipment?.length == 0) trackedShipment = outwardShipmentsArray;
+        currentLocationData = await calculateCurrentLocationData(
+          trackedShipment,
+          allowedOrgs,
+          trackingId,
+        );
       }
+      return apiResponse.successResponseWithData(res, "Shipments Table", {
+        poDetails: poDetails,
+        inwardShipmentsArray: allowedOrgs?.includes(req.user.organisationId)
+          ? inwardShipmentsArray
+          : [],
+        trackedShipment: allowedOrgs?.includes(req.user.organisationId) ? trackedShipment : [],
+        outwardShipmentsArray: allowedOrgs?.includes(req.user.organisationId)
+          ? outwardShipmentsArray
+          : [],
+        poShipmentsArray: allowedOrgs?.includes(req.user.organisationId) ? poShipmentsArray : [],
+        currentLocationData: allowedOrgs?.includes(req.user.organisationId)
+          ? currentLocationData
+          : {},
+      });
     } catch (err) {
       console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
@@ -4323,6 +4308,7 @@ exports.checkShipmentID = [
           responses(req.user.preferredLanguage).shipment_not_found
         );
     } catch (err) {
+      console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
     }
   },
@@ -4333,7 +4319,7 @@ exports.fetchairwayBillNumber = [
   async (req, res) => {
     try {
       const { warehouseId } = req.user;
-      await ShipmentModel.find(
+      const shipments = await ShipmentModel.find(
         {
           $or: [
             {
@@ -4346,17 +4332,14 @@ exports.fetchairwayBillNumber = [
         },
         "airWayBillNo id status"
       )
-        .then((shipments) => {
-          return apiResponse.successResponseWithData(
-            res,
-            "All Shipments",
-            shipments
-          );
-        })
-        .catch((err) => {
-          return apiResponse.ErrorResponse(res, err.message);
-        });
+
+      return apiResponse.successResponseWithData(
+        res,
+        "All Shipments",
+        shipments
+      );
     } catch (err) {
+      console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
     }
   },
@@ -4470,75 +4453,70 @@ exports.exportInboundShipments = [
         whereQuery["receiver.id"] = toReceiver;
       }
 
-      try {
-        let inboundShipmentsList = await ShipmentModel.find(whereQuery).sort({ createdAt: -1 });
-        if (!inboundShipmentsList || !inboundShipmentsList.length) {
-          throw new Error("No shipment data found!");
-        }
+      let inboundShipmentsList = await ShipmentModel.find(whereQuery).sort({ createdAt: -1 });
+      if (!inboundShipmentsList || !inboundShipmentsList.length) {
+        throw new Error("No shipment data found!");
+      }
 
-        let inboundShipmentsRes = [];
-        for (const element of inboundShipmentsList) {
-          let inboundShipment = element;
-          let inboundShipmentData = JSON.parse(JSON.stringify(inboundShipment));
-          let supplierOrganisation = await OrganisationModel.findOne({
-            id: inboundShipmentData.supplier.id,
-          });
-          let supplierWarehouse = await WarehouseModel.findOne({
-            id: inboundShipmentData.supplier.locationId,
-          });
-          let receiverOrganisation = await OrganisationModel.findOne({
-            id: inboundShipmentData.receiver.id,
-          });
-          let receiverWarehouse = await WarehouseModel.findOne({
-            id: inboundShipmentData.receiver.locationId,
-          });
-          inboundShipmentData.supplier[`org`] = supplierOrganisation;
-          inboundShipmentData.supplier[`warehouse`] = supplierWarehouse;
-          inboundShipmentData.receiver[`org`] = receiverOrganisation;
-          inboundShipmentData.receiver[`warehouse`] = receiverWarehouse;
-          inboundShipmentsRes.push(inboundShipmentData);
-        }
+      let inboundShipmentsRes = [];
+      for (const element of inboundShipmentsList) {
+        let inboundShipment = element;
+        let inboundShipmentData = JSON.parse(JSON.stringify(inboundShipment));
+        let supplierOrganisation = await OrganisationModel.findOne({
+          id: inboundShipmentData.supplier.id,
+        });
+        let supplierWarehouse = await WarehouseModel.findOne({
+          id: inboundShipmentData.supplier.locationId,
+        });
+        let receiverOrganisation = await OrganisationModel.findOne({
+          id: inboundShipmentData.receiver.id,
+        });
+        let receiverWarehouse = await WarehouseModel.findOne({
+          id: inboundShipmentData.receiver.locationId,
+        });
+        inboundShipmentData.supplier[`org`] = supplierOrganisation;
+        inboundShipmentData.supplier[`warehouse`] = supplierWarehouse;
+        inboundShipmentData.receiver[`org`] = receiverOrganisation;
+        inboundShipmentData.receiver[`warehouse`] = receiverWarehouse;
+        inboundShipmentsRes.push(inboundShipmentData);
+      }
 
-        let data = [];
-        let rowData;
-        for (const row of inboundShipmentsRes) {
-          for (const product of row.products) {
-            let receiverAtom = await AtomModel.findOne({ id: product.atomId });
-            rowData = {
-              id: row.id,
-              poId: row.poId,
-              productCategory: product.productCategory,
-              productName: product.productName,
-              productID: product.productID,
-              productQuantity: product.productQuantity + " " + product?.unitofMeasure?.name,
-              batchNumber: product.batchNumber,
-              manufacturer: product.manufacturer,
-              supplierOrgName: row?.supplier?.org?.name,
-              supplierOrgId: row?.supplier?.org?.id,
-              supplierOrgLocation: row?.supplier?.locationId,
-              recieverOrgName: row?.receiver?.org?.name,
-              recieverOrgId: row?.receiver?.org?.id,
-              recieverOrgLocation: row?.receiver?.locationId,
-              airWayBillNo: row.airWayBillNo,
-              label: row?.label?.labelId,
-              shippingDate: row.shippingDate ? formatInTimeZone(row.shippingDate, timezone, 'dd/MM/yyyy hh:mm:ss a') || "N/A" : "NA",
-              expectedDeliveryDate: row.expectedDeliveryDate ? formatInTimeZone(row.expectedDeliveryDate, timezone, 'dd/MM/yyyy hh:mm:ss a') || "N/A" : "NA",
-              expiryDate: receiverAtom?.attributeSet?.expDate || "N/A",
-            };
-            data.push(rowData);
-          }
+      let data = [];
+      let rowData;
+      for (const row of inboundShipmentsRes) {
+        for (const product of row.products) {
+          let receiverAtom = await AtomModel.findOne({ id: product.atomId });
+          rowData = {
+            id: row.id,
+            poId: row.poId,
+            productCategory: product.productCategory,
+            productName: product.productName,
+            productID: product.productID,
+            productQuantity: product.productQuantity + " " + product?.unitofMeasure?.name,
+            batchNumber: product.batchNumber,
+            manufacturer: product.manufacturer,
+            supplierOrgName: row?.supplier?.org?.name,
+            supplierOrgId: row?.supplier?.org?.id,
+            supplierOrgLocation: row?.supplier?.locationId,
+            recieverOrgName: row?.receiver?.org?.name,
+            recieverOrgId: row?.receiver?.org?.id,
+            recieverOrgLocation: row?.receiver?.locationId,
+            airWayBillNo: row.airWayBillNo,
+            label: row?.label?.labelId,
+            shippingDate: row.shippingDate ? formatInTimeZone(row.shippingDate, timezone, 'dd/MM/yyyy hh:mm:ss a') || "N/A" : "NA",
+            expectedDeliveryDate: row.expectedDeliveryDate ? formatInTimeZone(row.expectedDeliveryDate, timezone, 'dd/MM/yyyy hh:mm:ss a') || "N/A" : "NA",
+            expiryDate: receiverAtom?.attributeSet?.expDate || "N/A",
+          };
+          data.push(rowData);
         }
-        if (req.query.type === "pdf") {
-          buildPdfReport(req, res, data, "Inbound");
-        } else {
-          buildExcelReport(req, res, data, "Inbound");
-        }
-      } catch (err) {
-        console.log("Inner catch - ", err);
-        return apiResponse.ErrorResponse(res, err.message);
+      }
+      if (req.query.type === "pdf") {
+        buildPdfReport(req, res, data, "Inbound");
+      } else {
+        buildExcelReport(req, res, data, "Inbound");
       }
     } catch (err) {
-      console.log("Outer catch - ", err);
+      console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
     }
   },
@@ -4910,218 +4888,64 @@ exports.trackJourneyOnBlockchain = [
       var shipmentsArray = [];
       var inwardShipmentsArray = [];
       var outwardShipmentsArray = [];
-      const trackingId = req.query.trackingId;
-      try {
-        if (!trackingId.includes("PO")) {
-          const inwardShipmentsQuery = {
-            selector: {
-              $or: [
-                {
-                  Id: trackingId,
-                },
-                {
-                  AirwayBillNo: trackingId,
-                },
-              ],
+      const trackingId = req.query.trackingId; if (!trackingId.includes("PO")) {
+        const inwardShipmentsQuery = {
+          selector: {
+            $or: [
+              {
+                Id: trackingId,
+              },
+              {
+                AirwayBillNo: trackingId,
+              },
+            ],
+          },
+        };
+        let token =
+          req.headers["x-access-token"] || req.headers["authorization"]; // Express headers are auto converted to lowercase
+        const inwardShipments = await axios.post(
+          "http://13.235.113.206:8080/api/v1/transactionapi/shipment/querystring",
+          inwardShipmentsQuery,
+          {
+            headers: {
+              Authorization: token,
             },
-          };
-          let token =
-            req.headers["x-access-token"] || req.headers["authorization"]; // Express headers are auto converted to lowercase
-          const inwardShipments = await axios.post(
-            "http://13.235.113.206:8080/api/v1/transactionapi/shipment/querystring",
-            inwardShipmentsQuery,
-            {
-              headers: {
-                Authorization: token,
-              },
-            }
-          );
-
-          shipmentsArray = JSON.parse(
-            inwardShipments.data.data[0].TaggedShipments
-          );
-          //shipmentsArray.push(trackingId;
-
-          const shipmentQuery = {
-            selector: {
-              Id: {
-                $in: shipmentsArray,
-              },
-            },
-          };
-
-          const shipmentResult = await axios.post(
-            `${hf_blockchain_url}/api/v1/transactionapi/shipment/querystring`,
-            shipmentQuery,
-            {
-              headers: {
-                Authorization: token,
-              },
-            }
-          );
-          const len = shipmentResult.data.data;
-
-          for (let count = 0; count < len.length; count++) {
-            const supplierDetails = JSON.parse(
-              shipmentResult.data.data[count].Supplier
-            );
-            const receiverDetails = JSON.parse(
-              shipmentResult.data.data[count].Receiver
-            );
-
-            const supplierWarehouseDetails = await axios.get(
-              `${hf_blockchain_url}/api/v1/participantapi/Warehouse/get/WAR100451`,
-              {
-                headers: {
-                  Authorization: token,
-                },
-              }
-            );
-
-            const supplierOrgDetails = await axios.get(
-              `${hf_blockchain_url}/api/v1/participantapi/Organizations/get/${supplierDetails.id}`,
-              {
-                headers: {
-                  Authorization: token,
-                },
-              }
-            );
-
-            const receiverWarehouseDetails = await axios.get(
-              `${hf_blockchain_url}/api/v1/participantapi/Warehouse/get/WAR100451`,
-              {
-                headers: {
-                  Authorization: token,
-                },
-              }
-            );
-
-            const receiverOrgDetails = await axios.get(
-              `${hf_blockchain_url}/api/v1/participantapi/Organizations/get/${receiverDetails.id}`,
-              {
-                headers: {
-                  Authorization: token,
-                },
-              }
-            );
-
-            const shipmentInwardData = {
-              Shipmentdata: shipmentResult.data.data[count],
-              supplierWarehouseDetails: supplierWarehouseDetails.data.data,
-              supplierOrgDetails: supplierOrgDetails.data.data,
-              receiverWarehouseDetails: receiverWarehouseDetails.data.data,
-              receiverOrgDetails: receiverOrgDetails.data.data,
-            };
-            inwardShipmentsArray.push(shipmentInwardData);
           }
-          const shipmentQueryOutward = {
-            selector: {
-              $or: [
-                {
-                  taggedShipments: trackingId,
-                },
-                {
-                  status: "RECEIVED",
-                },
-              ],
+        );
+
+        shipmentsArray = JSON.parse(
+          inwardShipments.data.data[0].TaggedShipments
+        );
+        //shipmentsArray.push(trackingId;
+
+        const shipmentQuery = {
+          selector: {
+            Id: {
+              $in: shipmentsArray,
             },
-          };
+          },
+        };
 
-          const shipmentResultOutward = await axios.post(
-            `${hf_blockchain_url}/api/v1/transactionapi/shipment/querystring`,
-            shipmentQueryOutward,
-            {
-              headers: {
-                Authorization: token,
-              },
-            }
-          );
-          const len1 = shipmentResult.data.data;
-
-          for (let count = 0; count < len.length; count++) {
-            const supplierDetails = JSON.parse(
-              shipmentResultOutward.data.data[count].Supplier
-            );
-            const receiverDetails = JSON.parse(
-              shipmentResultOutward.data.data[count].Receiver
-            );
-
-            const supplierWarehouseDetails = await axios.get(
-              `${hf_blockchain_url}/api/v1/participantapi/Warehouse/get/WAR100451`,
-              {
-                headers: {
-                  Authorization: token,
-                },
-              }
-            );
-
-            const supplierOrgDetails = await axios.get(
-              `${hf_blockchain_url}/api/v1/participantapi/Organizations/get/${supplierDetails.id}`,
-              {
-                headers: {
-                  Authorization: token,
-                },
-              }
-            );
-
-            const receiverWarehouseDetails = await axios.get(
-              `${hf_blockchain_url}/api/v1/participantapi/Warehouse/get/WAR100451`,
-              {
-                headers: {
-                  Authorization: token,
-                },
-              }
-            );
-
-            const receiverOrgDetails = await axios.get(
-              `${hf_blockchain_url}/api/v1/participantapi/Organizations/get/${receiverDetails.id}`,
-              {
-                headers: {
-                  Authorization: token,
-                },
-              }
-            );
-            const shipmentOutwardData = {
-              Shipmentdata: shipmentResult.data.data[count],
-              supplierWarehouseDetails: supplierWarehouseDetails.data.data,
-              supplierOrgDetails: supplierOrgDetails.data.data,
-              receiverWarehouseDetails: receiverWarehouseDetails.data.data,
-              receiverOrgDetails: receiverOrgDetails.data.data,
-            };
-            outwardShipmentsArray.push(shipmentOutwardData);
+        const shipmentResult = await axios.post(
+          `${hf_blockchain_url}/api/v1/transactionapi/shipment/querystring`,
+          shipmentQuery,
+          {
+            headers: {
+              Authorization: token,
+            },
           }
+        );
+        const len = shipmentResult.data.data;
 
-          const shipmentQueryTracked = {
-            selector: {
-              $or: [
-                {
-                  Id: trackingId,
-                },
-                {
-                  AirwayBillNo: trackingId,
-                },
-              ],
-            },
-          };
-
-          const shipmentResultTracked = await axios.post(
-            `${hf_blockchain_url}/api/v1/transactionapi/shipment/querystring`,
-            shipmentQueryTracked,
-            {
-              headers: {
-                Authorization: token,
-              },
-            }
-          );
-
+        for (let count = 0; count < len.length; count++) {
           const supplierDetails = JSON.parse(
-            shipmentResultTracked.data.data[0].Supplier
+            shipmentResult.data.data[count].Supplier
           );
           const receiverDetails = JSON.parse(
-            shipmentResultTracked.data.data[0].Receiver
+            shipmentResult.data.data[count].Receiver
           );
 
-          const supplierWarehouseDetailsTracked = await axios.get(
+          const supplierWarehouseDetails = await axios.get(
             `${hf_blockchain_url}/api/v1/participantapi/Warehouse/get/WAR100451`,
             {
               headers: {
@@ -5130,7 +4954,7 @@ exports.trackJourneyOnBlockchain = [
             }
           );
 
-          const supplierOrgDetailsTracked = await axios.get(
+          const supplierOrgDetails = await axios.get(
             `${hf_blockchain_url}/api/v1/participantapi/Organizations/get/${supplierDetails.id}`,
             {
               headers: {
@@ -5139,7 +4963,7 @@ exports.trackJourneyOnBlockchain = [
             }
           );
 
-          const receiverWarehouseDetailsTracked = await axios.get(
+          const receiverWarehouseDetails = await axios.get(
             `${hf_blockchain_url}/api/v1/participantapi/Warehouse/get/WAR100451`,
             {
               headers: {
@@ -5148,7 +4972,7 @@ exports.trackJourneyOnBlockchain = [
             }
           );
 
-          const receiverOrgDetailsTracked = await axios.get(
+          const receiverOrgDetails = await axios.get(
             `${hf_blockchain_url}/api/v1/participantapi/Organizations/get/${receiverDetails.id}`,
             {
               headers: {
@@ -5156,26 +4980,176 @@ exports.trackJourneyOnBlockchain = [
               },
             }
           );
-          const trackedShipment = {
-            Shipmentdata: shipmentResultTracked.data.data,
-            supplierWarehouseDetails: supplierWarehouseDetailsTracked.data.data,
-            supplierOrgDetails: supplierOrgDetailsTracked.data.data,
-            receiverWarehouseDetails: receiverWarehouseDetailsTracked.data.data,
-            receiverOrgDetails: receiverOrgDetailsTracked.data.data,
-          };
 
-          return apiResponse.successResponseWithData(res, "Shipments Table", {
-            //poDetails: poDetails,
-            inwardShipmentsArray: inwardShipmentsArray,
-            trackedShipment: trackedShipment,
-            outwardShipmentsArray: outwardShipmentsArray,
-            //poShipmentsArray: poShipmentsArray,
-          });
+          const shipmentInwardData = {
+            Shipmentdata: shipmentResult.data.data[count],
+            supplierWarehouseDetails: supplierWarehouseDetails.data.data,
+            supplierOrgDetails: supplierOrgDetails.data.data,
+            receiverWarehouseDetails: receiverWarehouseDetails.data.data,
+            receiverOrgDetails: receiverOrgDetails.data.data,
+          };
+          inwardShipmentsArray.push(shipmentInwardData);
         }
-      } catch (err) {
-        return apiResponse.ErrorResponse(res, err.message);
+        const shipmentQueryOutward = {
+          selector: {
+            $or: [
+              {
+                taggedShipments: trackingId,
+              },
+              {
+                status: "RECEIVED",
+              },
+            ],
+          },
+        };
+
+        const shipmentResultOutward = await axios.post(
+          `${hf_blockchain_url}/api/v1/transactionapi/shipment/querystring`,
+          shipmentQueryOutward,
+          {
+            headers: {
+              Authorization: token,
+            },
+          }
+        );
+        const len1 = shipmentResult.data.data;
+
+        for (let count = 0; count < len.length; count++) {
+          const supplierDetails = JSON.parse(
+            shipmentResultOutward.data.data[count].Supplier
+          );
+          const receiverDetails = JSON.parse(
+            shipmentResultOutward.data.data[count].Receiver
+          );
+
+          const supplierWarehouseDetails = await axios.get(
+            `${hf_blockchain_url}/api/v1/participantapi/Warehouse/get/WAR100451`,
+            {
+              headers: {
+                Authorization: token,
+              },
+            }
+          );
+
+          const supplierOrgDetails = await axios.get(
+            `${hf_blockchain_url}/api/v1/participantapi/Organizations/get/${supplierDetails.id}`,
+            {
+              headers: {
+                Authorization: token,
+              },
+            }
+          );
+
+          const receiverWarehouseDetails = await axios.get(
+            `${hf_blockchain_url}/api/v1/participantapi/Warehouse/get/WAR100451`,
+            {
+              headers: {
+                Authorization: token,
+              },
+            }
+          );
+
+          const receiverOrgDetails = await axios.get(
+            `${hf_blockchain_url}/api/v1/participantapi/Organizations/get/${receiverDetails.id}`,
+            {
+              headers: {
+                Authorization: token,
+              },
+            }
+          );
+          const shipmentOutwardData = {
+            Shipmentdata: shipmentResult.data.data[count],
+            supplierWarehouseDetails: supplierWarehouseDetails.data.data,
+            supplierOrgDetails: supplierOrgDetails.data.data,
+            receiverWarehouseDetails: receiverWarehouseDetails.data.data,
+            receiverOrgDetails: receiverOrgDetails.data.data,
+          };
+          outwardShipmentsArray.push(shipmentOutwardData);
+        }
+
+        const shipmentQueryTracked = {
+          selector: {
+            $or: [
+              {
+                Id: trackingId,
+              },
+              {
+                AirwayBillNo: trackingId,
+              },
+            ],
+          },
+        };
+
+        const shipmentResultTracked = await axios.post(
+          `${hf_blockchain_url}/api/v1/transactionapi/shipment/querystring`,
+          shipmentQueryTracked,
+          {
+            headers: {
+              Authorization: token,
+            },
+          }
+        );
+
+        const supplierDetails = JSON.parse(
+          shipmentResultTracked.data.data[0].Supplier
+        );
+        const receiverDetails = JSON.parse(
+          shipmentResultTracked.data.data[0].Receiver
+        );
+
+        const supplierWarehouseDetailsTracked = await axios.get(
+          `${hf_blockchain_url}/api/v1/participantapi/Warehouse/get/WAR100451`,
+          {
+            headers: {
+              Authorization: token,
+            },
+          }
+        );
+
+        const supplierOrgDetailsTracked = await axios.get(
+          `${hf_blockchain_url}/api/v1/participantapi/Organizations/get/${supplierDetails.id}`,
+          {
+            headers: {
+              Authorization: token,
+            },
+          }
+        );
+
+        const receiverWarehouseDetailsTracked = await axios.get(
+          `${hf_blockchain_url}/api/v1/participantapi/Warehouse/get/WAR100451`,
+          {
+            headers: {
+              Authorization: token,
+            },
+          }
+        );
+
+        const receiverOrgDetailsTracked = await axios.get(
+          `${hf_blockchain_url}/api/v1/participantapi/Organizations/get/${receiverDetails.id}`,
+          {
+            headers: {
+              Authorization: token,
+            },
+          }
+        );
+        const trackedShipment = {
+          Shipmentdata: shipmentResultTracked.data.data,
+          supplierWarehouseDetails: supplierWarehouseDetailsTracked.data.data,
+          supplierOrgDetails: supplierOrgDetailsTracked.data.data,
+          receiverWarehouseDetails: receiverWarehouseDetailsTracked.data.data,
+          receiverOrgDetails: receiverOrgDetailsTracked.data.data,
+        };
+
+        return apiResponse.successResponseWithData(res, "Shipments Table", {
+          //poDetails: poDetails,
+          inwardShipmentsArray: inwardShipmentsArray,
+          trackedShipment: trackedShipment,
+          outwardShipmentsArray: outwardShipmentsArray,
+          //poShipmentsArray: poShipmentsArray,
+        });
       }
     } catch (err) {
+      console.log(err);
       return apiResponse.ErrorResponse(res, err.message);
     }
   },
@@ -5562,6 +5536,7 @@ exports.warehousesOrgsExportToBlockchain = [
       }
       return apiResponse.successResponseWithData(res, "Export success", orgs);
     } catch (err) {
+      console.log(err)
       return apiResponse.ErrorResponse(res, err.message);
     }
   },
