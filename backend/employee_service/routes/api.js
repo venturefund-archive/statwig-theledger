@@ -14,9 +14,9 @@ const {
 	getWarehouseAndUsersById,
 } = require("../controllers/OrganisationController");
 const {
-  getApprovals,
-  acceptApproval,
-  rejectApproval,
+	getApprovals,
+	acceptApproval,
+	rejectApproval,
 	addUser,
 	activateUser,
 	deactivateUser
