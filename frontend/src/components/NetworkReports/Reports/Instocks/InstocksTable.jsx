@@ -10,6 +10,8 @@ import { useTranslation } from "react-i18next";
 import { getInStockFilterOptions, getmanufacturerInStockReport } from "../../../../actions/networkActions";
 import { Pagination, useTheme } from "@mui/material";
 import Filterbar from "../../Filter/Filterbar";
+import { useDispatch } from "react-redux";
+import { turnOff, turnOn } from "../../../../actions/spinnerActions";
 
 function TableHeader({
 	anchorEl,
@@ -121,6 +123,7 @@ function TableHeader({
 }
 
 export default function InstocksTable({locationParams}) {
+	const dispatch = useDispatch();
   const [inStock, setInStock] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [inStockFilters, setInStockFilters] = useState();
@@ -177,12 +180,14 @@ export default function InstocksTable({locationParams}) {
     payload.reportWarehouse = reportWarehouse;
 		payload.skip = (page - 1) * 10;
 		payload.limit = 10;
+		dispatch(turnOn());
     const inStock = await getmanufacturerInStockReport(payload);
     if (inStock) {
 			setInStock(inStock.data.inStockReport);
 			setTotalCount(inStock.data.totalCount);
 			setReportWarehouse(inStock.data.warehouseId);		
 		}
+		dispatch(turnOff());
   };
 
   const getInstockFilters = async () => {
@@ -192,8 +197,10 @@ export default function InstocksTable({locationParams}) {
 		};
     payload.reportWarehouse = reportWarehouse;
     payload.date = "";
+		dispatch(turnOn());
     const inStockFilters = await getInStockFilterOptions(payload);
     if (inStockFilters) setInStockFilters(inStockFilters.filters);
+		dispatch(turnOff());
   };
 
   useEffect(() => {

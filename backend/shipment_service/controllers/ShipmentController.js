@@ -38,6 +38,7 @@ const PdfPrinter = require("pdfmake");
 const { responses } = require("../helpers/responses");
 const { asyncForEach } = require("../helpers/utility");
 const { fromUnixTime, format, startOfMonth } = require("date-fns");
+const { formatInTimeZone } = require("date-fns-tz")
 const fontDescriptors = {
   Roboto: {
     normal: resolve("./controllers/Roboto-Regular.ttf"),
@@ -4380,16 +4381,16 @@ exports.exportInboundShipments = [
   auth,
   async (req, res) => {
     try {
-      // const { skip, limit } = req.query;
-      const { warehouseId } = req.user;
-      let currentDate = new Date();
       let fromDateFilter = 0;
-      let status = req.query.status ? req.query.status : undefined;
-      let fromSupplier = req.query.from ? req.query.from : undefined;
-      let toReceiver = req.query.to ? req.query.to : undefined;
-      let shipmentId = req.query.shipmentId ? req.query.shipmentId : undefined;
-      let fromDate = req.query.fromDate ? req.query.fromDate : undefined;
-      let toDate = req.query.toDate ? req.query.toDate : undefined;
+      const { warehouseId } = req.user;
+      const currentDate = new Date();
+      const timezone = req.query.timezone ? req.query.timezone : "Asia/Calcutta";
+      const status = req.query.status ? req.query.status : undefined;
+      const fromSupplier = req.query.from ? req.query.from : undefined;
+      const toReceiver = req.query.to ? req.query.to : undefined;
+      const shipmentId = req.query.shipmentId ? req.query.shipmentId : undefined;
+      const fromDate = req.query.fromDate ? req.query.fromDate : undefined;
+      const toDate = req.query.toDate ? req.query.toDate : undefined;
       switch (req.query.dateFilter) {
         case "today":
           fromDateFilter = new Date(
@@ -4442,8 +4443,8 @@ exports.exportInboundShipments = [
       }
 
       if (fromDate && toDate) {
-        var firstDate = new Date(fromDate);
-        var nextDate = new Date(toDate);
+        const firstDate = new Date(fromDate);
+        const nextDate = new Date(toDate);
         whereQuery[`shippingDate`] = { $gte: firstDate, $lte: nextDate };
       }
 
@@ -4478,8 +4479,8 @@ exports.exportInboundShipments = [
         }
 
         let inboundShipmentsRes = [];
-        for (let i = 0; i < inboundShipmentsList.length; ++i) {
-          let inboundShipment = inboundShipmentsList[i];
+        for (const element of inboundShipmentsList) {
+          let inboundShipment = element;
           let inboundShipmentData = JSON.parse(JSON.stringify(inboundShipment));
           let supplierOrganisation = await OrganisationModel.findOne({
             id: inboundShipmentData.supplier.id,
@@ -4522,18 +4523,17 @@ exports.exportInboundShipments = [
               recieverOrgLocation: row?.receiver?.locationId,
               airWayBillNo: row.airWayBillNo,
               label: row?.label?.labelId,
-              shippingDate: new Date(row.shippingDate),
-              expectedDeliveryDate: row.expectedDeliveryDate ? new Date(row.expectedDeliveryDate) : "N/A",
+              shippingDate: row.shippingDate ? formatInTimeZone(row.shippingDate, timezone, 'dd/MM/yyyy hh:mm:ss a') || "N/A" : "NA",
+              expectedDeliveryDate: row.expectedDeliveryDate ? formatInTimeZone(row.expectedDeliveryDate, timezone, 'dd/MM/yyyy hh:mm:ss a') || "N/A" : "NA",
               expiryDate: receiverAtom?.attributeSet?.expDate || "N/A",
             };
             data.push(rowData);
           }
         }
         if (req.query.type === "pdf") {
-          res = buildPdfReport(req, res, data, "Inbound");
+          buildPdfReport(req, res, data, "Inbound");
         } else {
-          res = buildExcelReport(req, res, data, "Inbound");
-          // return apiResponse.successResponseWithData(res, "Inbound Shipment Records");
+          buildExcelReport(req, res, data, "Inbound");
         }
       } catch (err) {
         console.log("Inner catch - ", err);
@@ -4551,16 +4551,16 @@ exports.exportOutboundShipments = [
   auth,
   async (req, res) => {
     try {
-      // const { skip, limit } = req.query;
-      const { warehouseId } = req.user;
-      let currentDate = new Date();
       let fromDateFilter = 0;
-      let status = req.query.status ? req.query.status : undefined;
-      let fromSupplier = req.query.from ? req.query.from : undefined;
-      let toReceiver = req.query.to ? req.query.to : undefined;
-      let shipmentId = req.query.shipmentId ? req.query.shipmentId : undefined;
-      let fromDate = req.query.fromDate ? req.query.fromDate : undefined;
-      let toDate = req.query.toDate ? req.query.toDate : undefined;
+      const { warehouseId } = req.user;
+      const currentDate = new Date();
+      const timezone = req.query.timezone ? req.query.timezone : "Asia/Calcutta";
+      const status = req.query.status ? req.query.status : undefined;
+      const fromSupplier = req.query.from ? req.query.from : undefined;
+      const toReceiver = req.query.to ? req.query.to : undefined;
+      const shipmentId = req.query.shipmentId ? req.query.shipmentId : undefined;
+      const fromDate = req.query.fromDate ? req.query.fromDate : undefined;
+      const toDate = req.query.toDate ? req.query.toDate : undefined;
       switch (req.query.dateFilter) {
         case "today":
           fromDateFilter = new Date(
@@ -4602,8 +4602,6 @@ exports.exportOutboundShipments = [
             currentDate.getDate()
           );
           break;
-        default:
-          fromDateFilter = 0;
       }
 
       let whereQuery = {};
@@ -4613,8 +4611,8 @@ exports.exportOutboundShipments = [
       }
 
       if (fromDate && toDate) {
-        var firstDate = new Date(fromDate);
-        var nextDate = new Date(toDate);
+        const firstDate = new Date(fromDate);
+        const nextDate = new Date(toDate);
         whereQuery[`shippingDate`] = { $gte: firstDate, $lte: nextDate };
       }
 
@@ -4637,72 +4635,65 @@ exports.exportOutboundShipments = [
       if (toReceiver) {
         whereQuery["receiver.id"] = toReceiver;
       }
+      let outboundShipmentsCount = await ShipmentModel.count(whereQuery);
+      let outboundShipmentsList = await ShipmentModel.find(whereQuery).sort({ createdAt: -1 });
 
-      try {
-        let outboundShipmentsCount = await ShipmentModel.count(whereQuery);
-        let outboundShipmentsList = await ShipmentModel.find(whereQuery).sort({ createdAt: -1 });
+      let outboundShipmentsRes = [];
+      for (let i = 0; i < outboundShipmentsCount; ++i) {
+        let outboundShipmentData = outboundShipmentsList[i];
+        let supplierOrganisation = await OrganisationModel.findOne({
+          id: outboundShipmentData.supplier.id,
+        });
+        let supplierWarehouse = await WarehouseModel.findOne({
+          id: outboundShipmentData.supplier.locationId,
+        });
+        let receiverOrganisation = await OrganisationModel.findOne({
+          id: outboundShipmentData.receiver.id,
+        });
+        let receiverWarehouse = await WarehouseModel.findOne({
+          id: outboundShipmentData.receiver.locationId,
+        });
+        outboundShipmentData.supplier[`org`] = supplierOrganisation;
+        outboundShipmentData.supplier[`warehouse`] = supplierWarehouse;
+        outboundShipmentData.receiver[`org`] = receiverOrganisation;
+        outboundShipmentData.receiver[`warehouse`] = receiverWarehouse;
+        outboundShipmentsRes.push(outboundShipmentData);
+      }
 
-        let outboundShipmentsRes = [];
-        for (let i = 0; i < outboundShipmentsCount; ++i) {
-          // let outboundShipment = outboundShipmentsList[i];
-          let outboundShipmentData = outboundShipmentsList[i];
-          let supplierOrganisation = await OrganisationModel.findOne({
-            id: outboundShipmentData.supplier.id,
-          });
-          let supplierWarehouse = await WarehouseModel.findOne({
-            id: outboundShipmentData.supplier.locationId,
-          });
-          let receiverOrganisation = await OrganisationModel.findOne({
-            id: outboundShipmentData.receiver.id,
-          });
-          let receiverWarehouse = await WarehouseModel.findOne({
-            id: outboundShipmentData.receiver.locationId,
-          });
-          outboundShipmentData.supplier[`org`] = supplierOrganisation;
-          outboundShipmentData.supplier[`warehouse`] = supplierWarehouse;
-          outboundShipmentData.receiver[`org`] = receiverOrganisation;
-          outboundShipmentData.receiver[`warehouse`] = receiverWarehouse;
-          outboundShipmentsRes.push(outboundShipmentData);
+      let data = [];
+      let rowData;
+      for (const row of outboundShipmentsRes) {
+        for (const product of row.products) {
+          let receiverAtom = await AtomModel.findOne({ id: product.atomId });
+          rowData = {
+            id: row.id,
+            poId: row.poId,
+            productCategory: product.productCategory,
+            productName: product.productName,
+            productID: product.productID,
+            productQuantity: product.productQuantity + " " + product?.unitofMeasure?.name,
+            batchNumber: product.batchNumber,
+            manufacturer: product.manufacturer,
+            supplierOrgName: row?.supplier?.org?.name,
+            supplierOrgId: row?.supplier?.org?.id,
+            supplierOrgLocation: row?.supplier?.locationId,
+            recieverOrgName: row?.receiver?.org?.name,
+            recieverOrgId: row?.receiver?.org?.id,
+            recieverOrgLocation: row?.receiver?.locationId,
+            airWayBillNo: row.airWayBillNo,
+            label: row?.label?.labelId,
+            expiryDate: receiverAtom?.attributeSet?.expDate,
+            shippingDate: row.shippingDate ? formatInTimeZone(row.shippingDate, timezone, 'dd/MM/yyyy hh:mm:ss a') || "N/A" : "NA",
+            expectedDeliveryDate: row.expectedDeliveryDate ? formatInTimeZone(row.expectedDeliveryDate, timezone, 'dd/MM/yyyy hh:mm:ss a') || "N/A" : "NA",
+          };
+          data.push(rowData);
+          console.log(row.id)
         }
-
-        let data = [];
-        let rowData;
-        for (const row of outboundShipmentsRes) {
-          for (const product of row.products) {
-            let receiverAtom = await AtomModel.findOne({ id: product.atomId });
-            rowData = {
-              id: row.id,
-              poId: row.poId,
-              productCategory: product.productCategory,
-              productName: product.productName,
-              productID: product.productID,
-              productQuantity: product.productQuantity + " " + product?.unitofMeasure?.name,
-              batchNumber: product.batchNumber,
-              manufacturer: product.manufacturer,
-              supplierOrgName: row?.supplier?.org?.name,
-              supplierOrgId: row?.supplier?.org?.id,
-              supplierOrgLocation: row?.supplier?.locationId,
-              recieverOrgName: row?.receiver?.org?.name,
-              recieverOrgId: row?.receiver?.org?.id,
-              recieverOrgLocation: row?.receiver?.locationId,
-              airWayBillNo: row.airWayBillNo,
-              label: row?.label?.labelId,
-              shippingDate: row.shippingDate,
-              expectedDeliveryDate: row.expectedDeliveryDate || "unknown",
-              expiryDate: receiverAtom?.attributeSet?.expDate || "N/A",
-            };
-            data.push(rowData);
-          }
-        }
-        if (req.query.type == "pdf") {
-          res = buildPdfReport(req, res, data, "Outbound");
-        } else {
-          res = buildExcelReport(req, res, data, "Outbound");
-          return apiResponse.successResponseWithMultipleData(res, "Outbound Shipment Records");
-        }
-      } catch (err) {
-        console.log(err);
-        return apiResponse.ErrorResponse(res, err.message);
+      }
+      if (req.query.type == "pdf") {
+        buildPdfReport(req, res, data, "Outbound");
+      } else {
+        buildExcelReport(req, res, data, "Outbound");
       }
     } catch (err) {
       console.log(err);
@@ -4854,30 +4845,30 @@ function buildPdfReport(req, res, data, orderType) {
     { text: req.t("Shipment_Date"), bold: true },
     { text: req.t("Shipment_Estimate_Date"), bold: true },
   ]);
-  for (var i = 0; i < data.length; i++) {
+  for (const element of data) {
     rows.push([
-      data[i].id || "N/A",
-      data[i].poId || "N/A",
-      data[i].productCategory || "N/A",
-      data[i].productName || "N/A",
-      data[i].productID || "N/A",
-      data[i].productQuantity || "N/A",
-      data[i].batchNumber || "N/A",
-      data[i].manufacturer || "N/A",
-      data[i].supplierOrgName || "N/A",
-      data[i].supplierOrgId || "N/A",
-      data[i].supplierOrgLocation || "N/A",
-      data[i].recieverOrgName || "N/A",
-      data[i].recieverOrgId || "N/A",
-      data[i].recieverOrgLocation || "N/A",
-      data[i].airWayBillNo || "N/A",
-      data[i].label || "N/A",
-      data[i].shippingDate || "N/A",
-      data[i].expectedDeliveryDate || "N/A",
+      element.id || "N/A",
+      element.poId || "N/A",
+      element.productCategory || "N/A",
+      element.productName || "N/A",
+      element.productID || "N/A",
+      element.productQuantity || "N/A",
+      element.batchNumber || "N/A",
+      element.manufacturer || "N/A",
+      element.supplierOrgName || "N/A",
+      element.supplierOrgId || "N/A",
+      element.supplierOrgLocation || "N/A",
+      element.recieverOrgName || "N/A",
+      element.recieverOrgId || "N/A",
+      element.recieverOrgLocation || "N/A",
+      element.airWayBillNo || "N/A",
+      element.label || "N/A",
+      element.shippingDate || "N/A",
+      element.expectedDeliveryDate || "N/A",
     ]);
   }
 
-  var docDefinition = {
+  const docDefinition = {
     pageSize: "A3",
     pageOrientation: "landscape",
     pageMargins: [30, 30, 1, 5],
@@ -4904,17 +4895,14 @@ function buildPdfReport(req, res, data, orderType) {
     },
   };
 
-  var options = { fontLayoutCache: true };
-  var pdfDoc = printer.createPdfKitDocument(docDefinition, options);
-  var temp123;
-  var pdfFile = pdfDoc.pipe((temp123 = fs.createWriteStream("./output.pdf")));
-  var path = pdfFile.path;
+  const pdfDoc = printer.createPdfKitDocument(docDefinition, { fontLayoutCache: true });
+  let temp123;
+  const pdfFile = pdfDoc.pipe((temp123 = fs.createWriteStream("./output.pdf")));
   pdfDoc.end();
   temp123.on("finish", async function () {
     // do send PDF file
-    return res.sendFile(resolve(path));
+    return res.sendFile(resolve(pdfFile.path));
   });
-  return;
 }
 
 exports.trackJourneyOnBlockchain = [

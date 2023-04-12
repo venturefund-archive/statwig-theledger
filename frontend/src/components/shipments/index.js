@@ -44,8 +44,8 @@ const ShipmentAnalytic = (props) => {
   const [count, setCount] = useState(0);
   const [exportFilterData, setExportFilterData] = useState([]);
   const [showExportFilter, setShowExportFilter] = useState(false);
-  const [fromFilterDate, setFromFilterDate] = useState(new Date(0));
-  const [toFilterDate, setToFilterDate] = useState(new Date());
+  const [fromFilterDate, setFromFilterDate] = useState("");
+  const [toFilterDate, setToFilterDate] = useState("");
   const intelEnabled =
     props.user.type === "Third Party Logistics" ? true : false;
   if (
@@ -140,7 +140,7 @@ const ShipmentAnalytic = (props) => {
         setCount(inboundRes.data.count);
         dispatch(turnOff());
       } else {
-        if(statusFilter == null) setStatusFilter("");
+        if (statusFilter == null) setStatusFilter("");
         dispatch(turnOn());
         const outboundRes = await getOutboundShipments(
           idFilter,
@@ -389,7 +389,7 @@ const ShipmentAnalytic = (props) => {
       dispatch(turnOff());
     }
   };
-  
+
   const sendData = () => {
     let rtnArr = visible === "one" ? inboundShipments : outboundShipments;
     if (alerts)
@@ -406,81 +406,55 @@ const ShipmentAnalytic = (props) => {
   }, [t]);
 
   const onSelectionDateFilter = async (value) => {
+    const fromDate = value?.[0] || "";
+    const toDate = value?.[1] || "";
+    setFromFilterDate(fromDate);
+    setToFilterDate(toDate);
     if (intelEnabled) {
       dispatch(turnOn());
-      if (value.length > 1) {
-        const fromDate =
-          value[0] === "" ? new Date(0) : new Date(value[0]).toISOString();
-        setFromFilterDate(fromDate);
-        const toDate =
-          value[0] === ""
-            ? new Date(Date.now())
-            : new Date(new Date(value[1]).toDateString());
-        setToFilterDate(toDate);
-        const filteredOutboundShipments = await getGMRShipments(
-          skip,
+      const filteredOutboundShipments = await getGMRShipments(
+        skip,
+        limit,
+        fromDate,
+        toDate,
+        statusFilter
+      );
+      setOutboundShipments(filteredOutboundShipments.data.data);
+      setCount(filteredOutboundShipments.data.count);
+      dispatch(turnOff());
+    } else {
+      if (visible === "one") {
+        dispatch(turnOn());
+        const inboundRes = await getInboundShipments(
+          idFilter,
+          fromFilter,
+          toFilter,
+          dateFilter,
+          statusFilter,
+          0,
           limit,
           fromDate,
-          toDate,
-          statusFilter
-        );
-        setOutboundShipments(filteredOutboundShipments.data.data);
-        setCount(filteredOutboundShipments.data.count);
+          toDate
+        ); // id, from, to, dateFilter, status, skip, limit, fromDate, toDate
+        setInboundShipments(inboundRes.data.inboundShipments);
+        setCount(inboundRes.data.count);
         dispatch(turnOff());
       } else {
-        const filteredOutboundShipments = await getGMRShipments(
-          skip,
+        dispatch(turnOn());
+        const outboundRes = await getOutboundShipments(
+          idFilter,
+          fromFilter,
+          toFilter,
+          dateFilter,
+          statusFilter,
+          0,
           limit,
-          null,
-          null,
-          statusFilter
-        );
-        setOutboundShipments(filteredOutboundShipments.data.data);
-        setCount(filteredOutboundShipments.data.count);
+          fromDate,
+          toDate
+        ); // id, from, to, dateFilter, status, skip, limit, fromDate, toDate
+        setOutboundShipments(outboundRes.data.outboundShipments);
+        setCount(outboundRes.data.count);
         dispatch(turnOff());
-      }
-    } else {
-      const fromDate =
-        value[0] === "" ? "" : new Date(new Date(value[0]).toDateString());
-      setFromFilterDate(fromDate);
-      if (value.length > 1) {
-        const toDate =
-          value[0] === "" ? "" : new Date(new Date(value[1]).toDateString());
-        if (toDate) toDate.setDate(toDate.getDate() + 1);
-        setToFilterDate(toDate);
-        if (visible === "one") {
-          dispatch(turnOn());
-          const inboundRes = await getInboundShipments(
-            idFilter,
-            fromFilter,
-            toFilter,
-            dateFilter,
-            statusFilter,
-            0,
-            limit,
-            fromDate,
-            toDate
-          ); // id, from, to, dateFilter, status, skip, limit, fromDate, toDate
-          setInboundShipments(inboundRes.data.inboundShipments);
-          setCount(inboundRes.data.count);
-          dispatch(turnOff());
-        } else {
-          dispatch(turnOn());
-          const outboundRes = await getOutboundShipments(
-            idFilter,
-            fromFilter,
-            toFilter,
-            dateFilter,
-            statusFilter,
-            0,
-            limit,
-            fromDate,
-            toDate
-          ); // id, from, to, dateFilter, status, skip, limit, fromDate, toDate
-          setOutboundShipments(outboundRes.data.outboundShipments);
-          setCount(outboundRes.data.count);
-          dispatch(turnOff());
-        }
       }
     }
   };
@@ -488,20 +462,19 @@ const ShipmentAnalytic = (props) => {
   const onSelectionOfDropdownValue = (index, type, value) => {
     setShowExportFilter(false);
     let url = "";
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     if (visible === "one") {
-      url = `${
-        config().getExportFileForInboundShipmentUrl
-      }?type=${value.toLowerCase()}&shipmentId=${idFilter}&from=${fromFilter}&to=${toFilter}&dateFilter=${dateFilter}&status=${statusFilter}&fromDate=${fromFilterDate}&toDate=${toFilterDate}`;
+      url = `${config().getExportFileForInboundShipmentUrl
+        }?type=${value.toLowerCase()}&shipmentId=${idFilter}&from=${fromFilter}&to=${toFilter}&dateFilter=${dateFilter}&status=${statusFilter}&fromDate=${fromFilterDate}&toDate=${toFilterDate}&timezone=${timezone}`;
     }
     if (visible === "two") {
-      url = `${
-        config().getExportFileForOutboundShipmentUrl
-      }?type=${value.toLowerCase()}&shipmentId=${idFilter}&from=${fromFilter}&to=${toFilter}&dateFilter=${dateFilter}&status=${statusFilter}&fromDate=${fromFilterDate}&toDate=${toFilterDate}`;
+      url = `${config().getExportFileForOutboundShipmentUrl
+        }?type=${value.toLowerCase()}&shipmentId=${idFilter}&from=${fromFilter}&to=${toFilter}&dateFilter=${dateFilter}&status=${statusFilter}&fromDate=${fromFilterDate}&toDate=${toFilterDate}&timezone=${timezone}`;
     }
 
-    var today = new Date();
+    const today = new Date();
 
-    var nameOfFile;
+    let nameOfFile;
 
     if (visible === "one") {
       nameOfFile =
@@ -529,8 +502,7 @@ const ShipmentAnalytic = (props) => {
         link.href = downloadUrl;
         link.setAttribute(
           "download",
-          `${nameOfFile}.${
-            value.toLowerCase() === "excel" ? "xlsx" : value.toLowerCase()
+          `${nameOfFile}.${value.toLowerCase() === "excel" ? "xlsx" : value.toLowerCase()
           }`
         ); //any other extension
         document.body.appendChild(link);
@@ -596,7 +568,7 @@ const ShipmentAnalytic = (props) => {
           />
         </div>
       )}
-      <div className='ribben-space'  style={{pointerEvents: props.demoLogin ? "none" : "auto" }}>
+      <div className='ribben-space' style={{ pointerEvents: props.demoLogin ? "none" : "auto" }}>
         <Table
           {...props}
           skip={skip}

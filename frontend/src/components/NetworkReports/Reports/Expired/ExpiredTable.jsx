@@ -10,6 +10,8 @@ import { useTranslation } from "react-i18next";
 import { getExpiredFilterOptions, getManufacturerExpiredStockReport } from "../../../../actions/networkActions";
 import { Pagination, useTheme } from "@mui/material";
 import Filterbar from "../../Filter/Filterbar";
+import { useDispatch } from "react-redux";
+import { turnOff, turnOn } from "../../../../actions/spinnerActions";
 
 function TableHeader({
 	anchorEl,
@@ -127,6 +129,7 @@ function TableHeader({
 }
 
 export default function ExpiredTable({locationParams}) {
+  const dispatch = useDispatch();
   const [expiredStock, setExpiredStock] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [expiredStockFilters, setExpiredStockFilters] = useState();
@@ -183,12 +186,14 @@ export default function ExpiredTable({locationParams}) {
     payload.reportWarehouse = reportWarehouse;
 		payload.skip = (page - 1) * 10;
 		payload.limit = 10;
+		dispatch(turnOn());
     const expiredStock = await getManufacturerExpiredStockReport(payload);
     if (expiredStock) {
       setExpiredStock(expiredStock.data.expiredProducts);
 			setTotalCount(expiredStock.data.totalCount);
       setReportWarehouse(expiredStock.data.warehouseId);
     }
+		dispatch(turnOff());
   };
 
   const getExpiredStockFilters = async () => {
@@ -198,10 +203,12 @@ export default function ExpiredTable({locationParams}) {
 		};
     payload.reportWarehouse = reportWarehouse;
     payload.date = "";
+		dispatch(turnOn());
     const expiredStockFilters = await getExpiredFilterOptions(payload);
     if (expiredStockFilters) {
       setExpiredStockFilters(expiredStockFilters.filters);
     }
+		dispatch(turnOff());
   };
 
   useEffect(() => {

@@ -227,6 +227,7 @@ export default function Beneficiary(props) {
 							batchNumber={batchDetails?.batchNumber}
 							atomId={batchDetails?.atom?.id}
 							newVaccination={newVaccination}
+							setLayoutType={setLayoutType}
 						/>
 					)}
 				</div>

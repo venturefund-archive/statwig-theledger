@@ -325,8 +325,8 @@ async function GovtBodyNearExpiry(warehouse, date, body) {
 		},
 		{
 			$sort: {
-				expiredDates: -1,
-				productName: 1
+				expiredDates: 1,
+				productName: 1,
 			},
 		},
 		{
@@ -603,8 +603,8 @@ async function GovtBodyExpired(warehouse, date, body) {
 		},
 		{
 			$sort: {
-				expiredDates: -1,
-				productName: 1
+				expiredDates: 1,
+				productName: 1,
 			},
 		},
 		{
@@ -1254,7 +1254,7 @@ async function GovtBodyBestsellers(warehouse, date, body) {
 			},
 		},
 		{
-			$match: matchQuery,
+			$match: matchQueryStage2,
 		},
 		{
 			$sort: {
@@ -1753,6 +1753,7 @@ exports.getInventoryAnalytics = [
 				{
 					$match: {
 						$and: [
+							{ status: "HEALTHY" },
 							{ "attributeSet.expDate": { $exists: true } },
 							{ "attributeSet.expDate": { $nin: ["", null] } },
 							{ "attributeSet.expDate": { $gte: today } },
@@ -1774,6 +1775,7 @@ exports.getInventoryAnalytics = [
 				{
 					$match: {
 						$and: [
+							{ status: "HEALTHY" },
 							{ "attributeSet.expDate": { $exists: true } },
 							{ "attributeSet.expDate": { $nin: ["", null] } },
 							{ "attributeSet.expDate": { $lte: today } },
@@ -2741,7 +2743,7 @@ exports.inStockReport = [
 			const result = {
 				inStockReport: inStockReport,
 				totalCount: totalCount,
-				warehouseId: warehouse
+				warehouseId: warehouse,
 			};
 
 			if (reportType) {
@@ -2943,7 +2945,7 @@ exports.outOfStockReport = [
 			const result = {
 				outOfStockReport: outOfStockReport,
 				totalCount: totalCount,
-				warehouseId: warehouse
+				warehouseId: warehouse,
 			};
 
 			if (reportType) {
@@ -3189,7 +3191,7 @@ exports.expiredStockReport = [
 					},
 					{
 						$sort: {
-							productQuantity: -1,
+							expiredDates: 1,
 						},
 					},
 				]);
@@ -3198,7 +3200,7 @@ exports.expiredStockReport = [
 			const result = {
 				expiredProducts: expiredProducts,
 				totalCount: totalCount,
-				warehouseId: warehouse
+				warehouseId: warehouse,
 			};
 
 			if (reportType) {
@@ -3448,7 +3450,7 @@ exports.nearExpiryStockReport = [
 					},
 					{
 						$sort: {
-							productQuantity: -1,
+							expiredDates: 1,
 						},
 					},
 				]);
@@ -3457,7 +3459,7 @@ exports.nearExpiryStockReport = [
 			const result = {
 				nearExpiryProducts: nearExpiryProducts,
 				totalCount: totalCount,
-				warehouseId: warehouse
+				warehouseId: warehouse,
 			};
 
 			if (reportType) {

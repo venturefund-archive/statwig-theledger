@@ -1,13 +1,15 @@
 import React from "react";
 import Pagination from "@material-ui/lab/Pagination";
 import user from "../../../assets/icons/user.svg";
+import { formatDate } from "../../../utils/dateHelper";
 import "./style.scss";
+
 const Table = (props) => {
   const { t } = props;
   const handlePageChange = (event, value) => {
     props.onPageChange(value);
   };
-  var orgTypeArray = [...props.lastMile];
+  const orgTypeArray = [...props.lastMile];
   return (
     <div className='producttable'>
       <div className='rTable pt-2'>
@@ -37,10 +39,7 @@ const Table = (props) => {
                   {lastmile.productAdministeredInfo[0].productName}
                 </div>
                 <div className='rTableCell'>
-                  {lastmile.productAdministeredInfo[0].administeredData
-                    .split("T")
-                    .join(" ")
-                    .substring(0, 19)}
+                  {formatDate(lastmile.productAdministeredInfo[0].administeredData)}
                 </div>
               </div>
             </div>
