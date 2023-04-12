@@ -5,14 +5,10 @@ const { getImageURL, setImageURL } = require("../middlewares/rbac_middleware");
 const sharp = require("sharp");
 const bucketName = process.env.AWS_BUCKET_NAME;
 const region = process.env.AWS_BUCKET_REGION;
-const accessKeyId = process.env.AWS_ACCESS_KEY;
-const secretAccessKey = process.env.AWS_ACCESS_SECRET;
 const expiryLimit = process.env.AWS_EXPIRY_LIMIT || 7200;
 
 const s3 = new S3({
-  region,
-  accessKeyId,
-  secretAccessKey,
+  region
 });
 
 // uploads a file to s3
@@ -86,7 +82,11 @@ exports.getSignedUrl = async (fileKey) => {
     };
     const command = new GetObjectCommand(downloadParams);
     const signedUrl = await getSignedUrl(s3, command, { expiresIn: expiryLimit })
-    await setImageURL(fileKey, signedUrl);
-    return signedUrl;
+    if (signedUrl) {
+      await setImageURL(fileKey, signedUrl);
+      return signedUrl;
+    } else {
+      return null;
+    }
   }
 };
