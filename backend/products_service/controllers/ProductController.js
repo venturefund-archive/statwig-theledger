@@ -57,27 +57,27 @@ exports.getProductsOld = [
 ];
 
 function getProductCondition(query) {
-	let matchArr = [];
+  let matchArr = [];
 
-	if (query.status && query.status != "") {
-		matchArr.push({ status: query.status });
-	}
-	if (query.orgId && query.orgId != "") {
-		matchArr.push({ manufacturerId: query.orgId });
-	}
-	if (query.name && query.name != "") {
-		matchArr.push({
-			$or: [
-				{ name: { $regex: query.name, $options: "i" } },
-				{ type: { $regex: query.name, $options: "i" } },
-				{ manufacturer: { $regex: query.name, $options: "i" } },
-			],
-		});
-	}
+  if (query.status && query.status != "") {
+    matchArr.push({ status: query.status });
+  }
+  if (query.orgId && query.orgId != "") {
+    matchArr.push({ manufacturerId: query.orgId });
+  }
+  if (query.name && query.name != "") {
+    matchArr.push({
+      $or: [
+        { name: { $regex: query.name, $options: "i" } },
+        { type: { $regex: query.name, $options: "i" } },
+        { manufacturer: { $regex: query.name, $options: "i" } },
+      ],
+    });
+  }
 
-	const matchCondition =  matchArr?.length ? { $and: matchArr } : {};
+  const matchCondition = matchArr?.length ? { $and: matchArr } : {};
 
-	return matchCondition;
+  return matchCondition;
 }
 
 exports.getProducts = [
@@ -89,25 +89,25 @@ exports.getProducts = [
         permissionRequired: ["viewProductList"],
       };
       checkPermissions(permission_request, async (permissionResult) => {
-				if (permissionResult.success) {
-					const stages = [
-						{ $match: getProductCondition(req.query) },
-						{ $sort: { _id: -1 } },
-						{ $setWindowFields: { output: { totalCount: { $count: {} } } } },
-					];
-					if (req.query?.skip !== undefined && req.query?.limit !== undefined) {
-						stages.push({ $skip: parseInt(req.query.skip) });
-						stages.push({ $limit: parseInt(req.query.limit) });
-					}
-					const products = await ProductModel.aggregate(stages);
-					return apiResponse.successResponseWithData(res, "Products", products);
-				} else {
-					return apiResponse.forbiddenResponse(
-						res,
-						responses(req.user.preferredLanguage).no_permission,
-					);
-				}
-			});
+        if (permissionResult.success) {
+          const stages = [
+            { $match: getProductCondition(req.query) },
+            { $sort: { _id: -1 } },
+            { $setWindowFields: { output: { totalCount: { $count: {} } } } },
+          ];
+          if (req.query?.skip !== undefined && req.query?.limit !== undefined) {
+            stages.push({ $skip: parseInt(req.query.skip) });
+            stages.push({ $limit: parseInt(req.query.limit) });
+          }
+          const products = await ProductModel.aggregate(stages);
+          return apiResponse.successResponseWithData(res, "Products", products);
+        } else {
+          return apiResponse.forbiddenResponse(
+            res,
+            responses(req.user.preferredLanguage).no_permission,
+          );
+        }
+      });
     } catch (err) {
       console.error(err);
       return apiResponse.ErrorResponse(res, err.message);
@@ -386,7 +386,7 @@ exports.addProduct = [
               manufacturer: req.body.manufacturer,
               manufacturerId: manufacturerRef.id,
               pricing: req.body.pricing,
-              photoId: Upload != undefined ? Upload.key : "",
+              photoId: Upload?.Key || "",
               unitofMeasure: JSON.parse(req.body.unitofMeasure),
               characteristicSet: {
                 temperature_max: req.body.characteristicSet?.temperature_max,
