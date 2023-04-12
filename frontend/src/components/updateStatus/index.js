@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import uploadBlue from "../../assets/icons/UploadBlue.svg";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import crossIcon from "../../assets/icons/crossRed.svg";
 import SuccessPopup from "./successPopup";
 import FailPopup from "./failPopup";
@@ -14,7 +14,6 @@ import "./style.scss";
 import { Formik } from "formik";
 import { FormControlLabel, Switch } from "@material-ui/core";
 import withStyles from "@material-ui/core/styles/withStyles";
-import { useDispatch } from "react-redux";
 import moment from "moment";
 import Loader from "../../shared/loader/Loader";
 
@@ -312,16 +311,14 @@ const UpdateStatus = (props) => {
 												</label>
 												<input
 													type="text"
-													className={`form-control mb-2 ${
-														values.updateStatusLocation === "" ? "border-danger" : ""
-													}`}
+													className={`form-control mb-2 ${values.updateStatusLocation === "" ? "border-danger" : ""
+														}`}
 													name="updateStatusLocation"
 													onBlur={handleBlur}
 													onChange={handleChange}
 													value={values.updateStatusLocation}
-													placeholder={` ${
-														values.updateStatusLocation === "" ? t("Required") : ""
-													}`}
+													placeholder={` ${values.updateStatusLocation === "" ? t("Required") : ""
+														}`}
 												/>
 											</div>
 										</div>
@@ -329,9 +326,8 @@ const UpdateStatus = (props) => {
 											<div>
 												<h6 className="poheads potext m-4">Shipment Cargo Status</h6>
 												<div
-													className={`col-12 p-3 mb-3 ml-1 rounded1 row bg-white shadow justify-content-between ${
-														loader && "fade-color"
-													}`}
+													className={`col-12 p-3 mb-3 ml-1 rounded1 row bg-white shadow justify-content-between ${loader && "fade-color"
+														}`}
 												>
 													<div className="cargoLabels">
 														<label className="mb-1 text-secondary">Acceptance Date</label>
@@ -376,9 +372,8 @@ const UpdateStatus = (props) => {
 													/>
 												</div>
 												<div
-													className={`col-12 p-3 mb-3 ml-1 rounded1 row bg-white shadow justify-content-between ${
-														loaderC && "fade-color"
-													}`}
+													className={`col-12 p-3 mb-3 ml-1 rounded1 row bg-white shadow justify-content-between ${loaderC && "fade-color"
+														}`}
 												>
 													<div className="cargoLabels">
 														<label className="mb-1 text-secondary">Customs clearance Date</label>
@@ -412,9 +407,8 @@ const UpdateStatus = (props) => {
 													/>
 												</div>
 												<div
-													className={`col-12 p-3 mb-3 ml-1 rounded1 row bg-white shadow justify-content-between ${
-														loaderL && "fade-color"
-													}`}
+													className={`col-12 p-3 mb-3 ml-1 rounded1 row bg-white shadow justify-content-between ${loaderL && "fade-color"
+														}`}
 												>
 													<div className="cargoLabels">
 														<label className="mb-1 text-secondary">Last Status</label>
@@ -727,9 +721,8 @@ const UpdateStatus = (props) => {
 												const path =
 													returnToView === "false"
 														? "/shipments"
-														: `/${
-																intelEnabled === true ? `viewgmrshipment` : `viewshipment`
-														  }/${id}`;
+														: `/${intelEnabled === true ? `viewgmrshipment` : `viewshipment`
+														}/${id}`;
 												props.history.push(path);
 											}}
 										>
