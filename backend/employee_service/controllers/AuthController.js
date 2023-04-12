@@ -36,122 +36,118 @@ const moment = require("moment");
 // const phoneRgex = /^\d{10}$/;
 
 async function createWarehouse(payload) {
-	try {
-		const {
+	const {
+		organisationId,
+		title,
+		region,
+		country,
+		warehouseAddress,
+		supervisors,
+		employees,
+	} = payload;
+
+	const warehouseExists = await WarehouseModel.findOne({
+		organisationId: organisationId,
+		title: title,
+	});
+	if (warehouseExists) {
+		let warehouseId = warehouseExists.id;
+		await EmployeeModel.updateMany(
+			{ id: { $in: employees } },
+			{ $addToSet: { warehouseId: warehouseId } },
+		);
+		return false;
+	} else {
+		const invCounter = await CounterModel.findOneAndUpdate(
+			{ "counters.name": "inventoryId" },
+			{
+				$inc: {
+					"counters.$.value": 1,
+				},
+			},
+			{ new: true },
+		);
+		const inventoryId = invCounter.counters[7].format + invCounter.counters[7].value;
+		const inventoryResult = new InventoryModel({ id: inventoryId });
+		await inventoryResult.save();
+		const warehouseCounter = await CounterModel.findOneAndUpdate(
+			{ "counters.name": "warehouseId" },
+			{
+				$inc: {
+					"counters.$.value": 1,
+				},
+			},
+			{
+				new: true,
+			},
+		);
+		const warehouseId = warehouseCounter.counters[3].format + warehouseCounter.counters[3].value;
+
+		const loc = await getLatLongByCity(warehouseAddress.city + "," + country);
+
+		const postalAddress = `${warehouseAddress.line1}, ${warehouseAddress.city}, ${warehouseAddress.state}, ${country}, ${region}`;
+
+		const warehouse = new WarehouseModel({
+			id: warehouseId,
 			organisationId,
+			postalAddress,
 			title,
-			region,
-			country,
-			warehouseAddress,
+			region: {
+				regionName: region,
+			},
+			country: {
+				countryId: "001",
+				countryName: country,
+			},
+			location: loc,
+			bottleCapacity: 0,
+			sqft: 0,
 			supervisors,
 			employees,
-		} = payload;
-
-		const warehouseExists = await WarehouseModel.findOne({
-			organisationId: organisationId,
-			title: title,
+			warehouseAddress: {
+				firstLine: warehouseAddress.line1,
+				secondLine: "",
+				region: region,
+				city: warehouseAddress.city,
+				state: warehouseAddress.state,
+				country: country,
+				landmark: "",
+				zipCode: warehouseAddress.zip,
+			},
+			warehouseInventory: inventoryResult.id,
+			status: "ACTIVE",
 		});
-		if (warehouseExists) {
-			let warehouseId = warehouseExists.id;
-			await EmployeeModel.updateMany(
-				{ id: { $in: employees } },
-				{ $addToSet: { warehouseId: warehouseId } },
-			);
-			return false;
-		} else {
-			const invCounter = await CounterModel.findOneAndUpdate(
-				{ "counters.name": "inventoryId" },
-				{
-					$inc: {
-						"counters.$.value": 1,
-					},
-				},
-				{ new: true },
-			);
-			const inventoryId = invCounter.counters[7].format + invCounter.counters[7].value;
-			const inventoryResult = new InventoryModel({ id: inventoryId });
-			await inventoryResult.save();
-			const warehouseCounter = await CounterModel.findOneAndUpdate(
-				{ "counters.name": "warehouseId" },
-				{
-					$inc: {
-						"counters.$.value": 1,
-					},
-				},
-				{
-					new: true,
-				},
-			);
-			const warehouseId = warehouseCounter.counters[3].format + warehouseCounter.counters[3].value;
+		await warehouse.save();
 
-			const loc = await getLatLongByCity(warehouseAddress.city + "," + country);
-
-			const postalAddress = `${warehouseAddress.line1}, ${warehouseAddress.city}, ${warehouseAddress.state}, ${country}, ${region}`;
-
-			const warehouse = new WarehouseModel({
-				id: warehouseId,
-				organisationId,
-				postalAddress,
-				title,
-				region: {
-					regionName: region,
+		const addr = `${warehouseAddress?.firstLine}, ${warehouseAddress?.city}, ${warehouseAddress?.state}, ${warehouseAddress?.zipCode}`;
+		const skipOrgRegistration = false;
+		await OrganisationModel.findOneAndUpdate(
+			{
+				id: organisationId,
+			},
+			{
+				$set: {
+					...(skipOrgRegistration
+						? {
+							postalAddress: addr,
+							country: warehouseAddress.country,
+							region: warehouseAddress.region,
+							status: "NOTVERIFIED",
+						}
+						: {}),
 				},
-				country: {
-					countryId: "001",
-					countryName: country,
+				$push: {
+					warehouses: warehouseId,
 				},
-				location: loc,
-				bottleCapacity: 0,
-				sqft: 0,
-				supervisors,
-				employees,
-				warehouseAddress: {
-					firstLine: warehouseAddress.line1,
-					secondLine: "",
-					region: region,
-					city: warehouseAddress.city,
-					state: warehouseAddress.state,
-					country: country,
-					landmark: "",
-					zipCode: warehouseAddress.zip,
-				},
-				warehouseInventory: inventoryResult.id,
-				status: "ACTIVE",
-			});
-			await warehouse.save();
+			},
+		);
 
-			const addr = `${warehouseAddress?.firstLine}, ${warehouseAddress?.city}, ${warehouseAddress?.state}, ${warehouseAddress?.zipCode}`;
-			const skipOrgRegistration = false;
-			await OrganisationModel.findOneAndUpdate(
-				{
-					id: organisationId,
-				},
-				{
-					$set: {
-						...(skipOrgRegistration
-							? {
-								postalAddress: addr,
-								country: warehouseAddress.country,
-								region: warehouseAddress.region,
-								status: "NOTVERIFIED",
-							}
-							: {}),
-					},
-					$push: {
-						warehouses: warehouseId,
-					},
-				},
-			);
+		await EmployeeModel.updateMany(
+			{ id: { $in: employees } },
+			{ $addToSet: { warehouseId: warehouseId } },
+		);
 
-			await EmployeeModel.updateMany(
-				{ id: { $in: employees } },
-				{ $addToSet: { warehouseId: warehouseId } },
-			);
-
-			return true;
-		}
-	} catch (err) {
-		throw err;
+		return true;
 	}
 }
 
@@ -1604,7 +1600,7 @@ exports.uploadImage = [
 					},
 					{
 						$push: {
-							"userDocuments.$.imageDetails": `${Upload.key}`,
+							"userDocuments.$.imageDetails": Upload?.Key || null,
 						},
 					},
 					{ new: true },
@@ -1613,7 +1609,7 @@ exports.uploadImage = [
 			} else if (action == "STOREID") {
 				const userData = {
 					userDocuments: {
-						imageDetails: [`${Upload.key}`],
+						imageDetails: [Upload?.Key],
 						idType: "STOREID",
 					},
 				};
@@ -1631,7 +1627,7 @@ exports.uploadImage = [
 			} else if (action == "KYCNEW") {
 				const userData = {
 					userDocuments: {
-						imageDetails: [`${Upload.key}`],
+						imageDetails: [Upload?.Key],
 						idType: type,
 						idNumber: parseInt(id),
 						approvalStatus: "NOTAPPROVED",
@@ -1655,7 +1651,7 @@ exports.uploadImage = [
 						accountStatus: { $ne: "DELETED" },
 					},
 					{
-						$set: { photoId: Upload.key },
+						$set: { photoId: Upload?.Key || "default.jpg" },
 					},
 					{ new: true },
 				);
@@ -2471,7 +2467,7 @@ exports.addUsersFromExcel = [
 					}
 				}
 
-				for (let [warehouseTitle, warehouse] of warehouseMap) {
+				for (let [warehouse] of warehouseMap) {
 					const employees = new Array();
 					let warehousePayload;
 

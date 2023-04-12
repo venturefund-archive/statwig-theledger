@@ -2847,12 +2847,12 @@ exports.uploadImage = [
       await unlinkFile(req.file.path);
       await ShipmentModel.updateOne(
         { id: shipmentId },
-        { $push: { imageDetails: Upload.Key } }
+        { $push: { imageDetails: Upload?.Key } }
       );
       return apiResponse.successResponseWithData(
         res,
         "Image uploaded successfully",
-        { imageId: Upload.Key }
+        { imageId: Upload?.Key }
       );
     } catch (e) {
       return apiResponse.ErrorResponse(res, e.message);

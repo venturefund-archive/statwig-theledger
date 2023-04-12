@@ -277,7 +277,7 @@ class Profile extends React.Component {
 									id="profile"
 									onChange={(e) => {
 										this.setState({ selectedFile: e.target.files[0] });
-										this.setState({ image: URL.createObjectURL(e.target.files[0])});
+										this.setState({ image: URL.createObjectURL(e.target.files[0]) });
 										if (!e.target.files[0].type.match("image.*")) {
 											alert(t("image_error"));
 											this.setState({ selectedFile: null });
