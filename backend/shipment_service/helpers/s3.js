@@ -1,5 +1,6 @@
 const { Upload } = require("@aws-sdk/lib-storage");
-const { S3 } = require("@aws-sdk/client-s3");
+const { S3, GetObjectCommand } = require("@aws-sdk/client-s3");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { getImageURL, setImageURL } = require("../middlewares/rbac_middleware");
 const sharp = require("sharp");
 const bucketName = process.env.AWS_BUCKET_NAME;
@@ -81,10 +82,10 @@ exports.getSignedUrl = async (fileKey) => {
   } else {
     const downloadParams = {
       Bucket: bucketName,
-      Key: fileKey,
-      Expires: expiryLimit,
+      Key: fileKey
     };
-    const signedUrl = await s3.getSignedUrlPromise("getObject", downloadParams);
+    const command = new GetObjectCommand(downloadParams);
+    const signedUrl = await getSignedUrl(s3, command, { expiresIn: expiryLimit })
     await setImageURL(fileKey, signedUrl);
     return signedUrl;
   }
