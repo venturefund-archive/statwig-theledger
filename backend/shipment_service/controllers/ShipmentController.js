@@ -97,7 +97,7 @@ async function calculateCurrentLocationData(trackedShipment, allowedOrgs, tracki
       };
     }
   });
-  var atomsData = await AtomModel.aggregate([{ $match: { batchNumbers: trackingId } },
+  const atomsData = await AtomModel.aggregate([{ $match: { batchNumbers: trackingId } },
   {
     $lookup: {
       from: "products",
@@ -129,7 +129,7 @@ async function calculateCurrentLocationData(trackedShipment, allowedOrgs, tracki
         ],
       }
     );
-    warehouseAtoms = await WarehouseModel.aggregate([
+    const warehouseAtoms = await WarehouseModel.aggregate([
       { $match: { $or: [{ id: shipmentDetails?.receiver?.locationId }, { id: shipmentDetails?.supplier?.locationId }] } },
       {
         $lookup: {
@@ -886,10 +886,10 @@ exports.createShipment = [
             let atomsArray = [];
             if (serialNumbers.length > 1) {
               if (Array.isArray(products[count].serialNumbersRange)) {
-                for (let i = 0; i < serialNumbers.length; i++) {
+                for (const element of serialNumbers) {
                   const updateAtoms = await AtomModel.updateOne(
                     {
-                      id: `${serialNumbers[i]}`,
+                      id: element,
                       currentInventory: suppInventoryId,
                     },
                     {
@@ -1068,10 +1068,10 @@ exports.createShipment = [
             }
           );
 
-          for (let count = 0; count < products.length; count++) {
+          for (const element of products) {
             taggedShipmentUpdate(
-              products[count].productId,
-              products[count].productQuantity,
+              element.productId,
+              element.productQuantity,
               data.taggedShipments
             );
           }
@@ -1482,7 +1482,7 @@ exports.receiveShipment = [
             );
           }
         }
-        var flag = "Y";
+        let flag = "Y";
         // if (data.poId == "null") {
         //   flag = "YS";
         // }
@@ -1579,12 +1579,11 @@ exports.receiveShipment = [
               "RECEIVED",
             );
 
-            shipmentUpdate(
+            await shipmentUpdate(
               products[count].productID,
               products[count].productQuantity,
               data.id,
               products[count].atomId,
-              "RECEIVED",
             );
 
             if (flag == "Y" && data.poId != null) {
@@ -1763,7 +1762,7 @@ exports.receiveShipment = [
           }
           const updates = {
             updatedOn: new Date().toISOString(),
-            imageId: Upload?.key || null,
+            imageId: Upload?.Key || null,
             updatedBy: req.user.id,
             updateComment: data.comment,
             status: "RECEIVED",
@@ -2843,18 +2842,17 @@ exports.uploadImage = [
   auth,
   async (req, res) => {
     try {
-      // const Id = req.query.id;
+      const shipmentId = req.query.id;
       const Upload = await uploadFile(req.file);
       await unlinkFile(req.file.path);
-      // const update = await ShipmentModel.findOneAndUpdate(
-      //   { id: Id },
-      //   { $push: { imageDetails: `${Upload.key}` } },
-      //   { new: true }
-      // );
+      await ShipmentModel.updateOne(
+        { id: shipmentId },
+        { $push: { imageDetails: Upload.Key } }
+      );
       return apiResponse.successResponseWithData(
         res,
         "Image uploaded successfully",
-        { imageId: Upload.key }
+        { imageId: Upload.Key }
       );
     } catch (e) {
       return apiResponse.ErrorResponse(res, e.message);
@@ -2866,11 +2864,11 @@ exports.fetchImage = [
   auth,
   async (req, res) => {
     try {
-      const result = await ShipmentModel.find(
+      const result = await ShipmentModel.findOne(
         { id: req.query.id },
         { imageDetails: 1 }
       );
-      const imageArray = result[0].imageDetails || [];
+      const imageArray = result?.imageDetails || [];
       const resArray = [];
       await asyncForEach(imageArray, async (image) => {
         const signedUrl = await getSignedUrl(image);
