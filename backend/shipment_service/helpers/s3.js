@@ -17,7 +17,7 @@ const s3 = new S3({
 
 // uploads a file to s3
 exports.uploadFile = async (file) => {
-  console.log("AWS", bucketName, region, accessKeyId, secretAccessKey, s3)
+  console.log("AWS UPLOAD ==> ", bucketName, region, accessKeyId, secretAccessKey)
   if (file.mimetype == "image/png") {
     const image = await sharp(file.path)
       .rotate()
@@ -77,8 +77,8 @@ exports.getFile = async (fileKey) => {
 };
 
 exports.getSignedUrl = async (fileKey) => {
-  console.log("AWS", bucketName, region, accessKeyId, secretAccessKey, s3)
   const cachedURL = await getImageURL(fileKey);
+  console.log("AWS DOWN ==>", bucketName, region, accessKeyId, secretAccessKey, cachedURL)
   if (cachedURL) {
     return cachedURL;
   } else {
