@@ -89,7 +89,7 @@ export default function NetworkReports() {
 
 	return (
 		<section className="NetworkReports_container">
-			<div style={{height: "5vh", width: "100%", position: "fixed", display: "flex"}}>
+			<div style={{height: "5vh", width: "100%", position: "fixed", display: "flex", background: "lightGray", zIndex: 2000}}>
 				<Button
 					onClick={() => history.push("/network")}
 					style={{ fontSize: "14px", width: "18%", color: "teal", borderRadius: "10%" }}

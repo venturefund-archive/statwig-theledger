@@ -65,11 +65,11 @@ const routes = (
 	<Switch>
 		<Route exact path="/" component={LandingContainer} />
 		<Route exact path="/signup">
-			<ConnectionContainer connection="account" />
+			<ConnectionContainer connection="signup" />
 		</Route>
-		<Route exact path="/neworganization">
+		{/* <Route exact path="/neworganization">
 			<ConnectionContainer connection="organization" />
-		</Route>
+		</Route> */}
 		<Route exact path="/verify">
 			<ConnectionContainer connection="verify" />
 		</Route>

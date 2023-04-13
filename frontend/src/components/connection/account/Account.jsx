@@ -26,7 +26,7 @@ import {
 const filter = createFilterOptions();
 
 export default function Account(props) {
-	const { t } = props;
+	const { t, registerData, setPageLayout} = props;
 	const location = useLocation();
 	const [authData, setAuthData] = useState({
 		firstName: location?.state?.firstName,
@@ -53,15 +53,15 @@ export default function Account(props) {
 		handleSubmit,
 	} = useForm({
 		defaultValues: {
-			firstName: authData?.firstName ? authData?.firstName : "",
-			lastName: authData?.lastName ? authData?.lastName : "",
-			email: authData?.emailId ? authData?.emailId : "",
-			phone: "",
-			organizationExists: "existing",
-			organizationType: "",
-			organization: "",
-			organizationName: "",
-			skipOrgRegistration: false,
+			firstName: registerData?.firstName ? registerData?.firstName : authData?.firstName ? authData?.firstName : "",
+			lastName: registerData?.lastName ? registerData?.lastName : authData?.lastName ? authData?.lastName : "",
+			email: registerData?.email ? registerData?.email : authData?.emailId ? authData?.emailId : "",
+			phone: registerData?.phone ? registerData?.phone : "",
+			organizationExists: registerData?.organizationExists ? registerData?.organizationExists : "existing",
+			organizationType: registerData?.organizationType ? registerData?.organizationType : "",
+			organization: registerData?.organization ? registerData?.organization : "",
+			organizationName: registerData?.organizationName ? registerData?.organizationName : "",
+			skipOrgRegistration: registerData?.skipOrgRegistration ? registerData?.skipOrgRegistration : false,
 		},
 	});
 
@@ -190,9 +190,7 @@ export default function Account(props) {
 					let finalFlag = organizationExists === "existing" || skipOrgRegistration;
 					props.onUserDataSubmit(data, finalFlag);
 					if (!finalFlag) {
-						history.push({
-							pathname: "/neworganization",
-						});
+						setPageLayout("organisation");
 					}
 				}
 			}
