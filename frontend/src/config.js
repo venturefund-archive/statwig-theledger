@@ -430,7 +430,7 @@ export function config() {
       getWareHousesUrl: `${SERVER_URL}/api/address_service/fetchWarehouses`,
       fetchWarehousesByOrgId: `${SERVER_URL}/api/address_service/fetchWarehousesByOrgId`,
       verifyOrgUserUrl: `${SERVER_URL}/usermanagement/api/acceptApproval`,
-      updateOrgUrl: `${SERVER_URL}/usermanagement/api/updateOrg`,
+      updateOrgUrl: `${LOCAL_SERVER_URL_USER}/usermanagement/api/updateOrg`,
       rejectOrgUserUrl: `${SERVER_URL}/usermanagement/api/rejectApproval`,
       activateOrgUserUrl: `${SERVER_URL}/usermanagement/api/activateUser`,
       deactivateOrgUserUrl: `${SERVER_URL}/usermanagement/api/deactivateUser`,
