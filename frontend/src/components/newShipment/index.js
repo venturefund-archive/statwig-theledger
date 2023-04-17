@@ -290,7 +290,6 @@ const NewShipment = (props) => {
 					break;
 				}
 			}
-
 			if (check === 1) {
 				setShipmentError(t("check_product_quantity"));
 				setOpenShipmentFail(true);

@@ -114,10 +114,10 @@ function Table(props) {
                     </h5>
                     <p className=' mb-0  text-sm-2 grey'>
                       {`${supplierAddress?.firstLine
-                          ? supplierAddress?.firstLine
-                          : intelEnabled
-                            ? shipment.supplier.locationId
-                            : ""
+                        ? supplierAddress?.firstLine
+                        : intelEnabled
+                          ? shipment.supplier.locationId
+                          : ""
                         } ${supplierAddress?.secondLine
                           ? supplierAddress?.secondLine
                           : ""
@@ -139,10 +139,10 @@ function Table(props) {
                     </h5>
                     <p className='mb-0 text-sm-2 grey'>
                       {`${receiverAddress?.firstLine
-                          ? receiverAddress?.firstLine
-                          : intelEnabled
-                            ? shipment.receiver.locationId
-                            : ""
+                        ? receiverAddress?.firstLine
+                        : intelEnabled
+                          ? shipment.receiver.locationId
+                          : ""
                         }  ${receiverAddress?.secondLine
                           ? receiverAddress?.secondLine
                           : ""
@@ -183,8 +183,8 @@ function Table(props) {
                     ) : null}
                     <Link
                       to={`/${intelEnabled === true
-                          ? `viewgmrshipment`
-                          : `viewshipment`
+                        ? `viewgmrshipment`
+                        : `viewshipment`
                         }/${shipment.id}`}
                       className='mi-btn mi-btn-sm mi-btn-secondary-outline'
                       style={{

@@ -3,13 +3,13 @@ import { formatDate } from "../../utils/dateHelper";
 
 function GridRow({ heading, context, status, statusStyle }) {
   return (
-    <div className="ShipmentInfo--content-space-alt">
-      <div className="ShipmentInfo--grid-column">
-        <p className="info-text-width info-content-text text-secondary">
+    <div className='ShipmentInfo--content-space-alt'>
+      <div className='ShipmentInfo--grid-column'>
+        <p className='info-text-width info-content-text text-secondary'>
           {heading}
         </p>
-        <div className="context-wrapper-space">
-          <p className="info-content-text">{context}</p>
+        <div className='context-wrapper-space'>
+          <p className='info-content-text'>{context}</p>
           {status && (
             <span
               className={`badge-warning text-white badge badge-pill status secondary-bg ${statusStyle}`}
@@ -31,10 +31,10 @@ export default function ShipmentOverview(props) {
     status = t("delivered");
   }
   return Object.keys(props.shipments).length === 0 ? (
-    <div className="row panel justify-content-between">N/A</div>
+    <div className='row panel justify-content-between'>N/A</div>
   ) : (
-    <div className="ShipmentInfo--main-container">
-      <div className="ShipmentInfo--info-wrapper">
+    <div className='ShipmentInfo--main-container'>
+      <div className='ShipmentInfo--info-wrapper'>
         <GridRow
           heading={t("shipment_id")}
           context={props.shipments.id}
