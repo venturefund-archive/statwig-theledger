@@ -1,3 +1,4 @@
+import { Button } from "@mui/material";
 import React, { useState, useEffect } from "react";
 import { getNetworkPageAnalytics } from "../../actions/networkActions";
 import "./NetworkReports.css";
@@ -8,6 +9,7 @@ import InstocksTable from "./Reports/Instocks/InstocksTable";
 import NearexpireTable from "./Reports/Nearexpire/NearexpireTable";
 import OutofstocksTable from "./Reports/Outofstocks/OutofstocksTable";
 import ReportSearch from "./ReportSearch/ReportSearch";
+import { useHistory } from "react-router";
 
 function TabList({ Tab, setTab }) {
   return (
@@ -47,6 +49,8 @@ function TabList({ Tab, setTab }) {
 }
 
 export default function NetworkReports() {
+	const history = useHistory();
+
 	const [locationParams, setLocationParams] = useState({
 		country: "Costa Rica",
 		state: "",
@@ -85,6 +89,15 @@ export default function NetworkReports() {
 
 	return (
 		<section className="NetworkReports_container">
+			<div style={{height: "5vh", width: "100%", position: "fixed", display: "flex"}}>
+				<Button
+					onClick={() => history.push("/network")}
+					style={{ fontSize: "14px", width: "18%", color: "teal", borderRadius: "10%" }}
+				>
+					Switch to Location View
+				</Button>
+			</div>
+
 			<div className="NetworkReports_Search_Header">
 				<ReportSearch updateSearchParams={updateSearchParams} />
 			</div>

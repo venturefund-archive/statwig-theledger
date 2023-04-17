@@ -1,16 +1,14 @@
-const S3 = require("aws-sdk/clients/s3");
-const sharp = require("sharp");
+const { Upload } = require("@aws-sdk/lib-storage");
+const { S3, GetObjectCommand } = require("@aws-sdk/client-s3");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { getImageURL, setImageURL } = require("../middlewares/rbac_middleware");
+const sharp = require("sharp");
 const bucketName = process.env.AWS_BUCKET_NAME;
 const region = process.env.AWS_BUCKET_REGION;
-const accessKeyId = process.env.AWS_ACCESS_KEY;
-const secretAccessKey = process.env.AWS_ACCESS_SECRET;
 const expiryLimit = process.env.AWS_EXPIRY_LIMIT || 7200;
 
 const s3 = new S3({
-  region,
-  accessKeyId,
-  secretAccessKey,
+  region
 });
 
 // uploads a file to s3
@@ -25,7 +23,10 @@ exports.uploadFile = async (file) => {
       Body: image,
       Key: file.filename,
     };
-    return s3.upload(uploadParams).promise();
+    return new Upload({
+      client: s3,
+      params: uploadParams
+    }).done();
   } else {
     const image = await sharp(file.path)
       .jpeg({ quality: 60, force: true })
@@ -35,7 +36,10 @@ exports.uploadFile = async (file) => {
       Body: image,
       Key: file.filename,
     };
-    return s3.upload(uploadParams).promise();
+    return new Upload({
+      client: s3,
+      params: uploadParams
+    }).done();
   }
 };
 
@@ -59,7 +63,7 @@ async function getFileBinary(fileKey) {
     Key: fileKey,
     Bucket: bucketName,
   };
-  return s3.getObject(downloadParams).promise();
+  return s3.getObject(downloadParams);
 }
 
 exports.getFile = async (fileKey) => {
@@ -74,11 +78,15 @@ exports.getSignedUrl = async (fileKey) => {
   } else {
     const downloadParams = {
       Bucket: bucketName,
-      Key: fileKey,
-      Expires: expiryLimit,
+      Key: fileKey
     };
-    const signedUrl = await s3.getSignedUrlPromise("getObject", downloadParams);
-    await setImageURL(fileKey, signedUrl);
-    return signedUrl;
+    const command = new GetObjectCommand(downloadParams);
+    const signedUrl = await getSignedUrl(s3, command, { expiresIn: expiryLimit })
+    if (signedUrl) {
+      await setImageURL(fileKey, signedUrl);
+      return signedUrl;
+    } else {
+      return null;
+    }
   }
 };
