@@ -131,17 +131,17 @@ function Table(props) {
                 <td>
                   <div className='user-info__basic'>
                     <h5 className='mb-0 table-data dark'>
-                      {shipment.receiver.org
-                        ? shipment.receiver.org.name
+                      {shipment?.receiver?.org
+                        ? shipment.receiver.org?.name
                         : intelEnabled
-                          ? shipment.receiver.id
+                          ? shipment.receiver?.id
                           : "-"}
                     </h5>
                     <p className='mb-0 text-sm-2 grey'>
                       {`${receiverAddress?.firstLine
-                        ? receiverAddress?.firstLine
+                        ? receiverAddress.firstLine
                         : intelEnabled
-                          ? shipment.receiver.locationId
+                          ? shipment?.receiver?.locationId
                           : ""
                         }  ${receiverAddress?.secondLine
                           ? receiverAddress?.secondLine
