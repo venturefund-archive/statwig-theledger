@@ -195,7 +195,7 @@ export const AddLocationCard = (props) => {
                         id='referenceShipmentId'
                         name='addressTitle'
                         placeholder={t("Enter_Title")}
-                        value={values.addressTitle}
+                        value={addressTitle}
                         onBlur={handleBlur}
                         onChange={(e) => {
                           setAddressTitle(e.target.value);
@@ -407,7 +407,7 @@ export const AddLocationCard = (props) => {
                         placeholder={t("Enter_Address_Line")}
                         className='addlocP mt-2'
                         name='addressTitle'
-                        value={values.addressLine}
+                        value={addressLine}
                         onBlur={handleBlur}
                         onChange={(e) => {
                           setAddressLine(e.target.value);
@@ -449,7 +449,7 @@ export const AddLocationCard = (props) => {
                         placeholder={t("pincode")}
                         className='addlocP mt-2'
                         name='pincode'
-                        value={values.pincode}
+                        value={pincode}
                         onBlur={handleBlur}
                         onChange={(e) => {
                           setPincode(e.target.value);
