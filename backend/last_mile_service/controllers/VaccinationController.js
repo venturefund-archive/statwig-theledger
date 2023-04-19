@@ -385,15 +385,16 @@ exports.vaccinateIndividual = [
 				if(!atomId) {
 					throw new Error("AtomID is required for first dose!");
 				}
-				const existingInventory = await InventoryModel.findOne(
-					{ id: warehouse.warehouseInventory },
-					{ _id: 1, id: 1, inventoryDetails: { $elemMatch: { productId: productId } } },
-				);
-				if (existingInventory?.inventoryDetails?.length) {
-					if (existingInventory.inventoryDetails[0].quantity < 1) {
-						return apiResponse.ErrorResponse(res, "Inventory exhausted!");
-					}
-				}
+				// NOT NEEDED WITH NEW FRONTEND
+				// const existingInventory = await InventoryModel.findOne(
+				// 	{ id: warehouse.warehouseInventory },
+				// 	{ _id: 1, id: 1, inventoryDetails: { $elemMatch: { productId: productId } } },
+				// );
+				// if (existingInventory?.inventoryDetails?.length) {
+				// 	if (existingInventory.inventoryDetails[0].quantity < 1) {
+				// 		return apiResponse.ErrorResponse(res, "Inventory exhausted!");
+				// 	}
+				// }
 				const existingAtom = await AtomModel.findOne({
 					id: atomId,
 					status: "HEALTHY",
