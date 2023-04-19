@@ -6,7 +6,7 @@ const client = redis.createClient({
   },
   password: process.env.REDIS_PASSWORD,
 });
-client.connect();
+client.connect(); // Promise
 client.on("connect", () => {
   console.log("Connected to Redis");
 });
