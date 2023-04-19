@@ -1,35 +1,25 @@
 const redis = require("redis");
 const client = redis.createClient({
-  host: process.env.REDIS_HOST,
-  port: process.env.REDIS_PORT || 6379,
+  socket: {
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT
+  },
   password: process.env.REDIS_PASSWORD,
 });
-
+client.connect(); // Promise
 client.on("connect", () => {
-  console.log("Connected to Redis Cache");
+  console.log("Connected to Redis");
 });
-
 client.on("error", (err) => {
-  console.log("Error " + err);
+  console.log("Redis Error " + err);
 });
-
-const member = async (key, value) => {
-  return new Promise((resolve, reject) => {
-    client.sismember(key, value, (err, reply) => {
-      if (err) {
-        reject(err);
-      }
-      resolve(reply);
-    });
-  });
-};
 
 const checkPermissions = async (request, next) => {
   try {
     const required_permission = request["permissionRequired"];
     const request_role = request["role"];
-    for (var i = 0; i < required_permission.length; i++) {
-      const result = await member(request_role, required_permission[i]);
+    for (let i = 0; i < required_permission.length; i++) {
+      const result = await client.SISMEMBER(request_role, required_permission[i]);
       if (result === 1) {
         next({
           success: true,
@@ -58,8 +48,8 @@ const checkPermissionAwait = async (request) => {
   try {
     const required_permission = request["permissionRequired"];
     const request_role = request["role"];
-    for (var i = 0; i < required_permission.length; i++) {
-      const result = await member(request_role, required_permission[i]);
+    for (let i = 0; i < required_permission.length; i++) {
+      const result = await client.SISMEMBER(request_role, required_permission[i]);
       if (result === 1) {
         return true;
       } else {
@@ -74,38 +64,31 @@ const checkPermissionAwait = async (request) => {
   }
 };
 
-module.exports = {
-  checkPermissions: checkPermissions,
-  checkPermissionAwait: checkPermissionAwait,
-};
-
-/*
-const { createClient } = require("redis");
-
-(async () => {
+const getCachedData = async (key) => {
   try {
-    console.log(
-      process.env.REDIS_HOST,
-      process.env.REDIS_PORT,
-      process.env.REDIS_PASSWORD
-    );
-    const client = createClient({
-      socket: {
-        host: process.env.REDIS_HOST,
-        port: process.env.REDIS_PORT || 6379,
-      },
-      password: process.env.REDIS_PASSWORD,
-    });
-
-    client.on("error", (err) => console.log("Redis Client Error", err));
-
-    await client.connect();
-
-    await client.set("key", "value");
-    const value = await client.get("key");
-    console.log("value", value);
+    const result = await client.GET(key);
+    return result;
   } catch (err) {
     console.log(err);
+    return null;
   }
-})();
-*/
+};
+
+const setImageURL = async (key, value) => {
+  try {
+    const result = await client.SET(key, value, { EX: 3600 });
+    return result;
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+};
+
+module.exports = {
+  redisClient: client,
+  checkPermissions: checkPermissions,
+  checkPermissionAwait: checkPermissionAwait,
+  getCachedData: getCachedData,
+  getImageURL: getCachedData,
+  setImageURL: setImageURL,
+};
