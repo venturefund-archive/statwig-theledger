@@ -4,8 +4,7 @@ var EmployeeSchema = new mongoose.Schema(
     id: { type: String, required: false, unique: true },
     emailId: {
       type: String,
-      required: true,
-      unique: true,
+      default: null,
     },
     walletAddress: {
       type: String,

@@ -48,9 +48,10 @@ const NetworkingContainer = (props) => {
 
   const getBestsellers = async () => {
     const payload = {
-      reportWarehouse: reportWarehouse,
-      startDate: startDate
-    };
+			reportWarehouse: reportWarehouse,
+			startDate: startDate,
+			view: user?.type === "GoverningBody" ? "location" : null,
+		};
     const bestSellers = await getBestSellersReport(payload);
     if (bestSellers) setBestseller(bestSellers.data.bestSellers);
   };
@@ -58,24 +59,26 @@ const NetworkingContainer = (props) => {
   const getTopBestsellers = async () => {
     const bestSellers = await getBestSellerSummary(reportWarehouse);
     if (bestSellers) setTopBestseller(bestSellers.data.bestSellers);
-    if (bestSellers) setReportWarehouse(bestSellers.data.warehouseId);
+    // if (bestSellers) setReportWarehouse(bestSellers.data.warehouseId);
   };
   
   const getInstock = async (startDate) => {
     const payload = {
       reportWarehouse: reportWarehouse,
-      startDate: startDate
+      startDate: startDate,
+			view: user?.type === "GoverningBody" ? "location" : null,
     };
 
     const inStock = await getmanufacturerInStockReport(payload);
     if (inStock) setInStock(inStock.data.inStockReport);
-    if (inStock) setReportWarehouse(inStock.data.warehouseId);
+    // if (inStock) setReportWarehouse(inStock.data.warehouseId);
   };
 
   const getInstockFilters = async () => {
     const payload = {
       reportWarehouse: reportWarehouse,
-      startDate: startDate
+      startDate: startDate,
+			view: user?.type === "GoverningBody" ? "location" : null,
     };
     const inStockFilters = await getInStockFilterOptions(payload);
     const outStockFilters = await getOutStockFilterOptions(payload);
@@ -86,11 +89,12 @@ const NetworkingContainer = (props) => {
   const getOutStock = async () => {
     const payload = {
       reportWarehouse: reportWarehouse,
-      startDate: startDate
+      startDate: startDate,
+			view: user?.type === "GoverningBody" ? "location" : null,
     };
     const outStock = await getmanufacturerOutStockReport(payload);
     if (outStock) setOutStock(outStock.data.outOfStockReport);
-    if (outStock) setReportWarehouse(outStock.data.warehouseId);
+    // if (outStock) setReportWarehouse(outStock.data.warehouseId);
   };
   
   const getWarehouses = async (org) => {
