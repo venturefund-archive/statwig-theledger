@@ -5,6 +5,7 @@ const indexRouter = require("./routes/index");
 const apiResponse = require("./helpers/apiResponse");
 const { RbacCache } = require("./helpers/rbacCache");
 const cors = require("cors");
+const helmet = require('helmet')
 
 // DB connection
 const MONGODB_URL = process.env.MONGODB_URL;
@@ -21,11 +22,7 @@ mongoose
       console.log("Connected to %s", MONGODB_URL);
       console.log("RBAC Service is running ... \n");
     }
-    try {
-      RbacCache();
-    } catch (err) {
-      console.log(err);
-    }
+    RbacCache();
   })
   .catch((err) => {
     console.error("App starting error:", err.message);
@@ -42,6 +39,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 //To allow cross-origin requests
+app.use(helmet())
 app.use(cors());
 
 //Route Prefixes

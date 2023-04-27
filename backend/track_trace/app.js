@@ -5,6 +5,7 @@ const indexRouter = require("./routes/index");
 const apiRouter = require("./routes/api");
 const apiResponse = require("./helpers/apiResponse");
 const cors = require("cors");
+const helmet = require('helmet')
 const swaggerUi = require("swagger-ui-express");
 const openApiDocumentation = require("./openApiDocumentation");
 
@@ -35,6 +36,7 @@ mongoose
 if (process.env.NODE_ENV !== "test") {
   app.use(logger("dev"));
 }
+app.use(helmet())
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openApiDocumentation));

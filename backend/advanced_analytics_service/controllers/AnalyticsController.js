@@ -20,15 +20,18 @@ const S2_ORG = "S2";
 const { batchDelKeysByPattern } = require("../helpers/utility");
 const redis = require("redis");
 const client = redis.createClient({
-  host: process.env.REDIS_HOST,
-  port: process.env.REDIS_PORT || 6379,
+  socket: {
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT
+  },
   password: process.env.REDIS_PASSWORD,
 });
+client.connect(); // Promise
 client.on("connect", () => {
   console.log("Connected to Redis");
 });
 client.on("error", (err) => {
-  console.log("Error " + err);
+  console.log("Redis Error " + err);
 });
 
 const DATE_FORMAT = "YYYY-MM-DD";
@@ -1126,17 +1129,14 @@ exports.getStatsByBrand = [
     try {
       const filters = req.query;
       const filterString = "GSB" + JSON.stringify(filters);
-      var bool = false;
-      client.get(filterString, (err, data) => {
-        if (!err && data != null) {
-          bool = true;
-          return apiResponse.successResponseWithData(
-            res,
-            "HIT Cache",
-            JSON.parse(data)
-          );
-        }
-      });
+      const data = await client.GET(filterString);
+      if (data != null) {
+        return apiResponse.successResponseWithData(
+          res,
+          "HIT Cache",
+          JSON.parse(data)
+        );
+      }
       let warehouseIds = await _getWarehouseIds(filters);
       today = new Date();
       let analyticsFilter = getAnalyticsFilterConditions(filters, warehouseIds);
@@ -1271,18 +1271,12 @@ exports.getStatsByBrand = [
         arr.products.push(product.product);
         if (index == Products.length - 1) Analytics.push(arr);
       }
-      client.set(
+      const value = await client.SET(
         filterString,
-        JSON.stringify(Analytics),
-        function (err, value) {
-          if (err) {
-            console.log(err);
-          } else {
-            console.log("REDIS set for GSB", value);
-          }
-        }
-      );
-      if (!bool) {
+        JSON.stringify(Analytics))
+      console.log("REDIS set for GSB", value);
+
+      if (!data) {
         return apiResponse.successResponseWithData(
           res,
           "Operation success",
@@ -1427,18 +1421,14 @@ exports.getStatsByOrg = [
     try {
       const filters = req.query;
       const filterString = "GSO" + JSON.stringify(filters);
-      var bool = false;
-      client.get(filterString, (err, data) => {
-        if (!err && data != null) {
-          bool = true;
-          return apiResponse.successResponseWithData(
-            res,
-            "HIT Cache",
-            JSON.parse(data)
-          );
-        }
-      });
-
+      const data = await client.GET(filterString)
+      if (data) {
+        return apiResponse.successResponseWithData(
+          res,
+          "HIT Cache",
+          JSON.parse(data)
+        );
+      }
       let organizations = await OrganisationModel.aggregate([
         {
           $match: getFilterConditions(filters),
@@ -1507,19 +1497,11 @@ exports.getStatsByOrg = [
           aggregateSalesStats(prevMonthAnalytics);
       }
 
-      client.set(
+      await client.SET(
         filterString,
-        JSON.stringify(organizations),
-        function (err, value) {
-          if (err) {
-            console.log(err);
-          } else {
-            console.log("set Cache for GSO", value);
-          }
-        }
-      );
-
-      if (!bool) {
+        JSON.stringify(organizations));
+      console.log("set Cache for GSO")
+      if (!data) {
         return apiResponse.successResponseWithData(
           res,
           "Operation success",
@@ -2245,17 +2227,14 @@ exports.getSupplierPerformance = [
       const orgType = req.query.supplierType;
       const location = req.query.location ? req.query.location : "";
       const keyString = "GSP" + orgType + location;
-      var bool = false;
-      client.get(keyString, (err, data) => {
-        if (!err && data != null) {
-          bool = true;
-          return apiResponse.successResponseWithData(
-            res,
-            "HIT Cache",
-            JSON.parse(data)
-          );
-        }
-      });
+      const data = await client.GET(keyString);
+      if (data) {
+        return apiResponse.successResponseWithData(
+          res,
+          "HIT Cache",
+          JSON.parse(data)
+        );
+      }
 
       let matchCondition = {};
 
@@ -2373,18 +2352,9 @@ exports.getSupplierPerformance = [
         supplier.targets = await getSupplierTargets(ratingSchema);
       }
 
-      client.set(
-        keyString,
-        JSON.stringify(supplierOrgs),
-        function (err, value) {
-          if (err) {
-            console.log(err);
-          } else {
-            console.log("Cached GSP", value);
-          }
-        }
-      );
-      if (!bool) {
+      await client.SET(keyString, JSON.stringify(supplierOrgs));
+
+      if (data) {
         return apiResponse.successResponseWithData(
           res,
           "Operation success",
@@ -2530,17 +2500,14 @@ exports.getStatsBySKU = [
     try {
       const filters = req.query;
       const filterString = "GSS" + JSON.stringify(filters);
-      var bool = false;
-      client.get(filterString, (err, data) => {
-        if (!err && data != null) {
-          bool = true;
-          return apiResponse.successResponseWithData(
-            res,
-            "HIT Cache",
-            JSON.parse(data)
-          );
-        }
-      });
+      const data = await client.GET(filterString);
+      if (data) {
+        return apiResponse.successResponseWithData(
+          res,
+          "HIT Cache",
+          JSON.parse(data)
+        );
+      }
 
       const monthNames = [
         "January",
@@ -2676,15 +2643,9 @@ exports.getStatsBySKU = [
         });
       }
 
-      client.set(filterString, JSON.stringify(response), function (err, value) {
-        if (err) {
-          console.log(err);
-        } else {
-          console.log("Cache Updated for GSS", value);
-        }
-      });
+      await client.SET(filterString, JSON.stringify(response))
 
-      if (!bool) {
+      if (!data) {
         return apiResponse.successResponseWithData(
           res,
           "Operation Success",

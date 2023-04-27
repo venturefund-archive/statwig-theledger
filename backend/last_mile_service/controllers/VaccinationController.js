@@ -382,7 +382,7 @@ exports.vaccinateIndividual = [
 			const warehouse = await WarehouseModel.findOne({ id: warehouseId });
 			// Open a new bottle if first dose
 			if (!vaccineVialId) {
-				if(!atomId) {
+				if (!atomId) {
 					throw new Error("AtomID is required for first dose!");
 				}
 				// NOT NEEDED WITH NEW FRONTEND
