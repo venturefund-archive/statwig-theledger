@@ -1,4 +1,4 @@
-FROM node:lts as react_build 
+FROM node:lts AS react_build 
 
 ENV NODE_ENV=production
 
