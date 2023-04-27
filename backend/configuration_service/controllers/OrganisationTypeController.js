@@ -1,16 +1,13 @@
 const OrganisationModel = require("../models/ConfigurationModel");
-const apiResponse = require("../utils/apiResponse");
+const apiResponse = require("../helpers/apiResponse");
 const auth = require("../middlewares/jwt");
-const checkToken = require("../middlewares/middleware").checkToken;
 const CounterModel = require("../models/CounterModel");
 
 exports.addNewOrgTypeInstance = [
   auth,
   async (req, res) => {
     try {
-      const { id, name } = req.body;
-      //instance created
-      const incrementCounterOrg = await CounterModel.update(
+      await CounterModel.update(
         {
           "counters.name": "orgId",
         },
@@ -25,9 +22,9 @@ exports.addNewOrgTypeInstance = [
         { "counters.name": "orgId" },
         { "counters.$": 1 }
       );
-      organisatId =
+      const organisatId =
         orgCounter.counters[0].format + orgCounter.counters[0].value;
-      const incrementCounterWarehouse = await CounterModel.update(
+      await CounterModel.update(
         {
           "counters.name": "warehouseId",
         },
@@ -42,7 +39,7 @@ exports.addNewOrgTypeInstance = [
         { "counters.name": "warehouseId" },
         { "counters.$": 1 }
       );
-      configid =
+      const configid =
         warehouseCounter.counters[0].format +
         warehouseCounter.counters[0].value;
       const u_id = configid;
@@ -50,7 +47,7 @@ exports.addNewOrgTypeInstance = [
       const organisationModel = new OrganisationModel({
         id: u_id,
       });
-      const addtype = organisationModel.organisationTypes.push({
+      organisationModel.organisationTypes.push({
         id: Org_id,
         name: req.body.name,
         approvalAuthority: 0,
@@ -58,7 +55,7 @@ exports.addNewOrgTypeInstance = [
       const result = await organisationModel.save();
       return apiResponse.successResponseWithData(
         res,
-        "New Organisation Type Instance Addded",
+        "New Organization Type Instance Added",
         result
       );
     } catch (error) {
@@ -73,7 +70,7 @@ exports.addNewOrgType = [
   async (req, res) => {
     try {
       //instance created
-      const incrementCounterOrg = await CounterModel.update(
+      await CounterModel.update(
         {
           "counters.name": "orgId",
         },
@@ -88,23 +85,23 @@ exports.addNewOrgType = [
         { "counters.name": "orgId" },
         { "counters.$": 1 }
       );
-      organisatId =
+      const organisatId =
         orgCounter.counters[0].format + orgCounter.counters[0].value;
 
       const Org_id = organisatId;
-      var newObject2 = {
+      const newObject2 = {
         id: Org_id,
         name: req.body.name,
         approvalAuthority: 0,
       };
-      const organisations = await OrganisationModel.update(
+      const organizations = await OrganisationModel.update(
         { id: req.query.id },
         { $push: { organisationTypes: newObject2 } }
       );
       return apiResponse.successResponseWithData(
         res,
-        "Organisation Type Added",
-        organisations
+        "Organization Type Added",
+        organizations
       );
     } catch (error) {
       console.log(error.message);
@@ -143,14 +140,14 @@ exports.getOrganizationsByType = [
   async (req, res) => {
     try {
       const organisationId = req.query.id;
-      const organisations = await OrganisationModel.find(
+      const organizations = await OrganisationModel.find(
         { id: organisationId },
         "organisationTypes.id organisationTypes.name"
       );
       return apiResponse.successResponseWithData(
         res,
         "Operation success",
-        organisations
+        organizations
       );
     } catch (err) {
       return apiResponse.ErrorResponse(res, err);
@@ -164,11 +161,11 @@ exports.getOrganizationsByType = [
 //     try{
 //       checkToken(req, res, async (result) => {
 //         if (result.success) {
-//           const organisations=await OrganisationModel.find({},'organisationTypes.id organisationTypes.name')
+//           const organizations=await OrganisationModel.find({},'organisationTypes.id organisationTypes.name')
 //           return apiResponse.successResponseWithData(
 //             res,
-//             "Success - Organisations Types List",
-//             organisations
+//             "Success - Organizations Types List",
+//             organizations
 //           );
 //       } else{
 //         return apiResponse.unauthorizedResponse(res, "Auth Failed")
@@ -211,16 +208,15 @@ exports.getWarehouseByType = [
   async (req, res) => {
     try {
       const organisationId = req.query.id;
-      console.log(organisationId);
-      const organisations = await OrganisationModel.find(
+      const organizations = await OrganisationModel.find(
         { id: organisationId },
         "warehouseTypes.id warehouseTypes.name"
       );
-      console.log(organisations);
+      console.log(organizations);
       return apiResponse.successResponseWithData(
         res,
         "Operation success",
-        organisations
+        organizations
       );
     } catch (err) {
       return apiResponse.ErrorResponse(res, err);
@@ -257,9 +253,7 @@ exports.addNewWarehouseTypeInstance = [
   auth,
   async (req, res) => {
     try {
-      const { id, name } = req.body;
-      //instance created
-      const incrementCounterOrg = await CounterModel.update(
+      await CounterModel.update(
         {
           "counters.name": "orgId",
         },
@@ -274,10 +268,8 @@ exports.addNewWarehouseTypeInstance = [
         { "counters.name": "orgId" },
         { "counters.$": 1 }
       );
-      configid = orgCounter.counters[0].format + orgCounter.counters[0].value;
-
-      //organisationId = uniqid('org-');
-      const incrementCounterWarehouse = await CounterModel.update(
+      const configid = orgCounter.counters[0].format + orgCounter.counters[0].value;
+      await CounterModel.update(
         {
           "counters.name": "warehouseId",
         },
@@ -292,7 +284,7 @@ exports.addNewWarehouseTypeInstance = [
         { "counters.name": "warehouseId" },
         { "counters.$": 1 }
       );
-      organisatId =
+      const organisatId =
         warehouseCounter.counters[0].format +
         warehouseCounter.counters[0].value;
 
@@ -301,7 +293,7 @@ exports.addNewWarehouseTypeInstance = [
       const organisationModel = new OrganisationModel({
         id: u_id,
       });
-      const addtype = organisationModel.warehouseTypes.push({
+      organisationModel.warehouseTypes.push({
         id: Org_id,
         name: req.body.name,
       });
@@ -322,8 +314,8 @@ exports.addNewWarehouseType = [
   auth,
   async (req, res) => {
     try {
-      //instance created
-      const incrementCounterWarehouse = await CounterModel.update(
+
+      await CounterModel.update(
         {
           "counters.name": "warehouseId",
         },
@@ -338,20 +330,20 @@ exports.addNewWarehouseType = [
         { "counters.name": "warehouseId" },
         { "counters.$": 1 }
       );
-      organisatId =
+      const organisatId =
         warehouseCounter.counters[0].format +
         warehouseCounter.counters[0].value;
 
       const Org_id = organisatId;
-      var newObject2 = { id: Org_id, name: req.body.name };
-      const organisations = await OrganisationModel.update(
+      const newObject2 = { id: Org_id, name: req.body.name };
+      const organizations = await OrganisationModel.update(
         { id: req.query.id },
         { $push: { warehouseTypes: newObject2 } }
       );
       return apiResponse.successResponseWithData(
         res,
         "Warehouse Type Added",
-        organisations
+        organizations
       );
     } catch (error) {
       console.log(error.message);

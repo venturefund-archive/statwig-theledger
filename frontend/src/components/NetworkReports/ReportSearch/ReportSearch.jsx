@@ -48,7 +48,7 @@ export default function ReportSearch({ updateSearchParams }) {
 
   return (
 		<section className="ReportSearch_container">
-			<h1 className="Report_page_title_ts">Search here for units</h1>
+			<h1 className="Report_page_title_ts">{t('Search here for units')}</h1>
 			<form onSubmit={handleSubmit(onSubmit)}>
 				<div className="main_searchbar_wrapper">
 					<div className="search_icon_wrap">
@@ -130,7 +130,7 @@ export default function ReportSearch({ updateSearchParams }) {
 					</div>
 					<div className="null_space"></div>
 					<button type="submit" className="result_search_button">
-						Search
+						{t('search')}
 					</button>
 				</div>
 			</form>

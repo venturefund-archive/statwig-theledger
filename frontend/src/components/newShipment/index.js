@@ -290,7 +290,6 @@ const NewShipment = (props) => {
 					break;
 				}
 			}
-
 			if (check === 1) {
 				setShipmentError(t("check_product_quantity"));
 				setOpenShipmentFail(true);
@@ -1114,6 +1113,7 @@ const NewShipment = (props) => {
 													placeholderText={t("enter") + " " + t("shipment_date")}
 													onChange={(date) => {
 														setFieldValue("shipmentDate", date);
+														setFieldValue("estimateDeliveryDate", "");
 													}}
 													showYearDropdown
 													dateFormatCalendar="MMMM"
@@ -1172,6 +1172,7 @@ const NewShipment = (props) => {
 													className="date"
 													placeholderText={t("enter_delivery_date")}
 													onChange={(date) => {
+
 														setFieldValue("estimateDeliveryDate", date);
 														// setEstimateDeliveryDate(date);
 													}}
@@ -1180,7 +1181,7 @@ const NewShipment = (props) => {
 															? new Date(Date.parse(values.estimateDeliveryDate))
 															: values.estimateDeliveryDate
 													}
-													minDate={new Date()}
+													minDate={values.shipmentDate ? new Date(values.shipmentDate) : new Date()}
 													onKeyDown={(e) => e.keyCode !== 8 && e.preventDefault()}
 													showYearDropdown
 													dateFormatCalendar="MMMM"

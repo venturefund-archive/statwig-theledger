@@ -27,7 +27,6 @@ const Tracing = (props) => {
     setOpenShipping(false);
   };
 
-
   const shippmentChainOfCustodyData = props.shippmentChainOfCustodyData;
   const { id } = props.match.params;
   if (!isAuthenticated("viewShipment")) props.history.push(`/profile`);

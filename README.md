@@ -161,7 +161,7 @@ sudo service docker restart
 To connect to Redis Instance
 
 ```bash
-redis-cli -h <Hostname> -a StaTwig2021
+redis-cli -h <Hostname> -a <password>
 ```
 
 ## References
