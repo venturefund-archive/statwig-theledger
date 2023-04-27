@@ -46,7 +46,7 @@ export default function StatwigHeader() {
   const [image, setImage] = useState("");
 
   useEffect(() => {
-    let userName = user?.firstName + " " + user?.lastName;
+    let userName =  user.lastName ?user?.firstName + " " + user?.lastName: user?.firstName;
     let org = user?.organisation?.split("/")[0];
     if (user?.photoId) {
       getImage(user?.photoId).then((result) => {
