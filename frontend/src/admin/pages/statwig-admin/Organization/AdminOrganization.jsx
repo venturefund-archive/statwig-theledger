@@ -33,12 +33,14 @@ export default function AdminOrganization(props) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const [tableFlag, setTableFlag] = useState(false);
+  const [updateStatusFlag, setUpdateStatusFlag] = useState(false);
+
   const [orgStatus, setOrgStatus] = useState("");
   const [searchOrgByName, setSearchOrg] = useState("");
 
   useEffect(() => {
     dispatch(getOrgAnalytics());
-  }, [dispatch]);
+  }, [dispatch,updateStatusFlag]);
 
   const { orgAnalytics } = useSelector((state) => state.organisationReducer);
   const { totalCount, activeCount, inactiveCount } = orgAnalytics;
@@ -142,7 +144,7 @@ export default function AdminOrganization(props) {
 									</div>
 								</div>
 							</div>
-							<OrganizationTable t={t} tableFlag={tableFlag} orgStatus={orgStatus}  searchOrgByName={searchOrgByName}/>
+							<OrganizationTable t={t} tableFlag={tableFlag} orgStatus={orgStatus} updateStatusFlag={updateStatusFlag} setUpdateStatusFlag={setUpdateStatusFlag}  searchOrgByName={searchOrgByName}/>
 						</div>
 					</div>
 				</div>

@@ -4,8 +4,8 @@ WORKDIR /src
 
 COPY . /src
 
-RUN yarn install
+RUN yarn --production
 
 EXPOSE 3020
 
-CMD yarn run start
+CMD yarn start

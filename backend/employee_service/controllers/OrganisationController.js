@@ -250,7 +250,7 @@ function getOrgCondition(query) {
 	
 	if (query.status && query.status != "") {
 		matchCondition.status = query.status;
-	} else {
+	}  else {
 		matchCondition.status = {$in: ["ACTIVE", "DEACTIVATED"]}
 	}
 
@@ -547,7 +547,7 @@ exports.getOrgAnalytics = [
 				{
 					$facet: {
 						total: [
-							{ $match: {} },
+							{ $match: {status:  {$in: ["ACTIVE", "DEACTIVATED"]} }},
 							{
 								$group: {
 									_id: null,

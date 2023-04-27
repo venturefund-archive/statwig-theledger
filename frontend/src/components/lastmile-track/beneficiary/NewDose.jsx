@@ -39,7 +39,7 @@ export default function NewDose(props) {
 		getValues
   } = useForm({
     defaultValues: {
-      gender: defaultValues?.gender || "",
+      gender: {value:defaultValues?.gender,display:defaultValues?.gender} || "",
       age:
         defaultValues?.ageMonths > 0
           ? defaultValues.ageMonths

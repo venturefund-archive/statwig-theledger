@@ -10,7 +10,7 @@ import { TablePagination } from "@mui/material";
 import { getOrgs, updateOrg } from "../../../../actions/organisationActions";
 import { useDispatch, useSelector } from "react-redux";
 
-export default function OrganizationTable({ searchOrgByName, orgStatus, tableFlag, t }) {
+export default function OrganizationTable({ searchOrgByName, orgStatus, tableFlag, t,updateStatusFlag,setUpdateStatusFlag }) {
 	const dispatch = useDispatch();
 	const [page, setPage] = React.useState(0);
 	const [rowsPerPage, setRowsPerPage] = React.useState(10);
@@ -39,6 +39,7 @@ export default function OrganizationTable({ searchOrgByName, orgStatus, tableFla
 			alert(result.data.data.message);
 		} else {
 			toggleRefresh(!refresh);
+			setUpdateStatusFlag(!updateStatusFlag)
 		}
 	};
 

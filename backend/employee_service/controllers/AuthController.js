@@ -1985,6 +1985,8 @@ exports.getOrganizationsByTypeForAbInBev = [
 			matchCondition.status = "ACTIVE";
 			if (filters.status && filters.status !== "") {
 				matchCondition.status = filters.status;
+			}else {
+				matchCondition.status = {$in: ["ACTIVE", "DEACTIVATED"]}
 			}
 			if (filters.state && filters.state !== "") {
 				matchWarehouseCondition["warehouseDetails.warehouseAddress.state"] = new RegExp(
@@ -2765,7 +2767,7 @@ exports.getOrgUserAnalytics = [
 				{
 					$facet: {
 						total: [
-							{ $match: {} },
+							{ $match: {accountStatus:  {$in: ["ACTIVE", "DEACTIVATED","REJECTED"]} }},
 							{
 								$group: {
 									_id: null,
