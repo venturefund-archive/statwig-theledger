@@ -644,5 +644,13 @@
   "Last_name_required":"¡Se requiere apellido!",
   "mfg_greater_than_today": "La fecha de fabricación no puede ser posterior a hoy!",
   "mfg_greater_than_exp": "La fecha de fabricación no puede ser posterior a la fecha de caducidad!",
-  "choose_batch_to_continue": "Elija lote para continuar ->"
+  "choose_batch_to_continue": "Elija lote para continuar ->",
+  "Out of stocks":"No disponible",
+  "In-Stock":"En stock",
+  "Near Expiration":"Cerca del vencimiento",
+  "Expired":"Caducada",
+  "Best Seller":"Mejor vendedora",
+  "Location Details":"Detalles de ubicación",
+  "No of Days":"Nº de días",
+  "Product Name":"nombre del producto"
 }
