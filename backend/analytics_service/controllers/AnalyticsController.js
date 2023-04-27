@@ -2269,12 +2269,13 @@ exports.bestSellers = [
 				id: req.user.organisationId,
 			});
 			const reportType = req.body?.reportType || null;
+			const viewType = req.body?.view || null;
 
 			let bestSellers;
 			let totalCount;
 			const isGoverningBody = organisation?.type === "GoverningBody";
 
-			if (isGoverningBody) {
+			if (isGoverningBody && viewType !== "location") {
 				let res = await GovtBodyBestsellers(warehouse, date, req.body);
 				bestSellers = res[0].paginatedResults;
 				totalCount = res[0].totalCount;
@@ -2284,7 +2285,7 @@ exports.bestSellers = [
 						? true
 						: false;
 				let matchQuery = {};
-				if (!isDist) {
+				if (!isDist && viewType !== "location") {
 					matchQuery[`manufacturerId`] = req.user.organisationId;
 				} else {
 					if (req.user.warehouseId && req.user.warehouseId !== req.body.warehouseId) {
@@ -2572,13 +2573,14 @@ exports.inStockReport = [
 				? format(startOfMonth(new Date(req.body.date)), "yyyy-MM-dd")
 				: format(startOfMonth(new Date()), "yyyy-MM-dd");
 			const reportType = req.body.reportType || null;
+			const viewType = req.body?.view || null;
 			const organisation = await OrganisationModel.findOne({
 				id: req.user.organisationId,
 			});
 			let inStockReport;
 			let totalCount;
 			const isGoverningBody = organisation?.type === "GoverningBody";
-			if (isGoverningBody) {
+			if (isGoverningBody && viewType !== "location") {
 				// Default warehouseId
 				let res = await GovtBodyInstock(warehouse, date, req.body);
 				inStockReport = res[0].paginatedResults;
@@ -2594,7 +2596,7 @@ exports.inStockReport = [
 				const { productCategory, id } = req.body;
 				if (id) matchQuery3[`_id`] = id;
 				if (productCategory) matchQuery3[`productCategory`] = productCategory;
-				if (!isDist) {
+				if (!isDist && viewType !== "location") {
 					matchQuery2[`manufacturerId`] = req.user.organisationId;
 				} else {
 					if (req.user.warehouseId && req.user.warehouseId !== req.body.warehouseId) {
@@ -2770,13 +2772,14 @@ exports.outOfStockReport = [
 			const warehouse = req.body.warehouseId || req.user.warehouseId;
 			const date = req.body.date || format(startOfMonth(new Date()), "yyyy-MM-dd");
 			const reportType = req.body.reportType || null;
+			const viewType = req.body?.view || null;
 			const organisation = await OrganisationModel.findOne({
 				id: req.user.organisationId,
 			});
 			let outOfStockReport;
 			let totalCount;
 			const isGoverningBody = organisation?.type === "GoverningBody";
-			if (isGoverningBody) {
+			if (isGoverningBody && viewType !== "location") {
 				let res = await GovtBodyOutstock(warehouse, date, req.body);
 				outOfStockReport = res[0].paginatedResults;
 				totalCount = res[0].totalCount;
@@ -2793,7 +2796,7 @@ exports.outOfStockReport = [
 				if (id) matchQuery3[`_id`] = id;
 				if (productCategory) matchQuery3[`productCategory`] = productCategory;
 
-				if (!isDist) {
+				if (!isDist && viewType !== "location") {
 					matchQuery2[`manufacturerId`] = req.user.organisationId;
 				} else {
 					matchQuery[`totalSales`] = {
@@ -2998,7 +3001,7 @@ exports.expiredStockReport = [
 				const { productCategory, id } = req.body;
 				if (id) matchQuery3[`_id`] = id;
 				if (productCategory) matchQuery3[`productCategory`] = productCategory;
-				if (!isDist) {
+				if (!isDist && viewType !== "location") {
 					matchQuery2[`manufacturerId`] = req.user.organisationId;
 				} else {
 					if (req.user.warehouseId && req.user.warehouseId !== req.body.warehouseId) {
@@ -3256,7 +3259,7 @@ exports.nearExpiryStockReport = [
 				const { productCategory, id } = req.body;
 				if (id) matchQuery3[`_id`] = id;
 				if (productCategory) matchQuery3[`productCategory`] = productCategory;
-				if (!isDist) {
+				if (!isDist && viewType !== "location") {
 					matchQuery2[`manufacturerId`] = req.user.organisationId;
 				} else {
 					if (req.user.warehouseId && req.user.warehouseId !== req.body.warehouseId) {
@@ -3487,7 +3490,8 @@ exports.inStockFilterOptions = [
 			const date = req.body.date
 				? format(startOfMonth(new Date(req.body.date)), "yyyy-MM-dd")
 				: format(startOfMonth(new Date()), "yyyy-MM-dd");
-			const organisation = await OrganisationModel.findOne({
+				const viewType = req.body?.view || null;
+				const organisation = await OrganisationModel.findOne({
 				id: req.user.organisationId,
 			});
 			const isDist =
@@ -3497,7 +3501,7 @@ exports.inStockFilterOptions = [
 			let inStockReport;
 			let Filters;
 
-			if (!isDist) {
+			if (!isDist && viewType !== "location") {
 				// matchQuery2[`manufacturerId`] = req.user.organisationId;
 				inStockReport = await GovtBodyInstock(warehouse, date, req.body);
 				Filters = inStockReport[0].paginatedResults;
@@ -3669,6 +3673,7 @@ exports.outOfStockFilterOptions = [
 		try {
 			const warehouse = req.body.warehouseId || req.user.warehouseId;
 			const date = req.body.date || format(startOfMonth(new Date()), "yyyy-MM-dd");
+			const viewType = req.body?.view || null;
 			const organisation = await OrganisationModel.findOne({
 				id: req.user.organisationId,
 			});
@@ -3679,7 +3684,7 @@ exports.outOfStockFilterOptions = [
 			let matchQuery2 = {};
 			let outOfStockReport;
 			let Filters;
-			if (!isDist) {
+			if (!isDist && viewType !== "location") {
 				// matchQuery2[`manufacturerId`] = req.user.organisationId;
 				outOfStockReport = await GovtBodyOutstock(warehouse, date, req.body);
 				Filters = outOfStockReport[0].paginatedResults;
@@ -3887,7 +3892,7 @@ exports.bestSellerFilterOptions = [
 			}
 
 			let Filters;
-			if (!isDist) {
+			if (!isDist && viewType !== "location") {
 				matchQuery[`manufacturerId`] = req.user.organisationId;
 			} else {
 				if (req.user.warehouseId && req.user.warehouseId !== req.body.warehouseId) {
