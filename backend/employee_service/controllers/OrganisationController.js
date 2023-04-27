@@ -700,6 +700,23 @@ exports.updateOrg = [
 					},
 				);
 			}
+			if (status === "DEACTIVATED") {
+				await WarehouseModel.updateMany(
+					{ id: org.warehouses },
+					{ $set: { status: "DEACTIVATED" } },
+				);
+
+				for (let i = 0; i < org.warehouses?.length; ++i) {
+					const currWarehouse = org.warehouses[i];
+					await EmployeeModel.updateMany(
+						{ warehouseId: currWarehouse },
+						{
+							$push: { pendingWarehouseId: currWarehouse },
+							$pull: { warehouseId: currWarehouse },
+						},
+					);
+				}
+			}
 			await EmployeeModel.findOneAndUpdate(
 				{ id: org.primaryContactId },
 				{
