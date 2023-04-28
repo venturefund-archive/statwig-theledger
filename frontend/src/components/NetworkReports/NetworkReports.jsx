@@ -20,31 +20,31 @@ function TabList({ Tab, setTab }) {
         className={`Tab_Link ${Tab === "out_stock" && "active"}`}
         onClick={() => setTab("out_stock")}
       >
-        <p className="vl-subheading">{t("Out of stocks")}</p>
+        <p className="vl-subheading">{t("out_of_stock")}</p>
       </div>
       <div
         className={`Tab_Link ${Tab === "in_stock" && "active"}`}
         onClick={() => setTab("in_stock")}
       >
-        <p className="vl-subheading">{t('In-Stock')}</p>
+        <p className="vl-subheading">{t('in_stock')}</p>
       </div>
       <div
         className={`Tab_Link ${Tab === "near_expire" && "active"}`}
         onClick={() => setTab("near_expire")}
       >
-        <p className="vl-subheading">{t('Near Expiration')}</p>
+        <p className="vl-subheading">{t('near_expiration')}</p>
       </div>
       <div
         className={`Tab_Link ${Tab === "expired" && "active"}`}
         onClick={() => setTab("expired")}
       >
-        <p className="vl-subheading">{t('Expired')}</p>
+        <p className="vl-subheading">{t('expired')}</p>
       </div>
       <div
         className={`Tab_Link ${Tab === "best_seller" && "active"}`}
         onClick={() => setTab("best_seller")}
       >
-        <p className="vl-subheading">{t('Best Seller')}</p>
+        <p className="vl-subheading">{t('best_seller')}</p>
       </div>
     </div>
   );
@@ -97,7 +97,7 @@ export default function NetworkReports() {
 					onClick={() => history.push("/network")}
 					style={{ fontSize: "14px", width: "18%", color: "teal", borderRadius: "10%" }}
 				>
-					{t('Switch to Location View')}
+					{t('switch_to_location_view')}
 				</Button>
 			</div>
 
@@ -125,8 +125,8 @@ export default function NetworkReports() {
 					)}
 				</div>
 				<div className="NetworkReports_Analytics_container">
-					<ReportAnalytics variant={1} title="Out of stocks" value={analytics.outStock} />
-					<ReportAnalytics variant={2} title="In-Stock" value={analytics.inStock} />
+					<ReportAnalytics variant={1} title="out_of_stock" value={analytics.outStock} />
+					<ReportAnalytics variant={2} title="in_stock" value={analytics.inStock} />
 					<ReportAnalytics variant={3} title="best_seller" value={analytics.bestSellers} />
 				</div>
 				<div className="NetworkReports_Table_Wrapper">

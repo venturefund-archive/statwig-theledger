@@ -31,7 +31,7 @@ function TableHeader({
 					className="mi_report_table_head"
 					onClick={(event) => handleClick(event, "productCategory")}
 				>
-					<p className="mi-body-sm f-400 mi-reset grey-400">Product category</p>
+					<p className="mi-body-sm f-400 mi-reset grey-400">{t("product_category")}</p>
 					<i class="fa-solid fa-sort grey-400"></i>
 				</div>
 				<Filterbar
@@ -51,7 +51,7 @@ function TableHeader({
 					className="mi_report_table_head"
 					onClick={(event) => handleClick(event, "productName")}
 				>
-					<p className="mi-body-sm f-400 mi-reset grey-400">Product Name</p>
+					<p className="mi-body-sm f-400 mi-reset grey-400">{t("product_name")}</p>
 					<i class="fa-solid fa-sort grey-400"></i>
 				</div>
 				<Filterbar
@@ -71,7 +71,7 @@ function TableHeader({
 					className="mi_report_table_head"
 					onClick={(event) => handleClick(event, "manufacturer")}
 				>
-					<p className="mi-body-sm f-400 mi-reset grey-400">Manufacturer</p>
+					<p className="mi-body-sm f-400 mi-reset grey-400">{t("manufacturer")}</p>
 					<i class="fa-solid fa-sort grey-400"></i>
 					<Filterbar
 						title={t("manufacturer")}
@@ -88,13 +88,13 @@ function TableHeader({
 			</TableCell>
       <TableCell>
         <div className="mi_report_table_head">
-          <p className="mi-body-sm f-400 mi-reset grey-400">Batch Number</p>
+          <p className="mi-body-sm f-400 mi-reset grey-400">{t("batch_number")}</p>
           {/* <i class="fa-solid fa-sort grey-400"></i> */}
         </div>
       </TableCell>
       <TableCell>
         <div className="mi_report_table_head">
-          <p className="mi-body-sm f-400 mi-reset grey-400">Expiry Date</p>
+          <p className="mi-body-sm f-400 mi-reset grey-400">{t("exp_date")}</p>
           {/* <i class="fa-solid fa-sort grey-400"></i> */}
         </div>
       </TableCell>
@@ -103,7 +103,7 @@ function TableHeader({
 					className="mi_report_table_head"
 					onClick={(event) => handleClick(event, "organisation")}
 				>
-					<p className="mi-body-sm f-400 mi-reset grey-400">Organization Name</p>
+					<p className="mi-body-sm f-400 mi-reset grey-400">{t("organisation_name")}</p>
 					<i class="fa-solid fa-sort grey-400"></i>
 					<Filterbar
 						title={t("organisation_name")}
@@ -120,7 +120,7 @@ function TableHeader({
 			</TableCell>
       <TableCell>
         <div className="mi_report_table_head">
-          <p className="mi-body-sm f-400 mi-reset grey-400">Location Details</p>
+          <p className="mi-body-sm f-400 mi-reset grey-400">{t("location_details")}</p>
           {/* <i class="fa-solid fa-sort grey-400"></i> */}
         </div>
       </TableCell>

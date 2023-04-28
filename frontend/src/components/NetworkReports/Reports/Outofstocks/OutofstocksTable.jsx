@@ -37,7 +37,7 @@ function TableHeader({
 					className="mi_report_table_head"
 					onClick={(event) => handleClick(event, "productCategory")}
 				>
-					<p className="mi-body-sm f-400 mi-reset grey-400">{t('Product_Category')}</p>
+					<p className="mi-body-sm f-400 mi-reset grey-400">{t('product_category')}</p>
 					<i class="fa-solid fa-sort grey-400"></i>
 				</div>
 				<Filterbar
@@ -57,7 +57,7 @@ function TableHeader({
 					className="mi_report_table_head"
 					onClick={(event) => handleClick(event, "productName")}
 				>
-					<p className="mi-body-sm f-400 mi-reset grey-400">{t('Product Name')}</p>
+					<p className="mi-body-sm f-400 mi-reset grey-400">{t('product_name')}</p>
 					<i class="fa-solid fa-sort grey-400"></i>
 				</div>
 				<Filterbar
@@ -114,13 +114,13 @@ function TableHeader({
 			</TableCell>
 			<TableCell>
 				<div className="mi_report_table_head">
-					<p className="mi-body-sm f-400 mi-reset grey-400">{t('Location Details')}</p>
+					<p className="mi-body-sm f-400 mi-reset grey-400">{t('location_details')}</p>
 					{/* <i class="fa-solid fa-sort grey-400"></i> */}
 				</div>
 			</TableCell>
 			<TableCell>
 				<div className="mi_report_table_head">
-					<p className="mi-body-sm f-400 mi-reset grey-400">{t('No of Days')}</p>
+					<p className="mi-body-sm f-400 mi-reset grey-400">{t('number_of_days')}</p>
 					{/* <i class="fa-solid fa-sort grey-400"></i> */}
 				</div>
 			</TableCell>

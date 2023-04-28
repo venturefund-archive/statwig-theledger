@@ -312,7 +312,7 @@ exports.fetchBatchByIdWithoutCondition = [
 	async (req, res) => {
 		try {
 			const userId = req.user.id;
-			const batchNumber = req.body.batchNumber;
+			const atomId = req.body.atomId;
 			const warehouseId = req.body.warehouseId;
 
 			const user = await EmployeeModel.findOne({ id: userId });
@@ -321,8 +321,6 @@ exports.fetchBatchByIdWithoutCondition = [
 				throw new Error("User does not have access to this warehouse!");
 			}
 
-			const warehouse = await WarehouseModel.findOne({ id: warehouseId });
-
 			const productDetails = await EmployeeModel.aggregate(
 				[
 					{ $match: { id: userId } },
@@ -330,17 +328,14 @@ exports.fetchBatchByIdWithoutCondition = [
 						$lookup: {
 							from: "atoms",
 							let: {
-								inventoryId: warehouse.warehouseInventory,
-								batchNumber: batchNumber,
+								atomId: atomId,
 							},
 							pipeline: [
 								{
 									$match: {
 										$expr: {
 											$and: [
-												{ $eq: ["$currentInventory", "$$inventoryId"] },
-												// { $eq: ["$status", "HEALTHY"] },
-												{ $in: ["$$batchNumber", "$batchNumbers"] },
+												{ $eq: ["$id", "$$atomId"] },
 											],
 										},
 									},
