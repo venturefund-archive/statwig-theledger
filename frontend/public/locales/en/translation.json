@@ -623,5 +623,16 @@
   "Last_name_required":"Last name required",
   "org_type_required":"Organisation type required",
   "org_name_required":"Organisation name required",
-  "email_or_phone_required":"Email or Phone required"
+  "email_or_phone_required":"Email or Phone required",
+  "Out of stocks":"Out of stocks",
+  "In-Stock":"In-Stock",
+  "Near Expiration":"Near Expiration",
+  "Expired":"Expired",
+  "Best Seller":"Best Seller",
+  "Location Details":"Location Details",
+  "No of Days":"No of Days",
+  "Product Name":"Product Name",
+  "Switch to Location View":"Switch to Location View",
+  "Switch to Country View":"Switch to Country View",
+  "Search here for units":"Search here for units"
 }

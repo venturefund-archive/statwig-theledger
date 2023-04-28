@@ -33,7 +33,7 @@ export default function Networking(props) {
 						onClick={() => history.push("/admin-network-reports")}
 						style={{ fontSize: "14px", width: "18%", color: "teal", borderRadius: "10%" }}
 					>
-						Switch to Country View
+						{t('Switch to Country View')}
 					</Button>
 				</div>
 			)}
