@@ -9,40 +9,42 @@ import InstocksTable from "./Reports/Instocks/InstocksTable";
 import NearexpireTable from "./Reports/Nearexpire/NearexpireTable";
 import OutofstocksTable from "./Reports/Outofstocks/OutofstocksTable";
 import ReportSearch from "./ReportSearch/ReportSearch";
+import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router";
 
 function TabList({ Tab, setTab }) {
-  return (
+	const { t } = useTranslation();
+	return (
     <div className="Tablist_container">
       <div
         className={`Tab_Link ${Tab === "out_stock" && "active"}`}
         onClick={() => setTab("out_stock")}
       >
-        <p className="vl-subheading">Out of stocks</p>
+        <p className="vl-subheading">{t("Out of stocks")}</p>
       </div>
       <div
         className={`Tab_Link ${Tab === "in_stock" && "active"}`}
         onClick={() => setTab("in_stock")}
       >
-        <p className="vl-subheading">In-Stock</p>
+        <p className="vl-subheading">{t('In-Stock')}</p>
       </div>
       <div
         className={`Tab_Link ${Tab === "near_expire" && "active"}`}
         onClick={() => setTab("near_expire")}
       >
-        <p className="vl-subheading">Near Expiration</p>
+        <p className="vl-subheading">{t('Near Expiration')}</p>
       </div>
       <div
         className={`Tab_Link ${Tab === "expired" && "active"}`}
         onClick={() => setTab("expired")}
       >
-        <p className="vl-subheading">Expired</p>
+        <p className="vl-subheading">{t('Expired')}</p>
       </div>
       <div
         className={`Tab_Link ${Tab === "best_seller" && "active"}`}
         onClick={() => setTab("best_seller")}
       >
-        <p className="vl-subheading">Best Seller</p>
+        <p className="vl-subheading">{t('Best Seller')}</p>
       </div>
     </div>
   );
@@ -50,6 +52,7 @@ function TabList({ Tab, setTab }) {
 
 export default function NetworkReports() {
 	const history = useHistory();
+	const { t } = useTranslation();
 
 	const [locationParams, setLocationParams] = useState({
 		country: "Costa Rica",
@@ -94,7 +97,7 @@ export default function NetworkReports() {
 					onClick={() => history.push("/network")}
 					style={{ fontSize: "14px", width: "18%", color: "teal", borderRadius: "10%" }}
 				>
-					Switch to Location View
+					{t('Switch to Location View')}
 				</Button>
 			</div>
 
@@ -122,9 +125,9 @@ export default function NetworkReports() {
 					)}
 				</div>
 				<div className="NetworkReports_Analytics_container">
-					<ReportAnalytics variant={1} title="Out of Stocks" value={analytics.outStock} />
-					<ReportAnalytics variant={2} title="In stock" value={analytics.inStock} />
-					<ReportAnalytics variant={3} title="Best sellers" value={analytics.bestSellers} />
+					<ReportAnalytics variant={1} title="Out of stocks" value={analytics.outStock} />
+					<ReportAnalytics variant={2} title="In-Stock" value={analytics.inStock} />
+					<ReportAnalytics variant={3} title="best_seller" value={analytics.bestSellers} />
 				</div>
 				<div className="NetworkReports_Table_Wrapper">
 					<TabList Tab={Tab} setTab={setTab} />
