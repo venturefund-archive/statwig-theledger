@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { getManufacturerWarehouses } from "../../../../../actions/networkActions";
-const OrganizationList = ({ orgName, user, orgId, setReportWarehouse }) => {
+
+const OrganizationList = ({ orgName, user, orgId, setReportWarehouse, refetchWarehouses }) => {
 	const [warehouses, setWarehouses] = useState([]);
+	
 	useEffect(() => {
 		(async () => {
 			const warehouses = await getManufacturerWarehouses(orgId, "");
 			let warehouseArray = warehouses.data.warehouses;
 			setWarehouses(warehouseArray);
 		})();
-  }, []);
+	}, [refetchWarehouses]);
+	
 	const [toggleButton, setToggleButton] = useState(false);
 	return (
 		<div className="mi-accordion-container">
