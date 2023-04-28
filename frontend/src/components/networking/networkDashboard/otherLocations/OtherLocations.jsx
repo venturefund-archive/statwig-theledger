@@ -4,8 +4,12 @@ import "./OtherLocations.scss";
 import SearchCountry from "./searchCountry/SearchCountry";
 import SearchOrganization from "./searchOrganization/SearchOrganization";
 import { getManufacturerFilterOptions } from "../../../../actions/networkActions";
+import { useDispatch } from "react-redux";
+import { turnOff, turnOn } from "../../../../actions/spinnerActions";
 
 const OtherLocations = ({ user, setReportWarehouse, t }) => {
+  const dispatch = useDispatch();
+
   const [LocationTab, setLocationTab] = useState("ORGANIZATION");
   const [LocationTab1, setLocationTab1] = useState("ORGANIZATION");
   const [nManufacturer, setNManufacturer] = useState([]);
@@ -13,14 +17,17 @@ const OtherLocations = ({ user, setReportWarehouse, t }) => {
 
   useEffect(() => {
     const toggleOrgCountry = async (param) => {
+      dispatch(turnOn());
       const filterWarehouse = await getManufacturerFilterOptions(param, regExp);
       setNManufacturer(
         filterWarehouse.data.length ? filterWarehouse.data[0].filters : []
       );
       setLocationTab1(LocationTab);
+      dispatch(turnOff());
     };
     toggleOrgCountry(LocationTab === "ORGANIZATION" ? "org" : "country");
   }, [LocationTab, regExp]);
+
   return (
     <div className="other-locations-container">
       <div className="other-location-header">
