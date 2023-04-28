@@ -33,14 +33,17 @@ export default function ReportSearch({ updateSearchParams }) {
   
   const {
     control,
-    setValue,
+		setValue,
+		watch,
     formState: { errors },
     handleSubmit,
   } = useForm({
     country: "Costa Rica",
     state: "",
     city: "",
-  });
+	});
+	
+	const watchState = watch("state");
 
   const onSubmit = (data) => {
     updateSearchParams(data);
@@ -81,6 +84,7 @@ export default function ReportSearch({ updateSearchParams }) {
                     if(!value?.name) {
                       field.onChange("");
                       setAllCities([]);
+											updateSearchParams({ state: "", city: "" });
                     } else {
                       field.onChange(value.name);
                       getAllCities(value);
@@ -111,7 +115,8 @@ export default function ReportSearch({ updateSearchParams }) {
 									{...field}
 									onChange={(event, value) => {
                     if(!value?.name) {
-                      field.onChange("");
+											field.onChange("");
+											updateSearchParams({ state: watchState, city: "" });
                     } else {
                       field.onChange(value.name);
                     }
