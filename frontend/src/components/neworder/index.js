@@ -95,7 +95,6 @@ const NewOrder = (props) => {
 	const [orgTypes, setOrgTypes] = useState([]);
 	const [orgType, setOrgType] = useState("");
 	const [blinkRow, setBlinkRow] = useState();
-
 	useEffect(() => {
 		async function fetchData() {
 			const orgs = await getAllOrganisations();

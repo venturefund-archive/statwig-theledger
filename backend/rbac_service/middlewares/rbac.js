@@ -20,7 +20,7 @@ const checkPermissions = async (request, next) => {
     const request_role = request["role"];
     for (let i = 0; i < required_permission.length; i++) {
       const result = await client.SISMEMBER(request_role, required_permission[i]);
-      if (result === 1) {
+      if (result) {
         next({
           success: true,
           message: "Permission Granted",
@@ -50,7 +50,7 @@ const checkPermissionAwait = async (request) => {
     const request_role = request["role"];
     for (let i = 0; i < required_permission.length; i++) {
       const result = await client.SISMEMBER(request_role, required_permission[i]);
-      if (result === 1) {
+      if (result) {
         return true;
       } else {
         if (i === required_permission.length - 1) {

@@ -36,7 +36,7 @@ class Profile extends React.Component {
 			walletAddress: "",
 			phoneNumber: "",
 			status: "",
-			email: "",
+			emailId: "",
 			profileData: {},
 			profile_picture: "",
 			message: "",
@@ -62,7 +62,7 @@ class Profile extends React.Component {
 		if (response?.status === 200) {
 			const {
 				profile_picture,
-				email,
+				emailId,
 				firstName,
 				lastName,
 				phoneNumber,
@@ -79,7 +79,7 @@ class Profile extends React.Component {
 			} = response.data.data;
 			this.setState({
 				profile_picture,
-				email,
+				emailId,
 				firstName,
 				lastName,
 				phoneNumber,
@@ -117,7 +117,7 @@ class Profile extends React.Component {
 	onCancel() {
 		const {
 			prof,
-			email,
+			emailId,
 			firstName,
 			lastName,
 			phoneNumber,
@@ -139,7 +139,7 @@ class Profile extends React.Component {
 		this.setState({
 			editMode: false,
 			profile: prof,
-			email,
+			emailId,
 			firstName,
 			phoneNumber,
 			walletAddress: address,
@@ -343,13 +343,22 @@ class Profile extends React.Component {
 										</div>
 										<div className="form-group">
 											<label htmlFor="shipmentId">{t("email_id")}</label>
+											{this.props.user.phoneNumber && !this.props.user.emailId?
 											<input
-												className="form-control wallet"
-												//disabled
-												style={{ flexBasis: "34.5%", fontSize: "14px" }}
-												value={this.props.user.emailId}
-												onChange={(e) => this.setState({ email: e.target.value })}
-											/>
+											style={{ flexBasis: "34%" }}
+											className="input refship "
+											type="text"
+											id="referenceShipmentId"
+											value={this.state.emailId}
+											onChange={(e) => this.setState({ emailId: e.target.value })}
+										/>:<input
+										className="form-control wallet"
+										//disabled
+										style={{ flexBasis: "34.5%", fontSize: "14px" }}
+										value={this.props.user.emailId}
+										onChange={(e) => this.setState({ emailId: e.target.value })}
+									/>}
+											
 										</div>
 										<div className="form-group2 mb-3 relative">
 											<label htmlFor="shipmentId">{t("phone")}</label>
