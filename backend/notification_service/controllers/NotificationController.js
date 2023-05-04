@@ -137,11 +137,11 @@ exports.sendOtp = [
         " is " +
         req.body.OTP +
         ". It is valid for only 10 minutes";
-      if (req.body.mobile) {
-        if (req.body.whatsapp && req.body.whatsapp == true)
-          sendWhatsApp(content, req.body.mobile);
-        else sendSMS(content, req.body.mobile);
-      }
+      // if (req.body.mobile) {
+      //   if (req.body.whatsapp)
+      //     sendWhatsApp(content, req.body.mobile);
+      //   else sendSMS(content, req.body.mobile);
+      // }
       const data = {
         body: req.body.OTP,
         source: req.body.source,
@@ -166,16 +166,16 @@ exports.sendMessage = [
       }
       if (req.body.email)
         sendEmail(
-					req.body.subject,
-					{
-						body: req?.body?.content,
-						source: req?.body?.source,
-						isOTP: false,
-						isCustom: req.body?.isCustom || false,
-					},
-					req.body.email,
-					req?.body?.cc,
-				);
+          req.body.subject,
+          {
+            body: req?.body?.content,
+            source: req?.body?.source,
+            isOTP: false,
+            isCustom: req.body?.isCustom || false,
+          },
+          req.body.email,
+          req?.body?.cc,
+        );
       return apiResponse.successResponse(res, "Message Sent Success");
     } catch (err) {
       console.log(err);
