@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.4cf546a8.chunk.css",
-    "main.js": "/static/js/main.3cf0d249.chunk.js",
+    "main.css": "/static/css/main.ea5b0c34.chunk.css",
+    "main.js": "/static/js/main.a817bcfb.chunk.js",
     "runtime-main.js": "/static/js/runtime-main.9ee1f51e.js",
     "static/css/2.26f76c59.chunk.css": "/static/css/2.26f76c59.chunk.css",
     "static/js/2.1bbff155.chunk.js": "/static/js/2.1bbff155.chunk.js",
@@ -21,6 +21,8 @@
     "static/media/Delete.157ea675.png": "/static/media/Delete.157ea675.png",
     "static/media/English.1f9bd813.webp": "/static/media/English.1f9bd813.webp",
     "static/media/Export.8fb5d914.svg": "/static/media/Export.8fb5d914.svg",
+    "static/media/FARVIEW-ALT.2b8297a4.svg": "/static/media/FARVIEW-ALT.2b8297a4.svg",
+    "static/media/FARVIEW.5a6af04a.svg": "/static/media/FARVIEW.5a6af04a.svg",
     "static/media/Filter.e07b3a0a.svg": "/static/media/Filter.e07b3a0a.svg",
     "static/media/Inbound.12fee14d.png": "/static/media/Inbound.12fee14d.png",
     "static/media/Inbound_Alert.ef6c12f6.png": "/static/media/Inbound_Alert.ef6c12f6.png",
@@ -167,7 +169,7 @@
     "static/js/runtime-main.9ee1f51e.js",
     "static/css/2.26f76c59.chunk.css",
     "static/js/2.1bbff155.chunk.js",
-    "static/css/main.4cf546a8.chunk.css",
-    "static/js/main.3cf0d249.chunk.js"
+    "static/css/main.ea5b0c34.chunk.css",
+    "static/js/main.a817bcfb.chunk.js"
   ]
 }
