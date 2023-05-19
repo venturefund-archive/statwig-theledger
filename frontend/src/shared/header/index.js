@@ -21,6 +21,7 @@ import {
   postUserLocation,
 } from "../../actions/userActions";
 import logo from "../../assets/brands/VACCINELEDGER.png";
+import Farview from "../../assets/files/logos/FARVIEW.svg";
 import { turnOff, turnOn } from "../../actions/spinnerActions";
 import useOnclickOutside from "react-cool-onclickoutside";
 import { config } from "../../config";
@@ -393,8 +394,8 @@ const Header = (props) => {
         <nav className="navContent">
           {/* branding */}
           <Link to="/overview">
-            <div className="logo">
-              <img src={logo} alt="logo" />
+            <div className="farview_logo">
+              <img src={Farview} alt="logo" />
             </div>
           </Link>
 

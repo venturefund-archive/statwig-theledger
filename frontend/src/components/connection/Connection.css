@@ -35,6 +35,10 @@
   object-fit: contain;
 }
 
+.connection-farview-logo > img {
+  width: 10rem;
+  object-fit: contain;
+}
 .benefit-card {
   display: grid;
   grid-template-columns: 1.5rem 1fr;

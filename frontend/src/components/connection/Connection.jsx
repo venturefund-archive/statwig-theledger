@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./Connection.css";
 import Vaccineledgerlight from "../../assets/files/logos/vaccineledger-light.svg";
+import Farviewlight from "../../assets/files/logos/FARVIEW-ALT.svg";
 import VaccineLedgerLogo from "../../assets/files/logos/vaccineledger.svg";
 import statwig from "../../assets/files/logos/statwig-logo.png";
 import check from "../../assets/files/icons/check.svg";
@@ -45,7 +46,7 @@ export default function Connection(props) {
     city: "",
     pincode: "",
     address: "",
-    skipOrgRegistration: false
+    skipOrgRegistration: false,
   });
   const setSessionToken = (result) => {
     try {
@@ -126,97 +127,127 @@ export default function Connection(props) {
   };
 
   return (
-		<section className="connect-layout-container">
-			<div className="connection-two-column-grid-layout">
-				<div className="banner-section banner-grid-name">
-					<div className="banner-inner-container">
-						<div className="banner-top">
-							<figure className="connection-brand-logo">
-								<img src={Vaccineledgerlight} alt="Vaccineledger" />
-							</figure>
-							<section className="our-benefits-container">
-								<article className="benefit-card">
-									<img src={check} alt="check" className="check-icon" />
-									<p className="vl-subheading f-500 vl-white">{t("side_point-1")}</p>
-									<div className="straight-line"></div>
-								</article>
-								<article className="benefit-card">
-									<img src={check} alt="check" className="check-icon" />
-									<p className="vl-subheading f-500 vl-white">{t("side_point-2")}</p>
-									<div className="straight-line"></div>
-								</article>
-								<article className="benefit-card">
-									<img src={check} alt="check" className="check-icon" />
-									<p className="vl-subheading f-500 vl-white"> {t("side_point-3")}</p>
-									<div className="straight-line"></div>
-								</article>
-								<article className="benefit-card">
-									<img src={check} alt="check" className="check-icon" />
-									<p className="vl-subheading f-500 vl-white">{t("side_point-4")}</p>
-									<div className="straight-line"></div>
-								</article>
-								<article className="benefit-card">
-									<img src={check} alt="check" className="check-icon" />
-									<p className="vl-subheading f-500 vl-white">{t("side_point-5")}</p>
-									<div className="straight-line"></div>
-								</article>
-								<article className="benefit-card">
-									<img src={check} alt="check" className="check-icon" />
-									<p className="vl-subheading f-500 vl-white">{t("side_point-6")}</p>
-									<div className="straight-line"></div>
-								</article>
-								<article className="benefit-card">
-									<img src={check} alt="check" className="check-icon" />
-									<p className="vl-subheading f-500 vl-white">{t("side_point-7")}</p>
-								</article>
-							</section>
-						</div>
-						<div className="powerby">
-							<p className="vl-small f-700 vl-white"> {t("power_by")}</p>
-							<img src={statwig} alt="statwig" className="statwig-power-logo" />
-						</div>
-						<img src={Vaccine} alt="Illustration" className="connect-Illustration" />
-					</div>
-				</div>
-				<div className="main-context-section form-grid-name">
-					<div className="connection-mobile-header">
-						<figure className="brand-logo">
-							<img src={VaccineLedgerLogo} alt="vaccineledger" className="brand-logo-image" />
-						</figure>
-					</div>
-					<div className="connection-body-container">
-						<section className="back-navigation vl-link vl-grey-xs" onClick={handleBack}>
-							<i className="fa-solid fa-arrow-left"></i>
-							<p className="vl-subheading f-400">{t("back")}</p>
-						</section>
-						<div className="login-system-layout">
-							{connection === "signup" ? (
-								pageLayout === "account" ? (
-									<Account
+    <section className="connect-layout-container">
+      <div className="connection-two-column-grid-layout">
+        <div className="banner-section banner-grid-name">
+          <div className="banner-inner-container">
+            <div className="banner-top">
+              <figure className="connection-brand-logo connection-farview-logo ">
+                <img src={Farviewlight} alt="Vaccineledger" />
+              </figure>
+              <section className="our-benefits-container">
+                <article className="benefit-card">
+                  <img src={check} alt="check" className="check-icon" />
+                  <p className="vl-subheading f-500 vl-white">
+                    {t("side_point-1")}
+                  </p>
+                  <div className="straight-line"></div>
+                </article>
+                <article className="benefit-card">
+                  <img src={check} alt="check" className="check-icon" />
+                  <p className="vl-subheading f-500 vl-white">
+                    {t("side_point-2")}
+                  </p>
+                  <div className="straight-line"></div>
+                </article>
+                <article className="benefit-card">
+                  <img src={check} alt="check" className="check-icon" />
+                  <p className="vl-subheading f-500 vl-white">
+                    {" "}
+                    {t("side_point-3")}
+                  </p>
+                  <div className="straight-line"></div>
+                </article>
+                <article className="benefit-card">
+                  <img src={check} alt="check" className="check-icon" />
+                  <p className="vl-subheading f-500 vl-white">
+                    {t("side_point-4")}
+                  </p>
+                  <div className="straight-line"></div>
+                </article>
+                <article className="benefit-card">
+                  <img src={check} alt="check" className="check-icon" />
+                  <p className="vl-subheading f-500 vl-white">
+                    {t("side_point-5")}
+                  </p>
+                  <div className="straight-line"></div>
+                </article>
+                <article className="benefit-card">
+                  <img src={check} alt="check" className="check-icon" />
+                  <p className="vl-subheading f-500 vl-white">
+                    {t("side_point-6")}
+                  </p>
+                  <div className="straight-line"></div>
+                </article>
+                <article className="benefit-card">
+                  <img src={check} alt="check" className="check-icon" />
+                  <p className="vl-subheading f-500 vl-white">
+                    {t("side_point-7")}
+                  </p>
+                </article>
+              </section>
+            </div>
+            <div className="powerby">
+              <p className="vl-small f-700 vl-white"> {t("power_by")}</p>
+              <img src={statwig} alt="statwig" className="statwig-power-logo" />
+            </div>
+            <img
+              src={Vaccine}
+              alt="Illustration"
+              className="connect-Illustration"
+            />
+          </div>
+        </div>
+        <div className="main-context-section form-grid-name">
+          <div className="connection-mobile-header">
+            <figure className="brand-logo">
+              <img
+                src={VaccineLedgerLogo}
+                alt="vaccineledger"
+                className="brand-logo-image"
+              />
+            </figure>
+          </div>
+          <div className="connection-body-container">
+            <section
+              className="back-navigation vl-link vl-grey-xs"
+              onClick={handleBack}
+            >
+              <i className="fa-solid fa-arrow-left"></i>
+              <p className="vl-subheading f-400">{t("back")}</p>
+            </section>
+            <div className="login-system-layout">
+              {connection === "signup" ? (
+                pageLayout === "account" ? (
+                  <Account
                     registerData={registerData}
-										onUserDataSubmit={onUserDataSubmit}
-										setErrorMessage={setErrorMessage}
+                    onUserDataSubmit={onUserDataSubmit}
+                    setErrorMessage={setErrorMessage}
                     setErrorModal={setErrorModal}
                     setPageLayout={setPageLayout}
-										t={t}
-									/>
-								) : (
-									<Organization t={t} onUserDataSubmit={onUserDataSubmit} />
-								)
-							) : null}
-							{connection === "verify" && <Verify t={t} />}
-							{connection === "success" && <Success t={t} />}
-						</div>
-					</div>
-				</div>
-			</div>
-			{errorModal && (
-				<Dialog open={errorModal} onClose={() => setErrorModal(false)}>
-					<DialogContent>
-						<FailedPopUp t={t} onHide={() => setErrorModal(false)} message={errorMessage} />
-					</DialogContent>
-				</Dialog>
-			)}
-		</section>
-	);
+                    t={t}
+                  />
+                ) : (
+                  <Organization t={t} onUserDataSubmit={onUserDataSubmit} />
+                )
+              ) : null}
+              {connection === "verify" && <Verify t={t} />}
+              {connection === "success" && <Success t={t} />}
+            </div>
+          </div>
+        </div>
+      </div>
+      {errorModal && (
+        <Dialog open={errorModal} onClose={() => setErrorModal(false)}>
+          <DialogContent>
+            <FailedPopUp
+              t={t}
+              onHide={() => setErrorModal(false)}
+              message={errorMessage}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
+    </section>
+  );
 }
