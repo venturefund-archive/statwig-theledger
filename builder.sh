@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Set your GitLab Container Registry details
-GITLAB_REGISTRY_URL="https://gitlab.example.com"
-GITLAB_PROJECT_ID="your-project-id"
+GITLAB_REGISTRY_URL="registry.gitlab.com"
+GITLAB_PROJECT_ID="statwig-public/theledger"
 GITLAB_REGISTRY_USERNAME="your-gitlab-username"
 GITLAB_REGISTRY_PASSWORD="your-gitlab-access-token-or-password"
 
@@ -15,7 +15,7 @@ for DIR in $DIRECTORIES; do
     DIRECTORY_NAME=$(basename "$DIR")
 
     # Set the Docker image name
-    DOCKER_IMAGE_NAME="$DIRECTORY_NAME"
+    DOCKER_IMAGE_NAME="$GITLAB_REGISTRY_URL/$GITLAB_PROJECT_ID/$DIRECTORY_NAME"
     DOCKER_IMAGE_TAG="latest"
 
     echo "Building Docker image: $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG"
