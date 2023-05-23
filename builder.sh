@@ -18,18 +18,30 @@ for DIR in $DIRECTORIES; do
     DOCKER_IMAGE_NAME="$DIRECTORY_NAME"
     DOCKER_IMAGE_TAG="latest"
 
+    echo "Building Docker image: $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG"
+
     # Build the Docker image
     docker build -t "$DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG" "$DIR"
+
+    echo "Authenticating with GitLab Container Registry"
 
     # Authenticate with GitLab Container Registry
     docker login -u "$GITLAB_REGISTRY_USERNAME" -p "$GITLAB_REGISTRY_PASSWORD" "$GITLAB_REGISTRY_URL"
 
+    echo "Tagging Docker image: $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG -> $GITLAB_REGISTRY_URL/$GITLAB_PROJECT_ID/$DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG"
+
     # Tag the Docker image with the GitLab Container Registry URL
     docker tag "$DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG" "$GITLAB_REGISTRY_URL/$GITLAB_PROJECT_ID/$DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG"
+
+    echo "Pushing Docker image: $GITLAB_REGISTRY_URL/$GITLAB_PROJECT_ID/$DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG"
 
     # Push the Docker image to GitLab Container Registry
     docker push "$GITLAB_REGISTRY_URL/$GITLAB_PROJECT_ID/$DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG"
 
+    echo "Cleaning up Docker image: $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG"
+
     # Cleanup: Remove the local Docker image
     docker rmi "$DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG"
+
+    echo "Finished processing Docker image: $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG"
 done
