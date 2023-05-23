@@ -10,9 +10,9 @@
     display: grid;
     grid-template-columns: 24rem 1fr;
     grid-template-areas: "dashboard  map";
-    position: fixed;
-    top: calc(88px + 5vh);
-    height: 100% !important;
+    // position: fixed;
+    // top: calc(88px + 5vh);
+    // height: 100% !important;
 }
 
 .network-dashboard{
@@ -21,7 +21,7 @@
     border-right: 1px solid #ddd;
     height: calc( 100vh - 88px );
     position: fixed !important;
-    top: calc(88px + 5vh) !important;
+    top: calc(88px + 4.5rem) !important;
     left: 130px !important;
     overflow-y: auto;
     z-index: 1000;
