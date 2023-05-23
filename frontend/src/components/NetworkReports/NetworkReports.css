@@ -105,3 +105,22 @@
   background-color: rgb(238, 44, 96);
   color: var(--white);
 }
+
+.network_page_inner_header {
+  width: calc(100% - 130px);
+  height: 4.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  background-color: #fff;
+  position: fixed;
+  top: 85px;
+  left: 130px;
+  z-index: 1000;
+  border-bottom: 1px solid #eee;
+}
+
+.header_null_space {
+  height: 4.5rem;
+}
