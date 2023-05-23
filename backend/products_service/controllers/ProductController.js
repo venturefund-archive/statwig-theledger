@@ -51,7 +51,7 @@ exports.getProductsOld = [
       });
     } catch (err) {
       console.error(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -110,7 +110,7 @@ exports.getProducts = [
       });
     } catch (err) {
       console.error(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -136,7 +136,7 @@ exports.getProductsByCategory = [
       });
     } catch (err) {
       console.error(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -166,7 +166,7 @@ exports.getProductInfo = [
       });
     } catch (err) {
       console.error(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -199,7 +199,7 @@ exports.validateProductName = [
       });
     } catch (err) {
       console.error(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -279,7 +279,7 @@ exports.addMultipleProducts = [
       });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -414,7 +414,7 @@ exports.addProduct = [
       }
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -446,7 +446,7 @@ exports.uploadImage = [
         }
       });
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -456,7 +456,7 @@ exports.generateCodes = async function (req, res) {
     let qrCodes = [];
     const { limit, type } = req.query;
     if (limit > 1000)
-      return apiResponse.ErrorResponse(res, "Limit cannot be more than 1000");
+      return apiResponse.errorResponse(res, "Limit cannot be more than 1000");
     if (type === "qrcode") {
       for (let i = 0; i < limit; i++) {
         const qrId = await CounterModel.findOneAndUpdate(
@@ -549,7 +549,7 @@ exports.getManufacturer = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -570,7 +570,7 @@ exports.getIotEnabledStatus = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -587,7 +587,7 @@ exports.getproductcategory = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -607,7 +607,7 @@ exports.getproductname = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -672,7 +672,7 @@ exports.getproductname = [
 
     } catch(err) {
       console.log("Error in sync - ", err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   }
 ] */

@@ -62,7 +62,7 @@ exports.newDemoRequest = [
 
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(req, res, err.message);
+      return apiResponse.errorResponse(req, res, err.message);
     }
   }
 ];
@@ -77,13 +77,13 @@ exports.validateRequest = [
       });
 
       if (existingRequests) {
-        return apiResponse.ErrorResponse(req, res, "Duplicate request!");
+        return apiResponse.errorResponse(req, res, "Duplicate request!");
       }
 
       return apiResponse.successResponse(req, res, "Valid email!");
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(req, res, err.message);
+      return apiResponse.errorResponse(req, res, err.message);
     }
   }
 ]

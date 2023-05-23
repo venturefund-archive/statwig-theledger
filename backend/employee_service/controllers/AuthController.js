@@ -289,20 +289,20 @@ exports.checkEmail = [
 	async (req, res) => {
 		try {
 			if (!req.body.firstName.match("[A-Za-z0-9]") || !req.body.lastName.match("[A-Za-z0-9]")) {
-				return apiResponse.ErrorResponse(req, res, "not_valid_name");
+				return apiResponse.errorResponse(req, res, "not_valid_name");
 			}
 			const errors = validationResult(req);
 			if (!errors.isEmpty()) {
 				return apiResponse.validationErrorWithData(req, res, "validation_error", errors.array());
 			}
 			if (!mailer.validateEmail(req.body.emailId)) {
-				return apiResponse.ErrorResponse(req, res, "not_valid_email");
+				return apiResponse.errorResponse(req, res, "not_valid_email");
 			} else {
 				return apiResponse.successResponse(req, res, "valid_email_success");
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -354,7 +354,7 @@ exports.register = [
 	async (req, res) => {
 		try {
 			if (req.body.emailId == "" && req.body.phoneNumber == "") {
-				return apiResponse.ErrorResponse(req, res, "Enter either emailId or phoneNumber");
+				return apiResponse.errorResponse(req, res, "Enter either emailId or phoneNumber");
 			} else if (req.body.emailId != "") {
 				let emailId = req.body.emailId;
 				emailId = emailId.trim();
@@ -362,14 +362,14 @@ exports.register = [
 				emailId = emailId.replace("", "");
 				let user;
 				if (!emailId.match(emailRegex))
-					return apiResponse.ErrorResponse(req, res, "not_valid_email");
+					return apiResponse.errorResponse(req, res, "not_valid_email");
 				if (emailId.indexOf("@") > -1)
 					user = await EmployeeModel.findOne({
 						emailId: emailId,
 						accountStatus: { $ne: "DELETED" },
 					});
 				if (user) {
-					return apiResponse.ErrorResponse(req, res, "account_already_exists");
+					return apiResponse.errorResponse(req, res, "account_already_exists");
 				}
 			} else if (req.body.phoneNumber != "") {
 				let phoneNumber = req.body.phoneNumber;
@@ -377,25 +377,25 @@ exports.register = [
 				phoneNumber = phoneNumber.startsWith("+") ? phoneNumber : `+${phoneNumber}`;
 				let user;
 				// if (!phoneNumber.match(phoneRegex))
-				//   return apiResponse.ErrorResponse(req, res, "not_valid_phone");
+				//   return apiResponse.errorResponse(req, res, "not_valid_phone");
 				// phone = "+" + phoneNumber;
 				user = await EmployeeModel.findOne({
 					phoneNumber: phoneNumber,
 					accountStatus: { $ne: "DELETED" },
 				});
 				if (user) {
-					return apiResponse.ErrorResponse(req, res, "account_already_exists");
+					return apiResponse.errorResponse(req, res, "account_already_exists");
 				}
 			}
 			if (!req.body.firstName.match("[A-Za-z0-9]") || !req.body.lastName.match("[A-Za-z0-9]")) {
-				return apiResponse.ErrorResponse(req, res, "name_validation_error");
+				return apiResponse.errorResponse(req, res, "name_validation_error");
 			}
 			const errors = validationResult(req);
 			if (!errors.isEmpty()) {
 				return apiResponse.validationErrorWithData(req, res, "validation_error", errors.array());
 			}
 			// if (!mailer.validateEmail(req.body.emailId)) {
-			//   return apiResponse.ErrorResponse(req, res, "not_valid_email");
+			//   return apiResponse.errorResponse(req, res, "not_valid_email");
 			// } else {
 			let organisationId = req.body.organisationId;
 			const skipOrgRegistration = req.body?.skipOrgRegistration
@@ -657,7 +657,7 @@ exports.register = [
 			return apiResponse.successResponseWithData(req, res, "user_registered_success", null);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -730,7 +730,7 @@ exports.sendOtp = [
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -841,15 +841,15 @@ exports.verifyOtp = [
 						});
 						return apiResponse.successResponseWithData(req, res, "login_success", userData);
 					} else {
-						return apiResponse.ErrorResponse(req, res, "otp_not_match");
+						return apiResponse.errorResponse(req, res, "otp_not_match");
 					}
 				} else {
-					return apiResponse.ErrorResponse(req, res, "account_not_found");
+					return apiResponse.errorResponse(req, res, "account_not_found");
 				}
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -958,13 +958,13 @@ exports.verifyAuthentication = [
 					if (user.accountStatus === "ACTIVE") {
 						return apiResponse.successResponseWithData(req, res, "login_success", userData);
 					} else {
-						return apiResponse.ErrorResponse(req, res, "User not approved");
+						return apiResponse.errorResponse(req, res, "User not approved");
 					}
 				}
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1078,7 +1078,7 @@ exports.googleLogIn = [
 			return apiResponse.successResponseWithData(req, res, "login_success", userData);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "Error in authenticating user - " + err.message);
+			return apiResponse.errorResponse(req, res, "Error in authenticating user - " + err.message);
 		}
 	},
 ];
@@ -1170,7 +1170,7 @@ exports.userInfo = [
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1229,7 +1229,7 @@ exports.updateProfile = [
 			return apiResponse.successResponseWithData(req, res, "user_info_success", returnData);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1272,7 +1272,7 @@ exports.deleteProfilePicture = [
 			return apiResponse.successResponseWithData(req, res, "user_info_success", returnData);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(
+			return apiResponse.errorResponse(
 				req,
 				res,
 				"Error in deleting profile picture - ",
@@ -1295,7 +1295,7 @@ exports.deleteProfile = [
 			return apiResponse.successResponse(req, res, "User account deleted successfully!");
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err.message);
+			return apiResponse.errorResponse(req, res, err.message);
 		}
 	},
 ];
@@ -1312,7 +1312,7 @@ exports.getAllUsers = [
 			return apiResponse.successResponseWithData(req, res, "all_users_success", confirmedUsers);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1322,7 +1322,7 @@ exports.getUserWarehouses = [
 	async (req, res) => {
 		try {
 			if (!req.user.organisationId) {
-				return apiResponse.ErrorResponse(req, res, "organization_validation_error");
+				return apiResponse.errorResponse(req, res, "organization_validation_error");
 			}
 			const warehouses = await WarehouseModel.find({
 				organisationId: req.user.organisationId,
@@ -1330,7 +1330,7 @@ exports.getUserWarehouses = [
 			return apiResponse.successResponseWithData(req, res, "user_warehouse_success", warehouses);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1353,7 +1353,7 @@ exports.pushWarehouse = [
 			return apiResponse.successResponse(req, res, "add_warehouse_success");
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1544,7 +1544,7 @@ exports.addWarehouse = [
 			return apiResponse.successResponseWithData(req, res, "add_warehouse_success", warehouse);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1573,7 +1573,7 @@ exports.updateWarehouseAddress = [
 			return apiResponse.successResponseWithData(req, res, "update_warehouse_success", warehouse);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1662,11 +1662,11 @@ exports.uploadImage = [
 					employeeUpdate,
 				);
 			} else {
-				return apiResponse.ErrorResponse(req, res, "image_upload_error");
+				return apiResponse.errorResponse(req, res, "image_upload_error");
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1716,7 +1716,7 @@ exports.fetchImage = [
 			}
 			return apiResponse.successResponseWithData(req, res, "image_success", resArray);
 		} catch (err) {
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1792,7 +1792,7 @@ exports.getAllRegisteredUsers = [
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1872,7 +1872,7 @@ exports.getAllUsersByWarehouse = [
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1950,7 +1950,7 @@ exports.getAllUsersByOrganisation = [
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1971,7 +1971,7 @@ exports.getOrganizationsByType = [
 			);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1985,8 +1985,8 @@ exports.getOrganizationsByTypeForAbInBev = [
 			matchCondition.status = "ACTIVE";
 			if (filters.status && filters.status !== "") {
 				matchCondition.status = filters.status;
-			}else {
-				matchCondition.status = {$in: ["ACTIVE", "DEACTIVATED"]}
+			} else {
+				matchCondition.status = { $in: ["ACTIVE", "DEACTIVATED"] }
 			}
 			if (filters.state && filters.state !== "") {
 				matchWarehouseCondition["warehouseDetails.warehouseAddress.state"] = new RegExp(
@@ -2040,7 +2040,7 @@ exports.getOrganizationsByTypeForAbInBev = [
 			);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -2062,7 +2062,7 @@ exports.getwarehouseByType = [
 			);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -2076,7 +2076,7 @@ exports.getwarehouseinfo = [
 			return apiResponse.successResponseWithData(req, res, "warehouse_info_success", warehouseinfo);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -2098,7 +2098,7 @@ exports.getOrganizationsTypewithauth = [
 			);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -2128,7 +2128,7 @@ exports.emailverify = [
 			return apiResponse.successResponseWithData(req, res, "Valid Email/Phone");
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -2166,7 +2166,7 @@ exports.switchLocation = [
 			return apiResponse.successResponseWithData(req, res, "switch_location_success", returnData);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -2372,7 +2372,7 @@ exports.addNewOrganisation = [
 			);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -2521,7 +2521,7 @@ exports.addUsersFromExcel = [
 				return apiResponse.successResponseWithData(req, res, "success", responsePayload);
 			} catch (err) {
 				console.log(err);
-				return apiResponse.ErrorResponse(req, res, err);
+				return apiResponse.errorResponse(req, res, err);
 			}
 		} catch (err) {
 			console.log(err);
@@ -2587,10 +2587,10 @@ exports.activateUser = [
 					}
 				})
 				.catch((err) => {
-					return apiResponse.ErrorResponse(req, res, err);
+					return apiResponse.errorResponse(req, res, err);
 				});
 		} catch (err) {
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -2622,10 +2622,10 @@ exports.deactivateUser = [
 					return apiResponse.successResponseWithData(req, res, "User Rejected", emp);
 				})
 				.catch((err) => {
-					return apiResponse.ErrorResponse(req, res, err);
+					return apiResponse.errorResponse(req, res, err);
 				});
 		} catch (err) {
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -2647,7 +2647,7 @@ exports.updateUserRole = [
 				throw new Error("Error in updating user role!");
 			}
 		} catch (err) {
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -2665,7 +2665,7 @@ exports.getAllUsers = [
 				confirmedUsers,
 			);
 		} catch (err) {
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -2679,7 +2679,7 @@ exports.getWarehouseUsers = [
 			});
 			return apiResponse.successResponseWithData(req, res, "Users Retrieved Success", users);
 		} catch (err) {
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -2751,7 +2751,7 @@ exports.getOrgUsers = [
 			return apiResponse.successResponseWithData(req, res, "Organisation Users", result);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -2767,7 +2767,7 @@ exports.getOrgUserAnalytics = [
 				{
 					$facet: {
 						total: [
-							{ $match: {accountStatus:  {$in: ["ACTIVE", "DEACTIVATED","REJECTED"]} }},
+							{ $match: { accountStatus: { $in: ["ACTIVE", "DEACTIVATED", "REJECTED"] } } },
 							{
 								$group: {
 									_id: null,
@@ -2835,7 +2835,7 @@ exports.getOrgUserAnalytics = [
 			return apiResponse.successResponseWithData(req, res, "User Analytics", analyticsObject);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -2850,7 +2850,7 @@ exports.getUsers = [
 			const confirmedUsers = users.filter((user) => user.walletAddress !== "");
 			return apiResponse.successResponseWithData(req, res, "Organisation Users", confirmedUsers);
 		} catch (err) {
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -2865,7 +2865,7 @@ exports.getOrgActiveUsers = [
 			}).select("firstName lastName emailId id");
 			return apiResponse.successResponseWithData(req, res, "Organisation active users", users);
 		} catch (err) {
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -2878,7 +2878,7 @@ exports.Image = [
 			return apiResponse.successResponseWithData(req, res, "Image URL", signedUrl);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err.message);
+			return apiResponse.errorResponse(req, res, err.message);
 		}
 	},
 ];

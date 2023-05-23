@@ -32,7 +32,7 @@ exports.successResponseWithMultipleData = function (
   return res.status(200).json(resData);
 };
 
-exports.ErrorResponse = function (res, msg) {
+exports.errorResponse = function (res, msg) {
   const data = {
     success: false,
     message: msg,

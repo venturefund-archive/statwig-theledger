@@ -88,9 +88,8 @@ async function createOrg(payload) {
 		if (employeeExists) {
 			return {
 				inserted: false,
-				message: `Employee "${
-					employeeExists.emailId || employeeExists.phoneNumber
-				}" already exists!`,
+				message: `Employee "${employeeExists.emailId || employeeExists.phoneNumber
+					}" already exists!`,
 			};
 		}
 
@@ -234,7 +233,7 @@ async function createOrg(payload) {
 			inserted: true,
 			message: "Success",
 		};
-	} catch(err) {
+	} catch (err) {
 		throw err;
 	}
 }
@@ -247,18 +246,18 @@ function getOrgCondition(query) {
 	if (query.country && query.country != "") {
 		matchCondition["country.countryName"] = query.country;
 	}
-	
+
 	if (query.status && query.status != "") {
 		matchCondition.status = query.status;
-	}  else {
-		matchCondition.status = {$in: ["ACTIVE", "DEACTIVATED"]}
+	} else {
+		matchCondition.status = { $in: ["ACTIVE", "DEACTIVATED"] }
 	}
 
 	if (query.region && query.region != "") {
 		matchCondition["region.name"] = query.region;
 	}
-	if(query.orgName && query.orgName != ""){
-		matchCondition.name= { $regex: query.orgName ? query.orgName : "", $options: "i" }
+	if (query.orgName && query.orgName != "") {
+		matchCondition.name = { $regex: query.orgName ? query.orgName : "", $options: "i" }
 	}
 	if (query.creationFilter && query.creationFilter == "true") {
 		let now = moment();
@@ -310,12 +309,12 @@ exports.getPendingOrgs = [
 			const pendingOrgs = await OrganisationModel.find({
 				status: "NOTVERIFIED",
 				isRegistered: true,
-			}).sort({createdAt: -1});
+			}).sort({ createdAt: -1 });
 
 			return apiResponse.successResponseWithData(req, res, "Organisation list", pendingOrgs);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -368,7 +367,7 @@ exports.getOrgs = [
 			return apiResponse.successResponseWithData(req, res, "Organisation list", users);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -448,7 +447,7 @@ exports.getOrgDetails = [
 			);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -491,7 +490,7 @@ exports.getWarehouseAndUsersById = [
 			);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -534,7 +533,7 @@ exports.getWarehouseAndUsersById = [
 			);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -547,7 +546,7 @@ exports.getOrgAnalytics = [
 				{
 					$facet: {
 						total: [
-							{ $match: {status:  {$in: ["ACTIVE", "DEACTIVATED"]} }},
+							{ $match: { status: { $in: ["ACTIVE", "DEACTIVATED"] } } },
 							{
 								$group: {
 									_id: null,
@@ -643,7 +642,7 @@ exports.getOrgAnalytics = [
 			return apiResponse.successResponseWithData(req, res, "Organisation list", analyticsObject);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -679,7 +678,7 @@ exports.updateOrg = [
 					return apiResponse.successResponseWithData(req, res, "Organisation REJECTED", org);
 				} catch (err) {
 					console.log(err);
-					return apiResponse.ErrorResponse(req, res, err);
+					return apiResponse.errorResponse(req, res, err);
 				}
 			}
 			if (status === "ACTIVE") {
@@ -728,7 +727,7 @@ exports.updateOrg = [
 			);
 			return apiResponse.successResponseWithData(req, res, "Organisation updated", org);
 		} catch (err) {
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -749,7 +748,7 @@ exports.checkDuplicateOrgName = [
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err.message);
+			return apiResponse.errorResponse(req, res, err.message);
 		}
 	},
 ];
@@ -946,7 +945,7 @@ exports.addNewOrganisation = [
 			);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -1022,7 +1021,7 @@ exports.addOrgsFromExcel = [
 			}
 
 			const results = [];
-			for(const orgData of formattedData) {
+			for (const orgData of formattedData) {
 				const result = await createOrg(orgData);
 				results.push(result);
 			}
@@ -1036,7 +1035,7 @@ exports.addOrgsFromExcel = [
 			return apiResponse.successResponseWithData(req, res, "success", response);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];

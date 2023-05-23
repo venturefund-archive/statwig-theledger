@@ -1609,7 +1609,7 @@ exports.getAnalytics = [
 			return apiResponse.successResponseWithData(res, "Analytics", data);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err);
+			return apiResponse.errorResponse(res, err);
 		}
 	},
 ];
@@ -1701,7 +1701,7 @@ exports.getOverviewAnalytics = [
 			return apiResponse.successResponseWithData(res, "Analytics", data);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err);
+			return apiResponse.errorResponse(res, err);
 		}
 	},
 ];
@@ -1954,7 +1954,7 @@ exports.getInventoryAnalytics = [
 			return apiResponse.successResponseWithData(res, "Analytics", data);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err);
+			return apiResponse.errorResponse(res, err);
 		}
 	},
 ];
@@ -2009,7 +2009,7 @@ exports.getShipmentAnalytics = [
 			return apiResponse.successResponseWithData(res, "Analytics", data);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err);
+			return apiResponse.errorResponse(res, err);
 		}
 	},
 ];
@@ -2055,7 +2055,7 @@ exports.getOrderAnalytics = [
 			return apiResponse.successResponseWithData(res, "Analytics", data);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err);
+			return apiResponse.errorResponse(res, err);
 		}
 	},
 ];
@@ -2239,7 +2239,7 @@ exports.getNetworkAnalytics = [
 			return apiResponse.successResponseWithData(res, "Network Analytics", { analytics });
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err);
+			return apiResponse.errorResponse(res, err);
 		}
 	},
 ];
@@ -2422,7 +2422,7 @@ exports.bestSellers = [
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err);
+			return apiResponse.errorResponse(res, err);
 		}
 	},
 ];
@@ -2542,7 +2542,7 @@ exports.bestSellerSummary = [
 			});
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err);
+			return apiResponse.errorResponse(res, err);
 		}
 	},
 ];
@@ -2742,7 +2742,7 @@ exports.inStockReport = [
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err);
+			return apiResponse.errorResponse(res, err);
 		}
 	},
 ];
@@ -2777,7 +2777,7 @@ exports.outOfStockReport = [
 				if (id) matchQuery3[`_id`] = id;
 				if (productCategory) matchQuery3[`productCategory`] = productCategory;
 
-				if(isDist && !warehouseId) {
+				if (isDist && !warehouseId) {
 					matchQuery[`totalSales`] = {
 						$gt: 0,
 					};
@@ -2944,7 +2944,7 @@ exports.outOfStockReport = [
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err);
+			return apiResponse.errorResponse(res, err);
 		}
 	},
 ];
@@ -3199,7 +3199,7 @@ exports.expiredStockReport = [
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err);
+			return apiResponse.errorResponse(res, err);
 		}
 	},
 ];
@@ -3458,7 +3458,7 @@ exports.nearExpiryStockReport = [
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err);
+			return apiResponse.errorResponse(res, err);
 		}
 	},
 ];
@@ -3643,7 +3643,7 @@ exports.inStockFilterOptions = [
 			});
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err);
+			return apiResponse.errorResponse(res, err);
 		}
 	},
 ];
@@ -3828,7 +3828,7 @@ exports.outOfStockFilterOptions = [
 			});
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err);
+			return apiResponse.errorResponse(res, err);
 		}
 	},
 ];
@@ -4053,7 +4053,7 @@ exports.bestSellerFilterOptions = [
 			});
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err);
+			return apiResponse.errorResponse(res, err);
 		}
 	},
 ];
@@ -4298,7 +4298,7 @@ exports.nearExpiryFilterOptions = [
 			});
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err);
+			return apiResponse.errorResponse(res, err);
 		}
 	},
 ];
@@ -4538,7 +4538,7 @@ exports.expiredFilterOptions = [
 			});
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err);
+			return apiResponse.errorResponse(res, err);
 		}
 	},
 ];

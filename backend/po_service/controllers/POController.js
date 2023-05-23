@@ -186,7 +186,7 @@ exports.fetchPurchaseOrders = [
             });
           } catch (err) {
             console.log(err);
-            return apiResponse.ErrorResponse(res, err);
+            return apiResponse.errorResponse(res, err);
           }
         } else {
           return apiResponse.forbiddenResponse(
@@ -196,7 +196,7 @@ exports.fetchPurchaseOrders = [
         }
       });
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -229,7 +229,7 @@ exports.fetchAllPurchaseOrdersBC = [
         }
       });
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -264,7 +264,7 @@ exports.fetchPublisherPurchaseOrders = [
         }
       });
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -298,7 +298,7 @@ exports.fetchPurchaseOrderBC = [
         }
       });
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -370,13 +370,13 @@ exports.changePOStatus = [
                 responses(req.user.preferredLanguage).success
               );
             } else {
-              return apiResponse.ErrorResponse(
+              return apiResponse.errorResponse(
                 res,
                 responses(req.user.preferredLanguage).not_authorized
               );
             }
           } catch (e) {
-            return apiResponse.ErrorResponse(res, e.message);
+            return apiResponse.errorResponse(res, e.message);
           }
         } else {
           return apiResponse.forbiddenResponse(
@@ -386,7 +386,7 @@ exports.changePOStatus = [
         }
       });
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -436,7 +436,7 @@ exports.createPurchaseOrder = [
         result.id
       );
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -884,7 +884,7 @@ exports.addPOsFromExcel = [
           err
         );
       } else {
-        return apiResponse.ErrorResponse(res, err.message);
+        return apiResponse.errorResponse(res, err.message);
       }
     }
   },
@@ -956,7 +956,7 @@ exports.createOrder = [
         id: req.body.supplier.supplierOrganisation,
       });
       if (supplierOrgData == null) {
-        return apiResponse.ErrorResponse(
+        return apiResponse.errorResponse(
           res,
           responses(req.user.preferredLanguage).supplier_not_defined
         );
@@ -966,7 +966,7 @@ exports.createOrder = [
         id: req.body.customer.customerOrganisation,
       });
       if (receiverOrgData == null) {
-        return apiResponse.ErrorResponse(
+        return apiResponse.errorResponse(
           res,
           responses(req.user.preferredLanguage).receiver_not_defined
         );
@@ -1085,7 +1085,7 @@ exports.createOrder = [
       }
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1108,7 +1108,7 @@ exports.getOrderIds = [
 
       return apiResponse.successResponseWithData(res, "Order Ids", orderID);
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -1141,7 +1141,7 @@ exports.getOpenOrderIds = [
         orderID
       );
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -1313,7 +1313,7 @@ exports.fetchInboundPurchaseOrders = [
                 });
               });
           } catch (err) {
-            return apiResponse.ErrorResponse(res, err);
+            return apiResponse.errorResponse(res, err);
           }
         } else {
           return apiResponse.forbiddenResponse(
@@ -1323,7 +1323,7 @@ exports.fetchInboundPurchaseOrders = [
         }
       });
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -1502,7 +1502,7 @@ exports.fetchOutboundPurchaseOrders = [
       });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1532,7 +1532,7 @@ exports.fetchProductIdsCustomerLocationsOrganisations = [
         });
       });
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1722,10 +1722,10 @@ exports.exportInboundPurchaseOrders = [
             });
           });
       } catch (err) {
-        return apiResponse.ErrorResponse(res, err);
+        return apiResponse.errorResponse(res, err);
       }
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -1906,7 +1906,7 @@ exports.exportOutboundPurchaseOrders = [
         });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1922,77 +1922,77 @@ function buildExcelReport(req, res, dataForExcel, orderType) {
     },
   };
   const specification = {
-		id: {
-			displayName: req.t("Order_ID"),
-			headerStyle: styles.headerDark,
-			width: 120,
-		},
-		createdBy: {
-			displayName: req.t("Order_Created_By"),
-			headerStyle: styles.headerDark,
-			width: "10",
-		},
-		supplierOrgId: {
-			displayName: req.t("ORG_ID_-_Creator"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		orderReceiveIncharge: {
-			displayName: req.t("Order_Receive_Incharge"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		orderReceiverOrg: {
-			displayName: req.t("ORG_ID_-_Receiver"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		productCategory: {
-			displayName: req.t("Product_Category"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		productName: {
-			displayName: req.t("Product_Name"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		productId: {
-			displayName: req.t("Product_ID"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		productQuantity: {
-			displayName: req.t("Quantity"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		manufacturer: {
-			displayName: req.t("Manufacturer"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		recieverOrgName: {
-			displayName: req.t("Delivery_Organization_Name"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		recieverOrgId: {
-			displayName: req.t("Delivery_Organization_ID"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		recieverOrgLocation: {
-			displayName: req.t("Delivery_Organization_Location_Details"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		status: {
-			displayName: req.t("Status"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-	};
+    id: {
+      displayName: req.t("Order_ID"),
+      headerStyle: styles.headerDark,
+      width: 120,
+    },
+    createdBy: {
+      displayName: req.t("Order_Created_By"),
+      headerStyle: styles.headerDark,
+      width: "10",
+    },
+    supplierOrgId: {
+      displayName: req.t("ORG_ID_-_Creator"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    orderReceiveIncharge: {
+      displayName: req.t("Order_Receive_Incharge"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    orderReceiverOrg: {
+      displayName: req.t("ORG_ID_-_Receiver"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    productCategory: {
+      displayName: req.t("Product_Category"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    productName: {
+      displayName: req.t("Product_Name"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    productId: {
+      displayName: req.t("Product_ID"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    productQuantity: {
+      displayName: req.t("Quantity"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    manufacturer: {
+      displayName: req.t("Manufacturer"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    recieverOrgName: {
+      displayName: req.t("Delivery_Organization_Name"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    recieverOrgId: {
+      displayName: req.t("Delivery_Organization_ID"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    recieverOrgLocation: {
+      displayName: req.t("Delivery_Organization_Location_Details"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    status: {
+      displayName: req.t("Status"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+  };
 
   const report = excel.buildExport([
     {
@@ -2113,7 +2113,7 @@ exports.syncPoReceivers_DO_NOT_USE = [
       return apiResponse.successResponse(res, "Success!");
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, "Some err - " + err.message);
+      return apiResponse.errorResponse(res, "Some err - " + err.message);
     }
   }
 ];

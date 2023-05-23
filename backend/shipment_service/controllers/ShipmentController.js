@@ -550,7 +550,7 @@ exports.createShipment = [
         data.products
       );
       if (checkOverflow)
-        return apiResponse.ErrorResponse(
+        return apiResponse.errorResponse(
           res,
           responses(req.user.preferredLanguage).product_quantity_error
         );
@@ -577,7 +577,7 @@ exports.createShipment = [
         accountStatus: { $ne: "DELETED" },
       });
       if (empData == null) {
-        return apiResponse.ErrorResponse(
+        return apiResponse.errorResponse(
           res,
           responses(req.user.preferredLanguage).email_not_found
         );
@@ -586,7 +586,7 @@ exports.createShipment = [
       const orgName = empData.name;
       const orgData = await OrganisationModel.findOne({ id: orgId });
       if (orgData == null) {
-        return apiResponse.ErrorResponse(
+        return apiResponse.errorResponse(
           res,
           responses(req.user.preferredLanguage).orgdata_not_found
         );
@@ -595,7 +595,7 @@ exports.createShipment = [
       const confId = orgData.configuration_id || "CONF000";
       const confData = await ConfigurationModel.findOne({ id: confId });
       if (confData == null) {
-        return apiResponse.ErrorResponse(
+        return apiResponse.errorResponse(
           res,
           responses(req.user.preferredLanguage).config_not_found
         );
@@ -606,7 +606,7 @@ exports.createShipment = [
         id: req.body.supplier.id,
       });
       if (supplierOrgData == null) {
-        return apiResponse.ErrorResponse(
+        return apiResponse.errorResponse(
           res,
           responses(req.user.preferredLanguage).supplier_not_defined
         );
@@ -616,7 +616,7 @@ exports.createShipment = [
         id: req.body.receiver.id,
       });
       if (receiverOrgData == null) {
-        return apiResponse.ErrorResponse(
+        return apiResponse.errorResponse(
           res,
           responses(req.user.preferredLanguage).receiver_not_defined
         );
@@ -642,7 +642,7 @@ exports.createShipment = [
           id: data.poId,
         });
         if (po == null) {
-          return apiResponse.ErrorResponse(
+          return apiResponse.errorResponse(
             res,
             responses(req.user.preferredLanguage).orderid_not_defined,
           );
@@ -742,7 +742,7 @@ exports.createShipment = [
           },
         );
         if (poidupdate == null) {
-          return apiResponse.ErrorResponse(
+          return apiResponse.errorResponse(
             res,
             responses(req.user.preferredLanguage).product_not_updated,
           );
@@ -753,7 +753,7 @@ exports.createShipment = [
           id: data.supplier.locationId,
         });
         if (suppWarehouseDetails == null) {
-          return apiResponse.ErrorResponse(
+          return apiResponse.errorResponse(
             res,
             responses(req.user.preferredLanguage).supplier_not_found
           );
@@ -763,7 +763,7 @@ exports.createShipment = [
           id: suppInventoryId,
         });
         if (suppInventoryDetails == null) {
-          return apiResponse.ErrorResponse(
+          return apiResponse.errorResponse(
             res,
             "suppInventoryDetails" +
             responses(req.user.preferredLanguage).not_found
@@ -773,7 +773,7 @@ exports.createShipment = [
           id: data.receiver.locationId,
         });
         if (recvWarehouseDetails == null) {
-          return apiResponse.ErrorResponse(
+          return apiResponse.errorResponse(
             res,
             "recvWarehouseDetails" +
             responses(req.user.preferredLanguage).not_found
@@ -784,7 +784,7 @@ exports.createShipment = [
           id: recvInventoryId,
         });
         if (recvInventoryDetails == null) {
-          return apiResponse.ErrorResponse(
+          return apiResponse.errorResponse(
             res,
             "recvInventoryDetails" +
             responses(req.user.preferredLanguage).not_found
@@ -979,7 +979,7 @@ exports.createShipment = [
         const shipment = new ShipmentModel(data);
         const result = await shipment.save();
         if (result == null) {
-          return apiResponse.ErrorResponse(
+          return apiResponse.errorResponse(
             res,
             responses(req.user.preferredLanguage).shipment_not_saved
           );
@@ -1085,7 +1085,7 @@ exports.createShipment = [
       }
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1121,7 +1121,7 @@ exports.createShipmentForTpl = [
         accountStatus: { $ne: "DELETED" },
       });
       if (empData == null) {
-        return apiResponse.ErrorResponse(
+        return apiResponse.errorResponse(
           res,
           responses(req.user.preferredLanguage).email_not_found
         );
@@ -1130,7 +1130,7 @@ exports.createShipmentForTpl = [
       const orgName = empData.name;
       const orgData = await OrganisationModel.findOne({ id: orgId });
       if (orgData == null) {
-        return apiResponse.ErrorResponse(
+        return apiResponse.errorResponse(
           res,
           responses(req.user.preferredLanguage).orgdata_not_found
         );
@@ -1139,7 +1139,7 @@ exports.createShipmentForTpl = [
       const confId = orgData.configuration_id;
       const confData = await ConfigurationModel.findOne({ id: confId });
       if (confData == null) {
-        return apiResponse.ErrorResponse(
+        return apiResponse.errorResponse(
           res,
           responses(req.user.preferredLanguage).config_not_found
         );
@@ -1149,7 +1149,7 @@ exports.createShipmentForTpl = [
         id: req.body.supplier.id,
       });
       if (supplierOrgData == null) {
-        return apiResponse.ErrorResponse(
+        return apiResponse.errorResponse(
           res,
           responses(req.user.preferredLanguage).supplier_not_defined
         );
@@ -1159,7 +1159,7 @@ exports.createShipmentForTpl = [
         id: req.body.receiver.id,
       });
       if (receiverOrgData == null) {
-        return apiResponse.ErrorResponse(
+        return apiResponse.errorResponse(
           res,
           responses(req.user.preferredLanguage).receiver_not_defined
         );
@@ -1174,7 +1174,7 @@ exports.createShipmentForTpl = [
         id: data.supplier.locationId,
       });
       if (suppWarehouseDetails == null) {
-        return apiResponse.ErrorResponse(
+        return apiResponse.errorResponse(
           res,
           responses(req.user.preferredLanguage).supplier_not_found
         );
@@ -1183,7 +1183,7 @@ exports.createShipmentForTpl = [
         id: data.receiver.locationId,
       });
       if (recvWarehouseDetails == null) {
-        return apiResponse.ErrorResponse(
+        return apiResponse.errorResponse(
           res,
           "recvWarehouseDetails" +
           responses(req.user.preferredLanguage).not_found
@@ -1235,7 +1235,7 @@ exports.createShipmentForTpl = [
       const shipment = new ShipmentModel(data);
       const result = await shipment.save();
       if (result == null) {
-        return apiResponse.ErrorResponse(
+        return apiResponse.errorResponse(
           res,
           responses(req.user.preferredLanguage).shipment_not_saved
         );
@@ -1248,7 +1248,7 @@ exports.createShipmentForTpl = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1286,7 +1286,7 @@ exports.newShipment = [
       const shipment = new ShipmentModel(data);
       const result = await shipment.save();
       if (result == null) {
-        return apiResponse.ErrorResponse(
+        return apiResponse.errorResponse(
           res,
           responses(req.user.preferredLanguage).shipment_not_saved
         );
@@ -1340,7 +1340,7 @@ exports.newShipment = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1490,7 +1490,7 @@ exports.receiveShipment = [
         const confId = orgData.configuration_id;
         const confData = await ConfigurationModel.findOne({ id: confId });
         if (confData == null) {
-          return apiResponse.ErrorResponse(
+          return apiResponse.errorResponse(
             res,
             responses(req.user.preferredLanguage).config_not_found
           );
@@ -1893,7 +1893,7 @@ exports.receiveShipment = [
       }
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2041,7 +2041,7 @@ exports.customReceiveShipment = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2347,7 +2347,7 @@ exports.fetchShipmentsForAbInBev = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2452,7 +2452,7 @@ exports.fetchShipments = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2577,7 +2577,7 @@ exports.viewShipment = [
       });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2638,7 +2638,7 @@ exports.viewShipmentGmr = [
       });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2655,7 +2655,7 @@ exports.fetchAllShipments = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2698,7 +2698,7 @@ exports.fetchGMRShipments = [
       });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2717,7 +2717,7 @@ exports.fetch_po_Shipments = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2748,7 +2748,7 @@ exports.updateStatus = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2832,7 +2832,7 @@ exports.getProductsByInventory = [
       return apiResponse.successResponseWithData(res, "Products by inventory ", inventories);
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2855,7 +2855,7 @@ exports.uploadImage = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2882,7 +2882,7 @@ exports.fetchImage = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2947,7 +2947,7 @@ exports.updateTrackingStatus = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -3186,7 +3186,7 @@ exports.chainOfCustody = [
       });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -3414,7 +3414,7 @@ exports.fetchShipmentIds = [
       });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -3459,7 +3459,7 @@ exports.fetchShipmentIds = [
 
     } catch (err) {
       console.log(err)
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -3598,7 +3598,7 @@ exports.fetchInboundShipments = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -3737,7 +3737,7 @@ exports.fetchOutboundShipments = [
         });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -3762,7 +3762,7 @@ exports.fetchSupplierAndReceiverList = [
       }
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -3864,7 +3864,7 @@ exports.fetchAllWarehouseShipments = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -4286,7 +4286,7 @@ exports.trackJourney = [
       });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -4303,13 +4303,13 @@ exports.checkShipmentID = [
           responses(req.user.preferredLanguage).shipment_found
         );
       else
-        return apiResponse.ErrorResponse(
+        return apiResponse.errorResponse(
           res,
           responses(req.user.preferredLanguage).shipment_not_found
         );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -4340,7 +4340,7 @@ exports.fetchairwayBillNumber = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -4353,7 +4353,7 @@ exports.Image = [
       return apiResponse.successResponseWithData(res, "Image URL", signedUrl);
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -4517,7 +4517,7 @@ exports.exportInboundShipments = [
       }
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -4673,7 +4673,7 @@ exports.exportOutboundShipments = [
       }
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -5150,7 +5150,7 @@ exports.trackJourneyOnBlockchain = [
       }
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -5409,7 +5409,7 @@ exports.fetchShipmentsForAbInBevOnBlockchain = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -5537,7 +5537,7 @@ exports.warehousesOrgsExportToBlockchain = [
       return apiResponse.successResponseWithData(res, "Export success", orgs);
     } catch (err) {
       console.log(err)
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -5564,7 +5564,7 @@ exports.tripDetails = [
       });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -5680,7 +5680,7 @@ exports.sensorHistory = [
       });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -5745,7 +5745,7 @@ exports.syncAtoms = [
       return apiResponse.successResponse(res, "Success!");
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];

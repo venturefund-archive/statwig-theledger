@@ -302,7 +302,7 @@ exports.fetchBatchById = [
 			return apiResponse.successResponseWithData(res, "Product Details", validBatches);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err.message);
+			return apiResponse.errorResponse(res, err.message);
 		}
 	},
 ];
@@ -361,7 +361,7 @@ exports.fetchBatchByIdWithoutCondition = [
 			return apiResponse.successResponseWithData(res, "Product Details", productDetails);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err.message);
+			return apiResponse.errorResponse(res, err.message);
 		}
 	},
 ];
@@ -387,7 +387,7 @@ exports.vaccinateIndividual = [
 				// );
 				// if (existingInventory?.inventoryDetails?.length) {
 				// 	if (existingInventory.inventoryDetails[0].quantity < 1) {
-				// 		return apiResponse.ErrorResponse(res, "Inventory exhausted!");
+				// 		return apiResponse.errorResponse(res, "Inventory exhausted!");
 				// 	}
 				// }
 				const existingAtom = await AtomModel.findOne({
@@ -395,7 +395,7 @@ exports.vaccinateIndividual = [
 					status: "HEALTHY",
 				});
 				if (!existingAtom?.quantity) {
-					return apiResponse.ErrorResponse(res, "Batch Exhausted!");
+					return apiResponse.errorResponse(res, "Batch Exhausted!");
 				}
 				const vaccineVialCounter = await CounterModel.findOneAndUpdate(
 					{
@@ -489,7 +489,7 @@ exports.vaccinateIndividual = [
 			});
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err.message);
+			return apiResponse.errorResponse(res, err.message);
 		}
 	},
 ];
@@ -510,7 +510,7 @@ exports.vaccinateMultiple = [
 				);
 				if (existingInventory?.inventoryDetails?.length) {
 					if (existingInventory.inventoryDetails[0].quantity < 1) {
-						return apiResponse.ErrorResponse(res, "Inventory exhausted!");
+						return apiResponse.errorResponse(res, "Inventory exhausted!");
 					}
 				}
 				const existingAtom = await AtomModel.findOne({
@@ -518,7 +518,7 @@ exports.vaccinateMultiple = [
 					status: "HEALTHY",
 				});
 				if (!existingAtom?.quantity) {
-					return apiResponse.ErrorResponse(res, "Batch Exhausted!");
+					return apiResponse.errorResponse(res, "Batch Exhausted!");
 				}
 				if (doses?.length && doses.length > 10) {
 					throw new Error("Cannot vaccinate more than 10 people with a single vial!");
@@ -624,7 +624,7 @@ exports.vaccinateMultiple = [
 			});
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err.message);
+			return apiResponse.errorResponse(res, err.message);
 		}
 	},
 ];
@@ -659,7 +659,7 @@ exports.getVaccinationDetailsByVial = [
 			);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err.message);
+			return apiResponse.errorResponse(res, err.message);
 		}
 	},
 ];
@@ -712,7 +712,7 @@ exports.getVaccinationDetailsByBatch = [
 			);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err.message);
+			return apiResponse.errorResponse(res, err.message);
 		}
 	},
 ];
@@ -753,7 +753,7 @@ exports.getAllVaccinationDetails = [
 			return apiResponse.successResponseWithData(res, "Vaccinations list fetched!", result);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err.message);
+			return apiResponse.errorResponse(res, err.message);
 		}
 	},
 ];
@@ -839,7 +839,7 @@ exports.getAnalyticsWithFilters = [
 			return apiResponse.successResponseWithData(res, "Fetched Analytcs With Filters!", result);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err.message);
+			return apiResponse.errorResponse(res, err.message);
 		}
 	},
 ];
@@ -894,7 +894,7 @@ exports.getAnalytics = [
 			return apiResponse.successResponseWithData(res, "Analytics fetched successfully!", result);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err.message);
+			return apiResponse.errorResponse(res, err.message);
 		}
 	},
 ];
@@ -942,7 +942,7 @@ exports.getVialsUtilised = [
 			return apiResponse.successResponseWithData(res, "Vaccine Vial Details", result);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err.message);
+			return apiResponse.errorResponse(res, err.message);
 		}
 	},
 ];
@@ -1043,7 +1043,7 @@ exports.getVaccinationsList = [
 			});
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err.message);
+			return apiResponse.errorResponse(res, err.message);
 		}
 	}
 ]
@@ -1101,7 +1101,7 @@ exports.getVaccinationsListOld = [
 			return apiResponse.successResponseWithData(res, "Vaccine Vial Details", result);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err.message);
+			return apiResponse.errorResponse(res, err.message);
 		}
 	},
 ];
@@ -1144,7 +1144,7 @@ exports.getCitiesAndOrgsForFilters = [
 			return apiResponse.successResponseWithData(res, "Cities and orgs for filters", result);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err.message);
+			return apiResponse.errorResponse(res, err.message);
 		}
 	},
 ];
@@ -1203,7 +1203,7 @@ exports.getCitiesAndOrgsForFiltersOld = [
 			return apiResponse.successResponseWithData(res, "Cities and orgs for filters", result);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err.message);
+			return apiResponse.errorResponse(res, err.message);
 		}
 	},
 ];
@@ -1245,7 +1245,7 @@ exports.exportVaccinationList = [
 			else res = buildPdfReportDoses(req, res, result.result, today);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err.message);
+			return apiResponse.errorResponse(res, err.message);
 		}
 	},
 ];
@@ -1280,7 +1280,7 @@ exports.exportVialsUtilised = [
 			else res = buildPdfReportVials(req, res, fileData);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err.message);
+			return apiResponse.errorResponse(res, err.message);
 		}
 	}
 ]
@@ -1300,7 +1300,7 @@ exports.updateDose = [
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err.message);
+			return apiResponse.errorResponse(res, err.message);
 		}
 	}
 ]
@@ -1319,7 +1319,7 @@ exports.deleteDose = [
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(res, err.message);
+			return apiResponse.errorResponse(res, err.message);
 		}
 	}
 ]
