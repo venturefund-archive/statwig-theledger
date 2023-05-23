@@ -6,7 +6,7 @@ WORKDIR /app
 
 COPY . /app/
 
-RUN yarn install && yarn cache clean && yarn run build
+RUN yarn install && yarn run build
 
 FROM nginx:stable-alpine
 
