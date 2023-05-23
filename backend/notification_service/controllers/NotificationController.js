@@ -12,40 +12,50 @@ const { constants } = require("../helpers/constants");
 const fromMobile = process.env.FROMNO;
 const cuid = require("cuid");
 
-function sendEmail(subject, data, emailId, cc) {
-  return mailer.send(constants.confirmEmails.from, emailId, subject, data, cc);
+async function sendEmail(subject, data, emailId, cc) {
+  try {
+    await mailer.send(constants.confirmEmails.from, emailId, subject, data, cc);
+  } catch (err) {
+    console.log("Error sending email", err);
+  }
 }
 
-function sendSMS(content, mobile) {
-  return client.messages.create({
-    body: content,
-    from: fromMobile,
-    to: mobile,
-  });
+async function sendSMS(content, mobile) {
+  try {
+    await client.messages.create({
+      body: content,
+      from: fromMobile,
+      to: mobile,
+    });
+  } catch (err) {
+    console.log("Error sending SMS", err);
+  }
 }
 
-function sendWhatsApp(content, mobile) {
-  return client.messages.create({
-    from: `whatsapp:${fromMobile}`,
-    body: content,
-    to: `whatsapp:${mobile}`,
-  });
+async function sendWhatsApp(content, mobile) {
+  try {
+    await client.messages.create({
+      from: `whatsapp:${fromMobile}`,
+      body: content,
+      to: `whatsapp:${mobile}`,
+    });
+  } catch (err) {
+    console.log("Error sending WhatsApp", err);
+  }
 }
 
 async function pushNotification(body) {
   try {
-    const { content, user, type, transactionId, eventType } = body;
-    let notification = new Notification({
+    const { content, title, user, type, transactionId, eventType } = body;
+    const notification = new Notification({
       id: cuid(),
-      title: "Vaccine Ledger Alert",
+      title: title || "VaccineLedger Alert",
       message: content,
       user: user,
       eventType: eventType,
       transactionId: transactionId,
-    });
-    type == "ALERT"
-      ? (notification.type = "ALERT")
-      : (notification.type = "TRANSACTION");
+      type: type == "ALERT" ? "ALERT" : "TRANSACTION"
+    })
     await notification.save();
     await client.notify.services(twilio_service_id).notifications.create({
       fcm: { notification: { body: content, title: "New Notification" } },
@@ -53,7 +63,7 @@ async function pushNotification(body) {
       identity: user,
     });
   } catch (err) {
-    console.log(err);
+    console.log("Error pushing Notification", err);
   }
 }
 
@@ -138,16 +148,16 @@ exports.sendOtp = [
         req.body.OTP +
         ". It is valid for only 10 minutes";
       if (req.body.mobile) {
-        if (req.body.whatsapp && req.body.whatsapp == true)
-          sendWhatsApp(content, req.body.mobile);
-        else sendSMS(content, req.body.mobile);
+        if (req.body.whatsapp)
+          await sendWhatsApp(content, req.body.mobile);
+        else await sendSMS(content, req.body.mobile);
       }
       const data = {
         body: req.body.OTP,
         source: req.body.source,
         isOTP: true,
       };
-      if (req.body.email) sendEmail("OTP To Login", data, req.body.email);
+      if (req.body.email) await sendEmail("OTP To Login", data, req.body.email);
       return apiResponse.successResponse(res, "OTP Sent Successfully");
     } catch (err) {
       console.log(err);
@@ -160,22 +170,22 @@ exports.sendMessage = [
   async (req, res) => {
     try {
       if (req?.body?.mobile) {
-        if (req?.body?.whatsapp && req?.body?.whatsapp == true)
-          sendWhatsApp(req.body?.content, req.body.mobile);
-        sendSMS(req.body?.content, req.body.mobile);
+        if (req?.body?.whatsapp)
+          await sendWhatsApp(req.body?.content, req.body.mobile);
+        await sendSMS(req.body?.content, req.body.mobile);
       }
       if (req.body.email)
-        sendEmail(
-					req.body.subject,
-					{
-						body: req?.body?.content,
-						source: req?.body?.source,
-						isOTP: false,
-						isCustom: req.body?.isCustom || false,
-					},
-					req.body.email,
-					req?.body?.cc,
-				);
+        await sendEmail(
+          req.body.subject,
+          {
+            body: req?.body?.content,
+            source: req?.body?.source,
+            isOTP: false,
+            isCustom: req.body?.isCustom || false,
+          },
+          req.body.email,
+          req?.body?.cc,
+        );
       return apiResponse.successResponse(res, "Message Sent Success");
     } catch (err) {
       console.log(err);
@@ -190,13 +200,13 @@ exports.pushNotifications = [
       await pushNotification(req.body);
       if (!process.env.ENVIRONMENT == "TEST") {
         if (req.body.mobile) {
-          if (req.body.whatsapp && req.body.whatsapp == true)
-            sendWhatsApp(req.body.content, req.body.mobile);
-          else sendSMS(req.body.content, req.body.mobile);
+          if (req.body.whatsapp)
+            await sendWhatsApp(req.body.content, req.body.mobile);
+          else await sendSMS(req.body.content, req.body.mobile);
         }
       }
       if (req.body.email)
-        sendEmail(
+        await sendEmail(
           req.body.subject,
           {
             body: req.body.content,
@@ -218,7 +228,7 @@ exports.readNotification = [
   async (req, res) => {
     try {
       const { id } = req.query;
-      await Notification.findOneAndUpdate({ id }, { $set: { isRead: true } });
+      await Notification.updateOne({ id }, { $set: { isRead: true } });
       return apiResponse.successResponse(res, "Notification Read Success");
     } catch (err) {
       console.log(err);
