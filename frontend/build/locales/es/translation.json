@@ -645,16 +645,12 @@
   "mfg_greater_than_today": "La fecha de fabricación no puede ser posterior a hoy!",
   "mfg_greater_than_exp": "La fecha de fabricación no puede ser posterior a la fecha de caducidad!",
   "choose_batch_to_continue": "Elija lote para continuar ->",
-  "Out of stocks":"No disponible",
-  "In-Stock":"En stock",
-  "Near Expiration":"Cerca del vencimiento",
-  "Expired":"Caducada",
-  "Best Seller":"Mejor vendedora",
-  "Location Details":"Detalles de ubicación",
-  "No of Days":"Nº de días",
-  "Product Name":"nombre del producto",
-  "Switch to Location View":"Cambiar a vista de ubicación",
-  "Switch to Country View":"Cambiar a vista de país",
-  "Search here for units":"Busque aquí unidades"
+  "near_expiration":"Cerca del vencimiento",
+  "expired":"Caducada",
+  "location_details":"Detalles de ubicación",
+  "number_of_days":"Nº de días",
+  "switch_to_location_view":"Cambiar a vista de ubicación",
+  "switch_to_country_view":"Cambiar a vista de país",
+  "search_here_for_units":"Busque aquí unidades"
 
 }

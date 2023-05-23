@@ -11,15 +11,11 @@ const app = express();
 const MONGODB_URL = process.env.MONGODB_URL;
 const mongoose = require("mongoose");
 mongoose
-  .connect(MONGODB_URL, {
-    keepAlive: true,
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(MONGODB_URL)
   .then(() => {
     if (process.env.NODE_ENV !== "test") {
       console.log("Connected to %s", MONGODB_URL);
-      console.log("Notification Service is running ... \n");
+      console.log("Notification Service is running");
     }
   })
   .catch((err) => {
@@ -40,6 +36,7 @@ app.use(cors());
 //Route Prefixes
 app.use("/", indexRouter);
 app.use("/notificationmanagement/api/", apiRouter);
+
 // throw 404 if URL not found
 app.all("*", function (req, res) {
   return apiResponse.notFoundResponse(res, "Page not found");
