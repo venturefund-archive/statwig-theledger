@@ -8,7 +8,7 @@ COPY . /src
 
 RUN mkdir images
 
-RUN yarn --production && yarn cache clean
+RUN yarn --production
 
 EXPOSE 3010
 
