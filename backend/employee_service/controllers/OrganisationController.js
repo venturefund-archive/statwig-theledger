@@ -61,182 +61,177 @@ async function createWarehouse(address, warehouseId, organisationId, region, cou
 }
 
 async function createOrg(payload) {
-	try {
-		let {
-			firstName,
-			lastName,
-			emailId,
-			phoneNumber,
-			organisationName,
-			type,
-			address,
-			parentOrgName,
-			parentOrgId,
-		} = payload;
+	let {
+		firstName,
+		lastName,
+		emailId,
+		phoneNumber,
+		organisationName,
+		type,
+		address,
+		parentOrgName,
+		parentOrgId,
+	} = payload;
 
-		// Validate duplicate email/phone
-		if (emailId) emailId = emailId.toLowerCase().replace(" ", "");
-		if (phoneNumber) {
-			phoneNumber = phoneNumber.startsWith("+") ? phoneNumber : `+${phoneNumber}`;
-		}
-
-		let matchQuery = {};
-		if (emailId) matchQuery["emailId"] = emailId;
-		if (phoneNumber) matchQuery["phoneNumber"] = phoneNumber;
-
-		let employeeExists = await EmployeeModel.findOne(matchQuery);
-		if (employeeExists) {
-			return {
-				inserted: false,
-				message: `Employee "${
-					employeeExists.emailId || employeeExists.phoneNumber
-				}" already exists!`,
-			};
-		}
-
-		// Validate duplicate Organisation Name
-		const organisationExists = await OrganisationModel.findOne({
-			name: new RegExp("^" + organisationName + "$", "i"),
-		});
-		if (organisationExists) {
-			return {
-				inserted: false,
-				message: `Organisation "${organisationName}" already exists!`,
-			};
-		}
-
-		// Create new Organisation, Warehouse & Employee
-		const empCounter = await CounterModel.findOneAndUpdate(
-			{
-				"counters.name": "employeeId",
-			},
-			{
-				$inc: {
-					"counters.$.value": 1,
-				},
-			},
-			{ new: true },
-		);
-		const employeeId = empCounter.counters[4].format + empCounter.counters[4].value;
-
-		const warehouseCounter = await CounterModel.findOneAndUpdate(
-			{ "counters.name": "warehouseId" },
-			{
-				$inc: {
-					"counters.$.value": 1,
-				},
-			},
-			{ new: true },
-		);
-		const warehouseId = warehouseCounter.counters[3].format + warehouseCounter.counters[3].value;
-
-		const orgCounter = await CounterModel.findOneAndUpdate(
-			{ "counters.name": "orgId" },
-			{
-				$inc: {
-					"counters.$.value": 1,
-				},
-			},
-			{ new: true },
-		);
-		const organisationId = orgCounter.counters[2].format + orgCounter.counters[2].value;
-
-		let parentOrg;
-		if (!parentOrgId) {
-			parentOrg = await OrganisationModel.findOne({
-				name: new RegExp("^" + parentOrgName + "$", "i"),
-			});
-		}
-
-		const country = address?.country ? address?.country : "Costa Rica";
-		const region = address?.region ? address?.region : "Americas";
-		const addr =
-			address?.line1 + ", " + address?.city + ", " + address?.state + ", " + address?.pincode;
-
-		const organisation = new OrganisationModel({
-			primaryContactId: employeeId,
-			name: organisationName,
-			id: organisationId,
-			type: type,
-			status: "ACTIVE",
-			isRegistered: true,
-			postalAddress: addr,
-			warehouses: [warehouseId],
-			warehouseEmployees: [employeeId],
-			region: region,
-			country: country,
-			configuration_id: "CONF000",
-			parentOrgId: parentOrgId ? parentOrgId : parentOrg?.id,
-		});
-		await organisation.save();
-
-		await createWarehouse(address, warehouseId, organisationId, region, country);
-
-		const user = new EmployeeModel({
-			firstName: firstName || emailId.split("@")[0],
-			lastName: lastName || emailId.split("@")[0],
-			emailId: emailId,
-			phoneNumber: phoneNumber,
-			organisationId: organisationId,
-			id: employeeId,
-			postalAddress: addr,
-			accountStatus: "ACTIVE",
-			warehouseId: warehouseId == "NA" ? [] : [warehouseId],
-			role: "admin",
-		});
-		await user.save();
-
-		const bc_data = {
-			username: emailId ? emailId : phoneNumber,
-			password: "",
-			orgName: "org1MSP",
-			role: "",
-			email: emailId ? emailId : phoneNumber,
-		};
-		axios.post(`${hf_blockchain_url}/api/v1/register`, bc_data);
-
-		const event_data = {
-			eventID: cuid(),
-			eventTime: new Date().toISOString(),
-			actorWarehouseId: "null",
-			transactionId: employeeId,
-			eventType: {
-				primary: "CREATE",
-				description: "USER",
-			},
-			actor: {
-				actorid: employeeId,
-				actoruserid: employeeId,
-			},
-			stackholders: {
-				ca: {
-					id: "null",
-					name: "null",
-					address: "null",
-				},
-				actororg: {
-					id: organisationId ? organisationId : "null",
-					name: "null",
-					address: "null",
-				},
-				secondorg: {
-					id: "null",
-					name: "null",
-					address: "null",
-				},
-			},
-			payload: {
-				data: "CREATED ORG WITH EXCEL",
-			},
-		};
-		await logEvent(event_data);
-		return {
-			inserted: true,
-			message: "Success",
-		};
-	} catch(err) {
-		throw err;
+	// Validate duplicate email/phone
+	if (emailId) emailId = emailId.toLowerCase().replace(" ", "");
+	if (phoneNumber) {
+		phoneNumber = phoneNumber.startsWith("+") ? phoneNumber : `+${phoneNumber}`;
 	}
+
+	let matchQuery = {};
+	if (emailId) matchQuery["emailId"] = emailId;
+	if (phoneNumber) matchQuery["phoneNumber"] = phoneNumber;
+
+	let employeeExists = await EmployeeModel.findOne(matchQuery);
+	if (employeeExists) {
+		return {
+			inserted: false,
+			message: `Employee "${employeeExists.emailId || employeeExists.phoneNumber
+				}" already exists!`,
+		};
+	}
+
+	// Validate duplicate Organisation Name
+	const organisationExists = await OrganisationModel.findOne({
+		name: new RegExp("^" + organisationName + "$", "i"),
+	});
+	if (organisationExists) {
+		return {
+			inserted: false,
+			message: `Organisation "${organisationName}" already exists!`,
+		};
+	}
+
+	// Create new Organisation, Warehouse & Employee
+	const empCounter = await CounterModel.findOneAndUpdate(
+		{
+			"counters.name": "employeeId",
+		},
+		{
+			$inc: {
+				"counters.$.value": 1,
+			},
+		},
+		{ new: true },
+	);
+	const employeeId = empCounter.counters[4].format + empCounter.counters[4].value;
+
+	const warehouseCounter = await CounterModel.findOneAndUpdate(
+		{ "counters.name": "warehouseId" },
+		{
+			$inc: {
+				"counters.$.value": 1,
+			},
+		},
+		{ new: true },
+	);
+	const warehouseId = warehouseCounter.counters[3].format + warehouseCounter.counters[3].value;
+
+	const orgCounter = await CounterModel.findOneAndUpdate(
+		{ "counters.name": "orgId" },
+		{
+			$inc: {
+				"counters.$.value": 1,
+			},
+		},
+		{ new: true },
+	);
+	const organisationId = orgCounter.counters[2].format + orgCounter.counters[2].value;
+
+	let parentOrg;
+	if (!parentOrgId) {
+		parentOrg = await OrganisationModel.findOne({
+			name: new RegExp("^" + parentOrgName + "$", "i"),
+		});
+	}
+
+	const country = address?.country ? address?.country : "Costa Rica";
+	const region = address?.region ? address?.region : "Americas";
+	const addr =
+		address?.line1 + ", " + address?.city + ", " + address?.state + ", " + address?.pincode;
+
+	const organisation = new OrganisationModel({
+		primaryContactId: employeeId,
+		name: organisationName,
+		id: organisationId,
+		type: type,
+		status: "ACTIVE",
+		isRegistered: true,
+		postalAddress: addr,
+		warehouses: [warehouseId],
+		warehouseEmployees: [employeeId],
+		region: region,
+		country: country,
+		configuration_id: "CONF000",
+		parentOrgId: parentOrgId ? parentOrgId : parentOrg?.id,
+	});
+	await organisation.save();
+
+	await createWarehouse(address, warehouseId, organisationId, region, country);
+
+	const user = new EmployeeModel({
+		firstName: firstName || emailId.split("@")[0],
+		lastName: lastName || emailId.split("@")[0],
+		emailId: emailId,
+		phoneNumber: phoneNumber,
+		organisationId: organisationId,
+		id: employeeId,
+		postalAddress: addr,
+		accountStatus: "ACTIVE",
+		warehouseId: warehouseId == "NA" ? [] : [warehouseId],
+		role: "admin",
+	});
+	await user.save();
+
+	const bc_data = {
+		username: emailId ? emailId : phoneNumber,
+		password: "",
+		orgName: "org1MSP",
+		role: "",
+		email: emailId ? emailId : phoneNumber,
+	};
+	axios.post(`${hf_blockchain_url}/api/v1/register`, bc_data);
+
+	const event_data = {
+		eventID: cuid(),
+		eventTime: new Date().toISOString(),
+		actorWarehouseId: "null",
+		transactionId: employeeId,
+		eventType: {
+			primary: "CREATE",
+			description: "USER",
+		},
+		actor: {
+			actorid: employeeId,
+			actoruserid: employeeId,
+		},
+		stackholders: {
+			ca: {
+				id: "null",
+				name: "null",
+				address: "null",
+			},
+			actororg: {
+				id: organisationId ? organisationId : "null",
+				name: "null",
+				address: "null",
+			},
+			secondorg: {
+				id: "null",
+				name: "null",
+				address: "null",
+			},
+		},
+		payload: {
+			data: "CREATED ORG WITH EXCEL",
+		},
+	};
+	await logEvent(event_data);
+	return {
+		inserted: true,
+		message: "Success",
+	};
 }
 
 function getOrgCondition(query) {
@@ -247,18 +242,18 @@ function getOrgCondition(query) {
 	if (query.country && query.country != "") {
 		matchCondition["country.countryName"] = query.country;
 	}
-	
+
 	if (query.status && query.status != "") {
 		matchCondition.status = query.status;
-	}  else {
-		matchCondition.status = {$in: ["ACTIVE", "DEACTIVATED"]}
+	} else {
+		matchCondition.status = { $in: ["ACTIVE", "DEACTIVATED"] }
 	}
 
 	if (query.region && query.region != "") {
 		matchCondition["region.name"] = query.region;
 	}
-	if(query.orgName && query.orgName != ""){
-		matchCondition.name= { $regex: query.orgName ? query.orgName : "", $options: "i" }
+	if (query.orgName && query.orgName != "") {
+		matchCondition.name = { $regex: query.orgName ? query.orgName : "", $options: "i" }
 	}
 	if (query.creationFilter && query.creationFilter == "true") {
 		let now = moment();
@@ -310,7 +305,7 @@ exports.getPendingOrgs = [
 			const pendingOrgs = await OrganisationModel.find({
 				status: "NOTVERIFIED",
 				isRegistered: true,
-			}).sort({createdAt: -1});
+			}).sort({ createdAt: -1 });
 
 			return apiResponse.successResponseWithData(req, res, "Organisation list", pendingOrgs);
 		} catch (err) {
@@ -547,7 +542,7 @@ exports.getOrgAnalytics = [
 				{
 					$facet: {
 						total: [
-							{ $match: {status:  {$in: ["ACTIVE", "DEACTIVATED"]} }},
+							{ $match: { status: { $in: ["ACTIVE", "DEACTIVATED"] } } },
 							{
 								$group: {
 									_id: null,
@@ -683,7 +678,7 @@ exports.updateOrg = [
 				}
 			}
 			if (status === "ACTIVE") {
-				const warehouse = await WarehouseModel.findOneAndUpdate(
+				await WarehouseModel.findOneAndUpdate(
 					{ id: org.warehouses[0] },
 					{ $set: { status: "ACTIVE" } },
 					{ new: true },
@@ -1022,7 +1017,7 @@ exports.addOrgsFromExcel = [
 			}
 
 			const results = [];
-			for(const orgData of formattedData) {
+			for (const orgData of formattedData) {
 				const result = await createOrg(orgData);
 				results.push(result);
 			}
