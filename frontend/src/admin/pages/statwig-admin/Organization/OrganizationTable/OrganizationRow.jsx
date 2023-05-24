@@ -4,6 +4,7 @@ import TableRow from "@mui/material/TableRow";
 import { useState } from "react";
 import { useHistory } from "react-router";
 import Switch from "@mui/material/Switch";
+import { formatDateTime } from "../../../../../utils/dateHelper";
 
 export default function OrganizationRow({ rows, modifyOrg }) {
   const [checked, setChecked] = useState(true);
@@ -102,7 +103,7 @@ export default function OrganizationRow({ rows, modifyOrg }) {
               checked ? "f-400 vl-black" : "f-400 vl-grey-sm"
             }`}
           >
-            {rows.country}
+            {rows?.country}
           </p>
         </TableCell>
         <TableCell>
@@ -137,17 +138,17 @@ export default function OrganizationRow({ rows, modifyOrg }) {
             <p
               className={`vl-note f-400 ${checked ? "vl-black" : "vl-grey-sm"}`}
             >
-              {new Date(rows.createdAt).toLocaleDateString("en-GB")}
+              {formatDateTime(rows.createdAt)}
             </p>
             <p
               className={`vl-small f-400 ${
                 checked ? "vl-black" : "vl-grey-sm"
               }`}
             >
-              {new Date(rows.createdAt).toLocaleTimeString([], {
+              {/* {new Date(rows.createdAt).toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
-              })}
+              })} */}
             </p>
           </div>
         </TableCell>

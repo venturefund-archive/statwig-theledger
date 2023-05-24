@@ -6,50 +6,50 @@ import "./Pendings.css";
 
 function PendingCard({ organisation, updateOrgStatus, t }) {
   return (
-    <div className="pendingCard-container">
-      <div className="pendingcard-header">
-        <div className="pc-name-space">
-          <p className="vl-subheading f-500 vl-blue">{organisation.name}</p>
-          <p className="vl-small f-400 vl-grey-xs">
+    <div className='pendingCard-container'>
+      <div className='pendingcard-header'>
+        <div className='pc-name-space'>
+          <p className='vl-subheading f-500 vl-blue'>{organisation.name}</p>
+          <p className='vl-small f-400 vl-grey-xs'>
             {new Date(organisation.createdAt).toLocaleDateString("en-GB")}
           </p>
         </div>
-        {/* <div className="organization-name">
-					<p className="vl-body f-500 vl-black">{organisation.type}</p>
-				</div> */}
+        <div className='organization-name'>
+          <p className='vl-body f-500 vl-black'>{organisation?.type}</p>
+        </div>
       </div>
-      <div className="pendingcard-body">
-        <div className="pc-body-grid">
-          <p className="vl-body f-500 vl-black">{t("type")} :</p>
-          <p className="vl-body f-500 vl-grey-sm">{organisation.type}</p>
+      <div className='pendingcard-body'>
+        <div className='pc-body-grid'>
+          <p className='vl-body f-500 vl-black'>{t("type")} :</p>
+          <p className='vl-body f-500 vl-grey-sm'>{organisation.type}</p>
         </div>
-        <div className="pc-body-two-space">
-          <div className="pc-body-grid">
-            <p className="vl-body f-500 vl-black">{t("region")} :</p>
-            <p className="vl-body f-500 vl-grey-sm">{organisation?.region}</p>
+        <div className='pc-body-two-space'>
+          <div className='pc-body-grid'>
+            <p className='vl-body f-500 vl-black'>{t("region")} :</p>
+            <p className='vl-body f-500 vl-grey-sm'>{organisation?.region}</p>
           </div>
-          <div className="pc-body-grid">
-            <p className="vl-body f-500 vl-black">{t("country")} :</p>
-            <p className="vl-body f-500 vl-grey-sm">{organisation?.country}</p>
+          <div className='pc-body-grid'>
+            <p className='vl-body f-500 vl-black'>{t("country")} :</p>
+            <p className='vl-body f-500 vl-grey-sm'>{organisation?.country}</p>
           </div>
         </div>
-        <div className="pc-body-col-space">
-          <p className="vl-body f-500 vl-black">{t("org_address")} :</p>
-          <p className="vl-body f-500 vl-grey-sm">
+        <div className='pc-body-col-space'>
+          <p className='vl-body f-500 vl-black'>{t("org_address")} :</p>
+          <p className='vl-body f-500 vl-grey-sm'>
             {organisation?.postalAddress}
           </p>
         </div>
       </div>
-      <div className="pendingcard-action vl-flex vl-gap-sm">
+      <div className='pendingcard-action vl-flex vl-gap-sm'>
         <button
           onClick={() => updateOrgStatus(organisation, true)}
-          className="vl-btn vl-btn-sm vl-btn-accept"
+          className='vl-btn vl-btn-sm vl-btn-accept'
         >
           {t("accept")}
         </button>
         <button
           onClick={() => updateOrgStatus(organisation, true)}
-          className="vl-btn vl-btn-sm vl-btn-reject"
+          className='vl-btn vl-btn-sm vl-btn-reject'
         >
           {t("reject")}
         </button>
@@ -78,7 +78,6 @@ export default function Pendings(props) {
 
       const result = await updateOrg(payload);
       if (result.status === 200) {
-        console.log("Org updated successfully!");
         refetchOrgs();
       } else {
         console.log("Error in updating org!");
@@ -89,14 +88,15 @@ export default function Pendings(props) {
   };
 
   return (
-    <section className="pending-container">
-      <div className="pending-header">
-        <h1 className="vl-subheading f-700 vl-black">{t("pending")}</h1>
-        <div className="number-label">{pendingOrgsList?.length}</div>
+    <section className='pending-container'>
+      <div className='pending-header'>
+        <h1 className='vl-subheading f-700 vl-black'>{t("pending")}</h1>
+        <div className='number-label'>{pendingOrgsList?.length}</div>
       </div>
-      <div className="pending-body">
+      <div className='pending-body'>
         {pendingOrgsList?.map((pendingOrg) => (
           <PendingCard
+            key={pendingOrg.id}
             t={t}
             organisation={pendingOrg}
             updateOrgStatus={updateOrgStatus}

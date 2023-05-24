@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./style.scss";
 import traceDrop from "../../assets/icons/traceDrop.png";
 import Down from "../../assets/icons/up.png";
-import { formatTimeAMPM } from "../../utils/dateHelper";
+import { formatTime } from "../../utils/dateHelper";
 import SoChainOfCustody from "./sochainofcustody";
 import { Link } from "react-router-dom";
 
@@ -15,15 +15,13 @@ const PoChainOfCustody = (props) => {
     <>
       <div className={`row orderTxt ml-${index} mr-0 pl-3`}>
         <span
-          className={`pt-${index} p-0 ${
-            pindex === 1 && `border-primary border-left`
-          }`}
+          className={`pt-${index} p-0 ${pindex === 1 && `border-primary border-left`
+            }`}
           style={{ height: "1rem" }}
         ></span>
         <div
-          className={`pt-${index} p-0 col ${
-            pindex > 1 && `border-primary border-left`
-          } `}
+          className={`pt-${index} p-0 col ${pindex > 1 && `border-primary border-left`
+            } `}
         >
           <div className='row dot-pad'>
             <div className={`big-dot dot-${container} bg-info`}></div>
@@ -37,9 +35,8 @@ const PoChainOfCustody = (props) => {
             {data.poUpdates.map((r, i) => (
               <div key={i} className='col-12 row justify-content-between'>
                 <div
-                  className={`${
-                    op >= index && index !== 0 ? `col-5` : `col-10`
-                  }`}
+                  className={`${op >= index && index !== 0 ? `col-5` : `col-10`
+                    }`}
                 >
                   <span className='font-weight-bold'>t({r.status})</span>
                   {op === -1 && (
@@ -58,7 +55,7 @@ const PoChainOfCustody = (props) => {
                 <div className='text-primary col-2'>
                   <div className='text-muted'>{r.updatedOn.split(" ")[0]}</div>
                   <div className='text-muted'>
-                    {formatTimeAMPM(r.updatedOn.split(" ")[1])}
+                    {formatTime(r.updatedOn.split(" ")[1])}
                   </div>
                 </div>
               </div>

@@ -64,15 +64,8 @@ export const formatTime = (d) => {
   return hours + ":" + minutes + "" + ampm;
 };
 
-export const formatTimeAMPM = (d) => {
-  const date = d.split(":");
-  let hours = parseInt(date[0]);
-  let minutes = parseInt(date[1]);
-  let ampm = hours >= 12 ? "pm" : "am";
-  hours = hours % 12;
-  hours = hours ? hours : 12;
-  minutes = minutes < 10 ? "0" + minutes : minutes;
-  const strTime = hours + ":" + minutes + "" + ampm;
+export const formatDateTime = (d) => {
+  const strTime = formatDate(d) + "  " + formatTime(d) || "N/A";
   return strTime;
 };
 

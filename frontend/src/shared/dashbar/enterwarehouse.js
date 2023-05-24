@@ -170,11 +170,11 @@ const EnterWareHouse = (props) => {
       <div className='panel address searchpanel prodpanel d-flex flex-column inventoryDashboard'>
         {productArray?.length > 0
           ? productArray?.map((product, index) => (
-              <Product product={product} index={index} t={t} key={index} />
-            ))
+            <Product product={product} index={index} t={t} key={index} />
+          ))
           : dashBarData?.products?.map((product, index) => (
-              <Product product={product} index={index} t={t} key={index} />
-            ))}
+            <Product product={product} index={index} t={t} key={index} />
+          ))}
         {productArray?.length === 0 && (
           <center>
             <h5
