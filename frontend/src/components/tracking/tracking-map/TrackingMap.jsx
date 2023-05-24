@@ -217,28 +217,28 @@ export default function TrackingMap({ LocationTab, trackingData, t }) {
               setCurrentLocationSelected(null);
             }}
           >
-            <div className="info-popup-container">
-              <div className="info-header">
-                <div className="info-header-content">
-                  <i className="fa-solid fa-location-dot"></i>
+            <div className='info-popup-container'>
+              <div className='info-header'>
+                <div className='info-header-content'>
+                  <i className='fa-solid fa-location-dot'></i>
 
-                  <p className="mi-body-md f-500 mi-reset location-text-color">
+                  <p className='mi-body-md f-500 mi-reset location-text-color'>
                     {`${currentLocationData[locationClicked][0]?.warehouse?.warehouseAddress?.firstLine}, ${currentLocationData[locationClicked][0]?.warehouse?.warehouseAddress?.city}`}
                   </p>
                 </div>
               </div>
-              <div className="info-body">
-                <p className="mi-body-sm f-500 mi-reset header-text-color">
+              <div className='info-body'>
+                <p className='mi-body-sm f-500 mi-reset header-text-color'>
                   {t("product_details")}
                 </p>
-                <div className="product-details-list">
+                <div className='product-details-list'>
                   {currentLocationData[locationClicked]?.map((product) => (
-                    <div className="product-list-card map-card-design">
+                    <div className='product-list-card map-card-design'>
                       {console.log(product)}
-                      <p className="mi-body-sm f-500 mi-reset ">
+                      <p className='mi-body-sm f-500 mi-reset '>
                         {product?.productName}
                       </p>
-                      <p className="mi-body-sm f-500 mi-reset">
+                      <p className='mi-body-sm f-500 mi-reset'>
                         {/* {`${product?.productQuantity} ( ${product?.productInfo?.unitofMeasure?.name} )`} */}
                         {product?.productQuantity
                           ? `${product?.productQuantity} (${product?.productInfo?.unitofMeasure?.name})`
@@ -259,33 +259,33 @@ export default function TrackingMap({ LocationTab, trackingData, t }) {
               setChainOfCustodySelected(null);
             }}
           >
-            <div className="info-popup-container">
-              <div className="info-header">
-                <div className="info-header-content">
-                  <i className="fa-solid fa-location-dot"></i>
+            <div className='info-popup-container'>
+              <div className='info-header'>
+                <div className='info-header-content'>
+                  <i className='fa-solid fa-location-dot'></i>
 
-                  <p className="mi-body-md f-500 mi-reset location-text-color">
+                  <p className='mi-body-md f-500 mi-reset location-text-color'>
                     {locationClicked?.address}
                   </p>
                 </div>
               </div>
-              <div className="info-body">
-                <p className="mi-body-sm f-500 mi-reset header-text-color">
+              <div className='info-body'>
+                <p className='mi-body-sm f-500 mi-reset header-text-color'>
                   {t("product_details")}
                 </p>
                 {chainOfCustody[locationClicked.index]?.products?.map(
                   (product) => (
-                    <div className="product-details-list">
-                      <div className="product-list-card map-card-design">
-                        <p className="mi-body-sm f-500 mi-reset ">
+                    <div className='product-details-list'>
+                      <div className='product-list-card map-card-design'>
+                        <p className='mi-body-sm f-500 mi-reset '>
                           {product?.productName}
                         </p>
-                        <p className="mi-body-sm f-500 mi-reset">
+                        <p className='mi-body-sm f-500 mi-reset'>
                           {`${product?.productQuantity} ( ${product?.unitofMeasure?.name} )`}
                         </p>
                       </div>
                     </div>
-                  )
+                  ),
                 )}
               </div>
             </div>
