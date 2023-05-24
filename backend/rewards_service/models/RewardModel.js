@@ -2,7 +2,8 @@ const mongoose = require("mongoose");
 
 const RewardSchema = new mongoose.Schema(
     {
-        eventID: { type: String, required: true },
+        appId: { type: String, required: true },
+        eventId: { type: String, required: true },
         eventTime: { type: Date, required: true },
         event: { type: String, required: true },
         eventType: { type: String, required: true },
@@ -12,8 +13,8 @@ const RewardSchema = new mongoose.Schema(
         secondaryUserId: { type: String, default: null },
         secondaryOrgId: { type: String, default: null },
         secondaryWarehouseId: { type: String, default: null },
-        points: { type: Number, default: 0 },
-        redeemed: { type: Boolean, default: false },
+        points: { type: Number, default: 0, min: 0 },
+        redeemedPoints: { type: Number, default: 0, min: 0 },
         redeemedAt: { type: Date }
     },
     { timestamps: true }
