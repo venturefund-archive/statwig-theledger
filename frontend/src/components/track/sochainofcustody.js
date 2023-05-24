@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./style.scss";
 import traceDrop from "../../assets/icons/traceDrop.png";
 import Down from "../../assets/icons/up.png";
-import { formatTimeAMPM } from "../../utils/dateHelper";
+import { formatTime } from "../../utils/dateHelper";
 import { Link } from "react-router-dom";
 
 const SoChainOfCustody = (props) => {
@@ -44,23 +44,21 @@ const SoChainOfCustody = (props) => {
           }}
         >
           <span
-            className={`pt-${index > 2 ? 2 : index} p-0 ${
-              pindex === 1 && `border-primary border-left`
-            }`}
+            className={`pt-${index > 2 ? 2 : index} p-0 ${pindex === 1 && `border-primary border-left`
+              }`}
             style={{ height: "1rem" }}
           ></span>
           <div
-            className={`pt-${index > 2 ? 2 : index} p-0 col ${
-              pindex > 1 && `border-primary border-left`
-            } `}
+            className={`pt-${index > 2 ? 2 : index} p-0 col ${pindex > 1 && `border-primary border-left`
+              } `}
           >
             <div className="row dot-pad">
               <div className={`big-dot dot-${container} bg-info`}></div>
               <span className="text-primary pl-4 pb-1 row col-12 font-weight-bold">
                 {isShipment
                   ? data?.receiver?.org?.name +
-                    "/" +
-                    data?.supplier?.warehouse?.title
+                  "/" +
+                  data?.supplier?.warehouse?.title
                   : data?.supplier?.name}
               </span>
             </div>
@@ -98,12 +96,12 @@ const SoChainOfCustody = (props) => {
                   </div>
                   <div className="text-muted">
                     {[...dateArr].includes("/")
-                      ? formatTimeAMPM(
-                          new Date(updatedDate()).toString().split(" ")[4]
-                        )
-                      : formatTimeAMPM(
-                          new Date(update.updatedOn).toString().split(" ")[4]
-                        )}
+                      ? formatTime(
+                        new Date(updatedDate()).toString().split(" ")[4]
+                      )
+                      : formatTime(
+                        new Date(update.updatedOn).toString().split(" ")[4]
+                      )}
                   </div>
                 </div>
               </div>
