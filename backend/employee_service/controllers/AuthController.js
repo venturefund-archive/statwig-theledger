@@ -1562,7 +1562,7 @@ exports.updateWarehouseAddress = [
 			const warehouse = await WarehouseModel.findOneAndUpdate({ id: req.query.warehouseId }, data, {
 				new: true,
 			});
-			const employee = await EmployeeModel.findOneAndUpdate(
+			await EmployeeModel.findOneAndUpdate(
 				{ id: req.user.id },
 				{
 					$push: { pendingWarehouseId: warehouse.id },
@@ -1985,8 +1985,8 @@ exports.getOrganizationsByTypeForAbInBev = [
 			matchCondition.status = "ACTIVE";
 			if (filters.status && filters.status !== "") {
 				matchCondition.status = filters.status;
-			}else {
-				matchCondition.status = {$in: ["ACTIVE", "DEACTIVATED"]}
+			} else {
+				matchCondition.status = { $in: ["ACTIVE", "DEACTIVATED"] }
 			}
 			if (filters.state && filters.state !== "") {
 				matchWarehouseCondition["warehouseDetails.warehouseAddress.state"] = new RegExp(
@@ -2415,6 +2415,8 @@ exports.addUsersFromExcel = [
 					const zip = user?.["POSTAL CODE"];
 					const province = user?.["PROVINCE"];
 					const warehouseTitle = user?.["LOCATION NAME"];
+					const warehouseRegion = user?.["REGION"];
+					const country = user?.["COUNTRY"];
 					const district = user?.["DISTRICT"];
 					const line1 = user?.["ADDRESS LINE 1"];
 					const warehouseAddress = {
@@ -2432,8 +2434,8 @@ exports.addUsersFromExcel = [
 					const warehousePayload = {
 						organisationId: organisationId,
 						title: warehouseTitle,
-						region: "Americas",
-						country: "Costa Rica",
+						region: warehouseRegion || "Americas",
+						country: country || "Costa Rica",
 						warehouseAddress: warehouseAddress,
 						supervisors: [],
 					};
@@ -2767,7 +2769,7 @@ exports.getOrgUserAnalytics = [
 				{
 					$facet: {
 						total: [
-							{ $match: {accountStatus:  {$in: ["ACTIVE", "DEACTIVATED","REJECTED"]} }},
+							{ $match: { accountStatus: { $in: ["ACTIVE", "DEACTIVATED", "REJECTED"] } } },
 							{
 								$group: {
 									_id: null,

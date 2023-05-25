@@ -664,8 +664,8 @@ const NewOrder = (props) => {
 														setFieldValue("rtypeName", v.label);
 														setFieldValue("toOrg", "");
 														setFieldValue("toOrgName", "");
-														setFieldValue("toOrgCountry", "Costa Rica");
-														setFieldValue("toOrgRegion", "Americas");
+														setFieldValue("toOrgCountry", "");
+														setFieldValue("toOrgRegion", "");
 														setFieldValue("toOrgLoc", "");
 														setFieldValue("toOrgLocRegion", "");
 														setFieldValue("toOrgLocCountry", "");

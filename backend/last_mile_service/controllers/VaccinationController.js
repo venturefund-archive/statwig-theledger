@@ -1111,7 +1111,6 @@ exports.getCitiesAndOrgsForFilters = [
 	async (req, res) => {
 		try {
 			const country = await CountryModel.aggregate([
-				{ $match: { name: "Costa Rica" } },
 				{
 					$lookup: {
 						from: "cities",
@@ -1125,7 +1124,7 @@ exports.getCitiesAndOrgsForFilters = [
 				},
 				{ $unwind: "$cities" },
 			]);
-			if (!country || !country.length) {
+			if (!country.length) {
 				throw new Error("Something went wrong!");
 			}
 

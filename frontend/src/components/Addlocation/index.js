@@ -32,8 +32,8 @@ export const AddLocationCard = (props) => {
     props.user.type === "Third Party Logistics" ? true : false;
   const [addressTitle, setAddressTitle] = useState("");
   const [pincode, setPincode] = useState("");
-  const [region, setregion] = useState("Americas");
-  const [country, setcountry] = useState("Costa Rica");
+  const [region, setregion] = useState("");
+  const [country, setcountry] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [addressLine, setAddressLine] = useState("");
@@ -82,9 +82,9 @@ export const AddLocationCard = (props) => {
       postalAddress: props.user.postalAddress || null,
       region: values.region || region,
       country: country,
-        // intelEnabled && props?.popup
-        //   ? country
-        //   : values.country,
+      // intelEnabled && props?.popup
+      //   ? country
+      //   : values.country,
       // location: {
       //   longitude: '0',
       //   latitude: '0',
@@ -97,9 +97,9 @@ export const AddLocationCard = (props) => {
         city: values.city,
         state: values.state,
         country: country,
-          // intelEnabled && props?.popup
-          //   ? country
-          //   : values.country,
+        // intelEnabled && props?.popup
+        //   ? country
+        //   : values.country,
         landmark: null,
         zipCode: values.pincode,
       },
@@ -118,9 +118,9 @@ export const AddLocationCard = (props) => {
   };
 
   function search(name, myArray) {
-    for (var i = 0; i < myArray.length; i++) {
-      if (myArray[i].name === name) {
-        return myArray[i].id;
+    for (const element of myArray) {
+      if (element.name === name) {
+        return element.id;
       }
     }
   }
@@ -225,14 +225,13 @@ export const AddLocationCard = (props) => {
                           labelId='demo-simple-select-label'
                           disabled
                           id='demo-simple-select controllable-states-demo'
-                          // placeholder={
-                          //   <div className='select-placeholder-text'>
-                          //     {t("Select_Region")}
-                          //   </div>
-                          // }
+                          placeholder={
+                            <div className='select-placeholder-text'>
+                              {t("Select_Region")}
+                            </div>
+                          }
                           onChange={(event, newValue) => {
                             fetchAllCountries1(newValue);
-                            console.log(newValue)
                             setregion(newValue);
                             setcountry("");
                             setState("");
@@ -266,19 +265,18 @@ export const AddLocationCard = (props) => {
                         <Autocomplete
                           labelId='demo-simple-select-label'
                           id='demo-simple-select controllable-states-demo'
-                          // placeholder={
-                          //   <div className='select-placeholder-text'>
-                          //     {t("Select_Country")}
-                          //   </div>
-                          // }
+                          placeholder={
+                            <div className='select-placeholder-text'>
+                              {t("Select_Country")}
+                            </div>
+                          }
                           value={country}
                           disabled
-                          onClick={(e) => {e.preventDefault(); return}}
+                          onClick={(e) => { e.preventDefault() }}
                           onChange={(event, newValue) => {
                             let v = search(newValue, allCountries);
                             fetchAllState1(v);
                             setcountry(newValue);
-                            console.log(newValue)
                             setState("");
                             setCity("");
                           }}
@@ -542,5 +540,3 @@ export const AddLocationCard = (props) => {
     </>
   );
 };
-
-// export default AddLocation;

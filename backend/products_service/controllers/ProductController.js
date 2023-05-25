@@ -338,9 +338,9 @@ exports.addProduct = [
               },
               { new: true }
             );
-            const organisationId = orgCounter.counters[2].format + orgCounter.counters[2].value;
+            const organizationId = orgCounter.counters[2].format + orgCounter.counters[2].value;
             const newManufacturer = new OrganisationModel({
-              id: organisationId,
+              id: organizationId,
               region: 'Americas',
               country: 'Costa Rica',
               name: req.body.manufacturer,
@@ -375,7 +375,6 @@ exports.addProduct = [
               Upload = await uploadFile(req.file);
               await unlinkFile(req.file.path);
             }
-
 
             const product = new ProductModel({
               id: productId?.counters[5].format + productId?.counters[5].value,
