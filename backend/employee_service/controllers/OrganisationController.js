@@ -12,6 +12,7 @@ const cuid = require("cuid");
 const axios = require("axios");
 const hf_blockchain_url = process.env.HF_BLOCKCHAIN_URL || "http://3.110.249.128:8080";
 const fs = require("fs");
+const path = require("path");
 const XLSX = require("xlsx");
 
 const EmployeeIdMap = new Map();
@@ -950,21 +951,22 @@ exports.addOrgsFromExcel = [
 	auth,
 	async (req, res) => {
 		try {
-			const dir = `uploads`;
+			const dir = path.join(__dirname, "uploads");
 			if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+
 			const workbook = XLSX.readFile(req.file.path);
-			const sheet_name_list = workbook.SheetNames;
-			const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]], {
+			const sheetName = workbook.SheetNames[0];
+			const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {
 				dateNF: "dd/mm/yyyy;@",
 				cellDates: true,
 				raw: false,
 			});
 			const parentOrgId = req.user.type === "DISTRIBUTORS" ? req.user.organisationId : null;
-
 			const organisationMap = new Map();
 			const employeeMap = new Map();
-			const formattedData = new Array();
+			const formattedData = [];
 			let duplicateRecords = 0;
+
 			for (const [index, user] of data.entries()) {
 				const {
 					"FIRST NAME": firstName,
@@ -1022,19 +1024,16 @@ exports.addOrgsFromExcel = [
 					organisationMap.set(organisationKey, payload);
 					employeeMap.set(employeeKey, payload);
 				} else {
-					++duplicateRecords;
+					duplicateRecords++;
 				}
 			}
-			const results = [];
-			for (const orgData of formattedData) {
-				const result = await createOrg(orgData);
-				results.push(result);
-			}
+
+			const results = await Promise.all(formattedData.map(createOrg));
 			const insertedOrgs = results.filter((elem) => elem.inserted)?.length;
 
 			const response = {
 				insertedRecords: insertedOrgs,
-				invalidRecords: results?.length - insertedOrgs + duplicateRecords,
+				invalidRecords: results.length - insertedOrgs + duplicateRecords,
 			};
 
 			return apiResponse.successResponseWithData(req, res, "Success", response);
