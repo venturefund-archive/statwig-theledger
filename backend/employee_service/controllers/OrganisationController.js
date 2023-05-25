@@ -976,7 +976,8 @@ exports.addOrgsFromExcel = [
 					"PHONE": phoneNumber,
 					"ORG NAME": orgName,
 					"PHARMACY": pharmacy,
-					"ORG TYPE": type,
+					"ORG TYPE": orgType,
+					"ORGANIZATION TYPE": organisationType,
 					"PARENT ORG": parentOrgName,
 					"CITY": city,
 					"COUNTRY": country,
@@ -993,7 +994,7 @@ exports.addOrgsFromExcel = [
 
 				const emailId = email || emailOfOrganization;
 				const organisationName = orgName || pharmacy;
-
+				const type = orgType || organisationType;
 				const address = {
 					city: city?.trim(),
 					country: country?.trim(),
