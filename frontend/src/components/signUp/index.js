@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getOrganisations, getOrganisationsAtSignup } from "../../actions/productActions";
-import { getOrganizationsByType } from "../../actions/userActions";
+import { getOrganizationsByType, verifyEmailAndPhoneNo } from "../../actions/userActions";
 import { Formik } from "formik";
 import "react-phone-number-input/style.css";
-import PhoneInput from "react-phone-number-input";
-import { isValidPhoneNumber } from "react-phone-number-input";
+import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import "./style.scss";
 import User from "../../assets/icons/user.png";
@@ -16,8 +15,6 @@ import Waiting from "../../assets/icons/waiting.png";
 import organisationType from "../../assets/icons/organisationType.png";
 import logo from "../../assets/brands/VaccineLedgerlogo.svg";
 import TextField from "@material-ui/core/TextField";
-import { verifyEmailAndPhoneNo } from "../../actions/userActions";
-import { Alert, AlertTitle } from "@material-ui/lab";
 import { useTranslation } from "react-i18next";
 import { COUNTRY_CODE } from "../../constants/countryCode";
 
@@ -75,7 +72,7 @@ const FormPage = (props) => {
     return arr;
   };
 
-  var orgTypeArray = [];
+  let orgTypeArray = [];
   organisationsType.forEach((data) => {
     for (var i = 0; i < data.length; i++) {
       orgTypeArray.push(data[i].name);
@@ -106,8 +103,8 @@ const FormPage = (props) => {
       console.log("Other");
       fetchData('');
     }
-    
-  },[selectedType])
+
+  }, [selectedType])
 
   // const showOrgByType = React.useCallback((value) => {
   //   console.log('render');
@@ -461,7 +458,7 @@ const FormPage = (props) => {
                                 props.onEmailChange(e);
                                 handleChange(e);
                               }}
-                             onBlur={() => handleEmailVerification()}
+                              onBlur={() => handleEmailVerification()}
                             />
                             {errors.email && touched.email && (
                               <span className='error-msg text-dangerS'>

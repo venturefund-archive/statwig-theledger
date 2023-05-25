@@ -12,6 +12,7 @@ const cuid = require("cuid");
 const axios = require("axios");
 const hf_blockchain_url = process.env.HF_BLOCKCHAIN_URL || "http://3.110.249.128:8080";
 const fs = require("fs");
+const path = require("path");
 const XLSX = require("xlsx");
 
 const EmployeeIdMap = new Map();
@@ -92,18 +93,18 @@ async function createOrg(payload) {
 		};
 	}
 
-	// Validate duplicate Organisation Name
+	// Validate duplicate Organization Name
 	const organisationExists = await OrganisationModel.findOne({
 		name: new RegExp("^" + organisationName + "$", "i"),
 	});
 	if (organisationExists) {
 		return {
 			inserted: false,
-			message: `Organisation "${organisationName}" already exists!`,
+			message: `Organization "${organisationName}" already exists!`,
 		};
 	}
 
-	// Create new Organisation, Warehouse & Employee
+	// Create new Organization, Warehouse & Employee
 	const empCounter = await CounterModel.findOneAndUpdate(
 		{
 			"counters.name": "employeeId",
@@ -950,38 +951,58 @@ exports.addOrgsFromExcel = [
 	auth,
 	async (req, res) => {
 		try {
-			const dir = `uploads`;
+			const dir = path.join(__dirname, "uploads");
 			if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+
 			const workbook = XLSX.readFile(req.file.path);
-			const sheet_name_list = workbook.SheetNames;
-			const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]], {
+			const sheetName = workbook.SheetNames[0];
+			const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {
 				dateNF: "dd/mm/yyyy;@",
 				cellDates: true,
 				raw: false,
 			});
 			const parentOrgId = req.user.type === "DISTRIBUTORS" ? req.user.organisationId : null;
-
 			const organisationMap = new Map();
 			const employeeMap = new Map();
-			const formattedData = new Array();
+			const formattedData = [];
 			let duplicateRecords = 0;
+
 			for (const [index, user] of data.entries()) {
-				const firstName = user["FIRST NAME"];
-				const lastName = user["LAST NAME"];
-				const emailId = user["EMAIL"] || user["Email of organization"];
-				const phoneNumber = user["PHONE"];
-				const organisationName = user["ORG NAME"] || user["PHARMACY"];
-				const type = user["ORG TYPE"];
-				const parentOrgName = user["PARENT ORG"];
+				const {
+					"FIRST NAME": firstName,
+					"LAST NAME": lastName,
+					"EMAIL": email,
+					"Email of organization": emailOfOrganization,
+					"PHONE": phoneNumber,
+					"ORG NAME": orgName,
+					"PHARMACY": pharmacy,
+					"ORG TYPE": orgType,
+					"ORGANIZATION TYPE": organisationType,
+					"PARENT ORG": parentOrgName,
+					"CITY": city,
+					"COUNTRY": country,
+					"ADDRESS": line1,
+					"Address": alternateAddress,
+					"PINCODE": pincode,
+					"POSTAL CODE": postalCode,
+					"REGION": region,
+					"DISTRICT": district,
+					"STATE": state,
+					"PROVINCE": province,
+					"Province": alternateProvince
+				} = user;
+
+				const emailId = email || emailOfOrganization;
+				const organisationName = orgName || pharmacy;
+				const type = orgType || organisationType;
 				const address = {
-					city: user["CITY"]?.trim(),
-					country: user["COUNTRY"]?.trim(),
-					line1: user["ADDRESS"]?.trim() || user["Address"]?.trim(),
-					pincode:
-						user["PINCODE"]?.trim() || user["POSTAL CODE"]?.trim() || user["Postal Code"]?.trim(),
-					region: user["REGION"]?.trim() || user["DISTRICT"]?.trim(),
-					state: user["STATE"]?.trim(),
-					province: user["PROVINCE"]?.trim() || user["Province"]?.trim(),
+					city: city?.trim(),
+					country: country?.trim(),
+					line1: (line1 || alternateAddress)?.trim(),
+					pincode: (pincode || postalCode || postalCode)?.trim(),
+					region: (region || district)?.trim(),
+					state: state?.trim(),
+					province: (province || alternateProvince)?.trim()
 				};
 
 				const payload = {
@@ -993,42 +1014,30 @@ exports.addOrgsFromExcel = [
 					type,
 					address,
 					parentOrgName,
-					parentOrgId,
+					parentOrgId
 				};
 
-				let employeeKey;
-				if (emailId) employeeKey = emailId.toLowerCase().replace(" ", "");
-				else if (phoneNumber)
-					employeeKey = phoneNumber.startsWith("+") ? phoneNumber : `+${phoneNumber}`;
-				else continue;
-
-				let organisationKey;
-				if (organisationName && organisationName !== "")
-					organisationKey = organisationName.toLowerCase();
-				else continue;
+				const employeeKey = email ? email.toLowerCase().replace(" ", "") : phoneNumber.startsWith("+") ? phoneNumber : `+${phoneNumber}`;
+				const organisationKey = organisationName ? organisationName.toLowerCase() : undefined;
 
 				if (!organisationMap.has(organisationKey) && !employeeMap.has(employeeKey)) {
 					formattedData[index] = payload;
 					organisationMap.set(organisationKey, payload);
 					employeeMap.set(employeeKey, payload);
 				} else {
-					++duplicateRecords;
+					duplicateRecords++;
 				}
 			}
 
-			const results = [];
-			for (const orgData of formattedData) {
-				const result = await createOrg(orgData);
-				results.push(result);
-			}
+			const results = await Promise.all(formattedData.map(createOrg));
 			const insertedOrgs = results.filter((elem) => elem.inserted)?.length;
 
 			const response = {
 				insertedRecords: insertedOrgs,
-				invalidRecords: results?.length - insertedOrgs + duplicateRecords,
+				invalidRecords: results.length - insertedOrgs + duplicateRecords,
 			};
 
-			return apiResponse.successResponseWithData(req, res, "success", response);
+			return apiResponse.successResponseWithData(req, res, "Success", response);
 		} catch (err) {
 			console.log(err);
 			return apiResponse.errorResponse(req, res, err);

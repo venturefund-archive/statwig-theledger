@@ -29,7 +29,6 @@ const checkPermissions =
   require("../middlewares/rbac_middleware").checkPermissions;
 const wrapper = require("../models/DBWrapper");
 const excel = require("node-excel-export");
-const { compareArrays } = require("../helpers/utility");
 const blockchain_service_url = process.env.URL;
 const hf_blockchain_url = process.env.HF_BLOCKCHAIN_URL;
 const po_stream_name = process.env.PO_STREAM;
@@ -448,7 +447,6 @@ exports.addPOsFromExcel = [
       const createdBy = req.user.id;
       const workbook = XLSX.readFile(req.file.path);
       const sheet_name_list = workbook.SheetNames;
-      const errorsArr = [];
       const invalidArr = [];
       const data = XLSX.utils.sheet_to_json(
         workbook.Sheets[sheet_name_list[0]],
@@ -1838,7 +1836,7 @@ exports.exportOutboundPurchaseOrders = [
           },
         };
       }
-      let outboundPOsCount = await RecordModel.count(whereQuery);
+      await RecordModel.count(whereQuery);
       RecordModel.find(whereQuery)
         .sort({ createdAt: -1 })
         .then((outboundPOList) => {

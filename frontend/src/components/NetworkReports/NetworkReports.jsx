@@ -1,4 +1,3 @@
-import { Button } from "@mui/material";
 import React, { useState, useEffect } from "react";
 import { getNetworkPageAnalytics } from "../../actions/networkActions";
 import "./NetworkReports.css";
@@ -15,36 +14,36 @@ import { useHistory } from "react-router";
 function TabList({ Tab, setTab }) {
   const { t } = useTranslation();
   return (
-    <div className="Tablist_container">
+    <div className='Tablist_container'>
       <div
         className={`Tab_Link ${Tab === "out_stock" && "active"}`}
         onClick={() => setTab("out_stock")}
       >
-        <p className="vl-subheading">{t("out_of_stock")}</p>
+        <p className='vl-subheading'>{t("out_of_stock")}</p>
       </div>
       <div
         className={`Tab_Link ${Tab === "in_stock" && "active"}`}
         onClick={() => setTab("in_stock")}
       >
-        <p className="vl-subheading">{t("in_stock")}</p>
+        <p className='vl-subheading'>{t("in_stock")}</p>
       </div>
       <div
         className={`Tab_Link ${Tab === "near_expire" && "active"}`}
         onClick={() => setTab("near_expire")}
       >
-        <p className="vl-subheading">{t("near_expiration")}</p>
+        <p className='vl-subheading'>{t("near_expiration")}</p>
       </div>
       <div
         className={`Tab_Link ${Tab === "expired" && "active"}`}
         onClick={() => setTab("expired")}
       >
-        <p className="vl-subheading">{t("expired")}</p>
+        <p className='vl-subheading'>{t("expired")}</p>
       </div>
       <div
         className={`Tab_Link ${Tab === "best_seller" && "active"}`}
         onClick={() => setTab("best_seller")}
       >
-        <p className="vl-subheading">{t("best_seller")}</p>
+        <p className='vl-subheading'>{t("best_seller")}</p>
       </div>
     </div>
   );
@@ -55,7 +54,7 @@ export default function NetworkReports() {
   const { t } = useTranslation();
 
   const [locationParams, setLocationParams] = useState({
-    country: "Costa Rica",
+    country: "",
     state: "",
     city: "",
   });
@@ -86,12 +85,12 @@ export default function NetworkReports() {
     }));
   };
 
-  useEffect(async () => {
+  useEffect(() => {
     getNetworkAnalytics();
   }, [locationParams]);
 
   return (
-    <section className="NetworkReports_container">
+    <section className='NetworkReports_container'>
       {/* <div style={{height: "5vh", width: "100%", position: "fixed", display: "flex", background: "lightGray", zIndex: 2000}}>
 				<Button
 					onClick={() => history.push("/network")}
@@ -101,64 +100,64 @@ export default function NetworkReports() {
 				</Button>
 			</div> */}
 
-      <div className="network_page_inner_header">
+      <div className='network_page_inner_header'>
         <h1
           style={{ paddingBottom: "10px" }}
-          className="vl-heading-bdr black f-700 mi-reset"
+          className='vl-heading-bdr black f-700 mi-reset'
         >
           {t("network")}
         </h1>
 
         <button
-          className="mi-btn mi-btn-md mi-btn-secondary"
+          className='mi-btn mi-btn-md mi-btn-secondary'
           onClick={() => history.push("/network")}
         >
           {t("switch_to_location_view")}
         </button>
       </div>
-      <div className="header_null_space"></div>
+      <div className='header_null_space'></div>
 
-      <div className="NetworkReports_Search_Header">
+      <div className='NetworkReports_Search_Header'>
         <ReportSearch updateSearchParams={updateSearchParams} />
       </div>
       <main className={`Result_space ${locationParams && "show"}`}>
-        <div className="NetworkReports_Breadcrumps_links">
+        <div className='NetworkReports_Breadcrumps_links'>
           {locationParams?.country && (
             <>
-              <p className="vl-subheading f-500">{locationParams.country}</p>
-              <i class="fa-solid fa-chevron-right"></i>
+              <p className='vl-subheading f-500'>{locationParams.country}</p>
+              <i class='fa-solid fa-chevron-right'></i>
             </>
           )}
           {locationParams?.state && (
             <>
-              <p className="vl-subheading f-500">{locationParams.state}</p>
-              <i class="fa-solid fa-chevron-right"></i>
+              <p className='vl-subheading f-500'>{locationParams.state}</p>
+              <i class='fa-solid fa-chevron-right'></i>
             </>
           )}
           {locationParams?.city && (
             <>
-              <p className="vl-subheading f-500">{locationParams.city}</p>
+              <p className='vl-subheading f-500'>{locationParams.city}</p>
             </>
           )}
         </div>
-        <div className="NetworkReports_Analytics_container">
+        <div className='NetworkReports_Analytics_container'>
           <ReportAnalytics
             variant={1}
-            title="out_of_stock"
+            title='out_of_stock'
             value={analytics.outStock}
           />
           <ReportAnalytics
             variant={2}
-            title="in_stock"
+            title='in_stock'
             value={analytics.inStock}
           />
           <ReportAnalytics
             variant={3}
-            title="best_seller"
+            title='best_seller'
             value={analytics.bestSellers}
           />
         </div>
-        <div className="NetworkReports_Table_Wrapper">
+        <div className='NetworkReports_Table_Wrapper'>
           <TabList Tab={Tab} setTab={setTab} />
           {Tab === "out_stock" && (
             <OutofstocksTable locationParams={locationParams} />
