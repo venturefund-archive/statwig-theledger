@@ -29,7 +29,6 @@ const checkPermissions =
   require("../middlewares/rbac_middleware").checkPermissions;
 const wrapper = require("../models/DBWrapper");
 const excel = require("node-excel-export");
-const { compareArrays } = require("../helpers/utility");
 const blockchain_service_url = process.env.URL;
 const hf_blockchain_url = process.env.HF_BLOCKCHAIN_URL;
 const po_stream_name = process.env.PO_STREAM;
@@ -448,7 +447,6 @@ exports.addPOsFromExcel = [
       const createdBy = req.user.id;
       const workbook = XLSX.readFile(req.file.path);
       const sheet_name_list = workbook.SheetNames;
-      const errorsArr = [];
       const invalidArr = [];
       const data = XLSX.utils.sheet_to_json(
         workbook.Sheets[sheet_name_list[0]],
@@ -1838,7 +1836,7 @@ exports.exportOutboundPurchaseOrders = [
           },
         };
       }
-      let outboundPOsCount = await RecordModel.count(whereQuery);
+      await RecordModel.count(whereQuery);
       RecordModel.find(whereQuery)
         .sort({ createdAt: -1 })
         .then((outboundPOList) => {
@@ -1922,77 +1920,77 @@ function buildExcelReport(req, res, dataForExcel, orderType) {
     },
   };
   const specification = {
-		id: {
-			displayName: req.t("Order_ID"),
-			headerStyle: styles.headerDark,
-			width: 120,
-		},
-		createdBy: {
-			displayName: req.t("Order_Created_By"),
-			headerStyle: styles.headerDark,
-			width: "10",
-		},
-		supplierOrgId: {
-			displayName: req.t("ORG_ID_-_Creator"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		orderReceiveIncharge: {
-			displayName: req.t("Order_Receive_Incharge"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		orderReceiverOrg: {
-			displayName: req.t("ORG_ID_-_Receiver"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		productCategory: {
-			displayName: req.t("Product_Category"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		productName: {
-			displayName: req.t("Product_Name"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		productId: {
-			displayName: req.t("Product_ID"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		productQuantity: {
-			displayName: req.t("Quantity"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		manufacturer: {
-			displayName: req.t("Manufacturer"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		recieverOrgName: {
-			displayName: req.t("Delivery_Organization_Name"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		recieverOrgId: {
-			displayName: req.t("Delivery_Organization_ID"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		recieverOrgLocation: {
-			displayName: req.t("Delivery_Organization_Location_Details"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-		status: {
-			displayName: req.t("Status"),
-			headerStyle: styles.headerDark,
-			width: 220,
-		},
-	};
+    id: {
+      displayName: req.t("Order_ID"),
+      headerStyle: styles.headerDark,
+      width: 120,
+    },
+    createdBy: {
+      displayName: req.t("Order_Created_By"),
+      headerStyle: styles.headerDark,
+      width: "10",
+    },
+    supplierOrgId: {
+      displayName: req.t("ORG_ID_-_Creator"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    orderReceiveIncharge: {
+      displayName: req.t("Order_Receive_Incharge"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    orderReceiverOrg: {
+      displayName: req.t("ORG_ID_-_Receiver"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    productCategory: {
+      displayName: req.t("Product_Category"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    productName: {
+      displayName: req.t("Product_Name"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    productId: {
+      displayName: req.t("Product_ID"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    productQuantity: {
+      displayName: req.t("Quantity"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    manufacturer: {
+      displayName: req.t("Manufacturer"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    recieverOrgName: {
+      displayName: req.t("Delivery_Organization_Name"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    recieverOrgId: {
+      displayName: req.t("Delivery_Organization_ID"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    recieverOrgLocation: {
+      displayName: req.t("Delivery_Organization_Location_Details"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+    status: {
+      displayName: req.t("Status"),
+      headerStyle: styles.headerDark,
+      width: 220,
+    },
+  };
 
   const report = excel.buildExport([
     {

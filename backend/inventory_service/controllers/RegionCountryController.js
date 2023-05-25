@@ -300,11 +300,7 @@ exports.getCountryDetailsByRegion = [
           }
         }
         for (const org of orgs) {
-          if (typeof orgs.country === "string") {
-            countrySet.add(org.country);
-          } else if (orgs?.country?.countryName) {
-            countrySet.add(org.country.countryName);
-          }
+          countrySet.add(org.country);
         }
         const orgArray = [...countrySet];
         orgArray.sort();
@@ -395,7 +391,7 @@ exports.getOrganizations = [
             $and: [
               { type: orgType },
               { parentOrgId: req.user.organisationId },
-              { $or: [{ "country.countryName": country }, { country: country }] },
+              { country: country },
               { status: "ACTIVE" },
             ],
           })
@@ -403,7 +399,7 @@ exports.getOrganizations = [
           orgs = await OrganisationModel.find({
             $and: [
               { type: orgType },
-              { $or: [{ "country.countryName": country }, { country: country }] },
+              { country: country },
               { status: "ACTIVE" },
             ],
           })
