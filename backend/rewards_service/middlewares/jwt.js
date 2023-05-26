@@ -36,13 +36,13 @@ const authUser = (req, res, next) => {
   }
 };
 
-const apiKeyAuth = (req, res, next) => {
+const apiKeyAuth = async (req, res, next) => {
   try {
     if (REWARDS_AUTH) {
       next();
     } else {
-      const { appId, apiKey } = req.body;
-      const keyExists = RewardConfigModel.findOne({ appId, apiKeys: { $in: [apiKey] } });
+      const { appId, apiKey } = req.headers;
+      const keyExists = await RewardConfigModel.findOne({ appId, apiKeys: { $in: [apiKey] } });
       if (keyExists) next();
       else return new Error({ message: "API Key not found" })
     }
@@ -50,10 +50,29 @@ const apiKeyAuth = (req, res, next) => {
     console.log(err);
     return apiResponse.errorResponse(res, err?.message || "API Key Error");
   }
-
 };
 
+const roleAuth = async (req, res, next) => {
+  try {
+    const { appId, role } = req.headers;
+    const roleExists = await RewardConfigModel.findOne({ appId, config: { $elemMatch: { roles: { $in: [role] } } } });
+    if (roleExists) next();
+    else return new Error({ message: "Role doesn't have permission" })
+  }
+  catch (err) {
+    console.log(err);
+    return apiResponse.errorResponse(res, err?.message || "Role Error")
+  }
+}
+
+const asyncHandler = fn => (req, res, next) =>
+  Promise
+    .resolve(fn(req, res, next))
+    .catch(next)
+
 module.exports = {
+  asyncHandler,
   authUser,
+  roleAuth,
   apiKeyAuth
 };
