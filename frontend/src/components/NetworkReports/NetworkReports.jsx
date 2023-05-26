@@ -54,6 +54,7 @@ export default function NetworkReports() {
   const { t } = useTranslation();
 
   const [locationParams, setLocationParams] = useState({
+    region: "",
     country: "",
     state: "",
     city: "",
@@ -80,6 +81,8 @@ export default function NetworkReports() {
   const updateSearchParams = (data) => {
     setLocationParams((prevState) => ({
       ...prevState,
+      region: data.region,
+      country: data.country,
       state: data.state,
       city: data.city,
     }));
