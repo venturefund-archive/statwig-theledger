@@ -184,7 +184,7 @@ const AdvanceTableFilter = (props) => {
                   color='primary'
                   onClick={() => setStatusFilterOnSelect("PARTIALLYFULFILLED")}
                 >
-                  {t("Partially Fulfilled")}
+                  {t("partiallyfilled")}
                 </button>
               </StyledMenuItem>
 

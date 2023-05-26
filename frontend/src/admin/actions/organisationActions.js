@@ -569,7 +569,7 @@ export const addAddress = async (data) => {
 				geohash: "1231nejf923453",
 			},
 			supervisors: [],
-			employeess: [],
+			employees: [],
 		};
 
 		const result = await axios.post(

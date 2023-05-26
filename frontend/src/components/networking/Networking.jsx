@@ -3,7 +3,6 @@ import "./Networking.scss";
 import NetworkMap from "./networkMap/NetworkMap";
 import Reports from "./reports/Reports";
 import NetworkDashboard from "./networkDashboard/NetworkDashboard";
-import { Button } from "@mui/material";
 import { useHistory } from "react-router";
 
 export default function Networking(props) {
@@ -26,40 +25,40 @@ export default function Networking(props) {
   const myRef = useRef(null);
   const executeScroll = () => scrollToRef(myRef);
   return (
-    <div className="network-main-layout">
+    <div className='network-main-layout'>
       {/* {user?.type === "GoverningBody" && (
 				<div classname="network-header">
 					<Button
 						onClick={() => history.push("/admin-network-reports")}
 						style={{ fontSize: "14px", width: "18%", color: "teal", borderRadius: "10%" }}
 					>
-						{t('Switch to Country View')}
+						{t('switch_to_country_view')}
 					</Button>
 				</div>
 			)} */}
 
       {user?.type === "GoverningBody" && (
-        <div className="network_page_inner_header">
+        <div className='network_page_inner_header'>
           <h1
             style={{ paddingBottom: "10px" }}
-            className="vl-heading-bdr black f-700 mi-reset"
+            className='vl-heading-bdr black f-700 mi-reset'
           >
             {t("network")}
           </h1>
 
           <button
-            className="mi-btn mi-btn-md mi-btn-secondary"
+            className='mi-btn mi-btn-md mi-btn-secondary'
             onClick={() => history.push("/admin-network-reports")}
           >
-            {t("Switch to Country View")}
+            {t("switch_to_country_view")}
           </button>
         </div>
       )}
 
-      <div className="header_null_space"></div>
+      <div className='header_null_space'></div>
 
       <div
-        className="network-grid-container"
+        className='network-grid-container'
         style={{ pointerEvents: props.demoLogin ? "none" : "auto" }}
       >
         <div className={`network-dashboard ${MobileDashboard && "active"}`}>
@@ -74,15 +73,15 @@ export default function Networking(props) {
             t={t}
           />
         </div>
-        <div className="network-workspace">
-          <div className="network-map-holder">
-            <div className="map-filter-button">
+        <div className='network-workspace'>
+          <div className='network-map-holder'>
+            <div className='map-filter-button'>
               <div className={`dashboard-mobile`}>
                 <div
-                  className="dashboard-mobile-btn"
+                  className='dashboard-mobile-btn'
                   onClick={() => setMobileDashboard(true)}
                 >
-                  <i className="fa-solid fa-map-location-dot"></i>
+                  <i className='fa-solid fa-map-location-dot'></i>
                 </div>
               </div>
               {/* <div className="location-filter-btn filter-hide-sm">
@@ -96,7 +95,7 @@ export default function Networking(props) {
             </div>
             <NetworkMap {...props} />
           </div>
-          <div className="network-report-holders">
+          <div className='network-report-holders'>
             <Reports
               {...props}
               reportWarehouse={reportWarehouse}

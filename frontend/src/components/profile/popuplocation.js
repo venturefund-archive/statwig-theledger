@@ -33,7 +33,7 @@ const PopUpLocation = (props) => {
       location: wareHouse.location,
       warehouseAddress: wareHouse.warehouseAddress,
       supervisors: wareHouse.supervisors,
-      employeess: wareHouse.employees,
+      employees: wareHouse.employees,
     };
 
     const result = await addWarehouse(data);
@@ -104,9 +104,8 @@ const PopUpLocation = (props) => {
               <b>{t("select_location")}</b>
             </label>
             <div
-              className={`form-controlAddLoc mr-5 ${
-                alertFlag ? "border-danger" : ""
-              }`}
+              className={`form-controlAddLoc mr-5 ${alertFlag ? "border-danger" : ""
+                }`}
             >
               <LocationDropdown
                 name={selectLocation}
