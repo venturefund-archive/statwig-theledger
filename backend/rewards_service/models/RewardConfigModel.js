@@ -4,7 +4,6 @@ const RewardConfigSchema = new mongoose.Schema(
     {
         appId: { type: String, required: true },
         name: { type: String },
-        version: { type: String },
         config: [{
             event: { type: [String], default: [] },
             eventType: { type: [String], default: [] },

@@ -1,9 +1,10 @@
 const mongoose = require("mongoose");
+const cuid = require("cuid");
 
 const RedeemSchema = new mongoose.Schema(
     {
         appId: { type: String, required: true },
-        redeemId: { type: String, required: true },
+        redeemId: { type: String, default: cuid },
         userId: { type: String, required: true },
         userOrgId: { type: String, required: true },
         userWarehouseId: { type: String, required: true },
