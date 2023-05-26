@@ -402,7 +402,7 @@ const Header = (props) => {
           <MenuOutlined className="hambergerMenu" />
 
           <ul className="navList">
-          {allowSearch && (
+            {allowSearch && (
               <li className="navItems">
                 <div
                   className="search-form"
@@ -760,9 +760,15 @@ const Header = (props) => {
               flexItem
               className="divider"
             />
-
+            <i className='bx bxs-coin-stack m-1' />
+            Rewards : 100
+            <Divider
+              orientation="vertical"
+              variant="middle"
+              flexItem
+              className="divider"
+            />
             {/* Location */}
-
             <li className="navItems location">
               <img className="locationimg" src={Location} alt="Location" />
               <div className="navCard navlocation">

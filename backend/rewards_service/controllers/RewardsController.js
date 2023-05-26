@@ -8,15 +8,16 @@ const cuid = require("cuid");
 
 exports.userRewards = [
     authUser,
+    apiKeyAuth,
     async function (req, res) {
         try {
-            const { appId } = req.headers;
-            const rewards = await RewardUserModel.findOne({ appId, userId: req.user.id })
+            console.log(req.appId, req.user)
+            const rewards = await RewardUserModel.findOne({ appId: req.appId, userId: req.user.id })
             return apiResponse.successResponseWithData(res, "User Rewards", rewards)
         }
         catch (err) {
             console.log(err);
-            return apiResponse.errorResponse(err);
+            return apiResponse.errorResponse(res, err);
         }
     }
 ]
@@ -25,13 +26,12 @@ exports.listOfRewards = [
     authUser,
     async function (req, res) {
         try {
-            const { appId } = req.headers;
-            const rewards = await RewardModel.find({ appId, userId: req.user.id })
+            const rewards = await RewardModel.find({ appId: req.appId, userId: req.user.id })
             return apiResponse.successResponseWithData(res, "List of Rewards", rewards)
         }
         catch (err) {
             console.log(err);
-            return apiResponse.errorResponse(err);
+            return apiResponse.errorResponse(res, err);
         }
     }
 ]
@@ -46,7 +46,7 @@ exports.viewReward = [
         }
         catch (err) {
             console.log(err);
-            return apiResponse.errorResponse(err);
+            return apiResponse.errorResponse(res, err);
         }
     }
 ]
@@ -62,7 +62,7 @@ exports.updateReward = [
         }
         catch (err) {
             console.log(err);
-            return apiResponse.errorResponse(err);
+            return apiResponse.errorResponse(res, err);
         }
     }
 ]
@@ -78,7 +78,7 @@ exports.deleteReward = [
         }
         catch (err) {
             console.log(err);
-            return apiResponse.errorResponse(err);
+            return apiResponse.errorResponse(res, err);
         }
     }
 ]
@@ -88,14 +88,15 @@ exports.addReward = [
     asyncHandler(roleAuth),
     async function (req, res) {
         try {
-            const { appId } = req.headers;
-            const reward = new RewardModel(...req.body, appId);
+            console.log(req.appId)
+            const reward = new RewardModel({ ...req.body, appId: req.appId });
             await reward.save();
+            await RewardUserModel.findOneAndUpdate({ appId: req.appId, userId: reward.userId }, { $inc: { points: reward.points, totalPoints: reward.points } }, { upsert: true })
             return apiResponse.successResponseWithData(res, "Reward Added", reward)
         }
         catch (err) {
             console.log(err);
-            return apiResponse.errorResponse(err);
+            return apiResponse.errorResponse(res, err);
         }
     }
 ]
@@ -105,14 +106,13 @@ exports.addRedemption = [
     asyncHandler(roleAuth),
     async function (req, res) {
         try {
-            const { appId } = req.headers;
-            const reward = new RedeemModel(...req.body, appId);
+            const reward = new RedeemModel({ ...req.body, appId: req.appId });
             await reward.save();
             return apiResponse.successResponseWithData(res, "Reward Added Successfully", reward)
         }
         catch (err) {
             console.log(err);
-            return apiResponse.errorResponse(err);
+            return apiResponse.errorResponse(res, err);
         }
     }
 ]
@@ -121,13 +121,12 @@ exports.listOfRedemptions = [
     authUser,
     async function (req, res) {
         try {
-            const { appId } = req.headers;
-            const rewards = await RedeemModel.find({ appId, userId: req.user.id })
+            const rewards = await RedeemModel.find({ appId: req.appId, userId: req.user.id })
             return apiResponse.successResponseWithData(res, "List of Redemptions", rewards)
         }
         catch (err) {
             console.log(err);
-            return apiResponse.errorResponse(err);
+            return apiResponse.errorResponse(res, err);
         }
     }
 ]
@@ -141,7 +140,7 @@ exports.registerApp = [
         }
         catch (err) {
             console.log(err);
-            return apiResponse.errorResponse(err)
+            return apiResponse.errorResponse(res, err)
         }
     }
 ]

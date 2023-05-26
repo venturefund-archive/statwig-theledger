@@ -142,7 +142,8 @@ export const forgotPassword = async (data) => {
 export const getUserInfo = () => {
   return async (dispatch) => {
     const result = await axios.get(config().userInfoUrl);
-    dispatch(setProfile(result.data.data));
+    const rewards = await axios.get(config().userRewardsUrl);
+    dispatch(setProfile({ ...result.data.data, rewards.data.data }));
     return result;
   };
 };
@@ -207,7 +208,7 @@ export const setCurrentUser = (decoded) => {
 export const logoutUser = () => {
   localStorage.removeItem("theLedgerToken");
   localStorage.removeItem("location");
-  if(window?.torus) {
+  if (window?.torus) {
     window.torus.logout();
   }
   window.location.href = "/";
@@ -288,7 +289,7 @@ export const verifyAuth = async (data) => {
   try {
     const result = await axios.post(config().verifyAuth, data);
     return result;
-  } catch(err) {
+  } catch (err) {
     return err.response;
   }
 }
@@ -297,7 +298,7 @@ export const newDemoRequest = async (data) => {
   try {
     const result = await axios.post(config().newDemoRequestUrl, data);
     return result;
-  } catch(err) {
+  } catch (err) {
     return err.response;
   }
 }
@@ -306,7 +307,7 @@ export const validateRequest = async (data) => {
   try {
     const result = await axios.post(config().validateRequestUrl, data);
     return result;
-  } catch(err) {
+  } catch (err) {
     return err.response;
   }
 }

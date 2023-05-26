@@ -5,6 +5,7 @@ const setAuthToken = (token) => {
   if (token) {
     // Apply to every request
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    axios.defaults.headers.common['x-api-key'] = "apiKeyTest";
     // axios.interceptors.request.use(function (config) {
     //   const location = localStorage.getItem('location');
     //   // if (config.method === 'get' && location !="undefined") {
