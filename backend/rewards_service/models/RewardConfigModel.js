@@ -5,8 +5,8 @@ const RewardConfigSchema = new mongoose.Schema(
         appId: { type: String, required: true },
         name: { type: String },
         config: [{
-            event: { type: [String], default: [] },
-            eventType: { type: [String], default: [] },
+            event: { type: String },
+            eventType: { type: String },
             roles: { type: [String], default: [] },
             points: { type: Number, min: 0, default: 0 },
         }],

@@ -13,4 +13,4 @@ const RewardUserSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-module.exports = mongoose.model("reward", RewardUserSchema);
+module.exports = mongoose.model("reward_user", RewardUserSchema);

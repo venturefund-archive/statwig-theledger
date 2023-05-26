@@ -19,7 +19,7 @@ const RedeemSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-module.exports = mongoose.model("reward", RedeemSchema);
+module.exports = mongoose.model("redeem", RedeemSchema);
 
 
 /*
