@@ -70,21 +70,21 @@ export default function ReportSearch({ updateSearchParams }) {
   };
 
   return (
-    <section className='ReportSearch_container'>
-      <h1 className='Report_page_title_ts'>{t("search_here_for_units")}</h1>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className='main_searchbar_wrapper'>
-          <div className='search_icon_wrap'>
-            {/* <i class="fa-solid fa-magnifying-glass"></i> */}
+    <section className="ReportSearch_container">
+      <h1 className="Report_page_title_ts">{t("search_here_for_units")}</h1>
+      <form onSubmit={handleSubmit(onSubmit)} className="main_search_form">
+        <div className="main_searchbar_wrapper">
+          <div className="search_icon_wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
           </div>
-          <div className='input_hold bdr'>
+          <div className="input_hold bdr">
             <Controller
-              name='region'
+              name="region"
               control={control}
               render={({ field }) => (
                 <Autocomplete
                   fullWidth
-                  className='mi_report_autocomplete'
+                  className="mi_report_autocomplete"
                   options={allRegions}
                   getOptionLabel={(option) => option.name || ""}
                   {...field}
@@ -111,14 +111,14 @@ export default function ReportSearch({ updateSearchParams }) {
               )}
             />
           </div>
-          <div className='input_hold bdr'>
+          <div className="input_hold bdr">
             <Controller
-              name='country'
+              name="country"
               control={control}
               render={({ field }) => (
                 <Autocomplete
                   fullWidth
-                  className='mi_report_autocomplete'
+                  className="mi_report_autocomplete"
                   options={allCountries}
                   getOptionLabel={(option) => option.name || ""}
                   {...field}
@@ -145,14 +145,14 @@ export default function ReportSearch({ updateSearchParams }) {
               )}
             />
           </div>
-          <div className='input_hold bdr'>
+          <div className="input_hold bdr">
             <Controller
-              name='state'
+              name="state"
               control={control}
               render={({ field }) => (
                 <Autocomplete
                   fullWidth
-                  className='mi_report_autocomplete'
+                  className="mi_report_autocomplete"
                   options={allStates}
                   getOptionLabel={(option) => option.name || ""}
                   {...field}
@@ -179,13 +179,14 @@ export default function ReportSearch({ updateSearchParams }) {
               )}
             />
           </div>
-          <div className='input_hold'>
+          <div className="input_hold">
             <Controller
-              name='city'
+              name="city"
               control={control}
               render={({ field }) => (
                 <Autocomplete
                   fullWidth
+                  className="mi_report_autocomplete"
                   options={allCities}
                   getOptionLabel={(option) => option.name || ""}
                   {...field}
@@ -209,8 +210,8 @@ export default function ReportSearch({ updateSearchParams }) {
               )}
             />
           </div>
-          <div className='null_space'></div>
-          <button type='submit' className='result_search_button'>
+          <div className="null_space"></div>
+          <button type="submit" className="result_search_button">
             {t("search")}
           </button>
         </div>
