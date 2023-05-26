@@ -284,7 +284,7 @@ export const AddLocationCard = (props) => {
                           renderInput={(params) => (
                             <TextField
                               {...params}
-                              label={t("")}
+                              label={t("Select_Country")}
                             />
                           )}
                         />
