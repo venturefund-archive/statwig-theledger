@@ -137,7 +137,7 @@ export const AddLocationCard = (props) => {
               city,
               state,
               pincode,
-              // region
+              region
             }}
             validate={(values) => {
               const errors = {};

@@ -25,8 +25,6 @@ const LocationDropdown = (props) => {
     setMenu(false);
   });
 
-  console.log("Is text ", isText, name, menu);
-
   const useParse = name && name.includes("<");
   return (
     <div className='custom-dropdown' ref={ref}>
