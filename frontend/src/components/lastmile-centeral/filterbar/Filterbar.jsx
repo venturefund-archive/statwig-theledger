@@ -7,6 +7,13 @@ import FormControl from "@mui/material/FormControl";
 import Slider from "@mui/material/Slider";
 import { Autocomplete, TextField } from "@mui/material";
 import { getCitiesAndOrgsForFilters } from "../../../actions/lastMileActions";
+import {
+	fetchAllRegions,
+	fetchCountriesByRegion,
+	fetchStateByCountry,
+  fetchCitiesByState,
+  fetchUnregisteredOrganisations
+} from "../../../actions/productActions";
 
 function valuetext(value) {
   return `${value}°C`;
@@ -24,6 +31,16 @@ export default function Filterbar(props) {
   const [gender, setGender] = useState();
   const [city, setCity] = useState();
   const [organization, setOrganization] = useState();
+
+	const [allregions, setallregions] = useState([]);
+	const [allCountries, setallCountries] = useState([]);
+	const [allState, setallState] = useState([]);
+  const [allCity, setallCity] = useState([]);
+
+  const [region, setregion] = useState("");
+	const [country, setcountry] = useState("");
+	// const [city, setCity] = useState("");
+	const [state, setState] = useState("");
 
   useEffect(() => {
     let data = {};
@@ -72,6 +89,8 @@ export default function Filterbar(props) {
           setCities(result.data.data.cities);
           setOrganizations(result.data.data.organisations);
         }
+        let arr = await fetchAllRegions();
+        setallregions(arr.data);
       } catch (err) {
         console.log(err);
       }
@@ -91,6 +110,10 @@ export default function Filterbar(props) {
     switch (name) {
       case "city": {
         setCity(null);
+        setregion("");
+        setcountry("");
+        setState("");
+        setCity("");
         break;
       }
       case "organization": {
@@ -120,6 +143,30 @@ export default function Filterbar(props) {
   const handleYearChange = (event, newValue) => {
     setYearRange(newValue);
   };
+
+  async function fetchAllState(id) {
+		let res = await fetchStateByCountry(id);
+		setallState(res.data);
+	}
+
+  async function fetchAllCountries(id) {
+		let res = await fetchCountriesByRegion(id);
+		setallCountries(res.data);
+	}
+
+	async function fetchAllCity(id) {
+		let res = await fetchCitiesByState(id);
+		console.log(res, "All City");
+		setallCity(res.data);
+	}
+  
+	function search(name, myArray) {
+		for (var i = 0; i < myArray.length; i++) {
+			if (myArray[i].name === name) {
+				return myArray[i].id;
+			}
+		}
+	}
 
   return (
     <section className='Filterbar--container'>
@@ -192,6 +239,78 @@ export default function Filterbar(props) {
           </div>
           <div className='filterCard-body border-btm'>
             <Autocomplete
+              value={region}
+              onChange={(event, newValue) => {
+                fetchAllCountries(newValue);
+                setregion(newValue);
+                setcountry("");
+                setState("");
+                setCity("");
+              }}
+              id="controllable-states-demo"
+              options={allregions}
+              style={{ marginTop: 10 }}
+              disablePortal
+              fullWidth
+              renderInput={(params) => (
+                <TextField {...params} label={t("select") + " " + t("region")} />
+              )}
+            />
+            <Autocomplete
+              value={country}
+              onChange={(event, newValue) => {
+                let v = search(newValue, allCountries);
+                fetchAllState(v);
+                setcountry(newValue);
+                setState("");
+                setCity("");
+              }}
+              id="controllable-states-demo"
+              options={allCountries.map((option) => option.name)}
+              style={{ marginTop: 10 }}
+              disablePortal
+              fullWidth
+              renderInput={(params) => (
+                <TextField {...params} label={t("select") + " " + t("country")} />
+              )}
+            />
+            <Autocomplete
+              value={state}
+              onChange={(event, newValue) => {
+                let v = search(newValue, allState);
+                fetchAllCity(v);
+                setState(newValue);
+                setCity("");
+              }}
+              id="controllable-states-demo"
+              options={allState.map((option) => option.name)}
+              style={{ marginTop: 10 }}
+              disablePortal
+              fullWidth
+              renderInput={(params) => (
+                <TextField {...params} label={t("select") + " " + t("state")} />
+              )}
+            />
+            <Autocomplete
+              // value={city}
+              onChange={(event, newValue) => {
+                setCity(newValue);
+              }}
+              id="controllable-states-demo"
+              options={allCity.map((Option) => Option.name)}
+              style={{ marginTop: 10 }}
+              disablePortal
+              fullWidth
+              value={
+                typeof city === "string"
+                  ? cities.find((cty) => cty === city)
+                  : city || null
+              }
+              renderInput={(params) => (
+                <TextField {...params} label={t("select") + " " + t("city")} />
+              )}
+            />
+            {/* <Autocomplete
               disablePortal
               fullWidth
               options={cities}
@@ -204,7 +323,7 @@ export default function Filterbar(props) {
               renderInput={(params) => (
                 <TextField {...params} label={t("city")} />
               )}
-            />
+            /> */}
           </div>
         </div>
 
