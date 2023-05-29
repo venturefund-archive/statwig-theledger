@@ -3423,32 +3423,34 @@ exports.fetchShipmentIds = [
   auth,
   async (req, res) => {
     try {
-      const { warehouseId } = req.user;
-      const shipments = await ShipmentModel.find(
+      const { warehouseId, role } = req.user;
+      var where = {$and: [
         {
-          $and: [
+          $or: [
             {
-              $or: [
-                {
-                  "supplier.locationId": warehouseId,
-                },
-                {
-                  "receiver.locationId": warehouseId,
-                },
-              ],
+              "supplier.locationId": warehouseId,
             },
             {
-              $or: [
-                {
-                  "supplier.id": req.user.organisationId,
-                },
-                {
-                  "receiver.id": req.user.organisationId,
-                },
-              ],
+              "receiver.locationId": warehouseId,
             },
           ],
         },
+        {
+          $or: [
+            {
+              "supplier.id": req.user.organisationId,
+            },
+            {
+              "receiver.id": req.user.organisationId,
+            },
+          ],
+        },
+      ]};
+      if(role == 'Third Party Logistics'){
+        where = {status :'SENT'}
+      }
+      const shipments = await ShipmentModel.find(
+        where,
         "id"
       )
       return apiResponse.successResponseWithData(
