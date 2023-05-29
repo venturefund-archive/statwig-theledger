@@ -6,13 +6,12 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import Slider from "@mui/material/Slider";
 import { Autocomplete, TextField } from "@mui/material";
-import { getCitiesAndOrgsForFilters } from "../../../actions/lastMileActions";
+import { getOrgsForFilters } from "../../../actions/lastMileActions";
 import {
-	fetchAllRegions,
-	fetchCountriesByRegion,
-	fetchStateByCountry,
+  fetchAllRegions,
+  fetchCountriesByRegion,
+  fetchStateByCountry,
   fetchCitiesByState,
-  fetchUnregisteredOrganisations
 } from "../../../actions/productActions";
 
 function valuetext(value) {
@@ -22,25 +21,23 @@ function valuetext(value) {
 export default function Filterbar(props) {
   const { tableType, filters, setFilters, t, resetFilters } = props;
 
-  const [cities, setCities] = useState([""]);
   const [organizations, setOrganizations] = useState([""]);
   const [ageType, setAgeType] = useState("");
 
   const [yearRange, setYearRange] = useState([1, 150]);
   const [monthRange, setMonthRange] = useState([6, 11]);
   const [gender, setGender] = useState();
-  const [city, setCity] = useState();
-  const [organization, setOrganization] = useState();
 
-	const [allregions, setallregions] = useState([]);
-	const [allCountries, setallCountries] = useState([]);
-	const [allState, setallState] = useState([]);
+  const [allregions, setallregions] = useState([]);
+  const [allCountries, setallCountries] = useState([]);
+  const [allState, setallState] = useState([]);
   const [allCity, setallCity] = useState([]);
 
   const [region, setregion] = useState("");
-	const [country, setcountry] = useState("");
-	// const [city, setCity] = useState("");
-	const [state, setState] = useState("");
+  const [country, setcountry] = useState("");
+  const [state, setState] = useState("");
+  const [city, setCity] = useState("");
+  const [organization, setOrganization] = useState("");
 
   useEffect(() => {
     let data = {};
@@ -62,7 +59,6 @@ export default function Filterbar(props) {
     if (gender) {
       data.gender = gender;
     }
-
     if (city && city !== "") {
       data.city = city;
     }
@@ -70,7 +66,6 @@ export default function Filterbar(props) {
     if (organization && organization !== "") {
       data.organisation = organization;
     }
-
     setFilters(data);
   }, [gender, monthRange, yearRange, city, organization, ageType, setFilters]);
 
@@ -84,10 +79,9 @@ export default function Filterbar(props) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let result = await getCitiesAndOrgsForFilters();
+        let result = await getOrgsForFilters();
         if (result?.data?.success) {
-          setCities(result.data.data.cities);
-          setOrganizations(result.data.data.organisations);
+          setOrganizations(result.data.data);
         }
         let arr = await fetchAllRegions();
         setallregions(arr.data);
@@ -145,28 +139,27 @@ export default function Filterbar(props) {
   };
 
   async function fetchAllState(id) {
-		let res = await fetchStateByCountry(id);
-		setallState(res.data);
-	}
+    let res = await fetchStateByCountry(id);
+    setallState(res.data);
+  }
 
   async function fetchAllCountries(id) {
-		let res = await fetchCountriesByRegion(id);
-		setallCountries(res.data);
-	}
+    let res = await fetchCountriesByRegion(id);
+    setallCountries(res.data);
+  }
 
-	async function fetchAllCity(id) {
-		let res = await fetchCitiesByState(id);
-		console.log(res, "All City");
-		setallCity(res.data);
-	}
-  
-	function search(name, myArray) {
-		for (var i = 0; i < myArray.length; i++) {
-			if (myArray[i].name === name) {
-				return myArray[i].id;
-			}
-		}
-	}
+  async function fetchAllCity(id) {
+    let res = await fetchCitiesByState(id);
+    setallCity(res.data);
+  }
+
+  function search(name, myArray) {
+    for (var i = 0; i < myArray.length; i++) {
+      if (myArray[i].name === name) {
+        return myArray[i].id;
+      }
+    }
+  }
 
   return (
     <section className='Filterbar--container'>
@@ -247,13 +240,16 @@ export default function Filterbar(props) {
                 setState("");
                 setCity("");
               }}
-              id="controllable-states-demo"
+              id='controllable-states-demo'
               options={allregions}
               style={{ marginTop: 10 }}
               disablePortal
               fullWidth
               renderInput={(params) => (
-                <TextField {...params} label={t("select") + " " + t("region")} />
+                <TextField
+                  {...params}
+                  label={t("select") + " " + t("region")}
+                />
               )}
             />
             <Autocomplete
@@ -265,13 +261,16 @@ export default function Filterbar(props) {
                 setState("");
                 setCity("");
               }}
-              id="controllable-states-demo"
+              id='controllable-states-demo'
               options={allCountries.map((option) => option.name)}
               style={{ marginTop: 10 }}
               disablePortal
               fullWidth
               renderInput={(params) => (
-                <TextField {...params} label={t("select") + " " + t("country")} />
+                <TextField
+                  {...params}
+                  label={t("select") + " " + t("country")}
+                />
               )}
             />
             <Autocomplete
@@ -282,7 +281,7 @@ export default function Filterbar(props) {
                 setState(newValue);
                 setCity("");
               }}
-              id="controllable-states-demo"
+              id='controllable-states-demo'
               options={allState.map((option) => option.name)}
               style={{ marginTop: 10 }}
               disablePortal
@@ -292,38 +291,19 @@ export default function Filterbar(props) {
               )}
             />
             <Autocomplete
-              // value={city}
               onChange={(event, newValue) => {
                 setCity(newValue);
               }}
-              id="controllable-states-demo"
+              id='controllable-states-demo'
               options={allCity.map((Option) => Option.name)}
               style={{ marginTop: 10 }}
               disablePortal
               fullWidth
-              value={
-                typeof city === "string"
-                  ? cities.find((cty) => cty === city)
-                  : city || null
-              }
+              value={city}
               renderInput={(params) => (
                 <TextField {...params} label={t("select") + " " + t("city")} />
               )}
             />
-            {/* <Autocomplete
-              disablePortal
-              fullWidth
-              options={cities}
-              value={
-                typeof city === "string"
-                  ? cities.find((cty) => cty === city)
-                  : city || null
-              }
-              onChange={(event, value) => setCity(value)}
-              renderInput={(params) => (
-                <TextField {...params} label={t("city")} />
-              )}
-            /> */}
           </div>
         </div>
 
@@ -333,7 +313,7 @@ export default function Filterbar(props) {
               <div className='filterCard-inner-header'>
                 <p className='vl-body f-500 vl-grey-md'>{t("organisation")}</p>
                 <button
-                  onClick={() => handleClear("organisation")}
+                  onClick={() => handleClear("organization")}
                   className='filter-clear-btn'
                 >
                   Clear
@@ -346,11 +326,7 @@ export default function Filterbar(props) {
                 disablePortal
                 fullWidth
                 options={organizations}
-                value={
-                  typeof organization === "string"
-                    ? organizations.find((org) => org === organization)
-                    : organization || null
-                }
+                value={organization}
                 onChange={(event, value) => setOrganization(value)}
                 renderInput={(params) => (
                   <TextField {...params} label='Organization' />
