@@ -3423,7 +3423,7 @@ exports.fetchShipmentIds = [
   auth,
   async (req, res) => {
     try {
-      const { warehouseId, role } = req.user;
+      const { warehouseId, type } = req.user;
       var where = {$and: [
         {
           $or: [
@@ -3446,7 +3446,8 @@ exports.fetchShipmentIds = [
           ],
         },
       ]};
-      if(role == 'Third Party Logistics'){
+      
+      if(type == 'Third Party Logistics'){
         where = {status :'SENT'}
       }
       const shipments = await ShipmentModel.find(
