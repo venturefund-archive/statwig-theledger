@@ -3448,7 +3448,7 @@ exports.fetchShipmentIds = [
       ]};
       
       if(type == 'Third Party Logistics'){
-        where = {status :'SENT'}
+        where = {status :'CREATED'}
       }
       const shipments = await ShipmentModel.find(
         where,
