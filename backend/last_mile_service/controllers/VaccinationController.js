@@ -12,8 +12,6 @@ const WarehouseModel = require("../models/WarehouseModel");
 const excel = require("node-excel-export");
 const PdfPrinter = require("pdfmake");
 const { resolve } = require("path");
-const fs = require("fs");
-const CountryModel = require("../models/CountryModel");
 const { formatDate } = require("../helpers/dateHelper");
 const { getDateStringForMongo } = require("../helpers/utility");
 
@@ -35,7 +33,7 @@ const buildWarehouseQuery = async (user, city, organisationName) => {
 
 	let warehouseIds = userDetails.warehouseId;
 
-	// If user is admin show organisation wide details
+	// If user is admin show organization wide details
 	if (userDetails.role === "admin") {
 		let warehouses = await WarehouseModel.find({
 			organisationId: userDetails.organisationId,
@@ -583,11 +581,10 @@ exports.vaccinateMultiple = [
 				}
 			}
 
-			for (let i = 0; i < doses.length; ++i) {
-				if (doses[i]?.id) {
-					// eslint-disable-next-line no-unused-vars
-					const update = (({ id, ...other }) => other)(doses[i]);
-					await DoseModel.findOneAndUpdate({ id: doses[i].id }, {
+			for (const element of doses) {
+				if (element?.id) {
+					const update = (({ id, ...other }) => other)(element);
+					await DoseModel.findOneAndUpdate({ id: element.id }, {
 						$set: update
 					})
 				} else {
@@ -610,9 +607,9 @@ exports.vaccinateMultiple = [
 					const dose = new DoseModel({
 						id: doseId,
 						vaccineVialId: vaccineVialId,
-						age: doses[i].age || 0,
-						ageMonths: doses[i].ageMonths || 0,
-						gender: doses[i].gender === "GENERAL" ? "OTHERS" : doses[i].gender.toUpperCase(),
+						age: element.age || 0,
+						ageMonths: element.ageMonths || 0,
+						gender: element.gender === "GENERAL" ? "OTHERS" : element.gender.toUpperCase(),
 						createdDateString: getDateStringForMongo(new Date()),
 					});
 					await dose.save();
@@ -810,19 +807,15 @@ exports.getAnalyticsWithFilters = [
 			let now = new Date();
 			let nowString = getDateStringForMongo(now);
 
-			for (let i = 0; i < warehouses.length; ++i) {
-				const vaccineVials = warehouses[i].vaccinations;
-				for (let j = 0; j < vaccineVials.length; ++j) {
-					let createdAt = new Date(vaccineVials[j].createdAt);
+			for (const element of warehouses) {
+				const vaccineVials = element.vaccinations;
+				for (const element of vaccineVials) {
+					let createdAt = new Date(element.createdAt);
 					let createdAtString = getDateStringForMongo(createdAt);
-
-					const doses = vaccineVials[j].doses;
-
+					const doses = element.doses;
 					vialsUtilized++;
-
 					if (doses.length) {
 						totalVaccinations += doses.length;
-
 						if (nowString === createdAtString) {
 							todaysVaccinations += doses.length;
 						}
@@ -874,14 +867,12 @@ exports.getAnalytics = [
 			let now = new Date();
 			let nowString = getDateStringForMongo(now);
 
-			for (let i = 0; i < analytics.length; ++i) {
-				let createdAt = new Date(analytics[i].createdAt);
+			for (const element of analytics) {
+				let createdAt = new Date(element.createdAt);
 				let createdAtString = getDateStringForMongo(createdAt);
-
-				totalVaccinations += analytics[i].numberOfDoses;
-
+				totalVaccinations += element.numberOfDoses;
 				if (nowString === createdAtString) {
-					todaysVaccinations += analytics[i].numberOfDoses;
+					todaysVaccinations += element.numberOfDoses;
 				}
 			}
 
@@ -951,33 +942,28 @@ exports.getVaccinationsList = [
 	auth,
 	async (req, res) => {
 		try {
-			const user = req.user;
-			const { today, skip, limit } = req.body;
+			const { user, body: { today, skip, limit } } = req;
 
 			const userDetails = await EmployeeModel.findOne({ id: user.id });
 			let warehouseIds = userDetails.warehouseId;
 
-			let query = {};
 			if (userDetails.role === "admin") {
-				let warehouses = await WarehouseModel.find({
+				const warehouses = await WarehouseModel.find({
 					organisationId: userDetails.organisationId,
 					status: "ACTIVE",
 				});
 				warehouseIds = warehouses.map((warehouse) => warehouse.id);
 			}
-			const organisation = await OrganisationModel.findOne({
-				id: userDetails.organisationId,
-			});
-			if (organisation.type !== "GoverningBody") {
-				query = { warehouseId: { $in: warehouseIds } };
-			}
+
+			const organisation = await OrganisationModel.findOne({ id: userDetails.organisationId });
+			const query = (organisation.type !== "GoverningBody") ? { warehouseId: { $in: warehouseIds } } : {};
 
 			const vialsUtilized = await VaccineVialModel.find(query).sort({ _id: -1 });
 			const vialsList = vialsUtilized.map((vial) => vial.id);
 
-			let queryExprs = [{ $in: ["$vaccineVialId", vialsList] }];
+			const queryExprs = [{ $in: ["$vaccineVialId", vialsList] }];
 			if (today) {
-				let todayString = getDateStringForMongo(new Date());
+				const todayString = getDateStringForMongo(new Date());
 				queryExprs.push({ $gte: ["$createdDateString", todayString] });
 			}
 
@@ -988,6 +974,7 @@ exports.getVaccinationsList = [
 			if (limit) {
 				paginationQuery.push({ $limit: limit });
 			}
+
 			const dosesResult = await DoseModel.aggregate([
 				{
 					$match: {
@@ -1018,35 +1005,34 @@ exports.getVaccinationsList = [
 
 			let doses = [];
 			let totalCount = 0;
-			if (dosesResult && dosesResult?.length) {
-				doses = dosesResult[0].paginatedResults;
-				totalCount = dosesResult[0].totalCount;
+			if (dosesResult?.length) {
+				({ paginatedResults: doses, totalCount } = dosesResult[0]);
 			}
 
-			const result = [];
-			for (let i = 0; i < doses.length; ++i) {
-				let age = `${doses[i].ageMonths ? doses[i].ageMonths : doses[i].age} ${doses[i].ageMonths ? "months" : "years"
-					}`;
-				const data = {
-					date: doses[i].createdAt,
-					batchNumber: doses[i].vaccineVial.batchNumber,
-					age: age,
-					gender: doses[i].gender,
-				};
-
-				result.push(data);
-			}
+			const result = await Promise.all(
+				doses.map(async (element) => {
+					const age = `${element.ageMonths ? element.ageMonths : element.age} ${element.ageMonths ? "months" : "years"
+						}`;
+					const vaccineVial = element.vaccineVial;
+					return {
+						date: element.createdAt,
+						batchNumber: vaccineVial.batchNumber,
+						age,
+						gender: element.gender,
+					};
+				})
+			);
 
 			return apiResponse.successResponseWithData(res, "Vaccination list!", {
-				totalCount: totalCount,
+				totalCount,
 				vaccinationsList: result,
 			});
 		} catch (err) {
 			console.log(err);
 			return apiResponse.errorResponse(res, err.message);
 		}
-	}
-]
+	},
+];
 
 exports.getVaccinationsListOld = [
 	auth,
@@ -1078,15 +1064,13 @@ exports.getVaccinationsListOld = [
 			let now = new Date();
 			let nowString = getDateStringForMongo(now);
 
-			for (let i = 0; i < vialsUtilized.length; ++i) {
-				let createdAt = new Date(vialsUtilized[i].createdAt);
+			for (const element of vialsUtilized) {
+				let createdAt = new Date(element.createdAt);
 				let createdAtString = getDateStringForMongo(createdAt);
-
 				let currDoses = await DoseModel.aggregate([
-					{ $match: { vaccineVialId: vialsUtilized[i].id } },
-					{ $addFields: { batchNumber: vialsUtilized[i].batchNumber } },
+					{ $match: { vaccineVialId: element.id } },
+					{ $addFields: { batchNumber: element.batchNumber } },
 				]);
-
 				vaccinationsList.push(...currDoses);
 				if (nowString === createdAtString) {
 					todaysVaccinationsList.push(...currDoses);
@@ -1106,41 +1090,14 @@ exports.getVaccinationsListOld = [
 	},
 ];
 
-exports.getCitiesAndOrgsForFilters = [
+exports.lastMileOrgFilter = [
 	auth,
 	async (req, res) => {
 		try {
-			const country = await CountryModel.aggregate([
-				{
-					$lookup: {
-						from: "cities",
-						let: { country_id: "$id" },
-						pipeline: [
-							{ $match: { $expr: { $eq: ["$country_id", "$$country_id"] } } },
-							{ $group: { _id: null, uniqueCities: { $addToSet: "$name" } } },
-						],
-						as: "cities",
-					},
-				},
-				{ $unwind: "$cities" },
-			]);
-			if (!country.length) {
-				throw new Error("Something went wrong!");
-			}
-
-			let cities = country[0]?.cities?.uniqueCities ? country[0].cities.uniqueCities : [];
-
-			let orgs = await OrganisationModel.distinct("name", {
-				type: { $in: ["PHARMACY", "Hospital"] },
-			});
-			orgs = orgs?.length ? orgs : [];
-
-			const result = {
-				cities: cities,
-				organisations: orgs,
-			};
-
-			return apiResponse.successResponseWithData(res, "Cities and orgs for filters", result);
+			const orgs = await OrganisationModel.distinct("name", {
+				type: { $in: ["PHARMACY", 'Farmacia', "Hospital", 'HOSPITAL'] },
+			}, "name");
+			return apiResponse.successResponseWithData(res, "Last Mile Organization options for filters", orgs);
 		} catch (err) {
 			console.log(err);
 			return apiResponse.errorResponse(res, err.message);
@@ -1213,7 +1170,6 @@ exports.exportVaccinationList = [
 		try {
 			const { reportType, gender, city, organisation, minAge, maxAge, today, ageType } = req.body;
 			const user = req.user;
-
 			const warehouseQuery = await buildWarehouseQuery(user, city, organisation);
 			const warehouses = await WarehouseModel.aggregate([
 				{ $match: warehouseQuery },
@@ -1227,21 +1183,18 @@ exports.exportVaccinationList = [
 				},
 			]);
 
-			let vaccineVialIds = warehouses.map((warehouse) => {
-				let currVaccines = warehouse?.vaccinations?.map((vaccination) => vaccination.id);
-				if (currVaccines && currVaccines.length) {
-					return currVaccines;
-				} else {
-					return [];
-				}
-			});
-			vaccineVialIds = vaccineVialIds.flat();
+			const vaccineVialIds = warehouses
+				.map((warehouse) => warehouse?.vaccinations?.map((vaccination) => vaccination.id))
+				.flat();
 
 			const doseQuery = await buildDoseQuery(gender, minAge, maxAge, ageType, vaccineVialIds, today);
 			const result = await generateVaccinationsList(doseQuery, req);
 
-			if (reportType === "excel") res = buildExcelReportDoses(req, res, result.result, today);
-			else res = buildPdfReportDoses(req, res, result.result, today);
+			if (reportType === "excel") {
+				return buildExcelReportDoses(req, res, result.result, today);
+			} else {
+				await buildPdfReportDoses(req, res, result.result, today);
+			}
 		} catch (err) {
 			console.log(err);
 			return apiResponse.errorResponse(res, err.message);
@@ -1275,8 +1228,8 @@ exports.exportVialsUtilised = [
 			}
 
 			// Generate file
-			if (reportType === "excel") res = buildExcelReportVials(req, res, fileData);
-			else res = buildPdfReportVials(req, res, fileData);
+			if (reportType === "excel") buildExcelReportVials(req, res, fileData);
+			else await buildPdfReportVials(req, res, fileData);
 		} catch (err) {
 			console.log(err);
 			return apiResponse.errorResponse(res, err.message);
@@ -1392,7 +1345,7 @@ function buildExcelReportDoses(req, res, dataForExcel, today) {
 			displayName: req.t("organization"),
 			headerStyle: styles.headerDark,
 			width: 220,
-		}
+		},
 	};
 
 	const report = excel.buildExport([
@@ -1407,19 +1360,21 @@ function buildExcelReportDoses(req, res, dataForExcel, today) {
 	return res.send(report);
 }
 
-function buildPdfReportDoses(req, res, data, today) {
+async function buildPdfReportDoses(req, res, data, today) {
 	const todaysDate = new Date();
-	const rows = [];
-	rows.push([
-		{ text: req.t("date"), bold: true },
-		{ text: req.t("batch_number"), bold: true },
-		{ text: req.t("manufacturer"), bold: true },
-		{ text: req.t("age"), bold: true },
-		{ text: req.t("gender"), bold: true },
-		{ text: req.t("state"), bold: true },
-		{ text: req.t("city"), bold: true },
-		{ text: req.t("organization"), bold: true },
-	]);
+	const rows = [
+		[
+			{ text: req.t("date"), bold: true },
+			{ text: req.t("batch_number"), bold: true },
+			{ text: req.t("manufacturer"), bold: true },
+			{ text: req.t("age"), bold: true },
+			{ text: req.t("gender"), bold: true },
+			{ text: req.t("state"), bold: true },
+			{ text: req.t("city"), bold: true },
+			{ text: req.t("organization"), bold: true },
+		],
+	];
+
 	for (const element of data) {
 		const date = element.date ? formatDate(new Date(element.date)) : "N/A";
 		rows.push([
@@ -1440,7 +1395,9 @@ function buildPdfReportDoses(req, res, data, today) {
 		pageMargins: [30, 30, 2, 2],
 		content: [
 			{
-				text: today ? req.t("todays_vaccinations") + `(${formatDate(todaysDate)})` : req.t("vaccinated_so_far"),
+				text: today
+					? req.t("todays_vaccinations") + `(${formatDate(todaysDate)})`
+					: req.t("vaccinated_so_far"),
 				fontSize: 32,
 				style: "header",
 			},
@@ -1462,14 +1419,20 @@ function buildPdfReportDoses(req, res, data, today) {
 		},
 	};
 
-	const pdfDoc = printer.createPdfKitDocument(docDefinition, { fontLayoutCache: true });
-	var temp123;
-	const pdfFile = pdfDoc.pipe((temp123 = fs.createWriteStream("./VaccinationReport.pdf")));
-	pdfDoc.end();
-	temp123.on("finish", async function () { 		// send PDF file
-		return res.sendFile(resolve(pdfFile.path));
+	const pdfDoc = printer.createPdfKitDocument(docDefinition, {
+		fontLayoutCache: true,
 	});
-	return;
+
+	res.set({
+		"Content-Type": "application/pdf",
+		"Content-Disposition": 'attachment; filename="VaccinationReport.pdf"',
+	});
+
+	await new Promise((resolve) => {
+		pdfDoc.pipe(res);
+		pdfDoc.end();
+		res.on("finish", resolve);
+	});
 }
 
 function buildExcelReportVials(req, res, dataForExcel) {
@@ -1503,7 +1466,7 @@ function buildExcelReportVials(req, res, dataForExcel) {
 			displayName: req.t("number_of_doses"),
 			headerStyle: styles.headerDark,
 			width: 120,
-		}
+		},
 	};
 
 	const report = excel.buildExport([
@@ -1518,21 +1481,23 @@ function buildExcelReportVials(req, res, dataForExcel) {
 	return res.send(report);
 }
 
-function buildPdfReportVials(req, res, data) {
-	const rows = [];
-	rows.push([
-		{ text: req.t("sr_no"), bold: true },
-		{ text: req.t("date"), bold: true },
-		{ text: req.t("batch_number"), bold: true },
-		{ text: req.t("number_of_doses"), bold: true },
-	]);
-	for (let i = 0; i < data.length; i++) {
-		const date = data[i].date ? new Date(data[i].date) : "";
+async function buildPdfReportVials(req, res, data) {
+	const rows = [
+		[
+			{ text: req.t("sr_no"), bold: true },
+			{ text: req.t("date"), bold: true },
+			{ text: req.t("batch_number"), bold: true },
+			{ text: req.t("number_of_doses"), bold: true },
+		],
+	];
+
+	for (const element of data) {
+		const date = element.date ? new Date(element.date) : "";
 		rows.push([
-			data[i].index,
+			element.index,
 			formatDate(date),
-			data[i].batchNumber || "N/A",
-			data[i].numberOfDoses || "N/A",
+			element.batchNumber || "N/A",
+			element.numberOfDoses || "N/A",
 		]);
 	}
 
@@ -1560,22 +1525,28 @@ function buildPdfReportVials(req, res, data) {
 		},
 	};
 
-	const pdfDoc = printer.createPdfKitDocument(docDefinition, { fontLayoutCache: true });
-	var temp123;
-	const pdfFile = pdfDoc.pipe((temp123 = fs.createWriteStream("./VialsUtilizedReport.pdf")));
-	pdfDoc.end();
-	temp123.on("finish", async function () { 		// send PDF file
-		return res.sendFile(resolve(pdfFile.path));
+	const pdfDoc = printer.createPdfKitDocument(docDefinition, {
+		fontLayoutCache: true,
 	});
-	return;
+
+	res.set({
+		"Content-Type": "application/pdf",
+		"Content-Disposition": 'attachment; filename="VialsUtilizedReport.pdf"',
+	});
+
+	await new Promise((resolve) => {
+		pdfDoc.pipe(res);
+		pdfDoc.end();
+		res.on("finish", resolve);
+	});
 }
 
 exports.addDateStringToDoses = [
 	async (req, res) => {
 		const allDoses = await DoseModel.find();
 		let count = 0;
-		for (let i = 0; i < allDoses.length; ++i) {
-			let currDose = allDoses[i];
+		for (const element of allDoses) {
+			let currDose = element;
 			let createdDateString = getDateStringForMongo(new Date(currDose.createdAt));
 			await DoseModel.updateOne({ id: currDose.id }, { $set: { createdDateString: createdDateString } })
 			++count;

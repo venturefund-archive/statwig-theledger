@@ -262,7 +262,6 @@ const Inventory = (props) => {
     if (selectedInventoryType !== 'BREWERY' && !isDetailedView) {
       setIsDetailedView(true);
       setInventory(inv);
-      console.log(inv);
 
       const _filters = { ...filters };
       _filters.invDetails = inv._id;
@@ -337,13 +336,13 @@ const Inventory = (props) => {
                       <div className="col-md-12">
                         <h2 className="orgTitle">
                           {selectedVendor.organisation &&
-                          selectedVendor.organisation.name
+                            selectedVendor.organisation.name
                             ? selectedVendor.organisation.name
                             : ''}{' '}
                           &nbsp;
                           <span className="purple-badge">
                             {selectedVendor.organisation &&
-                            selectedVendor.organisation.type
+                              selectedVendor.organisation.type
                               ? selectedVendor.organisation.type
                               : ''}
                           </span>
@@ -354,7 +353,7 @@ const Inventory = (props) => {
                           <span className="labelHead">Vendor ID:</span>
                           <span>
                             {selectedVendor.organisation &&
-                            selectedVendor.organisation.id
+                              selectedVendor.organisation.id
                               ? selectedVendor.organisation.id
                               : ''}
                           </span>
@@ -376,7 +375,7 @@ const Inventory = (props) => {
                           <span className="labelHead">Address:</span>
                           <span>
                             {selectedVendor.organisation &&
-                            selectedVendor.organisation.postalAddress
+                              selectedVendor.organisation.postalAddress
                               ? selectedVendor.organisation.postalAddress
                               : ''}
                           </span>
@@ -390,9 +389,8 @@ const Inventory = (props) => {
                   {(type == 'BREWERY' || type == 'CENTRAL_AUTHORITY') && (
                     <>
                       <a
-                        className={`btn ${
-                          selectedInventoryType === 'BREWERY' ? 'active' : ''
-                        }`}
+                        className={`btn ${selectedInventoryType === 'BREWERY' ? 'active' : ''
+                          }`}
                         onClick={() => {
                           onInventoryTypeChange('BREWERY');
                         }}
@@ -400,9 +398,8 @@ const Inventory = (props) => {
                         Brewery
                       </a>
                       <a
-                        className={`btn ${
-                          selectedInventoryType === 'VENDOR' ? 'active' : ''
-                        }`}
+                        className={`btn ${selectedInventoryType === 'VENDOR' ? 'active' : ''
+                          }`}
                         onClick={() => {
                           onInventoryTypeChange('VENDOR');
                         }}
@@ -423,11 +420,11 @@ const Inventory = (props) => {
                             className="productImage"
                             src={
                               brandsIconArr[
-                                brands.indexOf(
-                                  inventory.org.manufacturer
-                                    .split(' ')
-                                    .join(''),
-                                )
+                              brands.indexOf(
+                                inventory.org.manufacturer
+                                  .split(' ')
+                                  .join(''),
+                              )
                               ]
                             }
                           />
@@ -440,11 +437,11 @@ const Inventory = (props) => {
                                   <img
                                     src={
                                       brandsArr[
-                                        brands.indexOf(
-                                          inventory.org.manufacturer
-                                            .split(' ')
-                                            .join(''),
-                                        )
+                                      brands.indexOf(
+                                        inventory.org.manufacturer
+                                          .split(' ')
+                                          .join(''),
+                                      )
                                       ]
                                     }
                                     alt=""
@@ -571,16 +568,15 @@ const Inventory = (props) => {
                   <img src={filterIcon} className="filterIcon" /> FILTERS
                 </div>
                 {filters.inventoryType === 'VENDOR' ||
-                filters.inventoryType === 'ALL_VENDORS' ? (
+                  filters.inventoryType === 'ALL_VENDORS' ? (
                   <>
                     <label className="filterSubHeading mt-3">
                       Vendor Type{' '}
                     </label>
                     <div className="btn-group mainButtonFilter">
                       <a
-                        className={`btn ${
-                          selectedVendorType === 'ALL_VENDORS' ? 'active' : ''
-                        }`}
+                        className={`btn ${selectedVendorType === 'ALL_VENDORS' ? 'active' : ''
+                          }`}
                         onClick={() => {
                           onVendorTypeChange('ALL_VENDORS');
                         }}
@@ -588,9 +584,8 @@ const Inventory = (props) => {
                         All
                       </a>
                       <a
-                        className={`btn ${
-                          selectedVendorType === 'S1' ? 'active' : ''
-                        }`}
+                        className={`btn ${selectedVendorType === 'S1' ? 'active' : ''
+                          }`}
                         onClick={() => {
                           onVendorTypeChange('S1');
                         }}
@@ -598,9 +593,8 @@ const Inventory = (props) => {
                         S1
                       </a>
                       <a
-                        className={`btn ${
-                          selectedVendorType === 'S2' ? 'active' : ''
-                        }`}
+                        className={`btn ${selectedVendorType === 'S2' ? 'active' : ''
+                          }`}
                         onClick={() => {
                           onVendorTypeChange('S2');
                         }}
@@ -608,9 +602,8 @@ const Inventory = (props) => {
                         S2
                       </a>
                       <a
-                        className={`btn ${
-                          selectedVendorType === 'S3' ? 'active' : ''
-                        }`}
+                        className={`btn ${selectedVendorType === 'S3' ? 'active' : ''
+                          }`}
                         onClick={() => {
                           onVendorTypeChange('S3');
                         }}

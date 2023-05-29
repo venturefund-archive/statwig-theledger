@@ -17,7 +17,7 @@ const SearchWareHouse = (props) => {
   const [regions, setRegions] = useState([]);
   const [country, setCountry] = useState(t("Select_Country"));
   const [countries, setCountries] = useState([]);
-  const [warehouseId, setWareHouseId] = useState(t("Select_Location"));
+  const [warehouseId, setWareHouseId] = useState(t("select_location"));
   const [warehouses, setWareHouses] = useState([]);
   const [warehouseIds, setWareHouseIds] = useState([]);
   useEffect(() => {

@@ -18,6 +18,21 @@ export default function ReportSearch({ updateSearchParams }) {
   const [allStates, setAllStates] = useState([]);
   const [allCities, setAllCities] = useState([]);
 
+  async function getAllRegions() {
+    let regions = await fetchAllRegions();
+    setAllRegions(regions.data);
+  }
+
+  async function getAllCountries(region) {
+    let countries = await fetchCountriesByRegion(region);
+    setAllCountries(countries.data);
+  }
+
+  async function getAllStates(country) {
+    let states = await fetchStateByCountry(country.id);
+    setAllStates(states.data);
+  }
+
   async function getAllCities(state) {
     const cities = await fetchCitiesByState(state.id);
     setAllCities(cities.data);
@@ -34,21 +49,7 @@ export default function ReportSearch({ updateSearchParams }) {
   }
 
   useEffect(() => {
-    // async function getCountriesForAmericas() {
-    //   let countries = await fetchCountriesByRegion("Americas");
-    //   setAllCountries(countries.data);
-    //   const costarica = countries.data.filter(
-    //     (country) => country.name === "Costa Rica",
-    //   );
-    //   let states = await fetchStateByCountry(costarica[0].id);
-    //   setAllStates(states.data);
-    // }
-    // getCountriesForAmericas();
-    async function getRegions() {
-      const regions = await fetchAllRegions();
-      setAllRegions(regions.data);
-    }
-    getRegions();
+    getAllRegions();
   }, []);
 
   const {
@@ -58,46 +59,56 @@ export default function ReportSearch({ updateSearchParams }) {
     formState: { errors },
     handleSubmit,
   } = useForm({
+    region: "",
     country: "",
     state: "",
     city: "",
   });
-
-  const watchState = watch("state");
 
   const onSubmit = (data) => {
     updateSearchParams(data);
   };
 
   return (
-    <section className='ReportSearch_container'>
-      <h1 className='Report_page_title_ts'>{t("search_here_for_units")}</h1>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className='main_searchbar_wrapper'>
-          <div className='search_icon_wrap'>
-            {/* <i class="fa-solid fa-magnifying-glass"></i> */}
+    <section className="ReportSearch_container">
+      <h1 className="Report_page_title_ts">{t("search_here_for_units")}</h1>
+      <form onSubmit={handleSubmit(onSubmit)} className="main_search_form">
+        <div className="main_searchbar_wrapper">
+          <div className="search_icon_wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
           </div>
-          <div className='input_hold bdr'>
+          <div className="input_hold bdr">
             <Controller
-              name='region'
+              name="region"
               control={control}
               render={({ field }) => (
                 <Autocomplete
                   fullWidth
-                  className='mi_report_autocomplete'
+                  className="mi_report_autocomplete"
                   options={allRegions}
-                  getOptionLabel={(option) => option.name || ""}
+                  getOptionLabel={(option) => option || ""}
                   {...field}
                   onChange={(event, value) => {
-                    if (!value?.name) {
+                    if (!value) {
                       field.onChange("");
                       setAllCountries([]);
-                      updateSearchParams({ state: "", city: "" });
+                      setAllStates([]);
+                      setAllCities([]);
+                      updateSearchParams({
+                        region: "",
+                        country: "",
+                        state: "",
+                        city: "",
+                      });
                     } else {
-                      field.onChange(value.name);
+                      field.onChange(value);
                       getAllCountries(value);
+                      setAllStates([]);
+                      setAllCities([]);
                     }
                     setValue("country", "");
+                    setValue("state", "");
+                    setValue("city", "");
                   }}
                   renderInput={(params) => (
                     <TextField
@@ -111,25 +122,27 @@ export default function ReportSearch({ updateSearchParams }) {
               )}
             />
           </div>
-          <div className='input_hold bdr'>
+          <div className="input_hold bdr">
             <Controller
-              name='country'
+              name="country"
               control={control}
               render={({ field }) => (
                 <Autocomplete
                   fullWidth
-                  className='mi_report_autocomplete'
+                  className="mi_report_autocomplete"
                   options={allCountries}
                   getOptionLabel={(option) => option.name || ""}
                   {...field}
                   onChange={(event, value) => {
                     if (!value?.name) {
                       field.onChange("");
+                      setAllStates([]);
                       setAllCities([]);
-                      updateSearchParams({ state: "", city: "" });
+                      updateSearchParams({ country: "", state: "", city: "" });
                     } else {
                       field.onChange(value.name);
                       getAllStates(value);
+                      setAllCities([]);
                     }
                     setValue("city", "");
                   }}
@@ -145,14 +158,14 @@ export default function ReportSearch({ updateSearchParams }) {
               )}
             />
           </div>
-          <div className='input_hold bdr'>
+          <div className="input_hold bdr">
             <Controller
-              name='state'
+              name="state"
               control={control}
               render={({ field }) => (
                 <Autocomplete
                   fullWidth
-                  className='mi_report_autocomplete'
+                  className="mi_report_autocomplete"
                   options={allStates}
                   getOptionLabel={(option) => option.name || ""}
                   {...field}
@@ -179,20 +192,21 @@ export default function ReportSearch({ updateSearchParams }) {
               )}
             />
           </div>
-          <div className='input_hold'>
+          <div className="input_hold">
             <Controller
-              name='city'
+              name="city"
               control={control}
               render={({ field }) => (
                 <Autocomplete
                   fullWidth
+                  className="mi_report_autocomplete"
                   options={allCities}
                   getOptionLabel={(option) => option.name || ""}
                   {...field}
                   onChange={(event, value) => {
                     if (!value?.name) {
                       field.onChange("");
-                      updateSearchParams({ state: watchState, city: "" });
+                      updateSearchParams({ city: "" });
                     } else {
                       field.onChange(value.name);
                     }
@@ -209,8 +223,8 @@ export default function ReportSearch({ updateSearchParams }) {
               )}
             />
           </div>
-          <div className='null_space'></div>
-          <button type='submit' className='result_search_button'>
+          <div className="null_space"></div>
+          <button type="submit" className="result_search_button">
             {t("search")}
           </button>
         </div>
