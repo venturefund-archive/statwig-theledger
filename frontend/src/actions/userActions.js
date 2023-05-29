@@ -141,12 +141,19 @@ export const forgotPassword = async (data) => {
 
 export const getUserInfo = () => {
   return async (dispatch) => {
-    const result = await axios.get(config().userInfoUrl);
-    const rewards = await axios.get(config().userRewardsUrl);
-    dispatch(setProfile({ ...result.data.data, rewards.data.data }));
-    return result;
+    try {
+      const [result, rewards] = await Promise.all([
+        axios.get(config().userInfoUrl),
+        axios.get(config().userRewardsUrl),
+      ]);
+      dispatch(setProfile({ ...result.data.data, rewards: rewards.data.data }));
+      return result;
+    } catch (error) {
+      console.log(error);
+    }
   };
 };
+
 
 export const getActiveWareHouses = async () => {
   try {

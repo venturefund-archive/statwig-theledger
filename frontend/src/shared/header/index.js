@@ -760,8 +760,10 @@ const Header = (props) => {
               flexItem
               className="divider"
             />
-            <i className='bx bxs-coin-stack m-1' />
-            Rewards : 100
+            <div className="m-2">
+              <i className='bx bxs-coin-stack mr-1' style={{ fontSize: '26px' }} />
+              Rewards : {profile?.rewards?.points}
+            </div>
             <Divider
               orientation="vertical"
               variant="middle"
