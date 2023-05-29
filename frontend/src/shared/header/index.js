@@ -350,20 +350,22 @@ const Header = (props) => {
     },
   };
 
-  const searchPermissions = props.user?.permissions?.search;
+  // const searchPermissions = props.user?.permissions?.search;
 
-  const [allowSearch, setAllowSearch] = useState(false);
+  // const [allowSearch, setAllowSearch] = useState(false);
 
-  useEffect(() => {
-    if (searchPermissions) {
-      for (const property in searchPermissions) {
-        if (searchPermissions[property]) {
-          setAllowSearch(true);
-          break;
-        }
-      }
-    }
-  }, [searchPermissions]);
+  // useEffect(() => {
+  //   if (searchPermissions) {
+  //     for (const property in searchPermissions) {
+  //       if (searchPermissions[property]) {
+  //         setAllowSearch(true);
+  //         break;
+  //       }
+  //     }
+  //   }
+  // }, [searchPermissions]);
+
+  const allowSearch = props.user?.type !== "Third Party Logistics"
 
   const handleUiSwitch = () => {
     // Check whether user has enough rights
@@ -402,7 +404,7 @@ const Header = (props) => {
           <MenuOutlined className="hambergerMenu" />
 
           <ul className="navList">
-          {allowSearch && (
+            {allowSearch && (
               <li className="navItems">
                 <div
                   className="search-form"

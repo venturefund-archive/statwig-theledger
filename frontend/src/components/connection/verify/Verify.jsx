@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import TextField from "@mui/material/TextField";
-import { Link, useHistory, useLocation } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { turnOff, turnOn } from "../../../actions/spinnerActions";
 import {
@@ -16,7 +16,7 @@ import MuiAlert from "@mui/material/Alert";
 import { Snackbar } from "@mui/material";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  return <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />;
 });
 
 export default function Verify({ t }) {
@@ -138,10 +138,9 @@ export default function Verify({ t }) {
         localStorage.setItem("theLedgerToken", token);
         localStorage.setItem("bkp", result.data.data.permissions.permissions);
         dispatch(setCurrentUser(decoded));
-        // const intelEnabled =
-        //   props.user?.type === "Third Party Logistics" ? true : false;
-        // props.history.push(intelEnabled ? `/shipments` : `/overview`);
-        history.push("/overview");
+        const intelEnabled =
+          decoded?.type === "Third Party Logistics" ? true : false;
+        history.push(intelEnabled ? `/enterid` : `/overview`);
       } else {
         const err = result.data.message;
         setErrorMessage(err);
@@ -153,20 +152,20 @@ export default function Verify({ t }) {
   };
 
   return (
-    <section className="account-section">
-      <div className="vl-verify-container">
+    <section className='account-section'>
+      <div className='vl-verify-container'>
         <form
           onSubmit={handleSubmit(handleVerifyOtp)}
-          className="account-form-container"
+          className='account-form-container'
         >
-          <hgroup className="form-headers">
-            <h1 className="vl-heading f-700 vl-black">{t("verify_head")}</h1>
-            <h2 className="vl-subheading f-400 vl-grey-xs vl-line-sm f-500-sm">
+          <hgroup className='form-headers'>
+            <h1 className='vl-heading f-700 vl-black'>{t("verify_head")}</h1>
+            <h2 className='vl-subheading f-400 vl-grey-xs vl-line-sm f-500-sm'>
               {t("verify_msg")}
             </h2>
           </hgroup>
-          <section className="vl-input-group form-auto-fill-section">
-            <div className="input-otp-column">
+          <section className='vl-input-group form-auto-fill-section'>
+            <div className='input-otp-column'>
               {otpArray.map((val, index) => (
                 <Controller
                   key={index}
@@ -178,13 +177,13 @@ export default function Verify({ t }) {
                       {...field}
                       inputRef={ref}
                       id={`otp${index}`}
-                      className="vl-custom-textfield"
+                      className='vl-custom-textfield'
                       fullWidth
                       onChange={otpChange(index)}
                       onKeyUp={onOtpKeyPress(index)}
                       onKeyDown={onkeydown}
-                      variant="outlined"
-                      placeholder="*"
+                      variant='outlined'
+                      placeholder='*'
                       inputProps={{ maxLength: 1 }}
                       autoFocus={index === 0 ? true : undefined}
                       error={Boolean(errors[`otp${index}`])}
@@ -201,18 +200,18 @@ export default function Verify({ t }) {
               {errorMessage ? errorMessage : "No Errors"}
             </p>
           </section>
-          <section className="call-by-action">
+          <section className='call-by-action'>
             <button
-              type="submit"
-              className="vl-btn vl-btn-md vl-btn-full vl-btn-primary"
+              type='submit'
+              className='vl-btn vl-btn-md vl-btn-full vl-btn-primary'
             >
               {t("verify")}
             </button>
           </section>
-          <section className="further-links vl-justify-auto">
-            <p className="vl-note vl-grey-xs f-400">
+          <section className='further-links vl-justify-auto'>
+            <p className='vl-note vl-grey-xs f-400'>
               {t("no_access_code")}{" "}
-              <span onClick={resendOtp} className="vl-blue vl-link">
+              <span onClick={resendOtp} className='vl-blue vl-link'>
                 {t("resend")}
               </span>
             </p>

@@ -112,13 +112,12 @@ const FormVerifyPage = (props) => {
                                 borderBottom: "1px solid #d6d6d6",
                                 borderRadius: 0,
                               }}
-                              className={`form-control text-center mr-5 ${
-                                (errors[`otp${index}`] &&
-                                  touched[`otp${index}`]) ||
+                              className={`form-control text-center mr-5 ${(errors[`otp${index}`] &&
+                                touched[`otp${index}`]) ||
                                 (errors.otp0 && touched.otp0)
-                                  ? "border-danger"
-                                  : ""
-                              }`}
+                                ? "border-danger"
+                                : ""
+                                }`}
                               value={otpArray[index]}
                               onKeyUp={onOtpKeyPress(index)}
                               maxLength={1}
@@ -149,9 +148,8 @@ const FormVerifyPage = (props) => {
                         </div>
                         {errorMessage && (
                           <span
-                            className={`text-danger-verify ${
-                              errorMessage ? "border-red" : ""
-                            }`}
+                            className={`text-danger-verify ${errorMessage ? "border-red" : ""
+                              }`}
                           >
                             {t("otp_doesnt_match")}
                           </span>
