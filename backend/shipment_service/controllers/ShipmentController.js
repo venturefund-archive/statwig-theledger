@@ -4323,28 +4323,47 @@ exports.fetchairwayBillNumber = [
   auth,
   async (req, res) => {
     try {
-      const { warehouseId } = req.user;
-      const shipments = await ShipmentModel.find(
-        {
-          $or: [
-            {
-              "supplier.locationId": warehouseId,
-            },
-            {
-              "receiver.locationId": warehouseId,
-            },
-          ],
-        },
-        "airWayBillNo id status"
-      )
+      const { warehouseId, type } = req.user;
+      var where = {
+        $and: [
+          {
+            $or: [
+              {
+                "supplier.locationId": warehouseId,
+              },
+              {
+                "receiver.locationId": warehouseId,
+              },
+            ],
+          },
+          {
+            $or: [
+              {
+                "supplier.id": req.user.organisationId,
+              },
+              {
+                "receiver.id": req.user.organisationId,
+              },
+            ],
+          },
+        ]
+      };
 
+      if (type == 'Third Party Logistics') {
+        where = { status: 'CREATED' }
+      }
+      const shipments = await ShipmentModel.find(
+        where,
+        "airWayBillNo"
+      )
       return apiResponse.successResponseWithData(
         res,
-        "All Shipments",
+        "All Transit ids Shipments",
         shipments
       );
+
     } catch (err) {
-      console.log(err);
+      console.log(err)
       return apiResponse.ErrorResponse(res, err.message);
     }
   },
