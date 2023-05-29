@@ -923,6 +923,13 @@ const Header = (props) => {
                     </div>
                     <div
                       className="header__link__card"
+                      onClick={() => props.history.push("/rewards")}
+                    >
+                      <i class="fa-solid fa-trophy"></i>
+                      <p className="vl-body f-400">My Rewards</p>
+                    </div>
+                    <div
+                      className="header__link__card"
                       onClick={() => props.history.push("/settings")}
                     >
                       <i className="fa-solid fa-gear"></i>
