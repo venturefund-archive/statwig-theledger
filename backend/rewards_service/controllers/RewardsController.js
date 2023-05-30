@@ -89,7 +89,10 @@ exports.addReward = [
     async function (req, res) {
         try {
             console.log(req.appId)
-            const reward = new RewardModel({ ...req.body, appId: req.appId });
+            const { event, eventType } = req.body;
+            const config = req.rewardConfig.find((item) => item.event === event && item.eventType === eventType);
+            const points = config ? config.points : null;
+            const reward = new RewardModel({ ...req.body, points, appId: req.appId });
             await reward.save();
             await RewardUserModel.findOneAndUpdate({ appId: req.appId, userId: reward.userId }, { $inc: { points: reward.points, totalPoints: reward.points } }, { upsert: true })
             return apiResponse.successResponseWithData(res, "Reward Added", reward)
