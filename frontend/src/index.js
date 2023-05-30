@@ -10,7 +10,6 @@ import setAuthToken from "./utils/setAuthToken";
 import "./assets/vl-styles/index.css";
 
 const store = configureStore();
-setAuthToken();
 if (localStorage.theLedgerToken) {
   setAuthToken(localStorage.theLedgerToken);
   const decoded = jwt_decode(localStorage.theLedgerToken);
