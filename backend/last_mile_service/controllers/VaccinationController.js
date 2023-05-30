@@ -487,6 +487,7 @@ exports.vaccinateIndividual = [
 				eventId: doseId,
 				event: "VACCINATE",
 				eventType: "DOSE",
+				eventTime: new Date(),
 				userId: req.user.id,
 				userOrgId: req.user.organisationId,
 				userWarehouseId: req.user.warehouseId,
