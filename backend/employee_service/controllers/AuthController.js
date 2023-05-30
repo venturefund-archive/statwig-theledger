@@ -20,7 +20,7 @@ const { OAuth2Client } = require("google-auth-library");
 const hf_blockchain_url = process.env.HF_BLOCKCHAIN_URL;
 const emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const phoneRegex = /^[\+]\d{11,12}$/;
-const blockchain_service_url = process.env.URL;
+const REWARDS_API_KEY = process.env.REWARDS_API_KEY;
 const { uploadFile, getSignedUrl } = require("../helpers/s3");
 const fs = require("fs");
 const util = require("util");
@@ -756,102 +756,111 @@ exports.verifyOtp = [
 			if (!errors.isEmpty()) {
 				return apiResponse.validationErrorWithData(req, res, "validation_error", errors.array());
 			} else {
-				let query = { accountStatus: { $ne: "DELETED" } };
-				if (req.body.emailId.indexOf("@") === -1) {
-					let phone = req.body.emailId.startsWith("+") ? req.body.emailId : "+" + req.body.emailId;
+				const { emailId, otp } = req.body;
+				const query = { accountStatus: { $ne: "DELETED" } };
+				if (emailId.indexOf("@") === -1) {
+					const phone = emailId.startsWith("+") ? emailId : "+" + emailId;
 					query.phoneNumber = phone;
 				} else {
-					query.emailId = req.body.emailId;
+					query.emailId = emailId;
 				}
+
 				const user = await EmployeeModel.findOne(query);
-				if (user) {
-					if (user.otp == req.body.otp) {
-						const activeWarehouse = await WarehouseModel.find({
-							$and: [
-								{ id: { $in: user.warehouseId } },
-								{
-									$or: [
-										{ status: "ACTIVE" },
-										{ status: "PENDING" },
-										{ status: { $exists: false } },
-									],
-								},
-							],
-						});
-
-						const org = await OrganisationModel.findOne({ id: user.organisationId });
-
-						let userData;
-						if (activeWarehouse.length > 0) {
-							let activeWarehouseId = 0;
-							const activeWRs = activeWarehouse.filter((w) => w.status == "ACTIVE");
-							if (activeWRs.length > 0) activeWarehouseId = activeWRs[0].id;
-							else activeWarehouseId = activeWarehouse[0].id;
-							userData = {
-								id: user.id,
-								firstName: user.firstName,
-								emailId: user.emailId,
-								role: user.role,
-								warehouseId: activeWarehouseId,
-								organisationId: user.organisationId,
-								phoneNumber: user.phoneNumber,
-								org: user.msp,
-								userName: user.emailId,
-								photoId: user.photoId,
-								preferredLanguage: user.preferredLanguage,
-								isCustom: user.isCustom,
-								type: org.type,
-							};
-						} else {
-							userData = {
-								id: user.id,
-								firstName: user.firstName,
-								emailId: user.emailId,
-								role: user.role,
-								warehouseId: [],
-								organisationId: user.organisationId,
-								phoneNumber: user.phoneNumber,
-								org: user.msp,
-								userName: user.emailId,
-								photoId: user.photoId,
-								preferredLanguage: user.preferredLanguage,
-								isCustom: user.isCustom,
-								type: org.type,
-							};
-						}
-						//Prepare JWT token for authentication
-						const jwtPayload = userData;
-						const jwtData = {
-							expiresIn: process.env.JWT_TIMEOUT_DURATION,
-						};
-						const secret = process.env.JWT_SECRET;
-						//Generated JWT token with Payload and secret.
-						userData.permissions = await RbacModel.findOne({ role: user.role });
-						userData.token = jwt.sign(jwtPayload, secret, jwtData);
-
-						const bc_data = {
-							username: req.body.emailId,
-							password: "",
-							orgName: "org1MSP",
-							role: "",
-							email: req.body.emailId,
-						};
-						axios.post(`${hf_blockchain_url}/api/v1/register`, bc_data).catch((err) => {
-							console.log(err);
-						});
-						return apiResponse.successResponseWithData(req, res, "login_success", userData);
-					} else {
-						return apiResponse.errorResponse(req, res, "otp_not_match");
-					}
-				} else {
+				if (!user) {
 					return apiResponse.errorResponse(req, res, "account_not_found");
 				}
+
+				if (user.otp !== otp) {
+					return apiResponse.errorResponse(req, res, "otp_not_match");
+				}
+
+				const activeWarehouse = await WarehouseModel.find({
+					$and: [
+						{ id: { $in: user.warehouseId } },
+						{
+							$or: [
+								{ status: "ACTIVE" },
+								{ status: "PENDING" },
+								{ status: { $exists: false } },
+							],
+						},
+					],
+				});
+
+				const org = await OrganisationModel.findOne({ id: user.organisationId });
+
+				let userData;
+				if (activeWarehouse.length > 0) {
+					let activeWarehouseId = 0;
+					const activeWRs = activeWarehouse.filter((w) => w.status == "ACTIVE");
+					if (activeWRs.length > 0) {
+						activeWarehouseId = activeWRs[0].id;
+					} else {
+						activeWarehouseId = activeWarehouse[0].id;
+					}
+					userData = {
+						id: user.id,
+						firstName: user.firstName,
+						emailId: user.emailId,
+						role: user.role,
+						warehouseId: activeWarehouseId,
+						organisationId: user.organisationId,
+						phoneNumber: user.phoneNumber,
+						org: user.msp,
+						userName: user.emailId,
+						photoId: user.photoId,
+						preferredLanguage: user.preferredLanguage,
+						isCustom: user.isCustom,
+						type: org.type,
+						rewardsApiKey : REWARDS_API_KEY
+					};
+				} else {
+					userData = {
+						id: user.id,
+						firstName: user.firstName,
+						emailId: user.emailId,
+						role: user.role,
+						warehouseId: [],
+						organisationId: user.organisationId,
+						phoneNumber: user.phoneNumber,
+						org: user.msp,
+						userName: user.emailId,
+						photoId: user.photoId,
+						preferredLanguage: user.preferredLanguage,
+						isCustom: user.isCustom,
+						type: org.type,
+						rewardsApiKey : REWARDS_API_KEY
+					};
+				}
+
+				//Prepare JWT token for authentication
+				const jwtPayload = userData;
+				const jwtData = {
+					expiresIn: process.env.JWT_TIMEOUT_DURATION,
+				};
+				const secret = process.env.JWT_SECRET;
+				//Generated JWT token with Payload and secret.
+				userData.permissions = await RbacModel.findOne({ role: user.role });
+				userData.token = jwt.sign(jwtPayload, secret, jwtData);
+
+				const bc_data = {
+					username: emailId,
+					password: "",
+					orgName: "org1MSP",
+					role: "",
+					email: emailId,
+				};
+				axios.post(`${hf_blockchain_url}/api/v1/register`, bc_data).catch((err) => {
+					console.log(err);
+				});
+
+				return apiResponse.successResponseWithData(req, res, "login_success", userData);
 			}
 		} catch (err) {
 			console.log(err);
 			return apiResponse.errorResponse(req, res, "default_error");
 		}
-	},
+	}
 ];
 
 exports.verifyAuthentication = [
@@ -2533,68 +2542,44 @@ exports.addUsersFromExcel = [
 
 exports.activateUser = [
 	auth,
-	(req, res) => {
+	async (req, res) => {
 		try {
 			const { organisationName } = req.user;
 			const { id, role } = req.query;
-			EmployeeModel.findOne({ id: id })
-				.then((employee) => {
-					if (employee) {
-						if (employee.isConfirmed && employee.accountStatus == "ACTIVE") {
-							return apiResponse.successResponseWithData(res, " User is already Active", employee);
-						} else {
-							axios.get(`${blockchain_service_url}/createUserAddress`).then((response) => {
-								const walletAddress = response.data.items;
-								const userData = {
-									walletAddress,
-								};
-								axios
-									.post(`${blockchain_service_url}/grantPermission`, userData)
-									.then(() => console.log("posted"));
-								EmployeeModel.findOneAndUpdate(
-									{ id: id },
-									{
-										$set: {
-											accountStatus: "ACTIVE",
-											isConfirmed: true,
-											walletAddress,
-											role,
-										},
-									},
-									{ new: true },
-								)
-									.exec()
-									.then((emp) => {
-										let emailBody = RequestApproved({
-											name: emp.firstName,
-											organisation: organisationName,
-										});
-										// Send confirmation email
-										try {
-											mailer.send(
-												constants.appovalEmail.from,
-												emp.emailId,
-												constants.appovalEmail.subject,
-												emailBody,
-											);
-										} catch (mailError) {
-											console.log(mailError);
-										}
-										return apiResponse.successResponseWithData(res, `User Activated`, emp);
-									});
-							});
-						}
-					} else {
-						return apiResponse.notFoundResponse(req, res, "User Not Found");
-					}
-				})
-				.catch((err) => {
-					return apiResponse.errorResponse(req, res, err);
-				});
+			const employee = await EmployeeModel.findOne({ id: id })
+			if (employee) {
+				if (employee.isConfirmed && employee.accountStatus == "ACTIVE") {
+					return apiResponse.successResponseWithData(res, " User is already Active", employee);
+				} else {
+					const emp = await EmployeeModel.findOneAndUpdate(
+						{ id: id },
+						{
+							$set: {
+								accountStatus: "ACTIVE",
+								isConfirmed: true,
+								role,
+							},
+						},
+						{ new: true },
+					)
+					const emailBody = RequestApproved({
+						name: emp.firstName,
+						organisation: organisationName,
+					});
+					await mailer.send(
+						constants.appovalEmail.from,
+						emp.emailId,
+						constants.appovalEmail.subject,
+						emailBody,
+					);
+					return apiResponse.successResponseWithData(res, `User Activated`, emp);
+				}
+			}
+			return apiResponse.notFoundResponse(req, res, "User Not Found");
 		} catch (err) {
 			return apiResponse.errorResponse(req, res, err);
 		}
-	},
+	}
 ];
 
 exports.deactivateUser = [
