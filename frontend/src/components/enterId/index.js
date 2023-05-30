@@ -12,17 +12,14 @@ import {
   getViewShipment,
   fetchairwayBillNumber,
 } from "../../actions/shipmentActions";
-import { useDispatch, useSelector } from "react-redux";
-import { element, func } from "prop-types";
 import { t } from "i18next";
 
 const EnterId = (props) => {
-  const { id } = props.match.params;
   const [billno, setbillno] = useState(null);
   const [shipmentArray, setShipmentArray] = useState([]);
   const [transitNumberArray, settransitNumberArray] = useState([]);
   const [shipdisabled, setshipdisabled] = useState(true);
-  const [shipdisabled1, setshipdisabled1] = useState(true);
+
   useEffect(() => {
     async function getShipmentArray() {
       let arr = await getShipmentIds();
@@ -30,9 +27,9 @@ const EnterId = (props) => {
     }
     async function fetchairwayBill() {
       let temp_arr = await fetchairwayBillNumber();
-      let newArr=temp_arr.data||[]
-      let newArr1=newArr.filter(each=>{
-        if(each.airWayBillNo){
+      let newArr = temp_arr.data || []
+      let newArr1 = newArr.filter(each => {
+        if (each.airWayBillNo) {
           return each
         }
       })
@@ -225,17 +222,16 @@ const EnterId = (props) => {
                       <Autocomplete
                         {...defaultProps1}
                         id='billNo'
-                        value1={value1}
+                        value={value1}
                         onChange={(event, newValue) => {
                           setValue1(newValue);
                         }}
-                        inputValue1={inputValue1}
+                        inputValue={inputValue1}
                         onInputChange={(event, newInputValue) => {
                           setbillno(newInputValue);
                           setInputValue1(newInputValue);
                           billNoCheck(newInputValue);
                         }}
-                        debug
                         renderInput={(params) => (
                           <TextField
                             {...params}
@@ -261,7 +257,7 @@ const EnterId = (props) => {
                   <button
                     type='button'
                     className='mi-btn mi-btn-md mi-btn-blue mr-2'
-                    onClick={() => props.history.push(`/shipments`)}
+                    onClick={() => props.history.push(props.user.type === "Third Party Logistics" ? "/enterid" : "/shipments")}
                   >
                     {t("cancel")}
                   </button>
