@@ -329,6 +329,7 @@ const NewShipment = (props) => {
 							message: "Created Successfully!",
 							id: result?.id,
 							type: "Success",
+							points:100,
 							t: t,
 						});
 					} else {
@@ -1524,6 +1525,7 @@ const NewShipment = (props) => {
 				<Modal
 					close={() => closeModal()}
 					size="modal-sm" //for other size's use `modal-lg, modal-md, modal-sm`
+					confetti={true}
 				>
 					<ShipmentPopUp
 						t={t}
