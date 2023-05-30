@@ -9,6 +9,7 @@ const InventoryModel = require("../models/InventoryModel");
 const OrganisationModel = require("../models/OrganisationModel");
 const VaccineVialModel = require("../models/VaccineVialModel");
 const WarehouseModel = require("../models/WarehouseModel");
+const { addReward } = require("../helpers/rewards")
 const excel = require("node-excel-export");
 const PdfPrinter = require("pdfmake");
 const { resolve } = require("path");
@@ -481,6 +482,16 @@ exports.vaccinateIndividual = [
 				{ id: vaccineVialId },
 				{ $inc: { numberOfDoses: 1 } },
 			);
+
+			const rewardData = {
+				eventId: doseId,
+				event: "VACCINATE",
+				eventType: "DOSE",
+				userId: req.user.id,
+				userOrgId: req.user.organisationId,
+				userWarehouseId: req.user.warehouseId,
+			}
+			await addReward(rewardData)
 			return apiResponse.successResponseWithData(res, "Dose added successfully!", {
 				vaccineVialId,
 				dose
