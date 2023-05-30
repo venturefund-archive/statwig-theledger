@@ -10,6 +10,7 @@ router.delete("/rewards/:id", rewardsController.deleteReward);
 router.get("/rewardsList", rewardsController.listOfRewards)
 router.get("/redemptions", rewardsController.listOfRedemptions)
 router.post("/redemptions", rewardsController.addRedemption)
+router.get("/config", rewardsController.getConfig)
 router.post("/registerApp", rewardsController.registerApp)
 
 module.exports = router;

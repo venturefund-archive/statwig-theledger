@@ -8,7 +8,7 @@ const cuid = require("cuid");
 
 exports.userRewards = [
     authUser,
-    apiKeyAuth,
+    asyncHandler(apiKeyAuth),
     async function (req, res) {
         try {
             console.log(req.appId, req.user)
@@ -24,6 +24,7 @@ exports.userRewards = [
 
 exports.listOfRewards = [
     authUser,
+    asyncHandler(apiKeyAuth),
     async function (req, res) {
         try {
             const rewards = await RewardModel.find({ appId: req.appId, userId: req.user.id })
@@ -38,6 +39,7 @@ exports.listOfRewards = [
 
 exports.viewReward = [
     authUser,
+    asyncHandler(apiKeyAuth),
     async function (req, res) {
         try {
             const { id } = req.params;
@@ -122,12 +124,26 @@ exports.addRedemption = [
 
 exports.listOfRedemptions = [
     authUser,
+    asyncHandler(apiKeyAuth),
     async function (req, res) {
         try {
             const rewards = await RedeemModel.find({ appId: req.appId, userId: req.user.id })
             return apiResponse.successResponseWithData(res, "List of Redemptions", rewards)
         }
         catch (err) {
+            console.log(err);
+            return apiResponse.errorResponse(res, err);
+        }
+    }
+]
+
+exports.getConfig = [
+    authUser,
+    asyncHandler(apiKeyAuth),
+    async function (req, res) {
+        try {
+            return apiResponse.successResponseWithData(res, "Reward Configuration", req.rewardConfig)
+        } catch (err) {
             console.log(err);
             return apiResponse.errorResponse(res, err);
         }
