@@ -45,6 +45,7 @@ const apiKeyAuth = async (req, res, next) => {
       console.log("API KEY", req.headers, keyExists)
       if (keyExists) {
         req.appId = keyExists.appId;
+        req.rewardConfig = keyExists.config;
         next();
       }
       else return new Error({ message: "API Key not found" })
@@ -63,6 +64,7 @@ const roleAuth = async (req, res, next) => {
       console.log(role, roleExists)
       if (roleExists) {
         req.appId = roleExists.appId;
+        req.rewardConfig = roleExists.config;
         next();
       }
     }
