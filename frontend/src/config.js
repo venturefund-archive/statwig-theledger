@@ -238,7 +238,8 @@ export function config() {
       fetchAllRoles: `${LOCAL_SERVER_URL_RBAC}/rbacmanagement/api/getRoles`,
       fetchPermissionsByRole: `${LOCAL_SERVER_URL_RBAC}/rbacmanagement/api/getPermissions`,
       updatePermissions: `${LOCAL_SERVER_URL_RBAC}/rbacmanagement/api/updatePermissions`,
-      userRewardsUrl: `${LOCAL_SERVER_URL_REWARDS}/rewardmanagement/api/rewards`
+      userRewardsUrl: `${LOCAL_SERVER_URL_REWARDS}/rewardmanagement/api/rewards`,
+      redeemRewardsUrl: `${LOCAL_SERVER_URL_REWARDS}/rewardmanagement/api/redeem`
     },
     prod: {
       getOrganizationsUrl: `${SERVER_URL}/inventorymanagement/api/inventory/getOrganizations?orgType=`,
@@ -466,7 +467,8 @@ export function config() {
       fetchAllRoles: `${SERVER_URL}/rbacmanagement/api/getRoles`,
       fetchPermissionsByRole: `${SERVER_URL}/rbacmanagement/api/getPermissions`,
       updatePermissions: `${SERVER_URL}/rbacmanagement/api/updatePermissions`,
-      userRewardsUrl: `${SERVER_URL}/rewardmanagement/api/rewards`
+      userRewardsUrl: `${SERVER_URL}/rewardmanagement/api/rewards`,
+      redeemRewardsUrl: `${SERVER_URL}/rewardmanagement/api/redeem`
     },
   };
 
