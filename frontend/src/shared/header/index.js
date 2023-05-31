@@ -755,17 +755,6 @@ const Header = (props) => {
                 )}
               </div>
             </li>
-
-            <Divider
-              orientation="vertical"
-              variant="middle"
-              flexItem
-              className="divider"
-            />
-            <div className="m-2">
-              <i className='bx bxs-coin-stack mr-1' style={{ fontSize: '26px' }} />
-              Rewards : {profile?.rewards?.points}
-            </div>
             <Divider
               orientation="vertical"
               variant="middle"
