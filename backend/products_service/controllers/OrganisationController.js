@@ -24,7 +24,7 @@ exports.getOrganisations = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -40,7 +40,7 @@ exports.getOrganisationsAtSignup = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -59,7 +59,7 @@ exports.getUnregisteredOrganisations = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -86,7 +86,7 @@ exports.saveNewOrg = [
       return apiResponse.successResponseWithData(res, "Added org successfully", newOrg)
     } catch (err) {
       console.log(err)
-      return apiResponse.ErrorResponse(res, err.message)
+      return apiResponse.errorResponse(res, err.message)
     }
   }
 ]
@@ -133,7 +133,7 @@ exports.addNewOrgNWarehouse = [
       return apiResponse.successResponseWithData(res, "Added warehouse successfully", [newOrg, newWarehouse]);
     } catch (err) {
       console.log(err)
-      return apiResponse.ErrorResponse(res, err.message)
+      return apiResponse.errorResponse(res, err.message)
     }
   }
 ]
@@ -162,7 +162,7 @@ exports.saveNewWarehouse = [
       return apiResponse.successResponseWithData(res, "Added warehouse successfully", newWarehouse)
     } catch (err) {
       console.log(err)
-      return apiResponse.ErrorResponse(res, err.message)
+      return apiResponse.errorResponse(res, err.message)
     }
   }
 ]
@@ -195,7 +195,7 @@ exports.getWarehouses = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(
+      return apiResponse.errorResponse(
         res,
         responses(req.user.preferredLanguage).orgid_not_found(req.query.id)
       );
@@ -218,7 +218,7 @@ exports.getAllWarehouses = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(
+      return apiResponse.errorResponse(
         res,
         responses(req.user.preferredLanguage).orgid_not_found(req.query.id)
       );

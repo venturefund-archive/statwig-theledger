@@ -18,7 +18,7 @@ exports.getEOLInfoBySerialNumber = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -37,7 +37,7 @@ exports.GetEOLInfoByProductId = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -74,7 +74,7 @@ exports.getEOLInfo = [
       });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -93,7 +93,7 @@ exports.GetEOLInfoByIdentityId = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -112,7 +112,7 @@ exports.GetEOLInfoByPlaceAdministered = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -142,7 +142,7 @@ exports.getProductsByWarehouse = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -164,7 +164,7 @@ exports.GetEOLListByDateWindow = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -201,11 +201,11 @@ exports.AddNewEOL = [
           last_mile
         );
       } else {
-        return apiResponse.ErrorResponse(res, "Invalid warehouse");
+        return apiResponse.errorResponse(res, "Invalid warehouse");
       }
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -221,7 +221,7 @@ exports.UpdateExistingEOLByID = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];

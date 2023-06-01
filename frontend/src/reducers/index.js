@@ -21,6 +21,7 @@ import { lastMileReducer } from "./lastMileReducer";
 import { lastMileCountReducer } from "./lastMileCountReducer";
 import { userLocationReducer } from "./userLocationReducer";
 import { organisationReducer } from "./organisationReducer";
+import { rewardsReducer } from "./rewardsReducer"
 
 const rootReducer = (history) =>
   combineReducers({
@@ -45,6 +46,7 @@ const rootReducer = (history) =>
     lastMile: lastMileReducer,
     lastMileCount: lastMileCountReducer,
     organisationReducer: organisationReducer,
+    rewards: rewardsReducer,
     router: connectRouter(history),
   });
 

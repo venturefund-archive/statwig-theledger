@@ -953,7 +953,7 @@ exports.getOverviewStats = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -992,7 +992,7 @@ exports.getAllBrands = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1113,7 +1113,7 @@ exports.getAllBrands = [
 // 				Analytics
 // 			);
 // 		} catch (err) {
-// 			return apiResponse.ErrorResponse(res, err.message);
+// 			return apiResponse.errorResponse(res, err.message);
 // 		}
 // 	}
 // ];
@@ -1287,7 +1287,7 @@ exports.getStatsByBrand = [
       // }
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1392,7 +1392,7 @@ exports.getSalesStatsByBrand = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1510,7 +1510,7 @@ exports.getStatsByOrg = [
       }
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1627,7 +1627,7 @@ exports.getStatsByOrgType = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1714,7 +1714,7 @@ exports.getStatsBySKUOrgType = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1848,7 +1848,7 @@ exports.getLeadTimes = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2363,7 +2363,7 @@ exports.getSupplierPerformance = [
       }
     } catch (err) {
       console.log("Error in supplier performance - ", err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2410,7 +2410,7 @@ exports.getAllStats = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2654,7 +2654,7 @@ exports.getStatsBySKU = [
       }
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2717,7 +2717,7 @@ exports.getSalesTotalOfAllBrands = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2798,7 +2798,7 @@ exports.getMonthlySalesOfSkuByBrand = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2832,7 +2832,7 @@ exports.updateTargetSales = [
       return apiResponse.successResponse(res, `Updated Target Sales`);
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2908,7 +2908,7 @@ exports.getTargetSales = [
       return apiResponse.successResponseWithData(res, "Depot targets", depots);
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -2929,7 +2929,7 @@ exports.getAllConfiguration = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2955,7 +2955,7 @@ exports.setNewConfiguration = [
       return apiResponse.successResponse(res, "Saved new config");
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];

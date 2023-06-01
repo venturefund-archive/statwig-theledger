@@ -2521,7 +2521,7 @@ exports.bestSellerSummary = [
       });
       const isDist =
         organisation?.type === "DISTRIBUTORS" ||
-        organisation?.type === "DROGUERIA"
+          organisation?.type === "DROGUERIA"
           ? true
           : false;
       const isGoverningBody = organisation?.type === "GoverningBody";
@@ -3116,7 +3116,7 @@ exports.expiredStockReport = [
       } else {
         const isDist =
           organisation?.type === "DISTRIBUTORS" ||
-          organisation?.type === "DROGUERIA"
+            organisation?.type === "DROGUERIA"
             ? true
             : false;
         let matchQuery1 = {};
@@ -3396,7 +3396,7 @@ exports.nearExpiryStockReport = [
       } else {
         const isDist =
           organisation?.type === "DISTRIBUTORS" ||
-          organisation?.type === "DROGUERIA"
+            organisation?.type === "DROGUERIA"
             ? true
             : false;
         let matchQuery1 = {};
@@ -3660,7 +3660,7 @@ exports.inStockFilterOptions = [
       });
       const isDist =
         organisation?.type === "DISTRIBUTORS" ||
-        organisation?.type === "DROGUERIA"
+          organisation?.type === "DROGUERIA"
           ? true
           : false;
       const warehouseId =
@@ -3859,7 +3859,7 @@ exports.outOfStockFilterOptions = [
       });
       const isDist =
         organisation?.type === "DISTRIBUTORS" ||
-        organisation?.type === "DROGUERIA"
+          organisation?.type === "DROGUERIA"
           ? true
           : false;
 
@@ -4057,7 +4057,7 @@ exports.bestSellerFilterOptions = [
       });
       const isDist =
         organisation?.type === "DISTRIBUTORS" ||
-        organisation?.type === "DROGUERIA"
+          organisation?.type === "DROGUERIA"
           ? true
           : false;
       const isGoverningBody = organisation?.type === "GoverningBody";
@@ -4295,7 +4295,7 @@ exports.nearExpiryFilterOptions = [
       });
       const isDist =
         organisation?.type === "DISTRIBUTORS" ||
-        organisation?.type === "DROGUERIA"
+          organisation?.type === "DROGUERIA"
           ? true
           : false;
       const warehouseId =
@@ -4558,7 +4558,7 @@ exports.expiredFilterOptions = [
       });
       const isDist =
         organisation?.type === "DISTRIBUTORS" ||
-        organisation?.type === "DROGUERIA"
+          organisation?.type === "DROGUERIA"
           ? true
           : false;
       let matchQuery1 = {};

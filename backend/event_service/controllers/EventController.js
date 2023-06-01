@@ -46,7 +46,7 @@ exports.getAllEvents = [
           }
         });
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -73,7 +73,7 @@ exports.deleteEventById = [
       } else {
         EventModal.remove({ ...req.params }, async function (err) {
           if (err) {
-            return apiResponse.ErrorResponse(res, err);
+            return apiResponse.errorResponse(res, err);
           } else {
             return apiResponse.successResponse(res, "Event delete Success.");
           }
@@ -81,7 +81,7 @@ exports.deleteEventById = [
       }
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -328,7 +328,7 @@ exports.getAllEventsWithFilter = [
         });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -350,7 +350,7 @@ exports.fetchProductDetailsList = [
       });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];

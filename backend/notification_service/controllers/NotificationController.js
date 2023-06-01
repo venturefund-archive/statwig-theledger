@@ -116,7 +116,7 @@ exports.getNotifications = [
       }
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -133,7 +133,7 @@ exports.createTwilioBinding = [
       return apiResponse.successResponse(res, "Successfully Registered");
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -161,7 +161,7 @@ exports.sendOtp = [
       return apiResponse.successResponse(res, "OTP Sent Successfully");
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -189,7 +189,7 @@ exports.sendMessage = [
       return apiResponse.successResponse(res, "Message Sent Success");
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -218,7 +218,7 @@ exports.pushNotifications = [
       return apiResponse.successResponse(res, "Push Notification Sent");
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -232,7 +232,7 @@ exports.readNotification = [
       return apiResponse.successResponse(res, "Notification Read Success");
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];

@@ -755,16 +755,13 @@ const Header = (props) => {
                 )}
               </div>
             </li>
-
             <Divider
               orientation="vertical"
               variant="middle"
               flexItem
               className="divider"
             />
-
             {/* Location */}
-
             <li className="navItems location">
               <img className="locationimg" src={Location} alt="Location" />
               <div className="navCard navlocation">
@@ -922,6 +919,13 @@ const Header = (props) => {
                     >
                       <i className="fa-solid fa-user"></i>
                       <p className="vl-body f-400">{t("my_profiles")}</p>
+                    </div>
+                    <div
+                      className="header__link__card"
+                      onClick={() => props.history.push("/rewards")}
+                    >
+                      <i className="fa-solid fa-trophy"></i>
+                      <p className="vl-body f-400">My Rewards</p>
                     </div>
                     <div
                       className="header__link__card"

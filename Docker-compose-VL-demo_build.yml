@@ -205,6 +205,23 @@ services:
       - "traefik.http.routers.rbac.tls=true"
       - "traefik.http.routers.rbac.tls.certresolver=lets-encrypt"
 
+  rewards:
+    build: "./backend/rewards_service"
+    image: "rewards_service1.0"
+    container_name: "rewards_service1.0"
+    restart: always
+    env_file:
+      - ./env/ledger.env
+    depends_on:
+      - cache
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.rewards.entrypoints=websecure"
+      - "traefik.http.routers.rewards.rule=Host(`demo.vaccineledger.com`) && PathPrefix(`/rewardmanagement/`)"
+      - "traefik.http.routers.rewards.tls=true"
+      - "traefik.http.routers.rewards.tls.certresolver=lets-encrypt"
+
   shipment:
     build:
       context: .
@@ -295,6 +312,8 @@ services:
         - "SERVER_URL=https://demo.vaccineledger.com"
         - "GOOGLE_CLIENT_ID=937115966227-mnidai9tm6vndogdjf1dlj0ve2j79k4h.apps.googleusercontent.com"
     image: "frontend2.0"
+    container_name: "cra-frontend"
+    restart: always
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"

@@ -15,7 +15,7 @@ exports.successResponseWithData = function (req, res, msg, data) {
   return res.status(200).json(resData);
 };
 
-exports.ErrorResponse = function (req, res, msg) {
+exports.errorResponse = function (req, res, msg) {
   const data = {
     success: false,
     message: req.t(msg),

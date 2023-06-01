@@ -27,7 +27,7 @@ exports.getRequests = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -121,7 +121,7 @@ exports.getRequestById = [
       return apiResponse.successResponseWithData(res, "Request", data);
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -134,10 +134,10 @@ exports.updateRequest = [
       const { id, status } = req.query;
       const oldRequest = await RequestModel.findOne({ id: id });
       if (oldRequest.status === "ACCEPTED") {
-        return apiResponse.ErrorResponse(res, "Request already accepted");
+        return apiResponse.errorResponse(res, "Request already accepted");
       }
       if (!oldRequest.to.employees.includes(req.user.id)) {
-        return apiResponse.ErrorResponse(
+        return apiResponse.errorResponse(
           res,
           "Not Eligible to Update a Request"
         );
@@ -181,12 +181,12 @@ exports.updateRequest = [
             request
           );
         } else {
-          return apiResponse.ErrorResponse(res, "Request not updated");
+          return apiResponse.errorResponse(res, "Request not updated");
         }
       }
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -250,7 +250,7 @@ exports.createRequest = [
           return apiResponse.successResponse(res, "Request Created");
         } catch (err) {
           console.log(err);
-          return apiResponse.ErrorResponse(res, err.message);
+          return apiResponse.errorResponse(res, err.message);
         }
       };
 
@@ -326,7 +326,7 @@ exports.createRequest = [
       }
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -370,6 +370,6 @@ exports.validateRequest = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    return apiResponse.ErrorResponse(res, err.message);
+    return apiResponse.errorResponse(res, err.message);
   }
 };

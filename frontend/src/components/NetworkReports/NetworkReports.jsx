@@ -128,13 +128,13 @@ export default function NetworkReports() {
           {locationParams?.country && (
             <>
               <p className='vl-subheading f-500'>{locationParams.country}</p>
-              <i class='fa-solid fa-chevron-right'></i>
+              <i className='fa-solid fa-chevron-right'></i>
             </>
           )}
           {locationParams?.state && (
             <>
               <p className='vl-subheading f-500'>{locationParams.state}</p>
-              <i class='fa-solid fa-chevron-right'></i>
+              <i className='fa-solid fa-chevron-right'></i>
             </>
           )}
           {locationParams?.city && (

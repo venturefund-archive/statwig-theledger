@@ -9,7 +9,7 @@ export const LOCAL_SERVER_URL_PO = "http://localhost:3012";
 export const LOCAL_SERVER_URL_TRACKANDTRACE = "http://localhost:3005";
 export const LOCAL_SERVER_URL_NOTIFICATION = "http://localhost:3006";
 export const LOCAL_SERVER_URL_ANALYTICS = "http://localhost:3014";
-export const LOCAL_SERVER_URL_EOL = "http://localhost:3017";
+export const LOCAL_SERVER_URL_REWARDS = "http://localhost:3017";
 export const LOCAL_SERVER_URL_EVENT = "http://localhost:3013";
 export const LOCAL_SERVER_URL_PRODUCTS = "http://localhost:3010";
 export const LOCAL_SERVER_URL_ALERTS = "http://localhost:3004";
@@ -121,11 +121,6 @@ export function config() {
       fetchProductIdsCustomerLocationsOrganisationsUrl: `${LOCAL_SERVER_URL_PO}/pomanagement/api/po/fetchProductIdsCustomerLocationsOrganisations`,
       fetchInboundShipmentsUrl: `${LOCAL_SERVER_URL_SHIPMENT}/shipmentmanagement/api/shipment/fetchInboundShipments`,
       fetchOutboundShipmentsUrl: `${LOCAL_SERVER_URL_SHIPMENT}/shipmentmanagement/api/shipment/fetchOutboundShipments`,
-      GetEOLInfoBySerialNumber: `${LOCAL_SERVER_URL_EOL}/lastmilemanagement/api/GetEOLInfoBySerialNumber?serial_number=`,
-      GetEOLInfoByProductId: `${LOCAL_SERVER_URL_EOL}/lastmilemanagement/api/GetEOLInfoByProductId?id=`,
-      GetEOLInfoByIdentityId: `${LOCAL_SERVER_URL_EOL}/lastmilemanagement/api/GetEOLInfoByIdentityId?id=`,
-      GetEOLInfoByPlaceAdministered: `${LOCAL_SERVER_URL_EOL}/lastmilemanagement/api/GetEOLInfoByPlaceAdministered?place=`,
-      GetEOLListByDateWindow: `${LOCAL_SERVER_URL_EOL}/lastmilemanagement/api/GetEOLListByDateWindow`,
       fetchSupplierAndReceiverListUrl: `${LOCAL_SERVER_URL_SHIPMENT}/shipmentmanagement/api/shipment/fetchSupplierAndReceiverList`,
       updateWarehouse: `${LOCAL_SERVER_URL_SHIPMENT}/usermanagement/api/auth/updateWarehouse?warehouseId=`,
       getWarehouseById: `${LOCAL_SERVER_URL_SHIPMENT}/usermanagement/api/auth/getwarehouseinfo?id=`,
@@ -135,8 +130,6 @@ export function config() {
       getTransactionFilterList: `${LOCAL_SERVER_URL_EVENT}/eventmanagement/api/event/fetchProductDetailsList`,
       getAllStates: `${LOCAL_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getAllStates`,
       getDistrictsByState: `${LOCAL_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getDistrictsByState`,
-      GetEOLInfo: `${LOCAL_SERVER_URL_EOL}/lastmilemanagement/api/GetEOLInfo`,
-      GetProductsByWarehouse: `${LOCAL_SERVER_URL_EOL}/lastmilemanagement/api/getProductsByWarehouse`,
       getCountries: `${LOCAL_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getCountries`,
       getStatesByCountry: `${LOCAL_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getStatesByCountry`,
       getCitiesByState: `${LOCAL_SERVER_URL_INVENTORY}/inventorymanagement/api/inventory/getCitiesByState`,
@@ -245,6 +238,8 @@ export function config() {
       fetchAllRoles: `${LOCAL_SERVER_URL_RBAC}/rbacmanagement/api/getRoles`,
       fetchPermissionsByRole: `${LOCAL_SERVER_URL_RBAC}/rbacmanagement/api/getPermissions`,
       updatePermissions: `${LOCAL_SERVER_URL_RBAC}/rbacmanagement/api/updatePermissions`,
+      userRewardsUrl: `${LOCAL_SERVER_URL_REWARDS}/rewardmanagement/api/rewards`,
+      redeemRewardsUrl: `${LOCAL_SERVER_URL_REWARDS}/rewardmanagement/api/redeem`
     },
     prod: {
       getOrganizationsUrl: `${SERVER_URL}/inventorymanagement/api/inventory/getOrganizations?orgType=`,
@@ -472,6 +467,8 @@ export function config() {
       fetchAllRoles: `${SERVER_URL}/rbacmanagement/api/getRoles`,
       fetchPermissionsByRole: `${SERVER_URL}/rbacmanagement/api/getPermissions`,
       updatePermissions: `${SERVER_URL}/rbacmanagement/api/updatePermissions`,
+      userRewardsUrl: `${SERVER_URL}/rewardmanagement/api/rewards`,
+      redeemRewardsUrl: `${SERVER_URL}/rewardmanagement/api/redeem`
     },
   };
 

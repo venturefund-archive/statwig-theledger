@@ -76,6 +76,7 @@ const ReviewOrder = (props) => {
         //setMessage("Status updated Successfully");
         setModalProps({
           message: "Created Successfully!",
+          points:50,
           OrderId: result.data.data.poId,
           type: "Success",
           t: t,
@@ -245,6 +246,7 @@ const ReviewOrder = (props) => {
               <Modal
                 close={() => closeModal()}
                 size='modal-sm' //for other size's use `modal-lg, modal-md, modal-sm`
+                confetti={true}
               >
                 <ReviewOrderPopUp
                   onHide={closeModal} // onHide={closeModal} //FailurePopUp

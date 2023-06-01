@@ -16,62 +16,62 @@ const { getLatLongByCity } = require("../helpers/getLatLong");
 const XLSX = require("xlsx");
 
 async function createWarehouse(warehouseExists, wareId, payload, employeeId) {
-	try {
-		if (warehouseExists) {
-			await EmployeeModel.findOneAndUpdate({ id: wareId }, { $push: { warehouseId: wareId } });
-		} else {
-			const invCounter = await CounterModel.findOneAndUpdate(
-				{ "counters.name": "inventoryId" },
-				{
-					$inc: {
-						"counters.$.value": 1,
-					},
-				},
-				{ new: true },
-			);
-			const inventoryId = invCounter.counters[7].format + invCounter.counters[7].value;
-			const inventoryResult = new InventoryModel({ id: inventoryId });
-			await inventoryResult.save();
-			const {
-				organisationId,
-				postalAddress,
-				title,
-				region,
-				country,
-				warehouseAddress,
-				supervisors,
-				employees,
-			} = payload;
-			const warehouseCounter = await CounterModel.findOneAndUpdate(
-				{ "counters.name": "warehouseId" },
-				{
-					$inc: {
-						"counters.$.value": 1,
-					},
-				},
-				{
-					new: true,
-				},
-			);
-			const warehouseId = warehouseCounter.counters[3].format + warehouseCounter.counters[3].value;
+  try {
+    if (warehouseExists) {
+      await EmployeeModel.findOneAndUpdate({ id: wareId }, { $push: { warehouseId: wareId } });
+    } else {
+      const invCounter = await CounterModel.findOneAndUpdate(
+        { "counters.name": "inventoryId" },
+        {
+          $inc: {
+            "counters.$.value": 1,
+          },
+        },
+        { new: true },
+      );
+      const inventoryId = invCounter.counters[7].format + invCounter.counters[7].value;
+      const inventoryResult = new InventoryModel({ id: inventoryId });
+      await inventoryResult.save();
+      const {
+        organisationId,
+        postalAddress,
+        title,
+        region,
+        country,
+        warehouseAddress,
+        supervisors,
+        employees,
+      } = payload;
+      const warehouseCounter = await CounterModel.findOneAndUpdate(
+        { "counters.name": "warehouseId" },
+        {
+          $inc: {
+            "counters.$.value": 1,
+          },
+        },
+        {
+          new: true,
+        },
+      );
+      const warehouseId = warehouseCounter.counters[3].format + warehouseCounter.counters[3].value;
 
-			const loc = await getLatLongByCity(warehouseAddress.city + "," + warehouseAddress.country);
-			const warehouse = new WarehouseModel({
-				id: warehouseId,
-				organisationId,
-				postalAddress,
-				title,
-				region: {
-					regionName: region,
-				},
-				country: {
-					countryId: "001",
-					countryName: country,
-				},
-				location: loc,
-				bottleCapacity: 0,
-				sqft: 0,
-				supervisors,
+      const loc = await getLatLongByCity(warehouseAddress.city + "," + warehouseAddress.country);
+      const warehouse = new WarehouseModel({
+        id: warehouseId,
+        organisationId,
+        postalAddress,
+        title,
+        region: {
+          regionName: region,
+        },
+        country: {
+          countryId: "001",
+          countryName: country,
+        },
+        location: loc,
+        bottleCapacity: 0,
+        sqft: 0,
+        supervisors,
         employees,
         warehouseAddress: {
           firstLine: warehouseAddress.line1,
@@ -83,51 +83,51 @@ async function createWarehouse(warehouseExists, wareId, payload, employeeId) {
           landmark: "",
           zipCode: warehouseAddress.pincode,
         },
-				warehouseInventory: inventoryResult.id,
-				status: "ACTIVE",
-			});
-			await warehouse.save();
+        warehouseInventory: inventoryResult.id,
+        status: "ACTIVE",
+      });
+      await warehouse.save();
 
-			const addr = `${warehouseAddress?.firstLine}, ${warehouseAddress?.city}, ${warehouseAddress?.state}, ${warehouseAddress?.zipCode}`;
-			const skipOrgRegistration = false;
-			await OrganisationModel.findOneAndUpdate(
-				{
-					id: organisationId,
-				},
-				{
-					$set: {
-						...(skipOrgRegistration
-							? {
-									postalAddress: addr,
-									country: warehouseAddress.country,
-									region: warehouseAddress.region,
-									status: "NOTVERIFIED",
-							  }
-							: {}),
-					},
-					$push: {
-						warehouses: warehouseId,
-					},
-				},
-			);
+      const addr = `${warehouseAddress?.firstLine}, ${warehouseAddress?.city}, ${warehouseAddress?.state}, ${warehouseAddress?.zipCode}`;
+      const skipOrgRegistration = false;
+      await OrganisationModel.findOneAndUpdate(
+        {
+          id: organisationId,
+        },
+        {
+          $set: {
+            ...(skipOrgRegistration
+              ? {
+                postalAddress: addr,
+                country: warehouseAddress.country,
+                region: warehouseAddress.region,
+                status: "NOTVERIFIED",
+              }
+              : {}),
+          },
+          $push: {
+            warehouses: warehouseId,
+          },
+        },
+      );
 
-			await EmployeeModel.findOneAndUpdate(
-				{
-					id: employeeId,
-				},
-				{
-					$set: {
-						role: "admin",
-					},
-					$addToSet: {
-						warehouseId: warehouseId,
-					},
-				},
-			);
-		}
-	} catch (err) {
-		throw err;
-	}
+      await EmployeeModel.findOneAndUpdate(
+        {
+          id: employeeId,
+        },
+        {
+          $set: {
+            role: "admin",
+          },
+          $addToSet: {
+            warehouseId: warehouseId,
+          },
+        },
+      );
+    }
+  } catch (err) {
+    throw err;
+  }
 }
 
 exports.getApprovals = [
@@ -163,7 +163,7 @@ exports.getApprovals = [
         employees
       );
     } catch (err) {
-      return apiResponse.ErrorResponse(req, res, err);
+      return apiResponse.errorResponse(req, res, err);
     }
   },
 ];
@@ -216,7 +216,7 @@ exports.acceptApproval = [
       }
     } catch (err) {
       errorList.push(err);
-      return apiResponse.ErrorResponse(req, res, errorList);
+      return apiResponse.errorResponse(req, res, errorList);
     }
   },
 ];
@@ -264,7 +264,7 @@ exports.rejectApproval = [
                   );
                 } catch (err) {
                   console.log(err);
-                  return apiResponse.ErrorResponse(req, res, err);
+                  return apiResponse.errorResponse(req, res, err);
                 }
                 return apiResponse.successResponseWithData(
                   req,
@@ -274,17 +274,17 @@ exports.rejectApproval = [
                 );
               })
               .catch((err) => {
-                return apiResponse.ErrorResponse(req, res, err);
+                return apiResponse.errorResponse(req, res, err);
               });
           } else {
             return apiResponse.notFoundResponse(req, res, "User not Found");
           }
         })
         .catch((err) => {
-          return apiResponse.ErrorResponse(req, res, err);
+          return apiResponse.errorResponse(req, res, err);
         });
     } catch (err) {
-      return apiResponse.ErrorResponse(req, res, err);
+      return apiResponse.errorResponse(req, res, err);
     }
   },
 ];
@@ -363,7 +363,7 @@ exports.addUser = [
       return apiResponse.successResponse(req, res, "User Added");
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(req, res, err);
+      return apiResponse.errorResponse(req, res, err);
     }
   },
 ];
@@ -385,7 +385,7 @@ exports.updateUserRole = [
         throw new Error("Error in updating user role!");
       }
     } catch (err) {
-      return apiResponse.ErrorResponse(req, res, err);
+      return apiResponse.errorResponse(req, res, err);
     }
   }
 ]
@@ -428,7 +428,7 @@ exports.activateUser = [
         return apiResponse.notFoundResponse(req, res, "User Not Found");
       }
     } catch (err) {
-      return apiResponse.ErrorResponse(req, res, err);
+      return apiResponse.errorResponse(req, res, err);
     }
   },
 ];
@@ -469,10 +469,10 @@ exports.deactivateUser = [
           );
         })
         .catch((err) => {
-          return apiResponse.ErrorResponse(req, res, err);
+          return apiResponse.errorResponse(req, res, err);
         });
     } catch (err) {
-      return apiResponse.ErrorResponse(req, res, err);
+      return apiResponse.errorResponse(req, res, err);
     }
   },
 ];
@@ -574,7 +574,7 @@ exports.addUsersFromExcel = [
       }
       catch (err) {
         console.log(err);
-        return apiResponse.ErrorResponse(req, res, err);
+        return apiResponse.errorResponse(req, res, err);
       }
     } catch (err) {
       console.log(err);

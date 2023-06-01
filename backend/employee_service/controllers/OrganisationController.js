@@ -311,7 +311,7 @@ exports.getPendingOrgs = [
 			return apiResponse.successResponseWithData(req, res, "Organisation list", pendingOrgs);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -364,7 +364,7 @@ exports.getOrgs = [
 			return apiResponse.successResponseWithData(req, res, "Organisation list", users);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -444,7 +444,7 @@ exports.getOrgDetails = [
 			);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -487,7 +487,7 @@ exports.getWarehouseAndUsersById = [
 			);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -530,7 +530,7 @@ exports.getWarehouseAndUsersById = [
 			);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -639,7 +639,7 @@ exports.getOrgAnalytics = [
 			return apiResponse.successResponseWithData(req, res, "Organisation list", analyticsObject);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -675,7 +675,7 @@ exports.updateOrg = [
 					return apiResponse.successResponseWithData(req, res, "Organisation REJECTED", org);
 				} catch (err) {
 					console.log(err);
-					return apiResponse.ErrorResponse(req, res, err);
+					return apiResponse.errorResponse(req, res, err);
 				}
 			}
 			if (status === "ACTIVE") {
@@ -724,7 +724,7 @@ exports.updateOrg = [
 			);
 			return apiResponse.successResponseWithData(req, res, "Organisation updated", org);
 		} catch (err) {
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -745,7 +745,7 @@ exports.checkDuplicateOrgName = [
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err.message);
+			return apiResponse.errorResponse(req, res, err.message);
 		}
 	},
 ];
@@ -942,7 +942,7 @@ exports.addNewOrganisation = [
 			);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -1040,7 +1040,7 @@ exports.addOrgsFromExcel = [
 			return apiResponse.successResponseWithData(req, res, "Success", response);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];

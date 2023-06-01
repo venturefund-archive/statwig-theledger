@@ -293,66 +293,66 @@ async function DistributorFilterList(organisationId, type, regExp) {
 }
 
 async function GoverningBodyMapLocations(myOrgId, warehouseOrg, countryName) {
-	let matchQuery = {};
-	let queryObj = {};
-	if (countryName && countryName !== "undefined" && countryName !== "")
-		queryObj[`country.countryName`] = countryName;
+  let matchQuery = {};
+  let queryObj = {};
+  if (countryName && countryName !== "undefined" && countryName !== "")
+    queryObj[`country.countryName`] = countryName;
   if (warehouseOrg) matchQuery[`organisationId`] = warehouseOrg;
-  
-	const warehouses = await WarehouseModel.aggregate([
-		{
-			$match: {
-				...matchQuery,
-				...queryObj,
-				status: "ACTIVE",
-			},
-		},
-		{
-			$lookup: {
-				from: "organisations",
-				localField: "organisationId",
-				foreignField: "id",
-				as: "orgData",
-			},
-		},
-		{
-			$unwind: "$orgData",
-		},
-		{
-			$project: {
-				warehouseId: "$id",
-				orgId: "$organisationId",
-				orgName: "$orgData.name",
-				city: "$warehouseAddress.city",
-				title: "$title",
-				location: "$location",
-				region: "$region",
-				country: "$country",
-			},
-		},
-		{
-			$facet: {
-				warehouses: [],
-				myLocations: [
-					{
-						$match: {
-							orgId: myOrgId,
-						},
-					},
-				],
-				partnerLocations: [
-					{
-						$match: {
-							orgId: {
-								$ne: myOrgId,
-							},
-						},
-					},
-				],
-			},
-		},
-	]);
-	return warehouses;
+
+  const warehouses = await WarehouseModel.aggregate([
+    {
+      $match: {
+        ...matchQuery,
+        ...queryObj,
+        status: "ACTIVE",
+      },
+    },
+    {
+      $lookup: {
+        from: "organisations",
+        localField: "organisationId",
+        foreignField: "id",
+        as: "orgData",
+      },
+    },
+    {
+      $unwind: "$orgData",
+    },
+    {
+      $project: {
+        warehouseId: "$id",
+        orgId: "$organisationId",
+        orgName: "$orgData.name",
+        city: "$warehouseAddress.city",
+        title: "$title",
+        location: "$location",
+        region: "$region",
+        country: "$country",
+      },
+    },
+    {
+      $facet: {
+        warehouses: [],
+        myLocations: [
+          {
+            $match: {
+              orgId: myOrgId,
+            },
+          },
+        ],
+        partnerLocations: [
+          {
+            $match: {
+              orgId: {
+                $ne: myOrgId,
+              },
+            },
+          },
+        ],
+      },
+    },
+  ]);
+  return warehouses;
 }
 
 async function GoverningBodyFilterList(type, regExp) {
@@ -407,7 +407,7 @@ exports.getWarehousesByCity = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -428,7 +428,7 @@ exports.getWarehouseDetailsByRegion = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -449,7 +449,7 @@ exports.getWarehouseDetailsByCountry = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -479,7 +479,7 @@ exports.getOrganizationWarehouses = [
       } else if (orgId) {
         warehouseData = await WarehouseModel.find({ organisationId: orgId });
       } else {
-        return apiResponse.ErrorResponse(res, "Provide OrgId and Country");
+        return apiResponse.errorResponse(res, "Provide OrgId and Country");
       }
       return apiResponse.successResponseWithData(
         res,
@@ -488,7 +488,7 @@ exports.getOrganizationWarehouses = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -550,7 +550,7 @@ exports.getProductDetailsByWarehouseId = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -584,10 +584,10 @@ exports.getManufacturerWarehouses = [
           response.warehouses = warehouses[0]?.warehouses;
         }
         return apiResponse.successResponseWithData(
-					res,
-					"List of warehouses - Governing Body View",
-					response,
-				);
+          res,
+          "List of warehouses - Governing Body View",
+          response,
+        );
       } else {
         const isDist = organisation?.type === "DISTRIBUTORS" || organisation?.type === "DROGUERIA" ? true : false;
         if (isDist) {
@@ -787,7 +787,7 @@ exports.getManufacturerWarehouses = [
       }
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -870,7 +870,7 @@ exports.getManufacturerFilterOptions = [
 
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];

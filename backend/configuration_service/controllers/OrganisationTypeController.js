@@ -60,7 +60,7 @@ exports.addNewOrgTypeInstance = [
       );
     } catch (error) {
       console.log(error.message);
-      return apiResponse.ErrorResponse(res, error.message);
+      return apiResponse.errorResponse(res, error.message);
     }
   },
 ];
@@ -105,7 +105,7 @@ exports.addNewOrgType = [
       );
     } catch (error) {
       console.log(error.message);
-      return apiResponse.ErrorResponse(res, error.message);
+      return apiResponse.errorResponse(res, error.message);
     }
   },
 ];
@@ -130,7 +130,7 @@ exports.updateOrganizationsByType = [
         organisations
       );
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -150,7 +150,7 @@ exports.getOrganizationsByType = [
         organizations
       );
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -174,7 +174,7 @@ exports.getOrganizationsByType = [
 //   )
 //   }
 //   catch(err){
-//     return apiResponse.ErrorResponse(res, err);
+//     return apiResponse.errorResponse(res, err);
 //   }
 //   }
 // ]
@@ -198,7 +198,7 @@ exports.getOrganizationsByType = [
 //   )
 //   }
 //   catch(err){
-//     return apiResponse.ErrorResponse(res, err);
+//     return apiResponse.errorResponse(res, err);
 //   }
 //   }
 // ]
@@ -219,7 +219,7 @@ exports.getWarehouseByType = [
         organizations
       );
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -244,7 +244,7 @@ exports.updateWareHouseByType = [
         warehouse
       );
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -305,7 +305,7 @@ exports.addNewWarehouseTypeInstance = [
       );
     } catch (error) {
       console.log(error.message);
-      return apiResponse.ErrorResponse(res, error.message);
+      return apiResponse.errorResponse(res, error.message);
     }
   },
 ];
@@ -347,7 +347,7 @@ exports.addNewWarehouseType = [
       );
     } catch (error) {
       console.log(error.message);
-      return apiResponse.ErrorResponse(res, error.message);
+      return apiResponse.errorResponse(res, error.message);
     }
   },
 ];
