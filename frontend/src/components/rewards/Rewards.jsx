@@ -16,7 +16,6 @@ import { getRewards } from "../../actions/rewardActions";
 export default function Rewards({ t }) {
   const dispatch = useDispatch();
   const rewards = useSelector((state) => state.rewards);
-  console.log(rewards);
   const [open, setOpen] = React.useState(false);
   const [RedeemOption, setRedeemOption] = React.useState(null);
 
@@ -45,7 +44,9 @@ export default function Rewards({ t }) {
               {rewards?.loading ? (
                 <h1 className='points_score_ts'>Loading ..</h1>
               ) : (
-                <h1 className='points_score_ts'>{rewards?.data?.points}</h1>
+                <h1 className='points_score_ts'>
+                  {rewards?.data?.points || 0}
+                </h1>
               )}
             </div>
             <div className='points_classification'>
@@ -65,7 +66,7 @@ export default function Rewards({ t }) {
                   </div>
                   <div className='point_score'>
                     <div className='points_wrap'>
-                      <p className='reward_points_ts'> 200</p>
+                      <p className='reward_points_ts'> 100</p>
                       <img src={Tropy} alt='Tropy' />
                     </div>
                   </div>
