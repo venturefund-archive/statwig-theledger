@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import Client from "./clients/Client";
 import Contact from "./contact/Contact";
 import Features from "./features/Features";
-import Landingfooter from "./landing-footer/Landingfooter";
-import Landingheader from "./landing-header/Landingheader";
+import LandingFooter from "./landing-footer/Landingfooter";
+import LandingHeader from "./landing-header/Landingheader";
 import Services from "./services/Services";
 import Showcase from "./showcase/Showcase";
 import Dialog from "@mui/material/Dialog";
@@ -12,9 +12,8 @@ import DialogContent from "@mui/material/DialogContent";
 import MuiAlert from "@mui/material/Alert";
 import { Snackbar } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { useSelector } from "react-redux";
 
-let useClickOutside = (handler) => {
+const useClickOutside = (handler) => {
   let domNode = useRef();
 
   useEffect(() => {
@@ -35,7 +34,7 @@ let useClickOutside = (handler) => {
 };
 
 const Alert = React.forwardRef(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  return <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />;
 });
 
 export default function Landing() {
@@ -102,12 +101,14 @@ export default function Landing() {
       case "contact":
         contactRef.current?.scrollIntoView({ behavaiour: "smooth" });
         break;
+      default:
+        break;
     }
   };
 
   return (
-    <React.Fragment>
-      <Landingheader
+    <>
+      <LandingHeader
         handleNavClick={handleNavClick}
         changeLanguage={changeLanguage}
         domNode={domNode}
@@ -121,7 +122,7 @@ export default function Landing() {
       <Client t={t} />
       <Features t={t} />
       <Services t={t} serviceRef={serviceRef} />
-      <Landingfooter t={t} contactRef={contactRef} />
+      <LandingFooter t={t} contactRef={contactRef} />
       <Dialog
         fullWidth={fullWidth}
         maxWidth={maxWidth}
@@ -153,6 +154,6 @@ export default function Landing() {
           {alertDetails?.message}
         </Alert>
       </Snackbar>
-    </React.Fragment>
+    </>
   );
 }

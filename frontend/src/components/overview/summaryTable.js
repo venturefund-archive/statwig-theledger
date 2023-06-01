@@ -19,7 +19,7 @@ const SummaryTable = (props) => {
 
   const { shipments, t } = props;
   return (
-    <React.Fragment>
+    <>
       {shipments.length === 0 ? (
         <div className="summaryTable justify-content-center ">
           <div className="d-flex flex-column ">
@@ -260,7 +260,7 @@ const SummaryTable = (props) => {
           )}
         </div>
       </div>
-    </React.Fragment>
+    </>
   );
 };
 export default SummaryTable;

@@ -1,11 +1,10 @@
 import React from "react";
-
 import "./style.scss";
 import CloseIcon from "../../../assets/icons/cross.svg";
 
 const Modal = (props) => {
   return (
-    <React.Fragment>
+    <>
       <div className='modal-backdrop' />
       <div className='modal' tabIndex='-1' role='dialog'>
         <div
@@ -40,7 +39,7 @@ const Modal = (props) => {
           </div>
         </div>
       </div>
-    </React.Fragment>
+    </>
   );
 };
 

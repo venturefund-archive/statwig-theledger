@@ -70,7 +70,7 @@ const ProductsDropDown = (props) => {
             src={arrowImg ? arrowImg : upDownArrow}
             alt='downarrow'
             className='customdropDown'
-            // style={{position:"relative",left:"3.5rem"}}
+          // style={{position:"relative",left:"3.5rem"}}
           />
         </button>
       )}
@@ -101,8 +101,8 @@ const ProductsDropDown = (props) => {
                         <span style={{ color: "#707070", fontSize: "12px" }}>
                           {
                             item?.warehouseAddress?.firstLine +
-                              " " +
-                              item?.warehouseAddress?.city
+                            " " +
+                            item?.warehouseAddress?.city
                             //  + " " +
                             //   item.postalAddress
                           }
@@ -113,16 +113,16 @@ const ProductsDropDown = (props) => {
                         {item?.warehouseInventory
                           ? item?.warehouseAddress
                             ? item?.title +
-                              " " +
-                              item?.warehouseAddress?.firstLine +
-                              " " +
-                              item?.warehouseAddress?.city
+                            " " +
+                            item?.warehouseAddress?.firstLine +
+                            " " +
+                            item?.warehouseAddress?.city
                             : item?.title + "/" + item.postalAddress
                           : item?.name
-                          ? item?.name
-                          : item?.productName
-                          ? item?.productName
-                          : parse(item)}
+                            ? item?.name
+                            : item?.productName
+                              ? item?.productName
+                              : parse(item)}
                       </span>
                     )}
                   </span>

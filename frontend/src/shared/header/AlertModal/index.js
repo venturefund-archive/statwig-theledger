@@ -1,4 +1,4 @@
-import { React, Fragment, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   getAlertModalData,
   updateAlertModalData,
@@ -29,7 +29,7 @@ const AlertModal = (props) => {
   }
 
   return (
-    <Fragment>
+    <>
       <div className='modal-backdrop' />
       <div className='modal' tabIndex='-1' role='dialog'>
         <div className='modal-dialog modal-mg' role='document'>
@@ -58,11 +58,11 @@ const AlertModal = (props) => {
                 shipment */}
                 {AlertTransport.status === "PENDING"
                   ? AlertTransport?.from?.name +
-                    "  is trying to scan & Recieve shipment"
+                  "  is trying to scan & Recieve shipment"
                   : AlertTransport.status === "ACCEPTED"
-                  ? AlertTransport?.from?.name +
+                    ? AlertTransport?.from?.name +
                     "  has been approved to Scan & Receive this Shipment"
-                  : AlertTransport?.from?.name +
+                    : AlertTransport?.from?.name +
                     "  has been Rejected to Scan & Receive this Shipment"}
               </h5>
               <p className='dataTag'>
@@ -176,7 +176,7 @@ const AlertModal = (props) => {
           </div>
         </div>
       </div>
-    </Fragment>
+    </>
   );
 };
 

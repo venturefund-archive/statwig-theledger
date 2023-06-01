@@ -1,11 +1,8 @@
 import * as React from "react";
 import PropTypes from "prop-types";
-import { useTheme, styled } from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
 import Popper from "@mui/material/Popper";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
-import SettingsIcon from "@mui/icons-material/Settings";
-import CloseIcon from "@mui/icons-material/Close";
-import DoneIcon from "@mui/icons-material/Done";
 import Autocomplete, { autocompleteClasses } from "@mui/material/Autocomplete";
 import ButtonBase from "@mui/material/ButtonBase";
 import InputBase from "@mui/material/InputBase";
@@ -125,81 +122,91 @@ export default function Filterbar({
   const open = Boolean(anchorEl) && fieldName === selectedColumn;
 
   return (
-		<React.Fragment>
-			<StyledPopper id={fieldName} open={open} anchorEl={anchorEl} placement="bottom-start">
-				<ClickAwayListener onClickAway={handleClose}>
-					<div>
-						<Box
-							sx={{
-								borderBottom: `1px solid ${theme.palette.mode === "light" ? "#eaecef" : "#30363d"}`,
-								padding: "8px 10px",
-								fontWeight: 600,
-							}}
-						>
-							<div className="filter_header_area">
-								<div> Filter {title}</div>
-								<button
-									onClick={() => {
+    <>
+      <StyledPopper
+        id={fieldName}
+        open={open}
+        anchorEl={anchorEl}
+        placement='bottom-start'
+      >
+        <ClickAwayListener onClickAway={handleClose}>
+          <div>
+            <Box
+              sx={{
+                borderBottom: `1px solid ${
+                  theme.palette.mode === "light" ? "#eaecef" : "#30363d"
+                }`,
+                padding: "8px 10px",
+                fontWeight: 600,
+              }}
+            >
+              <div className='filter_header_area'>
+                <div> Filter {title}</div>
+                <button
+                  onClick={() => {
                     handleFilterUpdate(fieldName, "");
                     handleClose();
-									}}
-									className="ui_filter_clear_btn"
-								>
-									Clear
-								</button>
-							</div>
-						</Box>
-						<Autocomplete
-							open
-							value={selectedFilters[fieldName]}
-							onClose={(event, reason) => {
-								if (reason === "escape") {
-									handleClose();
-								}
-							}}
-							onChange={(event, newValue, reason) => {
-								if (
-									event.type === "keydown" &&
-									event.key === "Backspace" &&
-									reason === "removeOption"
-								) {
-									return;
-								}
-								handleFilterUpdate(fieldName, newValue);
-								handleClose();
-							}}
-							// disableCloseOnSelect
-							PopperComponent={PopperComponent}
-							options={options}
-							renderOption={(props, option, { selected }) => (
-								<li {...props}>
-									<Box
-										sx={{
-											flexGrow: 1,
-											"& span": {
-												color: theme.palette.mode === "light" ? "#586069" : "#8b949e",
-											},
-										}}
-									>
-										{option}
-									</Box>
-								</li>
-							)}
-							renderInput={(params) => (
-								<StyledInput
-									ref={params.InputProps.ref}
-									inputProps={params.inputProps}
-									autoFocus
-									placeholder="Filter Options"
-								/>
+                  }}
+                  className='ui_filter_clear_btn'
+                >
+                  Clear
+                </button>
+              </div>
+            </Box>
+            <Autocomplete
+              open
+              value={selectedFilters[fieldName]}
+              onClose={(event, reason) => {
+                if (reason === "escape") {
+                  handleClose();
+                }
+              }}
+              onChange={(event, newValue, reason) => {
+                if (
+                  event.type === "keydown" &&
+                  event.key === "Backspace" &&
+                  reason === "removeOption"
+                ) {
+                  return;
+                }
+                handleFilterUpdate(fieldName, newValue);
+                handleClose();
+              }}
+              // disableCloseOnSelect
+              PopperComponent={PopperComponent}
+              options={options}
+              renderOption={(props, option, { selected }) => (
+                <li {...props}>
+                  <Box
+                    sx={{
+                      flexGrow: 1,
+                      "& span": {
+                        color:
+                          theme.palette.mode === "light"
+                            ? "#586069"
+                            : "#8b949e",
+                      },
+                    }}
+                  >
+                    {option}
+                  </Box>
+                </li>
+              )}
+              renderInput={(params) => (
+                <StyledInput
+                  ref={params.InputProps.ref}
+                  inputProps={params.inputProps}
+                  autoFocus
+                  placeholder='Filter Options'
+                />
               )}
               // getOptionLabel={(option) => option}
-						/>
-					</div>
-				</ClickAwayListener>
-			</StyledPopper>
-		</React.Fragment>
-	);
+            />
+          </div>
+        </ClickAwayListener>
+      </StyledPopper>
+    </>
+  );
 }
 
 // From https://github.com/abdonrd/github-labels
