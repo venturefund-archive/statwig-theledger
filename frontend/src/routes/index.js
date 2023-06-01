@@ -104,7 +104,7 @@ const routes = (
 		<Route path="/neworder" component={requireAuth(NewOrder)} />
 		<Route path="/vieworder/:id" component={requireAuth(ViewOrder)} />
 		<Route path="/revieworder" component={requireAuth(ReviewOrder)} />
-		<Route path="/updateStatus/:id/:returnToView" component={requireAuth(UpdateStatus)} />
+		<Route path="/updateStatus/:id/:returnToView?" component={requireAuth(UpdateStatus)} />
 		<Route path="/receiveShipment/:id" component={requireAuth(ReceiveShipment)} />
 		<Route path="/Addlocation" component={requireAuth(AddLocation)} />
 		<Route path="/lastMile" component={requireAuth(LastMile)} />

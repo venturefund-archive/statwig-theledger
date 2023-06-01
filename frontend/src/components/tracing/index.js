@@ -13,13 +13,11 @@ import Modal from "../../shared/modal";
 import ViewShippingModal from "./shippingorder/shippingpopup";
 import { Link } from "react-router-dom";
 const Tracing = (props) => {
-  console.log("Props");
-  console.log(props);
+  const { id } = props.match.params;
   const [menuShip, setMenuShip] = useState(false);
   const [menuProduct, setMenuProduct] = useState(false);
   const [highLight, setHighLight] = useState(false);
   const [productHighLight, setProductHighLight] = useState(false);
-  const [openPurchase, setOpenPurchase] = useState(false);
   const [openShipping, setOpenShipping] = useState(false);
   const tracking = props.trackData;
   const shippmentChainOfCustodyData = props.shippmentChainOfCustodyData;
@@ -28,13 +26,6 @@ const Tracing = (props) => {
   shippmentChainOfCustodyData.map((data) => {
     status = data.status;
   });
-  const productCard = props.productDetails;
-  const poCard = props.poDetails;
-  const { id } = props.match.params;
-
-  const closeModal = () => {
-    setOpenPurchase(false);
-  };
 
   const closeModalShipping = () => {
     setOpenShipping(false);
@@ -46,7 +37,7 @@ const Tracing = (props) => {
         <div className='row'>
           <Link
             to={
-              status === "RECEIVED" ? `/track/${id}` : `/updatestatus/${id}`
+              status === "RECEIVED" ? `/track/${id}` : `/updateStatus/${id}`
             }
           >
             <button
