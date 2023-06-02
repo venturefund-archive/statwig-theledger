@@ -30,7 +30,7 @@ async function logEvent(data, req) {
       event: data.eventType.primary,
       eventType: data.eventType.description,
       eventTime: new Date(),
-      userId: data.actor.actoruserid,
+      userId: data.actor.actorid,
       userOrgId: data.stackholders.actororg.id,
       userWarehouseId: data.actorWarehouseId,
     };
