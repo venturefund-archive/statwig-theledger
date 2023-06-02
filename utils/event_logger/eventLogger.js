@@ -12,7 +12,7 @@ mongoose.connect(MONGODB_URL, {
 })
   .then(() => {
     if (process.env.NODE_ENV !== "test") {
-      console.log("Event Logger Connected to DB");
+      console.log("Event Logger Connected", config);
     }
   })
   .catch((err) => {
@@ -20,12 +20,11 @@ mongoose.connect(MONGODB_URL, {
     process.exit(1);
   });
 
-async function logEvent(data) {
+async function logEvent(data, req) {
   try {
     if (!validate(data)) {
       throw new Error("Data Invalid: Fields incorrect");
     }
-
     const rewardData = {
       eventId: data.eventID,
       event: data.eventType.primary,
@@ -35,7 +34,7 @@ async function logEvent(data) {
       userOrgId: data.stackholders.actororg.id,
       userWarehouseId: data.actorWarehouseId,
     };
-    await addReward(rewardData).catch((err) => { console.log("Reward Error:", err) })
+    await addReward(rewardData, req?.user?.role)
 
     const event = new Event({
       eventID: data.eventID,

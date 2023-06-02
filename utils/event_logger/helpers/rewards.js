@@ -1,14 +1,14 @@
 const axios = require('axios');
-const REWARDS_SERVICE_URL = process.env.REWARDS_SERVICE_URL || 'https://test.vaccineledger.com/rewardmanagement/api/';
-const REWARDS_API_KEY = process.env.REWARDS_API_KEY || "testApiKey";
+const { REWARDS_SERVICE_URL, REWARDS_API_KEY } = require("../config")
 // Queue to store failed requests
 const requestQueue = [];
 
 // Function to send HTTP request
-async function addReward(data) {
+async function addReward(data, role) {
     try {
         axios.defaults.headers.common['x-api-key'] = REWARDS_API_KEY;
-        await axios.post(REWARDS_SERVICE_URL + "rewards", data);
+        axios.defaults.headers.common['role'] = role;
+        await axios.post(REWARDS_SERVICE_URL + "/rewards", data);
         console.log('Request sent successfully');
     } catch (error) {
         console.log('Failed to send request:', error);
