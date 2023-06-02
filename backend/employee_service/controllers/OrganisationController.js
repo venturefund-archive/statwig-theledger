@@ -932,7 +932,7 @@ exports.addNewOrganisation = [
 					data: req.body,
 				},
 			};
-			await logEvent(event_data);
+			await logEvent(event_data, req);
 
 			return apiResponse.successResponseWithData(
 				req,

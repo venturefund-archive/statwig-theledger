@@ -1076,7 +1076,7 @@ exports.createShipment = [
             );
           }
         }
-        await logEvent(event_data);
+        await logEvent(event_data, req);
         return apiResponse.successResponseWithData(
           res,
           responses(req.user.preferredLanguage).shipment_created,
@@ -1240,7 +1240,7 @@ exports.createShipmentForTpl = [
           responses(req.user.preferredLanguage).shipment_not_saved
         );
       }
-      await logEvent(event_data);
+      await logEvent(event_data, req);
       return apiResponse.successResponseWithData(
         res,
         responses(req.user.preferredLanguage).shipment_created,
@@ -1875,7 +1875,7 @@ exports.receiveShipment = [
             event_data.stackholders.secondorg.name = supplierOrgData?.name || null;
             event_data.stackholders.secondorg.address = supplierOrgData?.postalAddress || null;
           }
-          await logEvent(event_data);
+          await logEvent(event_data, req);
 
           return apiResponse.successResponseWithData(
             res,
@@ -2033,7 +2033,7 @@ exports.customReceiveShipment = [
         event_data.stackholders.secondorg.name = supplierName || null;
         event_data.stackholders.secondorg.address = supplierAddress || null;
       }
-      await logEvent(event_data);
+      await logEvent(event_data, req);
       return apiResponse.successResponseWithData(
         res,
         responses(req.user.preferredLanguage).shipment_received,
@@ -2940,7 +2940,7 @@ exports.updateTrackingStatus = [
           data: shipment,
         },
       };
-      await logEvent(event_data);
+      await logEvent(event_data, req);
       return apiResponse.successResponse(
         res,
         responses(req.user.preferredLanguage).status_updated

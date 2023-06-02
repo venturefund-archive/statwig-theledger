@@ -1011,7 +1011,7 @@ exports.createOrder = [
             Authorization: token,
           },
         }
-      );
+      ).catch(err => console.log(err));
       await purchaseOrder.save();
 
       try {
@@ -1070,7 +1070,7 @@ exports.createOrder = [
         event_data.payload.data = req.body;
         event_data.payload.data.order_id = poId;
         event_data.transactionId = poId;
-        await logEvent(event_data);
+        await logEvent(event_data, req);
         return apiResponse.successResponseWithData(
           res,
           responses(req.user.preferredLanguage).created_order,
