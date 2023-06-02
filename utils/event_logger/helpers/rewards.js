@@ -11,7 +11,7 @@ async function addReward(data) {
         await axios.post(REWARDS_SERVICE_URL + "rewards", data);
         console.log('Request sent successfully');
     } catch (error) {
-        console.error('Failed to send request:', error);
+        console.log('Failed to send request:', error);
         // Add request to the queue for later retry
         requestQueue.push(data);
     }
@@ -38,7 +38,7 @@ microserviceAvailabilityCheck()
 async function microserviceAvailabilityCheck() {
     try {
         // Check microservice availability (e.g., ping or health endpoint)
-        const response = await axios.get('microservice_health_url');
+        const response = await axios.get(REWARDS_SERVICE_URL + "/health");
         if (response.status === 200) {
             console.log('Microservice is available');
             return;
