@@ -23,12 +23,9 @@ mongoose.connect(MONGODB_URL, {
 async function logEvent(data) {
   try {
     if (!validate(data)) {
-      const err = {
-        message: "Data Invalid: Fields incorrect",
-        code: 500,
-      };
-      return err;
+      throw new Error("Data Invalid: Fields incorrect");
     }
+
     const rewardData = {
       eventId: data.eventID,
       event: data.eventType.primary,
@@ -38,7 +35,8 @@ async function logEvent(data) {
       userOrgId: data.stackholders.actororg.id,
       userWarehouseId: data.actorWarehouseId,
     };
-    await addReward(rewardData);
+    await addReward(rewardData).catch((err) => { console.log("Reward Error:", err) })
+
     const event = new Event({
       eventID: data.eventID,
       eventTime: data.eventTime,
@@ -59,8 +57,9 @@ async function logEvent(data) {
       secondaryOrgAddress: data.stackholders.secondorg.address,
       payloadData: data.payload,
     });
-    await event.save();
-    return event;
+
+    const savedEvent = await event.save();
+    return savedEvent;
   } catch (err) {
     console.log("EventLogger Error occurred:", err);
   }
