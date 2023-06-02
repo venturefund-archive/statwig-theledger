@@ -69,7 +69,9 @@ const roleAuth = async (req, res, next) => {
           next();
         }
       }
-      throw new Error("Role doesn't have permission")
+      else {
+        throw new Error("Role doesn't have permission")
+      }
     }
   }
   catch (err) {
