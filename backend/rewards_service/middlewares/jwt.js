@@ -42,37 +42,39 @@ const apiKeyAuth = async (req, res, next) => {
       next();
     } else {
       const keyExists = await RewardConfigModel.findOne({ apiKeys: { $in: [req.headers["x-api-key"]] } });
-      console.log("API KEY", req.headers, keyExists)
       if (keyExists) {
         req.appId = keyExists.appId;
         req.rewardConfig = keyExists.config;
         next();
       }
-      else return new Error({ message: "API Key not found" })
+      else throw new Error("API Key not found")
     }
   } catch (err) {
     console.log(err);
-    return apiResponse.errorResponse(res, err?.message || "API Key Error");
+    return apiResponse.errorResponse(res, err || "API Key Error");
   }
 };
 
 const roleAuth = async (req, res, next) => {
   try {
-    const role = req.headers["role"];
-    if (role) {
-      const roleExists = await RewardConfigModel.findOne({ apiKeys: { $in: [req.headers["x-api-key"]] }, config: { $elemMatch: { roles: { $in: [role] } } } });
-      console.log(role, roleExists)
-      if (roleExists) {
-        req.appId = roleExists.appId;
-        req.rewardConfig = roleExists.config;
-        next();
+    if (REWARDS_AUTH) {
+      next();
+    } else {
+      const role = req.headers["role"];
+      if (role) {
+        const roleExists = await RewardConfigModel.findOne({ apiKeys: { $in: [req.headers["x-api-key"]] }, config: { $elemMatch: { roles: { $in: [role] } } } });
+        if (roleExists) {
+          req.appId = roleExists.appId;
+          req.rewardConfig = roleExists.config;
+          next();
+        }
       }
+      throw new Error("Role doesn't have permission")
     }
-    return new Error({ message: "Role doesn't have permission" })
   }
   catch (err) {
     console.log(err);
-    return apiResponse.errorResponse(res, err?.message || "Role Error")
+    return apiResponse.errorResponse(res, err || "Role Error")
   }
 }
 
