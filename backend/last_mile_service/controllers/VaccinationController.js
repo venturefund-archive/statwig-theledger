@@ -485,7 +485,7 @@ exports.vaccinateIndividual = [
 
 			const rewardData = {
 				eventId: doseId,
-				event: "VACCINATE",
+				event: "VACCINATION",
 				eventType: "DOSE",
 				eventTime: new Date(),
 				userId: req.user.id,
