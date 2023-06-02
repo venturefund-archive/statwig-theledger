@@ -11,8 +11,14 @@ exports.userRewards = [
     asyncHandler(apiKeyAuth),
     async function (req, res) {
         try {
-            console.log(req.appId, req.user)
-            const rewards = await RewardUserModel.findOne({ appId: req.appId, userId: req.user.id })
+            let rewards = await RewardUserModel.findOne({ appId: req.appId, userId: req.user.id })
+            if (rewards === null) {
+                rewards = {
+                    points: 0,
+                    totalPoints: 0,
+                    redeemedPoints: 0,
+                }
+            }
             return apiResponse.successResponseWithData(res, "User Rewards", rewards)
         }
         catch (err) {
