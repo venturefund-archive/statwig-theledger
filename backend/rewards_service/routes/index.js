@@ -1,8 +1,10 @@
 const express = require("express");
 const router = express.Router();
 
-router.get("/", function (req, res) {
+function health(req, res) {
     res.status(200).json({ status: "OK", message: "Reward Service" });
-});
+}
 
-module.exports = router;
+router.get("/", health);
+
+module.exports = { router, health };
