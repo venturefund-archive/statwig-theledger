@@ -321,127 +321,125 @@ const UpdateStatus = (props) => {
 											</div>
 										</div>
 										{intelEnabled ? (
-											<div>
-												<h6 className="poheads potext m-4">Shipment Cargo Status</h6>
-												<div
-													className={`col-12 p-3 mb-3 ml-1 rounded1 row bg-white shadow justify-content-between ${loader && "fade-color"
-														}`}
-												>
-													<div className="cargoLabels">
-														<label className="mb-1 text-secondary">Acceptance Date</label>
-													</div>
-													{loader && <Loader />}
-													{!loader && (
-														<input
-															type="text"
-															className="form-control mb-2"
-															name="acceptanceDate"
-															value={acceptanceDate}
-															style={{
-																border: "0px",
-																color: "#6c757d!important",
-															}}
-														/>
-													)}
-													<div className="appearDate">
-														<FormControlLabel
-															control={
-																<CustomSwitch
-																	readOnly={acceptanceDate !== ""}
-																	disabled={acceptanceDate !== ""}
-																	checked={acceptanceDate !== ""}
-																	onChange={onToggle}
-																	name="checkedB"
-																	id="toggle1"
-																/>
-															}
-														/>
-													</div>
-												</div>
-												<div className="col col-1 pl-2 custom-control custom-radio">
-													<input
-														type="radio"
-														className="custom-control-input"
-														onBlur={handleBlur}
-														onChange={handleChange}
-														value="False"
-														id="noradio"
-														name="alerttrue"
-													/>
-												</div>
-												<div
-													className={`col-12 p-3 mb-3 ml-1 rounded1 row bg-white shadow justify-content-between ${loaderC && "fade-color"
-														}`}
-												>
-													<div className="cargoLabels">
-														<label className="mb-1 text-secondary">Customs clearance Date</label>
-													</div>
-													{loaderC && <Loader />}
-													{!loaderC && (
-														<div>
-															<input
-																type="text"
-																className="form-control mb-2"
-																name="customsClearanceDate"
-																value={customsDate}
-																style={{
-																	border: "0px",
-																	color: "#6c757d!important",
-																}}
-															/>
-														</div>
-													)}
-													<FormControlLabel
-														control={
-															<CustomSwitch
-																readOnly={customsDate !== ""}
-																disabled={customsDate !== ""}
-																checked={customsDate !== ""}
-																onChange={onToggle}
-																name="checkedB"
-																id="toggle2"
-															/>
-														}
-													/>
-												</div>
-												<div
-													className={`col-12 p-3 mb-3 ml-1 rounded1 row bg-white shadow justify-content-between ${loaderL && "fade-color"
-														}`}
-												>
-													<div className="cargoLabels">
-														<label className="mb-1 text-secondary">Last Status</label>
-													</div>
-													{loaderL && <Loader />}
-													{!loaderL && (
-														<div>
-															<input
-																type="text"
-																className="form-control mb-2"
-																name="lastStatus"
-																onBlur={handleBlur}
-																onChange={handleChange}
-																value={lastStatusDate}
-																style={{
-																	border: "0px",
-																	color: "#6c757d!important",
-																}}
-															/>
-														</div>
-													)}
-													<FormControlLabel
-														control={
-															<CustomSwitch
-																readOnly={lastStatusDate !== ""}
-																disabled={lastStatusDate !== ""}
-																checked={lastStatusDate !== ""}
-																onChange={onToggle}
-																name="checkedB"
-																id="toggle3"
-															/>
-														}
-													/>
-												</div>
-											</div>
+											<></>
+											// <div>
+											// 	<h6 className="poheads potext m-4">Shipment Cargo Status</h6>
+											// 	<div
+											// 		className={`col-12 p-3 mb-3 ml-1 rounded1 row bg-white shadow justify-content-between ${loader && "fade-color"
+											// 			}`}
+											// 	>
+											// 		<div className="cargoLabels">
+											// 			<label className="mb-1 text-secondary">Acceptance Date</label>
+											// 			<input
+											// 				type="text"
+											// 				className="form-control mb-2"
+											// 				name="acceptanceDate"
+											// 				value={acceptanceDate}
+											// 				style={{
+											// 					border: "0px",
+											// 					color: "#6c757d!important",
+											// 				}}
+											// 			/>
+											// 		</div>
+											// 		<div className="appearDate">
+											// 			<FormControlLabel
+											// 				control={
+											// 					<CustomSwitch
+											// 						readOnly={acceptanceDate !== ""}
+											// 						disabled={acceptanceDate !== ""}
+											// 						checked={acceptanceDate !== ""}
+											// 						onChange={onToggle}
+											// 						name="checkedB"
+											// 						id="toggle1"
+											// 					/>
+											// 				}
+											// 			/>
+											// 		</div>
+											// 	</div>
+											// 	<div className="col col-1 pl-2 custom-control custom-radio">
+											// 		<input
+											// 			type="radio"
+											// 			className="custom-control-input"
+											// 			onBlur={handleBlur}
+											// 			onChange={handleChange}
+											// 			value="False"
+											// 			id="noradio"
+											// 			name="alerttrue"
+											// 		/>
+											// 	</div>
+											// 	<div
+											// 		className={`col-12 p-3 mb-3 ml-1 rounded1 row bg-white shadow justify-content-between ${loaderC && "fade-color"
+											// 			}`}
+											// 	>
+											// 		<div className="cargoLabels">
+											// 			<label className="mb-1 text-secondary">Customs clearance Date</label>
+											// 		</div>
+											// 		{loaderC && <Loader />}
+											// 		{!loaderC && (
+											// 			<div>
+											// 				<input
+											// 					type="text"
+											// 					className="form-control mb-2"
+											// 					name="customsClearanceDate"
+											// 					value={customsDate}
+											// 					style={{
+											// 						border: "0px",
+											// 						color: "#6c757d!important",
+											// 					}}
+											// 				/>
+											// 			</div>
+											// 		)}
+											// 		<FormControlLabel
+											// 			control={
+											// 				<CustomSwitch
+											// 					readOnly={customsDate !== ""}
+											// 					disabled={customsDate !== ""}
+											// 					checked={customsDate !== ""}
+											// 					onChange={onToggle}
+											// 					name="checkedB"
+											// 					id="toggle2"
+											// 				/>
+											// 			}
+											// 		/>
+											// 	</div>
+											// 	<div
+											// 		className={`col-12 p-3 mb-3 ml-1 rounded1 row bg-white shadow justify-content-between ${loaderL && "fade-color"
+											// 			}`}
+											// 	>
+											// 		<div className="cargoLabels">
+											// 			<label className="mb-1 text-secondary">Last Status</label>
+											// 		</div>
+											// 		{loaderL && <Loader />}
+											// 		{!loaderL && (
+											// 			<div>
+											// 				<input
+											// 					type="text"
+											// 					className="form-control mb-2"
+											// 					name="lastStatus"
+											// 					onBlur={handleBlur}
+											// 					onChange={handleChange}
+											// 					value={lastStatusDate}
+											// 					style={{
+											// 						border: "0px",
+											// 						color: "#6c757d!important",
+											// 					}}
+											// 				/>
+											// 			</div>
+											// 		)}
+											// 		<FormControlLabel
+											// 			control={
+											// 				<CustomSwitch
+											// 					readOnly={lastStatusDate !== ""}
+											// 					disabled={lastStatusDate !== ""}
+											// 					checked={lastStatusDate !== ""}
+											// 					onChange={onToggle}
+											// 					name="checkedB"
+											// 					id="toggle3"
+											// 				/>
+											// 			}
+											// 		/>
+											// 	</div>
+											// </div>
 										) : (
 											<>
 												<h6 className="poheads potext m-4">{t("comment")}</h6>
@@ -737,25 +735,27 @@ const UpdateStatus = (props) => {
 								</div>
 							</div>
 						</div>
-					</form>
+					</form >
 				)}
-			</Formik>
+			</Formik >
 			{openUpdatedStatus && (
 				<Modal close={() => closeModal()} size="modal-sm">
 					<SuccessPopup onHide={closeModal} t={t} />
 				</Modal>
 			)}
-			{openShipmentFail && (
-				<Modal close={() => closeModalFail()} size="modal-sm">
-					<FailPopup
-						onHide={closeModalFail}
-						t={t}
-						errorMessage={errorMessage}
-						tryAgainEnabled={tryAgainEnabled}
-					/>
-				</Modal>
-			)}
-		</div>
+			{
+				openShipmentFail && (
+					<Modal close={() => closeModalFail()} size="modal-sm">
+						<FailPopup
+							onHide={closeModalFail}
+							t={t}
+							errorMessage={errorMessage}
+							tryAgainEnabled={tryAgainEnabled}
+						/>
+					</Modal>
+				)
+			}
+		</div >
 	);
 };
 export default UpdateStatus;
