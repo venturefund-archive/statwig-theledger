@@ -44,6 +44,7 @@ const ReceiveShipment = (props) => {
   const [commentEnabled, setCommentEnabled] = useState(false);
   const [openUpdatedStatus, setOpenUpdatedStatus] = useState(false);
   const [receiveShipmentModal, setreceiveShipmentModal] = useState(false);
+  const [ReceivePoints, setReceivePoints] = useState(null);
   const [transitNumberArray, settransitNumberArray] = useState([]);
 
   const setFile = (evt) => {
@@ -101,6 +102,7 @@ const ReceiveShipment = (props) => {
     const result = await receiveApi(formData);
     if (result.status === 200) {
       setreceiveShipmentModal(true);
+      setReceivePoints(200);
     } else {
       setErrorMsg(result.data);
       setFailPopUp(true);
@@ -130,14 +132,14 @@ const ReceiveShipment = (props) => {
   };
 
   return (
-    <div className='receiveShipment'>
-      <div className='d-flex flex-column justify-content-between'>
-        <div className='d-flex flex-row justify-content-between'>
-          <h1 className='breadcrumb mt-3'>{t("receive_shipment")}</h1>
-          <div className='d-flex flex-row justify-content-between'>
+    <div className="receiveShipment">
+      <div className="d-flex flex-column justify-content-between">
+        <div className="d-flex flex-row justify-content-between">
+          <h1 className="breadcrumb mt-3">{t("receive_shipment")}</h1>
+          <div className="d-flex flex-row justify-content-between">
             <div>
               <button
-                className='btn btn-outline-primary mr-4 mt-3'
+                className="btn btn-outline-primary mr-4 mt-3"
                 onClick={() => props.history.push(`/viewshipment/${id}`)}
               >
                 {t("cancel")}
@@ -145,23 +147,23 @@ const ReceiveShipment = (props) => {
             </div>
             <div>
               <button
-                className='btn-primary btn fontSize20 font-bold mr-2 mt-3'
+                className="btn-primary btn fontSize20 font-bold mr-2 mt-3"
                 onClick={receiveShipment}
                 disabled={isDisabled}
               >
                 <img
                   src={returnShipment}
-                  width='16'
-                  height='16'
-                  className='mr-2 mb-1'
-                  alt='Return Shipment'
+                  width="16"
+                  height="16"
+                  className="mr-2 mb-1"
+                  alt="Return Shipment"
                 />
                 <span>{t("receive_shipment")}</span>
               </button>
             </div>
 
             {FailPopUp && (
-              <Modal close={() => closeModalShipment()} size='modal-sm'>
+              <Modal close={() => closeModalShipment()} size="modal-sm">
                 <FailedPopup
                   onHide={closeModalShipment}
                   ErrorMsg={ErrorMsg}
@@ -170,38 +172,38 @@ const ReceiveShipment = (props) => {
               </Modal>
             )}
             {openUpdatedStatus && (
-              <Modal close={() => closeModal()} size='modal-sm'></Modal>
+              <Modal close={() => closeModal()} size="modal-sm"></Modal>
             )}
           </div>
         </div>
-        <div className='w-75 row row-cols'>
-          <div className='col'>
-            <div className='panel commonpanle'>
-              <div className='form-group justify-content-around'>
-                <label className='mt-2 text-secondary'>
+        <div className="w-75 row row-cols">
+          <div className="col">
+            <div className="panel commonpanle">
+              <div className="form-group justify-content-around">
+                <label className="mt-2 text-secondary">
                   {t("shipment_id")}:
                 </label>
                 <input
                   disabled={true}
-                  name='id'
-                  type='text'
-                  className='form-control'
+                  name="id"
+                  type="text"
+                  className="form-control"
                   value={id || ""}
                 />
               </div>
             </div>
           </div>
-          <div className='col'>
-            <div className='panel commonpanle'>
-              <div className='form-group justify-content-around'>
-                <label className='mt-2 text-secondary'>
+          <div className="col">
+            <div className="panel commonpanle">
+              <div className="form-group justify-content-around">
+                <label className="mt-2 text-secondary">
                   {t("transit_no")}:
                 </label>
                 <input
                   disabled={true}
-                  type='text'
-                  className='form-control'
-                  name='billNo'
+                  type="text"
+                  className="form-control"
+                  name="billNo"
                   value={props.trackData.airWayBillNo || ""}
                 />
               </div>
@@ -209,9 +211,9 @@ const ReceiveShipment = (props) => {
           </div>
         </div>
       </div>
-      <div className='row'>
-        <div className='col-sm-4'>
-          <h6 className='heading mt-3 mb-3 ml-3'>{t("shipment_details")}</h6>
+      <div className="row">
+        <div className="col-sm-4">
+          <h6 className="heading mt-3 mb-3 ml-3">{t("shipment_details")}</h6>
           <ShipmentInfo
             shipments={tracking}
             setMenuShip={setMenuShip}
@@ -221,10 +223,10 @@ const ReceiveShipment = (props) => {
             t={t}
           />
         </div>
-        <div className='col-sm-4'>
-          <h6 className='heading mt-3 mb-3 ml-3'>{t("comment")}</h6>
-          <div className='col panel commonpanle'>
-            <div className='pt-2 pb-2 d-flex row'>
+        <div className="col-sm-4">
+          <h6 className="heading mt-3 mb-3 ml-3">{t("comment")}</h6>
+          <div className="col panel commonpanle">
+            <div className="pt-2 pb-2 d-flex row">
               <span
                 onClick={() => {
                   setCount("r1");
@@ -279,9 +281,9 @@ const ReceiveShipment = (props) => {
             {commentEnabled && (
               <textarea
                 disabled={!commentEnabled}
-                type='text'
-                className='w-100 form-control'
-                name='Comment'
+                type="text"
+                className="w-100 form-control"
+                name="Comment"
                 onChange={(e) => setComment(e.target.value)}
                 placeholder={t("enter") + " " + t("comment")}
                 value={comment}
@@ -289,22 +291,22 @@ const ReceiveShipment = (props) => {
             )}
           </div>
         </div>
-        <div className='col-sm-4'>
-          <div className='row justify-content-between'>
-            <h6 className='heading mt-3 mb-3 ml-4'> {t("uploaded_image")}</h6>
+        <div className="col-sm-4">
+          <div className="row justify-content-between">
+            <h6 className="heading mt-3 mb-3 ml-4"> {t("uploaded_image")}</h6>
             <button
-              className='btn btn-orange font-weight-bold mr-4 pl-4 pr-4'
+              className="btn btn-orange font-weight-bold mr-4 pl-4 pr-4"
               onClick={uploadPhoto}
               style={{ position: "relative", bottom: "10px" }}
             >
               <span style={{ fontSize: "15px" }}> {t("upload")}</span>
             </button>
           </div>
-          <div className='upload bg-white panel commonpanle mt-0'>
+          <div className="upload bg-white panel commonpanle mt-0">
             {photo ? (
               <div>
                 <div
-                  className='images-preview'
+                  className="images-preview"
                   style={{
                     margin: "auto",
                     display: "table",
@@ -313,18 +315,18 @@ const ReceiveShipment = (props) => {
                 >
                   <img
                     onClick={clearImage}
-                    width='20'
-                    height='20'
+                    width="20"
+                    height="20"
                     src={crossIcon}
-                    className='cross-img shadow rounded-circle'
-                    alt='Clear'
+                    className="cross-img shadow rounded-circle"
+                    alt="Clear"
                   />
                   <ModalImage
                     large={photoUrl}
                     small={photoUrl}
                     showRotate={true}
-                    name='photo'
-                    className='mt-1 modal-image'
+                    name="photo"
+                    className="mt-1 modal-image"
                   />
                 </div>
                 {/* <button type='button' className='btn btn-link float-right'>
@@ -334,45 +336,45 @@ const ReceiveShipment = (props) => {
             ) : (
               <>
                 <div
-                  className='row '
+                  className="row "
                   style={{ margin: "auto", display: "table" }}
                 >
                   <img
                     src={uploadBlue}
-                    name='photo'
-                    width='50'
-                    height='50'
-                    className='mt-1'
+                    name="photo"
+                    width="50"
+                    height="50"
+                    className="mt-1"
                     style={{ margin: "auto", display: "table" }}
-                    alt='Upload'
+                    alt="Upload"
                   />
-                  <label className='mt-3'>
+                  <label className="mt-3">
                     {t("drag_drop") + " " + t("files_here")}{" "}
-                    <input type='file' className='select' onChange={setFile} />{" "}
+                    <input type="file" className="select" onChange={setFile} />{" "}
                   </label>
                 </div>
                 <div
-                  className='row mb-3'
+                  className="row mb-3"
                   style={{ margin: "auto", display: "table" }}
                 >
                   {t("or")}
                 </div>
                 <div
-                  className='row'
+                  className="row"
                   style={{
                     margin: "auto",
                     display: "table",
                   }}
                 >
                   <label
-                    className='btn btn-primary'
+                    className="btn btn-primary"
                     style={{ margin: 0, height: "max-content" }}
                   >
                     {t("browse_files")}
                     <input
-                      type='file'
+                      type="file"
                       multiple={true}
-                      className='select'
+                      className="select"
                       onChange={setFile}
                     />{" "}
                   </label>
@@ -382,12 +384,12 @@ const ReceiveShipment = (props) => {
           </div>
         </div>
       </div>
-      <div className='row'>
-        <div className='col-sm-4'>
-          <h6 className='heading mt-3 mb-3 ml-3'> {t("product_details")}</h6>
+      <div className="row">
+        <div className="col-sm-4">
+          <h6 className="heading mt-3 mb-3 ml-3"> {t("product_details")}</h6>
         </div>
       </div>
-      <div className='row'>
+      <div className="row">
         <ProductInfo
           shipments={tracking}
           productHighLight={productHighLight}
@@ -401,22 +403,26 @@ const ReceiveShipment = (props) => {
         />
       </div>
       {receiveShipmentModal && (
-        <Modal close={() => closeModalShipment()} size='modal-sm'>
-          <SuccessPopup onHide={closeModalShipment} t={t} />
+        <Modal close={() => closeModalShipment()} size="modal-sm">
+          <SuccessPopup
+            onHide={closeModalShipment}
+            t={t}
+            points={ReceivePoints}
+          />
         </Modal>
       )}
       {message && (
         <div
-          className='d-flex flex-column align-items-center mt-3'
+          className="d-flex flex-column align-items-center mt-3"
           style={{ position: "absolute", top: "55vh", right: "10vw" }}
         >
           <Alert
-            severity='success'
+            severity="success"
             onClick={() => {
               setMessage(false);
             }}
           >
-            <div className='d-flex flex-column align-items-center'>
+            <div className="d-flex flex-column align-items-center">
               <AlertTitle>{t("success")}</AlertTitle>
               {message}
             </div>

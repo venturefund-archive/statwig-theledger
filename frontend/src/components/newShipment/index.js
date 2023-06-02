@@ -329,7 +329,7 @@ const NewShipment = (props) => {
 							message: "Created Successfully!",
 							id: result?.id,
 							type: "Success",
-							points:100,
+							points:200,
 							t: t,
 						});
 					} else {
