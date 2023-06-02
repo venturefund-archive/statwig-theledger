@@ -492,7 +492,7 @@ exports.vaccinateIndividual = [
 				userOrgId: req.user.organisationId,
 				userWarehouseId: req.user.warehouseId,
 			}
-			await addReward(rewardData)
+			await addReward(rewardData, req?.user?.role)
 			return apiResponse.successResponseWithData(res, "Dose added successfully!", {
 				vaccineVialId,
 				dose
