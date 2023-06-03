@@ -69,8 +69,12 @@ export default function Beneficiary(props) {
     vialId,
     setVialId,
     saveVaccination,
+    saveCompleteVaccination,
     setRewardModal,
     setModalProps,
+    setOpen,
+    count,
+    setcount,
   } = props;
   const { t } = useTranslation();
   const [LayoutType, setLayoutType] = useState(1);
@@ -122,9 +126,7 @@ export default function Beneficiary(props) {
 
   const completeVaccination = async () => {
     await completeVaccinationVial({ vaccineVialId: vialId });
-    setRewardModal(true);
-    setModalProps(200);
-    saveVaccination();
+    saveCompleteVaccination();
   };
 
   return (
@@ -256,6 +258,9 @@ export default function Beneficiary(props) {
               atomId={batchDetails?.atom?.id}
               newVaccination={newVaccination}
               setLayoutType={setLayoutType}
+              setOpen={setOpen}
+              setcount={setcount}
+              count={count}
             />
           )}
         </div>

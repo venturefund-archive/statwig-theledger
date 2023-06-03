@@ -18,6 +18,7 @@ export default function UnitUsedTable({
   setTableView,
   setBatchDetails,
   setVialId,
+  setcount,
 }) {
   const [page, setPage] = useState(1);
   const [unitsUtilized, setUnitsUtilized] = useState([]);
@@ -98,6 +99,7 @@ export default function UnitUsedTable({
                       setTableView={setTableView}
                       setBatchDetails={setBatchDetails}
                       setVialId={setVialId}
+                      setcount={setcount}
                     />
                   ))}
               </TableBody>
