@@ -21,6 +21,18 @@ const DriverGraph = (props) => {
       fail(result.message);
     }
   }
+  const randomData = [];
+  const generateRandomData = (success, fail) => {
+    for (let i = 1; i < 8; i++) {
+      randomData.push([
+        new Date().toISOString(),
+        Math.floor(Math.random() * (100 - 75 + 1)) + 75,
+      ]);
+    }
+    randomData.shift();
+    setAvg(Math.floor(Math.random() * (90 - 88 + 1)) + 88);
+    success(randomData);
+  };
   return (
     <>
       <div className='row'>
@@ -41,8 +53,8 @@ const DriverGraph = (props) => {
             height='240px'
             ytitle='Driver Score'
             xtitle='Trips'
-            data={fetchData}
-            refresh={60}
+            data={generateRandomData}
+            refresh={6}
           />
         </div>
       </div>

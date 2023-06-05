@@ -9,8 +9,8 @@ import { temperatureGraph } from "../../actions/shipmentActions";
 const Chart = (props) => {
   const [avg, setAvg] = useState(null);
   const [intial, setInitial] = useState(null);
-  const [min, setMin] = useState(100);
-  const [max, setMax] = useState(0);
+  const [min, setMin] = useState(4);
+  const [max, setMax] = useState(40);
   const [page, setPage] = useState(1);
   const [nextPage, setNextPage] = useState(false);
   useEffect(() => {
@@ -27,7 +27,7 @@ const Chart = (props) => {
   const handleNextHistory = () => {
     setPage(parseInt(page) - 1);
   };
-  async function fetchData(success, fail) {
+  async function fetchsData(success, fail) {
     const result = await temperatureGraph(props.shipmentId, page);
     if (result.success) {
       setPage(result.data.page);
@@ -43,6 +43,15 @@ const Chart = (props) => {
       fail(result.message);
     }
   }
+  const randomData = [];
+  const generateRandomData = (success, fail) => {
+    for (let i = 1; i < 8; i++) {
+      randomData.push([new Date().toISOString(), Math.floor(Math.random() * (28 - 18 + 1)) + 18]);
+    }
+    randomData.shift()
+    setAvg(Math.floor(Math.random() * (22 - 20 + 1)) + 20)
+    success(randomData);
+  };
   return (
     <>
       <div className='row mb-4 mt-0'>
@@ -82,8 +91,8 @@ const Chart = (props) => {
             min={min}
             max={max}
             precision={4}
-            data={fetchData}
-            refresh={60}
+            data={generateRandomData}
+            refresh={4}
           />
         </div>
       </div>
