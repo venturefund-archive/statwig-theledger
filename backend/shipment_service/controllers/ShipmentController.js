@@ -1145,14 +1145,18 @@ exports.createShipmentForTpl = [
         );
       }
       const supplierID = req.body.supplier.id;
-      const supplierOrgData = await TplOrgModel.findOne({
+      let supplierOrgData = await TplOrgModel.findOne({
         id: req.body.supplier.id,
       });
       if (supplierOrgData == null) {
-        return apiResponse.errorResponse(
-          res,
-          responses(req.user.preferredLanguage).supplier_not_defined
-        );
+        supplierOrgData = await OrganisationModel.findOne({
+          id: req.body.supplier.id,
+        });
+        if (supplierOrgData == null)
+          return apiResponse.errorResponse(
+            res,
+            responses(req.user.preferredLanguage).supplier_not_defined
+          );
       }
 
       const receiverOrgData = await TplOrgModel.findOne({
