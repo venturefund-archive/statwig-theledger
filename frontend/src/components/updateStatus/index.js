@@ -23,7 +23,7 @@ const UpdateStatus = (props) => {
 	const profile = useSelector((state) => {
 		return state.user;
 	});
-	const intelEnabled = props.user.type === "Third Party Logistics" ? true : false;
+	const intelEnabled = (props.user.type && props.user.type.toUpperCase() === "THIRD PARTY LOGISTICS") ? true : false;
 	const { id, returnToView = "false" } = props.match.params;
 	const billNo = shipmentData?.airWayBillNo;
 	const { quantity, weight } = useState("");

@@ -19,8 +19,7 @@ function Table(props) {
       return 1;
     }
   });
-  const intelEnabled =
-    props.user.type === "Third Party Logistics" ? true : false;
+  const intelEnabled = (props.user.type && props.user.type.toUpperCase() === "THIRD PARTY LOGISTICS") ? true : false;
   const dispatch = useDispatch();
   const handlePageChange = (event, value) => {
     props.onPageChange(value);

@@ -28,8 +28,7 @@ export const AddLocation = (props) => {
 
 export const AddLocationCard = (props) => {
   const { t } = props;
-  const intelEnabled =
-    props.user.type === "Third Party Logistics" ? true : false;
+  const intelEnabled = (props.user.type && props.user.type.toUpperCase() === "THIRD PARTY LOGISTICS") ? true : false;
   const [addressTitle, setAddressTitle] = useState("");
   const [pincode, setPincode] = useState("");
   const [region, setRegion] = useState("");

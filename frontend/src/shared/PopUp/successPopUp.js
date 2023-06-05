@@ -4,8 +4,7 @@ import Checked from "../../assets/icons/waiting.png";
 
 const SuccessPopUp = (props) => {
   const { t } = props;
-  const intelEnabled =
-    props.user?.type === "Third Party Logistics" ? true : false;
+  const intelEnabled = (props.user.type && props.user.type.toUpperCase() === "THIRD PARTY LOGISTICS") ? true : false;
   return (
     <div className='popup'>
       <div className='d-flex  flex-column align-items-center'>

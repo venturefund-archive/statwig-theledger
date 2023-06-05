@@ -15,7 +15,7 @@ import {
   getAllOrganisations,
   getProductsByInventoryId,
 } from "../../actions/shippingOrderAction";
-import { getOrder, getOpenOrderIds } from "../../actions/poActions";
+import { getOrder, getOpenOrderIds, getProducts } from "../../actions/poActions";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import ShipmentPopUp from "./shipmentPopUp";
@@ -24,7 +24,6 @@ import Modal from "../../shared/modal";
 import { Formik } from "formik";
 import Select from "react-select";
 import { getOrganizationsTypewithauth } from "../../actions/userActions";
-import { getProducts } from "../../actions/poActions";
 import { getProductList } from "../../actions/productActions";
 import { config } from "../../config";
 import axios from "axios";
@@ -33,8 +32,7 @@ import OrganisationPopUp from "../signUp/organisationPopUp";
 
 const CreateShipment = (props) => {
   const { t } = props;
-  //const intelEnabled = props.user.type == "Third Party Logistics" ? true : false;
-  const intelEnabled = true;
+  const intelEnabled = (props.user.type && props.user.type.toUpperCase() === "THIRD PARTY LOGISTICS") ? true : false;
   const [senderOrganisationId, setSenderOrganistionId] = useState("");
   const [OrderIds, setOrderIds] = useState([]);
   const [senderOrganisation, setSenderOrganisation] = useState([]);
@@ -374,7 +372,7 @@ const CreateShipment = (props) => {
         setShipmentError(t("check_product_quantity"));
         setOpenShipmentFail(true);
       } else if (check === 2) {
-        setShipmentError(t("check_batch_numberssssssssssss"));
+        setShipmentError(t("check_batch_numbers"));
         setOpenShipmentFail(true);
       } else {
         dispatch(turnOn());

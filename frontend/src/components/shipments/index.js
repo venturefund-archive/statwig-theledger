@@ -47,7 +47,7 @@ const ShipmentAnalytic = (props) => {
   const [fromFilterDate, setFromFilterDate] = useState("");
   const [toFilterDate, setToFilterDate] = useState("");
   const intelEnabled =
-    props.user.type === "Third Party Logistics" ? true : false;
+    (props.user.type && props.user.type.toUpperCase() === "THIRD PARTY LOGISTICS") ? true : false;
   if (
     !isAuthenticated("inboundShipments") &&
     !isAuthenticated("outboundShipments")

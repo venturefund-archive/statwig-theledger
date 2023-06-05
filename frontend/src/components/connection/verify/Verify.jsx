@@ -139,7 +139,10 @@ export default function Verify({ t }) {
         localStorage.setItem("bkp", result.data.data.permissions.permissions);
         dispatch(setCurrentUser(decoded));
         const intelEnabled =
-          decoded?.type === "Third Party Logistics" ? true : false;
+          decoded?.type &&
+          decoded?.type.toUpperCase() === "THIRD PARTY LOGISTICS"
+            ? true
+            : false;
         history.push(intelEnabled ? `/enterid` : `/overview`);
       } else {
         const err = result.data.message;
