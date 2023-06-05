@@ -181,9 +181,9 @@ function Table(props) {
                       </button>
                     ) : null}
                     <Link
-                      to={`/${intelEnabled === true
-                        ? `viewgmrshipment`
-                        : `viewshipment`
+                      to={`${intelEnabled === true
+                        ? `/viewgmrshipment`
+                        : `/viewshipment`
                         }/${shipment.id}`}
                       className='mi-btn mi-btn-sm mi-btn-secondary-outline'
                       style={{

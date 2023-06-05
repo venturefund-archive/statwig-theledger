@@ -187,7 +187,7 @@ const UpdateStatus = (props) => {
 
 	const closeModal = () => {
 		setOpenUpdatedStatus(false);
-		props.history.push(`/${intelEnabled === true ? `viewgmrshipment` : `viewshipment`}/${id}`);
+		props.history.push(`${intelEnabled === true ? `/viewgmrshipment` : `/viewshipment`}/${id}`);
 	};
 
 	const closeModalFail = () => {
@@ -717,7 +717,7 @@ const UpdateStatus = (props) => {
 												const path =
 													returnToView === "false"
 														? "/shipments"
-														: `/${intelEnabled === true ? `viewgmrshipment` : `viewshipment`
+														: `${intelEnabled === true ? `/viewgmrshipment` : `/viewshipment`
 														}/${id}`;
 												props.history.push(path);
 											}}
