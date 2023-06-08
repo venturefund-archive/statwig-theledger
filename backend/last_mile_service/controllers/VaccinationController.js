@@ -626,6 +626,133 @@ exports.vaccinateMultiple = [
 	},
 ];
 
+exports.syncOfflineVaccinations = [
+	auth,
+	async (req, res) => {
+		try {
+			for (const group of req.body) {
+				let {
+					vaccineVialId,
+					isComplete,
+					doses
+				} = group;
+				const splits = []
+				for (let i = 0; i < doses.length; i += 10) {
+					splits.push(doses.slice(i, i + 10));
+				}
+				for (const split of splits) {
+					const {
+						warehouseId,
+						productId,
+						batchNumber,
+						atomId,
+					} = split;
+					const warehouse = await WarehouseModel.findOne({ id: warehouseId });
+
+					const existingInventory = await InventoryModel.findOne(
+						{ id: warehouse.warehouseInventory },
+						{ _id: 1, id: 1, inventoryDetails: { $elemMatch: { productId: productId } } }
+					);
+					let existingAtom;
+					if (atomId) {
+						existingAtom = await AtomModel.findOne({
+							id: atomId,
+							status: "HEALTHY",
+						});
+					} else {
+						existingAtom = await AtomModel.findOne({ currentInventory: existingInventory.id, productId: productId, batchNumbers: batchNumber });
+					}
+
+					/* Inventory & Batch Validation */
+					if (existingInventory?.inventoryDetails?.length) {
+						if (existingInventory.inventoryDetails[0].quantity < 1) {
+							throw new Error("Inventory exhausted!");
+						}
+					}
+					if (!existingAtom?.quantity) {
+						throw new Error("Batch exhausted!");
+					}
+
+
+					let vailDoes = 0;
+					if (vaccineVialId) {
+						const vaccineVial = await VaccineVialModel.findOne({ id: vaccineVialId });
+						vailDoes = split.length + vaccineVial.numberOfDoses;
+					}
+					if (!vaccineVialId || vailDoes > 10) {
+						const vaccineVialCounter = await CounterModel.findOneAndUpdate(
+							{ "counters.name": "vaccineVialId" },
+							{ $inc: { "counters.$.value": 1 } },
+							{ new: true }
+						);
+						// Create an new vaccineVialId
+						vaccineVialId = vaccineVialCounter.counters[13].format + vaccineVialCounter.counters[13].value;
+						// New vaccine vial
+						const vaccineVial = new VaccineVialModel({
+							id: vaccineVialId,
+							warehouseId: warehouseId,
+							productId: productId,
+							batchNumber: batchNumber,
+							isComplete: isComplete || false,
+							numberOfDoses: split.length,
+							atomId: existingAtom.id,
+						});
+						await vaccineVial.save();
+
+						// Reduce inventory in InventoryModel and AtomModel
+						await AtomModel.updateOne(
+							{ atomId: existingAtom.id, status: "HEALTHY" },
+							{ $inc: { quantity: -1 } }
+						);
+
+						await AtomModel.updateMany(
+							{ quantity: 0 },
+							{ $set: { status: "CONSUMED" } }
+						);
+
+						await InventoryModel.updateOne(
+							{ id: warehouse.warehouseInventory, "inventoryDetails.productId": productId },
+							{ $inc: { "inventoryDetails.$.quantity": -1 } }
+						);
+					}
+
+					for (const dose of split) {
+						if (dose?.id) {
+							const update = { ...dose };
+							delete update.id;
+							await DoseModel.findOneAndUpdate({ id: dose.id }, { $set: update });
+						} else {
+							const doseCounter = await CounterModel.findOneAndUpdate(
+								{ "counters.name": "doseId" },
+								{ $inc: { "counters.$.value": 1 } },
+								{ new: true }
+							);
+							const doseId = doseCounter.counters[14].format + doseCounter.counters[14].value;
+
+							const newDose = new DoseModel({
+								id: doseId,
+								vaccineVialId: vaccineVialId,
+								age: dose.age || 0,
+								ageMonths: dose.ageMonths || 0,
+								gender: dose.gender === "GENERAL" ? "OTHERS" : dose.gender.toUpperCase(),
+								createdDateString: getDateStringForMongo(new Date()),
+							});
+							await newDose.save();
+						}
+					}
+					vaccineVialId = false
+				}
+			}
+
+			return apiResponse.successResponse(res, "Offline Vaccinations Sync Success");
+		}
+		catch (err) {
+			console.log(err);
+			return apiResponse.errorResponse(res, err);
+		}
+	}
+]
+
 exports.getVaccinationDetailsByVial = [
 	auth,
 	async (req, res) => {

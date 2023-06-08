@@ -18,5 +18,6 @@ router.post("/exportVialsUtilised", VaccinationController.exportVialsUtilised);
 router.put("/updateDose", VaccinationController.updateDose);
 router.delete("/deleteDose", VaccinationController.deleteDose);
 router.post("/completeVial", VaccinationController.completeVial);
-router.get("/addDateStringToDoses", VaccinationController.addDateStringToDoses)
+router.get("/addDateStringToDoses", VaccinationController.addDateStringToDoses);
+router.post("/syncOfflineVaccinations", VaccinationController.syncOfflineVaccinations);
 module.exports = router;
