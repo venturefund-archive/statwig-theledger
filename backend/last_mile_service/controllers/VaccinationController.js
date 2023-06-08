@@ -609,6 +609,16 @@ exports.vaccinateMultiple = [
 						createdDateString: getDateStringForMongo(new Date()),
 					});
 					await newDose.save();
+					const rewardData = {
+						eventId: doseId,
+						event: "VACCINATION",
+						eventType: "DOSE",
+						eventTime: new Date(),
+						userId: req.user.id,
+						userOrgId: req.user.organisationId,
+						userWarehouseId: req.user.warehouseId,
+					}
+					await addReward(rewardData, req?.user?.role)
 				}
 			}
 
@@ -738,6 +748,16 @@ exports.syncOfflineVaccinations = [
 								createdDateString: getDateStringForMongo(new Date()),
 							});
 							await newDose.save();
+							const rewardData = {
+								eventId: doseId,
+								event: "VACCINATION",
+								eventType: "DOSE",
+								eventTime: new Date(),
+								userId: req.user.id,
+								userOrgId: req.user.organisationId,
+								userWarehouseId: req.user.warehouseId,
+							}
+							await addReward(rewardData, req?.user?.role)
 						}
 					}
 					vaccineVialId = false
