@@ -66,7 +66,9 @@ export default function Rewards({ t }) {
                   </div>
                   <div className='point_score'>
                     <div className='points_wrap'>
-                      <p className='reward_points_ts'> 100</p>
+                      <p className='reward_points_ts'>
+                        {rewards?.orderRewards || 0}
+                      </p>
                       <img src={Tropy} alt='Tropy' />
                     </div>
                   </div>
@@ -86,7 +88,9 @@ export default function Rewards({ t }) {
                   </div>
                   <div className='point_score'>
                     <div className='points_wrap'>
-                      <p className='reward_points_ts'> 200</p>
+                      <p className='reward_points_ts'>
+                        {rewards?.shipmentRewards || 0}
+                      </p>
                       <img src={Tropy} alt='Tropy' />
                     </div>
                   </div>
@@ -97,7 +101,7 @@ export default function Rewards({ t }) {
                   </div>
                   <div className='point_details'>
                     <h1 className='points_heading_ts'>
-                      Lastmile Reward Points
+                      Last Mile Reward Points
                     </h1>
                     <p className='points_subheading_ts'>
                       Lorem, ipsum dolor sit amet consectetur adipisicing elit.
@@ -106,7 +110,9 @@ export default function Rewards({ t }) {
                   </div>
                   <div className='point_score'>
                     <div className='points_wrap'>
-                      <p className='reward_points_ts'> 200</p>
+                      <p className='reward_points_ts'>
+                        {rewards?.lastMileRewards || 0}
+                      </p>
                       <img src={Tropy} alt='Tropy' />
                     </div>
                   </div>
