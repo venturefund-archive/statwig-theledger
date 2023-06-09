@@ -65,7 +65,7 @@ export default function Rewards({ t }) {
                   <div className='point_score'>
                     <div className='points_wrap'>
                       <p className='reward_points_ts'>
-                        {rewards?.orderRewards || 0}
+                        {rewards?.data?.orderRewards || 0}
                       </p>
                       <img src={Tropy} alt='Tropy' />
                     </div>
@@ -87,7 +87,7 @@ export default function Rewards({ t }) {
                   <div className='point_score'>
                     <div className='points_wrap'>
                       <p className='reward_points_ts'>
-                        {rewards?.shipmentRewards || 0}
+                        {rewards?.data?.shipmentRewards || 0}
                       </p>
                       <img src={Tropy} alt='Tropy' />
                     </div>
@@ -109,7 +109,7 @@ export default function Rewards({ t }) {
                   <div className='point_score'>
                     <div className='points_wrap'>
                       <p className='reward_points_ts'>
-                        {rewards?.lastMileRewards || 0}
+                        {rewards?.data?.lastMileRewards || 0}
                       </p>
                       <img src={Tropy} alt='Tropy' />
                     </div>
