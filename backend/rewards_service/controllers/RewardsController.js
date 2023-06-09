@@ -11,7 +11,35 @@ exports.userRewards = [
     asyncHandler(apiKeyAuth),
     async function (req, res) {
         try {
-            let rewards = await RewardUserModel.findOne({ appId: req.appId, userId: req.user.id })
+            let rewards = await RewardUserModel.findOne({ appId: req.appId, userId: req.user.id }).lean();
+            const detailedRewards = await RewardModel.aggregate([{
+                $facet: {
+                    order: [{
+                        $match: { eventType: "ORDER", appId: req.appId, userId: req.user.id },
+                    }, {
+                        $group: {
+                            _id: null,
+                            points: { "$sum": "$points" }
+                        }
+                    }],
+                    shipment: [{
+                        $match: { eventType: "SHIPMENT", appId: req.appId, userId: req.user.id },
+                    }, {
+                        $group: {
+                            _id: null,
+                            points: { "$sum": "$points" }
+                        }
+                    }],
+                    lastMile: [{
+                        $match: { eventType: "DOSE", appId: req.appId, userId: req.user.id },
+                    }, {
+                        $group: {
+                            _id: null,
+                            points: { "$sum": "$points" }
+                        }
+                    }],
+                }
+            }])
             if (rewards === null) {
                 rewards = {
                     points: 0,
@@ -19,7 +47,12 @@ exports.userRewards = [
                     redeemedPoints: 0,
                 }
             }
-            return apiResponse.successResponseWithData(res, "User Rewards", rewards)
+            const userRewards = {
+                ...rewards, orderRewards: detailedRewards?.[0].order?.[0]?.points || 0,
+                shipmentRewards: detailedRewards?.[0].shipment?.[0]?.points || 0,
+                lastMileRewards: detailedRewards?.[0].lastMile?.[0]?.points || 0
+            }
+            return apiResponse.successResponseWithData(res, "User Rewards", userRewards)
         }
         catch (err) {
             console.log(err);
