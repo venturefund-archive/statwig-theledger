@@ -643,75 +643,76 @@ exports.syncOfflineVaccinations = [
 			for (const group of req.body) {
 				const {
 					isComplete,
-					doses
+					doses = []
 				} = group;
-				for (const dose of doses) {
+				for (const [index, dose] of doses.entries()) {
 					const {
 						warehouseId,
 						productId,
 						batchNumber,
 						atomId,
 					} = dose;
-					const warehouse = await WarehouseModel.findOne({ id: warehouseId });
-					const existingInventory = await InventoryModel.findOne(
-						{ id: warehouse?.warehouseInventory },
-						{ _id: 1, id: 1, inventoryDetails: { $elemMatch: { productId: productId } } }
-					);
-					let existingAtom;
-					if (atomId) {
-						existingAtom = await AtomModel.findOne({
-							id: atomId,
-							status: "HEALTHY",
-						});
-					} else {
-						existingAtom = await AtomModel.findOne({ currentInventory: existingInventory?.id, productId: productId, batchNumbers: batchNumber, quantity: { $gt: 0 }, status: "HEALTHY" });
-					}
-
-					/* Inventory & Batch Validation */
-					if (existingInventory?.inventoryDetails?.length) {
-						if (existingInventory.inventoryDetails[0].quantity < 1) {
-							throw new Error("Inventory exhausted!");
+					let vaccineVialId;
+					if (index == 0) {
+						const warehouse = await WarehouseModel.findOne({ id: warehouseId });
+						const existingInventory = await InventoryModel.findOne(
+							{ id: warehouse?.warehouseInventory },
+							{ _id: 1, id: 1, inventoryDetails: { $elemMatch: { productId: productId } } }
+						);
+						let existingAtom;
+						if (atomId) {
+							existingAtom = await AtomModel.findOne({
+								id: atomId,
+								status: "HEALTHY",
+							});
+						} else {
+							existingAtom = await AtomModel.findOne({ currentInventory: existingInventory?.id, productId: productId, batchNumbers: batchNumber, quantity: { $gt: 0 }, status: "HEALTHY" });
 						}
+
+						/* Inventory & Batch Validation */
+						if (existingInventory?.inventoryDetails?.length) {
+							if (existingInventory.inventoryDetails[0].quantity < 1) {
+								throw new Error("Inventory exhausted!");
+							}
+						}
+						if (!existingAtom?.quantity) {
+							throw new Error("Batch exhausted!");
+						}
+
+						const vaccineVialCounter = await CounterModel.findOneAndUpdate(
+							{ "counters.name": "vaccineVialId" },
+							{ $inc: { "counters.$.value": 1 } },
+							{ new: true }
+						);
+						vaccineVialId = vaccineVialCounter.counters[13].format + vaccineVialCounter.counters[13].value;
+						// New vaccine vial
+						const vaccineVial = new VaccineVialModel({
+							id: vaccineVialId,
+							warehouseId: warehouseId,
+							productId: productId,
+							batchNumber: batchNumber,
+							isComplete: isComplete || false,
+							numberOfDoses: doses.length,
+							atomId: existingAtom.id,
+						});
+						await vaccineVial.save();
+
+						// Reduce inventory in InventoryModel and AtomModel
+						await AtomModel.updateOne(
+							{ atomId: existingAtom.id, status: "HEALTHY" },
+							{ $inc: { quantity: -1 } }
+						);
+
+						await AtomModel.updateMany(
+							{ quantity: 0 },
+							{ $set: { status: "CONSUMED" } }
+						);
+
+						await InventoryModel.updateOne(
+							{ id: warehouse.warehouseInventory, "inventoryDetails.productId": productId },
+							{ $inc: { "inventoryDetails.$.quantity": -1 } }
+						);
 					}
-					if (!existingAtom?.quantity) {
-						throw new Error("Batch exhausted!");
-					}
-
-					const vaccineVialCounter = await CounterModel.findOneAndUpdate(
-						{ "counters.name": "vaccineVialId" },
-						{ $inc: { "counters.$.value": 1 } },
-						{ new: true }
-					);
-					const vaccineVialId = vaccineVialCounter.counters[13].format + vaccineVialCounter.counters[13].value;
-					// New vaccine vial
-					const vaccineVial = new VaccineVialModel({
-						id: vaccineVialId,
-						warehouseId: warehouseId,
-						productId: productId,
-						batchNumber: batchNumber,
-						isComplete: isComplete || false,
-						numberOfDoses: doses.length,
-						atomId: existingAtom.id,
-					});
-					await vaccineVial.save();
-
-					// Reduce inventory in InventoryModel and AtomModel
-					await AtomModel.updateOne(
-						{ atomId: existingAtom.id, status: "HEALTHY" },
-						{ $inc: { quantity: -1 } }
-					);
-
-					await AtomModel.updateMany(
-						{ quantity: 0 },
-						{ $set: { status: "CONSUMED" } }
-					);
-
-					await InventoryModel.updateOne(
-						{ id: warehouse.warehouseInventory, "inventoryDetails.productId": productId },
-						{ $inc: { "inventoryDetails.$.quantity": -1 } }
-					);
-
-
 					if (dose?.id) {
 						const update = { ...dose };
 						delete update.id;
