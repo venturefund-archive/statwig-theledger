@@ -11,9 +11,41 @@ exports.userRewards = [
     asyncHandler(apiKeyAuth),
     async function (req, res) {
         try {
-            console.log(req.appId, req.user)
-            const rewards = await RewardUserModel.findOne({ appId: req.appId, userId: req.user.id })
-            return apiResponse.successResponseWithData(res, "User Rewards", rewards)
+            const rewards = await RewardUserModel.findOne({ appId: req.appId, userId: req.user.id }).lean();
+            const detailedRewards = await RewardModel.aggregate([{
+                $facet: {
+                    order: [{
+                        $match: { eventType: "ORDER", appId: req.appId, userId: req.user.id },
+                    }, {
+                        $group: {
+                            _id: null,
+                            points: { "$sum": "$points" }
+                        }
+                    }],
+                    shipment: [{
+                        $match: { eventType: "SHIPMENT", appId: req.appId, userId: req.user.id },
+                    }, {
+                        $group: {
+                            _id: null,
+                            points: { "$sum": "$points" }
+                        }
+                    }],
+                    lastMile: [{
+                        $match: { eventType: "DOSE", appId: req.appId, userId: req.user.id },
+                    }, {
+                        $group: {
+                            _id: null,
+                            points: { "$sum": "$points" }
+                        }
+                    }],
+                }
+            }])
+            const userRewards = {
+                ...rewards, orderRewards: detailedRewards?.[0].order?.[0]?.points || 0,
+                shipmentRewards: detailedRewards?.[0].shipment?.[0]?.points || 0,
+                lastMileRewards: detailedRewards?.[0].lastMile?.[0]?.points || 0
+            }
+            return apiResponse.successResponseWithData(res, "User Rewards", userRewards)
         }
         catch (err) {
             console.log(err);
