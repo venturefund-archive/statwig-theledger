@@ -645,6 +645,7 @@ exports.syncOfflineVaccinations = [
 					isComplete,
 					doses = []
 				} = group;
+				let vaccineVialId;
 				for (const [index, dose] of doses.entries()) {
 					const {
 						warehouseId,
@@ -652,7 +653,6 @@ exports.syncOfflineVaccinations = [
 						batchNumber,
 						atomId,
 					} = dose;
-					let vaccineVialId;
 					if (index == 0) {
 						const warehouse = await WarehouseModel.findOne({ id: warehouseId });
 						const existingInventory = await InventoryModel.findOne(
