@@ -9,7 +9,6 @@ async function addReward(data, role) {
         axios.defaults.headers.common['x-api-key'] = REWARDS_API_KEY;
         axios.defaults.headers.common['role'] = role;
         await axios.post(REWARDS_SERVICE_URL + "/rewards", data);
-        console.log('Request sent successfully');
     } catch (error) {
         console.log('Failed to send request:', error);
         // Add request to the queue for later retry
