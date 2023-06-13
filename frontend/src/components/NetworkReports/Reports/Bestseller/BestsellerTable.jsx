@@ -7,124 +7,137 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import BestsellerRow from "./BestsellerRow";
 import { useTranslation } from "react-i18next";
-import { getBestsellerFilterOptions, getBestSellersReport } from "../../../../actions/networkActions";
-import { useTheme, styled } from "@mui/material/styles";
+import {
+  getBestsellerFilterOptions,
+  getBestSellersReport,
+} from "../../../../actions/networkActions";
+import { useTheme } from "@mui/material/styles";
 import Filterbar from "../../Filter/Filterbar";
 import { Pagination } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { turnOff, turnOn } from "../../../../actions/spinnerActions";
 
 function TableHeader({
-	anchorEl,
-	selectedColumn,
-	handleClick,
-	handleClose,
-	theme,
-	filterOptions,
-	selectedFilters,
-	handleFilterUpdate,
-	t,
+  anchorEl,
+  selectedColumn,
+  handleClick,
+  handleClose,
+  theme,
+  filterOptions,
+  selectedFilters,
+  handleFilterUpdate,
+  t,
 }) {
-	return (
-		<TableRow>
-			<TableCell>
-				<div
-					className="mi_report_table_head"
-					onClick={(event) => handleClick(event, "productCategory")}
-				>
-					<p className="mi-body-sm f-400 mi-reset grey-400">{t("product_category")}</p>
-					<i class="fa-solid fa-sort grey-400"></i>
-				</div>
-				<Filterbar
-					title={t("product_category")}
-					fieldName="productCategory"
-					anchorEl={anchorEl}
-					selectedColumn={selectedColumn}
-					handleClose={handleClose}
-					theme={theme}
-					options={filterOptions.productCategories}
-					selectedFilters={selectedFilters}
-					handleFilterUpdate={handleFilterUpdate}
-				/>
-			</TableCell>
-			<TableCell>
-				<div
-					className="mi_report_table_head"
-					onClick={(event) => handleClick(event, "productName")}
-				>
-					<p className="mi-body-sm f-400 mi-reset grey-400">{t("product_name")}</p>
-					{/* <i class="fa-solid fa-sort grey-400"></i> */}
-				</div>
-				<Filterbar
-					title={t("product_name")}
-					fieldName="productName"
-					anchorEl={anchorEl}
-					selectedColumn={selectedColumn}
-					handleClose={handleClose}
-					theme={theme}
-					options={filterOptions.productNames}
-					selectedFilters={selectedFilters}
-					handleFilterUpdate={handleFilterUpdate}
-				/>
-			</TableCell>
-			<TableCell>
-				<div
-					className="mi_report_table_head"
-					onClick={(event) => handleClick(event, "manufacturer")}
-				>
-					<p className="mi-body-sm f-400 mi-reset grey-400">{t("manufacturer")}</p>
-					<i class="fa-solid fa-sort grey-400"></i>
-					<Filterbar
-						title={t("manufacturer")}
-						fieldName="manufacturer"
-						anchorEl={anchorEl}
-						selectedColumn={selectedColumn}
-						handleClose={handleClose}
-						theme={theme}
-						options={filterOptions.manufacturers}
-						selectedFilters={selectedFilters}
-						handleFilterUpdate={handleFilterUpdate}
-					/>
-				</div>
-			</TableCell>
-			<TableCell>
-				<div className="mi_report_table_head">
-					<p className="mi-body-sm f-400 mi-reset grey-400">{t("no_of_units_solds")}</p>
-					{/* <i class="fa-solid fa-sort grey-400"></i> */}
-				</div>
-			</TableCell>
-			<TableCell>
-				<div
-					className="mi_report_table_head"
-					onClick={(event) => handleClick(event, "organisation")}
-				>
-					<p className="mi-body-sm f-400 mi-reset grey-400">{t("organisation_name")}</p>
-					<i class="fa-solid fa-sort grey-400"></i>
-					<Filterbar
-						title={t("organisation_name")}
-						fieldName="organisation"
-						anchorEl={anchorEl}
-						selectedColumn={selectedColumn}
-						handleClose={handleClose}
-						theme={theme}
-						options={filterOptions.organisations}
-						selectedFilters={selectedFilters}
-						handleFilterUpdate={handleFilterUpdate}
-					/>
-				</div>
-			</TableCell>
-			<TableCell>
-				<div className="mi_report_table_head">
-					<p className="mi-body-sm f-400 mi-reset grey-400">{t("address")}</p>
-					{/* <i class="fa-solid fa-sort grey-400"></i> */}
-				</div>
-			</TableCell>
-		</TableRow>
-	);
+  return (
+    <TableRow>
+      <TableCell>
+        <div
+          className='mi_report_table_head'
+          onClick={(event) => handleClick(event, "productCategory")}
+        >
+          <p className='mi-body-sm f-400 mi-reset grey-400'>
+            {t("product_category")}
+          </p>
+          <i className='fa-solid fa-sort grey-400'></i>
+        </div>
+        <Filterbar
+          title={t("product_category")}
+          fieldName='productCategory'
+          anchorEl={anchorEl}
+          selectedColumn={selectedColumn}
+          handleClose={handleClose}
+          theme={theme}
+          options={filterOptions.productCategories}
+          selectedFilters={selectedFilters}
+          handleFilterUpdate={handleFilterUpdate}
+        />
+      </TableCell>
+      <TableCell>
+        <div
+          className='mi_report_table_head'
+          onClick={(event) => handleClick(event, "productName")}
+        >
+          <p className='mi-body-sm f-400 mi-reset grey-400'>
+            {t("product_name")}
+          </p>
+          {/* <i className="fa-solid fa-sort grey-400"></i> */}
+        </div>
+        <Filterbar
+          title={t("product_name")}
+          fieldName='productName'
+          anchorEl={anchorEl}
+          selectedColumn={selectedColumn}
+          handleClose={handleClose}
+          theme={theme}
+          options={filterOptions.productNames}
+          selectedFilters={selectedFilters}
+          handleFilterUpdate={handleFilterUpdate}
+        />
+      </TableCell>
+      <TableCell>
+        <div
+          className='mi_report_table_head'
+          onClick={(event) => handleClick(event, "manufacturer")}
+        >
+          <p className='mi-body-sm f-400 mi-reset grey-400'>
+            {t("manufacturer")}
+          </p>
+          <i className='fa-solid fa-sort grey-400'></i>
+          <Filterbar
+            title={t("manufacturer")}
+            fieldName='manufacturer'
+            anchorEl={anchorEl}
+            selectedColumn={selectedColumn}
+            handleClose={handleClose}
+            theme={theme}
+            options={filterOptions.manufacturers}
+            selectedFilters={selectedFilters}
+            handleFilterUpdate={handleFilterUpdate}
+          />
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className='mi_report_table_head'>
+          <p className='mi-body-sm f-400 mi-reset grey-400'>
+            {t("no_of_units_solds")}
+          </p>
+          {/* <i className="fa-solid fa-sort grey-400"></i> */}
+        </div>
+      </TableCell>
+      <TableCell>
+        <div
+          className='mi_report_table_head'
+          onClick={(event) => handleClick(event, "organisation")}
+        >
+          <p className='mi-body-sm f-400 mi-reset grey-400'>
+            {t("organisation_name")}
+          </p>
+          <i className='fa-solid fa-sort grey-400'></i>
+          <Filterbar
+            title={t("organisation_name")}
+            fieldName='organisation'
+            anchorEl={anchorEl}
+            selectedColumn={selectedColumn}
+            handleClose={handleClose}
+            theme={theme}
+            options={filterOptions.organisations}
+            selectedFilters={selectedFilters}
+            handleFilterUpdate={handleFilterUpdate}
+          />
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className='mi_report_table_head'>
+          <p className='mi-body-sm f-400 mi-reset grey-400'>{t("address")}</p>
+          {/* <i className="fa-solid fa-sort grey-400"></i> */}
+        </div>
+      </TableCell>
+    </TableRow>
+  );
 }
 
-export default function BestsellerTable({locationParams}) {
-	const dispatch = useDispatch();
+export default function BestsellerTable({ locationParams }) {
+  const dispatch = useDispatch();
   const [bestseller, setBestseller] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [bestsellerFilters, setBestsellerFilters] = useState();
@@ -136,7 +149,7 @@ export default function BestsellerTable({locationParams}) {
     productCategories: [],
     productNames: [],
     manufacturers: [],
-    organisations: []
+    organisations: [],
   });
   const [selectedFilters, setSelectedFilters] = useState({
     productCategory: "",
@@ -155,9 +168,9 @@ export default function BestsellerTable({locationParams}) {
   const handleFilterUpdate = (fieldName, newValue) => {
     if (!fieldName) return;
     setSelectedFilters((prevState) => ({
-			...prevState,
-			[fieldName]: newValue,
-		}));
+      ...prevState,
+      [fieldName]: newValue,
+    }));
   };
 
   const handleClick = (event, fieldName) => {
@@ -175,54 +188,54 @@ export default function BestsellerTable({locationParams}) {
 
   const getBestSellerStockFilters = async () => {
     let payload = {
-			...selectedFilters,
-			...locationParams,
-		};
+      ...selectedFilters,
+      ...locationParams,
+    };
     payload.reportWarehouse = reportWarehouse;
-		payload.date = "";
-		dispatch(turnOn());
-		const outStockFilters = await getBestsellerFilterOptions(payload);
-		if (outStockFilters) setBestsellerFilters(outStockFilters.filters);
-		dispatch(turnOff());
-	};
+    payload.date = "";
+    dispatch(turnOn());
+    const outStockFilters = await getBestsellerFilterOptions(payload);
+    if (outStockFilters) setBestsellerFilters(outStockFilters.filters);
+    dispatch(turnOff());
+  };
 
   const getBestsellers = async () => {
-		let payload = {
-			...selectedFilters,
-			...locationParams,
-		};
-		payload.reportWarehouse = reportWarehouse;
-		payload.skip = (page - 1) * 10;
-		payload.limit = 10;
-		dispatch(turnOn());
-		const bestSellers = await getBestSellersReport(payload);
-		if (bestSellers) {
-			setBestseller(bestSellers.data.bestSellers);
-			setTotalCount(bestSellers.data.totalCount);
-			setReportWarehouse(bestSellers.data.warehouseId);
-		}
-		dispatch(turnOff());
-	};
+    let payload = {
+      ...selectedFilters,
+      ...locationParams,
+    };
+    payload.reportWarehouse = reportWarehouse;
+    payload.skip = (page - 1) * 10;
+    payload.limit = 10;
+    dispatch(turnOn());
+    const bestSellers = await getBestSellersReport(payload);
+    if (bestSellers) {
+      setBestseller(bestSellers.data.bestSellers);
+      setTotalCount(bestSellers.data.totalCount);
+      setReportWarehouse(bestSellers.data.warehouseId);
+    }
+    dispatch(turnOff());
+  };
 
   useEffect(() => {
-		getBestSellerStockFilters();
-		if(page === 1) getBestsellers();
-		setPage(1);
+    getBestSellerStockFilters();
+    if (page === 1) getBestsellers();
+    setPage(1);
   }, [selectedFilters, locationParams]);
 
-	useEffect(() => {
-		getBestsellers();
-	}, [page]);
+  useEffect(() => {
+    getBestsellers();
+  }, [page]);
 
   useEffect(() => {
-		if (bestsellerFilters?.length) {
-			let categoriesSet = new Set();
-			let productNamesSet = new Set();
+    if (bestsellerFilters?.length) {
+      let categoriesSet = new Set();
+      let productNamesSet = new Set();
       let manufacturersSet = new Set();
       let organisationSet = new Set();
-			bestsellerFilters.map((elem) => {
-				categoriesSet.add(elem.productCategory);
-				productNamesSet.add(elem.productName);
+      bestsellerFilters.map((elem) => {
+        categoriesSet.add(elem.productCategory);
+        productNamesSet.add(elem.productName);
         manufacturersSet.add(elem.manufacturer);
         organisationSet.add(elem.organisation);
       });
@@ -232,14 +245,14 @@ export default function BestsellerTable({locationParams}) {
       cols.manufacturers = [...manufacturersSet];
       cols.organisations = [...organisationSet];
       setFilterOptions(cols);
-		}
+    }
   }, [bestsellerFilters]);
 
   return (
     <TableContainer>
-      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+      <Table sx={{ minWidth: 650 }} aria-label='simple table'>
         <TableHead>
-        <TableHeader
+          <TableHeader
             anchorEl={anchorEl}
             setAnchorEl={setAnchorEl}
             selectedColumn={selectedColumn}
@@ -258,7 +271,11 @@ export default function BestsellerTable({locationParams}) {
           ))}
         </TableBody>
       </Table>
-			<Pagination count={Math.ceil(totalCount / 10)} page={page} onChange={handlePageChange} />
+      <Pagination
+        count={Math.ceil(totalCount / 10)}
+        page={page}
+        onChange={handlePageChange}
+      />
     </TableContainer>
   );
 }

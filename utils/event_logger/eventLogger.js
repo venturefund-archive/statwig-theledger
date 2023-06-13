@@ -1,6 +1,7 @@
 const validate = require("./helpers/validation.js");
 const Event = require("./models/EventModal");
 const config = require("./config.js");
+const { addReward } = require("./helpers/rewards.js")
 const MONGODB_URL = process.env.MONGODB_URL || config.MONGODB_URL;
 const mongoose = require("mongoose");
 mongoose
@@ -22,6 +23,16 @@ mongoose
 async function logEvent(data) {
   if (validate(data)) {
     try {
+      const rewardData = {
+        eventId: data.eventID,
+        event: data.eventType.primary,
+        eventType: data.eventType.description,
+        eventTime: new Date(),
+        userId: data.actor.actoruserid,
+        userOrgId: data.stackholders.actororg.id,
+        userWarehouseId: data.actorWarehouseId,
+      }
+      await addReward(rewardData);
       return await Event.findOne(
         { eventID: data.eventID },
         async function (err, foundEvent) {

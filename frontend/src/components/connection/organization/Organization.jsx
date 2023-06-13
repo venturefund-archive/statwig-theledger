@@ -26,16 +26,16 @@ export default function Organization(props) {
     }
     getAllRegions();
 
-    async function getCountriesForAmericas() {
-      let countries = await fetchCountriesByRegion("Americas");
-      setAllCountries(countries.data);
-      const costarica = countries.data.filter(
-        (country) => country.name === "Costa Rica"
-      );
-      let states = await fetchStateByCountry(costarica[0].id);
-      setAllStates(states.data);
-    }
-    getCountriesForAmericas();
+    // async function getCountriesForAmericas() {
+    //   let countries = await fetchCountriesByRegion("Americas");
+    //   setAllCountries(countries.data);
+    //   const costarica = countries.data.filter(
+    //     (country) => country.name === "Costa Rica"
+    //   );
+    //   let states = await fetchStateByCountry(costarica[0].id);
+    //   setAllStates(states.data);
+    // }
+    // getCountriesForAmericas();
   }, []);
 
   async function getAllCountries(region) {
@@ -59,8 +59,8 @@ export default function Organization(props) {
     formState: { errors },
     handleSubmit,
   } = useForm({
-    region: "Americas",
-    country: "Costa Rica",
+    region: "",
+    country: "",
     state: "",
     city: "",
     pincode: "",
@@ -72,83 +72,83 @@ export default function Organization(props) {
   };
 
   return (
-    <section className="account-section">
-      <div className="vl-connection-container">
+    <section className='account-section'>
+      <div className='vl-connection-container'>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="account-form-container"
+          className='account-form-container'
         >
-          <hgroup className="form-headers">
-            <h1 className="vl-heading f-700 vl-black">{t("org_detail")}</h1>
-            <h2 className="vl-subheading f-400 vl-grey-xs vl-line-sm">
+          <hgroup className='form-headers'>
+            <h1 className='vl-heading f-700 vl-black'>{t("org_detail")}</h1>
+            <h2 className='vl-subheading f-400 vl-grey-xs vl-line-sm'>
               {t("org_detail_msg")}
             </h2>
           </hgroup>
-          <section className="vl-input-group form-auto-fill-section">
-            {/* <div className="input-two-column">
-							<Controller
-								name="region"
-								control={control}
-								rules={{ required: true }}
-								render={({ field }) => (
-									<Autocomplete
-										fullWidth
-										options={allRegions}
-										getOptionLabel={(option) => option || ""}
-										{...field}
-										onChange={(event, value) => {
-											field.onChange(value);
-											getAllCountries(value);
-											setValue("country", "");
-											setValue("state", "");
-											setValue("city", "");
-											setValue("address", "");
-										}}
-										renderInput={(params) => (
-											<TextField
-												{...params}
-												label={t("region")}
-												error={Boolean(errors.region)}
-												helperText={errors.region && "Region is required!"}
-											/>
-										)}
-									/>
-								)}
-							/>
-							<Controller
-								name="country"
-								control={control}
-								rules={{ required: true }}
-								render={({ field }) => (
-									<Autocomplete
-										fullWidth
-										options={allCountries}
-										getOptionLabel={(option) => option.name || ""}
-										{...field}
-										onChange={(event, value) => {
-											field.onChange(value.name);
-											getAllStates(value);
-											setValue("state", "");
-											setValue("city", "");
-											setValue("address", "");
-										}}
-										renderInput={(params) => (
-											<TextField
-												{...params}
-												label={t("country")}
-												error={Boolean(errors.country)}
-												helperText={errors.country && "Country is required!"}
-											/>
-										)}
-									/>
-								)}
-							/>
-						</div> */}
-            <div className="input-two-column">
+          <section className='vl-input-group form-auto-fill-section'>
+            <div className='input-two-column'>
+              <Controller
+                name='region'
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <Autocomplete
+                    fullWidth
+                    options={allRegions}
+                    getOptionLabel={(option) => option || ""}
+                    {...field}
+                    onChange={(event, value) => {
+                      field.onChange(value);
+                      getAllCountries(value);
+                      setValue("country", "");
+                      setValue("state", "");
+                      setValue("city", "");
+                      setValue("address", "");
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label={t("region")}
+                        error={Boolean(errors.region)}
+                        helperText={errors.region && "Region is required!"}
+                      />
+                    )}
+                  />
+                )}
+              />
+              <Controller
+                name='country'
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <Autocomplete
+                    fullWidth
+                    options={allCountries}
+                    getOptionLabel={(option) => option.name || ""}
+                    {...field}
+                    onChange={(event, value) => {
+                      field.onChange(value.name);
+                      getAllStates(value);
+                      setValue("state", "");
+                      setValue("city", "");
+                      setValue("address", "");
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label={t("country")}
+                        error={Boolean(errors.country)}
+                        helperText={errors.country && "Country is required!"}
+                      />
+                    )}
+                  />
+                )}
+              />
+            </div>
+            {/* <div className='input-two-column'>
               <TextField
-                value="Americas"
+                value='Americas'
                 fullWidth
-                variant="outlined"
+                variant='outlined'
                 label={t("region")}
                 error={Boolean(errors.firstName)}
                 helperText={errors.firstName && "First Name is required!"}
@@ -159,9 +159,9 @@ export default function Organization(props) {
                 style={{ textAlign: "left" }}
               />
               <TextField
-                value="Costa Rica"
+                value='Costa Rica'
                 fullWidth
-                variant="outlined"
+                variant='outlined'
                 label={t("country")}
                 error={Boolean(errors.lastName)}
                 helperText={errors.lastName && "Last Name is required!"}
@@ -170,10 +170,10 @@ export default function Organization(props) {
                 }}
                 style={{ textAlign: "left" }}
               />
-            </div>
-            <div className="input-two-column">
+            </div> */}
+            <div className='input-two-column'>
               <Controller
-                name="state"
+                name='state'
                 control={control}
                 rules={{ required: true }}
                 render={({ field }) => (
@@ -200,7 +200,7 @@ export default function Organization(props) {
                 )}
               />
               <Controller
-                name="city"
+                name='city'
                 control={control}
                 rules={{ required: true }}
                 render={({ field }) => (
@@ -225,16 +225,16 @@ export default function Organization(props) {
                 )}
               />
             </div>
-            <div className="input-two-column">
+            <div className='input-two-column'>
               <Controller
-                name="pincode"
+                name='pincode'
                 control={control}
                 rules={{ required: true }}
                 render={({ field }) => (
                   <TextField
-                    type="number"
+                    type='number'
                     fullWidth
-                    variant="outlined"
+                    variant='outlined'
                     label={t("pincode")}
                     {...field}
                     error={Boolean(errors.pincode)}
@@ -243,15 +243,15 @@ export default function Organization(props) {
                 )}
               />
             </div>
-            <div className="input-single-column">
+            <div className='input-single-column'>
               <Controller
-                name="address"
+                name='address'
                 control={control}
                 rules={{ required: true }}
                 render={({ field }) => (
                   <TextField
                     fullWidth
-                    variant="outlined"
+                    variant='outlined'
                     label={t("address")}
                     multiline
                     {...field}
@@ -261,21 +261,21 @@ export default function Organization(props) {
                 )}
               />
             </div>
-            {/* <section className="terms-condition">
-							<div className="verify-terms-card">
-								<Checkbox />
-								<h2 className="vl-subheading f-400 vl-grey-xs">
-									By checking this your are agree to the{" "}
-									<span className="vl-blue">Terms & conditions</span> of
-									<span className="vl-blue"> Vaccineledger</span>
-								</h2>
-							</div>
-						</section> */}
+            <section className='terms-condition'>
+              <div className='verify-terms-card'>
+                <Checkbox />
+                <h2 className='vl-subheading f-400 vl-grey-xs'>
+                  By checking this your are agree to the{" "}
+                  <span className='vl-blue'>Terms & conditions</span> of
+                  <span className='vl-blue'> Vaccineledger</span>
+                </h2>
+              </div>
+            </section>
           </section>
-          <section className="call-full-btn-action">
+          <section className='call-full-btn-action'>
             <button
-              type="submit"
-              className="vl-btn vl-btn-md vl-btn-full vl-btn-primary"
+              type='submit'
+              className='vl-btn vl-btn-md vl-btn-full vl-btn-primary'
             >
               {t("register")}
             </button>

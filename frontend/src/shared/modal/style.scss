@@ -6,6 +6,7 @@
   border: 1px solid #707070;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
 }
 
 .modal {

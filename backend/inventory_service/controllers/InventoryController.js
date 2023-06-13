@@ -87,7 +87,7 @@ exports.getTotalCount = [
       });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -116,7 +116,7 @@ exports.getTotalCountOnHold = [
       });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -145,7 +145,7 @@ exports.getExpiringInventory = [
       });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -173,7 +173,7 @@ exports.getInventoryforProduct = [
         }
       });
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -208,7 +208,7 @@ exports.getInventoryDetailsForProduct = [
       });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -436,7 +436,7 @@ exports.getAllInventoryDetails = [
         }
       });
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -484,7 +484,7 @@ exports.updateInventories = [
       );
     } catch (e) {
       console.log(e);
-      apiResponse.ErrorResponse(res, e.message);
+      apiResponse.errorResponse(res, e.message);
     }
   },
 ];
@@ -573,7 +573,7 @@ exports.insertInventories = [
         responses(req.user.preferredLanguage).success
       );
     } catch (e) {
-      apiResponse.ErrorResponse(res, e.message);
+      apiResponse.errorResponse(res, e.message);
     }
   },
 ];
@@ -620,7 +620,7 @@ exports.addProductsToInventory = [
           const warehouseId = req.query?.warehouseId || req.user.warehouseId;
           const warehouse = await WarehouseModel.findOne({ id: warehouseId });
           if (!warehouse) {
-            return apiResponse.ErrorResponse(
+            return apiResponse.errorResponse(
               res,
               responses(req.user.preferredLanguage).not_assigned_to_org
             );
@@ -629,7 +629,7 @@ exports.addProductsToInventory = [
             id: warehouse.warehouseInventory,
           });
           if (!inventory)
-            return apiResponse.ErrorResponse(
+            return apiResponse.errorResponse(
               res,
               responses(req.user.preferredLanguage).cant_find_warehouse_inv
             );
@@ -654,7 +654,7 @@ exports.addProductsToInventory = [
             id: { $in: atoms },
           });
           if (dupSerialFound) {
-            return apiResponse.ErrorResponse(
+            return apiResponse.errorResponse(
               res,
               responses(req.user.preferredLanguage).duplicated_sno
             );
@@ -879,7 +879,7 @@ exports.addProductsToInventory = [
 
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -934,7 +934,7 @@ exports.addInventoriesFromExcel = [
                   ...(expDate ? { expiryDate: expDate } : {}),
                 };
               } else {
-                return apiResponse.ErrorResponse(res, "Product Doesn't exist in the inventory");
+                return apiResponse.errorResponse(res, "Product Doesn't exist in the inventory");
               }
             }
             const validRecords = utility.excludeExpireProduct(formatedData);
@@ -950,19 +950,19 @@ exports.addInventoriesFromExcel = [
               result,
             );
           } else {
-            return apiResponse.ErrorResponse(
+            return apiResponse.errorResponse(
               res,
               responses(req.user.preferredLanguage).no_permission,
             );
           }
         } catch (err) {
           console.log(err);
-          return apiResponse.ErrorResponse(res, err.message);
+          return apiResponse.errorResponse(res, err.message);
         }
       });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1000,13 +1000,13 @@ exports.getInventoryDetails = [
           inventoryDetails
         );
       } else {
-        return apiResponse.ErrorResponse(
+        return apiResponse.errorResponse(
           res,
           responses(req.user.preferredLanguage).warehouse_not_found
         );
       }
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1241,7 +1241,7 @@ exports.getGroupedInventoryDetails = [
       });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1272,7 +1272,7 @@ exports.getInventoryDetailsByBatchNumber = [
       });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1318,7 +1318,7 @@ exports.getBatchDetailsByBatchNumber = [
       });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1377,7 +1377,7 @@ exports.getProductListCounts = [
       return apiResponse.successResponseWithData(res, productArray);
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1396,7 +1396,7 @@ exports.getEmployeeDetailsByWarehouseId = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1435,7 +1435,7 @@ exports.getInventory = [
           inventory
         );
       } else {
-        return apiResponse.ErrorResponse(
+        return apiResponse.errorResponse(
           res,
           responses(req.user.preferredLanguage).warehouse_not_found
         );
@@ -1443,7 +1443,7 @@ exports.getInventory = [
     } catch (err) {
       console.log(err);
 
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1467,7 +1467,7 @@ exports.getInventoryCountsOfThePlatform = [
       return apiResponse.successResponseWithData(res, platformInventoryCount);
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1543,7 +1543,7 @@ exports.getInventoryCountsByOrganisation = [
       });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1699,7 +1699,7 @@ exports.getInventoryCountsByWarehouse = [
       return apiResponse.successResponseWithData(res, "counts are:", response);
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1788,7 +1788,7 @@ exports.getInventoryProductsByWarehouse = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -1818,7 +1818,7 @@ exports.getInventoryProductsByOrganisation = [
       return apiResponse.successResponseWithData(res, orgInventoryPerProduct);
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2098,7 +2098,7 @@ exports.getInventoryProductsByPlatform = [
       return apiResponse.successResponseWithData(res, platformInventory);
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2230,7 +2230,7 @@ exports.uploadSalesData = [
         `Uploaded Sales Data successfully. Num Records - ${respObj.length}`
       );
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2277,14 +2277,14 @@ exports.getBatchNearExpiration = [
         ]);
         return apiResponse.successResponseWithData(res, "Near expiring batch Details", result);
       } else {
-        return apiResponse.ErrorResponse(
+        return apiResponse.errorResponse(
           res,
           responses(req.user.preferredLanguage).warehouse_not_found,
         );
       }
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2338,14 +2338,14 @@ exports.getBatchExpired = [
           result
         );
       } else {
-        return apiResponse.ErrorResponse(
+        return apiResponse.errorResponse(
           res,
           responses(req.user.preferredLanguage).warehouse_not_found
         );
       }
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2381,7 +2381,7 @@ exports.getBatchWarehouse = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2457,25 +2457,25 @@ exports.deleteProductsFromInventory = [
         id: data.supplier.locationId,
       });
       if (suppWarehouseDetails == null) {
-        return apiResponse.ErrorResponse(res, "suppWarehouseDetails not Found");
+        return apiResponse.errorResponse(res, "suppWarehouseDetails not Found");
       }
       const suppInventoryDetails = await InventoryModel.findOne({
         id: suppWarehouseDetails?.warehouseInventory,
       });
       if (suppInventoryDetails == null) {
-        return apiResponse.ErrorResponse(res, "suppInventoryDetails not Found");
+        return apiResponse.errorResponse(res, "suppInventoryDetails not Found");
       }
       const recvWarehouseDetails = await WarehouseModel.findOne({
         id: data.receiver.locationId,
       });
       if (recvWarehouseDetails == null) {
-        return apiResponse.ErrorResponse(res, "recvWarehouseDetails not Found");
+        return apiResponse.errorResponse(res, "recvWarehouseDetails not Found");
       }
       const recvInventoryDetails = await InventoryModel.findOne({
         id: recvWarehouseDetails?.warehouseInventory,
       });
       if (recvInventoryDetails == null) {
-        return apiResponse.ErrorResponse(res, "recvInventoryDetails not Found");
+        return apiResponse.errorResponse(res, "recvInventoryDetails not Found");
       }
 
       const user_id = req.user.id;
@@ -2568,7 +2568,7 @@ exports.deleteProductsFromInventory = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2610,7 +2610,7 @@ exports.searchProduct = [
             ]).sort({ createdAt: -1 });
             return apiResponse.successResponseWithData(res, "Inventory Details", inventory);
           } else {
-            return apiResponse.ErrorResponse(
+            return apiResponse.errorResponse(
               res,
               responses(req.user.preferredLanguage).warehouse_not_found,
             );
@@ -2624,7 +2624,7 @@ exports.searchProduct = [
       });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2760,7 +2760,7 @@ exports.autoCompleteSuggestions = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2797,7 +2797,7 @@ exports.fetchBatchesOfInventory = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -2905,7 +2905,7 @@ exports.reduceBatch = [
       });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];

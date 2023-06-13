@@ -48,7 +48,7 @@ const Tracing = (props) => {
               to={
                 status === "RECEIVED"
                   ? `/viewshipment/${id}`
-                  : `/updatestatus/${id}/true`
+                  : `/updateStatus/${id}/true`
               }
             >
               <button

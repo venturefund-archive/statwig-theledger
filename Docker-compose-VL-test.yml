@@ -12,6 +12,7 @@ services:
       - "./traefik.toml:/traefik.toml"
       - "./traefik_dynamic.toml:/traefik_dynamic.toml"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
   cache:
     image: "redis"
     container_name: "cache"
@@ -62,6 +63,7 @@ services:
       - "traefik.http.routers.analytics.rule=Host(`test.vaccineledger.com`) && PathPrefix(`/analyticsmanagement/`)"
       - "traefik.http.routers.analytics.tls=true"
       - "traefik.http.routers.analytics.tls.certresolver=lets-encrypt"
+
   employee:
     build:
       context: .
@@ -204,6 +206,23 @@ services:
       - "traefik.http.routers.rbac.tls=true"
       - "traefik.http.routers.rbac.tls.certresolver=lets-encrypt"
 
+  rewards:
+    build: "./backend/rewards_service"
+    image: "rewards_service1.0"
+    container_name: "rewards_service1.0"
+    restart: always
+    env_file:
+      - ./env/ledger.env
+    depends_on:
+      - cache
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.rewards.entrypoints=websecure"
+      - "traefik.http.routers.rewards.rule=Host(`test.vaccineledger.com`) && PathPrefix(`/rewardmanagement/`)"
+      - "traefik.http.routers.rewards.tls=true"
+      - "traefik.http.routers.rewards.tls.certresolver=lets-encrypt"
+
   shipment:
     build:
       context: .
@@ -222,6 +241,7 @@ services:
       - "traefik.http.routers.shipment.rule=Host(`test.vaccineledger.com`) && PathPrefix(`/shipmentmanagement/`)"
       - "traefik.http.routers.shipment.tls=true"
       - "traefik.http.routers.shipment.tls.certresolver=lets-encrypt"
+
   track:
     build: "./backend/track_trace"
     image: "track_trace1.0"
@@ -238,6 +258,7 @@ services:
       - "traefik.http.routers.track.rule=Host(`test.vaccineledger.com`) && PathPrefix(`/tracktracemanagement/`)"
       - "traefik.http.routers.track.tls=true"
       - "traefik.http.routers.track.tls.certresolver=lets-encrypt"
+
   address:
     build: "./backend/address_service"
     image: "address_service2.0"
@@ -252,6 +273,7 @@ services:
       - "traefik.http.routers.address.rule=Host(`test.vaccineledger.com`) && PathPrefix(`/api/address_service`)"
       - "traefik.http.routers.address.tls=true"
       - "traefik.http.routers.address.tls.certresolver=lets-encrypt"
+
   affliate:
     build: "./backend/affliation_service"
     image: "affliation_service2.0"
@@ -266,6 +288,7 @@ services:
       - "traefik.http.routers.affliate.rule=Host(`test.vaccineledger.com`) && PathPrefix(`/api/affliation_service`)"
       - "traefik.http.routers.affliate.tls=true"
       - "traefik.http.routers.affliate.tls.certresolver=lets-encrypt"
+
   configuration:
     build: "./backend/configuration_service"
     image: "configuration_service1.0"

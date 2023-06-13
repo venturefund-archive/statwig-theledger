@@ -83,7 +83,7 @@ exports.pendingRequests = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -146,7 +146,7 @@ exports.sentRequests = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -238,7 +238,7 @@ exports.affiliateOrg = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -271,7 +271,7 @@ exports.allAffiliateOrgs = [
       }
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -308,7 +308,7 @@ exports.acceptAffiliate = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -345,7 +345,7 @@ exports.rejectAffiliate = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -372,7 +372,7 @@ exports.unAffiliate = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -397,11 +397,11 @@ exports.unAffiliateOrg = [
       if (affiliatedOrgs.ok) {
         return apiResponse.successResponse(res, `Organisation unaffiliated`);
       } else {
-        return apiResponse.ErrorResponse(res, "Please try again");
+        return apiResponse.errorResponse(res, "Please try again");
       }
     } catch (err) {
       console.log(err)
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -438,7 +438,7 @@ exports.affiliate = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -458,7 +458,7 @@ exports.getAllOrg = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];

@@ -406,12 +406,12 @@ const NewOrder = (props) => {
 					rtype: editPo !== null ? editPo.rtype : "",
 					rtypeName: editPo !== null ? editPo.rtypeName : "",
 					fromOrgId: editPo !== null ? editPo.fromOrgId : "",
-					toOrgCountry: editPo !== null ? editPo.toOrgCountry : "Costa Rica",
-					toOrgRegion: editPo !== null ? editPo.toOrgRegion : "Americas",
+					toOrgCountry: editPo !== null ? editPo.toOrgCountry : "",
+					toOrgRegion: editPo !== null ? editPo.toOrgRegion : "",
 					toOrg: editPo !== null ? editPo.toOrg : "",
 					toOrgName: editPo !== null ? editPo.toOrgName : "",
 					toOrgLoc: editPo !== null ? editPo.toOrgLoc : "",
-					toOrgLocRegion: editPo !== null ? editPo.toOrgLocRegion : "Americas",
+					toOrgLocRegion: editPo !== null ? editPo.toOrgLocRegion : "",
 					toOrgLocName: editPo !== null ? editPo.toOrgLocName : "",
 					toOrgLocCountry: editPo !== null ? editPo.toOrgLocCountry : "",
 					products: editPo !== null ? editPo.products : [],
@@ -517,7 +517,7 @@ const NewOrder = (props) => {
 						</div>
 						{/* {errors.products && touched.products && (
               <span className="my-required-field error-msg text-danger1">
-                "heloooo"{errors.products}
+               {errors.products}
               </span>
             )} */}
 
@@ -659,13 +659,12 @@ const NewOrder = (props) => {
 													onChange={async (v) => {
 														setOrgType(v.label);
 														onOrgTypeChange(v.label);
-														onCountryChange(v.label, "Costa Rica");
 														setFieldValue("rtype", v.value);
 														setFieldValue("rtypeName", v.label);
 														setFieldValue("toOrg", "");
 														setFieldValue("toOrgName", "");
-														setFieldValue("toOrgCountry", "Costa Rica");
-														setFieldValue("toOrgRegion", "Americas");
+														setFieldValue("toOrgCountry", "");
+														setFieldValue("toOrgRegion", "");
 														setFieldValue("toOrgLoc", "");
 														setFieldValue("toOrgLocRegion", "");
 														setFieldValue("toOrgLocCountry", "");
@@ -690,26 +689,20 @@ const NewOrder = (props) => {
 												<Select
 													labelId="demo-simple-select-label"
 													id="demo-simple-select"
-													// styles={customStyles}
+													styles={customStyles}
 													placeholder={
 														<div className="select-placeholder-text">{t("Select_Region")}</div>
 													}
-													defaultValue={{ value: 'Americas', label: 'Americas' }}
-													// defaultInputValue={values.toOrgRegion}
 													onBlur={handleBlur}
 													onChange={(v) => {
-														setFieldValue("toOrgName", "");
-														// setFieldValue("toOrgCountry", "");
 														setFieldValue("toOrgRegion", v.label);
+														setFieldValue("toOrgName", "");
+														setFieldValue("toOrgCountry", "");
 														setFieldValue("toOrgLoc", "");
-														// setFieldValue("toOrgLocRegion", v.label);
-														// setFieldValue("toOrgLocCountry", "");
-														// setOrgType("");
-														// setOrgType(v.label);
-														// onOrgTypeChange(v.label);
+														setFieldValue("toOrgLocRegion", v.label);
+														setFieldValue("toOrgLocCountry", "");
 														onRegionChange(v.label);
 													}}
-													isDisabled={true}
 													options={receiverWarehousesRegion}
 													noOptionsMessage={() => t("no_options")}
 												/>
@@ -730,26 +723,16 @@ const NewOrder = (props) => {
 												<Select
 													labelId="demo-simple-select-label"
 													id="demo-simple-select"
-													// styles={customStyles}
+													styles={customStyles}
 													placeholder={
 														<div className="select-placeholder-text">{t("Select_Country")}</div>
 													}
-													// defaultInputValue={values.toOrgCountry}
-													defaultValue={{ value: 'Costa Rica', label: 'Costa Rica' }}
 													onBlur={handleBlur}
 													onChange={(v) => {
-														setFieldValue("toOrgName", "");
 														setFieldValue("toOrgCountry", v.label);
-														// setFieldValue("toOrgRegion", v.label);
-														// setFieldValue("toOrgLoc", "");
-														// setFieldValue("toOrgLocRegion", v.label);
-														// setFieldValue("toOrgLocCountry", "");
-														// setOrgType("");
-														// setOrgType(v.label);
-														// onOrgTypeChange(v.label);
 														onCountryChange(orgType, v.label);
+														setFieldValue("toOrgName", "");
 													}}
-													isDisabled={true}
 													options={receiverWarehousesCountry}
 													noOptionsMessage={() => t("no_options")}
 												/>

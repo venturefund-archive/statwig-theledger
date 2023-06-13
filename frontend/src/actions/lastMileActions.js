@@ -104,7 +104,7 @@ export const getAnalyticsWithFilters = async (data) => {
 	try {
 		const result = await axios.post(`${config().getAnalyticsWithFilters}`, data);
 		return result;
-	} catch(err) {
+	} catch (err) {
 		return err.response;
 	}
 }
@@ -118,9 +118,9 @@ export const getVaccinationsList = async (data) => {
 	}
 };
 
-export const getCitiesAndOrgsForFilters = async () => {
+export const getOrgsForFilters = async () => {
 	try {
-		const result = await axios.get(`${config().getCitiesAndOrgsForFilters}`);
+		const result = await axios.get(`${config().getOrgsForFilters}`);
 		return result;
 	} catch (err) {
 		throw err;
@@ -129,9 +129,9 @@ export const getCitiesAndOrgsForFilters = async () => {
 
 export const exportVaccinationList = async (data, language) => {
 	try {
-    if (language === undefined || language === "en-US") {
-      language = "en";
-    }
+		if (language === undefined || language === "en-US") {
+			language = "en";
+		}
 		const result = await axios.post(`${config().exportVaccinationList}`, data, {
 			responseType: "blob",
 			headers: {
@@ -146,9 +146,9 @@ export const exportVaccinationList = async (data, language) => {
 
 export const exportVialsUtilised = async (data, language) => {
 	try {
-    if (language === undefined || language === "en-US") {
-      language = "en";
-    }
+		if (language === undefined || language === "en-US") {
+			language = "en";
+		}
 		const result = await axios.post(`${config().exportVialsUtilised}`, data, {
 			responseType: "blob",
 			headers: {

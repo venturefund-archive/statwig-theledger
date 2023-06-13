@@ -517,7 +517,7 @@ const ShipmentAnalytic = (props) => {
       <div className='d-flex justify-content-between'>
         <h1 className='vl-heading-bdr black f-700'>{t("shipments")}</h1>
         <div className='d-flex'>
-          {isAuthenticated("updateShipment") && !intelEnabled && (
+          {isAuthenticated("updateShipment") && (
             <Link to='/enterid' className='text-none'>
               <button className='mi-btn mi-btn-md mi-btn-orange mr-3 '>
                 <img

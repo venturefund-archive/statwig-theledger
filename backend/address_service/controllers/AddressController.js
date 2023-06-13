@@ -23,7 +23,7 @@ exports.addressOfOrg = [
       );
     } catch (err) {
       console.log(err)
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -40,7 +40,7 @@ exports.addressesOfOrgWarehouses = [
       );
     } catch (err) {
       console.log(err)
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -71,7 +71,7 @@ exports.fetchWarehousesByOrgId = [
       return apiResponse.successResponseWithData(res, "Warehouses Addresses", warehouses);
     } catch (err) {
       console.log(err)
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -123,7 +123,7 @@ exports.getLocationApprovals = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -144,7 +144,7 @@ exports.updateAddressOrg = [
       );
     } catch (err) {
       console.log(err)
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -165,7 +165,7 @@ exports.updateWarehouseAddress = [
       );
     } catch (err) {
       console.log(err)
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -257,7 +257,7 @@ exports.AddWarehouse = [
       );
     } catch (err) {
       console.log(err)
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -311,7 +311,7 @@ exports.AddOffice = [
       );
     } catch (err) {
       console.log(err)
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -449,7 +449,7 @@ exports.addAddressesFromExcel = [
       return apiResponse.successResponseWithData(res, "Success", data);
     } catch (e) {
       console.log(e)
-      return apiResponse.ErrorResponse(res, e);
+      return apiResponse.errorResponse(res, e);
     }
   },
 ];
@@ -516,7 +516,7 @@ exports.modifyLocation = [
       );
     } catch (err) {
       console.log(err)
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -540,7 +540,7 @@ exports.getCountries = [
       );
     } catch (err) {
       console.log(err)
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -564,7 +564,7 @@ exports.getStatesByCountry = [
       );
     } catch (err) {
       console.log(err)
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -588,7 +588,7 @@ exports.getCitiesByState = [
       );
     } catch (err) {
       console.log(err)
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];

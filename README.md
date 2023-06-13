@@ -33,6 +33,7 @@ Branch out from `development` , Merge requests shall be to development, no direc
 |  analyticsmanagement   |    3014     |
 |   AdvancedAnalytics    |    3015     |
 |   lastmilemanagement   |    3016     |
+|    rewardmanagement    |    3017     |
 
 ## Flow
 

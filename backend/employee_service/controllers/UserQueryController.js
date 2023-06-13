@@ -66,7 +66,7 @@ exports.newUserQuery = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(req, res, err.message);
+      return apiResponse.errorResponse(req, res, err.message);
     }
   },
 ];
@@ -85,7 +85,7 @@ exports.getUserQueries = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(req, res, err.message);
+      return apiResponse.errorResponse(req, res, err.message);
     }
   },
 ];

@@ -856,15 +856,9 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{url}}/inventorymanagement/api/inventory/getAllStates?countryName=India",
+          "raw": "{{url}}/inventorymanagement/api/inventory/getAllStates",
           "host": ["{{url}}"],
-          "path": ["inventorymanagement", "api", "inventory", "getAllStates"],
-          "query": [
-            {
-              "key": "countryName",
-              "value": "India"
-            }
-          ]
+          "path": ["inventorymanagement", "api", "inventory", "getAllStates"]
         }
       },
       "response": []
@@ -885,7 +879,7 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{url}}/inventorymanagement/api/inventory/getDistrictsByState?countryName=India",
+          "raw": "{{url}}/inventorymanagement/api/inventory/getDistrictsByState?state=Telangana",
           "host": ["{{url}}"],
           "path": [
             "inventorymanagement",
@@ -895,8 +889,8 @@
           ],
           "query": [
             {
-              "key": "countryName",
-              "value": "India"
+              "key": "state",
+              "value": "Telangana"
             }
           ]
         }
@@ -947,7 +941,7 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{url}}/inventorymanagement/api/inventory/getVendorsByDistrict?countryName=India",
+          "raw": "{{url}}/inventorymanagement/api/inventory/getVendorsByDistrict?district=Hyderabad&type=",
           "host": ["{{url}}"],
           "path": [
             "inventorymanagement",
@@ -957,8 +951,12 @@
           ],
           "query": [
             {
-              "key": "countryName",
-              "value": "India"
+              "key": "district",
+              "value": "Hyderabad"
+            },
+            {
+              "key": "type",
+              "value": ""
             }
           ]
         }

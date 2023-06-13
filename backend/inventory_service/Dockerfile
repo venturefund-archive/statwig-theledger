@@ -14,7 +14,7 @@ COPY /backend/inventory_service/ .
 
 RUN mkdir uploads
 
-RUN yarn --production && yarn cache clean
+RUN yarn --production
 
 EXPOSE 3007
 

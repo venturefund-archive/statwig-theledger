@@ -19,7 +19,7 @@ export const AddLocation = (props) => {
   return (
     <div>
       <div className='addproduct'>
-        <h1 className='breadcrumb'>{t("ADD_NEW_LOCATION")}</h1>
+        <h1 className='breadcrumb'>{t("add_new_location")}</h1>
         <AddLocationCard {...props} />
       </div>
     </div>
@@ -32,18 +32,18 @@ export const AddLocationCard = (props) => {
     props.user.type === "Third Party Logistics" ? true : false;
   const [addressTitle, setAddressTitle] = useState("");
   const [pincode, setPincode] = useState("");
-  const [region, setregion] = useState("Americas");
-  const [country, setcountry] = useState("Costa Rica");
+  const [region, setRegion] = useState("");
+  const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [addressLine, setAddressLine] = useState("");
   const [addedLocationModal, setAddedLocationModal] = useState(false);
 
   //Newly Added
-  const [allregions, setallregions] = useState([]);
-  const [allCountries, setallCountries] = useState([]);
-  const [allState, setallState] = useState([]);
-  const [allCity, setallCity] = useState([]);
+  const [allregions, setAllRegions] = useState([]);
+  const [allCountries, setAllCountries] = useState([]);
+  const [allState, setAllState] = useState([]);
+  const [allCity, setAllCity] = useState([]);
 
   const closeModalAddedLocation = () => {
     setAddedLocationModal(false);
@@ -52,25 +52,25 @@ export const AddLocationCard = (props) => {
     props.popup && props.close();
   };
   useEffect(() => {
-    async function fetchAllRegions1() {
+    async function getAllRegions() {
       let arr = await fetchAllRegions();
-      setallregions(arr.data);
+      setAllRegions(arr.data);
       fetchAllState1(53);
     }
-    fetchAllRegions1();
+    getAllRegions();
   }, []);
 
   async function fetchAllCountries1(id) {
     let res = await fetchCountriesByRegion(id);
-    setallCountries(res.data);
+    setAllCountries(res.data);
   }
   async function fetchAllState1(id) {
     let res = await fetchStateByCountry(id);
-    setallState(res.data);
+    setAllState(res.data);
   }
   async function fetchAllCity1(id) {
     let res = await fetchCitiesByState(id);
-    setallCity(res.data);
+    setAllCity(res.data);
   }
   const updateStatus = async (values) => {
     const data = {
@@ -82,9 +82,9 @@ export const AddLocationCard = (props) => {
       postalAddress: props.user.postalAddress || null,
       region: values.region || region,
       country: country,
-        // intelEnabled && props?.popup
-        //   ? country
-        //   : values.country,
+      // intelEnabled && props?.popup
+      //   ? country
+      //   : values.country,
       // location: {
       //   longitude: '0',
       //   latitude: '0',
@@ -97,14 +97,14 @@ export const AddLocationCard = (props) => {
         city: values.city,
         state: values.state,
         country: country,
-          // intelEnabled && props?.popup
-          //   ? country
-          //   : values.country,
+        // intelEnabled && props?.popup
+        //   ? country
+        //   : values.country,
         landmark: null,
         zipCode: values.pincode,
       },
       supervisors: [],
-      employeess: [],
+      employees: [],
     };
     let userType = intelEnabled ? "TPL" : "regular";
     const result = await addWarehouse(data, userType);
@@ -118,9 +118,9 @@ export const AddLocationCard = (props) => {
   };
 
   function search(name, myArray) {
-    for (var i = 0; i < myArray.length; i++) {
-      if (myArray[i].name === name) {
-        return myArray[i].id;
+    for (const element of myArray) {
+      if (element.name === name) {
+        return element.id;
       }
     }
   }
@@ -137,7 +137,7 @@ export const AddLocationCard = (props) => {
               city,
               state,
               pincode,
-              // region
+              region
             }}
             validate={(values) => {
               const errors = {};
@@ -156,9 +156,9 @@ export const AddLocationCard = (props) => {
               if (!values.pincode) {
                 errors.pincode = t("Required");
               }
-              // if (!values.region) {
-              //   errors.region = t("Required");
-              // }
+              if (!values.region) {
+                errors.region = t("Required");
+              }
               return errors;
             }}
             onSubmit={(values, { setSubmitting }) => {
@@ -223,24 +223,22 @@ export const AddLocationCard = (props) => {
                         <Autocomplete
                           value={region}
                           labelId='demo-simple-select-label'
-                          disabled
                           id='demo-simple-select controllable-states-demo'
-                          // placeholder={
-                          //   <div className='select-placeholder-text'>
-                          //     {t("Select_Region")}
-                          //   </div>
-                          // }
+                          placeholder={
+                            <div className='select-placeholder-text'>
+                              {t("Select_Region")}
+                            </div>
+                          }
                           onChange={(event, newValue) => {
                             fetchAllCountries1(newValue);
-                            console.log(newValue)
-                            setregion(newValue);
-                            setcountry("");
+                            setRegion(newValue);
+                            setCountry("");
                             setState("");
                             setCity("");
                           }}
                           options={allregions}
                           renderInput={(params) => (
-                            <TextField {...params} label={t("")} />
+                            <TextField {...params} label={t("Select_Region")} />
                           )}
                         />
                         {errors.region && touched.region && (
@@ -266,19 +264,17 @@ export const AddLocationCard = (props) => {
                         <Autocomplete
                           labelId='demo-simple-select-label'
                           id='demo-simple-select controllable-states-demo'
-                          // placeholder={
-                          //   <div className='select-placeholder-text'>
-                          //     {t("Select_Country")}
-                          //   </div>
-                          // }
+                          placeholder={
+                            <div className='select-placeholder-text'>
+                              {t("Select_Country")}
+                            </div>
+                          }
                           value={country}
-                          disabled
-                          onClick={(e) => {e.preventDefault(); return}}
+                          onClick={(e) => { e.preventDefault() }}
                           onChange={(event, newValue) => {
                             let v = search(newValue, allCountries);
                             fetchAllState1(v);
-                            setcountry(newValue);
-                            console.log(newValue)
+                            setCountry(newValue);
                             setState("");
                             setCity("");
                           }}
@@ -288,7 +284,7 @@ export const AddLocationCard = (props) => {
                           renderInput={(params) => (
                             <TextField
                               {...params}
-                              label={t("")}
+                              label={t("Select_Country")}
                             />
                           )}
                         />
@@ -542,5 +538,3 @@ export const AddLocationCard = (props) => {
     </>
   );
 };
-
-// export default AddLocation;

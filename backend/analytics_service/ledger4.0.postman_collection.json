@@ -304,7 +304,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"id\": \"war12345\",\n    \"organisationId\": \"org1234\",\n    \"postalAddress\": \"JNIBF, Gachibowli, Hyderabad, Telanagana, India\",\n    \"region\": {\n      \"id\": \"reg123\",\n      \"name\": \"Earth Prime\"\n    },\n    \"country\": {\n      \"id\": \"001\",\n      \"name\": \"India\"\n    },\n    \"location\": {\n      \"longitude\": 12.12323453534,\n      \"latitude\": 13.123435345435,\n      \"geohash\": \"1231nejf923453\"\n    },\n    \"supervisors\": [\n      \"user_id 1\",\n      \"user_id 2\"\n    ],\n    \"employeess\": [\n      \"em12345\",\n      \"em12346\",\n      \"em12347\"\n    ]\n   \n  }"
+              "raw": "{\n    \"id\": \"war12345\",\n    \"organisationId\": \"org1234\",\n    \"postalAddress\": \"JNIBF, Gachibowli, Hyderabad, Telanagana, India\",\n    \"region\": {\n      \"id\": \"reg123\",\n      \"name\": \"Earth Prime\"\n    },\n    \"country\": {\n      \"id\": \"001\",\n      \"name\": \"India\"\n    },\n    \"location\": {\n      \"longitude\": 12.12323453534,\n      \"latitude\": 13.123435345435,\n      \"geohash\": \"1231nejf923453\"\n    },\n    \"supervisors\": [\n      \"user_id 1\",\n      \"user_id 2\"\n    ],\n    \"employees\": [\n      \"em12345\",\n      \"em12346\",\n      \"em12347\"\n    ]\n   \n  }"
             },
             "url": {
               "raw": "http://localhost:3001/usermanagement/api/auth/addWarehouse",

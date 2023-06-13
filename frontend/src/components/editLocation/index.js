@@ -59,7 +59,7 @@ const EditLocation = (props) => {
     async function fetchAllCountries1(id, country) {
       let res = await fetchCountriesByRegion(id);
       // setallCountries(res.data);
-      const {id: countryId} = res.data.find((val) => val.name === country);
+      const { id: countryId } = res.data.find((val) => val.name === country);
       fetchAllState1(countryId);
     }
     async function fetchAllState1(countryId) {
@@ -117,7 +117,7 @@ const EditLocation = (props) => {
         zipCode: values.pincode,
       },
       supervisors: [],
-      employeess: [],
+      employees: [],
     };
 
     const result = await updateWarehouse(data, id);

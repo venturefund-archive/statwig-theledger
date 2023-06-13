@@ -40,7 +40,7 @@ exports.fetchGoodsByID = [
       ];
       return apiResponse.successResponseWithData(res, "Data sent", goodsObject);
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -75,7 +75,7 @@ exports.fetchTracking = [
         trackingObject
       );
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -119,7 +119,7 @@ exports.fetchTemp = [
       );
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -291,7 +291,7 @@ exports.track = [
             });
           }
         } else {
-          return apiResponse.ErrorResponse(
+          return apiResponse.errorResponse(
             res,
             `Access Denied, User with Role ${req.user.role} doesn't have Permission to Track & Trace`
           );
@@ -299,7 +299,7 @@ exports.track = [
       });
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err);
+      return apiResponse.errorResponse(res, err);
     }
   },
 ];
@@ -414,7 +414,7 @@ exports.fetchDataByQRCode = [
         });
       }
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];

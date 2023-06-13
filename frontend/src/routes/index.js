@@ -59,6 +59,7 @@ import Configuration from "../admin/pages/statwig-admin/Configuration/Configurat
 import Users from "../admin/pages/org-admin/Users/Users";
 import AdminProductList from "../admin/pages/org-admin/ProductList/ProductList";
 import NetworkReportContainer from "../containers/NetworkReports/NetworkReportContainer";
+import RewardsContainer from "../containers/rewards/RewardsContainer";
 
 
 const routes = (
@@ -79,6 +80,7 @@ const routes = (
 		<Route path="/overview" component={requireAuth(OverView)} />
 		<Route path="/resetPassword" component={resetPasswordPage} />
 		<Route path="/profile" component={requireAuth(Profile)} />
+		<Route path="/rewards" component={requireAuth(RewardsContainer)} />
 		<Route path="/settings" component={requireAuth(SettingsContainer)} />
 		<Route path="/adminprofile" component={requireAuth(AdminProfile)} />
 		<Route path="/shipments" component={requireAuth(Shipment)} />
@@ -104,7 +106,7 @@ const routes = (
 		<Route path="/neworder" component={requireAuth(NewOrder)} />
 		<Route path="/vieworder/:id" component={requireAuth(ViewOrder)} />
 		<Route path="/revieworder" component={requireAuth(ReviewOrder)} />
-		<Route path="/updateStatus/:id/:returnToView" component={requireAuth(UpdateStatus)} />
+		<Route path="/updateStatus/:id/:returnToView?" component={requireAuth(UpdateStatus)} />
 		<Route path="/receiveShipment/:id" component={requireAuth(ReceiveShipment)} />
 		<Route path="/Addlocation" component={requireAuth(AddLocation)} />
 		<Route path="/lastMile" component={requireAuth(LastMile)} />

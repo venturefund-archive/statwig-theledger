@@ -21,6 +21,6 @@ module.exports = (req, res, next) => {
 		});
 	} catch (err) {
 		console.log(err);
-		return apiResponse.ErrorResponse(res, "default_error");
+		return apiResponse.errorResponse(res, "default_error");
 	}
 };

@@ -24,7 +24,7 @@ const UpdateStatus = (props) => {
 		return state.user;
 	});
 	const intelEnabled = props.user.type === "Third Party Logistics" ? true : false;
-	const { id, returnToView } = props.match.params;
+	const { id, returnToView = "false" } = props.match.params;
 	const billNo = shipmentData?.airWayBillNo;
 	const { quantity, weight } = useState("");
 	const [photo, setPhoto] = useState("");
@@ -173,10 +173,6 @@ const UpdateStatus = (props) => {
 			formData.append("updatedAt", updateStatusLocation);
 			formData.append("isAlertTrue", true);
 
-			for (var pair of formData.entries()) {
-				console.log(pair[0] + " : ", pair[1]);
-			}
-
 			const result = await updateTrackingStatus(formData);
 			if (result.status === 200) {
 				setOpenUpdatedStatus(true);
@@ -246,6 +242,7 @@ const UpdateStatus = (props) => {
 													name="shipmentId"
 													onBlur={handleBlur}
 													value={values.shipmentId}
+													readOnly
 												/>
 											</div>
 											{intelEnabled ? (
@@ -258,6 +255,7 @@ const UpdateStatus = (props) => {
 															name="airWayBillNo"
 															onBlur={handleBlur}
 															value={values.airWayBillNo}
+															readOnly
 														/>
 													</div>
 													<div className="form-group">

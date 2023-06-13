@@ -81,10 +81,10 @@ exports.createNewAlert = [
         alert.active = alertSubscription;
         await alert.save();
         return apiResponse.successResponse(res, "Alert created");
-      } else return apiResponse.ErrorResponse(res, "NO USER FOUND");
+      } else return apiResponse.errorResponse(res, "NO USER FOUND");
     } catch (err) {
       console.log(err);
-      apiResponse.ErrorResponse(res, err.message);
+      apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -115,7 +115,7 @@ exports.createNewAlert = [
         Alert.save(function (err, result) {
           if (err) {
             console.log(err)
-            apiResponse.ErrorResponse(res, err)
+            apiResponse.errorResponse(res, err)
           } else {
             return apiResponse.successResponse(res, 'Alert Added successfully')
           }
@@ -159,7 +159,7 @@ exports.createNewAlert = [
             alert.save(function (err, result) {
               if (err) {
                 console.log(err)
-                apiResponse.ErrorResponse(res, err)
+                apiResponse.errorResponse(res, err)
               } else {
                 return apiResponse.successResponse(
                   res,
@@ -168,11 +168,11 @@ exports.createNewAlert = [
               }
             })
           }
-          else return apiResponse.ErrorResponse(res,"NO USER FOUND")
+          else return apiResponse.errorResponse(res,"NO USER FOUND")
         })
       }
     } catch (err) {
-      apiResponse.ErrorResponse(res, err)
+      apiResponse.errorResponse(res, err)
     }
   },
 ]
@@ -192,7 +192,7 @@ exports.deleteAlert = [
       );
       return apiResponse.successResponse(res, "Alerts Deleted Successfully");
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -208,7 +208,7 @@ exports.getAllAlerts = [
         data
       );
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];

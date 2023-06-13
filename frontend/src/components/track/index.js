@@ -7,7 +7,7 @@ import Package from "../../assets/icons/package.svg";
 import back from "../../assets/icons/back.png";
 import searchingIcon from "../../assets/icons/searching@2x.png";
 import "./style.scss";
-import { formatTimeAMPM } from "../../utils/dateHelper";
+import { formatTime } from "../../utils/dateHelper";
 import zoomOutIcon from "../../assets/icons/smallScreen.png";
 import { isAuthenticated } from "../../utils/commonHelper";
 import { useTranslation } from "react-i18next";
@@ -255,7 +255,7 @@ const Track = (props) => {
                   <div className="info">Last Upadated on</div>
                   <div className="info">
                     {Object.keys(props.latestIotShipmentData).length > 0
-                      ? formatTimeAMPM(
+                      ? formatTime(
                           /**props.latestIotShipmentData.temp['UnixTimeStamp']*/ new Date()
                           .toString()
                           .split(" ")[4]

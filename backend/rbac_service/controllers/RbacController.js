@@ -5,47 +5,47 @@ const { RbacCache } = require("../helpers/rbacCache");
 const apiResponse = require("../helpers/apiResponse");
 
 exports.getPermissions = [
-	auth,
-	async (req, res) => {
-		try {
-			const { role, orgId, new_role } = req.query;
+  auth,
+  async (req, res) => {
+    try {
+      const { role, orgId, new_role } = req.query;
 
-			if (new_role) {
-				const result = await RbacModel.findOne({ role: "admin" });
-				const permissions = result.toJSON();
+      if (new_role) {
+        const result = await RbacModel.findOne({ role: "admin" });
+        const permissions = result.toJSON();
 
-				let defaultPermissions = {};
-				Object.keys(permissions).map((key) => {
-					if (key === "permissions") {
-						defaultPermissions.permissions = [];
-					} else if (typeof permissions[key] === "object") {
-						let currPerm = permissions[key];
-						Object.keys(currPerm).map((subPerm) => {
-							if (typeof currPerm[subPerm] === "boolean") {
-								currPerm[subPerm] = false;
-							}
-						});
-						defaultPermissions[key] = currPerm;
-					}
-				});
+        let defaultPermissions = {};
+        Object.keys(permissions).map((key) => {
+          if (key === "permissions") {
+            defaultPermissions.permissions = [];
+          } else if (typeof permissions[key] === "object") {
+            let currPerm = permissions[key];
+            Object.keys(currPerm).map((subPerm) => {
+              if (typeof currPerm[subPerm] === "boolean") {
+                currPerm[subPerm] = false;
+              }
+            });
+            defaultPermissions[key] = currPerm;
+          }
+        });
 
-				return apiResponse.successResponseWithData(res, "Empty permissions!", [defaultPermissions]);
-			}
+        return apiResponse.successResponseWithData(res, "Empty permissions!", [defaultPermissions]);
+      }
 
-			let query = {};
-			if (role) {
-				query.role = role;
-			}
-			if (orgId) {
-				query.orgId = orgId;
-			}
-			const permissions = await RbacModel.find(query);
-			return apiResponse.successResponseWithData(res, `Permissions - `, permissions);
-		} catch (err) {
-			console.log(err);
-			return apiResponse.ErrorResponse(res, err.message);
-		}
-	},
+      let query = {};
+      if (role) {
+        query.role = role;
+      }
+      if (orgId) {
+        query.orgId = orgId;
+      }
+      const permissions = await RbacModel.find(query);
+      return apiResponse.successResponseWithData(res, `Permissions - `, permissions);
+    } catch (err) {
+      console.log(err);
+      return apiResponse.errorResponse(res, err.message);
+    }
+  },
 ];
 
 exports.getRoles = [
@@ -60,7 +60,7 @@ exports.getRoles = [
       return apiResponse.successResponseWithData(res, "All Roles", roles);
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -124,7 +124,7 @@ exports.updatePermissions = [
       }
     } catch (err) {
       console.log(err);
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
@@ -135,42 +135,42 @@ exports.rbacCache = [
       RbacCache();
       return apiResponse.successResponse(res, "Success Cache Updated");
     } catch (err) {
-      return apiResponse.ErrorResponse(res, err.message);
+      return apiResponse.errorResponse(res, err.message);
     }
   },
 ];
 
 exports.getRolesForTPL = [
-	auth,
-	async (req, res) => {
-		try {
-			var roles = [];
-			const results = await RbacModel.find({ orgId: req.params.orgId }, { _id: 0, role: 1 });
-			results.map((element) => {
-				roles.push(element.role);
-			});
-			console.log("RESULTS LENGHT IS", results.length);
-			if (results.length > 0) {
-				return apiResponse.successResponseWithData(res, "All Roles", roles);
-			} else {
-				console.log(req.user);
-				const searchObj = { role: "OrgAdmin", orgId: req.user.organisationId };
-				console.log(getAllPermissions(utility.allPermissionsList));
+  auth,
+  async (req, res) => {
+    try {
+      var roles = [];
+      const results = await RbacModel.find({ orgId: req.params.orgId }, { _id: 0, role: 1 });
+      results.map((element) => {
+        roles.push(element.role);
+      });
+      console.log("RESULTS LENGHT IS", results.length);
+      if (results.length > 0) {
+        return apiResponse.successResponseWithData(res, "All Roles", roles);
+      } else {
+        console.log(req.user);
+        const searchObj = { role: "OrgAdmin", orgId: req.user.organisationId };
+        console.log(getAllPermissions(utility.allPermissionsList));
 
-				let rbac_object = await RbacModel.findOneAndUpdate(
-					{ ...searchObj },
-					{
-						$set: utility.allPermissionsList,
-						permissions: getAllPermissions(utility.allPermissionsList),
-					},
-					{ new: true, upsert: true },
-				);
-				roles.push("OrgAdmin");
-				return apiResponse.successResponseWithData(res, "All Roles", roles);
-			}
-		} catch (err) {
-			console.log(err);
-			return apiResponse.ErrorResponse(res, err);
-		}
-	},
+        let rbac_object = await RbacModel.findOneAndUpdate(
+          { ...searchObj },
+          {
+            $set: utility.allPermissionsList,
+            permissions: getAllPermissions(utility.allPermissionsList),
+          },
+          { new: true, upsert: true },
+        );
+        roles.push("OrgAdmin");
+        return apiResponse.successResponseWithData(res, "All Roles", roles);
+      }
+    } catch (err) {
+      console.log(err);
+      return apiResponse.errorResponse(res, err);
+    }
+  },
 ];

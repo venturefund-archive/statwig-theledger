@@ -20,7 +20,7 @@ const { OAuth2Client } = require("google-auth-library");
 const hf_blockchain_url = process.env.HF_BLOCKCHAIN_URL;
 const emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const phoneRegex = /^[\+]\d{11,12}$/;
-const blockchain_service_url = process.env.URL;
+const REWARDS_API_KEY = process.env.REWARDS_API_KEY;
 const { uploadFile, getSignedUrl } = require("../helpers/s3");
 const fs = require("fs");
 const util = require("util");
@@ -289,20 +289,20 @@ exports.checkEmail = [
 	async (req, res) => {
 		try {
 			if (!req.body.firstName.match("[A-Za-z0-9]") || !req.body.lastName.match("[A-Za-z0-9]")) {
-				return apiResponse.ErrorResponse(req, res, "not_valid_name");
+				return apiResponse.errorResponse(req, res, "not_valid_name");
 			}
 			const errors = validationResult(req);
 			if (!errors.isEmpty()) {
 				return apiResponse.validationErrorWithData(req, res, "validation_error", errors.array());
 			}
 			if (!mailer.validateEmail(req.body.emailId)) {
-				return apiResponse.ErrorResponse(req, res, "not_valid_email");
+				return apiResponse.errorResponse(req, res, "not_valid_email");
 			} else {
 				return apiResponse.successResponse(req, res, "valid_email_success");
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -354,7 +354,7 @@ exports.register = [
 	async (req, res) => {
 		try {
 			if (req.body.emailId == "" && req.body.phoneNumber == "") {
-				return apiResponse.ErrorResponse(req, res, "Enter either emailId or phoneNumber");
+				return apiResponse.errorResponse(req, res, "Enter either emailId or phoneNumber");
 			} else if (req.body.emailId != "") {
 				let emailId = req.body.emailId;
 				emailId = emailId.trim();
@@ -362,14 +362,14 @@ exports.register = [
 				emailId = emailId.replace("", "");
 				let user;
 				if (!emailId.match(emailRegex))
-					return apiResponse.ErrorResponse(req, res, "not_valid_email");
+					return apiResponse.errorResponse(req, res, "not_valid_email");
 				if (emailId.indexOf("@") > -1)
 					user = await EmployeeModel.findOne({
 						emailId: emailId,
 						accountStatus: { $ne: "DELETED" },
 					});
 				if (user) {
-					return apiResponse.ErrorResponse(req, res, "account_already_exists");
+					return apiResponse.errorResponse(req, res, "account_already_exists");
 				}
 			} else if (req.body.phoneNumber != "") {
 				let phoneNumber = req.body.phoneNumber;
@@ -377,25 +377,25 @@ exports.register = [
 				phoneNumber = phoneNumber.startsWith("+") ? phoneNumber : `+${phoneNumber}`;
 				let user;
 				// if (!phoneNumber.match(phoneRegex))
-				//   return apiResponse.ErrorResponse(req, res, "not_valid_phone");
+				//   return apiResponse.errorResponse(req, res, "not_valid_phone");
 				// phone = "+" + phoneNumber;
 				user = await EmployeeModel.findOne({
 					phoneNumber: phoneNumber,
 					accountStatus: { $ne: "DELETED" },
 				});
 				if (user) {
-					return apiResponse.ErrorResponse(req, res, "account_already_exists");
+					return apiResponse.errorResponse(req, res, "account_already_exists");
 				}
 			}
 			if (!req.body.firstName.match("[A-Za-z0-9]") || !req.body.lastName.match("[A-Za-z0-9]")) {
-				return apiResponse.ErrorResponse(req, res, "name_validation_error");
+				return apiResponse.errorResponse(req, res, "name_validation_error");
 			}
 			const errors = validationResult(req);
 			if (!errors.isEmpty()) {
 				return apiResponse.validationErrorWithData(req, res, "validation_error", errors.array());
 			}
 			// if (!mailer.validateEmail(req.body.emailId)) {
-			//   return apiResponse.ErrorResponse(req, res, "not_valid_email");
+			//   return apiResponse.errorResponse(req, res, "not_valid_email");
 			// } else {
 			let organisationId = req.body.organisationId;
 			const skipOrgRegistration = req.body?.skipOrgRegistration
@@ -657,7 +657,7 @@ exports.register = [
 			return apiResponse.successResponseWithData(req, res, "user_registered_success", null);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -730,7 +730,7 @@ exports.sendOtp = [
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -756,102 +756,111 @@ exports.verifyOtp = [
 			if (!errors.isEmpty()) {
 				return apiResponse.validationErrorWithData(req, res, "validation_error", errors.array());
 			} else {
-				let query = { accountStatus: { $ne: "DELETED" } };
-				if (req.body.emailId.indexOf("@") === -1) {
-					let phone = req.body.emailId.startsWith("+") ? req.body.emailId : "+" + req.body.emailId;
+				const { emailId, otp } = req.body;
+				const query = { accountStatus: { $ne: "DELETED" } };
+				if (emailId.indexOf("@") === -1) {
+					const phone = emailId.startsWith("+") ? emailId : "+" + emailId;
 					query.phoneNumber = phone;
 				} else {
-					query.emailId = req.body.emailId;
+					query.emailId = emailId;
 				}
+
 				const user = await EmployeeModel.findOne(query);
-				if (user) {
-					if (user.otp == req.body.otp) {
-						const activeWarehouse = await WarehouseModel.find({
-							$and: [
-								{ id: { $in: user.warehouseId } },
-								{
-									$or: [
-										{ status: "ACTIVE" },
-										{ status: "PENDING" },
-										{ status: { $exists: false } },
-									],
-								},
-							],
-						});
-
-						const org = await OrganisationModel.findOne({ id: user.organisationId });
-
-						let userData;
-						if (activeWarehouse.length > 0) {
-							let activeWarehouseId = 0;
-							const activeWRs = activeWarehouse.filter((w) => w.status == "ACTIVE");
-							if (activeWRs.length > 0) activeWarehouseId = activeWRs[0].id;
-							else activeWarehouseId = activeWarehouse[0].id;
-							userData = {
-								id: user.id,
-								firstName: user.firstName,
-								emailId: user.emailId,
-								role: user.role,
-								warehouseId: activeWarehouseId,
-								organisationId: user.organisationId,
-								phoneNumber: user.phoneNumber,
-								org: user.msp,
-								userName: user.emailId,
-								photoId: user.photoId,
-								preferredLanguage: user.preferredLanguage,
-								isCustom: user.isCustom,
-								type: org.type,
-							};
-						} else {
-							userData = {
-								id: user.id,
-								firstName: user.firstName,
-								emailId: user.emailId,
-								role: user.role,
-								warehouseId: [],
-								organisationId: user.organisationId,
-								phoneNumber: user.phoneNumber,
-								org: user.msp,
-								userName: user.emailId,
-								photoId: user.photoId,
-								preferredLanguage: user.preferredLanguage,
-								isCustom: user.isCustom,
-								type: org.type,
-							};
-						}
-						//Prepare JWT token for authentication
-						const jwtPayload = userData;
-						const jwtData = {
-							expiresIn: process.env.JWT_TIMEOUT_DURATION,
-						};
-						const secret = process.env.JWT_SECRET;
-						//Generated JWT token with Payload and secret.
-						userData.permissions = await RbacModel.findOne({ role: user.role });
-						userData.token = jwt.sign(jwtPayload, secret, jwtData);
-
-						const bc_data = {
-							username: req.body.emailId,
-							password: "",
-							orgName: "org1MSP",
-							role: "",
-							email: req.body.emailId,
-						};
-						axios.post(`${hf_blockchain_url}/api/v1/register`, bc_data).catch((err) => {
-							console.log(err);
-						});
-						return apiResponse.successResponseWithData(req, res, "login_success", userData);
-					} else {
-						return apiResponse.ErrorResponse(req, res, "otp_not_match");
-					}
-				} else {
-					return apiResponse.ErrorResponse(req, res, "account_not_found");
+				if (!user) {
+					return apiResponse.errorResponse(req, res, "account_not_found");
 				}
+
+				if (user.otp !== otp) {
+					return apiResponse.errorResponse(req, res, "otp_not_match");
+				}
+
+				const activeWarehouse = await WarehouseModel.find({
+					$and: [
+						{ id: { $in: user.warehouseId } },
+						{
+							$or: [
+								{ status: "ACTIVE" },
+								{ status: "PENDING" },
+								{ status: { $exists: false } },
+							],
+						},
+					],
+				});
+
+				const org = await OrganisationModel.findOne({ id: user.organisationId });
+
+				let userData;
+				if (activeWarehouse.length > 0) {
+					let activeWarehouseId = 0;
+					const activeWRs = activeWarehouse.filter((w) => w.status == "ACTIVE");
+					if (activeWRs.length > 0) {
+						activeWarehouseId = activeWRs[0].id;
+					} else {
+						activeWarehouseId = activeWarehouse[0].id;
+					}
+					userData = {
+						id: user.id,
+						firstName: user.firstName,
+						emailId: user.emailId,
+						role: user.role,
+						warehouseId: activeWarehouseId,
+						organisationId: user.organisationId,
+						phoneNumber: user.phoneNumber,
+						org: user.msp,
+						userName: user.emailId,
+						photoId: user.photoId,
+						preferredLanguage: user.preferredLanguage,
+						isCustom: user.isCustom,
+						type: org.type,
+						rewardsApiKey : REWARDS_API_KEY
+					};
+				} else {
+					userData = {
+						id: user.id,
+						firstName: user.firstName,
+						emailId: user.emailId,
+						role: user.role,
+						warehouseId: [],
+						organisationId: user.organisationId,
+						phoneNumber: user.phoneNumber,
+						org: user.msp,
+						userName: user.emailId,
+						photoId: user.photoId,
+						preferredLanguage: user.preferredLanguage,
+						isCustom: user.isCustom,
+						type: org.type,
+						rewardsApiKey : REWARDS_API_KEY
+					};
+				}
+
+				//Prepare JWT token for authentication
+				const jwtPayload = userData;
+				const jwtData = {
+					expiresIn: process.env.JWT_TIMEOUT_DURATION,
+				};
+				const secret = process.env.JWT_SECRET;
+				//Generated JWT token with Payload and secret.
+				userData.permissions = await RbacModel.findOne({ role: user.role });
+				userData.token = jwt.sign(jwtPayload, secret, jwtData);
+
+				const bc_data = {
+					username: emailId,
+					password: "",
+					orgName: "org1MSP",
+					role: "",
+					email: emailId,
+				};
+				axios.post(`${hf_blockchain_url}/api/v1/register`, bc_data).catch((err) => {
+					console.log(err);
+				});
+
+				return apiResponse.successResponseWithData(req, res, "login_success", userData);
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
-	},
+	}
 ];
 
 exports.verifyAuthentication = [
@@ -958,13 +967,13 @@ exports.verifyAuthentication = [
 					if (user.accountStatus === "ACTIVE") {
 						return apiResponse.successResponseWithData(req, res, "login_success", userData);
 					} else {
-						return apiResponse.ErrorResponse(req, res, "User not approved");
+						return apiResponse.errorResponse(req, res, "User not approved");
 					}
 				}
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1078,7 +1087,7 @@ exports.googleLogIn = [
 			return apiResponse.successResponseWithData(req, res, "login_success", userData);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "Error in authenticating user - " + err.message);
+			return apiResponse.errorResponse(req, res, "Error in authenticating user - " + err.message);
 		}
 	},
 ];
@@ -1170,7 +1179,7 @@ exports.userInfo = [
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1229,7 +1238,7 @@ exports.updateProfile = [
 			return apiResponse.successResponseWithData(req, res, "user_info_success", returnData);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1272,7 +1281,7 @@ exports.deleteProfilePicture = [
 			return apiResponse.successResponseWithData(req, res, "user_info_success", returnData);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(
+			return apiResponse.errorResponse(
 				req,
 				res,
 				"Error in deleting profile picture - ",
@@ -1295,7 +1304,7 @@ exports.deleteProfile = [
 			return apiResponse.successResponse(req, res, "User account deleted successfully!");
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err.message);
+			return apiResponse.errorResponse(req, res, err.message);
 		}
 	},
 ];
@@ -1312,7 +1321,7 @@ exports.getAllUsers = [
 			return apiResponse.successResponseWithData(req, res, "all_users_success", confirmedUsers);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1322,7 +1331,7 @@ exports.getUserWarehouses = [
 	async (req, res) => {
 		try {
 			if (!req.user.organisationId) {
-				return apiResponse.ErrorResponse(req, res, "organization_validation_error");
+				return apiResponse.errorResponse(req, res, "organization_validation_error");
 			}
 			const warehouses = await WarehouseModel.find({
 				organisationId: req.user.organisationId,
@@ -1330,7 +1339,7 @@ exports.getUserWarehouses = [
 			return apiResponse.successResponseWithData(req, res, "user_warehouse_success", warehouses);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1353,7 +1362,7 @@ exports.pushWarehouse = [
 			return apiResponse.successResponse(req, res, "add_warehouse_success");
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1544,7 +1553,7 @@ exports.addWarehouse = [
 			return apiResponse.successResponseWithData(req, res, "add_warehouse_success", warehouse);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1562,7 +1571,7 @@ exports.updateWarehouseAddress = [
 			const warehouse = await WarehouseModel.findOneAndUpdate({ id: req.query.warehouseId }, data, {
 				new: true,
 			});
-			const employee = await EmployeeModel.findOneAndUpdate(
+			await EmployeeModel.findOneAndUpdate(
 				{ id: req.user.id },
 				{
 					$push: { pendingWarehouseId: warehouse.id },
@@ -1573,7 +1582,7 @@ exports.updateWarehouseAddress = [
 			return apiResponse.successResponseWithData(req, res, "update_warehouse_success", warehouse);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1662,11 +1671,11 @@ exports.uploadImage = [
 					employeeUpdate,
 				);
 			} else {
-				return apiResponse.ErrorResponse(req, res, "image_upload_error");
+				return apiResponse.errorResponse(req, res, "image_upload_error");
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1716,7 +1725,7 @@ exports.fetchImage = [
 			}
 			return apiResponse.successResponseWithData(req, res, "image_success", resArray);
 		} catch (err) {
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1792,7 +1801,7 @@ exports.getAllRegisteredUsers = [
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1872,7 +1881,7 @@ exports.getAllUsersByWarehouse = [
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1950,7 +1959,7 @@ exports.getAllUsersByOrganisation = [
 			}
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1971,7 +1980,7 @@ exports.getOrganizationsByType = [
 			);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -1985,8 +1994,8 @@ exports.getOrganizationsByTypeForAbInBev = [
 			matchCondition.status = "ACTIVE";
 			if (filters.status && filters.status !== "") {
 				matchCondition.status = filters.status;
-			}else {
-				matchCondition.status = {$in: ["ACTIVE", "DEACTIVATED"]}
+			} else {
+				matchCondition.status = { $in: ["ACTIVE", "DEACTIVATED"] }
 			}
 			if (filters.state && filters.state !== "") {
 				matchWarehouseCondition["warehouseDetails.warehouseAddress.state"] = new RegExp(
@@ -2040,7 +2049,7 @@ exports.getOrganizationsByTypeForAbInBev = [
 			);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -2062,7 +2071,7 @@ exports.getwarehouseByType = [
 			);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -2076,7 +2085,7 @@ exports.getwarehouseinfo = [
 			return apiResponse.successResponseWithData(req, res, "warehouse_info_success", warehouseinfo);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -2098,7 +2107,7 @@ exports.getOrganizationsTypewithauth = [
 			);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -2128,7 +2137,7 @@ exports.emailverify = [
 			return apiResponse.successResponseWithData(req, res, "Valid Email/Phone");
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -2166,7 +2175,7 @@ exports.switchLocation = [
 			return apiResponse.successResponseWithData(req, res, "switch_location_success", returnData);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, "default_error");
+			return apiResponse.errorResponse(req, res, "default_error");
 		}
 	},
 ];
@@ -2372,7 +2381,7 @@ exports.addNewOrganisation = [
 			);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -2415,6 +2424,8 @@ exports.addUsersFromExcel = [
 					const zip = user?.["POSTAL CODE"];
 					const province = user?.["PROVINCE"];
 					const warehouseTitle = user?.["LOCATION NAME"];
+					const warehouseRegion = user?.["REGION"];
+					const country = user?.["COUNTRY"];
 					const district = user?.["DISTRICT"];
 					const line1 = user?.["ADDRESS LINE 1"];
 					const warehouseAddress = {
@@ -2432,8 +2443,8 @@ exports.addUsersFromExcel = [
 					const warehousePayload = {
 						organisationId: organisationId,
 						title: warehouseTitle,
-						region: "Americas",
-						country: "Costa Rica",
+						region: warehouseRegion || "Americas",
+						country: country || "Costa Rica",
 						warehouseAddress: warehouseAddress,
 						supervisors: [],
 					};
@@ -2521,7 +2532,7 @@ exports.addUsersFromExcel = [
 				return apiResponse.successResponseWithData(req, res, "success", responsePayload);
 			} catch (err) {
 				console.log(err);
-				return apiResponse.ErrorResponse(req, res, err);
+				return apiResponse.errorResponse(req, res, err);
 			}
 		} catch (err) {
 			console.log(err);
@@ -2531,68 +2542,44 @@ exports.addUsersFromExcel = [
 
 exports.activateUser = [
 	auth,
-	(req, res) => {
+	async (req, res) => {
 		try {
 			const { organisationName } = req.user;
 			const { id, role } = req.query;
-			EmployeeModel.findOne({ id: id })
-				.then((employee) => {
-					if (employee) {
-						if (employee.isConfirmed && employee.accountStatus == "ACTIVE") {
-							return apiResponse.successResponseWithData(res, " User is already Active", employee);
-						} else {
-							axios.get(`${blockchain_service_url}/createUserAddress`).then((response) => {
-								const walletAddress = response.data.items;
-								const userData = {
-									walletAddress,
-								};
-								axios
-									.post(`${blockchain_service_url}/grantPermission`, userData)
-									.then(() => console.log("posted"));
-								EmployeeModel.findOneAndUpdate(
-									{ id: id },
-									{
-										$set: {
-											accountStatus: "ACTIVE",
-											isConfirmed: true,
-											walletAddress,
-											role,
-										},
-									},
-									{ new: true },
-								)
-									.exec()
-									.then((emp) => {
-										let emailBody = RequestApproved({
-											name: emp.firstName,
-											organisation: organisationName,
-										});
-										// Send confirmation email
-										try {
-											mailer.send(
-												constants.appovalEmail.from,
-												emp.emailId,
-												constants.appovalEmail.subject,
-												emailBody,
-											);
-										} catch (mailError) {
-											console.log(mailError);
-										}
-										return apiResponse.successResponseWithData(res, `User Activated`, emp);
-									});
-							});
-						}
-					} else {
-						return apiResponse.notFoundResponse(req, res, "User Not Found");
-					}
-				})
-				.catch((err) => {
-					return apiResponse.ErrorResponse(req, res, err);
-				});
+			const employee = await EmployeeModel.findOne({ id: id })
+			if (employee) {
+				if (employee.isConfirmed && employee.accountStatus == "ACTIVE") {
+					return apiResponse.successResponseWithData(res, " User is already Active", employee);
+				} else {
+					const emp = await EmployeeModel.findOneAndUpdate(
+						{ id: id },
+						{
+							$set: {
+								accountStatus: "ACTIVE",
+								isConfirmed: true,
+								role,
+							},
+						},
+						{ new: true },
+					)
+					const emailBody = RequestApproved({
+						name: emp.firstName,
+						organisation: organisationName,
+					});
+					await mailer.send(
+						constants.appovalEmail.from,
+						emp.emailId,
+						constants.appovalEmail.subject,
+						emailBody,
+					);
+					return apiResponse.successResponseWithData(res, `User Activated`, emp);
+				}
+			}
+			return apiResponse.notFoundResponse(req, res, "User Not Found");
 		} catch (err) {
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
-	},
+	}
 ];
 
 exports.deactivateUser = [
@@ -2622,10 +2609,10 @@ exports.deactivateUser = [
 					return apiResponse.successResponseWithData(req, res, "User Rejected", emp);
 				})
 				.catch((err) => {
-					return apiResponse.ErrorResponse(req, res, err);
+					return apiResponse.errorResponse(req, res, err);
 				});
 		} catch (err) {
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -2647,7 +2634,7 @@ exports.updateUserRole = [
 				throw new Error("Error in updating user role!");
 			}
 		} catch (err) {
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -2665,7 +2652,7 @@ exports.getAllUsers = [
 				confirmedUsers,
 			);
 		} catch (err) {
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -2679,7 +2666,7 @@ exports.getWarehouseUsers = [
 			});
 			return apiResponse.successResponseWithData(req, res, "Users Retrieved Success", users);
 		} catch (err) {
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -2751,7 +2738,7 @@ exports.getOrgUsers = [
 			return apiResponse.successResponseWithData(req, res, "Organisation Users", result);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -2767,7 +2754,7 @@ exports.getOrgUserAnalytics = [
 				{
 					$facet: {
 						total: [
-							{ $match: {accountStatus:  {$in: ["ACTIVE", "DEACTIVATED","REJECTED"]} }},
+							{ $match: { accountStatus: { $in: ["ACTIVE", "DEACTIVATED", "REJECTED"] } } },
 							{
 								$group: {
 									_id: null,
@@ -2835,7 +2822,7 @@ exports.getOrgUserAnalytics = [
 			return apiResponse.successResponseWithData(req, res, "User Analytics", analyticsObject);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -2850,7 +2837,7 @@ exports.getUsers = [
 			const confirmedUsers = users.filter((user) => user.walletAddress !== "");
 			return apiResponse.successResponseWithData(req, res, "Organisation Users", confirmedUsers);
 		} catch (err) {
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -2865,7 +2852,7 @@ exports.getOrgActiveUsers = [
 			}).select("firstName lastName emailId id");
 			return apiResponse.successResponseWithData(req, res, "Organisation active users", users);
 		} catch (err) {
-			return apiResponse.ErrorResponse(req, res, err);
+			return apiResponse.errorResponse(req, res, err);
 		}
 	},
 ];
@@ -2878,7 +2865,7 @@ exports.Image = [
 			return apiResponse.successResponseWithData(req, res, "Image URL", signedUrl);
 		} catch (err) {
 			console.log(err);
-			return apiResponse.ErrorResponse(req, res, err.message);
+			return apiResponse.errorResponse(req, res, err.message);
 		}
 	},
 ];

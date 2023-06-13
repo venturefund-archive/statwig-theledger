@@ -444,7 +444,7 @@ const CreateShipment = (props) => {
       org: { name: data.name },
       warehouse: {
         country: data.country,
-        employeess: [],
+        employees: [],
         organisationId: "",
         postalAddress: null,
         region: data.region,
