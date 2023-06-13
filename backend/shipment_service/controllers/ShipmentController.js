@@ -25,7 +25,8 @@ const CENTRAL_AUTHORITY_ADDRESS = "null";
 const { checkPermissions, checkPermissionAwait } = require("../middlewares/rbac_middleware");
 const { saveTripDetails } = require("../helpers/sensorDataCollector");
 const logEvent = require("../../../utils/event_logger");
-const hf_blockchain_url = process.env.HF_BLOCKCHAIN_URL;
+const HF_BLOCKCHAIN_URL = process.env.HF_BLOCKCHAIN_URL;
+const LC_BLOCKCHAIN_URL = process.env.LC_BLOCKCHAIN_URL;
 const axios = require("axios");
 const { uploadFile, getSignedUrl } = require("../helpers/s3");
 const fs = require("fs");
@@ -1014,8 +1015,31 @@ exports.createShipment = [
 
         axios
           .post(
-            `${hf_blockchain_url}/api/v1/transactionapi/shipment/create`,
+            `${HF_BLOCKCHAIN_URL}/api/v1/transactionapi/shipment/create`,
             bc_data,
+            {
+              headers: {
+                Authorization: token,
+              },
+            }
+          )
+          .catch((error) => {
+            console.log(error);
+          });
+        const lc_data = {
+          shipmentid: shipment?.id,
+          poId: shipment?.poId || "",
+          supplierId: shipment?.supplier?.id || "",
+          receiverId: shipment?.receiver?.id || "",
+          shipmentUpdates: shipment?.status,
+          shippingDate: shipment?.shippingDate,
+          status: shipment?.status,
+          products: shipment?.products?.map((product) => product?.productID)
+        }
+        axios
+          .post(
+            `${LC_BLOCKCHAIN_URL}/api/blockchain/storeData`,
+            lc_data,
             {
               headers: {
                 Authorization: token,
@@ -1323,8 +1347,31 @@ exports.newShipment = [
         req.headers["x-access-token"] || req.headers["authorization"]; // Express headers are auto converted to lowercase
       axios
         .post(
-          `${hf_blockchain_url}/api/v1/transactionapi/shipment/create`,
+          `${HF_BLOCKCHAIN_URL}/api/v1/transactionapi/shipment/create`,
           bc_data,
+          {
+            headers: {
+              Authorization: token,
+            },
+          }
+        )
+        .catch((error) => {
+          console.log(error);
+        });
+      const lc_data = {
+        shipmentid: shipment?.id,
+        poId: shipment?.poId || "",
+        supplierId: shipment?.supplier?.id || "",
+        receiverId: shipment?.receiver?.id || "",
+        shipmentUpdates: shipment?.status,
+        shippingDate: shipment?.shippingDate,
+        status: shipment?.status,
+        products: shipment?.products?.map((product) => product?.productID)
+      }
+      axios
+        .post(
+          `${LC_BLOCKCHAIN_URL}/api/blockchain/storeData`,
+          lc_data,
           {
             headers: {
               Authorization: token,
@@ -1819,8 +1866,32 @@ exports.receiveShipment = [
             req.headers["x-access-token"] || req.headers["authorization"];
           axios
             .put(
-              `${hf_blockchain_url}/api/v1/transactionapi/shipment/update`,
+              `${HF_BLOCKCHAIN_URL}/api/v1/transactionapi/shipment/update`,
               bc_data,
+              {
+                headers: {
+                  Authorization: token,
+                },
+              }
+            )
+            .catch((error) => {
+              console.log(error);
+            });
+
+          const lc_data = {
+            shipmentid: shipmentData?.id,
+            poId: shipmentData?.poId || "",
+            supplierId: shipmentData?.supplier?.id || "",
+            receiverId: shipmentData?.receiver?.id || "",
+            shipmentUpdates: shipmentData?.status,
+            shippingDate: shipmentData?.shippingDate,
+            status: shipmentData?.status,
+            products: shipmentData?.products?.map((product) => product?.productID)
+          }
+          axios
+            .post(
+              `${LC_BLOCKCHAIN_URL}/api/blockchain/updateData`,
+              lc_data,
               {
                 headers: {
                   Authorization: token,
@@ -1979,18 +2050,40 @@ exports.customReceiveShipment = [
         Products: JSON.stringify(shipmentData.products),
         Misc: "",
       };
-      // const token =
-      //   req.headers["x-access-token"] || req.headers["authorization"];
-      // await axios.put(
-      //   `${hf_blockchain_url}/api/v1/transactionapi/shipment/update`,
-      //   bc_data,
-      //   {
-      //     headers: {
-      //       Authorization: token,
-      //     },
-      //   }
-      // );
-
+      const token =
+        req.headers["x-access-token"] || req.headers["authorization"];
+      axios.put(
+        `${HF_BLOCKCHAIN_URL}/api/v1/transactionapi/shipment/update`,
+        bc_data,
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      ).catch(err => console.log(err));
+      const lc_data = {
+        shipmentid: shipmentData?.id,
+        poId: shipmentData?.poId || "",
+        supplierId: shipmentData?.supplier?.id || "",
+        receiverId: shipmentData?.receiver?.id || "",
+        shipmentUpdates: shipmentData?.status,
+        shippingDate: shipmentData?.shippingDate,
+        status: shipmentData?.status,
+        products: shipmentData?.products?.map((product) => product?.productID)
+      }
+      axios
+        .post(
+          `${LC_BLOCKCHAIN_URL}/api/blockchain/updateData`,
+          lc_data,
+          {
+            headers: {
+              Authorization: token,
+            },
+          }
+        )
+        .catch((error) => {
+          console.log(error);
+        });
       const event_data = {
         eventID: cuid(),
         eventTime: new Date().toISOString(),
@@ -2597,13 +2690,13 @@ exports.viewShipmentGmr = [
           const shipment = await ShipmentModel.findOne({
             id: req.query.shipmentId,
           });
-          for (let i = 0; i < shipment.shipmentUpdates.length; i++) {
+          for (const element of shipment.shipmentUpdates) {
             if (
-              shipment.shipmentUpdates[i]?.imageId &&
-              shipment.shipmentUpdates[i]?.imageId.length
+              element?.imageId &&
+              element?.imageId.length
             ) {
-              shipment.shipmentUpdates[i].image = await getSignedUrl(
-                shipment.shipmentUpdates[i].imageId
+              element.image = await getSignedUrl(
+                element.imageId
               );
             }
           }
@@ -2941,6 +3034,29 @@ exports.updateTrackingStatus = [
           data: shipment,
         },
       };
+      const lc_data = {
+        shipmentid: shipment?.id,
+        poId: shipment?.poId || "",
+        supplierId: shipment?.supplier?.id || "",
+        receiverId: shipment?.receiver?.id || "",
+        shipmentUpdates: shipment?.status,
+        shippingDate: shipment?.shippingDate,
+        status: shipment?.status,
+        products: shipment?.products?.map((product) => product?.productID)
+      }
+      axios
+        .post(
+          `${LC_BLOCKCHAIN_URL}/api/blockchain/updateData`,
+          lc_data,
+          {
+            headers: {
+              Authorization: req.headers["x-access-token"] || req.headers["authorization"]
+            },
+          }
+        )
+        .catch((error) => {
+          console.log(error);
+        });
       await logEvent(event_data, req);
       return apiResponse.successResponse(
         res,
@@ -3008,10 +3124,10 @@ exports.chainOfCustody = [
 
               const shipmentIds = poDetails[0].shipments;
               var shipments = [];
-              for (let i = 0; i < shipmentIds.length; i++) {
+              for (const element of shipmentIds) {
                 const shipmentDetails = await userShipments(
                   "id",
-                  shipmentIds[i],
+                  element,
                   0,
                   100
                 );
@@ -3247,10 +3363,10 @@ exports.fetchShipmentIds = [
 
               const shipmentIds = poDetails[0].shipments;
               var shipments = [];
-              for (let i = 0; i < shipmentIds.length; i++) {
+              for (const element of shipmentIds) {
                 const shipmentDetails = await userShipments(
                   "id",
-                  shipmentIds[i],
+                  element,
                   0,
                   100
                 );
@@ -4952,7 +5068,7 @@ exports.trackJourneyOnBlockchain = [
         };
 
         const shipmentResult = await axios.post(
-          `${hf_blockchain_url}/api/v1/transactionapi/shipment/querystring`,
+          `${HF_BLOCKCHAIN_URL}/api/v1/transactionapi/shipment/querystring`,
           shipmentQuery,
           {
             headers: {
@@ -4971,7 +5087,7 @@ exports.trackJourneyOnBlockchain = [
           );
 
           const supplierWarehouseDetails = await axios.get(
-            `${hf_blockchain_url}/api/v1/participantapi/Warehouse/get/WAR100451`,
+            `${HF_BLOCKCHAIN_URL}/api/v1/participantapi/Warehouse/get/WAR100451`,
             {
               headers: {
                 Authorization: token,
@@ -4980,7 +5096,7 @@ exports.trackJourneyOnBlockchain = [
           );
 
           const supplierOrgDetails = await axios.get(
-            `${hf_blockchain_url}/api/v1/participantapi/Organizations/get/${supplierDetails.id}`,
+            `${HF_BLOCKCHAIN_URL}/api/v1/participantapi/Organizations/get/${supplierDetails.id}`,
             {
               headers: {
                 Authorization: token,
@@ -4989,7 +5105,7 @@ exports.trackJourneyOnBlockchain = [
           );
 
           const receiverWarehouseDetails = await axios.get(
-            `${hf_blockchain_url}/api/v1/participantapi/Warehouse/get/WAR100451`,
+            `${HF_BLOCKCHAIN_URL}/api/v1/participantapi/Warehouse/get/WAR100451`,
             {
               headers: {
                 Authorization: token,
@@ -4998,7 +5114,7 @@ exports.trackJourneyOnBlockchain = [
           );
 
           const receiverOrgDetails = await axios.get(
-            `${hf_blockchain_url}/api/v1/participantapi/Organizations/get/${receiverDetails.id}`,
+            `${HF_BLOCKCHAIN_URL}/api/v1/participantapi/Organizations/get/${receiverDetails.id}`,
             {
               headers: {
                 Authorization: token,
@@ -5029,7 +5145,7 @@ exports.trackJourneyOnBlockchain = [
         };
 
         const shipmentResultOutward = await axios.post(
-          `${hf_blockchain_url}/api/v1/transactionapi/shipment/querystring`,
+          `${HF_BLOCKCHAIN_URL}/api/v1/transactionapi/shipment/querystring`,
           shipmentQueryOutward,
           {
             headers: {
@@ -5048,7 +5164,7 @@ exports.trackJourneyOnBlockchain = [
           );
 
           const supplierWarehouseDetails = await axios.get(
-            `${hf_blockchain_url}/api/v1/participantapi/Warehouse/get/WAR100451`,
+            `${HF_BLOCKCHAIN_URL}/api/v1/participantapi/Warehouse/get/WAR100451`,
             {
               headers: {
                 Authorization: token,
@@ -5057,7 +5173,7 @@ exports.trackJourneyOnBlockchain = [
           );
 
           const supplierOrgDetails = await axios.get(
-            `${hf_blockchain_url}/api/v1/participantapi/Organizations/get/${supplierDetails.id}`,
+            `${HF_BLOCKCHAIN_URL}/api/v1/participantapi/Organizations/get/${supplierDetails.id}`,
             {
               headers: {
                 Authorization: token,
@@ -5066,7 +5182,7 @@ exports.trackJourneyOnBlockchain = [
           );
 
           const receiverWarehouseDetails = await axios.get(
-            `${hf_blockchain_url}/api/v1/participantapi/Warehouse/get/WAR100451`,
+            `${HF_BLOCKCHAIN_URL}/api/v1/participantapi/Warehouse/get/WAR100451`,
             {
               headers: {
                 Authorization: token,
@@ -5075,7 +5191,7 @@ exports.trackJourneyOnBlockchain = [
           );
 
           const receiverOrgDetails = await axios.get(
-            `${hf_blockchain_url}/api/v1/participantapi/Organizations/get/${receiverDetails.id}`,
+            `${HF_BLOCKCHAIN_URL}/api/v1/participantapi/Organizations/get/${receiverDetails.id}`,
             {
               headers: {
                 Authorization: token,
@@ -5106,7 +5222,7 @@ exports.trackJourneyOnBlockchain = [
         };
 
         const shipmentResultTracked = await axios.post(
-          `${hf_blockchain_url}/api/v1/transactionapi/shipment/querystring`,
+          `${HF_BLOCKCHAIN_URL}/api/v1/transactionapi/shipment/querystring`,
           shipmentQueryTracked,
           {
             headers: {
@@ -5123,7 +5239,7 @@ exports.trackJourneyOnBlockchain = [
         );
 
         const supplierWarehouseDetailsTracked = await axios.get(
-          `${hf_blockchain_url}/api/v1/participantapi/Warehouse/get/WAR100451`,
+          `${HF_BLOCKCHAIN_URL}/api/v1/participantapi/Warehouse/get/WAR100451`,
           {
             headers: {
               Authorization: token,
@@ -5132,7 +5248,7 @@ exports.trackJourneyOnBlockchain = [
         );
 
         const supplierOrgDetailsTracked = await axios.get(
-          `${hf_blockchain_url}/api/v1/participantapi/Organizations/get/${supplierDetails.id}`,
+          `${HF_BLOCKCHAIN_URL}/api/v1/participantapi/Organizations/get/${supplierDetails.id}`,
           {
             headers: {
               Authorization: token,
@@ -5141,7 +5257,7 @@ exports.trackJourneyOnBlockchain = [
         );
 
         const receiverWarehouseDetailsTracked = await axios.get(
-          `${hf_blockchain_url}/api/v1/participantapi/Warehouse/get/WAR100451`,
+          `${HF_BLOCKCHAIN_URL}/api/v1/participantapi/Warehouse/get/WAR100451`,
           {
             headers: {
               Authorization: token,
@@ -5150,7 +5266,7 @@ exports.trackJourneyOnBlockchain = [
         );
 
         const receiverOrgDetailsTracked = await axios.get(
-          `${hf_blockchain_url}/api/v1/participantapi/Organizations/get/${receiverDetails.id}`,
+          `${HF_BLOCKCHAIN_URL}/api/v1/participantapi/Organizations/get/${receiverDetails.id}`,
           {
             headers: {
               Authorization: token,
@@ -5361,7 +5477,7 @@ exports.fetchShipmentsForAbInBevOnBlockchain = [
         req.headers["x-access-token"] || req.headers["authorization"]; // Express headers are auto converted to lowercase
 
       const shipmentResult = await axios.post(
-        `${hf_blockchain_url}/api/v1/transactionapi/shipment/querystring`,
+        `${HF_BLOCKCHAIN_URL}/api/v1/transactionapi/shipment/querystring`,
         shipmentQuery,
         {
           headers: {
@@ -5379,7 +5495,7 @@ exports.fetchShipmentsForAbInBevOnBlockchain = [
         );
 
         const supplierWarehouseDetails = await axios.get(
-          `${hf_blockchain_url}/api/v1/participantapi/Warehouse/get/${supplierDetails.locationId}`,
+          `${HF_BLOCKCHAIN_URL}/api/v1/participantapi/Warehouse/get/${supplierDetails.locationId}`,
           {
             headers: {
               Authorization: token,
@@ -5388,7 +5504,7 @@ exports.fetchShipmentsForAbInBevOnBlockchain = [
         );
 
         await axios.get(
-          `${hf_blockchain_url}/api/v1/participantapi/Organizations/get/${supplierDetails.id}`,
+          `${HF_BLOCKCHAIN_URL}/api/v1/participantapi/Organizations/get/${supplierDetails.id}`,
           {
             headers: {
               Authorization: token,
@@ -5397,7 +5513,7 @@ exports.fetchShipmentsForAbInBevOnBlockchain = [
         );
 
         const receiverWarehouseDetails = await axios.get(
-          `${hf_blockchain_url}/api/v1/participantapi/Warehouse/get/${receiverDetails.locationId}`,
+          `${HF_BLOCKCHAIN_URL}/api/v1/participantapi/Warehouse/get/${receiverDetails.locationId}`,
           {
             headers: {
               Authorization: token,
@@ -5406,7 +5522,7 @@ exports.fetchShipmentsForAbInBevOnBlockchain = [
         );
 
         await axios.get(
-          `${hf_blockchain_url}/api/v1/participantapi/Organizations/get/${receiverDetails.id}`,
+          `${HF_BLOCKCHAIN_URL}/api/v1/participantapi/Organizations/get/${receiverDetails.id}`,
           {
             headers: {
               Authorization: token,
@@ -5448,7 +5564,7 @@ exports.warehousesOrgsExportToBlockchain = [
       });
       for (const warehouse of warehouses) {
         const supplierWarehouseDetails = await axios.get(
-          `${hf_blockchain_url}/api/v1/participantapi/Warehouse/get/${warehouse.id}`,
+          `${HF_BLOCKCHAIN_URL}/api/v1/participantapi/Warehouse/get/${warehouse.id}`,
           {
             headers: {
               Authorization: req.headers["x-access-token"],
@@ -5493,7 +5609,7 @@ exports.warehousesOrgsExportToBlockchain = [
           const token =
             req.headers["x-access-token"] || req.headers["authorization"];
           await axios.post(
-            `${hf_blockchain_url}/api/v1/participantapi/Warehouse/create`,
+            `${HF_BLOCKCHAIN_URL}/api/v1/participantapi/Warehouse/create`,
             bc_data,
             {
               headers: {
@@ -5508,12 +5624,12 @@ exports.warehousesOrgsExportToBlockchain = [
         status: "ACTIVE",
       });
 
-      for (let i = 0; i < orgs.length; i++) {
+      for (const element of orgs) {
         const token =
           req.headers["x-access-token"] || req.headers["authorization"]; // Express headers are auto converted to lowercase
-        const s = orgs[i].id;
+        const s = element.id;
         const supplierOrgDetails = await axios.get(
-          `${hf_blockchain_url}/api/v1/participantapi/Organizations/get/${s}`,
+          `${HF_BLOCKCHAIN_URL}/api/v1/participantapi/Organizations/get/${s}`,
           {
             headers: {
               Authorization: token,
@@ -5549,7 +5665,7 @@ exports.warehousesOrgsExportToBlockchain = [
           };
 
           await axios.post(
-            `${hf_blockchain_url}/api/v1/participantapi/Organizations/create`,
+            `${HF_BLOCKCHAIN_URL}/api/v1/participantapi/Organizations/create`,
             bc_data,
             {
               headers: {
@@ -5744,8 +5860,8 @@ exports.syncAtoms = [
 
       const atomsToMerge = [];
 
-      for (let i = 0; i < allGroups.length; ++i) {
-        let currAtoms = allGroups[i].atoms;
+      for (const element of allGroups) {
+        let currAtoms = element.atoms;
         let atomToUpdate = currAtoms[0];
         currAtoms.splice(0, 1);
 
@@ -5755,7 +5871,7 @@ exports.syncAtoms = [
           atomsToMerge.push(atom.id);
         });
 
-        const updatedAtom = await AtomModel.findOneAndUpdate(
+        await AtomModel.findOneAndUpdate(
           { id: atomToUpdate.id },
           {
             $set: { quantity: atomToUpdate.quantity },
