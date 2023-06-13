@@ -122,7 +122,6 @@ exports.addReward = [
     asyncHandler(roleAuth),
     async function (req, res) {
         try {
-            console.log(req.appId)
             const { event, eventType } = req.body;
             const config = req.rewardConfig.find((item) => item.event === event && item.eventType === eventType);
             const points = config ? config.points : null;

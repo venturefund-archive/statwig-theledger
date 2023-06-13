@@ -2,9 +2,8 @@ import React, { useEffect, useState } from "react";
 import ViewGMRShipment from "../../components/viewGMRShipment";
 import Header from "../../shared/header";
 import Sidebar from "../../shared/sidebarMenu";
-import { getViewShipmentGmr } from "../../actions/shipmentActions";
+import { getViewShipmentGmr, fetchImage } from "../../actions/shipmentActions";
 import { useDispatch } from "react-redux";
-import { fetchImage } from "../../actions/shipmentActions";
 import { useTranslation } from "react-i18next";
 
 const ViewShipmentContainer = (props) => {

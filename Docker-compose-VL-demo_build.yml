@@ -311,6 +311,9 @@ services:
         - "ENVIRONMENT=prod"
         - "SERVER_URL=https://demo.vaccineledger.com"
         - "GOOGLE_CLIENT_ID=937115966227-mnidai9tm6vndogdjf1dlj0ve2j79k4h.apps.googleusercontent.com"
+    # build:
+    #   context: "./frontend"
+    #   dockerfile: "Dockerfile.prebuilt"
     image: "frontend2.0"
     container_name: "cra-frontend"
     restart: always

@@ -69,7 +69,7 @@ const EnterId = (props) => {
   useEffect(() => {
     if (shipmentId) {
       getViewShipment(shipmentId).then((result) => {
-        let val = result.data.status;
+        const val = result.data.status;
         if (val == "RECEIVED") {
           setshipdisabled(true);
           seterrorShipment(true);

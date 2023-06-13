@@ -56,12 +56,12 @@ const ViewGMRShipment = (props) => {
       <div className='row justify-content-between'>
         <h1 className='breadcrumb mt-3'>VIEW SHIPMENT</h1>
         <div className='row'>
-          <Link to={`/shipments`}>
+          {/* <Link to={`/shipments`}>
             <button className='btn btn-outline-primary mr-4 mt-3'>
               <img src={back} height='17' className='mr-2 mb-1' alt='Back' />
               Back to shipments
             </button>
-          </Link>
+          </Link> */}
           {isAuthenticated("updateShipment") && (
             <Link
               to={
@@ -84,7 +84,7 @@ const ViewGMRShipment = (props) => {
               </button>
             </Link>
           )}
-          <button
+          {/* <button
             className='btn btn-primary mr-4 mt-3 chain'
             disabled={status === "RECEIVED"}
             onClick={() => {
@@ -99,7 +99,7 @@ const ViewGMRShipment = (props) => {
               alt='Receive Shipment'
             />
             <b>Receive Shipment</b>
-          </button>
+          </button> */}
         </div>
       </div>
       <div className='row'>
@@ -138,17 +138,18 @@ const ViewGMRShipment = (props) => {
         </div>
         <div className='col-sm-8'>
           <div className='d-flex'>
-            {isAuthenticated("vacus") && (
-              <div className='col-sm-7'>
-                <p className='heading'>TEMPERATURE</p>
-                <Chart shipmentId={id} />
-              </div>)
-            }
-            {isAuthenticated("mobileye") && (
-              <div className='col-sm-5 ml-2'>
-                <p className='heading'>DRIVER STATS</p>
-                <DriverGraph shipmentId={id} />
-              </div>)}
+            {/* {isAuthenticated("vacus") && ( */}
+            <div className='col-sm-7'>
+              <p className='heading'>TEMPERATURE</p>
+              <Chart shipmentId={id} />
+            </div>
+            {/* )} */}
+            {/* {isAuthenticated("mobileye") && ( */}
+            <div className='col-sm-5 ml-2'>
+              <p className='heading'>DRIVER STATS</p>
+              <DriverGraph shipmentId={id} />
+            </div>
+            {/* )} */}
           </div>
           {openShipping && (
             <Modal

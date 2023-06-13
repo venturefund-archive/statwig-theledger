@@ -4,9 +4,8 @@ import Footer from "../footer";
 import HomeIcon from "../../assets/icons/Overviewselected.svg";
 import shipIcon from "../../assets/icons/Shippmentselected.png";
 import InventoryIcon from "../../assets/icons/Inventoryselected.png";
-import trackIcon from "../../assets/icons/Track_Traceselected.png";
-import NetworkIcon from "../../assets/icons/blockicon.png";
 import trackSelectedIcon from "../../assets/icons/Track_Traceselected.png";
+import NetworkIcon from "../../assets/icons/blockicon.png";
 import OrderSelectedIcon from "../../assets/icons/orderSelected.png";
 import lastMileIcon from "../../assets/icons/lastMile.png";
 import { isAuthenticated } from "../../utils/commonHelper";
@@ -16,7 +15,7 @@ const SideBar = (props) => {
 	const { match, user, t, trackTraceData } = props;
 	const { url } = match;
 	const [enable, setEnable] = useState(true);
-	const intelEnabled = props.user?.type === "Third Party Logistics" ? true : false;
+	const intelEnabled = (props.user.type && props.user.type.toUpperCase() === "THIRD PARTY LOGISTICS") ? true : false;
 
 	useEffect(() => {
 		if (intelEnabled) setEnable(false);
@@ -51,7 +50,7 @@ const SideBar = (props) => {
 				{isAuthenticated("overview") && enable && (
 					<li className={url === "/overview" ? "active" : "inactive"}>
 						<Link to="/overview" className="nav-look-link">
-							<img src={url === "/overview" ? HomeIcon : HomeIcon} alt="Overview" />
+							<img src={HomeIcon} alt="Overview" />
 							<span>{t("overview")}</span>
 						</Link>
 					</li>
@@ -60,9 +59,7 @@ const SideBar = (props) => {
 					<li className={url === "/orders" || url === "/neworder" ? "active" : ""}>
 						<Link to="/orders" className="d-inline-block">
 							<img
-								src={
-									url === "/orders" || url === "/neworder" ? OrderSelectedIcon : OrderSelectedIcon
-								}
+								src={OrderSelectedIcon}
 								alt="Orders"
 							/>
 							<span className="ml-2">{t("orders")}</span>
@@ -86,25 +83,14 @@ const SideBar = (props) => {
 					>
 						<Link to="/inventory" className="d-inline-block">
 							<img
-								src={
-									url === "/inventory" ||
-										url === "/newinventory" ||
-										url === "/productcategory" ||
-										url === "/batchexpired" ||
-										url === "/batchnearexpiry/product" ||
-										url === "/productoutofstock" ||
-										url === "/addproduct" ||
-										url === "/productlist/all"
-										? InventoryIcon
-										: InventoryIcon
-								}
+								src={InventoryIcon}
 								alt="Inventory"
 							/>
 							<span className="ml-2">{t("inventory")}</span>
 						</Link>
 					</li>
 				)}
-				{(isAuthenticated("inboundShipments") || isAuthenticated("outboundShipments")) && (
+				{(isAuthenticated("inboundShipments") || isAuthenticated("outboundShipments")) && enable && (
 					<li
 						className={
 							url === "/shipments" || url === "/newshipment" || url === "/transactionHistory"
@@ -114,11 +100,7 @@ const SideBar = (props) => {
 					>
 						<Link to="/shipments" className="d-inline-block">
 							<img
-								src={
-									url === "/shipments" || url === "/newshipment" || url === "/transactionHistory"
-										? shipIcon
-										: shipIcon
-								}
+								src={shipIcon}
 								alt="Shippment"
 							/>
 							<span className="ml-2">{t("shipments")}</span>
@@ -129,7 +111,7 @@ const SideBar = (props) => {
 				{isAuthenticated("overview") && enable && networkPath && (
 					<li className={url === networkPath ? "active" : ""}>
 						<Link to={networkPath} className="d-inline-block">
-							<img src={url === networkPath ? NetworkIcon : NetworkIcon} alt="network" />
+							<img src={NetworkIcon} alt="network" />
 							<span className="ml-2">{t("network")}</span>
 						</Link>
 					</li>
@@ -141,7 +123,7 @@ const SideBar = (props) => {
 							className="nav-look-link d-inline-block"
 							onClick={resetTrackTracePage}
 						>
-							<img src={url === "/track" ? trackSelectedIcon : trackIcon} alt="Track &amp; Trace" />
+							<img src={url === "/track" ? trackSelectedIcon : NetworkIcon} alt="Track &amp; Trace" />
 							<span>{t("trackntrace")}</span>
 						</Link>
 					</li>
@@ -149,7 +131,7 @@ const SideBar = (props) => {
 				{enable && (
 					<li className={url === "/lastMile-Track" ? "active" : ""}>
 						<Link to={lastMilePath} className="d-inline-block">
-							<img src={url === "/lastMile-Track" ? lastMileIcon : lastMileIcon} alt="lastMile" />
+							<img src={lastMileIcon} alt="lastMile" />
 
 							<span className="ml-2">{t("lastmile")}</span>
 						</Link>

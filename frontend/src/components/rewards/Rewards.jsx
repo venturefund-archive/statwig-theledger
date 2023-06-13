@@ -44,7 +44,9 @@ export default function Rewards({ t }) {
               {rewards?.loading ? (
                 <h1 className='points_score_ts'>Loading ..</h1>
               ) : (
-                <h1 className='points_score_ts'>{rewards?.data?.points}</h1>
+                <h1 className='points_score_ts'>
+                  {rewards?.data?.points || 0}
+                </h1>
               )}
             </div>
             <div className='points_classification'>

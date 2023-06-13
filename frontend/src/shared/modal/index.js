@@ -1,13 +1,12 @@
 import React from "react";
 import "./style.scss";
 import CloseIcon from "../../assets/icons/cross.svg";
-// import useWindowSize from 'react-use/lib/useWindowSize'
 import Confetti from 'react-confetti'
 
 const Modal = (props) => {
   return (
-    <React.Fragment>
-      {props.confetti && (<Confetti tweenDuration={2000}/>)}
+    <>
+      {props.confetti && (<Confetti tweenDuration={2000} />)}
       <div className='modal-backdrop' />
       <div className='modal' tabIndex='-1' role='dialog'>
         <div
@@ -41,7 +40,7 @@ const Modal = (props) => {
           </div>
         </div>
       </div>
-    </React.Fragment>
+    </>
   );
 };
 

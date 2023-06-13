@@ -1,7 +1,9 @@
 const express = require("express");
 const rewardsController = require("../controllers/RewardsController");
+const healthRouter = require("./index")
 const router = express.Router();
 
+router.get("/health", healthRouter.health)
 router.get("/rewards", rewardsController.userRewards)
 router.post("/rewards", rewardsController.addReward)
 router.get("/rewards/:id", rewardsController.viewReward)

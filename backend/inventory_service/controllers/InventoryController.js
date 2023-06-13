@@ -867,7 +867,7 @@ exports.addProductsToInventory = [
               data: req.body
             },
           };
-          await logEvent(event_data);
+          await logEvent(event_data, req);
           return apiResponse.successResponseWithData(
             res,
             responses(req.user.preferredLanguage).added_inventory_products
@@ -2561,7 +2561,7 @@ exports.deleteProductsFromInventory = [
       event_data.stackholders.secondorg.address = receiverAddress || null;
       event_data.payload.data = payload;
 
-      await logEvent(event_data);
+      await logEvent(event_data, req);
       return apiResponse.successResponse(
         res,
         responses(req.user.preferredLanguage).success
@@ -2898,7 +2898,7 @@ exports.reduceBatch = [
       event_data.stackholders.ca.id = CENTRAL_AUTHORITY_ID || "null";
       event_data.stackholders.ca.name = CENTRAL_AUTHORITY_NAME || "null";
       event_data.stackholders.ca.address = CENTRAL_AUTHORITY_ADDRESS || "null";
-      await logEvent(event_data);
+      await logEvent(event_data, req);
       return apiResponse.successResponseWithData(res, "Subtracted Batch", {
         batch,
         inventory,

@@ -623,7 +623,7 @@ exports.register = [
 					data: req.body,
 				},
 			};
-			await logEvent(event_data);
+			await logEvent(event_data, req);
 
 			if (organisation && organisation.isRegistered && organisation.status !== "INCOMPLETE") {
 				return apiResponse.successResponseWithData(req, res, "user_registered_success", null);
@@ -812,7 +812,7 @@ exports.verifyOtp = [
 						preferredLanguage: user.preferredLanguage,
 						isCustom: user.isCustom,
 						type: org.type,
-						rewardsApiKey : REWARDS_API_KEY
+						rewardsApiKey: REWARDS_API_KEY
 					};
 				} else {
 					userData = {
@@ -829,7 +829,7 @@ exports.verifyOtp = [
 						preferredLanguage: user.preferredLanguage,
 						isCustom: user.isCustom,
 						type: org.type,
-						rewardsApiKey : REWARDS_API_KEY
+						rewardsApiKey: REWARDS_API_KEY
 					};
 				}
 
@@ -1549,7 +1549,7 @@ exports.addWarehouse = [
 					data: req.body,
 				},
 			};
-			await logEvent(event_data);
+			await logEvent(event_data, req);
 			return apiResponse.successResponseWithData(req, res, "add_warehouse_success", warehouse);
 		} catch (err) {
 			console.log(err);
@@ -2372,7 +2372,7 @@ exports.addNewOrganisation = [
 					data: req.body,
 				},
 			};
-			await logEvent(event_data);
+			await logEvent(event_data, req);
 
 			return apiResponse.successResponseWithData(
 				res,

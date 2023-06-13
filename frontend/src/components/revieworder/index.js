@@ -76,7 +76,7 @@ const ReviewOrder = (props) => {
         //setMessage("Status updated Successfully");
         setModalProps({
           message: "Created Successfully!",
-          points:50,
+          points:100,
           OrderId: result.data.data.poId,
           type: "Success",
           t: t,

@@ -1,11 +1,8 @@
 import * as React from "react";
 import PropTypes from "prop-types";
-import { useTheme, styled } from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
 import Popper from "@mui/material/Popper";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
-import SettingsIcon from "@mui/icons-material/Settings";
-import CloseIcon from "@mui/icons-material/Close";
-import DoneIcon from "@mui/icons-material/Done";
 import Autocomplete, { autocompleteClasses } from "@mui/material/Autocomplete";
 import ButtonBase from "@mui/material/ButtonBase";
 import InputBase from "@mui/material/InputBase";
@@ -125,18 +122,18 @@ export default function ReportFilter({
   theme,
   labels,
   selectedFilters,
-  handleFilterUpdate
+  handleFilterUpdate,
 }) {
   const open = Boolean(anchorEl);
   const id = open ? "github-label" : undefined;
 
   return (
-    <React.Fragment>
+    <>
       <StyledPopper
         id={id}
         open={open}
         anchorEl={anchorEl}
-        placement="bottom-start"
+        placement='bottom-start'
       >
         <ClickAwayListener onClickAway={handleClose}>
           <div>
@@ -169,12 +166,12 @@ export default function ReportFilter({
                   return;
                 }
                 setPendingValue(newValue);
-                handleFilterUpdate(fieldName, newValue)
+                handleFilterUpdate(fieldName, newValue);
               }}
               disableCloseOnSelect
               PopperComponent={PopperComponent}
               renderTags={() => null}
-              noOptionsText="No labels"
+              noOptionsText='No labels'
               renderOption={(props, option, { selected }) => (
                 <li {...props}>
                   <Box
@@ -199,14 +196,14 @@ export default function ReportFilter({
                   ref={params.InputProps.ref}
                   inputProps={params.inputProps}
                   autoFocus
-                  placeholder="Filter labels"
+                  placeholder='Filter labels'
                 />
               )}
             />
           </div>
         </ClickAwayListener>
       </StyledPopper>
-    </React.Fragment>
+    </>
   );
 }
 

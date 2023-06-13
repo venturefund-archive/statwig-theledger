@@ -19,8 +19,7 @@ function Table(props) {
       return 1;
     }
   });
-  const intelEnabled =
-    props.user.type === "Third Party Logistics" ? true : false;
+  const intelEnabled = (props.user.type && props.user.type.toUpperCase() === "THIRD PARTY LOGISTICS") ? true : false;
   const dispatch = useDispatch();
   const handlePageChange = (event, value) => {
     props.onPageChange(value);
@@ -182,9 +181,9 @@ function Table(props) {
                       </button>
                     ) : null}
                     <Link
-                      to={`/${intelEnabled === true
-                        ? `viewgmrshipment`
-                        : `viewshipment`
+                      to={`${intelEnabled === true
+                        ? `/viewgmrshipment`
+                        : `/viewshipment`
                         }/${shipment.id}`}
                       className='mi-btn mi-btn-sm mi-btn-secondary-outline'
                       style={{

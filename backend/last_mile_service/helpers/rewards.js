@@ -1,17 +1,17 @@
 const axios = require('axios');
-const REWARDS_SERVICE_URL = process.env.REWARDS_SERVICE_URL || 'https://test.vaccineledger.com/rewardmanagement/api/';
+const REWARDS_SERVICE_URL = process.env.REWARDS_SERVICE_URL || 'https://test.vaccineledger.com/rewardmanagement/api';
 const REWARDS_API_KEY = process.env.REWARDS_API_KEY || "testApiKey";
 // Queue to store failed requests
 const requestQueue = [];
 
 // Function to send HTTP request
-async function addReward(data) {
+async function addReward(data, role) {
     try {
         axios.defaults.headers.common['x-api-key'] = REWARDS_API_KEY;
-        await axios.post(REWARDS_SERVICE_URL + "rewards", data);
-        console.log('Request sent successfully');
+        axios.defaults.headers.common['role'] = role;
+        await axios.post(REWARDS_SERVICE_URL + "/rewards", data);
     } catch (error) {
-        console.error('Failed to send request:', error);
+        console.log('Failed to send request:', error);
         // Add request to the queue for later retry
         requestQueue.push(data);
     }
@@ -38,7 +38,7 @@ microserviceAvailabilityCheck()
 async function microserviceAvailabilityCheck() {
     try {
         // Check microservice availability (e.g., ping or health endpoint)
-        const response = await axios.get('microservice_health_url');
+        const response = await axios.get(REWARDS_SERVICE_URL + "/health");
         if (response.status === 200) {
             console.log('Microservice is available');
             return;

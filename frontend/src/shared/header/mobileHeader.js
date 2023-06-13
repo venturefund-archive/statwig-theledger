@@ -19,14 +19,14 @@ const MobileHeader = (props) => {
         </div>
         {sidebar && (
           <div className='slider-menu nav flex-column'>
-            <React.Fragment>
+            <>
               <Link className='slider-item nav-link' to='/login'>
                 Login
               </Link>
               <Link className='slider-item nav-link' to='/signup'>
                 Sign Up
               </Link>
-            </React.Fragment>
+            </>
           </div>
         )}
       </div>

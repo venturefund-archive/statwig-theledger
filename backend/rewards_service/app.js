@@ -34,7 +34,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 
 //Route Prefixes
-app.use("/", indexRouter);
+app.use("/", indexRouter.router);
 app.use("/rewardmanagement/api/", rewardsRouter);
 
 // throw 404 if URL not found

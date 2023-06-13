@@ -145,7 +145,7 @@ const LoginContainer = (props) => {
           localStorage.setItem("theLedgerToken", token);
           localStorage.setItem("bkp", result.data.data.permissions.permissions);
           dispatch(setCurrentUser(decoded));
-          // const intelEnabled = props.user?.type == "Third Party Logistics" ? true : false;
+          // const intelEnabled = (props.user.type && props.user.type.toUpperCase() === "THIRD PARTY LOGISTICS") ? true : false;
           props.history.push(`/overview`);
         } else {
           const err = result.data.message;
