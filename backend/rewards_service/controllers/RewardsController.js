@@ -11,7 +11,7 @@ exports.userRewards = [
     asyncHandler(apiKeyAuth),
     async function (req, res) {
         try {
-            let rewards = await RewardUserModel.findOne({ appId: req.appId, userId: req.user.id }).lean();
+            const rewards = await RewardUserModel.findOne({ appId: req.appId, userId: req.user.id }).lean();
             const detailedRewards = await RewardModel.aggregate([{
                 $facet: {
                     order: [{
@@ -40,13 +40,6 @@ exports.userRewards = [
                     }],
                 }
             }])
-            if (rewards === null) {
-                rewards = {
-                    points: 0,
-                    totalPoints: 0,
-                    redeemedPoints: 0,
-                }
-            }
             const userRewards = {
                 ...rewards, orderRewards: detailedRewards?.[0].order?.[0]?.points || 0,
                 shipmentRewards: detailedRewards?.[0].shipment?.[0]?.points || 0,
