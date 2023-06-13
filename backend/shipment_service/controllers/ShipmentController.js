@@ -430,7 +430,7 @@ async function poUpdate(id, quantity, poId, shipmentStatus, actor) {
 }
 
 const shipmentUpdate = async (id, quantity, shipmentId, atomId) => {
-  await ShipmentModel.findOneAndUpdate(
+  await ShipmentModel.updateOne(
     {
       $and: [{ id: shipmentId }, { products: { $elemMatch: { productID: id, atomId: atomId } } }],
     },
@@ -438,10 +438,7 @@ const shipmentUpdate = async (id, quantity, shipmentId, atomId) => {
       $inc: {
         "products.$.productQuantityDelivered": quantity,
       },
-    },
-    {
-      new: true,
-    },
+    }
   );
 };
 
@@ -1057,7 +1054,7 @@ exports.createShipment = [
 
           if (!quantityMismatch)
             throw new Error(responses(req.user.preferredLanguage).tagged_error);
-          await ShipmentModel.findOneAndUpdate(
+          await ShipmentModel.updateOne(
             {
               id: shipmentId,
             },
@@ -1785,7 +1782,7 @@ exports.receiveShipment = [
             { new: true }
           );
 
-          //await ShipmentModel.findOneAndUpdate({
+          //await ShipmentModel.updateOne({
           //  id: data.id
           //}, {
           //  status: "RECEIVED"
