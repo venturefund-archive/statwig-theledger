@@ -336,7 +336,7 @@ class Profile extends React.Component {
 											<label htmlFor="shipmentId">{t("organisation")}</label>
 											<input
 												className="form-control wallet"
-												//disabled
+												disabled
 												style={{ flexBasis: "34.5%", fontSize: "14px" }}
 												value={this.state.organisation}
 											/>
@@ -353,7 +353,7 @@ class Profile extends React.Component {
 											onChange={(e) => this.setState({ emailId: e.target.value })}
 										/>:<input
 										className="form-control wallet"
-										//disabled
+										disabled
 										style={{ flexBasis: "34.5%", fontSize: "14px" }}
 										value={this.props.user.emailId}
 										onChange={(e) => this.setState({ emailId: e.target.value })}
