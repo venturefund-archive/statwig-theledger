@@ -59,7 +59,7 @@ exports.listOfRewards = [
     asyncHandler(apiKeyAuth),
     async function (req, res) {
         try {
-            const rewards = await RewardModel.find({ appId: req.appId, userId: req.user.id })
+            const rewards = await RewardModel.find({ appId: req.appId, userId: req.user.id }).lean();
             return apiResponse.successResponseWithData(res, "List of Rewards", rewards)
         }
         catch (err) {
@@ -75,7 +75,7 @@ exports.viewReward = [
     async function (req, res) {
         try {
             const { id } = req.params;
-            const reward = await RewardModel.findById(id)
+            const reward = await RewardModel.findById(id).lean();
             return apiResponse.successResponseWithData(res, "View Reward", reward)
         }
         catch (err) {
@@ -106,15 +106,23 @@ exports.deleteReward = [
     asyncHandler(roleAuth),
     async function (req, res) {
         try {
-            const { id } = req.params;
-            const reward = await RewardModel.findByIdAndDelete(id);
-            return apiResponse.successResponseWithData(res, "Delete Reward", reward)
-        }
-        catch (err) {
+            const { event, eventType, userId, eventId } = req.body;
+            const config = req.rewardConfig.find((item) => item.event === event && item.eventType === eventType);
+            if (config?.points) {
+                await RewardUserModel.updateOne(
+                    { appId: req.appId, userId: userId },
+                    { $inc: { points: -config.points, totalPoints: -config.points } },
+                    { upsert: true }
+                );
+                await RewardModel.deleteOne({ appId: req.appId, userId: userId, eventId: eventId });
+            }
+            return apiResponse.successResponse(res, "Delete Reward");
+        } catch (err) {
             console.log(err);
             return apiResponse.errorResponse(res, err);
         }
     }
+
 ]
 
 exports.addReward = [
@@ -128,7 +136,7 @@ exports.addReward = [
             if (points) {
                 const reward = new RewardModel({ ...req.body, points, appId: req.appId });
                 await reward.save();
-                await RewardUserModel.findOneAndUpdate({ appId: req.appId, userId: reward.userId }, { $inc: { points: reward.points, totalPoints: reward.points } }, { upsert: true })
+                await RewardUserModel.updateOne({ appId: req.appId, userId: reward.userId }, { $inc: { points: reward.points, totalPoints: reward.points } }, { upsert: true })
                 return apiResponse.successResponseWithData(res, "Reward Added", reward)
             } else {
                 throw new Error("Invalid Reward")
