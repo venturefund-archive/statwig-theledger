@@ -109,12 +109,14 @@ exports.deleteReward = [
             const { event, eventType, userId, eventId } = req.body;
             const config = req.rewardConfig.find((item) => item.event === event && item.eventType === eventType);
             if (config?.points) {
-                await RewardUserModel.updateOne(
+                const updatePromise = RewardUserModel.updateOne(
                     { appId: req.appId, userId: userId },
                     { $inc: { points: -config.points, totalPoints: -config.points } },
                     { upsert: true }
                 );
-                await RewardModel.deleteOne({ appId: req.appId, userId: userId, eventId: eventId });
+                const deletePromise = RewardModel.deleteOne({ appId: req.appId, userId: userId, eventId: eventId });
+
+                await Promise.all([updatePromise, deletePromise]);
             }
             return apiResponse.successResponse(res, "Delete Reward");
         } catch (err) {
@@ -122,7 +124,6 @@ exports.deleteReward = [
             return apiResponse.errorResponse(res, err);
         }
     }
-
 ]
 
 exports.addReward = [
