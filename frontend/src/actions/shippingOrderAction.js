@@ -45,7 +45,7 @@ export const getShippingOrderById = async (id) => {
   }
 };
 
-export const getWarehouseByOrgId = async (id,type) => {
+export const getWarehouseByOrgId = async (id, type) => {
   try {
     const result = await axios.get(config().getWarehouseByOrgId + id);
     return result.data;
@@ -64,7 +64,7 @@ export const getAllOrganisations = async (type) => {
 };
 
 export const getProductsByInventoryId = async (id) => {
-  try { 
+  try {
     const result = await axios.get(config().getProductsByInventoryUrl + id);
     return result.data;
   } catch (e) {
@@ -72,9 +72,9 @@ export const getProductsByInventoryId = async (id) => {
   }
 };
 
-export const getRegions = async (id) => {
+export const getRegions = async (type) => {
   try {
-    const result = await axios.get(config().getRegionsUrl + "?" + id);
+    const result = await axios.get(config().getRegionsUrl, { params: { orgType: type } });
     return result.data;
   } catch (e) {
     return [];

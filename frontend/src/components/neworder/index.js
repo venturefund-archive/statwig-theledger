@@ -406,12 +406,12 @@ const NewOrder = (props) => {
 					rtype: editPo !== null ? editPo.rtype : "",
 					rtypeName: editPo !== null ? editPo.rtypeName : "",
 					fromOrgId: editPo !== null ? editPo.fromOrgId : "",
-					toOrgCountry: editPo !== null ? editPo.toOrgCountry : "",
-					toOrgRegion: editPo !== null ? editPo.toOrgRegion : "",
+					toOrgCountry: editPo !== null ? editPo.toOrgCountry : "Costa Rica",
+					toOrgRegion: editPo !== null ? editPo.toOrgRegion : "Americas",
 					toOrg: editPo !== null ? editPo.toOrg : "",
 					toOrgName: editPo !== null ? editPo.toOrgName : "",
 					toOrgLoc: editPo !== null ? editPo.toOrgLoc : "",
-					toOrgLocRegion: editPo !== null ? editPo.toOrgLocRegion : "",
+					toOrgLocRegion: editPo !== null ? editPo.toOrgLocRegion : "Americas",
 					toOrgLocName: editPo !== null ? editPo.toOrgLocName : "",
 					toOrgLocCountry: editPo !== null ? editPo.toOrgLocCountry : "",
 					products: editPo !== null ? editPo.products : [],
@@ -536,6 +536,7 @@ const NewOrder = (props) => {
 												<Select
 													labelId="demo-simple-select-label"
 													id="demo-simple-select"
+													styles={customStyles}
 													placeholder={
 														<div className="select-placeholder-text">
 															{t("select_organisation_type")}
@@ -583,6 +584,7 @@ const NewOrder = (props) => {
 												<Select
 													labelId="demo-simple-select-label"
 													id="demo-simple-select"
+													styles={customStyles}
 													placeholder={
 														<div className="select-placeholder-text">
 															{t("select_organisation_name")}
@@ -659,11 +661,13 @@ const NewOrder = (props) => {
 													onChange={async (v) => {
 														setOrgType(v.label);
 														onOrgTypeChange(v.label);
+														/* Setting Default as "Costa Rica" */
+														onCountryChange(v.label, "Costa Rica");
+														setFieldValue("toOrgCountry", "Costa Rica");
 														setFieldValue("rtype", v.value);
 														setFieldValue("rtypeName", v.label);
 														setFieldValue("toOrg", "");
 														setFieldValue("toOrgName", "");
-														setFieldValue("toOrgCountry", "");
 														setFieldValue("toOrgRegion", "");
 														setFieldValue("toOrgLoc", "");
 														setFieldValue("toOrgLocRegion", "");
@@ -693,6 +697,7 @@ const NewOrder = (props) => {
 													placeholder={
 														<div className="select-placeholder-text">{t("Select_Region")}</div>
 													}
+													defaultValue={{ value: 'Americas', label: 'Americas' }}
 													onBlur={handleBlur}
 													onChange={(v) => {
 														setFieldValue("toOrgRegion", v.label);
@@ -703,6 +708,7 @@ const NewOrder = (props) => {
 														setFieldValue("toOrgLocCountry", "");
 														onRegionChange(v.label);
 													}}
+													isDisabled={true}
 													options={receiverWarehousesRegion}
 													noOptionsMessage={() => t("no_options")}
 												/>
@@ -727,12 +733,14 @@ const NewOrder = (props) => {
 													placeholder={
 														<div className="select-placeholder-text">{t("Select_Country")}</div>
 													}
+													defaultValue={{ value: 'Costa Rica', label: 'Costa Rica' }}
 													onBlur={handleBlur}
 													onChange={(v) => {
 														setFieldValue("toOrgCountry", v.label);
 														onCountryChange(orgType, v.label);
 														setFieldValue("toOrgName", "");
 													}}
+													isDisabled={true}
 													options={receiverWarehousesCountry}
 													noOptionsMessage={() => t("no_options")}
 												/>
@@ -766,6 +774,7 @@ const NewOrder = (props) => {
 												<Select
 													labelId="demo-simple-select-label"
 													id="demo-simple-select"
+													styles={customStyles}
 													placeholder={
 														<div className="select-placeholder-text">
 															{t("select_organisation_name")}
@@ -846,6 +855,7 @@ const NewOrder = (props) => {
 												<Select
 													labelId="demo-simple-select-label"
 													id="demo-simple-select"
+													styles={customStyles}
 													placeholder={
 														<div className="select-placeholder-text">
 															{t("select_delivery_location")}
