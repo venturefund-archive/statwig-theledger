@@ -9,7 +9,7 @@ const InventoryModel = require("../models/InventoryModel");
 const OrganisationModel = require("../models/OrganisationModel");
 const VaccineVialModel = require("../models/VaccineVialModel");
 const WarehouseModel = require("../models/WarehouseModel");
-const { addReward } = require("../helpers/rewards")
+const { addReward, deleteReward } = require("../helpers/rewards")
 const excel = require("node-excel-export");
 const PdfPrinter = require("pdfmake");
 const { resolve } = require("path");
@@ -169,7 +169,7 @@ const generateVaccinationsList = async (doseQuery, req, skip = 0, limit) => {
 
 	let doses = [];
 	let totalCount = 0;
-	if (dosesResult && dosesResult?.length) {
+	if (dosesResult?.length) {
 		doses = dosesResult[0].paginatedResults;
 		totalCount = dosesResult[0].totalCount;
 	}
@@ -827,11 +827,8 @@ exports.getVaccinationDetailsByBatch = [
 			]);
 
 			if (!vaccinationDetails) {
-				return apiResponse.validationErrorWithData(res, "VaccineVialId invalid!", {
-					vaccineVialId: vaccineVialId,
-				});
+				return apiResponse.validationErrorWithData(res, "VaccineVialId invalid!");
 			}
-
 			return apiResponse.successResponseWithData(
 				res,
 				"Fetched doses successfully!",
@@ -865,8 +862,8 @@ exports.getAllVaccinationDetails = [
 			]);
 
 			let vaccineVialIds = warehouses.map((warehouse) => {
-				let currVaccines = warehouse?.vaccinations?.map((vaccination) => vaccination.id);
-				if (currVaccines && currVaccines.length) {
+				const currVaccines = warehouse?.vaccinations?.map((vaccination) => vaccination.id);
+				if (currVaccines?.length) {
 					return currVaccines;
 				} else {
 					return [];
@@ -1051,7 +1048,7 @@ exports.getVialsUtilised = [
 
 			let vialsUtilized = [];
 			let totalCount = 0;
-			if (vialsResult && vialsResult?.length) {
+			if (vialsResult?.length) {
 				vialsUtilized = vialsResult[0].paginatedResults;
 				totalCount = vialsResult[0].totalCount;
 			}
@@ -1389,13 +1386,23 @@ exports.updateDose = [
 
 exports.deleteDose = [
 	auth,
-	async (req, res) => {
+	async function (req, res) {
 		try {
 			const { doseId } = req.query;
-			const deleteDose = await DoseModel.findOneAndDelete({ id: doseId })
+			const deleteDose = await DoseModel.findOneAndDelete({ id: doseId });
 			if (deleteDose) {
-				await VaccineVialModel.updateOne({ id: deleteDose.vaccineVialId }, { $inc: { numberOfDoses: -1 } })
-				return apiResponse.successResponse(res, "Dose Deleted Successfully")
+				const rewardData = {
+					eventId: doseId,
+					type: "DELETE",
+					event: "VACCINATION",
+					eventType: "DOSE",
+					userId: req.user?.id || null,
+				};
+				await Promise.all([
+					VaccineVialModel.updateOne({ id: deleteDose.vaccineVialId }, { $inc: { numberOfDoses: -1 } }),
+					deleteReward(rewardData, req.user?.role),
+				]);
+				return apiResponse.successResponse(res, "Dose Deleted Successfully");
 			} else {
 				return apiResponse.notFoundResponse(res, "Dose not found");
 			}
