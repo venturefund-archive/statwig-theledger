@@ -23,12 +23,11 @@ const ReviewOrderPopUp = (props) => {
           <div className="data mb-4">
             {t("order_id")}-<b>{props.OrderId}</b>
           </div>
-          {props.points && (
+          {/* {props.points && (
             <div className="points_popup_body_ts">
               You've been rewarded with <span>{props.points}</span> points
             </div>
-          )}
-
+          )} */}
           <button className="btn-primary btn" onClick={props.onHide}>
             {t("ok")}
           </button>

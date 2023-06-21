@@ -329,7 +329,7 @@ const NewShipment = (props) => {
 							message: "Created Successfully!",
 							id: result?.id,
 							type: "Success",
-							points:200,
+							points: 200,
 							t: t,
 						});
 					} else {
@@ -358,7 +358,6 @@ const NewShipment = (props) => {
 	};
 
 	const handleBatchChange = (value, i) => {
-		console.log("Batch:", value, i);
 		const soDetailsClone = { ...OrderDetails };
 		soDetailsClone.products[i].batchNumber = value;
 		setOrderDetails(soDetailsClone);
@@ -1525,7 +1524,7 @@ const NewShipment = (props) => {
 				<Modal
 					close={() => closeModal()}
 					size="modal-sm" //for other size's use `modal-lg, modal-md, modal-sm`
-					confetti={true}
+				// confetti={true}
 				>
 					<ShipmentPopUp
 						t={t}

@@ -47,23 +47,25 @@ export default function UploadPopup({
       else result = await addUsersFromExcel(formData);
       dispatch(turnOff());
       if (result.status === 200) {
-				const response = result.data.data;
-				if (response.insertedRecords > 0) {
-					setMessage(
-						`${orgUpload ? "Organisations" : "Users"} added: ${result.data.data.insertedRecords} ${
-							result.data.data.invalidRecords > 0
-								? `(Invalid: ${result.data.data.invalidRecords})`
-								: ""
-						}`,
-					);
-					setOpenSuccessPopup(true);
-				} else {
-					setMessage("Invalid data in excel!");
-					setOpenFailurePopup(true);
-				}
-			} else {
-				setOpenFailurePopup(true);
-			}
+        const response = result.data.data;
+        if (response.insertedRecords > 0) {
+          setMessage(
+            `${orgUpload ? "Organisations" : "Users"} added: ${
+              result.data.data.insertedRecords
+            } ${
+              result.data.data.invalidRecords > 0
+                ? `(Invalid: ${result.data.data.invalidRecords})`
+                : ""
+            }`,
+          );
+          setOpenSuccessPopup(true);
+        } else {
+          setMessage("Invalid data in excel!");
+          setOpenFailurePopup(true);
+        }
+      } else {
+        setOpenFailurePopup(true);
+      }
       resetFlag();
     } catch (err) {
       console.log(err);
@@ -71,47 +73,52 @@ export default function UploadPopup({
     }
   };
   return (
-		<div className="addOrganization-container">
-			<div className="addorganization-header">
-				<p className="vl-subheading f-500 vl-blue">
-					{type === "org" ? t("import_org") : t("import_users")}
-				</p>
-				<i className="fa-solid fa-xmark" onClick={handleImportClose}></i>
-			</div>
-			<div className="addorganization-body">
-				<div className="Popup-wrapper">
-					<FileUpload t={t} files={excel} setFiles={setExcel} />
-					<FileList files={excel} />
-				</div>
-			</div>
-			<div className="addorganization-actions">
-				<button onClick={uploadExcel} className="vl-btn vl-btn-sm vl-btn-primary">
-					{t("import_file")}
-				</button>
-			</div>
-			{openSuccessPopup && (
-				<Modal
-					close={() => closeModal()}
-					size="modal-sm" //for other size's use `modal-lg, modal-md, modal-sm`
-				>
-					<SuccessPopup onHide={closeModal} successMessage={message} />
-				</Modal>
-			)}
-			{openFailurePopup && (
-				<Modal
-					close={() => closeModal()}
-					size="modal-sm" //for other size's use `modal-lg, modal-md, modal-sm`
-				>
-					<SuccessPopup
-						onHide={closeModal}
-						errorMessage={
-							message
-								? message
-								: `Unable to Add ${orgUpload ? "Organisations" : "Users"} please try again later`
-						}
-					/>
-				</Modal>
-			)}
-		</div>
-	);
+    <div className='addOrganization-container'>
+      <div className='addorganization-header'>
+        <p className='vl-subheading f-500 vl-blue'>
+          {type === "org" ? t("import_org") : t("import_users")}
+        </p>
+        <i className='fa-solid fa-xmark' onClick={handleImportClose}></i>
+      </div>
+      <div className='addorganization-body'>
+        <div className='Popup-wrapper'>
+          <FileUpload t={t} files={excel} setFiles={setExcel} />
+          <FileList files={excel} />
+        </div>
+      </div>
+      <div className='addorganization-actions'>
+        <button
+          onClick={uploadExcel}
+          className='vl-btn vl-btn-sm vl-btn-primary'
+        >
+          {t("import_file")}
+        </button>
+      </div>
+      {openSuccessPopup && (
+        <Modal
+          close={() => closeModal()}
+          size='modal-sm' //for other size's use `modal-lg, modal-md, modal-sm`
+        >
+          <SuccessPopup onHide={closeModal} successMessage={message} />
+        </Modal>
+      )}
+      {openFailurePopup && (
+        <Modal
+          close={() => closeModal()}
+          size='modal-sm' //for other size's use `modal-lg, modal-md, modal-sm`
+        >
+          <SuccessPopup
+            onHide={closeModal}
+            errorMessage={
+              message
+                ? message
+                : `Unable to Add ${
+                    orgUpload ? "Organisations" : "Users"
+                  } please try again later`
+            }
+          />
+        </Modal>
+      )}
+    </div>
+  );
 }
