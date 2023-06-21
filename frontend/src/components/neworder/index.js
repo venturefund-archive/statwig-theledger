@@ -398,7 +398,6 @@ const NewOrder = (props) => {
 				<h1 className="breadcrumb">{t("create_new_order")}</h1>
 			</div>
 			<Formik
-				// enableReinitialize={true}
 				initialValues={{
 					fromOrg: editPo !== null ? editPo.fromOrg : "",
 					type: editPo !== null ? editPo.type : "",
@@ -436,14 +435,12 @@ const NewOrder = (props) => {
 					if (values.products.length === 0) {
 						errors.products = t("required");
 					}
-					if (!values.toOrgRegion) {
-						errors.toOrgRegion = t("required");
-					}
-
-					if (!values.toOrgCountry) {
-						errors.toOrgCountry = t("required");
-					}
-
+					// if (!values.toOrgRegion) {
+					// 	errors.toOrgRegion = t("required");
+					// }
+					// if (!values.toOrgCountry) {
+					// 	errors.toOrgCountry = t("required");
+					// }
 					return errors;
 				}}
 				onSubmit={(values, { setSubmitting }) => {
@@ -515,11 +512,6 @@ const NewOrder = (props) => {
 								)}
 							</div>
 						</div>
-						{/* {errors.products && touched.products && (
-              <span className="my-required-field error-msg text-danger1">
-               {errors.products}
-              </span>
-            )} */}
 
 						<div className="row mb-3">
 							<div className="col bg-white formContainer low">
@@ -552,9 +544,6 @@ const NewOrder = (props) => {
 													options={orgTypes}
 													noOptionsMessage={() => t("no_options")}
 												/>
-												{/* {errors.type && touched.type && (
-                            <span className="error-msg text-danger">{errors.type}</span>
-                         )} */}
 											</div>
 										</div>
 									</div>
@@ -569,18 +558,6 @@ const NewOrder = (props) => {
 												className={`line ${errors.fromOrg && touched.fromOrg ? "border-danger" : ""
 													}`}
 											>
-												{/* <DropdownButton
-                          isText={true}
-                          name={senderOrgId}
-                          name2="Select Organisation Name"
-                          onSelect={(v) => {
-                            setSenderOrgId(v.name);
-                            setFieldValue('fromOrg', v.id);
-                            setFieldValue('fromOrgId', v.name);
-                          }}
-                          groups={allOrganisations}
-                        /> */}
-
 												<Select
 													labelId="demo-simple-select-label"
 													id="demo-simple-select"
@@ -613,9 +590,6 @@ const NewOrder = (props) => {
 													})}
 													noOptionsMessage={() => t("no_options")}
 												/>
-												{/* {errors.fromOrg && touched.fromOrg && (
-                          <span className="error-msg text-danger">{errors.fromOrg}</span>
-                        )} */}
 											</div>
 										</div>
 									</div>
@@ -757,20 +731,6 @@ const NewOrder = (props) => {
 											<div
 												className={`line ${errors.toOrg && touched.toOrg ? "border-danger" : ""}`}
 											>
-												{/* <DropdownButton
-                          isText={true}
-                          name={receiverOrgId}
-                          name2="Select Organisation Name"
-                          onSelect={(v) => {
-                            setReceiverOrgLoc("Select Delivery Location");
-                            setFieldValue('toOrgLoc', '');
-                            setReceiverOrgId(v.name);
-                            setFieldValue('toOrg', v.id);
-                            setFieldValue('toOrgName', v.name);
-                            onOrgChange(v.id);
-                          }}
-                          groups={allOrganisations.filter((org) => org.id != values.fromOrg)}
-                        /> */}
 												<Select
 													labelId="demo-simple-select-label"
 													id="demo-simple-select"
@@ -788,11 +748,6 @@ const NewOrder = (props) => {
 													defaultInputValue={values.toOrgName}
 													onBlur={handleBlur}
 													onChange={(v) => {
-														//setFieldValue('toOrgLoc', '');
-
-														//   const selOrg = orgDetails.filter((value) => {
-														//     return value.name==v.label;
-														// });
 														setFieldValue("toOrg", v.value);
 														setFieldValue("toOrgName", v.label);
 														onOrgChange(v.value);
@@ -802,9 +757,6 @@ const NewOrder = (props) => {
 													options={orgNames}
 													noOptionsMessage={() => t("no_options")}
 												/>
-												{/* {errors.toOrg && touched.toOrg && (
-                          <span className="error-msg text-danger">{errors.toOrg}</span>
-                        )} */}
 											</div>
 										</div>
 									</div>
@@ -829,29 +781,6 @@ const NewOrder = (props) => {
 												className={`line ${errors.toOrgLoc && touched.toOrgLoc ? "border-danger" : ""
 													}`}
 											>
-												{/* <DropdownButton
-                          isText={true}
-                          name={receiverOrgLoc}
-                          name2="Select Delivery Location"
-                          onSelect={(v) => {
-                            let name =v?.warehouseAddress ? (v?.title +'/' + v?.warehouseAddress?.firstLine + ', ' + v?.warehouseAddress?.city) : (v?.title  +'/' + v?.postalAddress)  ;
-                            setReceiverOrgLoc(name);
-                            setFieldValue('toOrgLocName', name);
-                           setFieldValue('toOrgLoc', v.id);
-                          }}
-                          groups={receiverWarehouses}
-                        /> */}
-												{/*<Select
-                          styles={customStyles}
-                          isDisabled={disabled}
-                          placeholder={disabled ? values.toOrgLoc : "Select Delivery Location"}
-                          onChange={(v) => {
-                            setFieldValue("toOrgLoc", v.value);
-                          }}
-                          defaultInputValue={values.toOrgLoc}
-                          options={receiverWarehouses}
-                        /> */}
-
 												<Select
 													labelId="demo-simple-select-label"
 													id="demo-simple-select"
