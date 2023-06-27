@@ -90,7 +90,7 @@ export default function Landingfooter({ contactRef, t }) {
                       <i className="fa-solid fa-envelope vl-grey-sm vl-icon-xs"></i>
                       <p className="vl-body f-400 vl-grey-sm">{t("email")} :</p>
                     </div>
-                    <p className="vl-body f-400 vl-grey-sm">info@statwig.com</p>
+                    <p className="vl-body f-400 vl-grey-sm">contactus@statwig.com</p>
                   </article>
                 </section>
               </div>
