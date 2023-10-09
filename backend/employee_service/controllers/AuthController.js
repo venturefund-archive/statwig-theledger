@@ -707,8 +707,8 @@ exports.sendOtp = [
 								});
 							}
 						} else {
-							if (process.env.EMAIL_APPSTORE.includes(user.emailId) && user.emailId != "") {
-								otp = process.env.OTP_APPSTORE;
+							if (process.env?.EMAIL_APPSTORE?.includes(user.emailId) && user.emailId != "") {
+								otp = process.env?.OTP_APPSTORE;
 							} else {
 								otp = utility.randomNumber(4);
 							}

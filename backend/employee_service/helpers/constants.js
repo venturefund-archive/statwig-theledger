@@ -9,7 +9,7 @@ exports.constants = {
   },
   appovalEmail: {
     from: `${process.env.EMAIL_SMTP_USERNAME}`,
-    subject: 'Account Approved - Login into VaccineLedger'
+    subject: 'Account Approved - Login into eVaxin'
   },
   rejectEmail: {
     from: `${process.env.EMAIL_SMTP_USERNAME}`,

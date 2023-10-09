@@ -1,7 +1,7 @@
-const RejectedApproval = ({ name,organisation }) => {
-    return `
+const RejectedApproval = ({ name, organisation }) => {
+  return `
     <head>
-    <title>StatLedger</title>
+    <title>eVaxin</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style type="text/css">
@@ -94,7 +94,7 @@ const RejectedApproval = ({ name,organisation }) => {
                           <tbody>
                             <tr>
                               <td style="width:200px;">
-                                <img height="auto" src="http://test.vaccineledger.com/dist/97b8f67db5b802bef872b0d34d7baf06.png" style="border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;"/>
+                                <img height="auto" src="https://unicef.vaccineledger.com/static/media/eVAXIN.dd22e28e.svg" style="border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;"/>
                               </td>
                             </tr>
                           </tbody>
@@ -192,7 +192,6 @@ const RejectedApproval = ({ name,organisation }) => {
         <![endif]-->
     </div>
   </body>`;
-  };
-  
-  module.exports = RejectedApproval;
-  
+};
+
+module.exports = RejectedApproval;
