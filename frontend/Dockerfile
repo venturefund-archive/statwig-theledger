@@ -8,7 +8,7 @@ COPY package.json /app/
 
 # RUN npm install --legacy-peer-deps
 
-RUN yarn --production
+RUN yarn
 
 COPY . /app/
 
