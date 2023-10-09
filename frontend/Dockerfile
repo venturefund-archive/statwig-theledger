@@ -4,9 +4,11 @@ WORKDIR /app
 
 COPY package.json /app/
 
-RUN npm cache clean --force
+# RUN npm cache clean --force
 
-RUN npm install --legacy-peer-deps
+# RUN npm install --legacy-peer-deps
+
+RUN yarn --production
 
 COPY . /app/
 
@@ -24,7 +26,9 @@ ARG GOOGLE_CLIENT_ID
 
 ENV REACT_APP_GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
 
-RUN npm run build 
+# RUN npm run build 
+
+RUN yarn run build 
 
 FROM nginx:stable-alpine
 
