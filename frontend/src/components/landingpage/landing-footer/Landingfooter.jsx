@@ -8,116 +8,121 @@ import { Link } from "react-router-dom";
 export default function Landingfooter({ contactRef, t }) {
   return (
     <>
-      <div className="footer-section section-space bg-blue" ref={contactRef}>
-        <div className="vl-page-container">
-          <div className="footer-four-column-layout">
-            <div className="powered-column">
-              <h1 className="vl-subtitle f-500 vl-black">{t("power_by")}</h1>
-              <div className="footer-content-area">
-                <figure className="company-logo">
+      <div className='footer-section section-space bg-blue' ref={contactRef}>
+        <div className='vl-page-container'>
+          <div className='footer-four-column-layout'>
+            <div className='powered-column'>
+              <h1 className='vl-subtitle f-500 vl-black'>{t("power_by")}</h1>
+              <div className='footer-content-area'>
+                <figure className='company-logo'>
                   <img
                     src={Statwig}
-                    alt="statwig"
-                    className="company-logo-image"
+                    alt='statwig'
+                    className='company-logo-image'
                   />
                 </figure>
-                <figure className="mobile-app-stores">
+                <figure className='mobile-app-stores'>
                   <a
-                    href="https://apps.apple.com/us/app/vaccineledger/id1559086870"
-                    target="_blank"
+                    href='https://apps.apple.com/us/app/vaccineledger/id1559086870'
+                    target='_blank'
+                    rel='noreferrer'
                   >
                     <img
                       src={appstore}
-                      alt="store"
-                      className="mobile-store-icons"
+                      alt='store'
+                      className='mobile-store-icons'
                     />
                   </a>
                   <a
-                    href="https://play.google.com/store/apps/details?id=com.thevaccineledger"
-                    target="_blank"
+                    href='https://play.google.com/store/apps/details?id=com.thevaccineledger'
+                    target='_blank'
+                    rel='noreferrer'
                   >
                     <img
                       src={googlestore}
-                      alt="store"
-                      className="mobile-store-icons"
+                      alt='store'
+                      className='mobile-store-icons'
                     />
                   </a>
                 </figure>
               </div>
             </div>
-            <div className="address-column">
-              <h1 className="vl-subtitle f-500 vl-black">{t("office_addr")}</h1>
-              <div className="footer-content-area">
-                <div className="address-card">
-                  <p className="vl-subheading f-700 vl-grey-md">India</p>
-                  <article className="full-address">
-                    <p className="vl-body f-400 vl-grey-sm">
-                    T-Hub, 2.0, Silpa Gram Craft Village, Gachibowli, Hyderabad, Telangana,
+            <div className='address-column'>
+              <h1 className='vl-subtitle f-500 vl-black'>{t("office_addr")}</h1>
+              <div className='footer-content-area'>
+                <div className='address-card'>
+                  <p className='vl-subheading f-700 vl-grey-md'>India</p>
+                  <article className='full-address'>
+                    <p className='vl-body f-400 vl-grey-sm'>
+                      T-Hub, 2.0, Silpa Gram Craft Village, Gachibowli,
+                      Hyderabad, Telangana,
                     </p>
-                    <p className="vl-body f-400 vl-grey-sm">India – 500032</p>
+                    <p className='vl-body f-400 vl-grey-sm'>India – 500032</p>
                   </article>
                 </div>
-                <div className="address-card">
-                  <p className="vl-subheading f-700 vl-grey-md">Singapore</p>
-                  <article className="full-address">
-                    <p className="vl-body f-400 vl-grey-sm">
+                <div className='address-card'>
+                  <p className='vl-subheading f-700 vl-grey-md'>Singapore</p>
+                  <article className='full-address'>
+                    <p className='vl-body f-400 vl-grey-sm'>
                       3 Fraser Street #05-25,
                     </p>
-                    <p className="vl-body f-400 vl-grey-sm">
+                    <p className='vl-body f-400 vl-grey-sm'>
                       Duo Tower, Singapore - 189352
                     </p>
                   </article>
                 </div>
               </div>
             </div>
-            <div className="contact-column">
-              <h1 className="vl-subtitle f-500 vl-black">{t("contact")}</h1>
-              <div className="footer-content-area">
-                <section className="contact-group">
-                  <article className="contact-card">
-                    <div className="contact-heading">
-                      <i className="fa-solid fa-phone vl-grey-sm vl-icon-xs"></i>
-                      <p className="vl-body f-400 vl-grey-sm">
+            <div className='contact-column'>
+              <h1 className='vl-subtitle f-500 vl-black'>{t("contact")}</h1>
+              <div className='footer-content-area'>
+                <section className='contact-group'>
+                  <article className='contact-card'>
+                    <div className='contact-heading'>
+                      <i className='fa-solid fa-phone vl-grey-sm vl-icon-xs'></i>
+                      <p className='vl-body f-400 vl-grey-sm'>
                         {t("phone_no")} :
                       </p>
                     </div>
-                    <p className="vl-body f-400 vl-grey-sm">
+                    <p className='vl-body f-400 vl-grey-sm'>
                       (+91) 939 059 0319
                     </p>
                   </article>
-                  <article className="contact-card">
-                    <div className="contact-heading">
-                      <i className="fa-solid fa-envelope vl-grey-sm vl-icon-xs"></i>
-                      <p className="vl-body f-400 vl-grey-sm">{t("email")} :</p>
+                  <article className='contact-card'>
+                    <div className='contact-heading'>
+                      <i className='fa-solid fa-envelope vl-grey-sm vl-icon-xs'></i>
+                      <p className='vl-body f-400 vl-grey-sm'>{t("email")} :</p>
                     </div>
-                    <p className="vl-body f-400 vl-grey-sm">contactus@statwig.com</p>
+                    <p className='vl-body f-400 vl-grey-sm'>
+                      contactus@statwig.com
+                    </p>
                   </article>
                 </section>
               </div>
-              <h1 className="vl-subtitle f-500 vl-black top-space">
+              <h1 className='vl-subtitle f-500 vl-black top-space'>
                 {t("help_center")}
               </h1>
-              <div className="footer-content-area">
-                <section className="contact-group">
-                  <p className="vl-body f-400 vl-grey-sm">{t("faq")}</p>
-                  <p className="vl-body f-400 vl-grey-sm">{t("terms&con")}</p>
+              <div className='footer-content-area'>
+                <section className='contact-group'>
+                  <p className='vl-body f-400 vl-grey-sm'>{t("faq")}</p>
+                  <p className='vl-body f-400 vl-grey-sm'>{t("terms&con")}</p>
                 </section>
               </div>
             </div>
-            <div className="support-column">
-              <h1 className="vl-subtitle f-500 vl-black">{t("follow")}</h1>
-              <div className="footer-content-area">
-                <div className="call-to-action">
+            <div className='support-column'>
+              <h1 className='vl-subtitle f-500 vl-black'>{t("follow")}</h1>
+              <div className='footer-content-area'>
+                <div className='call-to-action'>
                   <Link
                     to={{
                       pathname: "https://gitlab.com/statwig-public/theledger",
                     }}
-                    target="_blank"
+                    target='_blank'
                   >
-                    <button className="vl-btn vl-btn-sm vl-btn-primary">
-                      <div className="contact-heading">
-                        <i className="fa-brands fa-gitlab"></i>
-                        <p className="vl-body f-400"> {t("git_repo")}</p>
+                    <button className='vl-btn vl-btn-sm vl-btn-primary'>
+                      <div className='contact-heading'>
+                        <i className='fa-brands fa-gitlab'></i>
+                        <p className='vl-body f-400'> {t("git_repo")}</p>
                       </div>
                     </button>
                   </Link>
@@ -150,10 +155,10 @@ export default function Landingfooter({ contactRef, t }) {
           </div>
         </div>
       </div>
-      <section className="copy-section bg-blue">
-        <div className="vl-page-container">
-          <article className="copy-rights ">
-            <p className="vl-body f-400">{t("copy_rights")}</p>
+      <section className='copy-section bg-blue'>
+        <div className='vl-page-container'>
+          <article className='copy-rights '>
+            <p className='vl-body f-400'>{t("copy_rights")}</p>
           </article>
         </div>
       </section>

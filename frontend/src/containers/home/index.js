@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import MobileHeader from "../../shared/header/mobileHeader";
 import "./style.scss";
-import logo from "../../assets/brands/VACCINELEDGER.png";
+import logo from "../../assets/brands/eVAXIN.png";
 import icon from "../../assets/icons/block-icon.png";
 import icon1 from "../../assets/icons/temprature-icon.png";
 import icon2 from "../../assets/icons/location-icon.png";
@@ -81,7 +81,7 @@ const HomeContainer = (props) => {
         <div className='container'>
           <div className='row hero align-items-center'>
             <div className='col-sm-12 col-md-4'>
-              <img src={logo} width='400' height='50' alt='VaccineLedger' />
+              <img src={logo} width='400' height='50' alt='eVaxin' />
               <p className='hero-paragraph p-2'>{t("description")}</p>
               <Link
                 to={{
@@ -95,8 +95,8 @@ const HomeContainer = (props) => {
                     t("english") === "English"
                       ? appleStore
                       : t("english") === "Inglés"
-                      ? appleStoreEs
-                      : appleStore
+                        ? appleStoreEs
+                        : appleStore
                   }
                   width='165'
                   height='50'
@@ -116,8 +116,8 @@ const HomeContainer = (props) => {
                     t("english") === "English"
                       ? googleStore
                       : t("english") === "Inglés"
-                      ? googleStoreEs
-                      : googleStore
+                        ? googleStoreEs
+                        : googleStore
                   }
                   width='165'
                   height='50'
@@ -189,13 +189,12 @@ const HomeContainer = (props) => {
               <h2 className='display-4'> {t("how_it_works")}</h2>
               <div
                 style={{
-                  background: `url(${
-                    t("english") === "English"
-                      ? blockflow
-                      : t("english") === "Inglés"
+                  background: `url(${t("english") === "English"
+                    ? blockflow
+                    : t("english") === "Inglés"
                       ? blockflowEs
                       : blockflowEs
-                  })`,
+                    })`,
                 }}
                 className='bg-work-flow'
               ></div>
@@ -244,8 +243,8 @@ const HomeContainer = (props) => {
                       t("english") === "English"
                         ? appleStore
                         : t("english") === "Inglés"
-                        ? appleStoreEs
-                        : appleStore
+                          ? appleStoreEs
+                          : appleStore
                     }
                     width='165'
                     height='50'
@@ -265,8 +264,8 @@ const HomeContainer = (props) => {
                       t("english") === "English"
                         ? googleStore
                         : t("english") === "Inglés"
-                        ? googleStoreEs
-                        : googleStore
+                          ? googleStoreEs
+                          : googleStore
                     }
                     width='165'
                     height='50'

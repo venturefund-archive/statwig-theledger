@@ -267,7 +267,7 @@ export default function Organization(props) {
                 <h2 className='vl-subheading f-400 vl-grey-xs'>
                   By checking this your are agree to the{" "}
                   <span className='vl-blue'>Terms & conditions</span> of
-                  <span className='vl-blue'> Vaccineledger</span>
+                  <span className='vl-blue'>eVaxin</span>
                 </h2>
               </div>
             </section>

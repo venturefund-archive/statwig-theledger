@@ -1,16 +1,15 @@
 import React, { useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import MobileHeader from "../../shared/header/mobileHeader";
-import logo from "../../assets/brands/VACCINELEDGER.png";
+import logo from "../../assets/brands/eVAXIN.png";
 import { Link } from "react-router-dom";
 import Login from "../../components/login";
-import { sendOtp } from "../../actions/userActions";
+import { sendOtp, setCurrentUser } from "../../actions/userActions";
 import { turnOn, turnOff } from "../../actions/spinnerActions";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
 import setAuthToken from "../../utils/setAuthToken";
 import jwt_decode from "jwt-decode";
-import { setCurrentUser } from "../../actions/userActions";
 import Torus from "@toruslabs/torus-embed";
 import Web3 from "web3";
 import { config } from "../../config";

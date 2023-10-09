@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import logo from "../../assets/brands/VaccineLedgerlogo.svg";
+import logo from "../../assets/brands/eVAXIN.png";
 import "../login/style.scss";
 import { Formik } from "formik";
 import { useTranslation } from "react-i18next";
@@ -49,13 +49,13 @@ const FormVerifyPage = (props) => {
       <div className='container'>
         <div className='mobile-header'>
           <div className='branding'>
-            <img src={logo} alt='vaccineledger' />
+            <img src={logo} alt='eVaxin' />
           </div>
         </div>
         <div className='row'>
           <div className='col-sm-6 col-lg-6'>
             <div className='form-content'>
-              <img className='logo' src={logo} alt='VaccineLedger' />
+              <img className='logo' src={logo} alt='eVaxin' />
               <h1>{t("welcome")}</h1>
             </div>
           </div>

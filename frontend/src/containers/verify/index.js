@@ -2,7 +2,7 @@ import React, { useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import jwt_decode from "jwt-decode";
 import MobileHeader from "../../shared/header/mobileHeader";
-import logo from "../../assets/brands/VACCINELEDGER.png";
+import logo from "../../assets/brands/eVAXIN.png";
 import { Link } from "react-router-dom";
 import Verify from "../../components/verify";
 import { sendOtp, setCurrentUser, verifyOtp } from "../../actions/userActions";

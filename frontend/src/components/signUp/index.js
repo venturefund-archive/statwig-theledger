@@ -13,7 +13,7 @@ import Phone from "../../assets/icons/phone.png";
 import org from "../../assets/icons/org.png";
 import Waiting from "../../assets/icons/waiting.png";
 import organisationType from "../../assets/icons/organisationType.png";
-import logo from "../../assets/brands/VaccineLedgerlogo.svg";
+import logo from "../../assets/brands/eVAXIN.png";
 import TextField from "@material-ui/core/TextField";
 import { useTranslation } from "react-i18next";
 import { COUNTRY_CODE } from "../../constants/countryCode";
@@ -240,7 +240,7 @@ const FormPage = (props) => {
       <div className='container'>
         <div className='mobile-header '>
           <div className='branding'>
-            <img src={logo} alt='vaccineledger' />
+            <img src={logo} alt='eVaxin' />
           </div>
         </div>
 

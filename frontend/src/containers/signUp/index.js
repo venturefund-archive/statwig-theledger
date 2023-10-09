@@ -3,7 +3,7 @@ import Signup from "../../components/signUp";
 import { registerUser, checkUser } from "../../actions/userActions";
 import { turnOn, turnOff } from "../../actions/spinnerActions";
 import MobileHeader from "../../shared/header/mobileHeader";
-import logo from "../../assets/brands/VACCINELEDGER.png";
+import logo from "../../assets/brands/eVAXIN.png";
 import { useDispatch } from "react-redux";
 import Modal from "../../shared/modal";
 import OrganisationPopUp from "../../components/signUp/organisationPopUp";

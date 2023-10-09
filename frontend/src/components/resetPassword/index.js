@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import "../login/style.scss";
 import Key from "../../assets/icons/key.png";
 import hide from "../../assets/icons/hide.png";
-import logo from "../../assets/brands/VaccineLedgerlogo.svg";
+import logo from "../../assets/brands/eVAXIN.png";
 const ResetPasswordPage = () => {
   const [passwordType, setPasswordType] = useState(true);
   const [confirmPasswordType, setConfirmPasswordType] = useState(true);

@@ -4,7 +4,7 @@ import "react-phone-number-input/style.css";
 import PhoneInput from "react-phone-number-input";
 import "./style.scss";
 import User from "../../assets/icons/mail.png";
-import logo from "../../assets/brands/VaccineLedgerlogo.svg";
+import logo from "../../assets/brands/eVAXIN.png";
 import Phone from "../../assets/icons/phone.png";
 import TextField from "@material-ui/core/TextField";
 import { Alert, AlertTitle } from "@material-ui/lab";
@@ -34,7 +34,7 @@ const FormLoginPage = (props) => {
       <div className="container">
         {/* <div className="mobile-header">
             <div className="branding">
-                <img src={logo} alt="vaccineledger" />
+                <img src={logo} alt="eVaxin" />
             </div>
 </div> */}
         <div className="row">
@@ -91,9 +91,9 @@ const FormLoginPage = (props) => {
                     className="form-group mt-0 ml-5 mr-3 p-1"
                     style={
                       ({ position: "relative", left: "-15px" },
-                      phoneFieldDisable
-                        ? { pointerEvents: "none", opacity: "0.5" }
-                        : {})
+                        phoneFieldDisable
+                          ? { pointerEvents: "none", opacity: "0.5" }
+                          : {})
                     }
                   >
                     <div
@@ -143,7 +143,7 @@ const FormLoginPage = (props) => {
                     >
                       {t("continue")}
                     </button>
-                    
+
                     <button
                       type="button"
                       className=" buttonS btn btn-primary"

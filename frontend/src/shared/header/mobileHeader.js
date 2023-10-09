@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
-import logo from "../../assets/brands/VACCINELEDGER.png";
+import logo from "../../assets/brands/eVAXIN.png";
 
 import "./mobile-header-style.scss";
 
@@ -11,7 +11,7 @@ const MobileHeader = (props) => {
   return (
     <div className='mobile-header'>
       <Link className='branding' to='/'>
-        <img src={logo} alt='vaccineledger' />
+        <img src={logo} alt='eVaxin' />
       </Link>
       <div className='actions'>
         <div className='mobile-menu' onClick={() => openSidebar(!sidebar)}>
