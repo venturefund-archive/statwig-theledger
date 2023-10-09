@@ -1,5 +1,5 @@
 const AddUser = ({ name, organisation }) => {
-    return `  
+  return `  
     <head>
     <title>StatLedger</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -198,7 +198,6 @@ const AddUser = ({ name, organisation }) => {
         <![endif]-->
     </div>
   </body>`
-  };
-  
-  module.exports = AddUser;
-  
+};
+
+module.exports = AddUser;
