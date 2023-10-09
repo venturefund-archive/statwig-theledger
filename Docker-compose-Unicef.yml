@@ -1,4 +1,3 @@
-version: "3.7"
 services:
   traefik:
     image: "traefik"
@@ -26,24 +25,10 @@ services:
       - traefik.tcp.routers.cache.rule=HostSNI(`unicef.vaccineledger.com`)
       - traefik.tcp.routers.cache.tls=true
       - traefik.tcp.routers.cache.tls.certresolver=lets-encrypt
+      # - traefik.tcp.routers.cache.tls.passthrough=true
     volumes:
       - ./cache-data:/data
     command: ["redis-server", "--requirepass", "StaTwig2021"]
-
-  advancedanalytics:
-    build: "./backend/advanced_analytics_service"
-    image: "advanced_analytics_service1.0"
-    container_name: "advanced_analytics_service1.0"
-    restart: always
-    env_file:
-      - ./env/ledger.env
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
-      - "traefik.http.routers.advancedanalytics.entrypoints=websecure"
-      - "traefik.http.routers.advancedanalytics.rule=Host(`unicef.vaccineledger.com`) && PathPrefix(`/advancedanalytics/`)"
-      - "traefik.http.routers.advancedanalytics.tls=true"
-      - "traefik.http.routers.advancedanalytics.tls.certresolver=lets-encrypt"
 
   alert:
     build: "./backend/alert_service"
@@ -52,6 +37,8 @@ services:
     restart: always
     env_file:
       - ./env/ledger.env
+    depends_on:
+      - cache
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -67,6 +54,8 @@ services:
     restart: always
     env_file:
       - ./env/ledger.env
+    depends_on:
+      - cache
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -74,6 +63,26 @@ services:
       - "traefik.http.routers.analytics.rule=Host(`unicef.vaccineledger.com`) && PathPrefix(`/analyticsmanagement/`)"
       - "traefik.http.routers.analytics.tls=true"
       - "traefik.http.routers.analytics.tls.certresolver=lets-encrypt"
+
+  employee:
+    build:
+      context: .
+      dockerfile: backend/employee_service/Dockerfile
+    image: "employee_service"
+    container_name: "employee_service"
+    restart: always
+    env_file:
+      - ./env/ledger.env
+    depends_on:
+      - cache
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.employee.entrypoints=websecure"
+      - "traefik.http.routers.employee.rule=Host(`unicef.vaccineledger.com`) && PathPrefix(`/usermanagement/`)"
+      - "traefik.http.routers.employee.tls=true"
+      - "traefik.http.routers.employee.tls.certresolver=lets-encrypt"
+
   event:
     build: "./backend/event_service"
     image: "event_service1.0"
@@ -81,6 +90,8 @@ services:
     restart: always
     env_file:
       - ./env/ledger.env
+    depends_on:
+      - cache
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -98,6 +109,8 @@ services:
     restart: always
     env_file:
       - ./env/ledger.env
+    depends_on:
+      - cache
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -113,6 +126,8 @@ services:
     restart: always
     env_file:
       - ./env/ledger.env
+    depends_on:
+      - cache
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -128,6 +143,8 @@ services:
     restart: always
     env_file:
       - ./env/ledger.env
+    depends_on:
+      - cache
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -145,6 +162,8 @@ services:
     restart: always
     env_file:
       - ./env/ledger.env
+    depends_on:
+      - cache
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -160,6 +179,8 @@ services:
     restart: always
     env_file:
       - ./env/ledger.env
+    depends_on:
+      - cache
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -167,6 +188,40 @@ services:
       - "traefik.http.routers.product.rule=Host(`unicef.vaccineledger.com`) && PathPrefix(`/productmanagement/`)"
       - "traefik.http.routers.product.tls=true"
       - "traefik.http.routers.product.tls.certresolver=lets-encrypt"
+
+  rbac:
+    build: "./backend/rbac_service"
+    image: "rbac_service1.0"
+    container_name: "rbac_service1.0"
+    restart: always
+    env_file:
+      - ./env/ledger.env
+    depends_on:
+      - cache
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.rbac.entrypoints=websecure"
+      - "traefik.http.routers.rbac.rule=Host(`unicef.vaccineledger.com`) && PathPrefix(`/rbacmanagement/`)"
+      - "traefik.http.routers.rbac.tls=true"
+      - "traefik.http.routers.rbac.tls.certresolver=lets-encrypt"
+
+  rewards:
+    build: "./backend/rewards_service"
+    image: "rewards_service1.0"
+    container_name: "rewards_service1.0"
+    restart: always
+    env_file:
+      - ./env/ledger.env
+    depends_on:
+      - cache
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.rewards.entrypoints=websecure"
+      - "traefik.http.routers.rewards.rule=Host(`unicef.vaccineledger.com`) && PathPrefix(`/rewardmanagement/`)"
+      - "traefik.http.routers.rewards.tls=true"
+      - "traefik.http.routers.rewards.tls.certresolver=lets-encrypt"
 
   shipment:
     build:
@@ -177,6 +232,8 @@ services:
     restart: always
     env_file:
       - ./env/ledger.env
+    depends_on:
+      - cache
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -185,38 +242,6 @@ services:
       - "traefik.http.routers.shipment.tls=true"
       - "traefik.http.routers.shipment.tls.certresolver=lets-encrypt"
 
-  rbac:
-    build: "./backend/rbac_service"
-    image: "rbac_service1.0"
-    container_name: "rbac_service1.0"
-    restart: always
-    env_file:
-      - ./env/ledger.env
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
-      - "traefik.http.routers.rbac.entrypoints=websecure"
-      - "traefik.http.routers.rbac.rule=Host(`unicef.vaccineledger.com`) && PathPrefix(`/rbacmanagement/`)"
-      - "traefik.http.routers.rbac.tls=true"
-      - "traefik.http.routers.rbac.tls.certresolver=lets-encrypt"
-
-  employee:
-    build:
-      context: .
-      dockerfile: backend/employee_service/Dockerfile
-    image: "employee_service1.0"
-    container_name: "employee_service1.0"
-    restart: always
-    env_file:
-      - ./env/ledger.env
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
-      - "traefik.http.routers.employee.entrypoints=websecure"
-      - "traefik.http.routers.employee.rule=Host(`unicef.vaccineledger.com`) && PathPrefix(`/usermanagement/`)"
-      - "traefik.http.routers.employee.tls=true"
-      - "traefik.http.routers.employee.tls.certresolver=lets-encrypt"
-
   track:
     build: "./backend/track_trace"
     image: "track_trace1.0"
@@ -224,6 +249,8 @@ services:
     restart: always
     env_file:
       - ./env/ledger.env
+    depends_on:
+      - cache
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -232,14 +259,62 @@ services:
       - "traefik.http.routers.track.tls=true"
       - "traefik.http.routers.track.tls.certresolver=lets-encrypt"
 
+  address:
+    build: "./backend/address_service"
+    image: "address_service2.0"
+    container_name: "address_service"
+    restart: always
+    env_file:
+      - ./env/ledger.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.address.entrypoints=websecure"
+      - "traefik.http.routers.address.rule=Host(`unicef.vaccineledger.com`) && PathPrefix(`/api/address_service`)"
+      - "traefik.http.routers.address.tls=true"
+      - "traefik.http.routers.address.tls.certresolver=lets-encrypt"
+
+  affliate:
+    build: "./backend/affliation_service"
+    image: "affliation_service2.0"
+    container_name: "affliate_service"
+    restart: always
+    env_file:
+      - ./env/ledger.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.affliate.entrypoints=websecure"
+      - "traefik.http.routers.affliate.rule=Host(`unicef.vaccineledger.com`) && PathPrefix(`/api/affliation_service`)"
+      - "traefik.http.routers.affliate.tls=true"
+      - "traefik.http.routers.affliate.tls.certresolver=lets-encrypt"
+
+  configuration:
+    build: "./backend/configuration_service"
+    image: "configuration_service1.0"
+    container_name: "configuration_service"
+    restart: always
+    env_file:
+      - ./env/ledger.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.configuration.entrypoints=websecure"
+      - "traefik.http.routers.configuration.rule=Host(`unicef.vaccineledger.com`) && PathPrefix(`/api/configuration_service`)"
+      - "traefik.http.routers.configuration.tls=true"
+      - "traefik.http.routers.configuration.tls.certresolver=lets-encrypt"
+
   frontend:
-    build: "./frontend"
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+      args:
+        - "ENVIRONMENT=prod"
+        - "SERVER_URL=https://unicef.vaccineledger.com"
+        - "GOOGLE_CLIENT_ID=937115966227-mnidai9tm6vndogdjf1dlj0ve2j79k4h.apps.googleusercontent.com"
     image: "frontend2.0"
     container_name: "cra-frontend"
     restart: always
-    environment:
-      - "NODE_ENV=production"
-      - "ENVIRONMENT=unicef"
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
