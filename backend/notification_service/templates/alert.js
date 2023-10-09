@@ -47,7 +47,7 @@ module.exports = function template(body, source) {
               <table width="100%" style="border-spacing:0;border-spacing: 0;">
                 <tr>
                   <td style="padding:0;background-color: #8fc5f8;padding: 30px;text-align: center;">
-                    <a href="${source}" style="text-decoration: none;"><img class="brandlogo" src="https://test.vaccineledger.com/logo.png" width="280" alt="logo" style="border:0;"></a>
+                    <a href="${source}" style="text-decoration: none;"><img class="brandlogo" src="https:/unicef.vaccineledger.com/eVAXIN.png" width="280" alt="logo" style="border:0;"></a>
                   </td>
                 </tr>
               </table>
@@ -58,7 +58,7 @@ module.exports = function template(body, source) {
               <table width="100%" style="border-spacing:0;border-spacing: 0;">
                 <tr>
                   <td style="padding:0;padding: 30px;text-align: center;">
-                    <img class="bannerImg" src="https://test.vaccineledger.com/alert.png" width="360" alt="logo" style="border:0;">
+                    <img class="bannerImg" src="https://unicef.vaccineledger.com/alert.png" width="360" alt="logo" style="border:0;">
                   </td>
                 </tr>
               </table>
