@@ -20,7 +20,7 @@ import {
   setUserLocation,
   postUserLocation,
 } from "../../actions/userActions";
-import logo from "../../assets/brands/eVAXIN.png";
+import VaxIn from "../../assets/brands/VaxIN.png";
 import { turnOff, turnOn } from "../../actions/spinnerActions";
 import useOnclickOutside from "react-cool-onclickoutside";
 import { config } from "../../config";
@@ -396,7 +396,7 @@ const Header = (props) => {
           {/* branding */}
           <Link to="/overview">
             <div className="logo">
-              <img src={logo} alt="logo" />
+              <img src={VaxIn} alt="VaxIn" />
             </div>
           </Link>
 

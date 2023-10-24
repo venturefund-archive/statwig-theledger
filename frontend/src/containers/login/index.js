@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import MobileHeader from "../../shared/header/mobileHeader";
-import logo from "../../assets/brands/eVAXIN.png";
+import VaxIN from "../../assets/brands/VaxIN.png";
 import { Link } from "react-router-dom";
 import Login from "../../components/login";
 import { sendOtp, setCurrentUser } from "../../actions/userActions";
@@ -206,7 +206,7 @@ const LoginContainer = (props) => {
         {innerWidth > 1024 && (
           <nav className='navbar sticky-top navbar-expand-lg'>
             <Link className='navbar-brand' to='/'>
-              <img src={logo} width='230' height='30' alt='logo' />
+              <img src={VaxIN} width='230' height='30' alt='VaxIN' />
             </Link>
           </nav>
         )}

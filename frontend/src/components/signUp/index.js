@@ -13,7 +13,7 @@ import Phone from "../../assets/icons/phone.png";
 import org from "../../assets/icons/org.png";
 import Waiting from "../../assets/icons/waiting.png";
 import organisationType from "../../assets/icons/organisationType.png";
-import logo from "../../assets/brands/eVAXIN.png";
+import VaxIn from "../../assets/brands/VaxIN.png";
 import TextField from "@material-ui/core/TextField";
 import { useTranslation } from "react-i18next";
 import { COUNTRY_CODE } from "../../constants/countryCode";
@@ -240,14 +240,14 @@ const FormPage = (props) => {
       <div className='container'>
         <div className='mobile-header '>
           <div className='branding'>
-            <img src={logo} alt='eVaxin' />
+            <img src={VaxIn} alt='VaxIN' />
           </div>
         </div>
 
         <div className='row'>
           <div className='col-m-6 col-lg-6'>
             <div className='form-content'>
-              <img className='logo' src={logo} alt='Logo' />
+              <img className='logo' src={VaxIn} alt='VaxIN' />
               <h1>{t("welcome")},</h1>
               <p>
                 {t("signup")} {t("to")} {t("continue").toLowerCase()}

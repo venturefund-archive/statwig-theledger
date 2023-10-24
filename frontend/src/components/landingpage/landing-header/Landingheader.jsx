@@ -1,6 +1,6 @@
 import React from "react";
 import "./Landingheader.css";
-import eVaxin from "../../../assets/files/logos/eVAXIN.svg";
+import VaxIn from "../../../assets/files/logos/VaxIN.png";
 import EnglishFlag from "../../../assets/files/images/flags/English.webp";
 import SpanishFlag from "../../../assets/files/images/flags/Spanish.webp";
 import { Link, useHistory } from "react-router-dom";
@@ -24,7 +24,7 @@ export default function Landingheader({
       <div className='vl-page-container'>
         <nav className='landing-navbar'>
           <figure className='brand-logo'>
-            <img src={eVaxin} alt='eVaxin' className='brand-logo-image' />
+            <img src={VaxIn} alt='VaxIn' className='brand-logo-image' />
           </figure>
           <ul className='landing-navlist'>
             <li className='landing-nav-item'>

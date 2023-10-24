@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./Connection.css";
-import eVaxin from "../../assets/files/logos/eVAXIN.svg";
+import VaxIn from "../../assets/files/logos/VaxIN.png";
 import statwig from "../../assets/files/logos/statwig-logo.png";
 import check from "../../assets/files/icons/check.svg";
 import Vaccine from "../../assets/files/images/illustration/vaccine.png";
@@ -130,7 +130,7 @@ export default function Connection(props) {
           <div className='banner-inner-container'>
             <div className='banner-top'>
               <figure className='connection-brand-logo'>
-                <img src={eVaxin} alt='eVaxin' className='w-100' />
+                <img src={VaxIn} alt='VaxIn' className='w-100' />
               </figure>
               <section className='our-benefits-container'>
                 <article className='benefit-card'>
@@ -198,7 +198,7 @@ export default function Connection(props) {
         <div className='main-context-section form-grid-name'>
           <div className='connection-mobile-header'>
             <figure className='brand-logo'>
-              <img src={eVaxin} alt='eVaxin' className='brand-logo-image' />
+              <img src={VaxIn} alt='VaxIn' className='brand-logo-image' />
             </figure>
           </div>
           <div className='connection-body-container'>

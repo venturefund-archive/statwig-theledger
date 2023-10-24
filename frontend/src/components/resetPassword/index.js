@@ -3,7 +3,8 @@ import React, { useState } from "react";
 import "../login/style.scss";
 import Key from "../../assets/icons/key.png";
 import hide from "../../assets/icons/hide.png";
-import logo from "../../assets/brands/eVAXIN.png";
+import VaxIn from "../../assets/brands/VaxIN.png";
+
 const ResetPasswordPage = () => {
   const [passwordType, setPasswordType] = useState(true);
   const [confirmPasswordType, setConfirmPasswordType] = useState(true);
@@ -13,7 +14,7 @@ const ResetPasswordPage = () => {
         <div className='row'>
           <div className='col-sm-6 col-lg-6'>
             <div className='form-content'>
-              <img className='logo' src={logo} alt='Logo' />
+              <img className='logo' src={VaxIn} alt='VaxIn' />
               <h1>Welcome,</h1>
               <p>Reset to continue</p>
             </div>

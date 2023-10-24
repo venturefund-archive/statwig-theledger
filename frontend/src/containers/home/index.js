@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import MobileHeader from "../../shared/header/mobileHeader";
 import "./style.scss";
-import logo from "../../assets/brands/eVAXIN.png";
+import VaxIn from "../../assets/brands/VaxIN.png";
 import icon from "../../assets/icons/block-icon.png";
 import icon1 from "../../assets/icons/temprature-icon.png";
 import icon2 from "../../assets/icons/location-icon.png";
@@ -37,7 +37,7 @@ const HomeContainer = (props) => {
       <MobileHeader />
       <nav className='navbar sticky-top navbar-expand-lg'>
         <Link className='navbar-brand' to='/'>
-          <img src={logo} width='230' height='30' alt='logo' />
+          <img src={VaxIn} width='230' height='30' alt='VaxIN' />
         </Link>
         <button
           className='navbar-toggler'
@@ -81,7 +81,7 @@ const HomeContainer = (props) => {
         <div className='container'>
           <div className='row hero align-items-center'>
             <div className='col-sm-12 col-md-4'>
-              <img src={logo} width='400' height='50' alt='eVaxin' />
+              <img src={VaxIn} width='400' height='50' alt='VaxIn' />
               <p className='hero-paragraph p-2'>{t("description")}</p>
               <Link
                 to={{

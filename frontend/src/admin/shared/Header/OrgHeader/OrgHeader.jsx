@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import eVaxin from "../../../assets/files/brands/eVAXIN.svg";
+import VaxIn from "../../../assets/files/brands/VaxIN.png";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import "../Header.css";
 import { useDispatch, useSelector } from "react-redux";
@@ -80,7 +80,7 @@ export default function OrgHeader() {
         <nav className='admin-nav'>
           <article className='admin-nav-left'>
             <figure className='admin-logo'>
-              <img src={eVaxin} alt='eVaxin' />
+              <img src={VaxIn} alt='VaxIN' />
             </figure>
             <ul className='admin-nav-list'>
               <li className='admin-nav-item'>

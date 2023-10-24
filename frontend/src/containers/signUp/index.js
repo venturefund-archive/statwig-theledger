@@ -3,7 +3,7 @@ import Signup from "../../components/signUp";
 import { registerUser, checkUser } from "../../actions/userActions";
 import { turnOn, turnOff } from "../../actions/spinnerActions";
 import MobileHeader from "../../shared/header/mobileHeader";
-import logo from "../../assets/brands/eVAXIN.png";
+import VaxIn from "../../assets/brands/VaxIN.png";
 import { useDispatch } from "react-redux";
 import Modal from "../../shared/modal";
 import OrganisationPopUp from "../../components/signUp/organisationPopUp";
@@ -110,7 +110,7 @@ const SignupContainer = (props) => {
       {innerWidth > 1024 && (
         <nav className="navbar sticky-top navbar-expand-lg">
           <Link className="navbar-brand" to="/">
-            <img src={logo} width="230" height="30" alt="logo" />
+            <img src={VaxIn} width="230" height="30" alt="VaxIn" />
           </Link>
         </nav>
       )}

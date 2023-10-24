@@ -4,7 +4,7 @@ import "react-phone-number-input/style.css";
 import PhoneInput from "react-phone-number-input";
 import "./style.scss";
 import User from "../../assets/icons/mail.png";
-import logo from "../../assets/brands/eVAXIN.png";
+import VaxIn from "../../assets/brands/VaxIN.png";
 import Phone from "../../assets/icons/phone.png";
 import TextField from "@material-ui/core/TextField";
 import { Alert, AlertTitle } from "@material-ui/lab";
@@ -34,13 +34,13 @@ const FormLoginPage = (props) => {
       <div className="container">
         {/* <div className="mobile-header">
             <div className="branding">
-                <img src={logo} alt="eVaxin" />
+                <img src={VaxIn} alt="VaxIN" />
             </div>
 </div> */}
         <div className="row">
           <div className="col-m-6 col-lg-6">
             <div className="form-content">
-              <img className="logo" src={logo} alt="" />
+              <img className="logo" src={VaxIn} alt="VaxIN" />
               <h1>{t("welcome_back")},</h1>
               <p>{t("login_to_continue")}</p>
             </div>
