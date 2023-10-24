@@ -1,7 +1,7 @@
 const AddUser = ({ name, organisation }) => {
   return `  
     <head>
-    <title>eVaxin</title>
+    <title>VaxIN</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style type="text/css">
@@ -94,7 +94,7 @@ const AddUser = ({ name, organisation }) => {
                           <tbody>
                             <tr>
                               <td style="width:200px;">
-                                <img height="auto" src="https://unicef.vaccineledger.com/static/media/eVAXIN.dd22e28e.svg" style="border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;"/>
+                                <img height="auto" src="https://unicef.vaccineledger.com/VaxIN.png" style="border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;"/>
                               </td>
                             </tr>
                           </tbody>
@@ -168,8 +168,8 @@ const AddUser = ({ name, organisation }) => {
                     </tr>
                     <tr>
                       <td align="center" style="font-size:0px;padding:10px 25px;padding-right:16px;padding-left:25px;word-break:break-word;">
-                        <div style="font-family:open Sans Helvetica, Arial, sans-serif;font-size:16px;line-height:1;text-align:center;color:#000000;"><h2>What is eVaxin ?</h2>
-                        <p>eVaxin is a Blockchain based platform, to track and trace vaccine's journey across the suplly chain.</p></div>
+                        <div style="font-family:open Sans Helvetica, Arial, sans-serif;font-size:16px;line-height:1;text-align:center;color:#000000;"><h2>What is VaxIN ?</h2>
+                        <p>VaxIN is a Blockchain based platform, to track and trace vaccine's journey across the supply chain.</p></div>
                       </td>
                     </tr>
                     <tr>

@@ -49,7 +49,7 @@ async function pushNotification(body) {
     const { content, title, user, type, transactionId, eventType } = body;
     const notification = new Notification({
       id: cuid(),
-      title: title || "eVaxin Alert",
+      title: title || "VaxIN Alert",
       message: content,
       user: user,
       eventType: eventType,

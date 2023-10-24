@@ -3,7 +3,7 @@ const EmailContent = ({ name, origin, otp, email }) => {
   return `
     
     <head>
-    <title>eVaxin</title>
+    <title>VaxIN</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style type="text/css">
@@ -96,7 +96,7 @@ const EmailContent = ({ name, origin, otp, email }) => {
                           <tbody>
                             <tr>
                               <td style="width:200px;">
-                                <img height="auto" src="https://unicef.vaccineledger.com/static/media/eVAXIN.dd22e28e.svg" style="border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;"/>
+                                <img height="auto" src="https://unicef.vaccineledger.com/VaxIN.png" style="border:0;display:block;outline:none;text-decoration:none;height:auto;width:100%;"/>
                               </td>
                             </tr>
                           </tbody>
