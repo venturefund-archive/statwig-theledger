@@ -52,7 +52,8 @@ export default function Landingfooter({ contactRef, t }) {
                   <p className="vl-subheading f-700 vl-grey-md">India</p>
                   <article className="full-address">
                     <p className="vl-body f-400 vl-grey-sm">
-                    T-Hub, 2.0, Silpa Gram Craft Village, Gachibowli, Hyderabad, Telangana,
+                      T-Hub, 2.0, Silpa Gram Craft Village, Gachibowli,
+                      Hyderabad, Telangana,
                     </p>
                     <p className="vl-body f-400 vl-grey-sm">India – 500032</p>
                   </article>
@@ -82,7 +83,7 @@ export default function Landingfooter({ contactRef, t }) {
                       </p>
                     </div>
                     <p className="vl-body f-400 vl-grey-sm">
-                      (+91) 939 059 0319
+                      (+91) 917 771 7878
                     </p>
                   </article>
                   <article className="contact-card">
@@ -90,7 +91,9 @@ export default function Landingfooter({ contactRef, t }) {
                       <i className="fa-solid fa-envelope vl-grey-sm vl-icon-xs"></i>
                       <p className="vl-body f-400 vl-grey-sm">{t("email")} :</p>
                     </div>
-                    <p className="vl-body f-400 vl-grey-sm">contactus@statwig.com</p>
+                    <p className="vl-body f-400 vl-grey-sm">
+                      contactus@statwig.com
+                    </p>
                   </article>
                 </section>
               </div>
