@@ -65,6 +65,7 @@ import RewardsContainer from "../containers/rewards/RewardsContainer";
 const routes = (
 	<Switch>
 		<Route exact path="/" component={LandingContainer} />
+		<Route exact path="/contact" component={LandingContainer} />
 		<Route exact path="/signup">
 			<ConnectionContainer connection="signup" />
 		</Route>
