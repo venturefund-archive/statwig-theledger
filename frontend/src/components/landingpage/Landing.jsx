@@ -12,6 +12,7 @@ import DialogContent from "@mui/material/DialogContent";
 import MuiAlert from "@mui/material/Alert";
 import { Snackbar } from "@mui/material";
 import { useTranslation } from "react-i18next";
+import { useHistory } from "react-router-dom";
 
 const useClickOutside = (handler) => {
   let domNode = useRef();
@@ -34,17 +35,31 @@ const useClickOutside = (handler) => {
 };
 
 const Alert = React.forwardRef(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant='filled' {...props} />;
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
 export default function Landing() {
   const [open, setOpen] = React.useState(false);
   const [fullWidth] = React.useState(true);
   const [maxWidth] = React.useState("sm");
+  const [urlChanged, setUrlChanged] = React.useState(false);
+
   const [state, setState] = React.useState({
     vertical: "top",
     horizontal: "center",
   });
+
+  useEffect(() => {
+    const currentUrl = window.location.href;
+
+    // Check if the URL ends with "/contact"
+    if (currentUrl.endsWith("/contact")) {
+      // Open the contact popup
+      setOpen(true);
+    }
+  }, [urlChanged]);
+
+  const history = useHistory();
 
   const { vertical, horizontal } = state;
 
@@ -86,11 +101,14 @@ export default function Landing() {
   };
 
   const handleClickOpen = () => {
-    setOpen(true);
+    // setOpen(true);
+    history.push("/contact");
+    setUrlChanged((prev) => !prev);
   };
 
   const handleClose = () => {
     setOpen(false);
+    history.push("/");
   };
 
   const handleNavClick = (option) => {
