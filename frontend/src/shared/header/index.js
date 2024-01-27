@@ -7,11 +7,7 @@ import Location from "../../assets/icons/location_blue.png";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { Link, useHistory } from "react-router-dom";
 import "./Header.css";
-import {
-  CircularProgress,
-  Divider,
-
-} from "@mui/material";
+import { CircularProgress, Divider } from "@mui/material";
 import { MenuOutlined } from "@mui/icons-material";
 import {
   getActiveWareHouses,
@@ -44,7 +40,7 @@ import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "react-i18next";
 import EnglishFlag from "../../assets/files/images/flags/English.webp";
 import SpanishFlag from "../../assets/files/images/flags/Spanish.webp";
-import SearchIcon from '@mui/icons-material/Search';
+import SearchIcon from "@mui/icons-material/Search";
 
 let useClickOutside = (handler) => {
   let domNode = useRef();
@@ -365,14 +361,16 @@ const Header = (props) => {
   //   }
   // }, [searchPermissions]);
 
-  const allowSearch = props.user?.type !== "Third Party Logistics"
+  const allowSearch = props.user?.type !== "Third Party Logistics";
 
   const handleUiSwitch = () => {
     // Check whether user has enough rights
-    if (profile.type === "CENTRAL_AUTHORITY" || profile.role === "GoverningBody") {
+    if (
+      profile.type === "CENTRAL_AUTHORITY" ||
+      profile.role === "GoverningBody"
+    ) {
       history.push("/statwig/dashboard");
-    }
-    else if (profile.role === "admin") {
+    } else if (profile.role === "admin") {
       history.push("/org/dashboard");
     }
   };
@@ -445,23 +443,24 @@ const Header = (props) => {
             )}
             {/* Notification Icons */}
 
-            {(profile.role === "admin" ||
-              profile.type === "CENTRAL_AUTHORITY" || profile.role === "GoverningBody") && (
-                <li className="admin-nav-item configure-link user-switch-btn">
-                  <div className="switch-button">
-                    <p className="vl-note">{t("user")}</p>
-                    <i className="fa-solid fa-caret-down"></i>
-                  </div>
-                  <div className={`configure-list width-change active `}>
-                    <button
-                      onClick={handleUiSwitch}
-                      className="vl-btn vl-btn-sm vl-btn-full vl-btn-primary"
-                    >
-                      {t("switch_to_admin")}
-                    </button>
-                  </div>
-                </li>
-              )}
+            {(profile?.role === "admin" ||
+              profile?.type === "CENTRAL_AUTHORITY" ||
+              profile?.role === "GoverningBody") && (
+              <li className="admin-nav-item configure-link user-switch-btn">
+                <div className="switch-button">
+                  <p className="vl-note">{t("user")}</p>
+                  <i className="fa-solid fa-caret-down"></i>
+                </div>
+                <div className={`configure-list width-change active `}>
+                  <button
+                    onClick={handleUiSwitch}
+                    className="vl-btn vl-btn-sm vl-btn-full vl-btn-primary"
+                  >
+                    {t("switch_to_admin")}
+                  </button>
+                </div>
+              </li>
+            )}
 
             <li className="navItems notifyList">
               <div className="notifications cursorP">
@@ -893,8 +892,9 @@ const Header = (props) => {
                   )}
                 </div>
                 <div
-                  className={`header__profile_dropdown ${ProfileClickBtn && "active"
-                    }`}
+                  className={`header__profile_dropdown ${
+                    ProfileClickBtn && "active"
+                  }`}
                 >
                   <div className="header__profile_top">
                     <div className="header__inner_profile_icon">
