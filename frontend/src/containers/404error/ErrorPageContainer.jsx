@@ -7,9 +7,8 @@ import "./style.scss";
 export default function ErrorPageContainer(props) {
   const { t } = useTranslation();
   return (
-    <div className='error-grid-container'>
-      <Header {...props} t={t} />
-      <div className='page-grid-content'>
+    <div className="error-grid-container_main_container">
+      <div className="page-grid-content">
         <ErrorPage {...props} t={t} />
       </div>
     </div>
