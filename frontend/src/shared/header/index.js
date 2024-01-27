@@ -366,16 +366,16 @@ const Header = (props) => {
   const handleUiSwitch = () => {
     // Check whether user has enough rights
     if (
-      profile.type === "CENTRAL_AUTHORITY" ||
-      profile.role === "GoverningBody"
+      profile?.type === "CENTRAL_AUTHORITY" ||
+      profile?.role === "GoverningBody"
     ) {
       history.push("/statwig/dashboard");
-    } else if (profile.role === "admin") {
+    } else if (profile?.role === "admin") {
       history.push("/org/dashboard");
     }
   };
 
-  const [LangOption, setLangOption] = React.useState(i18n.language);
+  const [langOption, setLangOption] = React.useState(i18n.language);
 
   const changeLanguage = (option) => {
     setLangOption(option);
@@ -446,21 +446,21 @@ const Header = (props) => {
             {(profile?.role === "admin" ||
               profile?.type === "CENTRAL_AUTHORITY" ||
               profile?.role === "GoverningBody") && (
-              <li className="admin-nav-item configure-link user-switch-btn">
-                <div className="switch-button">
-                  <p className="vl-note">{t("user")}</p>
-                  <i className="fa-solid fa-caret-down"></i>
-                </div>
-                <div className={`configure-list width-change active `}>
-                  <button
-                    onClick={handleUiSwitch}
-                    className="vl-btn vl-btn-sm vl-btn-full vl-btn-primary"
-                  >
-                    {t("switch_to_admin")}
-                  </button>
-                </div>
-              </li>
-            )}
+                <li className="admin-nav-item configure-link user-switch-btn">
+                  <div className="switch-button">
+                    <p className="vl-note">{t("user")}</p>
+                    <i className="fa-solid fa-caret-down"></i>
+                  </div>
+                  <div className={`configure-list width-change active `}>
+                    <button
+                      onClick={handleUiSwitch}
+                      className="vl-btn vl-btn-sm vl-btn-full vl-btn-primary"
+                    >
+                      {t("switch_to_admin")}
+                    </button>
+                  </div>
+                </li>
+              )}
 
             <li className="navItems notifyList">
               <div className="notifications cursorP">
@@ -846,7 +846,7 @@ const Header = (props) => {
                   {t("settings")}
                 </MenuItem>
                 <Divider />
-                {LangOption === "en" ? (
+                {langOption === "en" ? (
                   <MenuItem
                     style={{ fontSize: "13px" }}
                     onClick={() => {
@@ -892,9 +892,8 @@ const Header = (props) => {
                   )}
                 </div>
                 <div
-                  className={`header__profile_dropdown ${
-                    ProfileClickBtn && "active"
-                  }`}
+                  className={`header__profile_dropdown ${ProfileClickBtn && "active"
+                    }`}
                 >
                   <div className="header__profile_top">
                     <div className="header__inner_profile_icon">
@@ -937,7 +936,7 @@ const Header = (props) => {
                     <div
                       className="header__link__card"
                       onClick={() => {
-                        if (LangOption === "en") {
+                        if (langOption === "en") {
                           changeLanguage("es");
                         } else {
                           changeLanguage("en");
@@ -949,11 +948,11 @@ const Header = (props) => {
                         <p className="vl-body f-400">{t("switch_lang")}</p>
                         <div className="lang__logo">
                           <p className="vl-small f-400">
-                            {LangOption === "en" ? "SPA" : "ENG"}
+                            {langOption === "en" ? "SPA" : "ENG"}
                           </p>
                           <img
                             src={
-                              LangOption === "en" ? SpanishFlag : EnglishFlag
+                              langOption === "en" ? SpanishFlag : EnglishFlag
                             }
                             className="lang__flag"
                             alt="flag"
