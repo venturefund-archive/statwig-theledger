@@ -123,7 +123,7 @@ const SideBar = (props) => {
 							className="nav-look-link d-inline-block"
 							onClick={resetTrackTracePage}
 						>
-							<img src={url === "/track" ? trackSelectedIcon : NetworkIcon} alt="Track &amp; Trace" />
+							<img src={trackSelectedIcon} alt="Track &amp; Trace" />
 							<span>{t("trackntrace")}</span>
 						</Link>
 					</li>
