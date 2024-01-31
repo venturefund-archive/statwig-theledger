@@ -17,11 +17,27 @@ async function addReward(data, role) {
     }
 }
 
+async function deleteReward(data, role) {
+    try {
+        axios.defaults.headers.common['x-api-key'] = REWARDS_API_KEY;
+        axios.defaults.headers.common['role'] = role;
+        await axios.post(REWARDS_SERVICE_URL + "/deleteReward", data);
+    } catch (error) {
+        console.log('Failed to send request:', error);
+        // Add request to the queue for later retry
+        requestQueue.push(data);
+    }
+}
+
 // Function to retry failed requests from the queue
 async function retryFailedRequests() {
     while (requestQueue.length > 0) {
         const requestData = requestQueue.shift();
-        await addReward(requestData);
+        if (requestData?.type === "DELETE") {
+            await deleteReward(requestData);
+        } else {
+            await addReward(requestData);
+        }
     }
 }
 
@@ -48,7 +64,7 @@ async function microserviceAvailabilityCheck() {
     }
 
     // Retry after a delay
-    await delay(360000);
+    await delay(600);
     await microserviceAvailabilityCheck();
 }
 
@@ -58,5 +74,6 @@ function delay(ms) {
 }
 
 module.exports = {
-    addReward
+    addReward,
+    deleteReward
 }
