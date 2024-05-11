@@ -1,4 +1,4 @@
-FROM node:16.18 AS react_build 
+FROM node:lts-bullseye-slim AS react_build 
 
 WORKDIR /app
 
