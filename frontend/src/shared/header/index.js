@@ -42,6 +42,8 @@ import EnglishFlag from "../../assets/files/images/flags/English.webp";
 import SpanishFlag from "../../assets/files/images/flags/Spanish.webp";
 import SearchIcon from "@mui/icons-material/Search";
 
+import profile from "../../assets/files/profile/profile.jpg";
+
 let useClickOutside = (handler) => {
   let domNode = useRef();
 
@@ -882,14 +884,10 @@ const Header = (props) => {
                   className="header__profile_icon_btn"
                   onClick={() => setProfileClickBtn(!ProfileClickBtn)}
                 >
-                  {image ? (
-                    <>
-                      <div className="green__active_sm"></div>
-                      <img src={image} alt="Profile" />
-                    </>
-                  ) : (
-                    <CircularProgress className="progress__bar" />
-                  )}
+                  <>
+                    <div className="green__active_sm"></div>
+                    <img src={profile} alt="Profile" />
+                  </>
                 </div>
                 <div
                   className={`header__profile_dropdown ${

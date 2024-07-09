@@ -10,6 +10,8 @@ import EnglishFlag from "../../../../assets/files/images/flags/English.webp";
 import SpanishFlag from "../../../../assets/files/images/flags/Spanish.webp";
 import { logoutUser } from "../../../../actions/userActions";
 
+import profile from "../../../../assets/files/profile/profile.jpg";
+
 let useClickOutside = (handler) => {
   let domNode = useRef();
 
@@ -46,7 +48,9 @@ export default function StatwigHeader() {
   const [image, setImage] = useState("");
 
   useEffect(() => {
-    let userName =  user.lastName ?user?.firstName + " " + user?.lastName: user?.firstName;
+    let userName = user.lastName
+      ? user?.firstName + " " + user?.lastName
+      : user?.firstName;
     let org = user?.organisation?.split("/")[0];
     if (user?.photoId) {
       getImage(user?.photoId).then((result) => {
@@ -148,11 +152,10 @@ export default function StatwigHeader() {
                 className="admin-profile-card vl-flex-md"
                 onClick={() => setProfileClickBtn(!ProfileClickBtn)}
               >
-                {image && (
-                  <figure className="profile-space">
-                    <img src={image} alt="profile" />
-                  </figure>
-                )}
+                <figure className="profile-space">
+                  <img src={profile} alt="profile" />
+                </figure>
+
                 <hgroup className="profile-name-card">
                   <h1 className="vl-note vl-light f-700">{name}</h1>
                   <h2 className="vl-small vl-light f-400">{orgName}</h2>
