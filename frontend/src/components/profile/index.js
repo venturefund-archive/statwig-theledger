@@ -343,22 +343,22 @@ class Profile extends React.Component {
 										</div>
 										<div className="form-group">
 											<label htmlFor="shipmentId">{t("email_id")}</label>
-											{this.props.user.phoneNumber && !this.props.user.emailId?
-											<input
-											style={{ flexBasis: "34%" }}
-											className="input refship "
-											type="text"
-											id="referenceShipmentId"
-											value={this.state.emailId}
-											onChange={(e) => this.setState({ emailId: e.target.value })}
-										/>:<input
-										className="form-control wallet"
-										//disabled
-										style={{ flexBasis: "34.5%", fontSize: "14px" }}
-										value={this.props.user.emailId}
-										onChange={(e) => this.setState({ emailId: e.target.value })}
-									/>}
-											
+											{this.props.user.phoneNumber && !this.props.user.emailId ?
+												<input
+													style={{ flexBasis: "34%" }}
+													className="input refship "
+													type="text"
+													id="referenceShipmentId"
+													value={this.state.emailId}
+													onChange={(e) => this.setState({ emailId: e.target.value })}
+												/> : <input
+													className="form-control wallet"
+													//disabled
+													style={{ flexBasis: "34.5%", fontSize: "14px" }}
+													value={this.props.user.emailId}
+													onChange={(e) => this.setState({ emailId: e.target.value })}
+												/>}
+
 										</div>
 										<div className="form-group2 mb-3 relative">
 											<label htmlFor="shipmentId">{t("phone")}</label>
@@ -708,13 +708,13 @@ class Profile extends React.Component {
 																				,{this.state.warehouseLocations[id].warehouseAddress.state}
 																			</span>
 																		)}
-
+																		{/* 
 																		{this.state.warehouseLocations[id].warehouseAddress.country && (
 																			<span>
 																				,
 																				{this.state.warehouseLocations[id].warehouseAddress.country}
 																			</span>
-																		)}
+																		)} */}
 																	</div>
 
 																	<div className="full-address">
