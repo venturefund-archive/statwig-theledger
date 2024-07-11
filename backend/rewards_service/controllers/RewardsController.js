@@ -46,6 +46,10 @@ exports.userRewards = [
                 shipmentRewards: detailedRewards?.[0].shipment?.[0]?.points || 200,
                 lastMileRewards: detailedRewards?.[0].lastMile?.[0]?.points || 300
             }
+
+            if (!rewards) {
+                userRewards.points = 900
+            }
             return apiResponse.successResponseWithData(res, "User Rewards", userRewards)
         }
         catch (err) {
