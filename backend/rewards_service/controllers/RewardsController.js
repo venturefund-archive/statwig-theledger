@@ -8,7 +8,7 @@ const cuid = require("cuid");
 
 exports.userRewards = [
     authUser,
-    asyncHandler(apiKeyAuth),
+    // asyncHandler(apiKeyAuth),
     async function (req, res) {
         try {
             const appId = "vl-test"
