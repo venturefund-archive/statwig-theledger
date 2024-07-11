@@ -42,9 +42,9 @@ exports.userRewards = [
                 }
             }])
             const userRewards = {
-                ...rewards, orderRewards: detailedRewards?.[0].order?.[0]?.points || 0,
-                shipmentRewards: detailedRewards?.[0].shipment?.[0]?.points || 0,
-                lastMileRewards: detailedRewards?.[0].lastMile?.[0]?.points || 0
+                ...rewards, orderRewards: detailedRewards?.[0].order?.[0]?.points || 400,
+                shipmentRewards: detailedRewards?.[0].shipment?.[0]?.points || 200,
+                lastMileRewards: detailedRewards?.[0].lastMile?.[0]?.points || 300
             }
             return apiResponse.successResponseWithData(res, "User Rewards", userRewards)
         }
