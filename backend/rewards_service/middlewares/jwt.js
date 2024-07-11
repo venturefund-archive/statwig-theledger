@@ -46,6 +46,7 @@ const apiKeyAuth = async (req, res, next) => {
       if (keyExists) {
         req.appId = keyExists.appId;
         req.rewardConfig = keyExists.config;
+        console.log(keyExists);
         next();
       }
       else throw new Error("API Key not found")
