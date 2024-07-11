@@ -26,7 +26,6 @@ const authUser = (req, res, next) => {
           }
           return apiResponse.unauthorizedResponse(res, "Invalid token");
         }
-        console.log(payload)
         req.user = payload;
         next();
       });
