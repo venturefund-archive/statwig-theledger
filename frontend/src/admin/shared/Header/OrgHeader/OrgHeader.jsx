@@ -10,7 +10,7 @@ import { getImage } from "../../../../actions/notificationActions";
 import { useTranslation } from "react-i18next";
 import EnglishFlag from "../../../../assets/files/images/flags/English.webp";
 import SpanishFlag from "../../../../assets/files/images/flags/Spanish.webp";
-import { logoutUser,getUserInfo } from "../../../../actions/userActions";
+import { logoutUser, getUserInfo } from "../../../../actions/userActions";
 
 let useClickOutside = (handler) => {
   let domNode = useRef();
@@ -147,11 +147,10 @@ export default function OrgHeader() {
                 className="admin-profile-card vl-flex-md"
                 onClick={() => setProfileClickBtn(!ProfileClickBtn)}
               >
-                {image && (
-                  <figure className="profile-space">
-                    <img src={image} alt="profile" />
-                  </figure>
-                )}
+                <figure className="profile-space">
+                  <img src={profile} alt="profile" />
+                </figure>
+
                 <hgroup className="profile-name-card">
                   <h1 className="vl-note vl-light f-700">{name}</h1>
                   <h2 className="vl-small vl-light f-400">{orgName}</h2>

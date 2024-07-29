@@ -7,29 +7,29 @@ const REWARDS_AUTH = process.env.REWARDS_AUTH || false;
 // Middleware to handle user authentication and authorization
 const authUser = (req, res, next) => {
   try {
-    if (REWARDS_AUTH) {
-      next();
-    } else {
-      const { authorization } = req.headers;
-      if (!authorization) {
-        return apiResponse.unauthorizedResponse(
-          res,
-          "Authorization token is not found"
-        );
-      }
-      const token = authorization.replace("Bearer ", "");
-      jwt.verify(token, JWT_SECRET, (err, payload) => {
-        if (err) {
-          console.log(err);
-          if (err.name === "TokenExpiredError") {
-            return apiResponse.unauthorizedResponse(res, "Token expired");
-          }
-          return apiResponse.unauthorizedResponse(res, "Invalid token");
-        }
-        req.user = payload;
-        next();
-      });
+    // if (REWARDS_AUTH) {
+    //   next();
+    // } else {
+    const { authorization } = req.headers;
+    if (!authorization) {
+      return apiResponse.unauthorizedResponse(
+        res,
+        "Authorization token is not found"
+      );
     }
+    const token = authorization.replace("Bearer ", "");
+    jwt.verify(token, JWT_SECRET, (err, payload) => {
+      if (err) {
+        console.log(err);
+        if (err.name === "TokenExpiredError") {
+          return apiResponse.unauthorizedResponse(res, "Token expired");
+        }
+        return apiResponse.unauthorizedResponse(res, "Invalid token");
+      }
+      req.user = payload;
+      next();
+    });
+    // }
   } catch (err) {
     console.log(err);
     return apiResponse.errorResponse(res, "Auth Error");
@@ -45,6 +45,7 @@ const apiKeyAuth = async (req, res, next) => {
       if (keyExists) {
         req.appId = keyExists.appId;
         req.rewardConfig = keyExists.config;
+        console.log(keyExists);
         next();
       }
       else throw new Error("API Key not found")

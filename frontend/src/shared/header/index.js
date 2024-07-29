@@ -7,7 +7,7 @@ import Location from "../../assets/icons/location_blue.png";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { Link, useHistory } from "react-router-dom";
 import "./Header.css";
-import { CircularProgress, Divider } from "@mui/material";
+import { Divider } from "@mui/material";
 import { MenuOutlined } from "@mui/icons-material";
 import {
   getActiveWareHouses,
@@ -41,6 +41,8 @@ import { useTranslation } from "react-i18next";
 import EnglishFlag from "../../assets/files/images/flags/English.webp";
 import SpanishFlag from "../../assets/files/images/flags/Spanish.webp";
 import SearchIcon from "@mui/icons-material/Search";
+
+import profileImage from "../../assets/icons/user.png";
 
 let useClickOutside = (handler) => {
   let domNode = useRef();
@@ -77,7 +79,6 @@ const Header = (props) => {
   const [invalidSearch, setInvalidSearch] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [image, setImage] = useState("");
   const [activeWarehouses, setActiveWarehouses] = useState([]);
   const [options, setOptions] = useState([]);
   const [icount, setIcount] = useState(0);
@@ -230,13 +231,6 @@ const Header = (props) => {
   const profile = useSelector((state) => {
     return state.user;
   });
-  useEffect(() => {
-    if (profile?.photoId) {
-      getImage(profile?.photoId).then((result) => {
-        setImage(result?.data);
-      });
-    }
-  }, [profile]);
 
   function changeNotifications(value, num) {
     turnOn();
@@ -446,21 +440,21 @@ const Header = (props) => {
             {(profile?.role === "admin" ||
               profile?.type === "CENTRAL_AUTHORITY" ||
               profile?.role === "GoverningBody") && (
-              <li className="admin-nav-item configure-link user-switch-btn">
-                <div className="switch-button">
-                  <p className="vl-note">{t("user")}</p>
-                  <i className="fa-solid fa-caret-down"></i>
-                </div>
-                <div className={`configure-list width-change active `}>
-                  <button
-                    onClick={handleUiSwitch}
-                    className="vl-btn vl-btn-sm vl-btn-full vl-btn-primary"
-                  >
-                    {t("switch_to_admin")}
-                  </button>
-                </div>
-              </li>
-            )}
+                <li className="admin-nav-item configure-link user-switch-btn">
+                  <div className="switch-button">
+                    <p className="vl-note">{t("user")}</p>
+                    <i className="fa-solid fa-caret-down"></i>
+                  </div>
+                  <div className={`configure-list width-change active `}>
+                    <button
+                      onClick={handleUiSwitch}
+                      className="vl-btn vl-btn-sm vl-btn-full vl-btn-primary"
+                    >
+                      {t("switch_to_admin")}
+                    </button>
+                  </div>
+                </li>
+              )}
 
             <li className="navItems notifyList">
               <div className="notifications cursorP">
@@ -882,24 +876,17 @@ const Header = (props) => {
                   className="header__profile_icon_btn"
                   onClick={() => setProfileClickBtn(!ProfileClickBtn)}
                 >
-                  {image ? (
-                    <>
-                      <div className="green__active_sm"></div>
-                      <img src={image} alt="Profile" />
-                    </>
-                  ) : (
-                    <CircularProgress className="progress__bar" />
-                  )}
+                  <div className="green__active_sm"></div>
+                  <img src={profileImage} alt="Profile" />
                 </div>
                 <div
-                  className={`header__profile_dropdown ${
-                    ProfileClickBtn && "active"
-                  }`}
+                  className={`header__profile_dropdown ${ProfileClickBtn && "active"
+                    }`}
                 >
                   <div className="header__profile_top">
                     <div className="header__inner_profile_icon">
                       <div className="green__active"></div>
-                      <img src={image} alt="Profile" />
+                      <img src={profileImage} alt="Profile" />
                     </div>
                     <div className="header__inner_profile_content">
                       <h1 className="vl-name-header f-500 profile__black">

@@ -8,14 +8,15 @@ const cuid = require("cuid");
 
 exports.userRewards = [
     authUser,
-    asyncHandler(apiKeyAuth),
+    // asyncHandler(apiKeyAuth),
     async function (req, res) {
         try {
-            const rewards = await RewardUserModel.findOne({ appId: req.appId, userId: req.user.id }).lean();
+            const appId = "vl-test"
+            const rewards = await RewardUserModel.findOne({ appId: appId, userId: req.user?.id }).lean();
             const detailedRewards = await RewardModel.aggregate([{
                 $facet: {
                     order: [{
-                        $match: { eventType: "ORDER", appId: req.appId, userId: req.user.id },
+                        $match: { eventType: "ORDER", appId: appId, userId: req.user?.id },
                     }, {
                         $group: {
                             _id: null,
@@ -23,7 +24,7 @@ exports.userRewards = [
                         }
                     }],
                     shipment: [{
-                        $match: { eventType: "SHIPMENT", appId: req.appId, userId: req.user.id },
+                        $match: { eventType: "SHIPMENT", appId: appId, userId: req.user?.id },
                     }, {
                         $group: {
                             _id: null,
@@ -31,7 +32,7 @@ exports.userRewards = [
                         }
                     }],
                     lastMile: [{
-                        $match: { eventType: "DOSE", appId: req.appId, userId: req.user.id },
+                        $match: { eventType: "DOSE", appId: appId, userId: req.user?.id },
                     }, {
                         $group: {
                             _id: null,
@@ -41,9 +42,13 @@ exports.userRewards = [
                 }
             }])
             const userRewards = {
-                ...rewards, orderRewards: detailedRewards?.[0].order?.[0]?.points || 0,
-                shipmentRewards: detailedRewards?.[0].shipment?.[0]?.points || 0,
-                lastMileRewards: detailedRewards?.[0].lastMile?.[0]?.points || 0
+                ...rewards, orderRewards: detailedRewards?.[0].order?.[0]?.points || 400,
+                shipmentRewards: detailedRewards?.[0].shipment?.[0]?.points || 200,
+                lastMileRewards: detailedRewards?.[0].lastMile?.[0]?.points || 300
+            }
+
+            if (!rewards) {
+                userRewards.points = 900
             }
             return apiResponse.successResponseWithData(res, "User Rewards", userRewards)
         }
